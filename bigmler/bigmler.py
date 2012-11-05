@@ -348,11 +348,10 @@ if __name__ == '__main__':
                         default='submission_%s.csv' % NOW,
                         help="Submission path")
 
-    # The column that represents the objective field (i.e., class or label)
+    # The name of the field that represents the objective field (i.e., class or label)
     parser.add_argument('--objective',
                         action='store',
                         dest='objective_field',
-                        type=int,
                         help="The column number of the Objective Field")
 
     # Category code.
