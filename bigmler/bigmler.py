@@ -141,7 +141,7 @@ def predict(test_set, test_set_header, models, fields, output,
 
     """
 
-    test_reader = csv.reader(open(test_set))
+    test_reader = csv.reader(open(test_set, "U"))
     if test_set_header:
         test_reader.next()
     output = open(output, 'w', 0)
@@ -546,7 +546,5 @@ if __name__ == '__main__':
         model_ids = model_ids + list_model_ids(API,
                                                "tag__in=%s" % ARGS.model_tag)
         output_args.update(model_ids=model_ids)
-
-    print output_args
 
     compute_output(**output_args)
