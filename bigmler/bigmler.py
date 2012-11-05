@@ -547,6 +547,4 @@ if __name__ == '__main__':
                                                "tag__in=%s" % ARGS.model_tag)
         output_args.update(model_ids=model_ids)
 
-    print output_args
-
     compute_output(**output_args)
