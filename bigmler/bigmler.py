@@ -233,10 +233,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         }
         update_fields = {}
         if dataset_fields:
-            for column in dataset_fields:
+            for name in dataset_fields:
                 update_fields.update({
-                    fields.field_id(column): {'name':
-                                              fields.field_name(column)}})
+                    fields.field_id(name): {'name': name}})
             dataset_args.update(fields=update_fields)
 
         dataset = api.create_dataset(source, dataset_args)
@@ -263,8 +262,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
         update_fields = []
         if model_fields:
-            for column in model_fields:
-                update_fields.append(fields.field_id(column))
+            for name in model_fields:
+                update_fields.append(fields.field_id(name))
             model_args.update(input_fields=update_fields)
 
         model_args.update(sample_rate=args.sample_rate,
@@ -529,14 +528,12 @@ if __name__ == '__main__':
 
     # Parses dataset fields if provided.
     if ARGS.dataset_fields:
-        DATASET_FIELDS = map(int,
-                             filter(lambda x: x != ',', ARGS.dataset_fields))
+        DATASET_FIELDS =  map(lambda x: x.strip(), ARGS.dataset_fields.split(','))
         output_args.update(dataset_fields=DATASET_FIELDS)
 
     # Parses model input fields if provided.
     if ARGS.model_fields:
-        MODEL_FIELDS = map(int,
-                           filter(lambda x: x != ',', ARGS.model_fields))
+        MODEL_FIELDS = map(lambda x: x.strip(), ARGS.model_fields.split(','))
         output_args.update(model_fields=MODEL_FIELDS)
 
     model_ids = []
@@ -550,5 +547,7 @@ if __name__ == '__main__':
         model_ids = model_ids + list_model_ids(API,
                                                "tag__in=%s" % ARGS.model_tag)
         output_args.update(model_ids=model_ids)
+
+    print output_args
 
     compute_output(**output_args)
