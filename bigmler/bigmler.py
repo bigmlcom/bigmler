@@ -162,6 +162,7 @@ def predict(test_set, test_set_header, models, fields, output,
         local_model = MultiModel(models)
         for row in test_reader:
             input_data = fields.pair(row, objective_field)
+            print input_data
             prediction = local_model.predict(input_data)
             output.write("%s\n" % prediction)
             output.flush()
@@ -544,7 +545,7 @@ if __name__ == '__main__':
     # Retrieve model/ids if provided
     if ARGS.model_tag:
         model_ids = model_ids + list_model_ids(API,
-                                               "tag__in=%s" % ARGS.model_tag)
+                                               "tags__in=%s" % ARGS.model_tag)
         output_args.update(model_ids=model_ids)
 
     compute_output(**output_args)
