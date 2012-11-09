@@ -1,0 +1,949 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>BigML Python Bindings &mdash; BigMLer 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="BigMLer 0.1.0 documentation" href="#" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="#">BigMLer 0.1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="bigml-python-bindings">
+<h1>BigML Python Bindings<a class="headerlink" href="#bigml-python-bindings" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="https://bigml.com">BigML</a> makes machine learning easy by taking care
+of the details required to add data-driven decisions and predictive
+power to your company. Unlike other machine learning services, BigML
+creates
+<a class="reference external" href="https://bigml.com/gallery/models">beautiful predictive models</a> that
+can be easily understood and interacted with.</p>
+<p>These BigML Python bindings allow you to interact with BigML.io, the API
+for BigML. You can use it to easily create, retrieve, list, update, and
+delete BigML resources (i.e., sources, datasets, models and,
+predictions).</p>
+<p>This module is licensed under the <a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache License, Version
+2.0</a>.</p>
+<div class="section" id="support">
+<h2>Support<a class="headerlink" href="#support" title="Permalink to this headline">¶</a></h2>
+<p>Please report problems and bugs to our <a class="reference external" href="https://github.com/bigmlcom/io/issues">BigML.io issue
+tracker</a>.</p>
+<p>Discussions about the different bindings take place in the general
+<a class="reference external" href="http://groups.google.com/group/bigml">BigML mailing list</a>. Or join us
+in our <a class="reference external" href="https://bigmlinc.campfirenow.com/f20a0">Campfire chatroom</a>.</p>
+</div>
+<div class="section" id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
+<p>Python 2.6 and Python 2.7 are currently supported by these bindings.</p>
+<p>The only mandatory third-party dependencies are the
+<a class="reference external" href="https://github.com/kennethreitz/requests">requests</a>,
+<a class="reference external" href="http://pypi.python.org/pypi/poster/">poster</a>, and <a class="reference external" href="http://http://pypi.python.org/pypi/Unidecode/">unidecode</a> libraries. These
+libraries are automatically installed during the setup.</p>
+<p>The bindings will also use <tt class="docutils literal"><span class="pre">simplejson</span></tt> if you happen to have it
+installed, but that is optional: we fall back to Python&#8217;s built-in JSON
+libraries is <tt class="docutils literal"><span class="pre">simplejson</span></tt> is not found.</p>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>To install the latest stable release with
+<a class="reference external" href="http://www.pip-installer.org/">pip</a>:</p>
+<div class="highlight-python"><pre>$ pip install bigml</pre>
+</div>
+<p>You can also install the development version of the bindings directly
+from the Git repository:</p>
+<div class="highlight-python"><pre>$ pip install -e git://github.com/bigmlcom/python.git#egg=bigml_python</pre>
+</div>
+</div>
+<div class="section" id="importing-the-module">
+<h2>Importing the module<a class="headerlink" href="#importing-the-module" title="Permalink to this headline">¶</a></h2>
+<p>To import the module:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">bigml.api</span>
+</pre></div>
+</div>
+<p>Alternatively you can just import the BigML class:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">bigml.api</span> <span class="kn">import</span> <span class="n">BigML</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="authentication">
+<h2>Authentication<a class="headerlink" href="#authentication" title="Permalink to this headline">¶</a></h2>
+<p>All the requests to BigML.io must be authenticated using your username
+and <a class="reference external" href="https://bigml.com/account/apikey">API key</a> and are always
+transmitted over HTTPS.</p>
+<p>This module will look for your username and API key in the environment
+variables <tt class="docutils literal"><span class="pre">BIGML_USERNAME</span></tt> and <tt class="docutils literal"><span class="pre">BIGML_API_KEY</span></tt> respectively. You can
+add the following lines to your <tt class="docutils literal"><span class="pre">.bashrc</span></tt> or <tt class="docutils literal"><span class="pre">.bash_profile</span></tt> to set
+those variables automatically when you log in:</p>
+<div class="highlight-python"><pre>export BIGML_USERNAME=myusername
+export BIGML_API_KEY=ae579e7e53fb9abd646a6ff8aa99d4afe83ac291</pre>
+</div>
+<p>With that environment set up, connecting to BigML is a breeze:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">bigml.api</span> <span class="kn">import</span> <span class="n">BigML</span>
+<span class="n">api</span> <span class="o">=</span> <span class="n">BigML</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Otherwise, you can initialize directly when instantiating the BigML
+class as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">api</span> <span class="o">=</span> <span class="n">BigML</span><span class="p">(</span><span class="s">&#39;myusername&#39;</span><span class="p">,</span> <span class="s">&#39;ae579e7e53fb9abd646a6ff8aa99d4afe83ac291&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Also, you can initialize the library to work in the Sandbox
+environment by passing the parameter <tt class="docutils literal"><span class="pre">dev_mode</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">api</span> <span class="o">=</span> <span class="n">BigML</span><span class="p">(</span><span class="n">dev_mode</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="quick-start">
+<h2>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h2>
+<p>Imagine that you want to use <a class="reference external" href="https://static.bigml.com/csv/iris.csv">this csv
+file</a> containing the <a class="reference external" href="http://en.wikipedia.org/wiki/Iris_flower_data_set">Iris
+flower dataset</a> to
+predict the species of a flower whose <tt class="docutils literal"><span class="pre">sepal</span> <span class="pre">length</span></tt> is <tt class="docutils literal"><span class="pre">5</span></tt> and
+whose <tt class="docutils literal"><span class="pre">sepal</span> <span class="pre">width</span></tt> is <tt class="docutils literal"><span class="pre">2.5</span></tt>. A preview of the dataset is shown
+below. It has 4 numeric fields: <tt class="docutils literal"><span class="pre">sepal</span> <span class="pre">length</span></tt>, <tt class="docutils literal"><span class="pre">sepal</span> <span class="pre">width</span></tt>,
+<tt class="docutils literal"><span class="pre">petal</span> <span class="pre">length</span></tt>, <tt class="docutils literal"><span class="pre">petal</span> <span class="pre">width</span></tt> and a categorical field: <tt class="docutils literal"><span class="pre">species</span></tt>.
+By default, BigML considers the last field in the dataset as the
+objective field (i.e., the field that you want to generate predictions
+for).</p>
+<div class="highlight-python"><pre>sepal length,sepal width,petal length,petal width,species
+5.1,3.5,1.4,0.2,Iris-setosa
+4.9,3.0,1.4,0.2,Iris-setosa
+4.7,3.2,1.3,0.2,Iris-setosa
+...
+5.8,2.7,3.9,1.2,Iris-versicolor
+6.0,2.7,5.1,1.6,Iris-versicolor
+5.4,3.0,4.5,1.5,Iris-versicolor
+...
+6.8,3.0,5.5,2.1,Iris-virginica
+5.7,2.5,5.0,2.0,Iris-virginica
+5.8,2.8,5.1,2.4,Iris-virginica</pre>
+</div>
+<p>You can easily generate a prediction following these steps:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">bigml.api</span> <span class="kn">import</span> <span class="n">BigML</span>
+
+<span class="n">api</span> <span class="o">=</span> <span class="n">BigML</span><span class="p">()</span>
+
+<span class="n">source</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">create_source</span><span class="p">(</span><span class="s">&#39;./data/iris.csv&#39;</span><span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">create_model</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">prediction</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">create_prediction</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;sepal length&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s">&#39;sepal width&#39;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>You can then print the prediction using the <tt class="docutils literal"><span class="pre">pprint</span></tt> method:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">api</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">prediction</span><span class="p">)</span>
+<span class="go">species for {&quot;sepal width&quot;: 2.5, &quot;sepal length&quot;: 5} is Iris-virginica</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="fields">
+<h2>Fields<a class="headerlink" href="#fields" title="Permalink to this headline">¶</a></h2>
+<p>BigML automatically generates idenfiers for each field. To see the
+fields and the ids and types that have been assigned to a source you can
+use <tt class="docutils literal"><span class="pre">get_fields</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">source</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">get_source</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">api</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">api</span><span class="o">.</span><span class="n">get_fields</span><span class="p">(</span><span class="n">source</span><span class="p">))</span>
+<span class="go">{   u&#39;000000&#39;: {   u&#39;column_number&#39;: 0,</span>
+<span class="go">                   u&#39;name&#39;: u&#39;sepal length&#39;,</span>
+<span class="go">                   u&#39;optype&#39;: u&#39;numeric&#39;},</span>
+<span class="go">    u&#39;000001&#39;: {   u&#39;column_number&#39;: 1,</span>
+<span class="go">                   u&#39;name&#39;: u&#39;sepal width&#39;,</span>
+<span class="go">                   u&#39;optype&#39;: u&#39;numeric&#39;},</span>
+<span class="go">    u&#39;000002&#39;: {   u&#39;column_number&#39;: 2,</span>
+<span class="go">                   u&#39;name&#39;: u&#39;petal length&#39;,</span>
+<span class="go">                   u&#39;optype&#39;: u&#39;numeric&#39;},</span>
+<span class="go">    u&#39;000003&#39;: {   u&#39;column_number&#39;: 3,</span>
+<span class="go">                   u&#39;name&#39;: u&#39;petal width&#39;,</span>
+<span class="go">                   u&#39;optype&#39;: u&#39;numeric&#39;},</span>
+<span class="go">    u&#39;000004&#39;: {   u&#39;column_number&#39;: 4,</span>
+<span class="go">                   u&#39;name&#39;: u&#39;species&#39;,</span>
+<span class="go">                   u&#39;optype&#39;: u&#39;categorical&#39;}}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="dataset">
+<h2>Dataset<a class="headerlink" href="#dataset" title="Permalink to this headline">¶</a></h2>
+<p>If you want to get some basic statistics for each field you can retrieve
+the <tt class="docutils literal"><span class="pre">fields</span></tt> from the dataset as follows to get a dictionary keyed by
+field id:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">api</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">api</span><span class="o">.</span><span class="n">get_fields</span><span class="p">(</span><span class="n">dataset</span><span class="p">))</span>
+<span class="go">{   u&#39;000000&#39;: {   u&#39;column_number&#39;: 0,</span>
+<span class="go">                   u&#39;datatype&#39;: u&#39;double&#39;,</span>
+<span class="go">                   u&#39;name&#39;: u&#39;sepal length&#39;,</span>
+<span class="go">                   u&#39;optype&#39;: u&#39;numeric&#39;,</span>
+<span class="go">                   u&#39;summary&#39;: {   u&#39;maximum&#39;: 7.9,</span>
+<span class="go">                                   u&#39;median&#39;: 5.77889,</span>
+<span class="go">                                   u&#39;minimum&#39;: 4.3,</span>
+<span class="go">                                   u&#39;missing_count&#39;: 0,</span>
+<span class="go">                                   u&#39;population&#39;: 150,</span>
+<span class="go">                                   u&#39;splits&#39;: [   4.51526,</span>
+<span class="go">                                                  4.67252,</span>
+<span class="go">                                                  4.81113,</span>
+
+<span class="go">                     [... snip ... ]</span>
+
+
+<span class="go">    u&#39;000004&#39;: {   u&#39;column_number&#39;: 4,</span>
+<span class="go">                   u&#39;datatype&#39;: u&#39;string&#39;,</span>
+<span class="go">                   u&#39;name&#39;: u&#39;species&#39;,</span>
+<span class="go">                   u&#39;optype&#39;: u&#39;categorical&#39;,</span>
+<span class="go">                   u&#39;summary&#39;: {   u&#39;categories&#39;: [   [   u&#39;Iris-versicolor&#39;,</span>
+<span class="go">                                                          50],</span>
+<span class="go">                                                      [u&#39;Iris-setosa&#39;, 50],</span>
+<span class="go">                                                      [   u&#39;Iris-virginica&#39;,</span>
+<span class="go">                                                          50]],</span>
+<span class="go">                                   u&#39;missing_count&#39;: 0}}}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="model">
+<h2>Model<a class="headerlink" href="#model" title="Permalink to this headline">¶</a></h2>
+<p>One of the greatest things about BigML is that the models that it
+generates for you are fully white-boxed. To get the explicit tree-like
+predictive model for the example above:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">api</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">model</span><span class="p">[</span><span class="s">&#39;object&#39;</span><span class="p">][</span><span class="s">&#39;model&#39;</span><span class="p">][</span><span class="s">&#39;root&#39;</span><span class="p">])</span>
+<span class="go">{u&#39;children&#39;: [</span>
+<span class="go">  {u&#39;children&#39;: [</span>
+<span class="go">    {u&#39;children&#39;: [{u&#39;count&#39;: 38,</span>
+<span class="go">                    u&#39;distribution&#39;: [[u&#39;Iris-virginica&#39;, 38]],</span>
+<span class="go">                    u&#39;output&#39;: u&#39;Iris-virginica&#39;,</span>
+<span class="go">                    u&#39;predicate&#39;: {u&#39;field&#39;: u&#39;000002&#39;,</span>
+<span class="go">                    u&#39;operator&#39;: u&#39;&gt;&#39;,</span>
+<span class="go">                    u&#39;value&#39;: 5.05}},</span>
+<span class="go">                    u&#39;children&#39;: [</span>
+
+<span class="go">                        [ ... ]</span>
+
+<span class="go">                       {u&#39;count&#39;: 50,</span>
+<span class="go">                        u&#39;distribution&#39;: [[u&#39;Iris-setosa&#39;, 50]],</span>
+<span class="go">                        u&#39;output&#39;: u&#39;Iris-setosa&#39;,</span>
+<span class="go">                        u&#39;predicate&#39;: {u&#39;field&#39;: u&#39;000002&#39;,</span>
+<span class="go">                                       u&#39;operator&#39;: u&#39;&lt;=&#39;,</span>
+<span class="go">                                       u&#39;value&#39;: 2.45}}]},</span>
+<span class="go">                    {u&#39;count&#39;: 150,</span>
+<span class="go">                     u&#39;distribution&#39;: [[u&#39;Iris-virginica&#39;, 50],</span>
+<span class="go">                                       [u&#39;Iris-versicolor&#39;, 50],</span>
+<span class="go">                                       [u&#39;Iris-setosa&#39;, 50]],</span>
+<span class="go">                     u&#39;output&#39;: u&#39;Iris-virginica&#39;,</span>
+<span class="go">                     u&#39;predicate&#39;: True}]}}}</span>
+</pre></div>
+</div>
+<p>(Note that we have abbreviated the output in the snippet above for
+readability: the full predictive model you&#8217;ll get is going to contain
+much more details).</p>
+</div>
+<div class="section" id="creating-resources">
+<h2>Creating Resources<a class="headerlink" href="#creating-resources" title="Permalink to this headline">¶</a></h2>
+<p>Newly-created resources are returned in a dictionary with the following
+keys:</p>
+<ul class="simple">
+<li><strong>code</strong>: If the request is successful you will get a
+<tt class="docutils literal"><span class="pre">bigml.api.HTTP_CREATED</span></tt> (201) status code. In asynchronous file uploading
+<cite>api.create_source</cite> calls, it will contain <tt class="docutils literal"><span class="pre">bigml.api.HTTP_ACCEPTED</span></tt> (202)
+status code. Otherwise, it will be
+one of the standard HTTP error codes <a class="reference external" href="https://bigml.com/developers/status_codes">detailed in the
+documentation</a>.</li>
+<li><strong>resource</strong>: The identifier of the new resource.</li>
+<li><strong>location</strong>: The location of the new resource.</li>
+<li><strong>object</strong>: The resource itself, as computed by BigML.</li>
+<li><strong>error</strong>: If an error occurs and the resource cannot be created, it
+will contain an additional code and a description of the error. In
+this case, <strong>location</strong>, and <strong>resource</strong> will be <tt class="docutils literal"><span class="pre">None</span></tt>.</li>
+</ul>
+<div class="section" id="statuses">
+<h3>Statuses<a class="headerlink" href="#statuses" title="Permalink to this headline">¶</a></h3>
+<p>Please, bear in mind that resource creation is almost always
+asynchronous (<strong>predictions</strong> are the only exception). Therefore, when
+you create a new source, a new dataset or a new model, even if you
+receive an immediate response from the BigML servers, the full creation
+of the resource can take from a few seconds to a few days, depending on
+the size of the resource and BigML&#8217;s load. A resource is not fully
+created until its status is <tt class="docutils literal"><span class="pre">bigml.api.FINISHED</span></tt>. See the
+<a class="reference external" href="https://bigml.com/developers/status_codes">documentation on status
+codes</a> for the listing of
+potential states and their semantics. So depending on your application
+you might need to import the following constants:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">bigml.api</span> <span class="kn">import</span> <span class="n">WAITING</span>
+<span class="kn">from</span> <span class="nn">bigml.api</span> <span class="kn">import</span> <span class="n">QUEUED</span>
+<span class="kn">from</span> <span class="nn">bigml.api</span> <span class="kn">import</span> <span class="n">STARTED</span>
+<span class="kn">from</span> <span class="nn">bigml.api</span> <span class="kn">import</span> <span class="n">IN_PROGRESS</span>
+<span class="kn">from</span> <span class="nn">bigml.api</span> <span class="kn">import</span> <span class="n">SUMMARIZED</span>
+<span class="kn">from</span> <span class="nn">bigml.api</span> <span class="kn">import</span> <span class="n">FINISHED</span>
+<span class="kn">from</span> <span class="nn">bigml.api</span> <span class="kn">import</span> <span class="n">UPLOADING</span>
+<span class="kn">from</span> <span class="nn">bigml.api</span> <span class="kn">import</span> <span class="n">FAULTY</span>
+<span class="kn">from</span> <span class="nn">bigml.api</span> <span class="kn">import</span> <span class="n">UNKNOWN</span>
+<span class="kn">from</span> <span class="nn">bigml.api</span> <span class="kn">import</span> <span class="n">RUNNABLE</span>
+</pre></div>
+</div>
+<p>You can query the status of any resource with the <tt class="docutils literal"><span class="pre">status</span></tt> method:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">api</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+<span class="n">api</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">api</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="n">api</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="n">prediction</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Before invoking the creation of a new resource, the library checks that
+the status of the resource that is passed as a parameter is
+<tt class="docutils literal"><span class="pre">FINISHED</span></tt>. You can change how often the status will be checked with
+the <tt class="docutils literal"><span class="pre">wait_time</span></tt> argument. By default, it is set to 3 seconds.</p>
+<p>You can also use the <tt class="docutils literal"><span class="pre">check_resource</span></tt> method:</p>
+<blockquote>
+<div>api.check_resource(resource, api.get_source)</div></blockquote>
+<p>that will constantly query the API until the resource gets to a FINISHED or
+FAULTY state.</p>
+</div>
+<div class="section" id="creating-sources">
+<h3>Creating sources<a class="headerlink" href="#creating-sources" title="Permalink to this headline">¶</a></h3>
+<p>To create a source from a local data file, you can use the
+<tt class="docutils literal"><span class="pre">create_source</span></tt> method. The only required parameter is the path to the
+data file. You can use a second optional parameter to specify any of the
+options for source creation described in the <a class="reference external" href="https://bigml.com/developers/sources">BigML API
+documentation</a>.</p>
+<p>Here&#8217;s a sample invocation:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">bigml.api</span> <span class="kn">import</span> <span class="n">BigML</span>
+<span class="n">api</span> <span class="o">=</span> <span class="n">BigML</span><span class="p">()</span>
+
+<span class="n">source</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">create_source</span><span class="p">(</span><span class="s">&#39;./data/iris.csv&#39;</span><span class="p">,</span>
+    <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;my source&#39;</span><span class="p">,</span> <span class="s">&#39;source_parser&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;missing_tokens&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s">&#39;?&#39;</span><span class="p">]}})</span>
+</pre></div>
+</div>
+<p>or you may want to create a source from a file in a remote location:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">source</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">create_source</span><span class="p">(</span><span class="s">&#39;s3://bigml-public/csv/iris.csv&#39;</span><span class="p">,</span>
+    <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;my remote source&#39;</span><span class="p">,</span> <span class="s">&#39;source_parser&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;missing_tokens&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s">&#39;?&#39;</span><span class="p">]}})</span>
+</pre></div>
+</div>
+<p>As already mentioned, source creation is asynchronous. In both these examples,
+the <cite>api.create_source</cite> call returns once the file is uploaded.
+Then <cite>source</cite> will contain a resource whose status code will be either
+<tt class="docutils literal"><span class="pre">WAITING</span></tt> or <tt class="docutils literal"><span class="pre">QUEUED</span></tt>.</p>
+<p>For local data files you can go one step further and use asynchronous
+uploading:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">source</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">create_source</span><span class="p">(</span><span class="s">&#39;./data/iris.csv&#39;</span><span class="p">,</span>
+    <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;my source&#39;</span><span class="p">,</span> <span class="s">&#39;source_parser&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;missing_tokens&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s">&#39;?&#39;</span><span class="p">]}},</span>
+    <span class="n">async</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In this case, the call fills <cite>source</cite> immediately with a primary resource like:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span><span class="s">&#39;code&#39;</span><span class="p">:</span> <span class="mi">202</span><span class="p">,</span>
+ <span class="s">&#39;resource&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+ <span class="s">&#39;location&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+ <span class="s">&#39;object&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;status&#39;</span><span class="p">:</span>
+               <span class="p">{</span><span class="s">&#39;progress&#39;</span><span class="p">:</span> <span class="mf">0.99</span><span class="p">,</span>
+                <span class="s">&#39;message&#39;</span><span class="p">:</span> <span class="s">&#39;The upload is in progress&#39;</span><span class="p">,</span>
+                <span class="s">&#39;code&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">}},</span>
+ <span class="s">&#39;error&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>where the <cite>source[&#8216;object&#8217;]</cite> status is set to <cite>UPLOADING</cite> and  its <cite>progress</cite>
+is periodically updated with the current uploading
+progress ranging from 0 to 1. When upload completes, this structure will be
+replaced by the real resource info as computed by BigML. Therefore source&#8217;s
+status will eventually be (as it is in the synchronous upload case)
+<tt class="docutils literal"><span class="pre">WAITING</span></tt> or <tt class="docutils literal"><span class="pre">QUEUED</span></tt>.</p>
+<p>You can retrieve the updated status at any time using the corresponding get
+method. For example, to get the status of our source we would use:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">api</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="creating-datasets">
+<h3>Creating datasets<a class="headerlink" href="#creating-datasets" title="Permalink to this headline">¶</a></h3>
+<p>Once you have created a source, you can create a dataset. The only
+required argument to create a dataset is a source id. You can add all
+the additional arguments accepted by BigML and documented in the
+<a class="reference external" href="https://bigml.com/developers/datasets">Datasets section of the Developer&#8217;s
+documentation</a>.</p>
+<p>For example, to create a dataset named &#8220;my dataset&#8221; with the first 1024
+bytes of a source, you can submit the following request:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">dataset</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="s">&quot;my dataset&quot;</span><span class="p">,</span> <span class="s">&quot;size&quot;</span><span class="p">:</span> <span class="mi">1024</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>Upon success, the dataset creation job will be queued for execution, and
+you can follow its evolution using <tt class="docutils literal"><span class="pre">api.status(dataset)</span></tt>.</p>
+</div>
+<div class="section" id="creating-models">
+<h3>Creating models<a class="headerlink" href="#creating-models" title="Permalink to this headline">¶</a></h3>
+<p>Once you have created a dataset, you can create a model. The only
+required argument to create a model is a dataset id. You can also
+include in the request all the additional arguments accepted by BigML
+and documented in the <a class="reference external" href="https://bigml.com/developers/models">Models section of the Developer&#8217;s
+documentation</a>.</p>
+<p>For example, to create a model only including the first two fields and
+the first 10 instances in the dataset, you can use the following
+invocation:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">create_model</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="p">{</span>
+    <span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="s">&quot;my model&quot;</span><span class="p">,</span> <span class="s">&quot;input_fields&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;000000&quot;</span><span class="p">,</span> <span class="s">&quot;000001&quot;</span><span class="p">],</span> <span class="s">&quot;range&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">]})</span>
+</pre></div>
+</div>
+<p>Again, the model is scheduled for creation, and you can retrieve its
+status at any time by means of <tt class="docutils literal"><span class="pre">api.status(model)</span></tt> .</p>
+</div>
+<div class="section" id="creating-predictions">
+<h3>Creating predictions<a class="headerlink" href="#creating-predictions" title="Permalink to this headline">¶</a></h3>
+<p>You can now use the model resource identifier together with some input
+parameters to ask for predictions, using the <tt class="docutils literal"><span class="pre">create_prediction</span></tt>
+method. You can also give the prediction a name:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">prediction</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">create_prediction</span><span class="p">(</span><span class="n">model</span><span class="p">,</span>
+                                   <span class="p">{</span><span class="s">&quot;sepal length&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                                    <span class="s">&quot;sepal width&quot;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">},</span>
+                                    <span class="p">{</span><span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="s">&quot;my prediction&quot;</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>To see the prediction you can use <tt class="docutils literal"><span class="pre">pprint</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">api</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">prediction</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="reading-resources">
+<h2>Reading Resources<a class="headerlink" href="#reading-resources" title="Permalink to this headline">¶</a></h2>
+<p>When retrieved individually, resources are returned as a dictionary
+identical to the one you get when you create a new resource. However,
+the status code will be <tt class="docutils literal"><span class="pre">bigml.api.HTTP_OK</span></tt> if the resource can be
+retrieved without problems, or one of the HTTP standard error codes
+otherwise.</p>
+</div>
+<div class="section" id="listing-resources">
+<h2>Listing Resources<a class="headerlink" href="#listing-resources" title="Permalink to this headline">¶</a></h2>
+<p>You can list resources with the appropriate api method:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">api</span><span class="o">.</span><span class="n">list_sources</span><span class="p">()</span>
+<span class="n">api</span><span class="o">.</span><span class="n">list_datasets</span><span class="p">()</span>
+<span class="n">api</span><span class="o">.</span><span class="n">list_models</span><span class="p">()</span>
+<span class="n">api</span><span class="o">.</span><span class="n">list_predictions</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>you will receive a dictionary with the following keys:</p>
+<ul class="simple">
+<li><strong>code</strong>: If the request is successful you will get a
+<tt class="docutils literal"><span class="pre">bigml.api.HTTP_OK</span></tt> (200) status code. Otherwise, it will be one of
+the standard HTTP error codes. See <a class="reference external" href="https://bigml.com/developers/status_codes">BigML documentation on status
+codes</a> for more info.</li>
+<li><strong>meta</strong>: A dictionary including the following keys that can help you
+paginate listings:<ul>
+<li><strong>previous</strong>: Path to get the previous page or <tt class="docutils literal"><span class="pre">None</span></tt> if there
+is no previous page.</li>
+<li><strong>next</strong>: Path to get the next page or <tt class="docutils literal"><span class="pre">None</span></tt> if there is no
+next page.</li>
+<li><strong>offset</strong>: How far off from the first entry in the resources is
+the first one listed in the resources key.</li>
+<li><strong>limit</strong>: Maximum number of resources that you will get listed in
+the resources key.</li>
+<li><strong>total_count</strong>: The total number of resources in BigML.</li>
+</ul>
+</li>
+<li><strong>objects</strong>: A list of resources as returned by BigML.</li>
+<li><strong>error</strong>: If an error occurs and the resource cannot be created, it
+will contain an additional code and a description of the error. In
+this case, <strong>meta</strong>, and <strong>resources</strong> will be <tt class="docutils literal"><span class="pre">None</span></tt>.</li>
+</ul>
+<div class="section" id="filtering-resources">
+<h3>Filtering Resources<a class="headerlink" href="#filtering-resources" title="Permalink to this headline">¶</a></h3>
+<p>You can filter resources in listings using the syntax and fields labeled
+as <em>filterable</em> in the <a class="reference external" href="https://bigml.com/developers">BigML
+documentation</a> for each resource.</p>
+<p>A few examples:</p>
+<div class="section" id="ids-of-the-first-5-sources-created-before-april-1st-2012">
+<h4>Ids of the first 5 sources created before April 1st, 2012<a class="headerlink" href="#ids-of-the-first-5-sources-created-before-april-1st-2012" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[</span><span class="n">source</span><span class="p">[</span><span class="s">&#39;resource&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">source</span> <span class="ow">in</span>
+  <span class="n">api</span><span class="o">.</span><span class="n">list_sources</span><span class="p">(</span><span class="s">&quot;limit=5;created__lt=2012-04-1&quot;</span><span class="p">)[</span><span class="s">&#39;objects&#39;</span><span class="p">]]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="name-of-the-first-10-datasets-bigger-than-1mb">
+<h4>Name of the first 10 datasets bigger than 1MB<a class="headerlink" href="#name-of-the-first-10-datasets-bigger-than-1mb" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[</span><span class="n">dataset</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">dataset</span> <span class="ow">in</span>
+  <span class="n">api</span><span class="o">.</span><span class="n">list_datasets</span><span class="p">(</span><span class="s">&quot;limit=10;size__gt=1048576&quot;</span><span class="p">)[</span><span class="s">&#39;objects&#39;</span><span class="p">]]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="name-of-models-with-more-than-5-fields-columns">
+<h4>Name of models with more than 5 fields (columns)<a class="headerlink" href="#name-of-models-with-more-than-5-fields-columns" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[</span><span class="n">model</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">api</span><span class="o">.</span><span class="n">list_models</span><span class="p">(</span><span class="s">&quot;columns__gt=5&quot;</span><span class="p">)[</span><span class="s">&#39;objects&#39;</span><span class="p">]]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="ids-of-predictions-whose-model-has-not-been-deleted">
+<h4>Ids of predictions whose model has not been deleted<a class="headerlink" href="#ids-of-predictions-whose-model-has-not-been-deleted" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[</span><span class="n">prediction</span><span class="p">[</span><span class="s">&#39;resource&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">prediction</span> <span class="ow">in</span>
+  <span class="n">api</span><span class="o">.</span><span class="n">list_predictions</span><span class="p">(</span><span class="s">&quot;model_status=true&quot;</span><span class="p">)[</span><span class="s">&#39;objects&#39;</span><span class="p">]]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="ordering-resources">
+<h3>Ordering Resources<a class="headerlink" href="#ordering-resources" title="Permalink to this headline">¶</a></h3>
+<p>You can order resources in listings using the syntax and fields labeled
+as <em>sortable</em> in the <a class="reference external" href="https://bigml.com/developers">BigML
+documentation</a> for each resource.</p>
+<p>A few examples:</p>
+<div class="section" id="name-of-sources-ordered-by-size">
+<h4>Name of sources ordered by size<a class="headerlink" href="#name-of-sources-ordered-by-size" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[</span><span class="n">source</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">api</span><span class="o">.</span><span class="n">list_sources</span><span class="p">(</span><span class="s">&quot;order_by=size&quot;</span><span class="p">)[</span><span class="s">&#39;objects&#39;</span><span class="p">]]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="number-of-instances-in-datasets-created-before-april-1st-2012-ordered-by-size">
+<h4>Number of instances in datasets created before April 1st, 2012 ordered by size<a class="headerlink" href="#number-of-instances-in-datasets-created-before-april-1st-2012-ordered-by-size" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[</span><span class="n">dataset</span><span class="p">[</span><span class="s">&#39;rows&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">dataset</span> <span class="ow">in</span>
+  <span class="n">api</span><span class="o">.</span><span class="n">list_datasets</span><span class="p">(</span><span class="s">&quot;created__lt=2012-04-1;order_by=size&quot;</span><span class="p">)[</span><span class="s">&#39;objects&#39;</span><span class="p">]]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="model-ids-ordered-by-number-of-predictions-in-descending-order">
+<h4>Model ids ordered by number of predictions (in descending order).<a class="headerlink" href="#model-ids-ordered-by-number-of-predictions-in-descending-order" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[</span><span class="n">model</span><span class="p">[</span><span class="s">&#39;resource&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span>
+  <span class="n">api</span><span class="o">.</span><span class="n">list_models</span><span class="p">(</span><span class="s">&quot;order_by=-number_of_predictions&quot;</span><span class="p">)[</span><span class="s">&#39;objects&#39;</span><span class="p">]]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="name-of-predictions-ordered-by-name">
+<h4>Name of predictions ordered by name.<a class="headerlink" href="#name-of-predictions-ordered-by-name" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[</span><span class="n">prediction</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">prediction</span> <span class="ow">in</span>
+  <span class="n">api</span><span class="o">.</span><span class="n">list_predictions</span><span class="p">(</span><span class="s">&quot;order_by=name&quot;</span><span class="p">)[</span><span class="s">&#39;objects&#39;</span><span class="p">]]</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="updating-resources">
+<h2>Updating Resources<a class="headerlink" href="#updating-resources" title="Permalink to this headline">¶</a></h2>
+<p>When you update a resource, it is returned in a dictionary exactly like
+the one you get when you create a new one. However the status code will
+be <tt class="docutils literal"><span class="pre">bigml.api.HTTP_ACCEPTED</span></tt> if the resource can be updated without
+problems or one of the HTTP standard error codes otherwise.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">api</span><span class="o">.</span><span class="n">update_source</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="s">&quot;new name&quot;</span><span class="p">})</span>
+<span class="n">api</span><span class="o">.</span><span class="n">update_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="s">&quot;new name&quot;</span><span class="p">})</span>
+<span class="n">api</span><span class="o">.</span><span class="n">update_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="s">&quot;new name&quot;</span><span class="p">})</span>
+<span class="n">api</span><span class="o">.</span><span class="n">update_prediction</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="s">&quot;new name&quot;</span><span class="p">})</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="deleting-resources">
+<h2>Deleting Resources<a class="headerlink" href="#deleting-resources" title="Permalink to this headline">¶</a></h2>
+<p>Resources can be deleted individually using the corresponding method for
+each type of resource.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">api</span><span class="o">.</span><span class="n">delete_source</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+<span class="n">api</span><span class="o">.</span><span class="n">delete_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">api</span><span class="o">.</span><span class="n">delete_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="n">api</span><span class="o">.</span><span class="n">delete_prediction</span><span class="p">(</span><span class="n">prediction</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Each of the calls above will return a dictionary with the following
+keys:</p>
+<ul class="simple">
+<li><strong>code</strong> If the request is successful, the code will be a
+<tt class="docutils literal"><span class="pre">bigml.api.HTTP_NO_CONTENT</span></tt> (204) status code. Otherwise, it wil be
+one of the standard HTTP error codes. See the <a class="reference external" href="https://bigml.com/developers/status_codes">documentation on
+status codes</a> for more
+info.</li>
+<li><strong>error</strong> If the request does not succeed, it will contain a
+dictionary with an error code and a message. It will be <tt class="docutils literal"><span class="pre">None</span></tt>
+otherwise.</li>
+</ul>
+</div>
+<div class="section" id="local-models">
+<h2>Local Models<a class="headerlink" href="#local-models" title="Permalink to this headline">¶</a></h2>
+<p>You can instantiate a local version of a remote model.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">bigml.api</span> <span class="kn">import</span> <span class="n">BigML</span>
+<span class="kn">from</span> <span class="nn">bigml.model</span> <span class="kn">import</span> <span class="n">Model</span>
+
+<span class="n">api</span> <span class="o">=</span> <span class="n">BigML</span><span class="p">()</span>
+
+<span class="c"># Use the model/id of one of your models</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span><span class="s">&#39;model/502fdbff1552687661000261&#39;</span><span class="p">)</span>
+
+<span class="n">local_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This will return a Model object that you can use to make local predictions,
+generate IF-THEN rules or a Python function that implements the model.</p>
+</div>
+<div class="section" id="multi-models">
+<h2>Multi Models<a class="headerlink" href="#multi-models" title="Permalink to this headline">¶</a></h2>
+<p>Multi Models use a numbers of BigML remote models to build a local version
+that can be used to generate predictions locally. Predictions are generated
+combining the outputs of each model.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">bigml.api</span> <span class="kn">import</span> <span class="n">BigML</span>
+<span class="kn">from</span> <span class="nn">bigml.multimodel</span> <span class="kn">import</span> <span class="n">MultiModel</span>
+
+<span class="n">api</span> <span class="o">=</span> <span class="n">BigML</span><span class="p">()</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">MultiModel</span><span class="p">([</span><span class="n">api</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span><span class="n">model</span><span class="p">[</span><span class="s">&#39;resource&#39;</span><span class="p">])</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span>
+                   <span class="n">api</span><span class="o">.</span><span class="n">list_models</span><span class="p">(</span><span class="n">query_string</span><span class="o">=</span><span class="s">&quot;tags__in=my_tag&quot;</span><span class="p">)</span>
+                   <span class="p">[</span><span class="s">&#39;objects&#39;</span><span class="p">]])</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">({</span><span class="s">&quot;petal length&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s">&quot;petal width&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>This will create a multi model using all the models that been previously tagged
+with <cite>my_tag</cite>.</p>
+</div>
+<div class="section" id="local-predictions">
+<h2>Local Predictions<a class="headerlink" href="#local-predictions" title="Permalink to this headline">¶</a></h2>
+<p>Once you have a local model you can use to generate predictions locally.</p>
+<div class="highlight-python"><pre>local_model.predict({"petal length": 3, "petal width": 1})
+petal length &gt; 2.45 AND petal width &lt;= 1.65 AND petal length &lt;= 4.95 =&gt;
+Iris-versicolor</pre>
+</div>
+<p>Local predictions have three clear advantages:</p>
+<ul class="simple">
+<li>Removing the dependency from BigML to make new predictions.</li>
+<li>No cost in BigML (i.e., you do not spend BigML credits).</li>
+<li>Extremely low latency to generate predictions for huge volumes of data.</li>
+</ul>
+</div>
+<div class="section" id="id3">
+<h2>Fields<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<p>Once you have a resource you can use the <tt class="docutils literal"><span class="pre">Fields</span></tt> class to generate a
+representation that will allow you to easily list fields, get fields ids, get a
+field id by name, column number, etc.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">bigml.fields</span> <span class="kn">import</span> <span class="n">Fields</span>
+
+<span class="n">fields</span> <span class="o">=</span> <span class="n">Fields</span><span class="p">(</span><span class="n">source</span><span class="p">[</span><span class="s">&#39;object&#39;</span><span class="p">][</span><span class="s">&#39;fields&#39;</span><span class="p">])</span>
+
+<span class="c"># Internal id of the &#39;sepal length&#39; field</span>
+<span class="n">fields</span><span class="o">.</span><span class="n">field_id</span><span class="p">(</span><span class="s">&#39;sepal length&#39;</span><span class="p">)</span>
+
+<span class="c"># Field name of field with column number 0</span>
+<span class="n">fields</span><span class="o">.</span><span class="n">field_name</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c"># Column number of field name &#39;petal length&#39;</span>
+<span class="n">fields</span><span class="o">.</span><span class="n">field_column_number</span><span class="p">(</span><span class="s">&#39;petal length&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can also easily <tt class="docutils literal"><span class="pre">pair</span></tt> a list of values with fields ids what is very
+useful to make predictions.</p>
+<p>For example, the following snippet may be useful to create local predictions using
+a csv file as input:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">test_reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="nb">dir</span> <span class="o">+</span> <span class="n">test_set</span><span class="p">))</span>
+<span class="n">local_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">test_reader</span><span class="p">:</span>
+    <span class="n">input_data</span> <span class="o">=</span> <span class="n">fields</span><span class="o">.</span><span class="n">pair</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">row</span><span class="p">],</span> <span class="n">objective_field</span><span class="p">)</span>
+    <span class="n">prediction</span> <span class="o">=</span> <span class="n">local_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">input_data</span><span class="p">,</span> <span class="n">by_name</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="rule-generation">
+<h2>Rule Generation<a class="headerlink" href="#rule-generation" title="Permalink to this headline">¶</a></h2>
+<p>You can also use a local model to generate a IF-THEN rule set that can be very
+helpful to understand how the model works internally.</p>
+<div class="highlight-python"><pre>local_model.rules()
+IF petal_length &gt; 2.45 AND
+    IF petal_width &gt; 1.65 AND
+        IF petal_length &gt; 5.05 THEN
+            species = Iris-virginica
+        IF petal_length &lt;= 5.05 AND
+            IF sepal_width &gt; 2.9 AND
+                IF sepal_length &gt; 5.95 AND
+                    IF petal_length &gt; 4.95 THEN
+                        species = Iris-versicolor
+                    IF petal_length &lt;= 4.95 THEN
+                        species = Iris-virginica
+                IF sepal_length &lt;= 5.95 THEN
+                    species = Iris-versicolor
+            IF sepal_width &lt;= 2.9 THEN
+                species = Iris-virginica
+    IF petal_width &lt;= 1.65 AND
+        IF petal_length &gt; 4.95 AND
+            IF sepal_length &gt; 6.05 THEN
+                species = Iris-virginica
+            IF sepal_length &lt;= 6.05 AND
+                IF sepal_width &gt; 2.45 THEN
+                    species = Iris-versicolor
+                IF sepal_width &lt;= 2.45 THEN
+                    species = Iris-virginica
+        IF petal_length &lt;= 4.95 THEN
+            species = Iris-versicolor
+IF petal_length &lt;= 2.45 THEN
+    species = Iris-setosa</pre>
+</div>
+</div>
+<div class="section" id="python-and-hadoop-ready-generation">
+<h2>Python and Hadoop-ready Generation<a class="headerlink" href="#python-and-hadoop-ready-generation" title="Permalink to this headline">¶</a></h2>
+<p>If you prefer you can also generate a Python function that implements the model
+and that can be useful to make the model actionable right away with <tt class="docutils literal"><span class="pre">local_model.python()</span></tt>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">local_model</span><span class="o">.</span><span class="n">python</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">predict_species</span><span class="p">(</span><span class="n">sepal_length</span><span class="o">=</span><span class="mf">5.77889</span><span class="p">,</span>
+                    <span class="n">sepal_width</span><span class="o">=</span><span class="mf">3.02044</span><span class="p">,</span>
+                    <span class="n">petal_length</span><span class="o">=</span><span class="mf">4.34142</span><span class="p">,</span>
+                    <span class="n">petal_width</span><span class="o">=</span><span class="mf">1.32848</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Predictor for species from model/5030e496155268765f000343</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">petal_length</span> <span class="o">&gt;</span> <span class="mf">2.45</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">petal_width</span> <span class="o">&gt;</span> <span class="mf">1.65</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">petal_length</span> <span class="o">&gt;</span> <span class="mf">5.05</span><span class="p">):</span>
+                 <span class="k">return</span> <span class="s">&#39;Iris-virginica&#39;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">petal_length</span> <span class="o">&lt;=</span> <span class="mf">5.05</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">sepal_width</span> <span class="o">&gt;</span> <span class="mf">2.9</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">sepal_length</span> <span class="o">&gt;</span> <span class="mf">5.95</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">petal_length</span> <span class="o">&gt;</span> <span class="mf">4.95</span><span class="p">):</span>
+                             <span class="k">return</span> <span class="s">&#39;Iris-versicolor&#39;</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">petal_length</span> <span class="o">&lt;=</span> <span class="mf">4.95</span><span class="p">):</span>
+                             <span class="k">return</span> <span class="s">&#39;Iris-virginica&#39;</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">sepal_length</span> <span class="o">&lt;=</span> <span class="mf">5.95</span><span class="p">):</span>
+                         <span class="k">return</span> <span class="s">&#39;Iris-versicolor&#39;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">sepal_width</span> <span class="o">&lt;=</span> <span class="mf">2.9</span><span class="p">):</span>
+                     <span class="k">return</span> <span class="s">&#39;Iris-virginica&#39;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">petal_width</span> <span class="o">&lt;=</span> <span class="mf">1.65</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">petal_length</span> <span class="o">&gt;</span> <span class="mf">4.95</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">sepal_length</span> <span class="o">&gt;</span> <span class="mf">6.05</span><span class="p">):</span>
+                     <span class="k">return</span> <span class="s">&#39;Iris-virginica&#39;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">sepal_length</span> <span class="o">&lt;=</span> <span class="mf">6.05</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">sepal_width</span> <span class="o">&gt;</span> <span class="mf">2.45</span><span class="p">):</span>
+                         <span class="k">return</span> <span class="s">&#39;Iris-versicolor&#39;</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">sepal_width</span> <span class="o">&lt;=</span> <span class="mf">2.45</span><span class="p">):</span>
+                         <span class="k">return</span> <span class="s">&#39;Iris-virginica&#39;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">petal_length</span> <span class="o">&lt;=</span> <span class="mf">4.95</span><span class="p">):</span>
+                 <span class="k">return</span> <span class="s">&#39;Iris-versicolor&#39;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">petal_length</span> <span class="o">&lt;=</span> <span class="mf">2.45</span><span class="p">):</span>
+         <span class="k">return</span> <span class="s">&#39;Iris-setosa&#39;</span>
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">local.python(hadoop=True)</span></tt> call will generate the code that you need
+for the Hadoop map-reduce engine to produce batch predictions using <a href="#id4"><span class="problematic" id="id5">`Hadoop
+streaming&lt;http://hadoop.apache.org/docs/r0.15.2/streaming.html&gt;`_</span></a>.
+Saving the mapper and reducer generated functions in their corresponding files
+(let&#8217;s say <tt class="docutils literal"><span class="pre">/home/hduser/hadoop_mapper.py</span></tt> and
+<tt class="docutils literal"><span class="pre">/home/hduser/hadoop_reducer.py</span></tt>) you can start a Hadoop job
+to generate predictions by issuing
+the following Hadoop command in your system console:</p>
+<div class="highlight-python"><pre>bin/hadoop jar contrib/streaming/hadoop-*streaming*.jar \
+-file /home/hduser/hadoop_mapper.py -mapper hadoop_mapper.py \
+-file /home/hduser/hadoop_reducer.py -reducer hadoop_reducer.py \
+-input /home/hduser/hadoop/input.csv \
+-output /home/hduser/hadoop/output_dir</pre>
+</div>
+<p>assuming you are in the Hadoop home directory, your input file is in the
+corresponding dfs directory
+(<tt class="docutils literal"><span class="pre">/home/hduser/hadoop/input.csv</span></tt> in this example) and the output will
+be placed at <tt class="docutils literal"><span class="pre">/home/hduser/hadoop/output_dir</span></tt> (inside the dfs directory).</p>
+</div>
+<div class="section" id="summary-generation">
+<h2>Summary generation<a class="headerlink" href="#summary-generation" title="Permalink to this headline">¶</a></h2>
+<p>You can also print the model from the point of view of the classes it predicts
+with <tt class="docutils literal"><span class="pre">local_model.summarize()</span></tt>.
+It shows a header section with the training data initial distribution per class
+(instances and percentage) and the final predicted distribution per class.</p>
+<p>Then each class distribution is detailed. First a header section
+shows the percentage of the total data that belongs to the class (in the
+training set and in the predicted results) and the rules applicable to
+all the
+the instances of that class (if any). Just after that, a detail section shows
+each of the leaves in which the class members are distributed.
+They are sorted in descending
+order by the percentage of predictions of the class that fall into that leaf
+and also show the full rule chain that leads to it.</p>
+<div class="highlight-python"><pre>Data distribution:
+    Iris-setosa: 33.33% (50 instances)
+    Iris-versicolor: 33.33% (50 instances)
+    Iris-virginica: 33.33% (50 instances)
+
+
+Predicted distribution:
+    Iris-setosa: 33.33% (50 instances)
+    Iris-versicolor: 33.33% (50 instances)
+    Iris-virginica: 33.33% (50 instances)
+
+
+
+
+Iris-setosa : (data 33.33% / prediction 33.33%) petal length &lt;= 2.45
+    · 100.00%: petal length &lt;= 2.45
+
+
+Iris-versicolor : (data 33.33% / prediction 33.33%) petal length &gt; 2.45
+    · 94.00%: petal length &gt; 2.45 and petal width &lt;= 1.65 and petal length &lt;= 4.95
+    · 2.00%: petal length &gt; 2.45 and petal width &lt;= 1.65 and petal length &gt; 4.95 and sepal length &lt;= 6.05 and sepal width &gt; 2.45
+    · 2.00%: petal length &gt; 2.45 and petal width &gt; 1.65 and petal length &lt;= 5.05 and sepal width &gt; 2.9 and sepal length &lt;= 5.95
+    · 2.00%: petal length &gt; 2.45 and petal width &gt; 1.65 and petal length &lt;= 5.05 and sepal width &gt; 2.9 and sepal length &gt; 5.95 and petal length &gt; 4.95
+
+
+Iris-virginica : (data 33.33% / prediction 33.33%) petal length &gt; 2.45
+    · 76.00%: petal length &gt; 2.45 and petal width &gt; 1.65 and petal length &gt; 5.05
+    · 12.00%: petal length &gt; 2.45 and petal width &gt; 1.65 and petal length &lt;= 5.05 and sepal width &lt;= 2.9
+    · 6.00%: petal length &gt; 2.45 and petal width &lt;= 1.65 and petal length &gt; 4.95 and sepal length &gt; 6.05
+    · 4.00%: petal length &gt; 2.45 and petal width &gt; 1.65 and petal length &lt;= 5.05 and sepal width &gt; 2.9 and sepal length &gt; 5.95 and petal length &lt;= 4.95
+    · 2.00%: petal length &gt; 2.45 and petal width &lt;= 1.65 and petal length &gt; 4.95 and sepal length &lt;= 6.05 and sepal width &lt;= 2.45</pre>
+</div>
+<p>You can also use <tt class="docutils literal"><span class="pre">local_model.get_data_distribution()</span></tt> and
+<tt class="docutils literal"><span class="pre">local_model.get_prediction_distribution()</span></tt> to obtain the training and
+prediction basic distribution
+information as a list (suitable to draw histograms or any further processing).</p>
+</div>
+<div class="section" id="running-the-tests">
+<h2>Running the Tests<a class="headerlink" href="#running-the-tests" title="Permalink to this headline">¶</a></h2>
+<p>To run the tests you will need to install
+<a class="reference external" href="http://packages.python.org/lettuce/tutorial/simple.html">lettuce</a>:</p>
+<div class="highlight-python"><pre>$ pip install lettuce</pre>
+</div>
+<p>and set up your authentication via environment variables, as explained
+above. With that in place, you can run the test suite simply by:</p>
+<div class="highlight-python"><pre>$ cd tests
+$ lettuce</pre>
+</div>
+<p>Additionally, <a class="reference external" href="http://tox.testrun.org/">Tox</a> can be used to
+automatically run the test suite in virtual environments for all
+supported Python versions.  To install Tox:</p>
+<div class="highlight-python"><pre>$ pip install tox</pre>
+</div>
+<p>Then run the tests from the top-level project directory:</p>
+<div class="highlight-python"><pre>$ tox</pre>
+</div>
+<p>Note that tox checks the exit status from the test command (lettuce) to
+determine pass/fail, but the latest version of lettuce (0.2.5)
+erroneously exits with a non-zero exit status indicating an error. So,
+tox will report failures even if the test suite is passing. This
+<a class="reference external" href="https://github.com/gabrielfalcao/lettuce/pull/270">should be fixed</a>
+in the next release of lettuce.</p>
+</div>
+<div class="section" id="building-the-documentation">
+<h2>Building the Documentation<a class="headerlink" href="#building-the-documentation" title="Permalink to this headline">¶</a></h2>
+<p>Install the tools required to build the documentation:</p>
+<div class="highlight-python"><pre>$ pip install sphinx</pre>
+</div>
+<p>To build the HTML version of the documentation:</p>
+<div class="highlight-python"><pre>$ cd docs/
+$ make html</pre>
+</div>
+<p>Then launch <tt class="docutils literal"><span class="pre">docs/_build/html/index.html</span></tt> in your browser.</p>
+</div>
+<div class="section" id="additional-information">
+<h2>Additional Information<a class="headerlink" href="#additional-information" title="Permalink to this headline">¶</a></h2>
+<p>For additional information about the API, see the
+<a class="reference external" href="https://bigml.com/developers">BigML developer&#8217;s documentation</a>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">BigML Python Bindings</a><ul>
+<li><a class="reference internal" href="#support">Support</a></li>
+<li><a class="reference internal" href="#requirements">Requirements</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#importing-the-module">Importing the module</a></li>
+<li><a class="reference internal" href="#authentication">Authentication</a></li>
+<li><a class="reference internal" href="#quick-start">Quick Start</a></li>
+<li><a class="reference internal" href="#fields">Fields</a></li>
+<li><a class="reference internal" href="#dataset">Dataset</a></li>
+<li><a class="reference internal" href="#model">Model</a></li>
+<li><a class="reference internal" href="#creating-resources">Creating Resources</a><ul>
+<li><a class="reference internal" href="#statuses">Statuses</a></li>
+<li><a class="reference internal" href="#creating-sources">Creating sources</a></li>
+<li><a class="reference internal" href="#creating-datasets">Creating datasets</a></li>
+<li><a class="reference internal" href="#creating-models">Creating models</a></li>
+<li><a class="reference internal" href="#creating-predictions">Creating predictions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#reading-resources">Reading Resources</a></li>
+<li><a class="reference internal" href="#listing-resources">Listing Resources</a><ul>
+<li><a class="reference internal" href="#filtering-resources">Filtering Resources</a><ul>
+<li><a class="reference internal" href="#ids-of-the-first-5-sources-created-before-april-1st-2012">Ids of the first 5 sources created before April 1st, 2012</a></li>
+<li><a class="reference internal" href="#name-of-the-first-10-datasets-bigger-than-1mb">Name of the first 10 datasets bigger than 1MB</a></li>
+<li><a class="reference internal" href="#name-of-models-with-more-than-5-fields-columns">Name of models with more than 5 fields (columns)</a></li>
+<li><a class="reference internal" href="#ids-of-predictions-whose-model-has-not-been-deleted">Ids of predictions whose model has not been deleted</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ordering-resources">Ordering Resources</a><ul>
+<li><a class="reference internal" href="#name-of-sources-ordered-by-size">Name of sources ordered by size</a></li>
+<li><a class="reference internal" href="#number-of-instances-in-datasets-created-before-april-1st-2012-ordered-by-size">Number of instances in datasets created before April 1st, 2012 ordered by size</a></li>
+<li><a class="reference internal" href="#model-ids-ordered-by-number-of-predictions-in-descending-order">Model ids ordered by number of predictions (in descending order).</a></li>
+<li><a class="reference internal" href="#name-of-predictions-ordered-by-name">Name of predictions ordered by name.</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#updating-resources">Updating Resources</a></li>
+<li><a class="reference internal" href="#deleting-resources">Deleting Resources</a></li>
+<li><a class="reference internal" href="#local-models">Local Models</a></li>
+<li><a class="reference internal" href="#multi-models">Multi Models</a></li>
+<li><a class="reference internal" href="#local-predictions">Local Predictions</a></li>
+<li><a class="reference internal" href="#id3">Fields</a></li>
+<li><a class="reference internal" href="#rule-generation">Rule Generation</a></li>
+<li><a class="reference internal" href="#python-and-hadoop-ready-generation">Python and Hadoop-ready Generation</a></li>
+<li><a class="reference internal" href="#summary-generation">Summary generation</a></li>
+<li><a class="reference internal" href="#running-the-tests">Running the Tests</a></li>
+<li><a class="reference internal" href="#building-the-documentation">Building the Documentation</a></li>
+<li><a class="reference internal" href="#additional-information">Additional Information</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="#">BigMLer 0.1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, The BigML Team.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

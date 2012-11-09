@@ -248,6 +248,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # we hadn't them yet.
     if dataset:
         dataset = api.check_resource(dataset, api.get_dataset)
+        if public_dataset:
+            dataset = api.update_dataset(dataset, {"private": False})
         if not fields:
             fields = Fields(dataset['object']['fields'])
 
@@ -297,6 +299,12 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # them yet.
     if model:
         model = api.check_resource(model, api.get_model)
+        if black_box:
+            model = api.update_model(model, {"private": False})
+        if white_box:
+            model = api.update_model(model, {"private": False, "white_box":
+                True})
+
         if not fields:
             fields = Fields(model['object']['model']['fields'])
     else:
@@ -491,6 +499,21 @@ if __name__ == '__main__':
     # Use it to retrieve models that were tagged with tag.
     parser.add_argument('--model_tag',
                         help="Retrieve models that were tagged with tag")
+
+    # Make dataset public.
+    parser.add_argument('--public_dataset',
+                        action='store_true',
+                        help="Make generated dataset public")
+
+    # Make model a public black-box model.
+    parser.add_argument('--black_box',
+                        action='store_true',
+                        help="Make generated model black-box")
+
+    # Make model a public white-box model.
+    parser.add_argument('--white_box',
+                        action='store_true',
+                        help="Make generated model white-box")
 
     # Parses command line arguments.
     ARGS = parser.parse_args()
