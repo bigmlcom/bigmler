@@ -56,7 +56,7 @@ distutils.core.setup(
     setup_requires = [],
     packages = ['bigmler'],
     include_package_data = True,
-    install_requires = ['bigml'],
+    install_requires = ['bigml==0.4.3'],
     classifiers=[
         'Development Status :: 1 - Beta',
         'Intended Audience :: Developers',
@@ -69,4 +69,9 @@ distutils.core.setup(
         'Programming Language :: Python :: 2.7',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
+    entry_points={
+        'console_scripts': [
+            'bigmler = bigmler.bigmler:main',
+        ]
+    },
 )

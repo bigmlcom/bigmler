@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #!/usr/bin/env python
 #
 # Copyright 2012 BigML
@@ -43,6 +42,7 @@ python bigmler.py \
     --no-test-header
 
 """
+import sys
 import datetime
 import argparse
 import csv
@@ -248,7 +248,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # we hadn't them yet.
     if dataset:
         dataset = api.check_resource(dataset, api.get_dataset)
-        if public_dataset:
+        if args.public_dataset:
             dataset = api.update_dataset(dataset, {"private": False})
         if not fields:
             fields = Fields(dataset['object']['fields'])
@@ -299,26 +299,24 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # them yet.
     if model:
         model = api.check_resource(model, api.get_model)
-        if black_box:
+        if args.black_box:
             model = api.update_model(model, {"private": False})
-        if white_box:
+        if args.white_box:
             model = api.update_model(model, {"private": False, "white_box":
                 True})
 
         if not fields:
             fields = Fields(model['object']['model']['fields'])
-    else:
-        raise ValueError("You need a valid model")
 
     if model and not models:
         models = [model]
 
-    if test_set:
+    if models and test_set:
         predict(test_set, test_set_header, models, fields, output,
                 objective_field, args.remote)
 
-if __name__ == '__main__':
 
+def main(args=sys.argv[1:]):
     # Date and time in format SunNov0412_120510 to name and tag resources
     NOW = datetime.datetime.now().strftime("%a%b%d%g_%H%M%S")
 
@@ -402,7 +400,7 @@ if __name__ == '__main__':
                                 to include in the dataset""")
 
     # Input fields to include in the model.
-    parser.add_argument('-mf', '--model_fields',
+    parser.add_argument('--model_fields',
                         action='store',
                         dest='model_fields',
                         help="""Comma-separated list of input fields
@@ -516,7 +514,7 @@ if __name__ == '__main__':
                         help="Make generated model white-box")
 
     # Parses command line arguments.
-    ARGS = parser.parse_args()
+    ARGS = parser.parse_args(args)
 
     API = bigml.api.BigML(dev_mode=ARGS.dev_mode, debug=ARGS.debug)
 
@@ -572,3 +570,7 @@ if __name__ == '__main__':
         output_args.update(model_ids=model_ids)
 
     compute_output(**output_args)
+
+
+if __name__ == '__main__':
+    main(sys.argv[1:])
