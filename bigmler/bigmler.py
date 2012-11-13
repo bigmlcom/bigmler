@@ -270,7 +270,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             model_args.update(input_fields=update_fields)
 
         model_args.update(sample_rate=args.sample_rate,
-                          replacement=args.replacement)
+                          replacement=args.replacement,
+                          randomize=args.randomize)
         model_ids = []
         model_file = open(name + '_models', 'w', 0)
         last_model = None
@@ -335,6 +336,15 @@ def main(args=sys.argv[1:]):
                         dest='dev_mode',
                         help="""Computes a test output using BigML FREE
                                 development environment""")
+    # BigML's username.
+    parser.add_argument('--username',
+                        action='store',
+                        help="BigML's username")
+
+    # BigML's API key.
+    parser.add_argument('--api_key',
+                        action='store',
+                        help="BigML's API key")
 
     # Path to the training set
     parser.add_argument('--train',
@@ -488,6 +498,11 @@ def main(args=sys.argv[1:]):
                         type=int,
                         help="Max number of models to create in parallel")
 
+    # Randomize feature selection at each split.
+    parser.add_argument('--randomize',
+                        action='store_true',
+                        help="Randomize feature selection at each split.")
+
     # Use it to add a tag to the new resources created.
     parser.add_argument('--tag',
                         action='append',
@@ -516,7 +531,13 @@ def main(args=sys.argv[1:]):
     # Parses command line arguments.
     ARGS = parser.parse_args(args)
 
-    API = bigml.api.BigML(dev_mode=ARGS.dev_mode, debug=ARGS.debug)
+    API_ARGS = {
+        'username': ARGS.username,
+        'api_key': ARGS.api_key,
+        'dev_mode': ARGS.dev_mode,
+        'debug': ARGS.debug}
+
+    API = bigml.api.BigML(**API_ARGS)
 
     output_args = {
         "api": API,
