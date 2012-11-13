@@ -210,7 +210,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         source = api.get_source(args.source)
 
     # If we alreday have source, we check that is finished and extract the
-    # fields.
+    # fields, and update them if needed.
     if source:
         source = api.check_resource(source, api.get_source)
         fields = Fields(source['object']['fields'])
@@ -229,8 +229,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             source = api.update_source(source, {"fields": update_fields})
 
     # If we have a source but not dataset or model has been provided, we
-    # create a new dataset
-    if (source and not args.dataset and not args.model and not model_ids):
+    # create a new dataset if the no_dataset option isn't set up.
+    if (source and not args.dataset and not args.model and not model_ids and
+            not args.no_dataset):
         dataset_args = {
             "description": description,
             "tags": args.tag
@@ -243,6 +244,11 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             dataset_args.update(fields=update_fields)
 
         dataset = api.create_dataset(source, dataset_args)
+        dataset_file = open(name + '_dataset', 'w', 0)
+        dataset_file.write("%s\n" % dataset['resource'])
+        dataset_file.flush()
+        dataset_file.close()
+
     # If a dataset is provided, let's retrieve it.
     elif args.dataset:
         dataset = api.get_dataset(args.dataset)
@@ -332,13 +338,13 @@ def main(args=sys.argv[1:]):
     # Shows log info for each https request.
     parser.add_argument('--debug',
                         action='store_true',
-                        help="Activates debug level")
+                        help="Activate debug level")
 
     # Uses BigML dev environment. Sizes must be under 1MB though.
     parser.add_argument('--dev',
                         action='store_true',
                         dest='dev_mode',
-                        help="""Computes a test output using BigML FREE
+                        help="""Compute a test output using BigML FREE
                                 development environment""")
     # BigML's username.
     parser.add_argument('--username',
@@ -465,7 +471,7 @@ def main(args=sys.argv[1:]):
     # Use it to compute predictions remotely.
     parser.add_argument('--remote',
                         action='store_true',
-                        help="Computes predictions remotely")
+                        help="Compute predictions remotely")
 
     # The path to a file containing model ids.
     parser.add_argument('--models',
@@ -536,12 +542,18 @@ def main(args=sys.argv[1:]):
     # Shows progress information when uploading a file.
     parser.add_argument('--progress_bar',
                         action='store_true',
-                        help="Shows progress details when creating a source.")
+                        help="Show progress details when creating a source.")
 
     # Does not create a model just a dataset.
     parser.add_argument('--no_model',
                         action='store_true',
-                        help="Does not create a model.")
+                        help="Do not create a model.")
+
+    # Does not create a dataset.
+    parser.add_argument('--no_dataset',
+                        action='store_true',
+                        help="Do not create a dataset.")
+
 
     # Parses command line arguments.
     ARGS = parser.parse_args(args)

@@ -335,6 +335,8 @@ Fancy Options
 -------------
 --progress_bar  Shows an update on the bytes uploaded when creating a new source. This option might run into issues depending on the locale settings of your OS.
 
+--no_model  Does not create a model. BigMLer will only create a dataset.
+
 Building the Documentation
 ==========================
 
