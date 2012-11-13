@@ -162,7 +162,6 @@ def predict(test_set, test_set_header, models, fields, output,
         local_model = MultiModel(models)
         for row in test_reader:
             input_data = fields.pair(row, objective_field)
-            print input_data
             prediction = local_model.predict(input_data)
             output.write("%s\n" % prediction)
             output.flush()
@@ -198,7 +197,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             "category": args.category,
             "tags": args.tag,
             "source_parser": {"header": training_set_header}}
-        source = api.create_source(training_set, source_args)
+        source = api.create_source(training_set, source_args,
+                                   progress_bar=args.progress_bar)
         source = api.check_resource(source, api.get_source)
         fields = Fields(source['object']['fields'])
 
@@ -346,26 +346,27 @@ def main(args=sys.argv[1:]):
                         action='store',
                         help="BigML's API key")
 
-    # Path to the training set
+    # Path to the training set.
     parser.add_argument('--train',
                         action='store',
                         dest='training_set',
                         help="Training set path")
 
-    # Path to the test set
+    # Path to the test set.
     parser.add_argument('--test',
                         action='store',
                         dest='test_set',
                         help="Test set path")
 
-    # Name of the output
+    # Name of the file to output predictions.
     parser.add_argument('--output',
                         action='store',
-                        dest='submission',
-                        default='submission_%s.csv' % NOW,
-                        help="Submission path")
+                        dest='predictions',
+                        default='predictions_%s.csv' % NOW,
+                        help="Path to the file to output predictions.")
 
-    # The name of the field that represents the objective field (i.e., class or label)
+    # The name of the field that represents the objective field (i.e., class or
+    # label).
     parser.add_argument('--objective',
                         action='store',
                         dest='objective_field',
@@ -528,6 +529,11 @@ def main(args=sys.argv[1:]):
                         action='store_true',
                         help="Make generated model white-box")
 
+    # Shows progress information when uploading a file.
+    parser.add_argument('--progress_bar',
+                        action='store_true',
+                        help="Shows progress details when creating a source.")
+
     # Parses command line arguments.
     ARGS = parser.parse_args(args)
 
@@ -543,7 +549,7 @@ def main(args=sys.argv[1:]):
         "api": API,
         "training_set": ARGS.training_set,
         "test_set": ARGS.test_set,
-        "output": ARGS.submission,
+        "output": ARGS.predictions,
         "objective_field": ARGS.objective_field,
         "name": ARGS.name,
         "training_set_header": ARGS.train_header,
