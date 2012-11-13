@@ -14,11 +14,11 @@ BigMLer is open sourced under the `Apache License, Version
 Quick Start
 ===========
 
-You can create a new model with just::
+You can create a new model just with ::
 
     bigmler --train data/iris.csv
 
-You can generate predictions for a test set::
+You can generate predictions for a test set using::
 
     bigmler --train data/iris.csv  --test data/test_iris.csv
 
@@ -26,10 +26,10 @@ You can specify a file name to save the newly created predictions::
 
     bigmler --train data/iris.csv  --test data/test_iris.csv --output predictions
 
-If you do not specify an output file name BigML will auto-generate one based on
+If you do not specify an output file,  BigML will auto-generate one based on
 the current date and time.
 
-A different `objective_field` (the field that you want to predict) can be selected using:
+A different `objective_field` (the field that you want to predict) can be selected using::
 
     bigmler --train data/iris.csv  --test data/test_iris.csv --objective 'sepal length'
 
@@ -191,7 +191,7 @@ Ensembles
 --max_parallel_models MAX_PARALLEL_MODELS    Max number of models to create in parallel
 --randomize           Use a random set of fields to split on.
 
-Ensembles aren't `first-class citizen <http://en.wikipedia.org/wiki/First-class_citizen>`_ in BigML yet. So make sure that you tag your models conveniently so that you can then retrieve them conveniently to generate prediction from multiple models. We expect to have ensembles at the first level of our API pretty soon.
+Ensembles aren't `first-class citizen <http://en.wikipedia.org/wiki/First-class_citizen>`_ in BigML yet. So make sure that you tag your models conveniently so that you can then retrieve them later to generate predictions. We expect to have ensembles at the first level of our API pretty soon.
 
 Public Resources
 ----------------
@@ -201,6 +201,10 @@ Public Resources
 
 Notice that datasets and models will be made public without assigning any price
 to them.
+
+Fancy Options
+-------------
+--progress_bar          Shows an update on the bytes uploaded when creating a new source. This option might run into issues depending on the locale settings of your OS.
 
 Running the Tests
 =================

@@ -140,8 +140,11 @@ def predict(test_set, test_set_header, models, fields, output,
 
 
     """
+    try:
+        test_reader = csv.reader(open(test_set, "U"))
+    except IOError:
+        sys.exit("Error: cannot read test test")
 
-    test_reader = csv.reader(open(test_set, "U"))
     if test_set_header:
         test_reader.next()
     output = open(output, 'w', 0)
