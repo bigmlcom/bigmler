@@ -256,8 +256,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if not fields:
             fields = Fields(dataset['object']['fields'])
 
-    # If we have a dataset but not a model we create the model.
-    if (dataset and not args.model and not model_ids):
+    # If we have a dataset but not a model, we create the model.
+    if (dataset and not args.model and not model_ids and not args.no_model):
         model_args = {
             "description": description,
             "tags": args.tag
@@ -536,6 +536,11 @@ def main(args=sys.argv[1:]):
     parser.add_argument('--progress_bar',
                         action='store_true',
                         help="Shows progress details when creating a source.")
+
+    # Does not create a model just a dataset.
+    parser.add_argument('--no_model',
+                        action='store_true',
+                        help="Does not create a model.")
 
     # Parses command line arguments.
     ARGS = parser.parse_args(args)
