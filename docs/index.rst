@@ -118,9 +118,27 @@ Using previous Sources, Datasets, and Models
 --------------------------------------------
 
 You don't need to create a model from scratch every time that you use BigMLer.
+You can generate predictions for a test set using a previously generated
+model::
 
+    bigmler --model model/50a1f43deabcb404d3000079 --test data/test_iris.csv
 
+You can also use a number of models providing a file with a model/id per line::
 
+    bigmler --models BigMLer_FriNov0912_223645_models --test data/test_iris.csv
+
+Or all the models that were tagged with a specific tag::
+
+    bigmler --model_tag my_tag --test data/test_iris.csv
+
+You can also use a previously generated dataset to create a new model::
+
+    bigmler --dataset dataset/50a1f441035d0706d9000371
+
+Finally, a previously generated source can also be used to generate a new
+dataset and model::
+
+    bigmler --source source/50a1e520eabcb404cd0000d1
 
 Configuring Datasets and Models
 -------------------------------
