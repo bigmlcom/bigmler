@@ -14,7 +14,7 @@ BigMLer is open sourced under the `Apache License, Version
 Quick Start
 ===========
 
-Let's see some basic usage examples. Check the installation and authentication
+Let's see some basic usage examples. Check the `installation <#bigmler-installation>`_ and `authentication <#bigml-authentication>`_
 sections below if you are not familiar with BigML.
 
 Basics
@@ -38,7 +38,7 @@ You can also specify a file name to save the newly created predictions::
 If you do not specify an output file, BigMLer will auto-generate one for you based on
 the current date and time (e.g., `predictions_MonNov1212_174715.csv`).
 
-A different `objective field` (the field that you want to predict) can be selected using::
+A different ``objective field`` (the field that you want to predict) can be selected using::
 
     bigmler --train data/iris.csv  --test data/test_iris.csv --objective 'sepal length'
 
@@ -95,7 +95,7 @@ If you just want to share it as a black-box model just use::
 
     bigmler --train data/iris.csv --black_box
 
-If you want also to make public your daaset::
+If you also want to make public your dataset::
 
     bigmler --train data/iris.csv --public_dataset
 
@@ -113,6 +113,15 @@ Please note:
     - Many tags can be added to the same resource.
     - BigMLer will add the name, category, description, and tags to all the newly created resources in each request.
 
+
+Using previous Sources, Datasets, and Models
+--------------------------------------------
+
+You don't need to create a model from scratch every time that you use BigMLer.
+
+
+
+
 Configuring Datasets and Models
 -------------------------------
 
@@ -120,17 +129,47 @@ What if your raw data isn't necessarily in the format that BigML expects? So we
 have good news: you can use a number of options to configure your sources,
 datasets, and models.
 
-You can change field names
+Imagine that you want to alter BigML's default field names or the ones provided by the training set header and capitalize them, you can use a text file with a change per line as follows::
 
-You can also change the auto-detect-type behavior from BigML assigning specific
-types to specific fields.
+    bigmler --test/iris.csv --field_names fields.txt
 
-You can select what fields to include in a dataset
+where ``fields.txt`` would be::
 
-You can select what fields to include in a model creation
+    0,  SEPAL LENGTH
+    1,  SEPAL WIDTH
+    2,  PETAL LENGTH
+    3,  PETAL WIDTH
+    4,  SPECIES
+
+The number on the left in each line is the `column number` of the field in your
+source.
+
+
+Similarly you can also alter the auto-detect type behavior from BigML assigning specific
+types to specific fields::
+
+    bigml --test/iris.csv --types types.txt
+
+where ``types.txt`` woud be::
+
+    0, 'numeric'
+    1, 'numeric'
+    2, 'numeric'
+    3, 'numeric'
+    4, 'categorical'
+
+You can specify the fields that you want to include in the dataset::
+
+    bigmler --train data/iris.csv --dataset_fields 'sepal length','sepal width','species'
+
+or the fields that you want to include as predictors in the model::
+
+    bigmler --train data/iris.csv --model_fields 'sepal length','sepal width'
 
 Finally, you can also tell BigML whether your training and test set come with a
-header row or not. For example, if the both come without header:
+header row or not. For example, if the both come without header::
+
+    bigmler --train data/iris.csv --test data/test_iris.csv --no-train-header --no-test-header
 
 
 Support
@@ -150,8 +189,8 @@ Python 2.6 and Python 2.7 are currently supported by BigMLer.
 
 BigML requires `bigml 0.4.3 <https://github.com/bigmlcom/python>`_  or higher.
 
-Installation
-============
+BigMLer Installation
+====================
 
 To install the latest stable release with
 `pip <http://www.pip-installer.org/>`_::
@@ -277,37 +316,6 @@ to them.
 Fancy Options
 -------------
 --progress_bar          Shows an update on the bytes uploaded when creating a new source. This option might run into issues depending on the locale settings of your OS.
-
-Running the Tests
-=================
-
-To run the tests you will need to install
-`lettuce <http://packages.python.org/lettuce/tutorial/simple.html>`_::
-
-    $ pip install lettuce
-
-and set up your authentication via environment variables, as explained
-above. With that in place, you can run the test suite simply by::
-
-    $ cd tests
-    $ lettuce
-
-Additionally, `Tox <http://tox.testrun.org/>`_ can be used to
-automatically run the test suite in virtual environments for all
-supported Python versions.  To install Tox::
-
-    $ pip install tox
-
-Then run the tests from the top-level project directory::
-
-    $ tox
-
-Note that tox checks the exit status from the test command (lettuce) to
-determine pass/fail, but the latest version of lettuce (0.2.5)
-erroneously exits with a non-zero exit status indicating an error. So,
-tox will report failures even if the test suite is passing. This
-`should be fixed <https://github.com/gabrielfalcao/lettuce/pull/270>`_
-in the next release of lettuce.
 
 Building the Documentation
 ==========================

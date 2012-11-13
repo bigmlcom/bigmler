@@ -220,7 +220,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             source = api.update_source(source, {"fields": update_fields})
     # If a source is provided, we retrieve it.
     elif args.source:
-        source = api.get_source(source)
+        source = api.get_source(args.source)
 
     # If we alreday have source, we check that is finished and extract the
     # fields.
