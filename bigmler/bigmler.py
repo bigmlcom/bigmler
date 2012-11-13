@@ -59,7 +59,6 @@ def read_description(path):
     """Reads a text description from a file.
 
     """
-
     lines = ''
     for line in fileinput.input([path]):
         lines += line
@@ -124,6 +123,20 @@ def read_models(path):
     for line in fileinput.input([path]):
         models.append(line.rstrip())
     return models
+
+def read_dataset(path):
+    """Reads dataset id from a file.
+
+    For example:
+
+    dataset/50978822035d0706da000069
+
+    """
+    datasets = []
+    for line in fileinput.input([path]):
+        datasets.append(line.rstrip())
+    return datasets[0]
+
 
 
 def list_model_ids(api, query_string):
@@ -478,7 +491,14 @@ def main(args=sys.argv[1:]):
                         action='store',
                         dest='models',
                         help="""Path to a file containing model/ids. One model
-                                per line (e.g., 0, 'model/4f824203ce80053')""")
+                                per line (e.g., model/50a206a8035d0706dc000376)""")
+
+    # The path to a file containing a dataset id.
+    parser.add_argument('--datasets',
+                        action='store',
+                        dest='datasets',
+                        help="""Path to a file containing a dataset/id. Just one
+                        dataset (e.g., dataset/50a20697035d0706da0004a4)""")
 
     # Number of models to create when using ensembles.
     parser.add_argument('--number_of_models',
@@ -610,6 +630,12 @@ def main(args=sys.argv[1:]):
     if ARGS.models:
         model_ids = read_models(ARGS.models)
         output_args.update(model_ids=model_ids)
+
+    dataset_id = None
+    # Parses dataset/id if provided
+    if ARGS.datasets:
+        dataset_id = read_dataset(ARGS.datasets)
+        ARGS.dataset = dataset_id
 
     # Retrieve model/ids if provided
     if ARGS.model_tag:
