@@ -48,7 +48,8 @@ column in your dataset.
 If you check your working directory you will see that BigMLer creates a file with the
 model ids that have been generated (e.g., BigMLer_FriNov0912_223645_models).
 This file is handy if then you want to use those model ids to generate local
-predictions. See below.
+predictions. BigMLer also creates a file with the dataset id that have been
+generated (e.g., BigMLer_TueNov1312_003451_dataset).
 
 Remote Sources
 --------------
@@ -134,6 +135,10 @@ Or all the models that were tagged with a specific tag::
 You can also use a previously generated dataset to create a new model::
 
     bigmler --dataset dataset/50a1f441035d0706d9000371
+
+You can also imput the dataset from a file::
+
+    bigmler --datasets iris_dataset
 
 Finally, a previously generated source can also be used to generate a new
 dataset and model::
@@ -304,9 +309,10 @@ Remote Resources
 ----------------
 --source SOURCE     BigML source Id
 --dataset DATASET       BigML dataset Id
+--datasets PATH     Path to a file containing a daaset Id
 --model MODEL       BigML model Id
 --remote        Computes predictions remotely
---models MODELS     Path to a file containing model/ids. One model per line (e.g., 0, 'model/4f824203ce80053')
+--models PATH     Path to a file containing model/ids. One model per line (e.g., model/4f824203ce80053)
 --model_tag MODEL_TAG
                         Retrieve models that were tagged with tag
 
