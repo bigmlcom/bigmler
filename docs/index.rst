@@ -333,7 +333,7 @@ to them.
 
 Fancy Options
 -------------
---progress_bar          Shows an update on the bytes uploaded when creating a new source. This option might run into issues depending on the locale settings of your OS.
+--progress_bar  Shows an update on the bytes uploaded when creating a new source. This option might run into issues depending on the locale settings of your OS.
 
 Building the Documentation
 ==========================
@@ -356,3 +356,16 @@ For additional information, see
 the `full documentation for the Python
 bindings on Read the Docs <http://bigml.readthedocs.org>`_. For more information about BigML's API, see the
 `BigML developer's documentation <https://bigml.com/developers>`_.
+
+How to Contribute
+=================
+
+Please follow the next steps:
+
+  1. Fork the project on `github <https://github.com/bigmlcom/bigmler`_
+  2. Create a new branch.
+  3. Commit changes to the new branch.
+  4. Send a `pull request <https://github.com/bigmlcom/bigmler/pulls>`_.
+
+For details on the underlying API, see the
+`BigML API documentation <https://bigml.com/developers>`_.

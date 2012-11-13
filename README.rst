@@ -278,36 +278,6 @@ Fancy Options
 -------------
 --progress_bar          Shows an update on the bytes uploaded when creating a new source. This option might run into issues depending on the locale settings of your OS.
 
-Running the Tests
-=================
-
-To run the tests you will need to install
-`lettuce <http://packages.python.org/lettuce/tutorial/simple.html>`_::
-
-    $ pip install lettuce
-
-and set up your authentication via environment variables, as explained
-above. With that in place, you can run the test suite simply by::
-
-    $ cd tests
-    $ lettuce
-
-Additionally, `Tox <http://tox.testrun.org/>`_ can be used to
-automatically run the test suite in virtual environments for all
-supported Python versions.  To install Tox::
-
-    $ pip install tox
-
-Then run the tests from the top-level project directory::
-
-    $ tox
-
-Note that tox checks the exit status from the test command (lettuce) to
-determine pass/fail, but the latest version of lettuce (0.2.5)
-erroneously exits with a non-zero exit status indicating an error. So,
-tox will report failures even if the test suite is passing. This
-`should be fixed <https://github.com/gabrielfalcao/lettuce/pull/270>`_
-in the next release of lettuce.
 
 Building the Documentation
 ==========================
