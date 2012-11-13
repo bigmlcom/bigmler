@@ -194,6 +194,29 @@ header row or not. For example, if the both come without header::
 
     bigmler --train data/iris.csv --test data/test_iris.csv --no-train-header --no-test-header
 
+Fitering Sources
+----------------
+
+Imagine that you have create a new source and that you want to create a
+specific dataset filtering the rows of the source that only meet certain
+criteria.  You can do that using a JSON expresion as follows::
+
+    bigmler --source source/50a2bb64035d0706db0006cc --json_filter filter.json
+
+where ``filter.json`` is a file containg a expression like this::
+
+    ["<", 7.00, ["field", "000000"]]
+
+or a LISP expression as follows::
+
+    bigmler --source source/50a2bb64035d0706db0006cc --lisp_filter filter.lisp
+
+where ``filter.lisp`` is a file containing a expression like this::
+
+    (< 7.00 (field "sepal length"))
+
+For more details, see the BigML's API documentation on `filtering rows <https://bigml.com/developers/datasets#d_filteringrows>`_.
+
 
 Support
 =======
@@ -300,10 +323,13 @@ Data Configuration
 ------------------
 --no-train-header   The train set file hasn't a header
 --no-test-header    The test set file hasn't a header
---field_names FIELD_NAMES       Path to a file describing field names. One definition per line (e.g., 0, 'Last Name')
---types TYPES       Path to a file describing field types. One definition per line (e.g., 0, 'numeric')
+--field_names PATH  Path to a file describing field names. One definition per line (e.g., 0, 'Last Name')
+--types PATH        Path to a file describing field types. One definition per line (e.g., 0, 'numeric')
 --dataset_fields DATASET_FIELDS     Comma-separated list of field column numbers to include in the dataset
 --model_fields MODEL_FIELDS     Comma-separated list of input fields (predictors) to create the model
+--json_filter PATH  Path to a file containing a JSON expression to filter the source
+--lisp_filter PATH  Path to a file containing a LISP expression to filter the source
+
 
 Remote Resources
 ----------------
