@@ -49,6 +49,11 @@ import csv
 import fileinput
 import ast
 
+try:
+    import simplejson as json
+except ImportError:
+    import json
+
 import bigml.api
 from bigml.multimodel import MultiModel
 from bigml.multimodel import combine_predictions
@@ -137,6 +142,34 @@ def read_dataset(path):
         datasets.append(line.rstrip())
     return datasets[0]
 
+
+def read_json_filter(path):
+    """Reads a json filter from a file.
+
+    For example:
+
+    [">", 3.14, ["field", "000002"]]
+
+    """
+    json_data = open(path)
+    json_filter = json.load(json_data)
+    json_data.close()
+    return json_filter
+
+
+def read_lisp_filter(path):
+    """Reads a lisp filter from a file.
+
+    For example:
+
+    (> (/ (+ (- (field "00000") 4.4)
+            (field 23)
+            (* 2 (field "Class") (field "00004")))
+       3)
+       5.5)
+
+    """
+    return read_description(path)
 
 
 def list_model_ids(api, query_string):
@@ -249,6 +282,14 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             "description": description,
             "tags": args.tag
         }
+
+        if args.json_filter:
+            dataset_args.update(json_filter=args.json_filter)
+        elif args.lisp_filter:
+            dataset_args.update(lisp_filter=args.lisp_filter)
+
+        # This needs to be changed with the newest version of Wintermute
+        # Use input_fields instead of fields
         update_fields = {}
         if dataset_fields:
             for name in dataset_fields:
@@ -433,6 +474,16 @@ def main(args=sys.argv[1:]):
                         help="""Comma-separated list of field column numbers
                                 to include in the dataset""")
 
+    # Path to a file that includes a JSON filter.
+    parser.add_argument('--json_filter',
+                        action='store',
+                        help="File including a JSON filter")
+
+    # Path to a file that includes a lisp filter.
+    parser.add_argument('--lisp_filter',
+                        action='store',
+                        help="File including a Lisp filter")
+
     # Input fields to include in the model.
     parser.add_argument('--model_fields',
                         action='store',
@@ -564,16 +615,15 @@ def main(args=sys.argv[1:]):
                         action='store_true',
                         help="Show progress details when creating a source.")
 
-    # Does not create a model just a dataset.
-    parser.add_argument('--no_model',
-                        action='store_true',
-                        help="Do not create a model.")
-
     # Does not create a dataset.
     parser.add_argument('--no_dataset',
                         action='store_true',
                         help="Do not create a dataset.")
 
+    # Does not create a model just a dataset.
+    parser.add_argument('--no_model',
+                        action='store_true',
+                        help="Do not create a model.")
 
     # Parses command line arguments.
     ARGS = parser.parse_args(args)
@@ -642,6 +692,16 @@ def main(args=sys.argv[1:]):
         model_ids = model_ids + list_model_ids(API,
                                                "tags__in=%s" % ARGS.model_tag)
         output_args.update(model_ids=model_ids)
+
+    # Reads a json filter if provided
+    if ARGS.json_filter:
+        json_filter = read_json_filter(ARGS.json_filter)
+        ARGS.json_filter = json_filter
+
+    # Reads a lisp filter if provided
+    if ARGS.lisp_filter:
+        lisp_filter = read_lisp_filter(ARGS.lisp_filter)
+        ARGS.lisp_filter = lisp_filter
 
     compute_output(**output_args)
 
