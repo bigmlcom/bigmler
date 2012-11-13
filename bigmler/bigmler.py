@@ -205,6 +205,15 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         source = api.check_resource(source, api.get_source)
         fields = Fields(source['object']['fields'])
 
+    # If a source is provided, we retrieve it.
+    elif args.source:
+        source = api.get_source(args.source)
+
+    # If we alreday have source, we check that is finished and extract the
+    # fields.
+    if source:
+        source = api.check_resource(source, api.get_source)
+        fields = Fields(source['object']['fields'])
         update_fields = {}
         if field_names:
             for (column, value) in field_names.iteritems():
@@ -218,15 +227,6 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 update_fields.update({
                     fields.field_id(column): {'optype': value}})
             source = api.update_source(source, {"fields": update_fields})
-    # If a source is provided, we retrieve it.
-    elif args.source:
-        source = api.get_source(args.source)
-
-    # If we alreday have source, we check that is finished and extract the
-    # fields.
-    if source:
-        source = api.check_resource(source, api.get_source)
-        fields = Fields(source['object']['fields'])
 
     # If we have a source but not dataset or model has been provided, we
     # create a new dataset
@@ -256,7 +256,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if not fields:
             fields = Fields(dataset['object']['fields'])
 
-    # If we have a dataset but not a model, we create the model.
+    # If we have a dataset but not a model, we create the model if the no_model
+    # flag hasn't been set up.
     if (dataset and not args.model and not model_ids and not args.no_model):
         model_args = {
             "description": description,
