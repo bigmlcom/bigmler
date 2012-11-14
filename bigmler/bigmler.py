@@ -279,6 +279,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if (source and not args.dataset and not args.model and not model_ids and
             not args.no_dataset):
         dataset_args = {
+            "name": name,
             "description": description,
             "tags": args.tag
         }
@@ -320,6 +321,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # flag hasn't been set up.
     if (dataset and not args.model and not model_ids and not args.no_model):
         model_args = {
+            "name": name,
             "description": description,
             "tags": args.tag
         }
