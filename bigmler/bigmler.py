@@ -205,14 +205,14 @@ def predict(test_set, test_set_header, models, fields, output,
                 predictions.append(prediction['object']['prediction']
                                    [prediction['object']
                                    ['objective_fields'][0]])
-            output.write("%s\n" % combine_predictions(predictions))
+            output.write("%s\n" % combine_predictions(predictions).encode("utf-8"))
             output.flush()
     else:
         local_model = MultiModel(models)
         for row in test_reader:
             input_data = fields.pair(row, objective_field)
             prediction = local_model.predict(input_data)
-            output.write("%s\n" % prediction)
+            output.write("%s\n" % prediction.encode("utf-8"))
             output.flush()
     output.close()
 
@@ -249,7 +249,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         source = api.create_source(training_set, source_args,
                                    progress_bar=args.progress_bar)
         source = api.check_resource(source, api.get_source)
-        fields = Fields(source['object']['fields'])
+        fields = Fields(source['object']['fields'],
+                        source['object']['source_parser']['missing_tokens'],
+                        source['object']['source_parser']['locale'])
 
     # If a source is provided, we retrieve it.
     elif args.source:
