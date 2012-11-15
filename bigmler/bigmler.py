@@ -173,12 +173,40 @@ def read_lisp_filter(path):
     return read_description(path)
 
 
+def list_source_ids(api, query_string):
+    """Lists BigML sources filtered by `query_string`.
+
+    """
+    sources = api.list_sources(query_string)
+    return ([] if sources['objects'] is None else 
+            [obj['resource'] for obj in sources['objects']])
+
+
+def list_dataset_ids(api, query_string):
+    """Lists BigML datasets filtered by `query_string`.
+
+    """
+    datasets = api.list_datasets(query_string)
+    return ([] if datasets['objects'] is None else
+            [obj['resource'] for obj in datasets['objects']])
+
+
 def list_model_ids(api, query_string):
     """Lists BigML models filtered by `query_string`.
 
     """
     models = api.list_models(query_string)
-    return [obj['resource'] for obj in models['objects']]
+    return ([] if models['objects'] is None else
+            [obj['resource'] for obj in models['objects']])
+
+
+def list_prediction_ids(api, query_string):
+    """Lists BigML predictions filtered by `query_string`.
+
+    """
+    predictions = api.list_predictions(query_string)
+    return ([] if predictions['objects'] is None else
+            [obj['resource'] for obj in predictions['objects']])
 
 
 def predict(test_set, test_set_header, models, fields, output,
@@ -663,12 +691,37 @@ def main(args=sys.argv[1:]):
                         action='store_true',
                         help="Do not create a model.")
 
-    # Resources to be deleted.
+    # Changes to delete mode.
     parser.add_argument('--delete',
+                        action='store_true',
+                        help="Delete command.")
+
+    # Resources to be deleted.
+    parser.add_argument('--ids',
                         action='store',
                         dest='delete_list',
-                        help="""Comma-separated list of resource ids
-                                to be deleted""")
+                        help="""Select comma separated list of 
+                                resources to be deleted.""")
+
+    # Sources selected by tag to be deleted.
+    parser.add_argument('--source_tag',
+                        help="""Select sources tagged with tag to 
+                                be deleted""")
+
+    # Datasets selected by tag to be deleted.
+    parser.add_argument('--dataset_tag',
+                        help="""Select datasets tagged with tag to 
+                                be deleted""")
+
+    # Predictions selected by tag to be deleted.
+    parser.add_argument('--prediction_tag',
+                        help="""Select prediction tagged with tag to 
+                                be deleted""")
+
+    # Resources selected by tag to be deleted.
+    parser.add_argument('--all_tag',
+                        help="""Select resources tagged with tag to 
+                                be deleted""")
 
     # Parses command line arguments.
     ARGS = parser.parse_args(args)
@@ -749,8 +802,33 @@ def main(args=sys.argv[1:]):
         ARGS.lisp_filter = lisp_filter
 
     # Parses resources ids if provided.
-    if ARGS.delete_list:
-        delete_list = map(lambda x: x.strip(), ARGS.delete_list.split(','))
+    if ARGS.delete:
+        delete_list = []
+        if ARGS.delete_list:
+            delete_list = map(lambda x: x.strip(), ARGS.delete_list.split(','))
+        if ARGS.all_tag:
+            query_string = "tags__in=%s" % ARGS.all_tag
+            delete_list.extend(list_source_ids(API, query_string))
+            delete_list.extend(list_dataset_ids(API, query_string))
+            delete_list.extend(list_model_ids(API, query_string))
+            delete_list.extend(list_prediction_ids(API, query_string))
+        # Retrieve sources/ids if provided
+        if ARGS.source_tag:
+            query_string = "tags__in=%s" % ARGS.source_tag
+            delete_list.extend(list_source_ids(API, query_string))
+        # Retrieve datasets/ids if provided
+        if ARGS.dataset_tag:
+            query_string = "tags__in=%s" % ARGS.dataset_tag
+            delete_list.extend(list_dataset_ids(API, query_string))
+        # Retrieve model/ids if provided
+        if ARGS.model_tag:
+            query_string = "tags__in=%s" % ARGS.model_tag
+            delete_list.extend(list_model_ids(API, query_string))
+        # Retrieve prediction/ids if provided
+        if ARGS.prediction_tag:
+            query_string = "tags__in=%s" % ARGS.prediction_tag
+            delete_list.extend(list_prediction_ids(API, query_string))
+
         delete(API, delete_list)
     else:
         compute_output(**output_args)
