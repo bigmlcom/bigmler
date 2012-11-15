@@ -43,6 +43,7 @@ python bigmler.py \
 
 """
 import sys
+import os
 import datetime
 import argparse
 import csv
@@ -58,7 +59,7 @@ import bigml.api
 from bigml.multimodel import MultiModel
 from bigml.multimodel import combine_predictions
 from bigml.fields import Fields
-
+from bigml.util import slugify
 
 def read_description(path):
     """Reads a text description from a file.
@@ -193,6 +194,7 @@ def predict(test_set, test_set_header, models, fields, output,
 
     if test_set_header:
         test_reader.next()
+    check_dir(output)
     output = open(output, 'w', 0)
     if remote:
         for row in test_reader:
@@ -236,6 +238,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     models = None
     fields = None
 
+    path = check_dir(output)
+
     # If neither a previous source, dataset or model are provided.
     # we create a new one
     if (training_set and not args.source and not args.dataset and
@@ -257,7 +261,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     elif args.source:
         source = api.get_source(args.source)
 
-    # If we alreday have source, we check that is finished and extract the
+    # If we already have source, we check that is finished and extract the
     # fields, and update them if needed.
     if source:
         source = api.check_resource(source, api.get_source)
@@ -275,6 +279,11 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 update_fields.update({
                     fields.field_id(column): {'optype': value}})
             source = api.update_source(source, {"fields": update_fields})
+        source_file = open(path + '/source', 'w', 0)
+        source_file.write("%s\n" % source['resource'])
+        source_file.write("%s\n" % source['object']['name'])
+        source_file.flush()
+        source_file.close()
 
     # If we have a source but not dataset or model has been provided, we
     # create a new dataset if the no_dataset option isn't set up.
@@ -301,7 +310,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             dataset_args.update(fields=update_fields)
 
         dataset = api.create_dataset(source, dataset_args)
-        dataset_file = open(name + '_dataset', 'w', 0)
+        dataset_file = open(path + '/dataset', 'w', 0)
         dataset_file.write("%s\n" % dataset['resource'])
         dataset_file.flush()
         dataset_file.close()
@@ -341,7 +350,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                           replacement=args.replacement,
                           randomize=args.randomize)
         model_ids = []
-        model_file = open(name + '_models', 'w', 0)
+        model_file = open(path + '/models', 'w', 0)
         last_model = None
         for i in range(1, args.number_of_models + 1):
             if i > args.max_parallel_models:
@@ -384,6 +393,31 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         predict(test_set, test_set_header, models, fields, output,
                 objective_field, args.remote)
 
+def delete(api, delete_list):
+    """ Deletes the resources given in the list.
+
+    """
+
+    DELETE = {bigml.api.SOURCE_RE: api.delete_source,
+              bigml.api.DATASET_RE: api.delete_dataset,
+              bigml.api.MODEL_RE: api.delete_model,
+              bigml.api.PREDICTION_RE: api.delete_prediction}
+    for resource_id in delete_list:
+        for resource_type in DELETE:
+            try:
+                bigml.api.get_resource(resource_type, resource_id)
+                DELETE[resource_type](resource_id)
+                break
+            except ValueError:
+                pass
+
+def check_dir(path):
+    """Creates a directory if it doesn't exist
+    """
+    directory = os.path.dirname(path)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    return directory
 
 def main(args=sys.argv[1:]):
     # Date and time in format SunNov0412_120510 to name and tag resources
@@ -430,7 +464,7 @@ def main(args=sys.argv[1:]):
     parser.add_argument('--output',
                         action='store',
                         dest='predictions',
-                        default='predictions_%s.csv' % NOW,
+                        default='%s/predictions.csv' % NOW,
                         help="Path to the file to output predictions.")
 
     # The name of the field that represents the objective field (i.e., class or
@@ -629,6 +663,13 @@ def main(args=sys.argv[1:]):
                         action='store_true',
                         help="Do not create a model.")
 
+    # Resources to be deleted.
+    parser.add_argument('--delete',
+                        action='store',
+                        dest='delete_list',
+                        help="""Comma-separated list of resource ids
+                                to be deleted""")
+
     # Parses command line arguments.
     ARGS = parser.parse_args(args)
 
@@ -707,7 +748,12 @@ def main(args=sys.argv[1:]):
         lisp_filter = read_lisp_filter(ARGS.lisp_filter)
         ARGS.lisp_filter = lisp_filter
 
-    compute_output(**output_args)
+    # Parses resources ids if provided.
+    if ARGS.delete_list:
+        delete_list = map(lambda x: x.strip(), ARGS.delete_list.split(','))
+        delete(API, delete_list)
+    else:
+        compute_output(**output_args)
 
 
 if __name__ == '__main__':
