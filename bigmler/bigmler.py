@@ -267,6 +267,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     fields = None
 
     path = check_dir(output)
+    csv_properties = {}
 
     # If neither a previous source, dataset or model are provided.
     # we create a new one
@@ -294,7 +295,12 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # fields, and update them if needed.
     if source:
         source = api.check_resource(source, api.get_source)
-        fields = Fields(source['object']['fields'])
+        csv_properties = {'missing_tokens':
+                          source['object']['source_parser']['missing_tokens'],
+                          'data_locale':
+                          source['object']['source_parser']['locale']}
+
+        fields = Fields(source['object']['fields'], **csv_properties)
         update_fields = {}
         if field_names:
             for (column, value) in field_names.iteritems():
@@ -354,8 +360,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         dataset = api.check_resource(dataset, api.get_dataset)
         if args.public_dataset:
             dataset = api.update_dataset(dataset, {"private": False})
-        if not fields:
-            fields = Fields(dataset['object']['fields'])
+        fields = Fields(dataset['object']['fields'], **csv_properties)
 
     # If we have a dataset but not a model, we create the model if the no_model
     # flag hasn't been set up.
@@ -411,9 +416,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if args.white_box:
             model = api.update_model(model, {"private": False, "white_box":
                 True})
-
-        if not fields:
-            fields = Fields(model['object']['model']['fields'])
+        fields = Fields(model['object']['model']['fields'], **csv_properties)
 
     if model and not models:
         models = [model]
