@@ -178,7 +178,7 @@ def list_source_ids(api, query_string):
 
     """
     sources = api.list_sources(query_string)
-    return ([] if sources['objects'] is None else 
+    return ([] if sources['objects'] is None else
             [obj['resource'] for obj in sources['objects']])
 
 
@@ -281,6 +281,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         source = api.create_source(training_set, source_args,
                                    progress_bar=args.progress_bar)
         source = api.check_resource(source, api.get_source)
+
         fields = Fields(source['object']['fields'],
                         source['object']['source_parser']['missing_tokens'],
                         source['object']['source_parser']['locale'])
@@ -700,27 +701,27 @@ def main(args=sys.argv[1:]):
     parser.add_argument('--ids',
                         action='store',
                         dest='delete_list',
-                        help="""Select comma separated list of 
+                        help="""Select comma separated list of
                                 resources to be deleted.""")
 
     # Sources selected by tag to be deleted.
     parser.add_argument('--source_tag',
-                        help="""Select sources tagged with tag to 
+                        help="""Select sources tagged with tag to
                                 be deleted""")
 
     # Datasets selected by tag to be deleted.
     parser.add_argument('--dataset_tag',
-                        help="""Select datasets tagged with tag to 
+                        help="""Select datasets tagged with tag to
                                 be deleted""")
 
     # Predictions selected by tag to be deleted.
     parser.add_argument('--prediction_tag',
-                        help="""Select prediction tagged with tag to 
+                        help="""Select prediction tagged with tag to
                                 be deleted""")
 
     # Resources selected by tag to be deleted.
     parser.add_argument('--all_tag',
-                        help="""Select resources tagged with tag to 
+                        help="""Select resources tagged with tag to
                                 be deleted""")
 
     # Parses command line arguments.
