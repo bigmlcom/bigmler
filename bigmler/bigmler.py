@@ -241,7 +241,7 @@ def predict(test_set, test_set_header, models, fields, output,
         local_model = MultiModel(models)
         for row in test_reader:
             input_data = fields.pair(row, objective_field)
-            prediction = local_model.predict(input_data)
+            prediction = local_model.predict(input_data, by_name=False)
             output.write("%s\n" % prediction.encode("utf-8"))
             output.flush()
     output.close()
