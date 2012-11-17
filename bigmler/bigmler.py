@@ -220,18 +220,33 @@ def predict(test_set, test_set_header, models, fields, output,
     except IOError:
         sys.exit("Error: cannot read test test")
 
+    headers = None
     if test_set_header:
-        test_reader.next()
+        headers = test_reader.next()
+        if objective_field is None:
+            objective_field = fields.len() - 1
+        fields_names = [fields.fields[fields.field_id(i)]
+                        ['name'] for i in range(fields.len())
+                        if i != objective_field]
+        headers = [header for header in headers
+                   if header !=
+                      fields.fields[fields.field_id(objective_field)]]
+        if (len(headers) > len(fields_names) or
+            any([not header in fields_names for header in headers])):
+                raise Exception(u"Mismatch input data type in field. "
+                                u"The expected fields are: \n%s" %
+                                ",".join(fields_names))
+
     check_dir(output)
     output = open(output, 'w', 0)
     if remote:
         for row in test_reader:
             predictions = []
-            input_data = fields.pair(row, objective_field)
+            input_data = fields.pair(row, headers, objective_field)
 
             for model in models:
                 prediction = api.create_prediction(model, input_data,
-                                                   by_name=False, wait_time=0)
+                                                   by_name=test_set_header, wait_time=0)
                 predictions.append(prediction['object']['prediction']
                                    [prediction['object']
                                    ['objective_fields'][0]])
@@ -240,8 +255,8 @@ def predict(test_set, test_set_header, models, fields, output,
     else:
         local_model = MultiModel(models)
         for row in test_reader:
-            input_data = fields.pair(row, objective_field)
-            prediction = local_model.predict(input_data, by_name=False)
+            input_data = fields.pair(row, headers, objective_field)
+            prediction = local_model.predict(input_data, by_name=test_set_header)
             output.write("%s\n" % prediction.encode("utf-8"))
             output.flush()
     output.close()
