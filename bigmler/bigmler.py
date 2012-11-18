@@ -210,7 +210,7 @@ def list_prediction_ids(api, query_string):
 
 
 def predict(test_set, test_set_header, models, fields, output,
-            objective_field, remote=False):
+            objective_field, remote=False, api=None, log=None):
     """Computes a prediction for each entry in the `test_set`
 
 
@@ -466,7 +466,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
     if models and test_set:
         predict(test_set, test_set_header, models, fields, output,
-                objective_field, args.remote)
+                objective_field, args.remote, api, log)
     if args.log_file and log:
         log.close()
 
