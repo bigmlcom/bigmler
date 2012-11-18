@@ -29,27 +29,27 @@ see a new source, dataset, and model. Isn't it magic?
 
 You can generate predictions for a test set using::
 
-    bigmler --train data/iris.csv  --test data/test_iris.csv
+    bigmler --train data/iris.csv --test data/test_iris.csv 
 
 You can also specify a file name to save the newly created predictions::
 
-    bigmler --train data/iris.csv  --test data/test_iris.csv --output predictions
+    bigmler --train data/iris.csv --test data/test_iris.csv --output predictions 
 
-If you do not specify an output file, BigMLer will auto-generate one for you based on
-the current date and time (e.g., `predictions_MonNov1212_174715.csv`).
+If you do not specify the path to an output file, BigMLer will auto-generate one for you under a 
+new directory named after the current date and time (e.g., `MonNov1212_174715/predictions.csv`).
 
 A different ``objective field`` (the field that you want to predict) can be selected using::
 
-    bigmler --train data/iris.csv  --test data/test_iris.csv --objective 'sepal length'
+    bigmler --train data/iris.csv --test data/test_iris.csv  --objective 'sepal length'
 
 If you do not explicitly specify an objective field, BigML will default to the last
 column in your dataset.
 
 If you check your working directory you will see that BigMLer creates a file with the
-model ids that have been generated (e.g., BigMLer_FriNov0912_223645_models).
+model ids that have been generated (e.g., FriNov0912_223645/models).
 This file is handy if then you want to use those model ids to generate local
 predictions. BigMLer also creates a file with the dataset id that have been
-generated (e.g., BigMLer_TueNov1312_003451_dataset).
+generated (e.g., TueNov1312_003451/dataset).
 
 Remote Sources
 --------------
@@ -75,13 +75,13 @@ Ensembles
 
 You can also easily create ensembles. For example, using `bagging <http://en.wikipedia.org/wiki/Bootstrap_aggregating>`_ is as easy as::
 
-    bigmler --train data/iris.csv --test data/test_irist.csv --number_of_models 10 --sample_rate 0.75 --replacement --tag my_ensemble
+    bigmler --train data/iris.csv --test data/test_iris.csv  --number_of_models 10 --sample_rate 0.75 --replacement --tag my_ensemble
 
-We recommend to tag resources when you create multiple models at the same time so that you can get then retrieve them together to generate predicitions locally using the multiple models feature from BigML's Python binding.
+We recommend to tag resources when you create multiple models at the same time so that you can get then retrieve them together to generate predictions locally using the multiple models feature from BigML's Python binding.
 
 To create a `random decision forest <http://www.quora.com/Machine-Learning/How-do-random-forests-work-in-laymans-terms>`_ just use the `--randomize` option::
 
-     bigmler --train data/iris.csv --test data/test_irist.csv --number_of_models 10 --sample_rate 0.75 --replacement --tag my_ensemble --randomize
+     bigmler --train data/iris.csv --test data/test_iris.csv  --number_of_models 10 --sample_rate 0.75 --replacement --tag my_ensemble --randomize
 
 The fields to choose from will be randomized at each split helping you creating a random decision forest that when using together will increase the prediction performance of the individual models.
 
@@ -122,7 +122,7 @@ You don't need to create a model from scratch every time that you use BigMLer.
 You can generate predictions for a test set using a previously generated
 model::
 
-    bigmler --model model/50a1f43deabcb404d3000079 --test data/test_iris.csv
+    bigmler --model model/50a1f43deabcb404d3000079 --test data/test_iris.csv 
 
 You can also use a number of models providing a file with a model/id per line::
 
@@ -136,7 +136,7 @@ You can also use a previously generated dataset to create a new model::
 
     bigmler --dataset dataset/50a1f441035d0706d9000371
 
-You can also imput the dataset from a file::
+You can also input the dataset from a file::
 
     bigmler --datasets iris_dataset
 
@@ -154,15 +154,15 @@ datasets, and models.
 
 Imagine that you want to alter BigML's default field names or the ones provided by the training set header and capitalize them, you can use a text file with a change per line as follows::
 
-    bigmler --test/iris.csv --field_names fields.txt
+    bigmler --train data/iris.csv --field_names fields.txt
 
 where ``fields.txt`` would be::
 
-    0,  SEPAL LENGTH
-    1,  SEPAL WIDTH
-    2,  PETAL LENGTH
-    3,  PETAL WIDTH
-    4,  SPECIES
+    0, 'SEPAL LENGTH'
+    1, 'SEPAL WIDTH'
+    2, 'PETAL LENGTH'
+    3, 'PETAL WIDTH'
+    4, 'SPECIES'
 
 The number on the left in each line is the `column number` of the field in your
 source.
@@ -171,7 +171,7 @@ source.
 Similarly you can also alter the auto-detect type behavior from BigML assigning specific
 types to specific fields::
 
-    bigml --test/iris.csv --types types.txt
+    bigml --train data/iris.csv --types types.txt
 
 where ``types.txt`` woud be::
 
@@ -190,9 +190,9 @@ or the fields that you want to include as predictors in the model::
     bigmler --train data/iris.csv --model_fields 'sepal length','sepal width'
 
 Finally, you can also tell BigML whether your training and test set come with a
-header row or not. For example, if the both come without header::
+header row or not. For example, if both come without header::
 
-    bigmler --train data/iris.csv --test data/test_iris.csv --no-train-header --no-test-header
+    bigmler --train data/iris_nh.csv --test data/test_iris_nh.csv --no-train-header --no-test-header
 
 Fitering Sources
 ----------------
@@ -217,6 +217,42 @@ where ``filter.lisp`` is a file containing a expression like this::
 
 For more details, see the BigML's API documentation on `filtering rows <https://bigml.com/developers/datasets#d_filteringrows>`_.
 
+Deleting Remote Resources
+-------------------------
+
+You have seen that BigMLer is an agile tool that empowers you to create a
+great number of resources easily. This is a tremedous help, but it also can
+lead to a garbage-prone environment. To keep a control of the each new created
+remote resource use the flag `--resources_log` followed by the name of the log
+file you choose.::
+
+    bigmler --train data/iris.csv --resources_log my_log.log
+
+Each new resource created by that command will cause its id to be appended as
+a new line of the log file.
+
+BigMLer can help you as well in deleting these resources. Using the `--delete`
+tag there are many options available. For instance, deleting a comma separated
+list of ids::
+
+    bigmler --delete --ids source/50a2bb64035d0706db0006cc, dataset/50a1f441035d0706d9000371
+
+deleting resources listed in a file::
+
+    bigmler --delete --from_file to_delete.log
+
+where `to_delete.log` contains a resource id per line. You can also delete
+resources based on the
+tags they are associated to::
+
+    bigmler --delete --all_tag my_tag
+
+or restricting the operation to a specific type::
+
+    bigmler --delete --source_tag my_tag
+    bigmler --delete --dataset_tag my_tag
+    bigmler --delete --model_tag my_tag
+    bigmler --delete --prediction_tag my_tag
 
 Support
 =======
@@ -309,7 +345,7 @@ Basic Functionality
 
 --train TRAINING_SET        Full path to a training set. It can be a remote URL to a (gzipped or compressed) csv file. The protocol schemes can be http, https, s3, azure, odata.
 --test TEST_SET     Full path to a test set. A file containing the data that you want to input to generate predictions.
---objective OBJECTIVE_FIELD     The name of the Objective Field. The field that youwant to predict.
+--objective OBJECTIVE_FIELD     The name of the Objective Field. The field that you want to predict.
 --output PREDICTIONS        Full path to a file to save predictions. If left unspecified, it will default to an auto-generated file created by BigMLer.
 
 Content
@@ -341,6 +377,16 @@ Remote Resources
 --models PATH     Path to a file containing model/ids. One model per line (e.g., model/4f824203ce80053)
 --model_tag MODEL_TAG
                         Retrieve models that were tagged with tag
+
+Delete Remote Resources
+-----------------------
+--delete     Starts delete mode
+--ids LIST_OF_IDS   Comma separated list of ids to be deleted
+--all_tag TAG    Retrieves resources that were tagged with tag to be deleted
+--source_tag TAG    Retrieves sources that were tagged with tag to be deleted
+--dataset_tag TAG   Retrieves datasets that were tagged with tag to be deleted
+--model_tag TAG   Retrieves models that were tagged with tag to be deleted
+--prediction_tag TAG   Retrieves predictions that were tagged with tag to be deleted
 
 Ensembles
 ---------

@@ -218,24 +218,30 @@ def predict(test_set, test_set_header, models, fields, output,
     try:
         test_reader = csv.reader(open(test_set, "U"))
     except IOError:
-        sys.exit("Error: cannot read test test")
+        sys.exit("Error: cannot read test %s" % test_set)
 
     headers = None
     if test_set_header:
         headers = test_reader.next()
         if objective_field is None:
-            objective_field = fields.len() - 1
+            objective_field = sorted(fields.fields_by_column_number.keys())[-1]
+        # validate headers against model fields excluding objective_field,
+        # that may be present or not
         fields_names = [fields.fields[fields.field_id(i)]
-                        ['name'] for i in range(fields.len())
+                        ['name'] for i in sorted(fields.fields_by_column_number.keys())
                         if i != objective_field]
-        headers = [header for header in headers
+        headers_list = [unicode(header, "utf-8") for header in headers
                    if header !=
-                      fields.fields[fields.field_id(objective_field)]]
-        if (len(headers) > len(fields_names) or
-            any([not header in fields_names for header in headers])):
-                raise Exception(u"Mismatch input data type in field. "
-                                u"The expected fields are: \n%s" %
-                                ",".join(fields_names))
+                      fields.fields[fields.field_id(objective_field)]['name']]
+        if (len(headers_list) > len(fields_names) or
+            any([not header in fields_names for header in headers_list])):
+                raise Exception((u"Mismatch input data type in field. "
+                                u"The expected fields are: \n%s\nwhile"
+                                u" the found headers are: \n%s\nUse "
+                                u" --no-test-header flag if first line"
+                                u" should not be interpreted as headers." %
+                                (",".join(fields_names),
+                                 ",".join(headers_list))).encode("utf-8"))
 
     check_dir(output)
     output = open(output, 'w', 0)
@@ -247,17 +253,25 @@ def predict(test_set, test_set_header, models, fields, output,
             for model in models:
                 prediction = api.create_prediction(model, input_data,
                                                    by_name=test_set_header, wait_time=0)
+                if log:
+                    log.write("%s\n" % prediction['resource'])
+                    log.flush()
                 predictions.append(prediction['object']['prediction']
                                    [prediction['object']
                                    ['objective_fields'][0]])
-            output.write("%s\n" % combine_predictions(predictions).encode("utf-8"))
+            prediction = combine_predictions(predictions)
+            if isinstance(prediction, basestring):
+                prediction = prediction.encode("utf-8")
+            output.write("%s\n" % prediction)
             output.flush()
     else:
         local_model = MultiModel(models)
         for row in test_reader:
             input_data = fields.pair(row, headers, objective_field)
             prediction = local_model.predict(input_data, by_name=test_set_header)
-            output.write("%s\n" % prediction.encode("utf-8"))
+            if isinstance(prediction, basestring):
+                prediction = prediction.encode("utf-8")
+            output.write("%s\n" % prediction)
             output.flush()
     output.close()
 
@@ -283,6 +297,11 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
     path = check_dir(output)
     csv_properties = {}
+    # If logging is required, open the file for logging
+    log = None
+    if args.log_file:
+        check_dir(args.log_file)
+        log = open(args.log_file, 'a', 0)
 
     # If neither a previous source, dataset or model are provided.
     # we create a new one
@@ -297,6 +316,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         source = api.create_source(training_set, source_args,
                                    progress_bar=args.progress_bar)
         source = api.check_resource(source, api.get_source)
+        if log:
+            log.write("%s\n" % source['resource'])
+            log.flush()
 
         fields = Fields(source['object']['fields'],
                         source['object']['source_parser']['missing_tokens'],
@@ -360,6 +382,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             dataset_args.update(fields=update_fields)
 
         dataset = api.create_dataset(source, dataset_args)
+        if log:
+            log.write("%s\n" % dataset['resource'])
+            log.flush()
         dataset_file = open(path + '/dataset', 'w', 0)
         dataset_file.write("%s\n" % dataset['resource'])
         dataset_file.flush()
@@ -405,6 +430,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             if i > args.max_parallel_models:
                 api.check_resource(last_model, api.get_model)
             model = api.create_model(dataset, model_args)
+            if log:
+                log.write("%s\n" % model['resource'])
+                log.flush()
             last_model = model
             model_ids.append(model['resource'])
             model_file.write("%s\n" % model['resource'])
@@ -439,6 +467,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if models and test_set:
         predict(test_set, test_set_header, models, fields, output,
                 objective_field, args.remote)
+    if args.log_file and log:
+        log.close()
 
 def delete(api, delete_list):
     """ Deletes the resources given in the list.
@@ -462,7 +492,7 @@ def check_dir(path):
     """Creates a directory if it doesn't exist
     """
     directory = os.path.dirname(path)
-    if not os.path.exists(directory):
+    if len(directory) > 0  and not os.path.exists(directory):
         os.makedirs(directory)
     return directory
 
@@ -710,6 +740,13 @@ def main(args=sys.argv[1:]):
                         action='store_true',
                         help="Do not create a model.")
 
+    # Log file to store resources ids.
+    parser.add_argument('--resources_log',
+                        action='store',
+                        dest='log_file',
+                        help="""Path to a file to store new resources ids. 
+                                One resource per line
+                                (e.g., model/50a206a8035d0706dc000376)""")
     # Changes to delete mode.
     parser.add_argument('--delete',
                         action='store_true',
@@ -721,6 +758,14 @@ def main(args=sys.argv[1:]):
                         dest='delete_list',
                         help="""Select comma separated list of
                                 resources to be deleted.""")
+
+    # Resources to be deleted are taken from file.
+    parser.add_argument('--from_file',
+                        action='store',
+                        dest='delete_file',
+                        help="""Path to a file containing resources ids. 
+                                One resource per line
+                                (e.g., model/50a206a8035d0706dc000376)""")
 
     # Sources selected by tag to be deleted.
     parser.add_argument('--source_tag',
@@ -744,6 +789,9 @@ def main(args=sys.argv[1:]):
 
     # Parses command line arguments.
     ARGS = parser.parse_args(args)
+
+    if len(os.path.dirname(ARGS.predictions).strip()) == 0:
+        ARGS.predictions = "%s/%s" % (NOW, ARGS.predictions)
 
     API_ARGS = {
         'username': ARGS.username,
@@ -825,8 +873,13 @@ def main(args=sys.argv[1:]):
         delete_list = []
         if ARGS.delete_list:
             delete_list = map(lambda x: x.strip(), ARGS.delete_list.split(','))
+        if ARGS.delete_file:
+            if not os.path.exists(ARGS.delete_file):
+                raise Exception("File %s not found" % ARGS_delete_file)
+            delete_list.extend([line for line in open(ARGS.delete_file, "r")])
         if ARGS.all_tag:
             query_string = "tags__in=%s" % ARGS.all_tag
+            query_string = "created__gt=%s" % "2012-11-18 17:00:00.000000"
             delete_list.extend(list_source_ids(API, query_string))
             delete_list.extend(list_dataset_ids(API, query_string))
             delete_list.extend(list_model_ids(API, query_string))
