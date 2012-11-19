@@ -847,33 +847,34 @@ def main(args=sys.argv[1:]):
         output_args.update(model_fields=MODEL_FIELDS)
 
     model_ids = []
-    # Parses model/ids if provided
+    # Parses model/ids if provided.
     if ARGS.models:
         model_ids = read_models(ARGS.models)
         output_args.update(model_ids=model_ids)
 
     dataset_id = None
-    # Parses dataset/id if provided
+    # Parses dataset/id if provided.
     if ARGS.datasets:
         dataset_id = read_dataset(ARGS.datasets)
         ARGS.dataset = dataset_id
 
-    # Retrieve model/ids if provided
+    # Retrieve model/ids if provided.
     if ARGS.model_tag:
         model_ids = model_ids + list_model_ids(API,
                                                "tags__in=%s" % ARGS.model_tag)
         output_args.update(model_ids=model_ids)
 
-    # Reads a json filter if provided
+    # Reads a json filter if provided.
     if ARGS.json_filter:
         json_filter = read_json_filter(ARGS.json_filter)
         ARGS.json_filter = json_filter
 
-    # Reads a lisp filter if provided
+    # Reads a lisp filter if provided.
     if ARGS.lisp_filter:
         lisp_filter = read_lisp_filter(ARGS.lisp_filter)
         ARGS.lisp_filter = lisp_filter
 
+    # Adds default tags unless that it is requested not to do so.
     if ARGS.no_tag:
         ARGS.tag.append('BigMLer')
         ARGS.tag.append('BigMLer_%s' % NOW)

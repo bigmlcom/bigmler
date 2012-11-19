@@ -29,13 +29,13 @@ see a new source, dataset, and model. Isn't it magic?
 
 You can generate predictions for a test set using::
 
-    bigmler --train data/iris.csv --test data/test_iris.csv 
+    bigmler --train data/iris.csv --test data/test_iris.csv
 
 You can also specify a file name to save the newly created predictions::
 
-    bigmler --train data/iris.csv --test data/test_iris.csv --output predictions 
+    bigmler --train data/iris.csv --test data/test_iris.csv --output predictions
 
-If you do not specify the path to an output file, BigMLer will auto-generate one for you under a 
+If you do not specify the path to an output file, BigMLer will auto-generate one for you under a
 new directory named after the current date and time (e.g., `MonNov1212_174715/predictions.csv`).
 
 A different ``objective field`` (the field that you want to predict) can be selected using::
@@ -112,6 +112,7 @@ Please note:
     - You can get a full list of BigML category codes `here <https://bigml.com/developers/sources#s_categories>`_.
     - Descriptions are provided in a text file that can also include `markdown <http://en.wikipedia.org/wiki/Markdown>`_.
     - Many tags can be added to the same resource.
+    - Use --no_tag if you do not want default BigMLer tags to be added.
     - BigMLer will add the name, category, description, and tags to all the newly created resources in each request.
 
 
@@ -122,7 +123,7 @@ You don't need to create a model from scratch every time that you use BigMLer.
 You can generate predictions for a test set using a previously generated
 model::
 
-    bigmler --model model/50a1f43deabcb404d3000079 --test data/test_iris.csv 
+    bigmler --model model/50a1f43deabcb404d3000079 --test data/test_iris.csv
 
 You can also use a number of models providing a file with a model/id per line::
 
