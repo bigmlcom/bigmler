@@ -703,8 +703,14 @@ def main(args=sys.argv[1:]):
     # Use it to add a tag to the new resources created.
     parser.add_argument('--tag',
                         action='append',
-                        default=['BigMLer', 'BigMLer_%s' % NOW],
+                        default=[],
                         help="""Tag to later retrieve new resources""")
+
+    # Avoid default tagging of resources.
+    parser.add_argument('--no_tag',
+                        action='store_false',
+                        help="""No tag resources with default BigMLer tags""")
+
 
     # Use it to retrieve models that were tagged with tag.
     parser.add_argument('--model_tag',
@@ -744,7 +750,7 @@ def main(args=sys.argv[1:]):
     parser.add_argument('--resources_log',
                         action='store',
                         dest='log_file',
-                        help="""Path to a file to store new resources ids. 
+                        help="""Path to a file to store new resources ids.
                                 One resource per line
                                 (e.g., model/50a206a8035d0706dc000376)""")
     # Changes to delete mode.
@@ -763,7 +769,7 @@ def main(args=sys.argv[1:]):
     parser.add_argument('--from_file',
                         action='store',
                         dest='delete_file',
-                        help="""Path to a file containing resources ids. 
+                        help="""Path to a file containing resources ids.
                                 One resource per line
                                 (e.g., model/50a206a8035d0706dc000376)""")
 
@@ -867,6 +873,10 @@ def main(args=sys.argv[1:]):
     if ARGS.lisp_filter:
         lisp_filter = read_lisp_filter(ARGS.lisp_filter)
         ARGS.lisp_filter = lisp_filter
+
+    if ARGS.no_tag:
+        ARGS.tag.append('BigMLer')
+        ARGS.tag.append('BigMLer_%s' % NOW)
 
     # Parses resources ids if provided.
     if ARGS.delete:
