@@ -890,7 +890,6 @@ def main(args=sys.argv[1:]):
             delete_list.extend([line for line in open(ARGS.delete_file, "r")])
         if ARGS.all_tag:
             query_string = "tags__in=%s" % ARGS.all_tag
-            query_string = "created__gt=%s" % "2012-11-18 17:00:00.000000"
             delete_list.extend(list_source_ids(API, query_string))
             delete_list.extend(list_dataset_ids(API, query_string))
             delete_list.extend(list_model_ids(API, query_string))
