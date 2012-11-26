@@ -364,6 +364,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         dataset_args = {
             "name": name,
             "description": description,
+            "category": args.category,
             "tags": args.tag
         }
 
@@ -408,6 +409,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         model_args = {
             "name": name,
             "description": description,
+            "category": args.category,
             "tags": args.tag
         }
         if not objective_field is None:
