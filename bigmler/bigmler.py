@@ -373,14 +373,11 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         elif args.lisp_filter:
             dataset_args.update(lisp_filter=args.lisp_filter)
 
-        # This needs to be changed with the newest version of Wintermute
-        # Use input_fields instead of fields
-        update_fields = {}
+        input_fields = []
         if dataset_fields:
             for name in dataset_fields:
-                update_fields.update({
-                    fields.field_id(name): {'name': name}})
-            dataset_args.update(fields=update_fields)
+                input_fields.append(fields.field_id(name))
+            dataset_args.update(input_fields=input_fields)
 
         dataset = api.create_dataset(source, dataset_args)
         if log:
@@ -416,11 +413,11 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             model_args.update({"objective_field":
                                fields.field_id(objective_field)})
 
-        update_fields = []
+        input_fields = []
         if model_fields:
             for name in model_fields:
-                update_fields.append(fields.field_id(name))
-            model_args.update(input_fields=update_fields)
+                input_fields.append(fields.field_id(name))
+            model_args.update(input_fields=input_fields)
 
         model_args.update(sample_rate=args.sample_rate,
                           replacement=args.replacement,
