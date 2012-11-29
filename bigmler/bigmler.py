@@ -397,7 +397,10 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if dataset:
         dataset = api.check_resource(dataset, api.get_dataset)
         if args.public_dataset:
-            dataset = api.update_dataset(dataset, {"private": False})
+            public_dataset = {"private": False}
+            if args.dataset_price:
+                public_dataset.update(price=args.dataset_price)
+            dataset = api.update_dataset(dataset, public_dataset)
         fields = Fields(dataset['object']['fields'], **csv_properties)
 
     # If we have a dataset but not a model, we create the model if the no_model
@@ -456,8 +459,13 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if args.black_box:
             model = api.update_model(model, {"private": False})
         if args.white_box:
-            model = api.update_model(model, {"private": False, "white_box":
-                True})
+            public_model = {"private": False, "white_box": True}
+            if args.model_price:
+                public_model.update(price=args.model_price)
+            if args.cpp:
+                public_model.update(credits_per_prediction=args.cpp)
+            model = api.update_model(model, public_model)
+
         fields = Fields(model['object']['model']['fields'], **csv_properties)
 
     if model and not models:
@@ -729,6 +737,28 @@ def main(args=sys.argv[1:]):
     parser.add_argument('--white_box',
                         action='store_true',
                         help="Make generated model white-box")
+
+    # Set a price tag to your white-box model.
+    parser.add_argument('--model_price',
+                        action='store',
+                        type=float,
+                        default=0.0,
+                        help="The price other users must pay to clone your model")
+
+    # Set a price tag to your dataset.
+    parser.add_argument('--dataset_price',
+                        action='store',
+                        type=float,
+                        default=0.0,
+                        help="Price for the dataset")
+
+    # Set credits per prediction to your white box or black box models.
+    parser.add_argument('--cpp',
+                        action='store',
+                        type=float,
+                        default=0.0,
+                        help="""The number of credits that other users will
+                                consume to make a prediction with your model.""")
 
     # Shows progress information when uploading a file.
     parser.add_argument('--progress_bar',
