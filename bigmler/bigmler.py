@@ -422,6 +422,13 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 input_fields.append(fields.field_id(name))
             model_args.update(input_fields=input_fields)
 
+
+        if args.stat_pruning:
+            model_args.update(stat_pruning=True)
+
+        if args.no_stat_pruning:
+            model_args.update(stat_pruning=False)
+
         model_args.update(sample_rate=args.sample_rate,
                           replacement=args.replacement,
                           randomize=args.randomize)
@@ -445,7 +452,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     elif args.model:
         model = api.get_model(args.model)
 
-    if model_ids:
+    if model_ids and test_set:
         models = []
         for model in model_ids:
             model = api.check_resource(model, api.get_model)
@@ -454,7 +461,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
     # We check that the model is finished and get the fields if haven't got
     # them yet.
-    if model:
+    if model and (test_set or args.black_box or args.white_box):
         model = api.check_resource(model, api.get_model)
         if args.black_box:
             model = api.update_model(model, {"private": False})
@@ -673,6 +680,16 @@ def main(args=sys.argv[1:]):
                         help="""Path to a file containing a dataset/id. Just one
                         dataset (e.g., dataset/50a20697035d0706da0004a4)""")
 
+    # Set to True to active statiscal pruning.
+    parser.add_argument('--stat_pruning',
+                        action='store_true',
+                        help="Use statiscal pruning.")
+
+    # Set to False to deactivate statiscal pruning.
+    parser.add_argument('--no_stat_pruning',
+                        action='store_true',
+                        help="Do not use statistical pruning.")
+
     # Number of models to create when using ensembles.
     parser.add_argument('--number_of_models',
                         action='store',
@@ -890,7 +907,7 @@ def main(args=sys.argv[1:]):
     # Retrieve model/ids if provided.
     if ARGS.model_tag:
         model_ids = model_ids + list_model_ids(API,
-                                               "tags__in=%s" % ARGS.model_tag)
+                                               "tags__in=%s;limit=200" % ARGS.model_tag)
         output_args.update(model_ids=model_ids)
 
     # Reads a json filter if provided.
