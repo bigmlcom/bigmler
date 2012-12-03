@@ -283,7 +283,7 @@ To install the latest stable release with
 You can also install the development version of the bindings directly
 from the Git repository::
 
-    $ pip install -e git://github.com/bigmlcom/bigmler.git#egg=bigmler_python
+    $ pip install -e git://github.com/bigmlcom/bigmler.git#egg=bigmler
 
 BigML Authentication
 ====================
