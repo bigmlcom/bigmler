@@ -61,6 +61,10 @@ from bigml.multimodel import combine_predictions
 from bigml.fields import Fields
 from bigml.util import slugify
 
+
+PAGE_LENGTH = 200
+
+
 def read_description(path):
     """Reads a text description from a file.
 
@@ -177,36 +181,73 @@ def list_source_ids(api, query_string):
     """Lists BigML sources filtered by `query_string`.
 
     """
-    sources = api.list_sources(query_string)
-    return ([] if sources['objects'] is None else
+    sources = api.list_sources('limit=%s;%s' % (PAGE_LENGTH, query_string))
+    ids = ([] if sources['objects'] is None else
             [obj['resource'] for obj in sources['objects']])
+    while (not sources['objects'] is None and
+          (sources['meta']['total_count'] > (sources['meta']['offset'] +
+          sources['meta']['limit']))):
+        offset = sources['meta']['offset'] + PAGE_LENGTH
+        sources = api.list_sources('offset=%s;limit=%s;%s' % (offset,
+                                   PAGE_LENGTH, query_string))
+        ids.extend(([] if sources['objects'] is None else
+                   [obj['resource'] for obj in sources['objects']]))
+    return ids
 
 
 def list_dataset_ids(api, query_string):
     """Lists BigML datasets filtered by `query_string`.
 
     """
-    datasets = api.list_datasets(query_string)
-    return ([] if datasets['objects'] is None else
-            [obj['resource'] for obj in datasets['objects']])
+    datasets = api.list_datasets('limit=%s;%s' % (PAGE_LENGTH, query_string))
+    ids = ([] if datasets['objects'] is None else
+           [obj['resource'] for obj in datasets['objects']])
+    while (not datasets['objects'] is None and
+          (datasets['meta']['total_count'] > (datasets['meta']['offset'] +
+          datasets['meta']['limit']))):
+        offset = datasets['meta']['offset'] + PAGE_LENGTH
+        datasets = api.list_datasets('offset=%s;limit=%s;%s' % (offset,
+                                     PAGE_LENGTH, query_string))
+        ids.extend(([] if datasets['objects'] is None else
+                   [obj['resource'] for obj in datasets['objects']]))
+    return ids
 
 
 def list_model_ids(api, query_string):
     """Lists BigML models filtered by `query_string`.
 
     """
-    models = api.list_models(query_string)
-    return ([] if models['objects'] is None else
-            [obj['resource'] for obj in models['objects']])
+    models = api.list_models('limit=%s;%s' % (PAGE_LENGTH, query_string))
+    ids = ([] if models['objects'] is None else
+           [obj['resource'] for obj in models['objects']])
+    while (not models['objects'] is None and
+          (models['meta']['total_count'] > (models['meta']['offset'] +
+          models['meta']['limit']))):
+        offset = models['meta']['offset'] + PAGE_LENGTH
+        models = api.list_models('offset=%s;limit=%s;%s' % (offset,
+                                 PAGE_LENGTH, query_string))
+        ids.extend(([] if models['objects'] is None else
+                   [obj['resource'] for obj in models['objects']]))
+    return ids
 
 
 def list_prediction_ids(api, query_string):
     """Lists BigML predictions filtered by `query_string`.
 
     """
-    predictions = api.list_predictions(query_string)
-    return ([] if predictions['objects'] is None else
-            [obj['resource'] for obj in predictions['objects']])
+    predictions = api.list_predictions('limit=%s;%s' % (PAGE_LENGTH,
+                                       query_string))
+    ids = ([] if predictions['objects'] is None else
+           [obj['resource'] for obj in predictions['objects']])
+    while (not predictions['objects'] is None and
+          (predictions['meta']['total_count'] > (predictions['meta']['offset']
+          + predictions['meta']['limit']))):
+        offset = predictions['meta']['offset'] + PAGE_LENGTH
+        predictions = api.list_predictions('offset=%s;limit=%s;%s' % (offset,
+                                           PAGE_LENGTH, query_string))
+        ids.extend(([] if predictions['objects'] is None else
+                   [obj['resource'] for obj in predictions['objects']]))
+    return ids
 
 
 def predict(test_set, test_set_header, models, fields, output,
@@ -907,7 +948,7 @@ def main(args=sys.argv[1:]):
     # Retrieve model/ids if provided.
     if ARGS.model_tag:
         model_ids = model_ids + list_model_ids(API,
-                                               "tags__in=%s;limit=200" % ARGS.model_tag)
+                                               "tags__in=%s" % ARGS.model_tag)
         output_args.update(model_ids=model_ids)
 
     # Reads a json filter if provided.
