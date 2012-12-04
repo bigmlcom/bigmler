@@ -271,24 +271,32 @@ def predict(test_set, test_set_header, models, fields, output,
         fields_names = [fields.fields[fields.field_id(i)]
                         ['name'] for i in sorted(fields.fields_by_column_number.keys())
                         if i != objective_field]
-        headers_list = [unicode(header, "utf-8") for header in headers
-                   if header !=
-                      fields.fields[fields.field_id(objective_field)]['name']]
-        if (len(headers_list) > len(fields_names) or
-            any([not header in fields_names for header in headers_list])):
-                raise Exception((u"Mismatch input data type in field. "
-                                u"The expected fields are: \n%s\nwhile"
-                                u" the found headers are: \n%s\nUse "
-                                u" --no-test-header flag if first line"
-                                u" should not be interpreted as headers." %
-                                (",".join(fields_names),
-                                 ",".join(headers_list))).encode("utf-8"))
+        headers = [unicode(header, "utf-8") for header in headers]
+        exclude = [i for i in range(len(headers)) if not headers[i] in fields_names]
+        if (len(headers) - len(exclude)):
+            print (u"Warning: predictions will be processed but some data"
+                   u" might not be used. The used fields will be: \n%s\nwhile"
+                   u" the headers found in the test file are: \n%s" %
+                   (",".join(fields_names),
+                    ",".join(headers))).encode("utf-8")
+            for index in exclude:
+                del headers[index]
+        else:
+            raise Exception((u"No test field matches the model fields.\n"
+                             u"The expected fields are: \n%s\nwhile"
+                             u" the headers found in the test file are: \n%s\nUse "
+                             u" --no-test-header flag if first line"
+                             u" should not be interpreted as headers." %
+                             (",".join(fields_names),
+                              ",".join(headers))).encode("utf-8"))
 
     check_dir(output)
     output = open(output, 'w', 0)
     if remote:
         for row in test_reader:
             predictions = []
+            for index in exclude:
+                del row[index]
             input_data = fields.pair(row, headers, objective_field)
 
             for model in models:
@@ -308,6 +316,8 @@ def predict(test_set, test_set_header, models, fields, output,
     else:
         local_model = MultiModel(models)
         for row in test_reader:
+            for index in exclude:
+                del row[index]
             input_data = fields.pair(row, headers, objective_field)
             prediction = local_model.predict(input_data, by_name=test_set_header)
             if isinstance(prediction, basestring):
