@@ -264,31 +264,30 @@ def predict(test_set, test_set_header, models, fields, output,
     headers = None
     if test_set_header:
         headers = test_reader.next()
-        if objective_field is None:
-            objective_field = sorted(fields.fields_by_column_number.keys())[-1]
         # validate headers against model fields excluding objective_field,
         # that may be present or not
         fields_names = [fields.fields[fields.field_id(i)]
                         ['name'] for i in sorted(fields.fields_by_column_number.keys())
-                        if i != objective_field]
+                        if i != fields.field_column_number(objective_field)]
         headers = [unicode(header, "utf-8") for header in headers]
         exclude = [i for i in range(len(headers)) if not headers[i] in fields_names]
-        if (len(headers) - len(exclude)):
-            print (u"Warning: predictions will be processed but some data"
-                   u" might not be used. The used fields will be: \n%s\nwhile"
-                   u" the headers found in the test file are: \n%s" %
-                   (",".join(fields_names),
-                    ",".join(headers))).encode("utf-8")
-            for index in exclude:
-                del headers[index]
-        else:
-            raise Exception((u"No test field matches the model fields.\n"
-                             u"The expected fields are: \n%s\nwhile"
-                             u" the headers found in the test file are: \n%s\nUse "
-                             u" --no-test-header flag if first line"
-                             u" should not be interpreted as headers." %
-                             (",".join(fields_names),
-                              ",".join(headers))).encode("utf-8"))
+        if len(exclude):
+            if (len(headers) - len(exclude)):
+                print (u"Warning: predictions will be processed but some data"
+                       u" might not be used. The used fields will be: \n%s\nwhile"
+                       u" the headers found in the test file are: \n%s" %
+                       (",".join(fields_names),
+                        ",".join(headers))).encode("utf-8")
+                for index in exclude:
+                    del headers[index]
+            else:
+                raise Exception((u"No test field matches the model fields.\n"
+                                 u"The expected fields are: \n%s\nwhile"
+                                 u" the headers found in the test file are: \n%s\nUse "
+                                 u" --no-test-header flag if first line"
+                                 u" should not be interpreted as headers." %
+                                 (",".join(fields_names),
+                                  ",".join(headers))).encode("utf-8"))
 
     check_dir(output)
     output = open(output, 'w', 0)
@@ -530,6 +529,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         models = [model]
 
     if models and test_set:
+        objective_field = models[0]['object']['objective_fields']
+        if isinstance(objective_field, list):
+            objective_field = objective_field[0]
         predict(test_set, test_set_header, models, fields, output,
                 objective_field, args.remote, api, log)
     if args.log_file and log:
