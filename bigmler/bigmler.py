@@ -134,6 +134,7 @@ def read_models(path):
         models.append(line.rstrip())
     return models
 
+
 def read_dataset(path):
     """Reads dataset id from a file.
 
@@ -183,10 +184,10 @@ def list_source_ids(api, query_string):
     """
     sources = api.list_sources('limit=%s;%s' % (PAGE_LENGTH, query_string))
     ids = ([] if sources['objects'] is None else
-            [obj['resource'] for obj in sources['objects']])
+           [obj['resource'] for obj in sources['objects']])
     while (not sources['objects'] is None and
           (sources['meta']['total_count'] > (sources['meta']['offset'] +
-          sources['meta']['limit']))):
+           sources['meta']['limit']))):
         offset = sources['meta']['offset'] + PAGE_LENGTH
         sources = api.list_sources('offset=%s;limit=%s;%s' % (offset,
                                    PAGE_LENGTH, query_string))
@@ -204,7 +205,7 @@ def list_dataset_ids(api, query_string):
            [obj['resource'] for obj in datasets['objects']])
     while (not datasets['objects'] is None and
           (datasets['meta']['total_count'] > (datasets['meta']['offset'] +
-          datasets['meta']['limit']))):
+           datasets['meta']['limit']))):
         offset = datasets['meta']['offset'] + PAGE_LENGTH
         datasets = api.list_datasets('offset=%s;limit=%s;%s' % (offset,
                                      PAGE_LENGTH, query_string))
@@ -222,7 +223,7 @@ def list_model_ids(api, query_string):
            [obj['resource'] for obj in models['objects']])
     while (not models['objects'] is None and
           (models['meta']['total_count'] > (models['meta']['offset'] +
-          models['meta']['limit']))):
+           models['meta']['limit']))):
         offset = models['meta']['offset'] + PAGE_LENGTH
         models = api.list_models('offset=%s;limit=%s;%s' % (offset,
                                  PAGE_LENGTH, query_string))
@@ -241,7 +242,7 @@ def list_prediction_ids(api, query_string):
            [obj['resource'] for obj in predictions['objects']])
     while (not predictions['objects'] is None and
           (predictions['meta']['total_count'] > (predictions['meta']['offset']
-          + predictions['meta']['limit']))):
+           + predictions['meta']['limit']))):
         offset = predictions['meta']['offset'] + PAGE_LENGTH
         predictions = api.list_predictions('offset=%s;limit=%s;%s' % (offset,
                                            PAGE_LENGTH, query_string))
@@ -268,16 +269,18 @@ def predict(test_set, test_set_header, models, fields, output,
         # validate headers against model fields excluding objective_field,
         # that may be present or not
         fields_names = [fields.fields[fields.field_id(i)]
-                        ['name'] for i in sorted(fields.fields_by_column_number.keys())
+                        ['name'] for i in
+                        sorted(fields.fields_by_column_number.keys())
                         if i != fields.field_column_number(objective_field)]
         headers = [unicode(header, "utf-8") for header in headers]
-        exclude = [i for i in range(len(headers)) if not headers[i] in fields_names]
+        exclude = [i for i in range(len(headers)) if not headers[i]
+                   in fields_names]
         exclude.reverse()
         if len(exclude):
             if (len(headers) - len(exclude)):
                 print (u"Warning: predictions will be processed but some data"
-                       u" might not be used. The used fields will be: \n%s\nwhile"
-                       u" the headers found in the test file are: \n%s" %
+                       u" might not be used. The used fields will be: \n%s\n"
+                       u"while the headers found in the test file are: \n%s" %
                        (",".join(fields_names),
                         ",".join(headers))).encode("utf-8")
                 for index in exclude:
@@ -285,8 +288,8 @@ def predict(test_set, test_set_header, models, fields, output,
             else:
                 raise Exception((u"No test field matches the model fields.\n"
                                  u"The expected fields are: \n%s\nwhile"
-                                 u" the headers found in the test file are: \n%s\nUse "
-                                 u" --no-test-header flag if first line"
+                                 u" the headers found in the test file are: \n"
+                                 u"%s\nUse --no-test-header flag if first line"
                                  u" should not be interpreted as headers." %
                                  (",".join(fields_names),
                                   ",".join(headers))).encode("utf-8"))
@@ -302,7 +305,8 @@ def predict(test_set, test_set_header, models, fields, output,
 
             for model in models:
                 prediction = api.create_prediction(model, input_data,
-                                                   by_name=test_set_header, wait_time=0)
+                                                   by_name=test_set_header,
+                                                   wait_time=0)
                 if log:
                     log.write("%s\n" % prediction['resource'])
                     log.flush()
@@ -320,7 +324,8 @@ def predict(test_set, test_set_header, models, fields, output,
             for index in exclude:
                 del row[index]
             input_data = fields.pair(row, headers, objective_field)
-            prediction = local_model.predict(input_data, by_name=test_set_header)
+            prediction = local_model.predict(input_data,
+                                             by_name=test_set_header)
             if isinstance(prediction, basestring):
                 prediction = prediction.encode("utf-8")
             output.write("%s\n" % prediction)
@@ -474,7 +479,6 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 input_fields.append(fields.field_id(name))
             model_args.update(input_fields=input_fields)
 
-
         if args.stat_pruning:
             model_args.update(stat_pruning=True)
 
@@ -539,6 +543,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if args.log_file and log:
         log.close()
 
+
 def delete(api, delete_list):
     """ Deletes the resources given in the list.
 
@@ -557,15 +562,20 @@ def delete(api, delete_list):
             except ValueError:
                 pass
 
+
 def check_dir(path):
     """Creates a directory if it doesn't exist
     """
     directory = os.path.dirname(path)
-    if len(directory) > 0  and not os.path.exists(directory):
+    if len(directory) > 0 and not os.path.exists(directory):
         os.makedirs(directory)
     return directory
 
+
 def main(args=sys.argv[1:]):
+    """Main process
+
+    """
     # Date and time in format SunNov0412_120510 to name and tag resources
     NOW = datetime.datetime.now().strftime("%a%b%d%g_%H%M%S")
 
@@ -726,14 +736,16 @@ def main(args=sys.argv[1:]):
                         action='store',
                         dest='models',
                         help="""Path to a file containing model/ids. One model
-                                per line (e.g., model/50a206a8035d0706dc000376)""")
+                                per line (e.g., model/50a206a8035d0706dc000376
+                                )""")
 
     # The path to a file containing a dataset id.
     parser.add_argument('--datasets',
                         action='store',
                         dest='datasets',
-                        help="""Path to a file containing a dataset/id. Just one
-                        dataset (e.g., dataset/50a20697035d0706da0004a4)""")
+                        help="""Path to a file containing a dataset/id. Just
+                        one dataset
+                        (e.g., dataset/50a20697035d0706da0004a4)""")
 
     # Set to True to active statiscal pruning.
     parser.add_argument('--stat_pruning',
@@ -790,7 +802,6 @@ def main(args=sys.argv[1:]):
                         action='store_false',
                         help="""No tag resources with default BigMLer tags""")
 
-
     # Use it to retrieve models that were tagged with tag.
     parser.add_argument('--model_tag',
                         help="Retrieve models that were tagged with tag")
@@ -815,7 +826,8 @@ def main(args=sys.argv[1:]):
                         action='store',
                         type=float,
                         default=0.0,
-                        help="The price other users must pay to clone your model")
+                        help="""The price other users must pay to clone your
+                                model""")
 
     # Set a price tag to your dataset.
     parser.add_argument('--dataset_price',
@@ -830,7 +842,8 @@ def main(args=sys.argv[1:]):
                         type=float,
                         default=0.0,
                         help="""The number of credits that other users will
-                                consume to make a prediction with your model.""")
+                                consume to make a prediction with your
+                                model.""")
 
     # Shows progress information when uploading a file.
     parser.add_argument('--progress_bar',
@@ -939,7 +952,8 @@ def main(args=sys.argv[1:]):
 
     # Parses dataset fields if provided.
     if ARGS.dataset_fields:
-        DATASET_FIELDS =  map(lambda x: x.strip(), ARGS.dataset_fields.split(','))
+        DATASET_FIELDS = map(lambda x: x.strip(),
+                             ARGS.dataset_fields.split(','))
         output_args.update(dataset_fields=DATASET_FIELDS)
 
     # Parses model input fields if provided.
@@ -987,7 +1001,7 @@ def main(args=sys.argv[1:]):
             delete_list = map(lambda x: x.strip(), ARGS.delete_list.split(','))
         if ARGS.delete_file:
             if not os.path.exists(ARGS.delete_file):
-                raise Exception("File %s not found" % ARGS_delete_file)
+                raise Exception("File %s not found" % ARGS.delete_file)
             delete_list.extend([line for line in open(ARGS.delete_file, "r")])
         if ARGS.all_tag:
             query_string = "tags__in=%s" % ARGS.all_tag
