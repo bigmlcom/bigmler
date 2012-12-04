@@ -60,7 +60,7 @@ BigML recognizes a growing list of schemas (**http**, **https**, **s3**,
 
     bigmler --train https://test:test@static.bigml.com/csv/iris.csv
 
-    bigmler --train s3://bigml-test/csv/iris.csv?access-key=AKIAIF6IUYDYUQ7BALJQ&secret-key=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
+    bigmler --train "s3://bigml-public/csv/iris.csv?access-key=AKIAIF6IUYDYUQ7BALJQ&secret-key=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"
 
     bigmler --train azure://csv/diabetes.csv?AccountName=bigmlpublic
 
@@ -77,13 +77,13 @@ You can also easily create ensembles. For example, using `bagging <http://en.wik
 
     bigmler --train data/iris.csv --test data/test_iris.csv  --number_of_models 10 --sample_rate 0.75 --replacement --tag my_ensemble
 
-We recommend to tag resources when you create multiple models at the same time so that you can get then retrieve them together to generate predictions locally using the multiple models feature from BigML's Python binding.
+We recommend to tag resources when you create multiple models at the same time so that you can retrieve them together to generate predictions locally using the multiple models feature from BigML's Python binding.
 
 To create a `random decision forest <http://www.quora.com/Machine-Learning/How-do-random-forests-work-in-laymans-terms>`_ just use the `--randomize` option::
 
      bigmler --train data/iris.csv --test data/test_iris.csv  --number_of_models 10 --sample_rate 0.75 --replacement --tag my_ensemble --randomize
 
-The fields to choose from will be randomized at each split helping you creating a random decision forest that when using together will increase the prediction performance of the individual models.
+The fields to choose from will be randomized at each split creating a random decision forest that when used together will increase the prediction performance of the individual models.
 
 Making your Dastaset and Model Public
 -------------------------------------
@@ -105,7 +105,7 @@ Content
 
 Before making your model public, probably you want to add a name, a category, a description, and tags to your resources. This is easy too. For example::
 
-    bigmler --train data/iris.csv --name "My model" --category 6 --description description.txt --tag iris tag my_tag
+    bigmler --train data/iris.csv --name "My model" --category 6 --description data/description.txt --tag iris --tag my_tag
 
 Please note:
 
@@ -127,7 +127,7 @@ model::
 
 You can also use a number of models providing a file with a model/id per line::
 
-    bigmler --models BigMLer_FriNov0912_223645_models --test data/test_iris.csv
+    bigmler --models TueDec0412_174148/models --test data/test_iris.csv
 
 Or all the models that were tagged with a specific tag::
 
@@ -236,7 +236,7 @@ BigMLer can help you as well in deleting these resources. Using the `--delete`
 tag there are many options available. For instance, deleting a comma separated
 list of ids::
 
-    bigmler --delete --ids source/50a2bb64035d0706db0006cc, dataset/50a1f441035d0706d9000371
+    bigmler --delete --ids source/50a2bb64035d0706db0006cc,dataset/50a1f441035d0706d9000371
 
 deleting resources listed in a file::
 
@@ -270,7 +270,7 @@ Requirements
 
 Python 2.6 and Python 2.7 are currently supported by BigMLer.
 
-BigMLer requires `bigml 0.4.3 <https://github.com/bigmlcom/python>`_  or higher.
+BigMLer requires `bigml 0.4.4 <https://github.com/bigmlcom/python>`_  or higher.
 
 BigMLer Installation
 ====================
@@ -280,7 +280,7 @@ To install the latest stable release with
 
     $ pip install bigmler
 
-You can also install the development version of the bindings directly
+You can also install the development version of bigmler directly
 from the Git repository::
 
     $ pip install -e git://github.com/bigmlcom/bigmler.git#egg=bigmler

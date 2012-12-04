@@ -262,6 +262,7 @@ def predict(test_set, test_set_header, models, fields, output,
         sys.exit("Error: cannot read test %s" % test_set)
 
     headers = None
+    exclude = []
     if test_set_header:
         headers = test_reader.next()
         # validate headers against model fields excluding objective_field,
@@ -271,6 +272,7 @@ def predict(test_set, test_set_header, models, fields, output,
                         if i != fields.field_column_number(objective_field)]
         headers = [unicode(header, "utf-8") for header in headers]
         exclude = [i for i in range(len(headers)) if not headers[i] in fields_names]
+        exclude.reverse()
         if len(exclude):
             if (len(headers) - len(exclude)):
                 print (u"Warning: predictions will be processed but some data"
