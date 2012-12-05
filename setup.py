@@ -58,7 +58,7 @@ distutils.core.setup(
     include_package_data = True,
     install_requires = ['bigml==0.4.5'],
     classifiers=[
-        'Development Status :: 1 - Beta',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',
