@@ -453,6 +453,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # we hadn't them yet.
     if dataset:
         dataset = api.check_resource(dataset, api.get_dataset)
+        if not csv_properties:
+            csv_properties = {'data_locale':
+                              dataset['object']['locale']}
         if args.public_dataset:
             public_dataset = {"private": False}
             if args.dataset_price:
@@ -528,7 +531,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             if args.cpp:
                 public_model.update(credits_per_prediction=args.cpp)
             model = api.update_model(model, public_model)
-
+        if not csv_properties:
+            csv_properties = {'data_locale':
+                              model['object']['locale']}
         fields = Fields(model['object']['model']['fields'], **csv_properties)
 
     if model and not models:
@@ -577,7 +582,7 @@ def main(args=sys.argv[1:]):
 
     """
     # Date and time in format SunNov0412_120510 to name and tag resources
-    NOW = datetime.datetime.now().strftime("%a%b%d%g_%H%M%S")
+    NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
 
     parser = argparse.ArgumentParser(
         description="A higher level API to BigML's API.",

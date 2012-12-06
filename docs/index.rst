@@ -270,7 +270,7 @@ Requirements
 
 Python 2.6 and Python 2.7 are currently supported by BigMLer.
 
-BigMLer requires `bigml 0.4.5 <https://github.com/bigmlcom/python>`_  or higher.
+BigMLer requires `bigml 0.4.6 <https://github.com/bigmlcom/python>`_  or higher.
 
 BigMLer Installation
 ====================
@@ -444,7 +444,7 @@ How to Contribute
 
 Please follow the next steps:
 
-  1. Fork the project on `github <https://github.com/bigmlcom/bigmler`_
+  1. Fork the project on `github <https://github.com/bigmlcom/bigmler>`_.
   2. Create a new branch.
   3. Commit changes to the new branch.
   4. Send a `pull request <https://github.com/bigmlcom/bigmler/pulls>`_.
