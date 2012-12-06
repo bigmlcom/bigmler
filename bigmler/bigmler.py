@@ -183,7 +183,7 @@ def list_source_ids(api, query_string):
 
     """
     sources = api.list_sources('status.code=%s;limit=%s;%s' % (
-                                bigml.api.FINISHED, PAGE_LENGTH, query_string))
+                               bigml.api.FINISHED, PAGE_LENGTH, query_string))
     ids = ([] if sources['objects'] is None else
            [obj['resource'] for obj in sources['objects']])
     while (not sources['objects'] is None and
@@ -202,7 +202,8 @@ def list_dataset_ids(api, query_string):
 
     """
     datasets = api.list_datasets('status.code=%s;limit=%s;%s' % (
-                                 bigml.api.FINISHED, PAGE_LENGTH, query_string))
+                                 bigml.api.FINISHED, PAGE_LENGTH,
+                                 query_string))
     ids = ([] if datasets['objects'] is None else
            [obj['resource'] for obj in datasets['objects']])
     while (not datasets['objects'] is None and
@@ -538,10 +539,10 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if not csv_properties:
             csv_properties = {'data_locale':
                               model['object']['locale']}
-        csv_properties.update(verbose= True)
+        csv_properties.update(verbose=True)
         if args.user_locale:
             csv_properties.update(data_locale=args.user_locale)
-                    
+
         fields = Fields(model['object']['model']['fields'], **csv_properties)
 
     if model and not models:
