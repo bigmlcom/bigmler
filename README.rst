@@ -90,8 +90,8 @@ explanation for each option below.
 Quick Start
 ===========
 
-Let's see some basic usage examples. Check the `installation <#bigmler-installation>`_ and `authentication <#bigml-authentication>`_
-sections below if you are not familiar with BigML.
+Let's see some basic usage examples. Check the `installation` and `authentication`
+sections in `BigMLer on Read the Docs <http://bigmler.readthedocs.org>`_ if you are not familiar with BigML.
 
 Basics
 ------

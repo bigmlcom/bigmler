@@ -182,7 +182,8 @@ def list_source_ids(api, query_string):
     """Lists BigML sources filtered by `query_string`.
 
     """
-    sources = api.list_sources('limit=%s;%s' % (PAGE_LENGTH, query_string))
+    sources = api.list_sources('status.code=%s;limit=%s;%s' % (
+                                bigml.api.FINISHED, PAGE_LENGTH, query_string))
     ids = ([] if sources['objects'] is None else
            [obj['resource'] for obj in sources['objects']])
     while (not sources['objects'] is None and
@@ -200,7 +201,8 @@ def list_dataset_ids(api, query_string):
     """Lists BigML datasets filtered by `query_string`.
 
     """
-    datasets = api.list_datasets('limit=%s;%s' % (PAGE_LENGTH, query_string))
+    datasets = api.list_datasets('status.code=%s;limit=%s;%s' % (
+                                 bigml.api.FINISHED, PAGE_LENGTH, query_string))
     ids = ([] if datasets['objects'] is None else
            [obj['resource'] for obj in datasets['objects']])
     while (not datasets['objects'] is None and
@@ -218,7 +220,8 @@ def list_model_ids(api, query_string):
     """Lists BigML models filtered by `query_string`.
 
     """
-    models = api.list_models('limit=%s;%s' % (PAGE_LENGTH, query_string))
+    models = api.list_models('status.code=%s;limit=%s;%s' % (
+                             bigml.api.FINISHED, PAGE_LENGTH, query_string))
     ids = ([] if models['objects'] is None else
            [obj['resource'] for obj in models['objects']])
     while (not models['objects'] is None and
@@ -236,7 +239,8 @@ def list_prediction_ids(api, query_string):
     """Lists BigML predictions filtered by `query_string`.
 
     """
-    predictions = api.list_predictions('limit=%s;%s' % (PAGE_LENGTH,
+    predictions = api.list_predictions('status.code=%s;limit=%s;%s' % (
+                                       bigml.api.FINISHED, PAGE_LENGTH,
                                        query_string))
     ids = ([] if predictions['objects'] is None else
            [obj['resource'] for obj in predictions['objects']])
@@ -534,6 +538,10 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if not csv_properties:
             csv_properties = {'data_locale':
                               model['object']['locale']}
+        csv_properties.update(verbose= True)
+        if args.user_locale:
+            csv_properties.update(data_locale=args.user_locale)
+                    
         fields = Fields(model['object']['model']['fields'], **csv_properties)
 
     if model and not models:
@@ -911,6 +919,13 @@ def main(args=sys.argv[1:]):
     parser.add_argument('--all_tag',
                         help="""Select resources tagged with tag to
                                 be deleted""")
+
+    # Locale settings.
+    parser.add_argument('--locale',
+                        action='store',
+                        dest='user_locale',
+                        default=None,
+                        help="Chosen locale code string.")
 
     # Parses command line arguments.
     ARGS = parser.parse_args(args)
