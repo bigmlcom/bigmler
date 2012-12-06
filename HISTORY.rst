@@ -3,6 +3,12 @@
 History
 -------
 
+0.1.3 (2012-12-06)
+~~~~~~~~~~~~~~~~~~
+
+- New flag for locale settings configuration
+- Filtering only finished resources
+
 0.1.2 (2012-12-06)
 ~~~~~~~~~~~~~~~~~~
 

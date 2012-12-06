@@ -45,6 +45,13 @@ A different ``objective field`` (the field that you want to predict) can be sele
 If you do not explicitly specify an objective field, BigML will default to the last
 column in your dataset.
 
+BigMLer will try to use the locale of the model to interpret test data. In case
+it fails, it will try `en_US.UTF-8`
+or 'English_United States.1252' and a warning message will be printed.
+If you want to change this behaviour you can specify your preferred locale::
+
+    bigmler --train data/iris.csv --test data/test_iris.csv --locale 'English_United States.1252'
+
 If you check your working directory you will see that BigMLer creates a file with the
 model ids that have been generated (e.g., FriNov0912_223645/models).
 This file is handy if then you want to use those model ids to generate local
@@ -270,7 +277,7 @@ Requirements
 
 Python 2.6 and Python 2.7 are currently supported by BigMLer.
 
-BigMLer requires `bigml 0.4.6 <https://github.com/bigmlcom/python>`_  or higher.
+BigMLer requires `bigml 0.4.7 <https://github.com/bigmlcom/python>`_  or higher.
 
 BigMLer Installation
 ====================
@@ -366,6 +373,7 @@ Data Configuration
 --model_fields MODEL_FIELDS     Comma-separated list of input fields (predictors) to create the model
 --json_filter PATH  Path to a file containing a JSON expression to filter the source
 --lisp_filter PATH  Path to a file containing a LISP expression to filter the source
+--locale LOCALE     Locale code string
 
 
 Remote Resources
