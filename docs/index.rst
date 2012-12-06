@@ -47,7 +47,7 @@ column in your dataset.
 
 BigMLer will try to use the locale of the model to interpret test data. In case
 it fails, it will try `en_US.UTF-8`
-or 'English_United States.1252' but a warning message will arise.
+or 'English_United States.1252' and a warning message will be printed.
 If you want to change this behaviour you can specify your preferred locale::
 
     bigmler --train data/iris.csv --test data/test_iris.csv --locale 'English_United States.1252'
