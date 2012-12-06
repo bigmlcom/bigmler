@@ -126,7 +126,7 @@ it fails, it will try `en_US.UTF-8`
 or 'English_United States.1252' and a warning message will be printed.
 If you want to change this behaviour you can specify your preferred locale::
 
-    bigmler --train data/iris.csv --test data/test_iris.csv --locale 'English_United States.1252'
+    bigmler --train data/iris.csv --test data/test_iris.csv --locale "English_United States.1252"
 
 If you check your working directory you will see that BigMLer creates a file with the
 model ids that have been generated (e.g., FriNov0912_223645/models).
