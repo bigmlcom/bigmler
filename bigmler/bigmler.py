@@ -63,6 +63,7 @@ from bigml.util import slugify
 
 
 PAGE_LENGTH = 200
+MAX_MODELS = 10
 
 
 def read_description(path):
@@ -283,23 +284,24 @@ def predict(test_set, test_set_header, models, fields, output,
         exclude.reverse()
         if len(exclude):
             if (len(headers) - len(exclude)):
-                print (u"Warning: predictions will be processed but some data"
-                       u" might not be used. The used fields will be: \n%s\n"
-                       u"while the headers found in the test file are: \n%s" %
+                print (u"WARNING: predictions will be processed but some data"
+                       u" might not be used. The used fields will be:\n\n%s"
+                       u"\n\nwhile the headers found in the test file are:"
+                       u"\n\n%s" %
                        (",".join(fields_names),
                         ",".join(headers))).encode("utf-8")
                 for index in exclude:
                     del headers[index]
             else:
                 raise Exception((u"No test field matches the model fields.\n"
-                                 u"The expected fields are: \n%s\nwhile"
-                                 u" the headers found in the test file are: \n"
-                                 u"%s\nUse --no-test-header flag if first line"
-                                 u" should not be interpreted as headers." %
+                                 u"The expected fields are:\n\n%s\n\nwhile "
+                                 u"the headers found in the test file are:\n\n"
+                                 u"%s\n\nUse --no-test-header flag if first li"
+                                 u"ne should not be interpreted as headers." %
                                  (",".join(fields_names),
                                   ",".join(headers))).encode("utf-8"))
 
-    check_dir(output)
+    output_path = check_dir(output)
     output = open(output, 'w', 0)
     if remote:
         for row in test_reader:
@@ -324,17 +326,53 @@ def predict(test_set, test_set_header, models, fields, output,
             output.write("%s\n" % prediction)
             output.flush()
     else:
-        local_model = MultiModel(models)
-        for row in test_reader:
-            for index in exclude:
-                del row[index]
-            input_data = fields.pair(row, headers, objective_field)
-            prediction = local_model.predict(input_data,
-                                             by_name=test_set_header)
-            if isinstance(prediction, basestring):
-                prediction = prediction.encode("utf-8")
-            output.write("%s\n" % prediction)
-            output.flush()
+        if len(models) < MAX_MODELS:
+            local_model = MultiModel(models)
+            for row in test_reader:
+                for index in exclude:
+                    del row[index]
+                input_data = fields.pair(row, headers, objective_field)
+                prediction = local_model.predict(input_data,
+                                                 by_name=test_set_header)
+                if isinstance(prediction, basestring):
+                    prediction = prediction.encode("utf-8")
+                output.write("%s\n" % prediction)
+                output.flush()
+        else:
+            models_splits = [models[index:(index + MAX_MODELS)] for index
+                             in range(0, len(models), MAX_MODELS)]
+            input_data_list = []
+            for row in test_reader:
+                for index in exclude:
+                    del row[index]
+                input_data_list.append(fields.pair(row, headers,
+                                                   objective_field))
+            total_votes = []
+            for models_split in models_splits:
+                complete_models = []
+                for index in range(len(models_split)):
+                    complete_models.append(api.check_resource(
+                        models_split[index]['resource'], api.get_model))
+                local_model = MultiModel(complete_models)
+                local_model.batch_predict(input_data_list,
+                                          output_path, reuse=True)
+                votes = local_model.batch_votes(output_path)
+                if total_votes:
+                    for index in range(len(votes)):
+                        for prediction in votes[index].keys():
+                            if not prediction in total_votes[index]:
+                                total_votes[index][prediction] = 0
+                            total_votes[index][prediction] += (votes[index]
+                                                               [prediction])
+                else:
+                    total_votes = votes
+            for predictions in total_votes:
+                prediction = combine_predictions(predictions)
+                if isinstance(prediction, basestring):
+                    prediction = prediction.encode("utf-8")
+                output.write("%s\n" % prediction)
+                output.flush()
+
     output.close()
 
 
@@ -497,6 +535,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                           replacement=args.replacement,
                           randomize=args.randomize)
         model_ids = []
+        models = []
         model_file = open(path + '/models', 'w', 0)
         last_model = None
         for i in range(1, args.number_of_models + 1):
@@ -508,6 +547,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 log.flush()
             last_model = model
             model_ids.append(model['resource'])
+            models.append(model)
             model_file.write("%s\n" % model['resource'])
             model_file.flush()
         model_file.close()
@@ -517,11 +557,15 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         model = api.get_model(args.model)
 
     if model_ids and test_set:
-        models = []
-        for model in model_ids:
-            model = api.check_resource(model, api.get_model)
-            models.append(model)
-        model = models[0]
+        if len(model_ids) < MAX_MODELS:
+            models = []
+            for model in model_ids:
+                model = api.check_resource(model, api.get_model)
+                models.append(model)
+            model = models[0]
+        else:
+            model = api.check_resource(model_ids[0], api.get_model)
+            models[0] = model
 
     # We check that the model is finished and get the fields if haven't got
     # them yet.
