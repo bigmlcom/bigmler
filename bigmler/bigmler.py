@@ -350,9 +350,9 @@ def predict(test_set, test_set_header, models, fields, output,
             total_votes = []
             for models_split in models_splits:
                 complete_models = []
-                for index in range(len(models_split)):
+                for index in range(len(models_split)):                    
                     complete_models.append(api.check_resource(
-                        models_split[index]['resource'], api.get_model))
+                        models_split[index], api.get_model))
                 local_model = MultiModel(complete_models)
                 local_model.batch_predict(input_data_list,
                                           output_path, reuse=True)
@@ -555,6 +555,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # If a model is provided, we retrieve it.
     elif args.model:
         model = api.get_model(args.model)
+
+    elif args.models:
+        models = model_ids[:]
 
     if model_ids and test_set:
         if len(model_ids) < MAX_MODELS:
