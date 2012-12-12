@@ -59,7 +59,7 @@ import bigml.api
 from bigml.multimodel import MultiModel
 from bigml.multimodel import combine_predictions
 from bigml.fields import Fields
-from bigml.util import slugify
+from bigml.util import slugify, reset_progress_bar, localize
 
 
 PAGE_LENGTH = 200
@@ -263,6 +263,17 @@ def predict(test_set, test_set_header, models, fields, output,
 
 
     """
+    out = sys.stdout
+
+    def draw_progress_bar(current, total):
+        """Draws a text based progress report.
+
+        """
+        pct = 100 - ((total - current) * 100) / (total)
+        reset_progress_bar(out=out)
+        out.write("Predicted on %s out of %s models [%s%%]" % (
+            localize(current), localize(total), pct))
+
     try:
         test_reader = csv.reader(open(test_set, "U"))
     except IOError:
@@ -326,7 +337,8 @@ def predict(test_set, test_set_header, models, fields, output,
             output.write("%s\n" % prediction)
             output.flush()
     else:
-        if len(models) < MAX_MODELS:
+        models_total = len(models)
+        if models_total < MAX_MODELS:
             local_model = MultiModel(models)
             for row in test_reader:
                 for index in exclude:
@@ -340,7 +352,7 @@ def predict(test_set, test_set_header, models, fields, output,
                 output.flush()
         else:
             models_splits = [models[index:(index + MAX_MODELS)] for index
-                             in range(0, len(models), MAX_MODELS)]
+                             in range(0, models_total, MAX_MODELS)]
             input_data_list = []
             for row in test_reader:
                 for index in exclude:
@@ -348,15 +360,22 @@ def predict(test_set, test_set_header, models, fields, output,
                 input_data_list.append(fields.pair(row, headers,
                                                    objective_field))
             total_votes = []
+            models_count = 0
             for models_split in models_splits:
                 complete_models = []
-                for index in range(len(models_split)):                    
+                for index in range(len(models_split)):
                     complete_models.append(api.check_resource(
                         models_split[index], api.get_model))
+
                 local_model = MultiModel(complete_models)
                 local_model.batch_predict(input_data_list,
                                           output_path, reuse=True)
                 votes = local_model.batch_votes(output_path)
+                models_count += MAX_MODELS
+                if models_count > models_total:
+                    models_count = models_total
+                draw_progress_bar(models_count, models_total)
+
                 if total_votes:
                     for index in range(len(votes)):
                         for prediction in votes[index].keys():
@@ -366,13 +385,18 @@ def predict(test_set, test_set_header, models, fields, output,
                                                                [prediction])
                 else:
                     total_votes = votes
+
+            reset_progress_bar(out=out)
+            out.write("Combining predictions.")
             for predictions in total_votes:
                 prediction = combine_predictions(predictions)
                 if isinstance(prediction, basestring):
                     prediction = prediction.encode("utf-8")
                 output.write("%s\n" % prediction)
                 output.flush()
-
+            reset_progress_bar(out=out)
+            out.write("Done.")
+            reset_progress_bar(out=out)
     output.close()
 
 
