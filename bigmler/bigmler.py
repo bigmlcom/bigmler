@@ -630,6 +630,9 @@ def check_dir(path):
     directory = os.path.dirname(path)
     if len(directory) > 0 and not os.path.exists(directory):
         os.makedirs(directory)
+        directory_log = open(".bigmler_dirs", "a", 0)
+        directory_log.write("%s\n" % directory)
+        directory_log.close()
     return directory
 
 
@@ -637,6 +640,9 @@ def main(args=sys.argv[1:]):
     """Main process
 
     """
+    command_log = open(".bigmler", "a", 0)
+    command_log.write("bigmler %s\n" % " ".join(args))
+    command_log.close()
     # Date and time in format SunNov0412_120510 to name and tag resources
     NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
 
