@@ -556,7 +556,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     elif args.model:
         model = api.get_model(args.model)
 
-    elif args.models:
+    elif args.models or args.model_tag:
         models = model_ids[:]
 
     if model_ids and test_set:
