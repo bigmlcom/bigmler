@@ -76,26 +76,37 @@ def read_description(path):
     return lines
 
 
-def read_field_names(path):
-    """Reads field names from a file to update source field names.
+def read_field_attributes(path):
+    """Reads field attributes from a csv file to update source fields.
 
-    A column number and a name separated by a comma per line.
+    A column number and a list of attributes separated by a comma per line.
+    The expected structure is:
+    column number, name, label, description
 
     For example:
 
-    0, 'first name'
-    1, 'last name'
+    0,'first name','label for the first field','fist field full description'
+    1,'last name','label for the last field','last field full description'
 
     """
-    field_names = {}
-    for line in fileinput.input([path]):
+    field_attributes = {}
+    ATTRIBUTE_NAMES = ['name', 'label', 'description']
+    try:
+        attributes_reader = csv.reader(open(path, "U"), quotechar="'")
+    except IOError:
+        sys.exit("Error: cannot read field attributes %s" % path)
+
+    for row in attributes_reader:
         try:
-            pair = ast.literal_eval(line)
-            field_names.update({
-                pair[0]: pair[1]})
-        except SyntaxError:
+            attributes = {}
+            if len(row) > 1:
+                for index in range(0, len(row) - 1):
+                    attributes.update({ATTRIBUTE_NAMES[index]: row[index + 1]})
+                field_attributes.update({
+                    int(row[0]): attributes})
+        except ValueError:
             pass
-    return field_names
+    return field_attributes
 
 
 def read_types(path):
@@ -403,7 +414,7 @@ def predict(test_set, test_set_header, models, fields, output,
 def compute_output(api, args, training_set, test_set=None, output=None,
                    objective_field=None,
                    description=None,
-                   field_names=None,
+                   field_attributes=None,
                    types=None,
                    dataset_fields=None,
                    model_fields=None,
@@ -463,10 +474,10 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
         fields = Fields(source['object']['fields'], **csv_properties)
         update_fields = {}
-        if field_names:
-            for (column, value) in field_names.iteritems():
+        if field_attributes:
+            for (column, value) in field_attributes.iteritems():
                 update_fields.update({
-                    fields.field_id(column): {'name': value}})
+                    fields.field_id(column): value})
             source = api.update_source(source, {"fields": update_fields})
 
         update_fields = {}
@@ -683,8 +694,8 @@ def main(args=sys.argv[1:]):
     parser.add_argument('--dev',
                         action='store_true',
                         dest='dev_mode',
-                        help="""Compute a test output using BigML FREE
-                                development environment""")
+                        help=("Compute a test output using BigML FREE"
+                             " development environment"))
     # BigML's username.
     parser.add_argument('--username',
                         action='store',
@@ -733,31 +744,41 @@ def main(args=sys.argv[1:]):
     parser.add_argument('--description',
                         action='store',
                         dest='description',
-                        help="""Path to a file with a description in plain
-                                text or markdown""")
+                        help=("Path to a file with a description in plain"
+                              " text or markdown"))
 
     # The path to a file containing names if you want to alter BigML's
     # default field names or the ones provided by the train file header.
+    # Kept for backwards compatibility
     parser.add_argument('--field_names',
                         action='store',
-                        dest='field_names',
-                        help="""Path to a file describing field names. One
-                                definition per line (e.g., 0, 'Last Name')""")
+                        dest='field_attributes',
+                        help=("Path to a csv file describing field names. One"
+                              " definition per line (e.g., 0,'Last Name')"))
+
+    # The path to a file containing attributes if you want to alter BigML's
+    # default field attributes or the ones provided by the train file header.
+    parser.add_argument('--field_attributes',
+                        action='store',
+                        dest='field_attributes',
+                        help=("Path to a csv file describing field attributes."
+                              " One definition per line"
+                              " (e.g., 0,'Last Name')"))
 
     # The path to a file containing types if you want to alter BigML's
     # type auto-detect.
     parser.add_argument('--types',
                         action='store',
                         dest='types',
-                        help="""Path to a file describing field types. One
-                                definition per line (e.g., 0, 'numeric')""")
+                        help=("Path to a file describing field types. One"
+                              " definition per line (e.g., 0, 'numeric')"))
 
     # Fields to include in the dataset.
     parser.add_argument('--dataset_fields',
                         action='store',
                         dest='dataset_fields',
-                        help="""Comma-separated list of field column numbers
-                                to include in the dataset""")
+                        help=("Comma-separated list of field column numbers"
+                              " to include in the dataset"))
 
     # Path to a file that includes a JSON filter.
     parser.add_argument('--json_filter',
@@ -773,8 +794,8 @@ def main(args=sys.argv[1:]):
     parser.add_argument('--model_fields',
                         action='store',
                         dest='model_fields',
-                        help="""Comma-separated list of input fields
-                                (predictors) to create the model""")
+                        help=("Comma-separated list of input fields"
+                              " (predictors) to create the model"))
 
     # Set when the training set file doesn't include a header on the first
     # line.
@@ -826,17 +847,17 @@ def main(args=sys.argv[1:]):
     parser.add_argument('--models',
                         action='store',
                         dest='models',
-                        help="""Path to a file containing model/ids. One model
-                                per line (e.g., model/50a206a8035d0706dc000376
-                                )""")
+                        help=("Path to a file containing model/ids. One model"
+                              " per line (e.g., model/50a206a8035d0706dc000376"
+                              ")"))
 
     # The path to a file containing a dataset id.
     parser.add_argument('--datasets',
                         action='store',
                         dest='datasets',
-                        help="""Path to a file containing a dataset/id. Just
-                        one dataset
-                        (e.g., dataset/50a20697035d0706da0004a4)""")
+                        help=("Path to a file containing a dataset/id. Just"
+                              " one dataset"
+                              " (e.g., dataset/50a20697035d0706da0004a4)"))
 
     # Set to True to active statiscal pruning.
     parser.add_argument('--stat_pruning',
@@ -886,12 +907,12 @@ def main(args=sys.argv[1:]):
     parser.add_argument('--tag',
                         action='append',
                         default=[],
-                        help="""Tag to later retrieve new resources""")
+                        help="Tag to later retrieve new resources")
 
     # Avoid default tagging of resources.
     parser.add_argument('--no_tag',
                         action='store_false',
-                        help="""No tag resources with default BigMLer tags""")
+                        help="No tag resources with default BigMLer tags")
 
     # Use it to retrieve models that were tagged with tag.
     parser.add_argument('--model_tag',
@@ -917,8 +938,8 @@ def main(args=sys.argv[1:]):
                         action='store',
                         type=float,
                         default=0.0,
-                        help="""The price other users must pay to clone your
-                                model""")
+                        help=("The price other users must pay to clone your"
+                              " model"))
 
     # Set a price tag to your dataset.
     parser.add_argument('--dataset_price',
@@ -932,9 +953,9 @@ def main(args=sys.argv[1:]):
                         action='store',
                         type=float,
                         default=0.0,
-                        help="""The number of credits that other users will
-                                consume to make a prediction with your
-                                model.""")
+                        help=("The number of credits that other users will"
+                              " consume to make a prediction with your"
+                              " model."))
 
     # Shows progress information when uploading a file.
     parser.add_argument('--progress_bar',
@@ -955,9 +976,9 @@ def main(args=sys.argv[1:]):
     parser.add_argument('--resources_log',
                         action='store',
                         dest='log_file',
-                        help="""Path to a file to store new resources ids.
-                                One resource per line
-                                (e.g., model/50a206a8035d0706dc000376)""")
+                        help=("Path to a file to store new resources ids."
+                              " One resource per line"
+                              " (e.g., model/50a206a8035d0706dc000376)"))
     # Changes to delete mode.
     parser.add_argument('--delete',
                         action='store_true',
@@ -974,29 +995,29 @@ def main(args=sys.argv[1:]):
     parser.add_argument('--from_file',
                         action='store',
                         dest='delete_file',
-                        help="""Path to a file containing resources ids.
-                                One resource per line
-                                (e.g., model/50a206a8035d0706dc000376)""")
+                        help=("Path to a file containing resources ids."
+                              " One resource per line"
+                              " (e.g., model/50a206a8035d0706dc000376)"))
 
     # Sources selected by tag to be deleted.
     parser.add_argument('--source_tag',
-                        help="""Select sources tagged with tag to
-                                be deleted""")
+                        help=("Select sources tagged with tag to"
+                              " be deleted"))
 
     # Datasets selected by tag to be deleted.
     parser.add_argument('--dataset_tag',
-                        help="""Select datasets tagged with tag to
-                                be deleted""")
+                        help=("Select datasets tagged with tag to"
+                              " be deleted"))
 
     # Predictions selected by tag to be deleted.
     parser.add_argument('--prediction_tag',
-                        help="""Select prediction tagged with tag to
-                                be deleted""")
+                        help=("Select prediction tagged with tag to"
+                              " be deleted"))
 
     # Resources selected by tag to be deleted.
     parser.add_argument('--all_tag',
-                        help="""Select resources tagged with tag to
-                                be deleted""")
+                        help=("Select resources tagged with tag to"
+                              " be deleted"))
 
     # Locale settings.
     parser.add_argument('--locale',
@@ -1039,9 +1060,9 @@ def main(args=sys.argv[1:]):
         output_args.update(description="Created using BigMLer")
 
     # Parses fields if provided.
-    if ARGS.field_names:
-        FIELD_NAMES = read_field_names(ARGS.field_names)
-        output_args.update(field_names=FIELD_NAMES)
+    if ARGS.field_attributes:
+        FIELD_ATTRIBUTES = read_field_attributes(ARGS.field_attributes)
+        output_args.update(field_attributes=FIELD_ATTRIBUTES)
 
     # Parses types if provided.
     if ARGS.types:
