@@ -160,20 +160,20 @@ What if your raw data isn't necessarily in the format that BigML expects? So we
 have good news: you can use a number of options to configure your sources,
 datasets, and models.
 
-Imagine that you want to alter BigML's default field names or the ones provided by the training set header and capitalize them, you can use a text file with a change per line as follows::
+Imagine that you want to alter BigML's default field names or the ones provided by the training set header and capitalize them, even to add a label or a description to each field. You can use a text file with a change per line as follows::
 
-    bigmler --train data/iris.csv --field_names fields.txt
+    bigmler --train data/iris.csv --field_attributes fields.csv
 
-where ``fields.txt`` would be::
+where ``fields.csv`` would be::
 
-    0, 'SEPAL LENGTH'
-    1, 'SEPAL WIDTH'
-    2, 'PETAL LENGTH'
-    3, 'PETAL WIDTH'
-    4, 'SPECIES'
+    0,'SEPAL LENGTH','label for SEPAL LENGTH','description for SEPAL LENGTH'
+    1,'SEPAL WIDTH','label for SEPAL WIDTH','description for SEPAL WIDTH'
+    2,'PETAL LENGTH','label for PETAL LENGTH','description for PETAL LENGTH'
+    3,'PETAL WIDTH','label for PETAL WIDTH','description for PETAL WIDTH'
+    4,'SPECIES','label for SPECIES','description for SPECIES'
 
 The number on the left in each line is the `column number` of the field in your
-source.
+source and is followed by the new field's name, label and description.
 
 
 Similarly you can also alter the auto-detect type behavior from BigML assigning specific
