@@ -49,6 +49,8 @@ import argparse
 import csv
 import fileinput
 import ast
+import glob
+import re
 
 try:
     import simplejson as json
@@ -56,10 +58,12 @@ except ImportError:
     import json
 
 import bigml.api
+from bigml.model import Model
 from bigml.multimodel import MultiModel
 from bigml.multimodel import combine_predictions
 from bigml.fields import Fields
-from bigml.util import slugify, reset_progress_bar, localize
+from bigml.util import slugify, reset_progress_bar, localize, \
+    get_predictions_file_name
 
 
 PAGE_LENGTH = 200
@@ -190,6 +194,29 @@ def read_lisp_filter(path):
     return read_description(path)
 
 
+def read_votes(dirs_list, path):
+    """Reads a list of directories to look for votes.
+
+    If model's prediction files are found, they are retrieved to be combined.
+    """
+    file_name = "%s%scombined_predictions" % (path,
+                                              os.sep)
+    check_dir(file_name)
+    group_predictions = open(file_name, "w", 0)
+    current_directory = os.getcwd()
+    for directory in dirs_list:
+        directory = os.path.abspath(directory)
+        os.chdir(directory)
+        predictions_files = []
+        for predictions_file in glob.glob("model_*_predictions.csv"):
+            predictions_files.append("%s%s%s" % (os.getcwd(),
+                                     os.sep, predictions_file))
+            group_predictions.write("%s\n" % predictions_file)
+        os.chdir(current_directory)
+    group_predictions.close()
+    return predictions_files
+
+
 def list_source_ids(api, query_string):
     """Lists BigML sources filtered by `query_string`.
 
@@ -269,7 +296,8 @@ def list_prediction_ids(api, query_string):
 
 
 def predict(test_set, test_set_header, models, fields, output,
-            objective_field, remote=False, api=None, log=None):
+            objective_field, remote=False, api=None, log=None,
+            max_models=MAX_MODELS):
     """Computes a prediction for each entry in the `test_set`
 
 
@@ -349,7 +377,7 @@ def predict(test_set, test_set_header, models, fields, output,
             output.flush()
     else:
         models_total = len(models)
-        if models_total < MAX_MODELS:
+        if models_total < max_models:
             local_model = MultiModel(models)
             for row in test_reader:
                 for index in exclude:
@@ -362,8 +390,8 @@ def predict(test_set, test_set_header, models, fields, output,
                 output.write("%s\n" % prediction)
                 output.flush()
         else:
-            models_splits = [models[index:(index + MAX_MODELS)] for index
-                             in range(0, models_total, MAX_MODELS)]
+            models_splits = [models[index:(index + max_models)] for index
+                             in range(0, models_total, max_models)]
             input_data_list = []
             for row in test_reader:
                 for index in exclude:
@@ -382,7 +410,7 @@ def predict(test_set, test_set_header, models, fields, output,
                 local_model.batch_predict(input_data_list,
                                           output_path, reuse=True)
                 votes = local_model.batch_votes(output_path)
-                models_count += MAX_MODELS
+                models_count += max_models
                 if models_count > models_total:
                     models_count = models_total
                 draw_progress_bar(models_count, models_total)
@@ -411,6 +439,34 @@ def predict(test_set, test_set_header, models, fields, output,
     output.close()
 
 
+def combine_votes(votes_files, to_prediction, data_locale, to_file):
+    """Combines the votes found in the votes' files and stores predictions.
+
+    """
+    votes = []
+    for votes_file in votes_files:
+        index = 0
+        
+        for row in csv.reader(open(votes_file, "U")):
+            prediction = to_prediction(row[0])
+            if index > (len(votes) - 1):
+                votes.append({prediction: 0})
+            if not prediction in votes[index]:
+                votes[index][prediction] = 0
+            votes[index][prediction] += 1
+            index += 1
+
+    check_dir(to_file)
+    output = open(to_file, 'w', 0)
+    for predictions in votes:
+        prediction = combine_predictions(predictions)
+        if isinstance(prediction, basestring):
+            prediction = prediction.encode("utf-8")
+        output.write("%s\n" % prediction)
+        output.flush()
+    output.close()
+
+
 def compute_output(api, args, training_set, test_set=None, output=None,
                    objective_field=None,
                    description=None,
@@ -419,7 +475,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                    dataset_fields=None,
                    model_fields=None,
                    name=None, training_set_header=True,
-                   test_set_header=True, model_ids=None):
+                   test_set_header=True, model_ids=None,
+                   votes_files=None):
     """ Creates one or models using the `training_set` or uses the ids
     of previous created BigML models to make predictions for the `test_set`.
 
@@ -635,7 +692,19 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if isinstance(objective_field, list):
             objective_field = objective_field[0]
         predict(test_set, test_set_header, models, fields, output,
-                objective_field, args.remote, api, log)
+                objective_field, args.remote, api, log,
+                args.max_batch_models)
+
+    if votes_files:
+        model_id = re.sub(r'.*(model_[a-f0-9]{24})__predictions\.csv$',
+                          r'\1', votes_files[0]).replace("_", "/")
+        model = api.check_resource(model_id, api.get_model)
+        data_locale = (model['object']['locale'] if not args.user_locale
+                       else args.user_locale)
+        local_model = Model(model)
+        combine_votes(votes_files, local_model.to_prediction,
+                      data_locale, output)
+
     if args.log_file and log:
         log.close()
 
@@ -722,7 +791,7 @@ def main(args=sys.argv[1:]):
     parser.add_argument('--output',
                         action='store',
                         dest='predictions',
-                        default='%s/predictions.csv' % NOW,
+                        default='%s%spredictions.csv' % (NOW, os.sep),
                         help="Path to the file to output predictions.")
 
     # The name of the field that represents the objective field (i.e., class or
@@ -898,6 +967,14 @@ def main(args=sys.argv[1:]):
                         type=int,
                         help="Max number of models to create in parallel")
 
+    # Max number of models to predict from in parallel.
+    parser.add_argument('--max_batch_models',
+                        action='store',
+                        dest='max_batch_models',
+                        default=MAX_MODELS,
+                        type=int,
+                        help="Max number of models to predict from in parallel")
+
     # Randomize feature selection at each split.
     parser.add_argument('--randomize',
                         action='store_true',
@@ -988,8 +1065,8 @@ def main(args=sys.argv[1:]):
     parser.add_argument('--ids',
                         action='store',
                         dest='delete_list',
-                        help="""Select comma separated list of
-                                resources to be deleted.""")
+                        help=("Select comma separated list of"
+                              " resources to be deleted."))
 
     # Resources to be deleted are taken from file.
     parser.add_argument('--from_file',
@@ -1026,11 +1103,19 @@ def main(args=sys.argv[1:]):
                         default=None,
                         help="Chosen locale code string.")
 
+    # Prediction directories to be combined.
+    parser.add_argument('--combine_votes',
+                        action='store',
+                        dest='votes_dirs',
+                        help=("Comma separated list of"
+                              " directories that contain models' votes"
+                              " for the same test set."))
+
     # Parses command line arguments.
     ARGS = parser.parse_args(args)
 
     if len(os.path.dirname(ARGS.predictions).strip()) == 0:
-        ARGS.predictions = "%s/%s" % (NOW, ARGS.predictions)
+        ARGS.predictions = "%s%s%s" % (NOW, os.sep, ARGS.predictions)
 
     API_ARGS = {
         'username': ARGS.username,
@@ -1112,6 +1197,12 @@ def main(args=sys.argv[1:]):
     if ARGS.no_tag:
         ARGS.tag.append('BigMLer')
         ARGS.tag.append('BigMLer_%s' % NOW)
+
+    # Reads votes files in the provided directories.
+    if ARGS.votes_dirs:
+        dirs = map(lambda x: x.strip(), ARGS.votes_dirs.split(','))
+        votes_files = read_votes(dirs, os.path.dirname(ARGS.predictions))
+        output_args.update(votes_files=votes_files)
 
     # Parses resources ids if provided.
     if ARGS.delete:
