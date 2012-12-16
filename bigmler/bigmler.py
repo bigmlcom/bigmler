@@ -61,6 +61,7 @@ import bigml.api
 from bigml.model import Model
 from bigml.multimodel import MultiModel
 from bigml.multimodel import combine_predictions
+from bigml.multimodel import COMBINATION_METHODS
 from bigml.fields import Fields
 from bigml.util import slugify, reset_progress_bar, localize, \
     get_predictions_file_name
@@ -297,7 +298,7 @@ def list_prediction_ids(api, query_string):
 
 def predict(test_set, test_set_header, models, fields, output,
             objective_field, remote=False, api=None, log=None,
-            max_models=MAX_MODELS):
+            max_models=MAX_MODELS, method='pluralize'):
     """Computes a prediction for each entry in the `test_set`
 
 
@@ -370,7 +371,7 @@ def predict(test_set, test_set_header, models, fields, output,
                 predictions.append(prediction['object']['prediction']
                                    [prediction['object']
                                    ['objective_fields'][0]])
-            prediction = combine_predictions(predictions)
+            prediction = combine_predictions(predictions, method)
             if isinstance(prediction, basestring):
                 prediction = prediction.encode("utf-8")
             output.write("%s\n" % prediction)
@@ -419,16 +420,16 @@ def predict(test_set, test_set_header, models, fields, output,
                     for index in range(len(votes)):
                         for prediction in votes[index].keys():
                             if not prediction in total_votes[index]:
-                                total_votes[index][prediction] = 0
-                            total_votes[index][prediction] += (votes[index]
-                                                               [prediction])
+                                total_votes[index][prediction] = []
+                            total_votes[index][prediction].extend(votes[index]
+                                                                  [prediction])
                 else:
                     total_votes = votes
 
             reset_progress_bar(out=out)
             out.write("Combining predictions.")
             for predictions in total_votes:
-                prediction = combine_predictions(predictions)
+                prediction = combine_predictions(predictions, method)
                 if isinstance(prediction, basestring):
                     prediction = prediction.encode("utf-8")
                 output.write("%s\n" % prediction)
@@ -439,7 +440,8 @@ def predict(test_set, test_set_header, models, fields, output,
     output.close()
 
 
-def combine_votes(votes_files, to_prediction, data_locale, to_file):
+def combine_votes(votes_files, to_prediction, data_locale,
+                  to_file, method='pluralize'):
     """Combines the votes found in the votes' files and stores predictions.
 
     """
@@ -450,16 +452,16 @@ def combine_votes(votes_files, to_prediction, data_locale, to_file):
         for row in csv.reader(open(votes_file, "U")):
             prediction = to_prediction(row[0])
             if index > (len(votes) - 1):
-                votes.append({prediction: 0})
+                votes.append({prediction: []})
             if not prediction in votes[index]:
-                votes[index][prediction] = 0
-            votes[index][prediction] += 1
+                votes[index][prediction] = []
+            votes[index][prediction].append(row[1])
             index += 1
 
     check_dir(to_file)
     output = open(to_file, 'w', 0)
     for predictions in votes:
-        prediction = combine_predictions(predictions)
+        prediction = combine_predictions(predictions, method)
         if isinstance(prediction, basestring):
             prediction = prediction.encode("utf-8")
         output.write("%s\n" % prediction)
@@ -693,7 +695,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             objective_field = objective_field[0]
         predict(test_set, test_set_header, models, fields, output,
                 objective_field, args.remote, api, log,
-                args.max_batch_models)
+                args.max_batch_models, args.method)
 
     if votes_files:
         model_id = re.sub(r'.*(model_[a-f0-9]{24})__predictions\.csv$',
@@ -703,7 +705,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                        else args.user_locale)
         local_model = Model(model)
         combine_votes(votes_files, local_model.to_prediction,
-                      data_locale, output)
+                      data_locale, output, args.method)
 
     if args.log_file and log:
         log.close()
@@ -1111,6 +1113,15 @@ def main(args=sys.argv[1:]):
                               " directories that contain models' votes"
                               " for the same test set."))
 
+    # Method to combine votes in multiple models predictions
+    parser.add_argument('--method',
+                        action='store',
+                        dest='method',
+                        default='pluralize',
+                        help="Method to combine votes from ensemble"
+                             " predictions. Allowed methods: pluralize"
+                             " or \"confidence weighted\".")
+
     # Parses command line arguments.
     ARGS = parser.parse_args(args)
 
@@ -1197,6 +1208,10 @@ def main(args=sys.argv[1:]):
     if ARGS.no_tag:
         ARGS.tag.append('BigMLer')
         ARGS.tag.append('BigMLer_%s' % NOW)
+
+    # Checks combined votes method
+    if ARGS.method and not ARGS.method in COMBINATION_METHODS.keys():
+        ARGS.method = 'pluralize'
 
     # Reads votes files in the provided directories.
     if ARGS.votes_dirs:
