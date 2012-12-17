@@ -47,7 +47,7 @@ column in your dataset.
 
 BigMLer will try to use the locale of the model to interpret test data. In case
 it fails, it will try `en_US.UTF-8`
-or 'English_United States.1252' and a warning message will be printed.
+or `English_United States.1252` and a warning message will be printed.
 If you want to change this behaviour you can specify your preferred locale::
 
     bigmler --train data/iris.csv --test data/test_iris.csv --locale "English_United States.1252"
@@ -91,6 +91,27 @@ To create a `random decision forest <http://www.quora.com/Machine-Learning/How-d
      bigmler --train data/iris.csv --test data/test_iris.csv  --number_of_models 10 --sample_rate 0.75 --replacement --tag my_ensemble --randomize
 
 The fields to choose from will be randomized at each split creating a random decision forest that when used together will increase the prediction performance of the individual models.
+
+There are some more advance options that can help you build your ensembles. When the number of models becomes quite large holding all the models in memory may exhaust your resources. To avoid this problem you can use the `--max_batch_models` flag which controls how many models are held in memory at the same time::
+
+    bigmler --train data/iris.csv --test data/test_iris.csv  --number_of_models 10 --sample_rate 0.75 --max_batch_models 5
+
+The predictions generated when using this option will be stored in a file per model and named after the
+models' id (e.g. `model_50c23e5e035d07305a00004f__predictions.csv"). Each line contains the prediction and its confidence. The default value for `max_batch_models` is 10.
+
+When using ensembles model's predictions are combined to issue a final prediction. There are several different methods
+to build the combination. For numeric objective fields the mean value method will be applied. For categorical objective fields you can choose `plurality` or `confidence weighted` using the `--method` flag::
+
+    bigmler --train data/iris.csv --test data/test_iris.csv  --number_of_models 10 --sample_rate 0.75 --method "confidence weighted"
+
+It is also possible to enlarge the number of models that build your prediction gradually. You can build more than one ensemble for the same test data and combine the votes of all of them by using the flag `combine_votes` followed by the comma separated list of directories where predictions are stored. For instance::
+
+    bigmler --train data/iris.csv --test data/test_iris.csv  --number_of_models 20 --sample_rate 0.75 --output ./dir1/predictions.csv
+    bigmler --dataset dataset/50c23e5e035d07305a000056 --test data/test_iris.csv  --number_of_models 20 --sample_rate 0.75 --output ./dir2/predictions.csv
+    bigmler --combine_votes ./dir1,./dir2
+
+would generate a set of 20 prediction files, one for each model, in `./dir1`, a similar set in `./dir2` and combine all of them to generate the final prediction.
+
 
 Making your Dastaset and Model Public
 -------------------------------------

@@ -298,7 +298,7 @@ def list_prediction_ids(api, query_string):
 
 def predict(test_set, test_set_header, models, fields, output,
             objective_field, remote=False, api=None, log=None,
-            max_models=MAX_MODELS, method='pluralize'):
+            max_models=MAX_MODELS, method='plurality'):
     """Computes a prediction for each entry in the `test_set`
 
 
@@ -356,7 +356,7 @@ def predict(test_set, test_set_header, models, fields, output,
     output = open(output, 'w', 0)
     if remote:
         for row in test_reader:
-            predictions = []
+            predictions = {}
             for index in exclude:
                 del row[index]
             input_data = fields.pair(row, headers, objective_field)
@@ -368,9 +368,14 @@ def predict(test_set, test_set_header, models, fields, output,
                 if log:
                     log.write("%s\n" % prediction['resource'])
                     log.flush()
-                predictions.append(prediction['object']['prediction']
-                                   [prediction['object']
-                                   ['objective_fields'][0]])
+                prediction_key = (prediction['object']['prediction']
+                                  [prediction['object']
+                                  ['objective_fields'][0]])
+                if not prediction_key in predictions:
+                    predictions[prediction_key] = []
+                predictions[prediction_key].append(prediction['object']
+                                                   ['prediction_path']
+                                                   ['confidence'])
             prediction = combine_predictions(predictions, method)
             if isinstance(prediction, basestring):
                 prediction = prediction.encode("utf-8")
@@ -441,7 +446,7 @@ def predict(test_set, test_set_header, models, fields, output,
 
 
 def combine_votes(votes_files, to_prediction, data_locale,
-                  to_file, method='pluralize'):
+                  to_file, method='plurality'):
     """Combines the votes found in the votes' files and stores predictions.
 
     """
@@ -1117,9 +1122,9 @@ def main(args=sys.argv[1:]):
     parser.add_argument('--method',
                         action='store',
                         dest='method',
-                        default='pluralize',
+                        default='plurality',
                         help="Method to combine votes from ensemble"
-                             " predictions. Allowed methods: pluralize"
+                             " predictions. Allowed methods: plurality"
                              " or \"confidence weighted\".")
 
     # Parses command line arguments.
@@ -1211,7 +1216,7 @@ def main(args=sys.argv[1:]):
 
     # Checks combined votes method
     if ARGS.method and not ARGS.method in COMBINATION_METHODS.keys():
-        ARGS.method = 'pluralize'
+        ARGS.method = 'plurality'
 
     # Reads votes files in the provided directories.
     if ARGS.votes_dirs:
