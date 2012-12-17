@@ -64,7 +64,7 @@ from bigml.multimodel import combine_predictions
 from bigml.multimodel import COMBINATION_METHODS
 from bigml.fields import Fields
 from bigml.util import slugify, reset_progress_bar, localize, \
-    get_predictions_file_name
+    get_predictions_file_name, get_csv_delimiter
 
 
 PAGE_LENGTH = 200
@@ -315,7 +315,8 @@ def predict(test_set, test_set_header, models, fields, output,
             localize(current), localize(total), pct))
 
     try:
-        test_reader = csv.reader(open(test_set, "U"))
+        test_reader = csv.reader(open(test_set, "U"),
+                                 delimiter=get_csv_delimiter())
     except IOError:
         sys.exit("Error: cannot read test %s" % test_set)
 
@@ -453,14 +454,13 @@ def combine_votes(votes_files, to_prediction, data_locale,
     votes = []
     for votes_file in votes_files:
         index = 0
-        
         for row in csv.reader(open(votes_file, "U")):
             prediction = to_prediction(row[0])
             if index > (len(votes) - 1):
                 votes.append({prediction: []})
             if not prediction in votes[index]:
                 votes[index][prediction] = []
-            votes[index][prediction].append(row[1])
+            votes[index][prediction].append(float(row[1]))
             index += 1
 
     check_dir(to_file)
@@ -980,7 +980,8 @@ def main(args=sys.argv[1:]):
                         dest='max_batch_models',
                         default=MAX_MODELS,
                         type=int,
-                        help="Max number of models to predict from in parallel")
+                        help=("Max number of models to predict from"
+                              "in parallel"))
 
     # Randomize feature selection at each split.
     parser.add_argument('--randomize',
