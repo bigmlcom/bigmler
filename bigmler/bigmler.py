@@ -54,10 +54,9 @@ from bigml.model import Model
 from bigml.multimodel import MultiModel
 from bigml.multimodel import COMBINATION_METHODS
 from bigml.fields import Fields
-from bigml.util import slugify, reset_progress_bar, localize, \
-    get_predictions_file_name, get_csv_delimiter, clear_progress_bar
+
 from bigml.util import reset_progress_bar, localize, \
-    get_csv_delimiter
+    get_csv_delimiter, clear_progress_bar
 from bigmler.options import create_parser
 from bigmler.utils import read_description, read_field_attributes, \
     read_types, read_models, read_dataset, read_json_filter, \
@@ -209,6 +208,7 @@ def predict(test_set, test_set_header, models, fields, output,
             reset_progress_bar(out=out)
             for predictions in total_votes:
                 write_prediction(predictions, method, output)
+
             clear_progress_bar(out=out)
             reset_progress_bar(out=out)
             out.write("Done.")
