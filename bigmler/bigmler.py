@@ -65,6 +65,8 @@ from bigmler.utils import read_description, read_field_attributes, \
     write_prediction
 
 MAX_MODELS = 10
+# Date and time in format SunNov0412_120510 to name and tag resources
+NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
 
 
 def predict(test_set, test_set_header, models, fields, output,
@@ -403,7 +405,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         models = model_ids[:]
 
     if model_ids and test_set:
-        if len(model_ids) < MAX_MODELS:
+        if len(model_ids) < args.max_batch_models:
             models = []
             for model in model_ids:
                 model = api.check_resource(model, api.get_model)
@@ -465,141 +467,147 @@ def main(args=sys.argv[1:]):
     command_log = open(".bigmler", "a", 0)
     command_log.write("bigmler %s\n" % " ".join(args))
     command_log.close()
-    # Date and time in format SunNov0412_120510 to name and tag resources
-    NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
 
     parser = create_parser(defaults={'NOW': NOW, 'MAX_MODELS': MAX_MODELS})
 
     # Parses command line arguments.
-    ARGS = parser.parse_args(args)
+    command_args = parser.parse_args(args)
 
-    if len(os.path.dirname(ARGS.predictions).strip()) == 0:
-        ARGS.predictions = "%s%s%s" % (NOW, os.sep, ARGS.predictions)
+    if len(os.path.dirname(command_args.predictions).strip()) == 0:
+        command_args.predictions = ("%s%s%s" %
+                                    (NOW, os.sep, command_args.predictions))
 
-    API_ARGS = {
-        'username': ARGS.username,
-        'api_key': ARGS.api_key,
-        'dev_mode': ARGS.dev_mode,
-        'debug': ARGS.debug}
+    api_command_args = {
+        'username': command_args.username,
+        'api_key': command_args.api_key,
+        'dev_mode': command_args.dev_mode,
+        'debug': command_args.debug}
 
-    API = bigml.api.BigML(**API_ARGS)
+    api = bigml.api.BigML(**api_command_args)
 
     output_args = {
-        "api": API,
-        "training_set": ARGS.training_set,
-        "test_set": ARGS.test_set,
-        "output": ARGS.predictions,
-        "objective_field": ARGS.objective_field,
-        "name": ARGS.name,
-        "training_set_header": ARGS.train_header,
-        "test_set_header": ARGS.test_header,
-        "args": ARGS,
+        "api": api,
+        "training_set": command_args.training_set,
+        "test_set": command_args.test_set,
+        "output": command_args.predictions,
+        "objective_field": command_args.objective_field,
+        "name": command_args.name,
+        "training_set_header": command_args.train_header,
+        "test_set_header": command_args.test_header,
+        "args": command_args,
     }
 
     # Reads description if provided.
-    if ARGS.description:
-        DESCRIPTION = read_description(ARGS.description)
-        output_args.update(description=DESCRIPTION)
+    if command_args.description:
+        description_arg = read_description(command_args.description)
+        output_args.update(description=description_arg)
     else:
         output_args.update(description="Created using BigMLer")
 
     # Parses fields if provided.
-    if ARGS.field_attributes:
-        FIELD_ATTRIBUTES = read_field_attributes(ARGS.field_attributes)
-        output_args.update(field_attributes=FIELD_ATTRIBUTES)
+    if command_args.field_attributes:
+        field_attributes_arg = (
+            read_field_attributes(command_args.field_attributes))
+        output_args.update(field_attributes=field_attributes_arg)
 
     # Parses types if provided.
-    if ARGS.types:
-        TYPES = read_types(ARGS.types)
-        output_args.update(types=TYPES)
+    if command_args.types:
+        types_arg = read_types(command_args.types)
+        output_args.update(types=types_arg)
 
     # Parses dataset fields if provided.
-    if ARGS.dataset_fields:
-        DATASET_FIELDS = map(lambda x: x.strip(),
-                             ARGS.dataset_fields.split(','))
-        output_args.update(dataset_fields=DATASET_FIELDS)
+    if command_args.dataset_fields:
+        dataset_fields_arg = map(lambda x: x.strip(),
+                                 command_args.dataset_fields.split(','))
+        output_args.update(dataset_fields=dataset_fields_arg)
 
     # Parses model input fields if provided.
-    if ARGS.model_fields:
-        MODEL_FIELDS = map(lambda x: x.strip(), ARGS.model_fields.split(','))
-        output_args.update(model_fields=MODEL_FIELDS)
+    if command_args.model_fields:
+        model_fields_arg = map(lambda x: x.strip(),
+                               command_args.model_fields.split(','))
+        output_args.update(model_fields=model_fields_arg)
 
     model_ids = []
     # Parses model/ids if provided.
-    if ARGS.models:
-        model_ids = read_models(ARGS.models)
+    if command_args.models:
+        model_ids = read_models(command_args.models)
         output_args.update(model_ids=model_ids)
 
     dataset_id = None
     # Parses dataset/id if provided.
-    if ARGS.datasets:
-        dataset_id = read_dataset(ARGS.datasets)
-        ARGS.dataset = dataset_id
+    if command_args.datasets:
+        dataset_id = read_dataset(command_args.datasets)
+        command_args.dataset = dataset_id
 
     # Retrieve model/ids if provided.
-    if ARGS.model_tag:
-        model_ids = model_ids + list_model_ids(API,
-                                               "tags__in=%s" % ARGS.model_tag)
+    if command_args.model_tag:
+        model_ids = (model_ids +
+                     list_model_ids(api,
+                                    "tags__in=%s" % command_args.model_tag))
         output_args.update(model_ids=model_ids)
 
     # Reads a json filter if provided.
-    if ARGS.json_filter:
-        json_filter = read_json_filter(ARGS.json_filter)
-        ARGS.json_filter = json_filter
+    if command_args.json_filter:
+        json_filter = read_json_filter(command_args.json_filter)
+        command_args.json_filter = json_filter
 
     # Reads a lisp filter if provided.
-    if ARGS.lisp_filter:
-        lisp_filter = read_lisp_filter(ARGS.lisp_filter)
-        ARGS.lisp_filter = lisp_filter
+    if command_args.lisp_filter:
+        lisp_filter = read_lisp_filter(command_args.lisp_filter)
+        command_args.lisp_filter = lisp_filter
 
     # Adds default tags unless that it is requested not to do so.
-    if ARGS.no_tag:
-        ARGS.tag.append('BigMLer')
-        ARGS.tag.append('BigMLer_%s' % NOW)
+    if command_args.no_tag:
+        command_args.tag.append('BigMLer')
+        command_args.tag.append('BigMLer_%s' % NOW)
 
     # Checks combined votes method
-    if ARGS.method and not ARGS.method in COMBINATION_METHODS.keys():
-        ARGS.method = 'plurality'
+    if (command_args.method and
+        not command_args.method in COMBINATION_METHODS.keys()):
+        command_args.method = 'plurality'
 
     # Reads votes files in the provided directories.
-    if ARGS.votes_dirs:
-        dirs = map(lambda x: x.strip(), ARGS.votes_dirs.split(','))
-        votes_files = read_votes(dirs, os.path.dirname(ARGS.predictions))
+    if command_args.votes_dirs:
+        dirs = map(lambda x: x.strip(), command_args.votes_dirs.split(','))
+        votes_files = read_votes(dirs,
+                                 os.path.dirname(command_args.predictions))
         output_args.update(votes_files=votes_files)
 
     # Parses resources ids if provided.
-    if ARGS.delete:
+    if command_args.delete:
         delete_list = []
-        if ARGS.delete_list:
-            delete_list = map(lambda x: x.strip(), ARGS.delete_list.split(','))
-        if ARGS.delete_file:
-            if not os.path.exists(ARGS.delete_file):
-                raise Exception("File %s not found" % ARGS.delete_file)
-            delete_list.extend([line for line in open(ARGS.delete_file, "r")])
-        if ARGS.all_tag:
-            query_string = "tags__in=%s" % ARGS.all_tag
-            delete_list.extend(list_source_ids(API, query_string))
-            delete_list.extend(list_dataset_ids(API, query_string))
-            delete_list.extend(list_model_ids(API, query_string))
-            delete_list.extend(list_prediction_ids(API, query_string))
+        if command_args.delete_list:
+            delete_list = map(lambda x: x.strip(),
+                              command_args.delete_list.split(','))
+        if command_args.delete_file:
+            if not os.path.exists(command_args.delete_file):
+                raise Exception("File %s not found" % command_args.delete_file)
+            delete_list.extend([line for line
+                                in open(command_args.delete_file, "r")])
+        if command_args.all_tag:
+            query_string = "tags__in=%s" % command_args.all_tag
+            delete_list.extend(list_source_ids(api, query_string))
+            delete_list.extend(list_dataset_ids(api, query_string))
+            delete_list.extend(list_model_ids(api, query_string))
+            delete_list.extend(list_prediction_ids(api, query_string))
         # Retrieve sources/ids if provided
-        if ARGS.source_tag:
-            query_string = "tags__in=%s" % ARGS.source_tag
-            delete_list.extend(list_source_ids(API, query_string))
+        if command_args.source_tag:
+            query_string = "tags__in=%s" % command_args.source_tag
+            delete_list.extend(list_source_ids(api, query_string))
         # Retrieve datasets/ids if provided
-        if ARGS.dataset_tag:
-            query_string = "tags__in=%s" % ARGS.dataset_tag
-            delete_list.extend(list_dataset_ids(API, query_string))
+        if command_args.dataset_tag:
+            query_string = "tags__in=%s" % command_args.dataset_tag
+            delete_list.extend(list_dataset_ids(api, query_string))
         # Retrieve model/ids if provided
-        if ARGS.model_tag:
-            query_string = "tags__in=%s" % ARGS.model_tag
-            delete_list.extend(list_model_ids(API, query_string))
+        if command_args.model_tag:
+            query_string = "tags__in=%s" % command_args.model_tag
+            delete_list.extend(list_model_ids(api, query_string))
         # Retrieve prediction/ids if provided
-        if ARGS.prediction_tag:
-            query_string = "tags__in=%s" % ARGS.prediction_tag
-            delete_list.extend(list_prediction_ids(API, query_string))
+        if command_args.prediction_tag:
+            query_string = "tags__in=%s" % command_args.prediction_tag
+            delete_list.extend(list_prediction_ids(api, query_string))
 
-        delete(API, delete_list)
+        delete(api, delete_list)
     else:
         compute_output(**output_args)
 
