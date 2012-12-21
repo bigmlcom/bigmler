@@ -64,7 +64,7 @@ from bigml.multimodel import combine_predictions
 from bigml.multimodel import COMBINATION_METHODS
 from bigml.fields import Fields
 from bigml.util import slugify, reset_progress_bar, localize, \
-    get_predictions_file_name, get_csv_delimiter
+    get_predictions_file_name, get_csv_delimiter, clear_progress_bar
 
 
 PAGE_LENGTH = 200
@@ -421,7 +421,6 @@ def predict(test_set, test_set_header, models, fields, output,
                 if models_count > models_total:
                     models_count = models_total
                 draw_progress_bar(models_count, models_total)
-
                 if total_votes:
                     for index in range(len(votes)):
                         for prediction in votes[index].keys():
@@ -431,17 +430,21 @@ def predict(test_set, test_set_header, models, fields, output,
                                                                   [prediction])
                 else:
                     total_votes = votes
-
             reset_progress_bar(out=out)
+            clear_progress_bar(out=out)
             out.write("Combining predictions.")
+            reset_progress_bar(out=out)
             for predictions in total_votes:
                 prediction = combine_predictions(predictions, method)
                 if isinstance(prediction, basestring):
                     prediction = prediction.encode("utf-8")
                 output.write("%s\n" % prediction)
                 output.flush()
+            clear_progress_bar(out=out)
             reset_progress_bar(out=out)
             out.write("Done.")
+            reset_progress_bar(out=out)
+            clear_progress_bar(out=out)
             reset_progress_bar(out=out)
     output.close()
 
