@@ -310,9 +310,11 @@ def predict(test_set, test_set_header, models, fields, output,
 
         """
         pct = 100 - ((total - current) * 100) / (total)
+        clear_progress_bar(out=out)
         reset_progress_bar(out=out)
         out.write("Predicted on %s out of %s models [%s%%]" % (
             localize(current), localize(total), pct))
+        reset_progress_bar(out=out)
 
     try:
         test_reader = csv.reader(open(test_set, "U"),
@@ -430,8 +432,9 @@ def predict(test_set, test_set_header, models, fields, output,
                                                                   [prediction])
                 else:
                     total_votes = votes
-            reset_progress_bar(out=out)
+
             clear_progress_bar(out=out)
+            reset_progress_bar(out=out)
             out.write("Combining predictions.")
             reset_progress_bar(out=out)
             for predictions in total_votes:
