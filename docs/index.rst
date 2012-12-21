@@ -376,6 +376,7 @@ Basic Functionality
 --test TEST_SET     Full path to a test set. A file containing the data that you want to input to generate predictions.
 --objective OBJECTIVE_FIELD     The name of the Objective Field. The field that you want to predict.
 --output PREDICTIONS        Full path to a file to save predictions. If left unspecified, it will default to an auto-generated file created by BigMLer.
+--method METHOD             Prediction method used: plurality or "confidence weighted"
 
 Content
 -------
@@ -388,7 +389,7 @@ Data Configuration
 ------------------
 --no-train-header   The train set file hasn't a header
 --no-test-header    The test set file hasn't a header
---field_names PATH  Path to a file describing field names. One definition per line (e.g., 0, 'Last Name')
+--field_attribute PATH  Path to a file describing field attributes. One definition per line (e.g., 0,'Last Name')
 --types PATH        Path to a file describing field types. One definition per line (e.g., 0, 'numeric')
 --dataset_fields DATASET_FIELDS     Comma-separated list of field column numbers to include in the dataset
 --model_fields MODEL_FIELDS     Comma-separated list of input fields (predictors) to create the model
@@ -427,6 +428,7 @@ Ensembles
 --replacement         Use replacement when sampling
 --max_parallel_models MAX_PARALLEL_MODELS    Max number of models to create in parallel
 --randomize           Use a random set of fields to split on.
+--combine_votes LIST_OF_DIRS    Combines the votes of models generated in a list of directories.
 
 Ensembles aren't `first-class citizen <http://en.wikipedia.org/wiki/First-class_citizen>`_ in BigML yet. So make sure that you tag your models conveniently so that you can then retrieve them later to generate predictions. We expect to have ensembles at the first level of our API pretty soon.
 
