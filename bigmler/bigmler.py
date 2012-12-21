@@ -97,7 +97,8 @@ def read_field_attributes(path):
     field_attributes = {}
     ATTRIBUTE_NAMES = ['name', 'label', 'description']
     try:
-        attributes_reader = csv.reader(open(path, "U"), quotechar="'")
+        attributes_reader = csv.reader(open(path, "U"), quotechar="'",
+                                       lineterminator="\n")
     except IOError:
         sys.exit("Error: cannot read field attributes %s" % path)
 
@@ -318,7 +319,8 @@ def predict(test_set, test_set_header, models, fields, output,
 
     try:
         test_reader = csv.reader(open(test_set, "U"),
-                                 delimiter=get_csv_delimiter())
+                                 delimiter=get_csv_delimiter(),
+                                 lineterminator="\n")
     except IOError:
         sys.exit("Error: cannot read test %s" % test_set)
 
@@ -460,7 +462,7 @@ def combine_votes(votes_files, to_prediction, data_locale,
     votes = []
     for votes_file in votes_files:
         index = 0
-        for row in csv.reader(open(votes_file, "U")):
+        for row in csv.reader(open(votes_file, "U"), lineterminator="\n"):
             prediction = to_prediction(row[0])
             if index > (len(votes) - 1):
                 votes.append({prediction: []})
