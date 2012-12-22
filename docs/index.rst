@@ -47,7 +47,7 @@ column in your dataset.
 
 BigMLer will try to use the locale of the model to interpret test data. In case
 it fails, it will try `en_US.UTF-8`
-or 'English_United States.1252' and a warning message will be printed.
+or `English_United States.1252` and a warning message will be printed.
 If you want to change this behaviour you can specify your preferred locale::
 
     bigmler --train data/iris.csv --test data/test_iris.csv --locale "English_United States.1252"
@@ -91,6 +91,27 @@ To create a `random decision forest <http://www.quora.com/Machine-Learning/How-d
      bigmler --train data/iris.csv --test data/test_iris.csv  --number_of_models 10 --sample_rate 0.75 --replacement --tag my_ensemble --randomize
 
 The fields to choose from will be randomized at each split creating a random decision forest that when used together will increase the prediction performance of the individual models.
+
+There are some more advance options that can help you build your ensembles. When the number of models becomes quite large holding all the models in memory may exhaust your resources. To avoid this problem you can use the `--max_batch_models` flag which controls how many models are held in memory at the same time::
+
+    bigmler --train data/iris.csv --test data/test_iris.csv  --number_of_models 10 --sample_rate 0.75 --max_batch_models 5
+
+The predictions generated when using this option will be stored in a file per model and named after the
+models' id (e.g. `model_50c23e5e035d07305a00004f__predictions.csv"). Each line contains the prediction and its confidence. The default value for `max_batch_models` is 10.
+
+When using ensembles model's predictions are combined to issue a final prediction. There are several different methods
+to build the combination. For numeric objective fields the mean value method will be applied. For categorical objective fields you can choose `plurality` or `confidence weighted` using the `--method` flag::
+
+    bigmler --train data/iris.csv --test data/test_iris.csv  --number_of_models 10 --sample_rate 0.75 --method "confidence weighted"
+
+It is also possible to enlarge the number of models that build your prediction gradually. You can build more than one ensemble for the same test data and combine the votes of all of them by using the flag `combine_votes` followed by the comma separated list of directories where predictions are stored. For instance::
+
+    bigmler --train data/iris.csv --test data/test_iris.csv  --number_of_models 20 --sample_rate 0.75 --output ./dir1/predictions.csv
+    bigmler --dataset dataset/50c23e5e035d07305a000056 --test data/test_iris.csv  --number_of_models 20 --sample_rate 0.75 --output ./dir2/predictions.csv
+    bigmler --combine_votes ./dir1,./dir2
+
+would generate a set of 20 prediction files, one for each model, in `./dir1`, a similar set in `./dir2` and combine all of them to generate the final prediction.
+
 
 Making your Dastaset and Model Public
 -------------------------------------
@@ -160,20 +181,20 @@ What if your raw data isn't necessarily in the format that BigML expects? So we
 have good news: you can use a number of options to configure your sources,
 datasets, and models.
 
-Imagine that you want to alter BigML's default field names or the ones provided by the training set header and capitalize them, you can use a text file with a change per line as follows::
+Imagine that you want to alter BigML's default field names or the ones provided by the training set header and capitalize them, even to add a label or a description to each field. You can use a text file with a change per line as follows::
 
-    bigmler --train data/iris.csv --field_names fields.txt
+    bigmler --train data/iris.csv --field_attributes fields.csv
 
-where ``fields.txt`` would be::
+where ``fields.csv`` would be::
 
-    0, 'SEPAL LENGTH'
-    1, 'SEPAL WIDTH'
-    2, 'PETAL LENGTH'
-    3, 'PETAL WIDTH'
-    4, 'SPECIES'
+    0,'SEPAL LENGTH','label for SEPAL LENGTH','description for SEPAL LENGTH'
+    1,'SEPAL WIDTH','label for SEPAL WIDTH','description for SEPAL WIDTH'
+    2,'PETAL LENGTH','label for PETAL LENGTH','description for PETAL LENGTH'
+    3,'PETAL WIDTH','label for PETAL WIDTH','description for PETAL WIDTH'
+    4,'SPECIES','label for SPECIES','description for SPECIES'
 
 The number on the left in each line is the `column number` of the field in your
-source.
+source and is followed by the new field's name, label and description.
 
 
 Similarly you can also alter the auto-detect type behavior from BigML assigning specific
@@ -277,7 +298,7 @@ Requirements
 
 Python 2.6 and Python 2.7 are currently supported by BigMLer.
 
-BigMLer requires `bigml 0.4.7 <https://github.com/bigmlcom/python>`_  or higher.
+BigMLer requires `bigml 0.4.8 <https://github.com/bigmlcom/python>`_  or higher.
 
 BigMLer Installation
 ====================
@@ -355,6 +376,7 @@ Basic Functionality
 --test TEST_SET     Full path to a test set. A file containing the data that you want to input to generate predictions.
 --objective OBJECTIVE_FIELD     The name of the Objective Field. The field that you want to predict.
 --output PREDICTIONS        Full path to a file to save predictions. If left unspecified, it will default to an auto-generated file created by BigMLer.
+--method METHOD             Prediction method used: plurality or "confidence weighted"
 
 Content
 -------
@@ -367,7 +389,7 @@ Data Configuration
 ------------------
 --no-train-header   The train set file hasn't a header
 --no-test-header    The test set file hasn't a header
---field_names PATH  Path to a file describing field names. One definition per line (e.g., 0, 'Last Name')
+--field_attribute PATH  Path to a file describing field attributes. One definition per line (e.g., 0,'Last Name')
 --types PATH        Path to a file describing field types. One definition per line (e.g., 0, 'numeric')
 --dataset_fields DATASET_FIELDS     Comma-separated list of field column numbers to include in the dataset
 --model_fields MODEL_FIELDS     Comma-separated list of input fields (predictors) to create the model
@@ -406,6 +428,7 @@ Ensembles
 --replacement         Use replacement when sampling
 --max_parallel_models MAX_PARALLEL_MODELS    Max number of models to create in parallel
 --randomize           Use a random set of fields to split on.
+--combine_votes LIST_OF_DIRS    Combines the votes of models generated in a list of directories.
 
 Ensembles aren't `first-class citizen <http://en.wikipedia.org/wiki/First-class_citizen>`_ in BigML yet. So make sure that you tag your models conveniently so that you can then retrieve them later to generate predictions. We expect to have ensembles at the first level of our API pretty soon.
 

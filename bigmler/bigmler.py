@@ -49,6 +49,8 @@ import argparse
 import csv
 import fileinput
 import ast
+import glob
+import re
 
 try:
     import simplejson as json
@@ -56,13 +58,17 @@ except ImportError:
     import json
 
 import bigml.api
+from bigml.model import Model
 from bigml.multimodel import MultiModel
 from bigml.multimodel import combine_predictions
+from bigml.multimodel import COMBINATION_METHODS
 from bigml.fields import Fields
-from bigml.util import slugify
+from bigml.util import slugify, reset_progress_bar, localize, \
+    get_predictions_file_name, get_csv_delimiter, clear_progress_bar
 
 
 PAGE_LENGTH = 200
+MAX_MODELS = 10
 
 
 def read_description(path):
@@ -75,26 +81,38 @@ def read_description(path):
     return lines
 
 
-def read_field_names(path):
-    """Reads field names from a file to update source field names.
+def read_field_attributes(path):
+    """Reads field attributes from a csv file to update source fields.
 
-    A column number and a name separated by a comma per line.
+    A column number and a list of attributes separated by a comma per line.
+    The expected structure is:
+    column number, name, label, description
 
     For example:
 
-    0, 'first name'
-    1, 'last name'
+    0,'first name','label for the first field','fist field full description'
+    1,'last name','label for the last field','last field full description'
 
     """
-    field_names = {}
-    for line in fileinput.input([path]):
+    field_attributes = {}
+    ATTRIBUTE_NAMES = ['name', 'label', 'description']
+    try:
+        attributes_reader = csv.reader(open(path, "U"), quotechar="'",
+                                       lineterminator="\n")
+    except IOError:
+        sys.exit("Error: cannot read field attributes %s" % path)
+
+    for row in attributes_reader:
         try:
-            pair = ast.literal_eval(line)
-            field_names.update({
-                pair[0]: pair[1]})
-        except SyntaxError:
+            attributes = {}
+            if len(row) > 1:
+                for index in range(0, len(row) - 1):
+                    attributes.update({ATTRIBUTE_NAMES[index]: row[index + 1]})
+                field_attributes.update({
+                    int(row[0]): attributes})
+        except ValueError:
             pass
-    return field_names
+    return field_attributes
 
 
 def read_types(path):
@@ -178,6 +196,29 @@ def read_lisp_filter(path):
     return read_description(path)
 
 
+def read_votes(dirs_list, path):
+    """Reads a list of directories to look for votes.
+
+    If model's prediction files are found, they are retrieved to be combined.
+    """
+    file_name = "%s%scombined_predictions" % (path,
+                                              os.sep)
+    check_dir(file_name)
+    group_predictions = open(file_name, "w", 0)
+    current_directory = os.getcwd()
+    for directory in dirs_list:
+        directory = os.path.abspath(directory)
+        os.chdir(directory)
+        predictions_files = []
+        for predictions_file in glob.glob("model_*_predictions.csv"):
+            predictions_files.append("%s%s%s" % (os.getcwd(),
+                                     os.sep, predictions_file))
+            group_predictions.write("%s\n" % predictions_file)
+        os.chdir(current_directory)
+    group_predictions.close()
+    return predictions_files
+
+
 def list_source_ids(api, query_string):
     """Lists BigML sources filtered by `query_string`.
 
@@ -257,13 +298,29 @@ def list_prediction_ids(api, query_string):
 
 
 def predict(test_set, test_set_header, models, fields, output,
-            objective_field, remote=False, api=None, log=None):
+            objective_field, remote=False, api=None, log=None,
+            max_models=MAX_MODELS, method='plurality'):
     """Computes a prediction for each entry in the `test_set`
 
 
     """
+    out = sys.stdout
+
+    def draw_progress_bar(current, total):
+        """Draws a text based progress report.
+
+        """
+        pct = 100 - ((total - current) * 100) / (total)
+        clear_progress_bar(out=out)
+        reset_progress_bar(out=out)
+        out.write("Predicted on %s out of %s models [%s%%]" % (
+            localize(current), localize(total), pct))
+        reset_progress_bar(out=out)
+
     try:
-        test_reader = csv.reader(open(test_set, "U"))
+        test_reader = csv.reader(open(test_set, "U"),
+                                 delimiter=get_csv_delimiter(),
+                                 lineterminator="\n")
     except IOError:
         sys.exit("Error: cannot read test %s" % test_set)
 
@@ -283,27 +340,28 @@ def predict(test_set, test_set_header, models, fields, output,
         exclude.reverse()
         if len(exclude):
             if (len(headers) - len(exclude)):
-                print (u"Warning: predictions will be processed but some data"
-                       u" might not be used. The used fields will be: \n%s\n"
-                       u"while the headers found in the test file are: \n%s" %
+                print (u"WARNING: predictions will be processed but some data"
+                       u" might not be used. The used fields will be:\n\n%s"
+                       u"\n\nwhile the headers found in the test file are:"
+                       u"\n\n%s" %
                        (",".join(fields_names),
                         ",".join(headers))).encode("utf-8")
                 for index in exclude:
                     del headers[index]
             else:
                 raise Exception((u"No test field matches the model fields.\n"
-                                 u"The expected fields are: \n%s\nwhile"
-                                 u" the headers found in the test file are: \n"
-                                 u"%s\nUse --no-test-header flag if first line"
-                                 u" should not be interpreted as headers." %
+                                 u"The expected fields are:\n\n%s\n\nwhile "
+                                 u"the headers found in the test file are:\n\n"
+                                 u"%s\n\nUse --no-test-header flag if first li"
+                                 u"ne should not be interpreted as headers." %
                                  (",".join(fields_names),
                                   ",".join(headers))).encode("utf-8"))
 
-    check_dir(output)
+    output_path = check_dir(output)
     output = open(output, 'w', 0)
     if remote:
         for row in test_reader:
-            predictions = []
+            predictions = {}
             for index in exclude:
                 del row[index]
             input_data = fields.pair(row, headers, objective_field)
@@ -315,38 +373,125 @@ def predict(test_set, test_set_header, models, fields, output,
                 if log:
                     log.write("%s\n" % prediction['resource'])
                     log.flush()
-                predictions.append(prediction['object']['prediction']
-                                   [prediction['object']
-                                   ['objective_fields'][0]])
-            prediction = combine_predictions(predictions)
+                prediction_key = (prediction['object']['prediction']
+                                  [prediction['object']
+                                  ['objective_fields'][0]])
+                if not prediction_key in predictions:
+                    predictions[prediction_key] = []
+                predictions[prediction_key].append(prediction['object']
+                                                   ['prediction_path']
+                                                   ['confidence'])
+            prediction = combine_predictions(predictions, method)
             if isinstance(prediction, basestring):
                 prediction = prediction.encode("utf-8")
             output.write("%s\n" % prediction)
             output.flush()
     else:
-        local_model = MultiModel(models)
-        for row in test_reader:
-            for index in exclude:
-                del row[index]
-            input_data = fields.pair(row, headers, objective_field)
-            prediction = local_model.predict(input_data,
-                                             by_name=test_set_header)
-            if isinstance(prediction, basestring):
-                prediction = prediction.encode("utf-8")
-            output.write("%s\n" % prediction)
-            output.flush()
+        models_total = len(models)
+        if models_total < max_models:
+            local_model = MultiModel(models)
+            for row in test_reader:
+                for index in exclude:
+                    del row[index]
+                input_data = fields.pair(row, headers, objective_field)
+                prediction = local_model.predict(input_data,
+                                                 by_name=test_set_header)
+                if isinstance(prediction, basestring):
+                    prediction = prediction.encode("utf-8")
+                output.write("%s\n" % prediction)
+                output.flush()
+        else:
+            models_splits = [models[index:(index + max_models)] for index
+                             in range(0, models_total, max_models)]
+            input_data_list = []
+            for row in test_reader:
+                for index in exclude:
+                    del row[index]
+                input_data_list.append(fields.pair(row, headers,
+                                                   objective_field))
+            total_votes = []
+            models_count = 0
+            for models_split in models_splits:
+                complete_models = []
+                for index in range(len(models_split)):
+                    complete_models.append(api.check_resource(
+                        models_split[index], api.get_model))
+
+                local_model = MultiModel(complete_models)
+                local_model.batch_predict(input_data_list,
+                                          output_path, reuse=True)
+                votes = local_model.batch_votes(output_path)
+                models_count += max_models
+                if models_count > models_total:
+                    models_count = models_total
+                draw_progress_bar(models_count, models_total)
+                if total_votes:
+                    for index in range(len(votes)):
+                        for prediction in votes[index].keys():
+                            if not prediction in total_votes[index]:
+                                total_votes[index][prediction] = []
+                            total_votes[index][prediction].extend(votes[index]
+                                                                  [prediction])
+                else:
+                    total_votes = votes
+
+            clear_progress_bar(out=out)
+            reset_progress_bar(out=out)
+            out.write("Combining predictions.")
+            reset_progress_bar(out=out)
+            for predictions in total_votes:
+                prediction = combine_predictions(predictions, method)
+                if isinstance(prediction, basestring):
+                    prediction = prediction.encode("utf-8")
+                output.write("%s\n" % prediction)
+                output.flush()
+            clear_progress_bar(out=out)
+            reset_progress_bar(out=out)
+            out.write("Done.")
+            reset_progress_bar(out=out)
+            clear_progress_bar(out=out)
+            reset_progress_bar(out=out)
+    output.close()
+
+
+def combine_votes(votes_files, to_prediction, data_locale,
+                  to_file, method='plurality'):
+    """Combines the votes found in the votes' files and stores predictions.
+
+    """
+    votes = []
+    for votes_file in votes_files:
+        index = 0
+        for row in csv.reader(open(votes_file, "U"), lineterminator="\n"):
+            prediction = to_prediction(row[0])
+            if index > (len(votes) - 1):
+                votes.append({prediction: []})
+            if not prediction in votes[index]:
+                votes[index][prediction] = []
+            votes[index][prediction].append(float(row[1]))
+            index += 1
+
+    check_dir(to_file)
+    output = open(to_file, 'w', 0)
+    for predictions in votes:
+        prediction = combine_predictions(predictions, method)
+        if isinstance(prediction, basestring):
+            prediction = prediction.encode("utf-8")
+        output.write("%s\n" % prediction)
+        output.flush()
     output.close()
 
 
 def compute_output(api, args, training_set, test_set=None, output=None,
                    objective_field=None,
                    description=None,
-                   field_names=None,
+                   field_attributes=None,
                    types=None,
                    dataset_fields=None,
                    model_fields=None,
                    name=None, training_set_header=True,
-                   test_set_header=True, model_ids=None):
+                   test_set_header=True, model_ids=None,
+                   votes_files=None):
     """ Creates one or models using the `training_set` or uses the ids
     of previous created BigML models to make predictions for the `test_set`.
 
@@ -401,10 +546,10 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
         fields = Fields(source['object']['fields'], **csv_properties)
         update_fields = {}
-        if field_names:
-            for (column, value) in field_names.iteritems():
+        if field_attributes:
+            for (column, value) in field_attributes.iteritems():
                 update_fields.update({
-                    fields.field_id(column): {'name': value}})
+                    fields.field_id(column): value})
             source = api.update_source(source, {"fields": update_fields})
 
         update_fields = {}
@@ -497,6 +642,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                           replacement=args.replacement,
                           randomize=args.randomize)
         model_ids = []
+        models = []
         model_file = open(path + '/models', 'w', 0)
         last_model = None
         for i in range(1, args.number_of_models + 1):
@@ -508,6 +654,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 log.flush()
             last_model = model
             model_ids.append(model['resource'])
+            models.append(model)
             model_file.write("%s\n" % model['resource'])
             model_file.flush()
         model_file.close()
@@ -516,12 +663,19 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     elif args.model:
         model = api.get_model(args.model)
 
+    elif args.models or args.model_tag:
+        models = model_ids[:]
+
     if model_ids and test_set:
-        models = []
-        for model in model_ids:
-            model = api.check_resource(model, api.get_model)
-            models.append(model)
-        model = models[0]
+        if len(model_ids) < MAX_MODELS:
+            models = []
+            for model in model_ids:
+                model = api.check_resource(model, api.get_model)
+                models.append(model)
+            model = models[0]
+        else:
+            model = api.check_resource(model_ids[0], api.get_model)
+            models[0] = model
 
     # We check that the model is finished and get the fields if haven't got
     # them yet.
@@ -553,7 +707,19 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if isinstance(objective_field, list):
             objective_field = objective_field[0]
         predict(test_set, test_set_header, models, fields, output,
-                objective_field, args.remote, api, log)
+                objective_field, args.remote, api, log,
+                args.max_batch_models, args.method)
+
+    if votes_files:
+        model_id = re.sub(r'.*(model_[a-f0-9]{24})__predictions\.csv$',
+                          r'\1', votes_files[0]).replace("_", "/")
+        model = api.check_resource(model_id, api.get_model)
+        data_locale = (model['object']['locale'] if not args.user_locale
+                       else args.user_locale)
+        local_model = Model(model)
+        combine_votes(votes_files, local_model.to_prediction,
+                      data_locale, output, args.method)
+
     if args.log_file and log:
         log.close()
 
@@ -583,6 +749,9 @@ def check_dir(path):
     directory = os.path.dirname(path)
     if len(directory) > 0 and not os.path.exists(directory):
         os.makedirs(directory)
+        directory_log = open(".bigmler_dirs", "a", 0)
+        directory_log.write("%s\n" % directory)
+        directory_log.close()
     return directory
 
 
@@ -590,6 +759,9 @@ def main(args=sys.argv[1:]):
     """Main process
 
     """
+    command_log = open(".bigmler", "a", 0)
+    command_log.write("bigmler %s\n" % " ".join(args))
+    command_log.close()
     # Date and time in format SunNov0412_120510 to name and tag resources
     NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
 
@@ -606,8 +778,8 @@ def main(args=sys.argv[1:]):
     parser.add_argument('--dev',
                         action='store_true',
                         dest='dev_mode',
-                        help="""Compute a test output using BigML FREE
-                                development environment""")
+                        help=("Compute a test output using BigML FREE"
+                             " development environment"))
     # BigML's username.
     parser.add_argument('--username',
                         action='store',
@@ -634,7 +806,7 @@ def main(args=sys.argv[1:]):
     parser.add_argument('--output',
                         action='store',
                         dest='predictions',
-                        default='%s/predictions.csv' % NOW,
+                        default='%s%spredictions.csv' % (NOW, os.sep),
                         help="Path to the file to output predictions.")
 
     # The name of the field that represents the objective field (i.e., class or
@@ -656,31 +828,41 @@ def main(args=sys.argv[1:]):
     parser.add_argument('--description',
                         action='store',
                         dest='description',
-                        help="""Path to a file with a description in plain
-                                text or markdown""")
+                        help=("Path to a file with a description in plain"
+                              " text or markdown"))
 
     # The path to a file containing names if you want to alter BigML's
     # default field names or the ones provided by the train file header.
+    # Kept for backwards compatibility
     parser.add_argument('--field_names',
                         action='store',
-                        dest='field_names',
-                        help="""Path to a file describing field names. One
-                                definition per line (e.g., 0, 'Last Name')""")
+                        dest='field_attributes',
+                        help=("Path to a csv file describing field names. One"
+                              " definition per line (e.g., 0,'Last Name')"))
+
+    # The path to a file containing attributes if you want to alter BigML's
+    # default field attributes or the ones provided by the train file header.
+    parser.add_argument('--field_attributes',
+                        action='store',
+                        dest='field_attributes',
+                        help=("Path to a csv file describing field attributes."
+                              " One definition per line"
+                              " (e.g., 0,'Last Name')"))
 
     # The path to a file containing types if you want to alter BigML's
     # type auto-detect.
     parser.add_argument('--types',
                         action='store',
                         dest='types',
-                        help="""Path to a file describing field types. One
-                                definition per line (e.g., 0, 'numeric')""")
+                        help=("Path to a file describing field types. One"
+                              " definition per line (e.g., 0, 'numeric')"))
 
     # Fields to include in the dataset.
     parser.add_argument('--dataset_fields',
                         action='store',
                         dest='dataset_fields',
-                        help="""Comma-separated list of field column numbers
-                                to include in the dataset""")
+                        help=("Comma-separated list of field column numbers"
+                              " to include in the dataset"))
 
     # Path to a file that includes a JSON filter.
     parser.add_argument('--json_filter',
@@ -696,8 +878,8 @@ def main(args=sys.argv[1:]):
     parser.add_argument('--model_fields',
                         action='store',
                         dest='model_fields',
-                        help="""Comma-separated list of input fields
-                                (predictors) to create the model""")
+                        help=("Comma-separated list of input fields"
+                              " (predictors) to create the model"))
 
     # Set when the training set file doesn't include a header on the first
     # line.
@@ -749,17 +931,17 @@ def main(args=sys.argv[1:]):
     parser.add_argument('--models',
                         action='store',
                         dest='models',
-                        help="""Path to a file containing model/ids. One model
-                                per line (e.g., model/50a206a8035d0706dc000376
-                                )""")
+                        help=("Path to a file containing model/ids. One model"
+                              " per line (e.g., model/50a206a8035d0706dc000376"
+                              ")"))
 
     # The path to a file containing a dataset id.
     parser.add_argument('--datasets',
                         action='store',
                         dest='datasets',
-                        help="""Path to a file containing a dataset/id. Just
-                        one dataset
-                        (e.g., dataset/50a20697035d0706da0004a4)""")
+                        help=("Path to a file containing a dataset/id. Just"
+                              " one dataset"
+                              " (e.g., dataset/50a20697035d0706da0004a4)"))
 
     # Set to True to active statiscal pruning.
     parser.add_argument('--stat_pruning',
@@ -800,6 +982,15 @@ def main(args=sys.argv[1:]):
                         type=int,
                         help="Max number of models to create in parallel")
 
+    # Max number of models to predict from in parallel.
+    parser.add_argument('--max_batch_models',
+                        action='store',
+                        dest='max_batch_models',
+                        default=MAX_MODELS,
+                        type=int,
+                        help=("Max number of models to predict from"
+                              "in parallel"))
+
     # Randomize feature selection at each split.
     parser.add_argument('--randomize',
                         action='store_true',
@@ -809,12 +1000,12 @@ def main(args=sys.argv[1:]):
     parser.add_argument('--tag',
                         action='append',
                         default=[],
-                        help="""Tag to later retrieve new resources""")
+                        help="Tag to later retrieve new resources")
 
     # Avoid default tagging of resources.
     parser.add_argument('--no_tag',
                         action='store_false',
-                        help="""No tag resources with default BigMLer tags""")
+                        help="No tag resources with default BigMLer tags")
 
     # Use it to retrieve models that were tagged with tag.
     parser.add_argument('--model_tag',
@@ -840,8 +1031,8 @@ def main(args=sys.argv[1:]):
                         action='store',
                         type=float,
                         default=0.0,
-                        help="""The price other users must pay to clone your
-                                model""")
+                        help=("The price other users must pay to clone your"
+                              " model"))
 
     # Set a price tag to your dataset.
     parser.add_argument('--dataset_price',
@@ -855,9 +1046,9 @@ def main(args=sys.argv[1:]):
                         action='store',
                         type=float,
                         default=0.0,
-                        help="""The number of credits that other users will
-                                consume to make a prediction with your
-                                model.""")
+                        help=("The number of credits that other users will"
+                              " consume to make a prediction with your"
+                              " model."))
 
     # Shows progress information when uploading a file.
     parser.add_argument('--progress_bar',
@@ -878,9 +1069,9 @@ def main(args=sys.argv[1:]):
     parser.add_argument('--resources_log',
                         action='store',
                         dest='log_file',
-                        help="""Path to a file to store new resources ids.
-                                One resource per line
-                                (e.g., model/50a206a8035d0706dc000376)""")
+                        help=("Path to a file to store new resources ids."
+                              " One resource per line"
+                              " (e.g., model/50a206a8035d0706dc000376)"))
     # Changes to delete mode.
     parser.add_argument('--delete',
                         action='store_true',
@@ -890,36 +1081,36 @@ def main(args=sys.argv[1:]):
     parser.add_argument('--ids',
                         action='store',
                         dest='delete_list',
-                        help="""Select comma separated list of
-                                resources to be deleted.""")
+                        help=("Select comma separated list of"
+                              " resources to be deleted."))
 
     # Resources to be deleted are taken from file.
     parser.add_argument('--from_file',
                         action='store',
                         dest='delete_file',
-                        help="""Path to a file containing resources ids.
-                                One resource per line
-                                (e.g., model/50a206a8035d0706dc000376)""")
+                        help=("Path to a file containing resources ids."
+                              " One resource per line"
+                              " (e.g., model/50a206a8035d0706dc000376)"))
 
     # Sources selected by tag to be deleted.
     parser.add_argument('--source_tag',
-                        help="""Select sources tagged with tag to
-                                be deleted""")
+                        help=("Select sources tagged with tag to"
+                              " be deleted"))
 
     # Datasets selected by tag to be deleted.
     parser.add_argument('--dataset_tag',
-                        help="""Select datasets tagged with tag to
-                                be deleted""")
+                        help=("Select datasets tagged with tag to"
+                              " be deleted"))
 
     # Predictions selected by tag to be deleted.
     parser.add_argument('--prediction_tag',
-                        help="""Select prediction tagged with tag to
-                                be deleted""")
+                        help=("Select prediction tagged with tag to"
+                              " be deleted"))
 
     # Resources selected by tag to be deleted.
     parser.add_argument('--all_tag',
-                        help="""Select resources tagged with tag to
-                                be deleted""")
+                        help=("Select resources tagged with tag to"
+                              " be deleted"))
 
     # Locale settings.
     parser.add_argument('--locale',
@@ -928,11 +1119,28 @@ def main(args=sys.argv[1:]):
                         default=None,
                         help="Chosen locale code string.")
 
+    # Prediction directories to be combined.
+    parser.add_argument('--combine_votes',
+                        action='store',
+                        dest='votes_dirs',
+                        help=("Comma separated list of"
+                              " directories that contain models' votes"
+                              " for the same test set."))
+
+    # Method to combine votes in multiple models predictions
+    parser.add_argument('--method',
+                        action='store',
+                        dest='method',
+                        default='plurality',
+                        help="Method to combine votes from ensemble"
+                             " predictions. Allowed methods: plurality"
+                             " or \"confidence weighted\".")
+
     # Parses command line arguments.
     ARGS = parser.parse_args(args)
 
     if len(os.path.dirname(ARGS.predictions).strip()) == 0:
-        ARGS.predictions = "%s/%s" % (NOW, ARGS.predictions)
+        ARGS.predictions = "%s%s%s" % (NOW, os.sep, ARGS.predictions)
 
     API_ARGS = {
         'username': ARGS.username,
@@ -962,9 +1170,9 @@ def main(args=sys.argv[1:]):
         output_args.update(description="Created using BigMLer")
 
     # Parses fields if provided.
-    if ARGS.field_names:
-        FIELD_NAMES = read_field_names(ARGS.field_names)
-        output_args.update(field_names=FIELD_NAMES)
+    if ARGS.field_attributes:
+        FIELD_ATTRIBUTES = read_field_attributes(ARGS.field_attributes)
+        output_args.update(field_attributes=FIELD_ATTRIBUTES)
 
     # Parses types if provided.
     if ARGS.types:
@@ -1014,6 +1222,16 @@ def main(args=sys.argv[1:]):
     if ARGS.no_tag:
         ARGS.tag.append('BigMLer')
         ARGS.tag.append('BigMLer_%s' % NOW)
+
+    # Checks combined votes method
+    if ARGS.method and not ARGS.method in COMBINATION_METHODS.keys():
+        ARGS.method = 'plurality'
+
+    # Reads votes files in the provided directories.
+    if ARGS.votes_dirs:
+        dirs = map(lambda x: x.strip(), ARGS.votes_dirs.split(','))
+        votes_files = read_votes(dirs, os.path.dirname(ARGS.predictions))
+        output_args.update(votes_files=votes_files)
 
     # Parses resources ids if provided.
     if ARGS.delete:
