@@ -48,6 +48,7 @@ import os
 import datetime
 import csv
 import re
+import shlex
 
 import bigml.api
 from bigml.model import Model
@@ -56,13 +57,15 @@ from bigml.multimodel import COMBINATION_METHODS
 from bigml.fields import Fields
 
 from bigml.util import reset_progress_bar, localize, \
-    get_csv_delimiter, clear_progress_bar
+    get_csv_delimiter, get_predictions_file_name, clear_progress_bar
+
 from bigmler.options import create_parser
 from bigmler.utils import read_description, read_field_attributes, \
     read_types, read_models, read_dataset, read_json_filter, \
     read_lisp_filter, read_votes, list_source_ids, list_dataset_ids, \
     list_model_ids, list_prediction_ids, combine_votes, delete, check_dir, \
-    write_prediction
+    write_prediction, get_log_reversed, is_source_created, checkpoint, \
+    is_dataset_created, are_models_created, are_predictions_created
 
 MAX_MODELS = 10
 # Date and time in format SunNov0412_120510 to name and tag resources
@@ -71,7 +74,7 @@ NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
 
 def predict(test_set, test_set_header, models, fields, output,
             objective_field, remote=False, api=None, log=None,
-            max_models=MAX_MODELS, method='plurality'):
+            max_models=MAX_MODELS, method='plurality', resume=False):
     """Computes a prediction for each entry in the `test_set`
 
 
@@ -129,31 +132,70 @@ def predict(test_set, test_set_header, models, fields, output,
                                  (",".join(fields_names),
                                   ",".join(headers))).encode("utf-8"))
 
+    prediction_file = output
     output_path = check_dir(output)
     output = open(output, 'w', 0)
+    if resume:
+        number_of_tests = 0
+        for line in open(test_set, "U"):
+            number_of_tests += 1
+        if test_set_header:
+            number_of_tests -= 1
     if remote:
-        for row in test_reader:
-            predictions = {}
-            for index in exclude:
-                del row[index]
-            input_data = fields.pair(row, headers, objective_field)
-
+        
+        if resume:
+            predictions_files = []
             for model in models:
-                prediction = api.create_prediction(model, input_data,
-                                                   by_name=test_set_header,
-                                                   wait_time=0)
-                if log:
-                    log.write("%s\n" % prediction['resource'])
-                    log.flush()
-                prediction_key = (prediction['object']['prediction']
-                                  [prediction['object']
-                                  ['objective_fields'][0]])
-                if not prediction_key in predictions:
-                    predictions[prediction_key] = []
-                predictions[prediction_key].append(prediction['object']
-                                                   ['prediction_path']
-                                                   ['confidence'])
-            write_prediction(predictions, method, output)
+                if not isinstance(model, basestring) and 'resource' in model:
+                    model = model['resource']
+                predictions_files.append(
+                    get_predictions_file_name(model, output_path))
+
+            check = checkpoint(are_predictions_created,
+                               predictions_files, models, number_of_tests)
+            if not check:
+                for predictions_file in predictions_files:
+                    try:
+                        handler = open(predictions_file, "w", 0)
+                        handler.close()
+                    except:
+                        pass
+                resume = False
+        
+        if not resume:
+            for row in test_reader:
+                predictions = {}
+                for index in exclude:
+                    del row[index]
+                input_data = fields.pair(row, headers, objective_field)
+                for model in models:
+                    if not isinstance(model, basestring) and 'resource' in model:
+                        model = model['resource']
+                    prediction_file = get_predictions_file_name(model,
+                                                                output_path)
+
+                    prediction = api.create_prediction(model, input_data,
+                                                       by_name=test_set_header,
+                                                       wait_time=0)
+                    if log:
+                        log.write("%s\n" % prediction['resource'])
+                        log.flush()
+                    prediction_file = csv.writer(open(prediction_file, 'a', 0))
+                    prediction_row = [prediction['object']['prediction']
+                                      [prediction['object']
+                                      ['objective_fields'][0]],
+                                      prediction['object']['prediction_path']
+                                      ['confidence']]
+                    prediction_file.writerow(prediction_row)
+                    prediction_key = prediction_row[0]
+                    if not prediction_key in predictions:
+                        predictions[prediction_key] = []
+                    predictions[prediction_key].append(prediction_row[1])
+                write_prediction(predictions, method, output)
+        else:
+            combine_votes(predictions_files,
+                          Model(models[0]).to_prediction,
+                          prediction_file, method)
     else:
         models_total = len(models)
         if models_total < max_models:
@@ -229,7 +271,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                    model_fields=None,
                    name=None, training_set_header=True,
                    test_set_header=True, model_ids=None,
-                   votes_files=None):
+                   votes_files=None, resume=False):
     """ Creates one or models using the `training_set` or uses the ids
     of previous created BigML models to make predictions for the `test_set`.
 
@@ -247,7 +289,13 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if args.log_file:
         check_dir(args.log_file)
         log = open(args.log_file, 'a', 0)
-
+    if resume:
+        check = checkpoint(is_source_created, path)
+        try:
+            source_id = bigml.api.get_source_id(check)
+            args.source = source_id
+        except:
+            resume = False
     # If neither a previous source, dataset or model are provided.
     # we create a new one
     if (training_set and not args.source and not args.dataset and
@@ -268,6 +316,11 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         fields = Fields(source['object']['fields'],
                         source['object']['source_parser']['missing_tokens'],
                         source['object']['source_parser']['locale'])
+        source_file = open(path + '/source', 'w', 0)
+        source_file.write("%s\n" % source['resource'])
+        source_file.write("%s\n" % source['object']['name'])
+        source_file.flush()
+        source_file.close()
 
     # If a source is provided, we retrieve it.
     elif args.source:
@@ -296,12 +349,14 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 update_fields.update({
                     fields.field_id(column): {'optype': value}})
             source = api.update_source(source, {"fields": update_fields})
-        source_file = open(path + '/source', 'w', 0)
-        source_file.write("%s\n" % source['resource'])
-        source_file.write("%s\n" % source['object']['name'])
-        source_file.flush()
-        source_file.close()
 
+    if resume:
+        check = checkpoint(is_dataset_created, path)
+        try:
+            dataset_id = bigml.api.get_dataset_id(check)
+            args.dataset = dataset_id
+        except:
+            resume = False
     # If we have a source but not dataset or model has been provided, we
     # create a new dataset if the no_dataset option isn't set up.
     if (source and not args.dataset and not args.model and not model_ids and
@@ -351,6 +406,14 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             dataset = api.update_dataset(dataset, public_dataset)
         fields = Fields(dataset['object']['fields'], **csv_properties)
 
+    if resume:
+        check = checkpoint(are_models_created, path, args.number_of_models)
+        try:
+            for model in check:
+                model_id = bigml.api.get_model_id(model)
+            model_ids = check
+        except:
+            resume = False
     # If we have a dataset but not a model, we create the model if the no_model
     # flag hasn't been set up.
     if (dataset and not args.model and not model_ids and not args.no_model):
@@ -446,7 +509,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             objective_field = objective_field[0]
         predict(test_set, test_set_header, models, fields, output,
                 objective_field, args.remote, api, log,
-                args.max_batch_models, args.method)
+                args.max_batch_models, args.method, resume)
 
     if votes_files:
         model_id = re.sub(r'.*(model_[a-f0-9]{24})__predictions\.csv$',
@@ -464,18 +527,35 @@ def main(args=sys.argv[1:]):
     """Main process
 
     """
-    command_log = open(".bigmler", "a", 0)
-    command_log.write("bigmler %s\n" % " ".join(args))
-    command_log.close()
+    if not "--resume" in args:
+        command_log = open(".bigmler", "a", 0)
+        command_log.write("bigmler %s\n" % " ".join(args))
+        command_log.close()
+        resume = False
 
     parser = create_parser(defaults={'NOW': NOW, 'MAX_MODELS': MAX_MODELS})
 
     # Parses command line arguments.
     command_args = parser.parse_args(args)
-
-    if len(os.path.dirname(command_args.predictions).strip()) == 0:
+    if command_args.resume:
+        command = get_log_reversed('.bigmler',
+                                   command_args.stack_level)
+        args = shlex.split(command)[1:]
+        command_args = parser.parse_args(args)
+        command_args.predictions = get_log_reversed('.bigmler_dir_stack',
+                                                    command_args.stack_level)
         command_args.predictions = ("%s%s%s" %
-                                    (NOW, os.sep, command_args.predictions))
+                                    (command_args.predictions, os.sep,
+                                     'predictions.csv'))
+        resume = True
+    else:
+        if len(os.path.dirname(command_args.predictions).strip()) == 0:
+            command_args.predictions = ("%s%s%s" %
+                                        (NOW, os.sep, command_args.predictions))
+        directory = check_dir(command_args.predictions)
+        directory_log = open(".bigmler_dir_stack", "a", 0)
+        directory_log.write("%s\n" % os.path.abspath(directory))
+        directory_log.close()
 
     api_command_args = {
         'username': command_args.username,
@@ -495,6 +575,7 @@ def main(args=sys.argv[1:]):
         "training_set_header": command_args.train_header,
         "test_set_header": command_args.test_header,
         "args": command_args,
+        "resume": resume,
     }
 
     # Reads description if provided.
