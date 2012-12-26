@@ -56,8 +56,8 @@ from bigml.multimodel import MultiModel
 from bigml.multimodel import COMBINATION_METHODS
 from bigml.fields import Fields
 
-from bigml.util import reset_progress_bar, localize, \
-    get_csv_delimiter, get_predictions_file_name, clear_progress_bar
+from bigml.util import reset_console_line, localize, console_log, \
+    get_csv_delimiter, get_predictions_file_name, clear_console_line
 
 from bigmler.options import create_parser
 from bigmler.utils import read_description, read_field_attributes, \
@@ -74,23 +74,19 @@ NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
 
 def predict(test_set, test_set_header, models, fields, output,
             objective_field, remote=False, api=None, log=None,
-            max_models=MAX_MODELS, method='plurality', resume=False):
+            max_models=MAX_MODELS, method='plurality', resume=False, tags=None):
     """Computes a prediction for each entry in the `test_set`
 
 
     """
-    out = sys.stdout
 
     def draw_progress_bar(current, total):
         """Draws a text based progress report.
 
         """
         pct = 100 - ((total - current) * 100) / (total)
-        clear_progress_bar(out=out)
-        reset_progress_bar(out=out)
-        out.write("Predicted on %s out of %s models [%s%%]" % (
+        console_log("Predicted on %s out of %s models [%s%%]" % (
             localize(current), localize(total), pct))
-        reset_progress_bar(out=out)
 
     try:
         test_reader = csv.reader(open(test_set, "U"),
@@ -142,61 +138,48 @@ def predict(test_set, test_set_header, models, fields, output,
         if test_set_header:
             number_of_tests -= 1
     if remote:
-        
-        if resume:
-            predictions_files = []
-            for model in models:
-                if not isinstance(model, basestring) and 'resource' in model:
-                    model = model['resource']
-                predictions_files.append(
-                    get_predictions_file_name(model, output_path))
 
-            check = checkpoint(are_predictions_created,
-                               predictions_files, models, number_of_tests)
-            if not check:
-                for predictions_file in predictions_files:
-                    try:
-                        handler = open(predictions_file, "w", 0)
-                        handler.close()
-                    except:
-                        pass
-                resume = False
-        
-        if not resume:
-            for row in test_reader:
-                predictions = {}
-                for index in exclude:
-                    del row[index]
-                input_data = fields.pair(row, headers, objective_field)
-                for model in models:
-                    if not isinstance(model, basestring) and 'resource' in model:
-                        model = model['resource']
-                    prediction_file = get_predictions_file_name(model,
-                                                                output_path)
-
+        predictions_files = []
+        prediction_args = {
+            "tags": tags
+        }
+        for model in models:
+            if not isinstance(model, basestring) and 'resource' in model:
+                model = model['resource']
+            predictions_file = get_predictions_file_name(model,
+                                                        output_path)
+            predictions_files.append(predictions_file)
+            if resume:
+                resume = checkpoint(are_predictions_created, predictions_file,
+                                   number_of_tests)
+            if not resume:
+                console_log("Creating remote predictions.")
+                predictions_file = csv.writer(open(predictions_file, 'w', 0))
+                for row in test_reader:
+                    predictions = {}
+                    for index in exclude:
+                        del row[index]
+                    input_data = fields.pair(row, headers, objective_field)
                     prediction = api.create_prediction(model, input_data,
                                                        by_name=test_set_header,
-                                                       wait_time=0)
+                                                       wait_time=0,
+                                                       args=prediction_args)
                     if log:
                         log.write("%s\n" % prediction['resource'])
                         log.flush()
-                    prediction_file = csv.writer(open(prediction_file, 'a', 0))
+
                     prediction_row = [prediction['object']['prediction']
                                       [prediction['object']
                                       ['objective_fields'][0]],
                                       prediction['object']['prediction_path']
                                       ['confidence']]
-                    prediction_file.writerow(prediction_row)
+                    predictions_file.writerow(prediction_row)
                     prediction_key = prediction_row[0]
-                    if not prediction_key in predictions:
-                        predictions[prediction_key] = []
-                    predictions[prediction_key].append(prediction_row[1])
-                write_prediction(predictions, method, output)
-        else:
-            combine_votes(predictions_files,
-                          Model(models[0]).to_prediction,
-                          prediction_file, method)
+        combine_votes(predictions_files,
+                      Model(models[0]).to_prediction,
+                      prediction_file, method)
     else:
+        console_log("Creating local predictions.")
         models_total = len(models)
         if models_total < max_models:
             local_model = MultiModel(models)
@@ -222,6 +205,14 @@ def predict(test_set, test_set_header, models, fields, output,
             total_votes = []
             models_count = 0
             for models_split in models_splits:
+                if resume:
+                    for model in models_split:
+                        predictions_file = get_predictions_file_name(model,
+                                                                    output_path)
+
+                        check = checkpoint(are_predictions_created,
+                                           predictions_file,
+                                           number_of_tests)
                 complete_models = []
                 for index in range(len(models_split)):
                     complete_models.append(api.check_resource(
@@ -245,20 +236,12 @@ def predict(test_set, test_set_header, models, fields, output,
                 else:
                     total_votes = votes
 
-
-            clear_progress_bar(out=out)
-            reset_progress_bar(out=out)
-            out.write("Combining predictions.")
-            reset_progress_bar(out=out)
+            console_log("Combining predictions.")
             for predictions in total_votes:
                 write_prediction(predictions, method, output)
 
-            clear_progress_bar(out=out)
-            reset_progress_bar(out=out)
-            out.write("Done.")
-            reset_progress_bar(out=out)
-            clear_progress_bar(out=out)
-            reset_progress_bar(out=out)
+    console_log("Done.")
+    console_log("")
     output.close()
 
 
@@ -290,12 +273,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         check_dir(args.log_file)
         log = open(args.log_file, 'a', 0)
     if resume:
-        check = checkpoint(is_source_created, path)
-        try:
-            source_id = bigml.api.get_source_id(check)
-            args.source = source_id
-        except:
-            resume = False
+        resume, args.source = checkpoint(is_source_created, path, bigml.api)
+
     # If neither a previous source, dataset or model are provided.
     # we create a new one
     if (training_set and not args.source and not args.dataset and
@@ -306,6 +285,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             "category": args.category,
             "tags": args.tag,
             "source_parser": {"header": training_set_header}}
+        console_log("Creating source.")
         source = api.create_source(training_set, source_args,
                                    progress_bar=args.progress_bar)
         source = api.check_resource(source, api.get_source)
@@ -329,6 +309,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # If we already have source, we check that is finished and extract the
     # fields, and update them if needed.
     if source:
+        console_log("Retrieving source.")
         source = api.check_resource(source, api.get_source)
         csv_properties = {'missing_tokens':
                           source['object']['source_parser']['missing_tokens'],
@@ -341,6 +322,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             for (column, value) in field_attributes.iteritems():
                 update_fields.update({
                     fields.field_id(column): value})
+            console_log("Updating source.")
             source = api.update_source(source, {"fields": update_fields})
 
         update_fields = {}
@@ -348,15 +330,12 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             for (column, value) in types.iteritems():
                 update_fields.update({
                     fields.field_id(column): {'optype': value}})
+            console_log("Updating source.")
             source = api.update_source(source, {"fields": update_fields})
 
     if resume:
-        check = checkpoint(is_dataset_created, path)
-        try:
-            dataset_id = bigml.api.get_dataset_id(check)
-            args.dataset = dataset_id
-        except:
-            resume = False
+        resume, args.dataset = checkpoint(is_dataset_created, path, bigml.api)
+
     # If we have a source but not dataset or model has been provided, we
     # create a new dataset if the no_dataset option isn't set up.
     if (source and not args.dataset and not args.model and not model_ids and
@@ -378,7 +357,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             for name in dataset_fields:
                 input_fields.append(fields.field_id(name))
             dataset_args.update(input_fields=input_fields)
-
+        console_log("Creating dataset.")
         dataset = api.create_dataset(source, dataset_args)
         if log:
             log.write("%s\n" % dataset['resource'])
@@ -395,6 +374,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # If we already have a dataset, we check the status and get the fields if
     # we hadn't them yet.
     if dataset:
+        console_log("Retrieving dataset.")
         dataset = api.check_resource(dataset, api.get_dataset)
         if not csv_properties:
             csv_properties = {'data_locale':
@@ -402,18 +382,13 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if args.public_dataset:
             public_dataset = {"private": False}
             if args.dataset_price:
+                console_log("Updating dataset.")
                 public_dataset.update(price=args.dataset_price)
+            console_log("Updating dataset.")
             dataset = api.update_dataset(dataset, public_dataset)
         fields = Fields(dataset['object']['fields'], **csv_properties)
 
-    if resume:
-        check = checkpoint(are_models_created, path, args.number_of_models)
-        try:
-            for model in check:
-                model_id = bigml.api.get_model_id(model)
-            model_ids = check
-        except:
-            resume = False
+
     # If we have a dataset but not a model, we create the model if the no_model
     # flag hasn't been set up.
     if (dataset and not args.model and not model_ids and not args.no_model):
@@ -444,20 +419,31 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                           randomize=args.randomize)
         model_ids = []
         models = []
+        if resume:
+            resume, model_ids = checkpoint(are_models_created, path,
+                                          args.number_of_models,
+                                          bigml.api)
+            models = model_ids
+            args.number_of_models -= len(model_ids)
+
         model_file = open(path + '/models', 'w', 0)
+        for model_id in model_ids:
+            model_file.write("%s\n" % model_id)
         last_model = None
-        for i in range(1, args.number_of_models + 1):
-            if i > args.max_parallel_models:
-                api.check_resource(last_model, api.get_model)
-            model = api.create_model(dataset, model_args)
-            if log:
-                log.write("%s\n" % model['resource'])
-                log.flush()
-            last_model = model
-            model_ids.append(model['resource'])
-            models.append(model)
-            model_file.write("%s\n" % model['resource'])
-            model_file.flush()
+        if args.number_of_models > 0:
+            console_log("Creating models.")
+            for i in range(1, args.number_of_models + 1):
+                if i > args.max_parallel_models:
+                    api.check_resource(last_model, api.get_model)
+                model = api.create_model(dataset, model_args)
+                if log:
+                    log.write("%s\n" % model['resource'])
+                    log.flush()
+                last_model = model
+                model_ids.append(model['resource'])
+                models.append(model)
+                model_file.write("%s\n" % model['resource'])
+                model_file.flush()
         model_file.close()
 
     # If a model is provided, we retrieve it.
@@ -471,6 +457,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if len(model_ids) < args.max_batch_models:
             models = []
             for model in model_ids:
+                console_log("Retrieving models.")
                 model = api.check_resource(model, api.get_model)
                 models.append(model)
             model = models[0]
@@ -487,8 +474,10 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if args.white_box:
             public_model = {"private": False, "white_box": True}
             if args.model_price:
+                console_log("Updating model.")
                 public_model.update(price=args.model_price)
             if args.cpp:
+                console_log("Updating model.")
                 public_model.update(credits_per_prediction=args.cpp)
             model = api.update_model(model, public_model)
         if not csv_properties:
@@ -509,13 +498,14 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             objective_field = objective_field[0]
         predict(test_set, test_set_header, models, fields, output,
                 objective_field, args.remote, api, log,
-                args.max_batch_models, args.method, resume)
+                args.max_batch_models, args.method, resume, args.tag)
 
     if votes_files:
         model_id = re.sub(r'.*(model_[a-f0-9]{24})__predictions\.csv$',
                           r'\1', votes_files[0]).replace("_", "/")
         model = api.check_resource(model_id, api.get_model)
         local_model = Model(model)
+        console_log("Combining votes.")
         combine_votes(votes_files, local_model.to_prediction,
                       output, args.method)
 
@@ -656,6 +646,7 @@ def main(args=sys.argv[1:]):
 
     # Parses resources ids if provided.
     if command_args.delete:
+        console_log("Retrieving objects to delete")
         delete_list = []
         if command_args.delete_list:
             delete_list = map(lambda x: x.strip(),
@@ -687,8 +678,9 @@ def main(args=sys.argv[1:]):
         if command_args.prediction_tag:
             query_string = "tags__in=%s" % command_args.prediction_tag
             delete_list.extend(list_prediction_ids(api, query_string))
-
+        console_log("Deleting objects")
         delete(api, delete_list)
+        console_log("")
     else:
         compute_output(**output_args)
 

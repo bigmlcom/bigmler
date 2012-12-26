@@ -190,16 +190,18 @@ def list_source_ids(api, query_string):
     """Lists BigML sources filtered by `query_string`.
 
     """
-    sources = api.list_sources('status.code=%s;limit=%s;%s' % (
-                               bigml.api.FINISHED, PAGE_LENGTH, query_string))
+    qs = 'status.code=%s;limit=%s;%s' % (
+         bigml.api.FINISHED, PAGE_LENGTH, query_string)
+    sources = api.list_sources(qs)
     ids = ([] if sources['objects'] is None else
            [obj['resource'] for obj in sources['objects']])
     while (not sources['objects'] is None and
           (sources['meta']['total_count'] > (sources['meta']['offset'] +
            sources['meta']['limit']))):
         offset = sources['meta']['offset'] + PAGE_LENGTH
-        sources = api.list_sources('offset=%s;limit=%s;%s' % (offset,
-                                   PAGE_LENGTH, query_string))
+        qs = 'status.code=%s;offset=%s;limit=%s;%s' % (
+             bigml.api.FINISHED, offset, PAGE_LENGTH, query_string)
+        sources = api.list_sources(qs)
         ids.extend(([] if sources['objects'] is None else
                    [obj['resource'] for obj in sources['objects']]))
     return ids
@@ -209,17 +211,18 @@ def list_dataset_ids(api, query_string):
     """Lists BigML datasets filtered by `query_string`.
 
     """
-    datasets = api.list_datasets('status.code=%s;limit=%s;%s' % (
-                                 bigml.api.FINISHED, PAGE_LENGTH,
-                                 query_string))
+    qs = 'status.code=%s;limit=%s;%s' % (
+         bigml.api.FINISHED, PAGE_LENGTH, query_string)
+    datasets = api.list_datasets(qs)
     ids = ([] if datasets['objects'] is None else
            [obj['resource'] for obj in datasets['objects']])
     while (not datasets['objects'] is None and
           (datasets['meta']['total_count'] > (datasets['meta']['offset'] +
            datasets['meta']['limit']))):
         offset = datasets['meta']['offset'] + PAGE_LENGTH
-        datasets = api.list_datasets('offset=%s;limit=%s;%s' % (offset,
-                                     PAGE_LENGTH, query_string))
+        qs = 'status.code=%s;offset=%s;limit=%s;%s' % (
+             bigml.api.FINISHED, offset, PAGE_LENGTH, query_string)
+        datasets = api.list_datasets(qs)
         ids.extend(([] if datasets['objects'] is None else
                    [obj['resource'] for obj in datasets['objects']]))
     return ids
@@ -229,16 +232,18 @@ def list_model_ids(api, query_string):
     """Lists BigML models filtered by `query_string`.
 
     """
-    models = api.list_models('status.code=%s;limit=%s;%s' % (
-                             bigml.api.FINISHED, PAGE_LENGTH, query_string))
+    qs = 'status.code=%s;limit=%s;%s' % (
+         bigml.api.FINISHED, PAGE_LENGTH, query_string)
+    models = api.list_models(qs)
     ids = ([] if models['objects'] is None else
            [obj['resource'] for obj in models['objects']])
     while (not models['objects'] is None and
           (models['meta']['total_count'] > (models['meta']['offset'] +
            models['meta']['limit']))):
         offset = models['meta']['offset'] + PAGE_LENGTH
-        models = api.list_models('offset=%s;limit=%s;%s' % (offset,
-                                 PAGE_LENGTH, query_string))
+        qs = 'status.code=%s;offset=%s;limit=%s;%s' % (
+             bigml.api.FINISHED, offset, PAGE_LENGTH, query_string)
+        models = api.list_models(qs)
         ids.extend(([] if models['objects'] is None else
                    [obj['resource'] for obj in models['objects']]))
     return ids
@@ -248,17 +253,18 @@ def list_prediction_ids(api, query_string):
     """Lists BigML predictions filtered by `query_string`.
 
     """
-    predictions = api.list_predictions('status.code=%s;limit=%s;%s' % (
-                                       bigml.api.FINISHED, PAGE_LENGTH,
-                                       query_string))
+    qs = 'status.code=%s;limit=%s;%s' % (
+         bigml.api.FINISHED, PAGE_LENGTH, query_string)
+    predictions = api.list_predictions(qs)
     ids = ([] if predictions['objects'] is None else
            [obj['resource'] for obj in predictions['objects']])
     while (not predictions['objects'] is None and
           (predictions['meta']['total_count'] > (predictions['meta']['offset']
            + predictions['meta']['limit']))):
         offset = predictions['meta']['offset'] + PAGE_LENGTH
-        predictions = api.list_predictions('offset=%s;limit=%s;%s' % (offset,
-                                           PAGE_LENGTH, query_string))
+        qs = 'status.code=%s;offset=%s;limit=%s;%s' % (
+             bigml.api.FINISHED, offset, PAGE_LENGTH, query_string)
+        predictions = api.list_predictions(qs)
         ids.extend(([] if predictions['objects'] is None else
                    [obj['resource'] for obj in predictions['objects']]))
     return ids
@@ -365,29 +371,41 @@ def get_log_reversed(file_name, stack_level=0):
     return lines_list[0]
 
 
-def is_source_created(path):
+def is_source_created(path, api):
     """Reads the source id from the source file in the path directory
 
     """
+    source_id = None
     try:
         source_file = open("%s%ssource" % (path, os.sep))
-        return source_file.readline().strip()
-    except:
-        return False
+        source_id = source_file.readline().strip()
+        try:
+            source_id = api.get_source_id(source_id)
+            return True, source_id
+        except ValueError:
+            return False, None
+    except IOError:
+        return False, None
 
 
-def is_dataset_created(path):
+def is_dataset_created(path, api):
     """Reads the dataset id from the dataset file in the path directory
 
     """
+    dataset_id = None
     try:
         dataset_file = open("%s%sdataset" % (path, os.sep))
-        return dataset_file.readline().strip()
-    except:
-        return False
+        dataset_id = dataset_file.readline().strip()
+        try:
+            dataset_id = api.get_dataset_id(dataset_id)
+            return True, dataset_id
+        except ValueError:
+            return False, None
+    except IOError:
+        return False, None
 
 
-def are_models_created(path, number_of_models):
+def are_models_created(path, number_of_models, api):
     """Reads the model ids from the models file in the path directory
 
     """
@@ -395,29 +413,37 @@ def are_models_created(path, number_of_models):
     try:
         models_file = open("%s%smodels" % (path, os.sep))
         for line in models_file:
-            model_ids.append(line.strip())
+            model = line.strip()
+            try:
+                model_id = api.get_model_id(model)
+                model_ids.append(model_id)
+            except ValueError:
+                return False, model_ids
         if len(model_ids) == number_of_models:
-            return model_ids
+            return True, model_ids
         else:
-            return False
-    except:
-        return False
+            return False, model_ids
+    except IOError:
+        return False, model_ids
 
 
-def are_predictions_created(predictions_files, models, number_of_tests):
+def are_predictions_created(predictions_file, number_of_tests):
     """Reads the predictions from the predictions file in the path directory
 
     """
-    for predictions_file in predictions_files:
-        predictions = 0
-        try:
-            predictions_file = open(predictions_file)
-            for line in predictions_file:
-                predictions += 1
-            if predictions != number_of_tests:
-                return False
-        except:
+    predictions = 0
+    predictions_files = []
+    try:
+        predictions_handler = open(predictions_file)
+        for line in predictions_handler:
+            predictions += 1
+        if predictions != number_of_tests:
+            predictions_handler.close()
+            os.remove(predictions_file)
             return False
+        predictions_handler.close()
+    except IOError:
+        return False
     return True
 
 
