@@ -31,8 +31,6 @@ try:
 except ImportError:
     import json
 
-from subprocess import call
-
 import bigml.api
 from bigml.multimodel import combine_predictions
 
@@ -190,18 +188,18 @@ def list_source_ids(api, query_string):
     """Lists BigML sources filtered by `query_string`.
 
     """
-    qs = 'status.code=%s;limit=%s;%s' % (
-         bigml.api.FINISHED, PAGE_LENGTH, query_string)
-    sources = api.list_sources(qs)
+    q_s = 'status.code=%s;limit=%s;%s' % (
+          bigml.api.FINISHED, PAGE_LENGTH, query_string)
+    sources = api.list_sources(q_s)
     ids = ([] if sources['objects'] is None else
            [obj['resource'] for obj in sources['objects']])
     while (not sources['objects'] is None and
           (sources['meta']['total_count'] > (sources['meta']['offset'] +
            sources['meta']['limit']))):
         offset = sources['meta']['offset'] + PAGE_LENGTH
-        qs = 'status.code=%s;offset=%s;limit=%s;%s' % (
-             bigml.api.FINISHED, offset, PAGE_LENGTH, query_string)
-        sources = api.list_sources(qs)
+        q_s = 'status.code=%s;offset=%s;limit=%s;%s' % (
+              bigml.api.FINISHED, offset, PAGE_LENGTH, query_string)
+        sources = api.list_sources(q_s)
         ids.extend(([] if sources['objects'] is None else
                    [obj['resource'] for obj in sources['objects']]))
     return ids
@@ -211,18 +209,18 @@ def list_dataset_ids(api, query_string):
     """Lists BigML datasets filtered by `query_string`.
 
     """
-    qs = 'status.code=%s;limit=%s;%s' % (
-         bigml.api.FINISHED, PAGE_LENGTH, query_string)
-    datasets = api.list_datasets(qs)
+    q_s = 'status.code=%s;limit=%s;%s' % (
+          bigml.api.FINISHED, PAGE_LENGTH, query_string)
+    datasets = api.list_datasets(q_s)
     ids = ([] if datasets['objects'] is None else
            [obj['resource'] for obj in datasets['objects']])
     while (not datasets['objects'] is None and
           (datasets['meta']['total_count'] > (datasets['meta']['offset'] +
            datasets['meta']['limit']))):
         offset = datasets['meta']['offset'] + PAGE_LENGTH
-        qs = 'status.code=%s;offset=%s;limit=%s;%s' % (
-             bigml.api.FINISHED, offset, PAGE_LENGTH, query_string)
-        datasets = api.list_datasets(qs)
+        q_s = 'status.code=%s;offset=%s;limit=%s;%s' % (
+              bigml.api.FINISHED, offset, PAGE_LENGTH, query_string)
+        datasets = api.list_datasets(q_s)
         ids.extend(([] if datasets['objects'] is None else
                    [obj['resource'] for obj in datasets['objects']]))
     return ids
@@ -232,18 +230,18 @@ def list_model_ids(api, query_string):
     """Lists BigML models filtered by `query_string`.
 
     """
-    qs = 'status.code=%s;limit=%s;%s' % (
-         bigml.api.FINISHED, PAGE_LENGTH, query_string)
-    models = api.list_models(qs)
+    q_s = 'status.code=%s;limit=%s;%s' % (
+          bigml.api.FINISHED, PAGE_LENGTH, query_string)
+    models = api.list_models(q_s)
     ids = ([] if models['objects'] is None else
            [obj['resource'] for obj in models['objects']])
     while (not models['objects'] is None and
           (models['meta']['total_count'] > (models['meta']['offset'] +
            models['meta']['limit']))):
         offset = models['meta']['offset'] + PAGE_LENGTH
-        qs = 'status.code=%s;offset=%s;limit=%s;%s' % (
-             bigml.api.FINISHED, offset, PAGE_LENGTH, query_string)
-        models = api.list_models(qs)
+        q_s = 'status.code=%s;offset=%s;limit=%s;%s' % (
+              bigml.api.FINISHED, offset, PAGE_LENGTH, query_string)
+        models = api.list_models(q_s)
         ids.extend(([] if models['objects'] is None else
                    [obj['resource'] for obj in models['objects']]))
     return ids
@@ -253,18 +251,18 @@ def list_prediction_ids(api, query_string):
     """Lists BigML predictions filtered by `query_string`.
 
     """
-    qs = 'status.code=%s;limit=%s;%s' % (
-         bigml.api.FINISHED, PAGE_LENGTH, query_string)
-    predictions = api.list_predictions(qs)
+    q_s = 'status.code=%s;limit=%s;%s' % (
+          bigml.api.FINISHED, PAGE_LENGTH, query_string)
+    predictions = api.list_predictions(q_s)
     ids = ([] if predictions['objects'] is None else
            [obj['resource'] for obj in predictions['objects']])
     while (not predictions['objects'] is None and
           (predictions['meta']['total_count'] > (predictions['meta']['offset']
            + predictions['meta']['limit']))):
         offset = predictions['meta']['offset'] + PAGE_LENGTH
-        qs = 'status.code=%s;offset=%s;limit=%s;%s' % (
-             bigml.api.FINISHED, offset, PAGE_LENGTH, query_string)
-        predictions = api.list_predictions(qs)
+        q_s = 'status.code=%s;offset=%s;limit=%s;%s' % (
+              bigml.api.FINISHED, offset, PAGE_LENGTH, query_string)
+        predictions = api.list_predictions(q_s)
         ids.extend(([] if predictions['objects'] is None else
                    [obj['resource'] for obj in predictions['objects']]))
     return ids
@@ -332,33 +330,33 @@ def write_prediction(predictions, method, output=sys.stdout):
     if isinstance(prediction, basestring):
         prediction = prediction.encode("utf-8")
     output.write("%s\n" % prediction)
-    output.flush()   
+    output.flush()
 
 
 def tail(file_handler, window=1):
     """Returns the last n lines of a file.
 
     """
-    BUFSIZ = 1024
+    bufsiz = 1024
     file_handler.seek(0, 2)
-    bytes = file_handler.tell()
+    file_bytes = file_handler.tell()
     size = window
     block = -1
     data = []
     while size > 0 and bytes > 0:
-        if (bytes - BUFSIZ > 0):
-            # Seek back one whole BUFSIZ
-            file_handler.seek(block * BUFSIZ, 2)
+        if (file_bytes - bufsiz > 0):
+            # Seek back one whole bufsiz
+            file_handler.seek(block * bufsiz, 2)
             # read BUFFER
-            data.append(file_handler.read(BUFSIZ))
+            data.append(file_handler.read(bufsiz))
         else:
             # file too small, start from begining
             file_handler.seek(0, 0)
             # only read what was not read
             data.append(file_handler.read(bytes))
-        linesFound = data[-1].count('\n')
-        size -= linesFound
-        bytes -= BUFSIZ
+        lines_found = data[-1].count('\n')
+        size -= lines_found
+        file_bytes -= bufsiz
         block -= 1
     return (''.join(data).splitlines()[-window:])
 
@@ -431,18 +429,9 @@ def are_predictions_created(predictions_file, number_of_tests):
     """Reads the predictions from the predictions file in the path directory
 
     """
-    predictions = 0
-    predictions_files = []
-    try:
-        predictions_handler = open(predictions_file)
-        for line in predictions_handler:
-            predictions += 1
-        if predictions != number_of_tests:
-            predictions_handler.close()
-            os.remove(predictions_file)
-            return False
-        predictions_handler.close()
-    except IOError:
+    predictions = file_number_of_lines(predictions_file)
+    if predictions != number_of_tests:
+        os.remove(predictions_file)
         return False
     return True
 
@@ -452,3 +441,16 @@ def checkpoint(function, *args):
 
     """
     return function(*args)
+
+
+def file_number_of_lines(file_name):
+    """Counts the number of lines in a file
+
+    """
+    try:
+        with open(file_name) as file_handler:
+            for item in enumerate(file_handler):
+                pass
+        return item[0] + 1
+    except IOError:
+        return 0

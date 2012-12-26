@@ -56,8 +56,8 @@ from bigml.multimodel import MultiModel
 from bigml.multimodel import COMBINATION_METHODS
 from bigml.fields import Fields
 
-from bigml.util import reset_console_line, localize, console_log, \
-    get_csv_delimiter, get_predictions_file_name, clear_console_line
+from bigml.util import localize, console_log, get_csv_delimiter, \
+    get_predictions_file_name
 
 from bigmler.options import create_parser
 from bigmler.utils import read_description, read_field_attributes, \
@@ -65,7 +65,8 @@ from bigmler.utils import read_description, read_field_attributes, \
     read_lisp_filter, read_votes, list_source_ids, list_dataset_ids, \
     list_model_ids, list_prediction_ids, combine_votes, delete, check_dir, \
     write_prediction, get_log_reversed, is_source_created, checkpoint, \
-    is_dataset_created, are_models_created, are_predictions_created
+    is_dataset_created, are_models_created, are_predictions_created, \
+    file_number_of_lines
 
 MAX_MODELS = 10
 # Date and time in format SunNov0412_120510 to name and tag resources
@@ -74,7 +75,8 @@ NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
 
 def predict(test_set, test_set_header, models, fields, output,
             objective_field, remote=False, api=None, log=None,
-            max_models=MAX_MODELS, method='plurality', resume=False, tags=None):
+            max_models=MAX_MODELS, method='plurality', resume=False,
+            tags=None):
     """Computes a prediction for each entry in the `test_set`
 
 
@@ -132,9 +134,7 @@ def predict(test_set, test_set_header, models, fields, output,
     output_path = check_dir(output)
     output = open(output, 'w', 0)
     if resume:
-        number_of_tests = 0
-        for line in open(test_set, "U"):
-            number_of_tests += 1
+        number_of_tests = file_number_of_lines(test_set)
         if test_set_header:
             number_of_tests -= 1
     if remote:
@@ -147,11 +147,11 @@ def predict(test_set, test_set_header, models, fields, output,
             if not isinstance(model, basestring) and 'resource' in model:
                 model = model['resource']
             predictions_file = get_predictions_file_name(model,
-                                                        output_path)
+                                                         output_path)
             predictions_files.append(predictions_file)
             if resume:
                 resume = checkpoint(are_predictions_created, predictions_file,
-                                   number_of_tests)
+                                    number_of_tests)
             if not resume:
                 console_log("Creating remote predictions.")
                 predictions_file = csv.writer(open(predictions_file, 'w', 0))
@@ -174,7 +174,6 @@ def predict(test_set, test_set_header, models, fields, output,
                                       prediction['object']['prediction_path']
                                       ['confidence']]
                     predictions_file.writerow(prediction_row)
-                    prediction_key = prediction_row[0]
         combine_votes(predictions_files,
                       Model(models[0]).to_prediction,
                       prediction_file, method)
@@ -207,12 +206,12 @@ def predict(test_set, test_set_header, models, fields, output,
             for models_split in models_splits:
                 if resume:
                     for model in models_split:
-                        predictions_file = get_predictions_file_name(model,
-                                                                    output_path)
+                        pred_file = get_predictions_file_name(model,
+                                                              output_path)
 
-                        check = checkpoint(are_predictions_created,
-                                           predictions_file,
-                                           number_of_tests)
+                        checkpoint(are_predictions_created,
+                                   pred_file,
+                                   number_of_tests)
                 complete_models = []
                 for index in range(len(models_split)):
                     complete_models.append(api.check_resource(
@@ -388,7 +387,6 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             dataset = api.update_dataset(dataset, public_dataset)
         fields = Fields(dataset['object']['fields'], **csv_properties)
 
-
     # If we have a dataset but not a model, we create the model if the no_model
     # flag hasn't been set up.
     if (dataset and not args.model and not model_ids and not args.no_model):
@@ -421,8 +419,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         models = []
         if resume:
             resume, model_ids = checkpoint(are_models_created, path,
-                                          args.number_of_models,
-                                          bigml.api)
+                                           args.number_of_models,
+                                           bigml.api)
             models = model_ids
             args.number_of_models -= len(model_ids)
 
@@ -541,7 +539,8 @@ def main(args=sys.argv[1:]):
     else:
         if len(os.path.dirname(command_args.predictions).strip()) == 0:
             command_args.predictions = ("%s%s%s" %
-                                        (NOW, os.sep, command_args.predictions))
+                                        (NOW, os.sep,
+                                         command_args.predictions))
         directory = check_dir(command_args.predictions)
         directory_log = open(".bigmler_dir_stack", "a", 0)
         directory_log.write("%s\n" % os.path.abspath(directory))
@@ -634,7 +633,7 @@ def main(args=sys.argv[1:]):
 
     # Checks combined votes method
     if (command_args.method and
-        not command_args.method in COMBINATION_METHODS.keys()):
+            not command_args.method in COMBINATION_METHODS.keys()):
         command_args.method = 'plurality'
 
     # Reads votes files in the provided directories.
