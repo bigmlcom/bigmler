@@ -32,7 +32,7 @@ except ImportError:
     import json
 
 import bigml.api
-from bigml.multimodel import combine_predictions
+from bigml.multimodel import combine_predictions, read_votes
 
 PAGE_LENGTH = 200
 ATTRIBUTE_NAMES = ['name', 'label', 'description']
@@ -161,7 +161,7 @@ def read_lisp_filter(path):
     return read_description(path)
 
 
-def read_votes(dirs_list, path):
+def read_votes_files(dirs_list, path):
     """Reads a list of directories to look for votes.
 
     If model's prediction files are found, they are retrieved to be combined.
@@ -272,17 +272,7 @@ def combine_votes(votes_files, to_prediction, to_file, method='plurality'):
     """Combines the votes found in the votes' files and stores predictions.
 
     """
-    votes = []
-    for votes_file in votes_files:
-        index = 0
-        for row in csv.reader(open(votes_file, "U")):
-            prediction = to_prediction(row[0])
-            if index > (len(votes) - 1):
-                votes.append({prediction: []})
-            if not prediction in votes[index]:
-                votes[index][prediction] = []
-            votes[index][prediction].append(float(row[1]))
-            index += 1
+    votes = read_votes(votes_files, to_prediction)
 
     check_dir(to_file)
     output = open(to_file, 'w', 0)

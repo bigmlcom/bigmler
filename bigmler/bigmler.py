@@ -62,7 +62,7 @@ from bigml.util import localize, console_log, get_csv_delimiter, \
 from bigmler.options import create_parser
 from bigmler.utils import read_description, read_field_attributes, \
     read_types, read_models, read_dataset, read_json_filter, \
-    read_lisp_filter, read_votes, list_source_ids, list_dataset_ids, \
+    read_lisp_filter, read_votes_files, list_source_ids, list_dataset_ids, \
     list_model_ids, list_prediction_ids, combine_votes, delete, check_dir, \
     write_prediction, get_log_reversed, is_source_created, checkpoint, \
     is_dataset_created, are_models_created, are_predictions_created, \
@@ -156,7 +156,6 @@ def predict(test_set, test_set_header, models, fields, output,
                 console_log("Creating remote predictions.")
                 predictions_file = csv.writer(open(predictions_file, 'w', 0))
                 for row in test_reader:
-                    predictions = {}
                     for index in exclude:
                         del row[index]
                     input_data = fields.pair(row, headers, objective_field)
@@ -639,8 +638,8 @@ def main(args=sys.argv[1:]):
     # Reads votes files in the provided directories.
     if command_args.votes_dirs:
         dirs = map(lambda x: x.strip(), command_args.votes_dirs.split(','))
-        votes_files = read_votes(dirs,
-                                 os.path.dirname(command_args.predictions))
+        votes_path = os.path.dirname(command_args.predictions)
+        votes_files = read_votes_files(dirs, votes_path)
         output_args.update(votes_files=votes_files)
 
     # Parses resources ids if provided.

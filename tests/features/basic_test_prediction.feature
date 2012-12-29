@@ -77,3 +77,12 @@ Feature: Upload source and produce test predictions
         Examples:
         | dataset_file        | test                  | output                      |predictions_file         |
         | ./scenario2/dataset | ../data/test_iris.csv | ./scenario7/predictions.csv | ./predictions_check.csv |
+
+
+    Scenario: Successfully combining test predictions from existing directories
+        Given I combine BigML predictions files in "<directory1>" and "<directory2>" into "<output>"
+        Then the local prediction file is like "<predictions_file>"
+
+        Examples:
+        | directory1  | directory2   | output                      |predictions_file         |
+        | ./scenario4 | ./scenario5 | ./scenario8/predictions.csv | ./predictions_check.csv |
