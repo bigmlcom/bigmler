@@ -526,7 +526,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             "description": description,
             "tags": args.tag
         }
-        if not args.dataset:
+        if not (args.dataset
+                and (args.model or args.models or args.model_tag)):
             seed = dataset['resource']
             evaluation_args.update(out_of_bag=True, seed=seed,
                                    sample_rate=args.sample_rate)
