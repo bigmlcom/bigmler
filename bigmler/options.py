@@ -418,4 +418,9 @@ def create_parser(defaults={}):
                         type=int,
                         help="Resume command.")
 
+    # Evaluate a model
+    parser.add_argument('--evaluate',
+                        action='store_true',
+                        help="Evaluate command.")
+
     return parser

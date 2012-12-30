@@ -50,6 +50,11 @@ import csv
 import re
 import shlex
 
+try:
+    import simplejson as json
+except ImportError:
+    import json
+
 import bigml.api
 from bigml.model import Model
 from bigml.multimodel import MultiModel
@@ -69,6 +74,7 @@ from bigmler.utils import read_description, read_field_attributes, \
     file_number_of_lines
 
 MAX_MODELS = 10
+EVALUATE_SAMPLE_RATE = 0.8
 # Date and time in format SunNov0412_120510 to name and tag resources
 NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
 
@@ -398,6 +404,13 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if not objective_field is None:
             model_args.update({"objective_field":
                                fields.field_id(objective_field)})
+        # if evaluate flag is on we choose a deterministic sampling with 80%
+        # of the data
+        if args.evaluate:
+            if args.sample_rate == 1:
+                args.sample_rate = EVALUATE_SAMPLE_RATE
+            seed = dataset['resource']
+            model_args.update(seed=seed)
 
         input_fields = []
         if model_fields:
@@ -506,6 +519,37 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         combine_votes(votes_files, local_model.to_prediction,
                       output, args.method)
 
+    if args.evaluate:
+        evaluation_file = open(path + '/evaluation', 'w', 0)
+        evaluation_args = {
+            "name": name,
+            "description": description,
+            "tags": args.tag
+        }
+        if not args.dataset:
+            seed = dataset['resource']
+            evaluation_args.update(out_of_bag=True, seed=seed,
+                                   sample_rate=args.sample_rate)
+        console_log("Creating evaluation.")
+        evaluation = api.create_evaluation(model, dataset, evaluation_args)
+        if log:
+            log.write("%s\n" % evaluation['resource'])
+            log.flush()
+        evaluation_file.write("%s\n" % evaluation['resource'])
+        evaluation_file.flush()
+        evaluation_file.close()
+        console_log("Retrieving evaluation.")
+        evaluation = api.check_resource(evaluation, api.get_evaluation)
+        evaluation_json = open(path + '/evaluation.json', 'w', 0)
+        evaluation_json.write(json.dumps(evaluation['object']['result']))
+        evaluation_json.flush()
+        evaluation_json.close()
+        evaluation_txt = open(path + '/evaluation.txt', 'w', 0)
+        api.pprint(evaluation['object']['result'],
+                   evaluation_txt)
+        evaluation_txt.flush()
+        evaluation_txt.close()
+
     if args.log_file and log:
         log.close()
 
@@ -552,6 +596,15 @@ def main(args=sys.argv[1:]):
         'debug': command_args.debug}
 
     api = bigml.api.BigML(**api_command_args)
+
+    if command_args.evaluate and not (command_args.training_set
+                                      or command_args.source
+                                      or command_args.dataset):
+        parser.error("Evaluation wrong syntax.\n"
+                     "\nTry for instance:\n\nbigmler --train data/iris.csv"
+                     " --evaluate\nbigmler --model "
+                     "model/5081d067035d076151000011 --dataset "
+                     "dataset/5081d067035d076151003423 --evaluate")
 
     output_args = {
         "api": api,
