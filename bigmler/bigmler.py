@@ -71,10 +71,11 @@ from bigmler.utils import read_description, read_field_attributes, \
     list_model_ids, list_prediction_ids, combine_votes, delete, check_dir, \
     write_prediction, get_log_reversed, is_source_created, checkpoint, \
     is_dataset_created, are_models_created, are_predictions_created, \
-    file_number_of_lines
+    file_number_of_lines, is_evaluation_created
 
 MAX_MODELS = 10
 EVALUATE_SAMPLE_RATE = 0.8
+SEED = "BigML, Machine Learning made easy"
 # Date and time in format SunNov0412_120510 to name and tag resources
 NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
 
@@ -280,17 +281,26 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         resume, args.source = checkpoint(is_source_created, path, bigml.api)
 
     # If neither a previous source, dataset or model are provided.
-    # we create a new one
+    # we create a new one. Also if --evaluate and test data are provided
+    # we create a new dataset.
+    data_set = None
     if (training_set and not args.source and not args.dataset and
             not args.model and not args.models):
+        data_set = training_set
+        data_set_header = training_set_header
+    elif (args.evaluate and test_set):
+        data_set = test_set
+        data_set_header = test_set_header
+
+    if not data_set is None:
         source_args = {
             "name": name,
             "description": description,
             "category": args.category,
             "tags": args.tag,
-            "source_parser": {"header": training_set_header}}
+            "source_parser": {"header": data_set_header}}
         console_log("Creating source.")
-        source = api.create_source(training_set, source_args,
+        source = api.create_source(data_set, source_args,
                                    progress_bar=args.progress_bar)
         source = api.check_resource(source, api.get_source)
         if log:
@@ -342,8 +352,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
     # If we have a source but not dataset or model has been provided, we
     # create a new dataset if the no_dataset option isn't set up.
-    if (source and not args.dataset and not args.model and not model_ids and
-            not args.no_dataset):
+    if ((source and not args.dataset and not args.model and not model_ids and
+            not args.no_dataset) or
+            (args.evaluate and args.test_set)):
         dataset_args = {
             "name": name,
             "description": description,
@@ -405,11 +416,11 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             model_args.update({"objective_field":
                                fields.field_id(objective_field)})
         # if evaluate flag is on we choose a deterministic sampling with 80%
-        # of the data
+        # of the data to create the model
         if args.evaluate:
             if args.sample_rate == 1:
                 args.sample_rate = EVALUATE_SAMPLE_RATE
-            seed = dataset['resource']
+            seed = SEED
             model_args.update(seed=seed)
 
         input_fields = []
@@ -463,7 +474,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     elif args.models or args.model_tag:
         models = model_ids[:]
 
-    if model_ids and test_set:
+    if model_ids and test_set and not args.evaluate:
         if len(model_ids) < args.max_batch_models:
             models = []
             for model in model_ids:
@@ -477,7 +488,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
     # We check that the model is finished and get the fields if haven't got
     # them yet.
-    if model and (test_set or args.black_box or args.white_box):
+    if model and not args.evaluate and (test_set or args.black_box
+                                        or args.white_box):
         model = api.check_resource(model, api.get_model)
         if args.black_box:
             model = api.update_model(model, {"private": False})
@@ -502,7 +514,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if model and not models:
         models = [model]
 
-    if models and test_set:
+    if models and test_set and not args.evaluate:
         objective_field = models[0]['object']['objective_fields']
         if isinstance(objective_field, list):
             objective_field = objective_field[0]
@@ -520,32 +532,36 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                       output, args.method)
 
     if args.evaluate:
-        evaluation_file = open(path + '/evaluation', 'w', 0)
-        evaluation_args = {
-            "name": name,
-            "description": description,
-            "tags": args.tag
-        }
-        if not (args.dataset
-                and (args.model or args.models or args.model_tag)):
-            seed = dataset['resource']
-            evaluation_args.update(out_of_bag=True, seed=seed,
-                                   sample_rate=args.sample_rate)
-        console_log("Creating evaluation.")
-        evaluation = api.create_evaluation(model, dataset, evaluation_args)
-        if log:
-            log.write("%s\n" % evaluation['resource'])
-            log.flush()
-        evaluation_file.write("%s\n" % evaluation['resource'])
-        evaluation_file.flush()
-        evaluation_file.close()
+        if resume:
+            resume, evaluation = checkpoint(is_evaluation_created,
+                                            path, bigml.api)
+        if not resume:
+            evaluation_file = open(path + '/evaluation', 'w', 0)
+            evaluation_args = {
+                "name": name,
+                "description": description,
+                "tags": args.tag
+            }
+            if not ((args.dataset or args.test_set)
+                    and (args.model or args.models or args.model_tag)):
+                seed = SEED
+                evaluation_args.update(out_of_bag=True, seed=seed,
+                                       sample_rate=args.sample_rate)
+            console_log("Creating evaluation.")
+            evaluation = api.create_evaluation(model, dataset, evaluation_args)
+            if log:
+                log.write("%s\n" % evaluation['resource'])
+                log.flush()
+            evaluation_file.write("%s\n" % evaluation['resource'])
+            evaluation_file.flush()
+            evaluation_file.close()
         console_log("Retrieving evaluation.")
         evaluation = api.check_resource(evaluation, api.get_evaluation)
-        evaluation_json = open(path + '/evaluation.json', 'w', 0)
+        evaluation_json = open(output + '.json', 'w', 0)
         evaluation_json.write(json.dumps(evaluation['object']['result']))
         evaluation_json.flush()
         evaluation_json.close()
-        evaluation_txt = open(path + '/evaluation.txt', 'w', 0)
+        evaluation_txt = open(output + '.txt', 'w', 0)
         api.pprint(evaluation['object']['result'],
                    evaluation_txt)
         evaluation_txt.flush()
@@ -576,9 +592,14 @@ def main(args=sys.argv[1:]):
         command_args = parser.parse_args(args)
         command_args.predictions = get_log_reversed('.bigmler_dir_stack',
                                                     command_args.stack_level)
-        command_args.predictions = ("%s%s%s" %
-                                    (command_args.predictions, os.sep,
-                                     'predictions.csv'))
+        if command_args.evaluation:
+            command_args.predictions = ("%s%s%s" %
+                                        (command_args.predictions, os.sep,
+                                         'evaluation'))
+        else:
+            command_args.predictions = ("%s%s%s" %
+                                        (command_args.predictions, os.sep,
+                                         'predictions.csv'))
         resume = True
     else:
         if len(os.path.dirname(command_args.predictions).strip()) == 0:
@@ -598,9 +619,11 @@ def main(args=sys.argv[1:]):
 
     api = bigml.api.BigML(**api_command_args)
 
-    if command_args.evaluate and not (command_args.training_set
-                                      or command_args.source
-                                      or command_args.dataset):
+    if (command_args.evaluate
+        and not (command_args.training_set or command_args.source
+                 or command_args.dataset)
+        and not (command_args.test_set and (command_args.model or
+                 command_args.models or command_args.model_tag))):
         parser.error("Evaluation wrong syntax.\n"
                      "\nTry for instance:\n\nbigmler --train data/iris.csv"
                      " --evaluate\nbigmler --model "

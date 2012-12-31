@@ -174,6 +174,40 @@ dataset and model::
 
     bigmler --source source/50a1e520eabcb404cd0000d1
 
+Evaluations
+-----------
+
+BigMLer can also help you in measuring the performance of your models. The
+simplest way to build a model and evaluate it all at once is::
+
+    bigmler --train data/iris.csv --evaluate
+
+which will build the source, dataset and model objects for you using an 80% of
+the data in your training file chosen at random. After that the 20% percent
+that has not been used to build the model will be run through it to obtain
+the corresponding evaluation. You can use the same procedure with a previously
+existing source or dataset::
+
+    bigmler --source source/50a1e520eabcb404cd0000d1 --evaluate
+    bigmler --dataset dataset/50a1f441035d0706d9000371 --evaluate
+
+The results of an evaluation are stored both in `txt` and `json`. Its contents
+ will follow the description given in the
+`Developers guide, evaluation section
+ <https://bigml.com/developers/evaluations>`_ and vary depending on the
+ objective field being categorical or numeric.
+
+Finally, you can also evaluate a preexisting model using a separate set of
+data stored in a file or a previous dataset::
+
+    bigmler --model model/50a1f43deabcb404d3000079 --test data/iris.csv --evaluate
+    bigmler --model model/50a1f43deabcb404d3000079 --dataset dataset/50a1f441035d0706d9000371 --evaluate
+
+As with predictions, you can specify a particular file name to store the
+ evaluation in::
+
+    bigmler --train data/iris.csv --evaluate --output my_dir/evaluation
+
 Configuring Datasets and Models
 -------------------------------
 

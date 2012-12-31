@@ -426,6 +426,23 @@ def are_predictions_created(predictions_file, number_of_tests):
     return True
 
 
+def is_evaluation_created(path, api):
+    """Reads the evaluation id from the evaluation file in the path directory
+
+    """
+    evaluation_id = None
+    try:
+        evaluation_file = open("%s%sevaluation" % (path, os.sep))
+        evaluation_id = evaluation_file.readline().strip()
+        try:
+            evaluation_id = api.get_evaluation_id(evaluation_id)
+            return True, evaluation_id
+        except ValueError:
+            return False, None
+    except IOError:
+        return False, None
+
+
 def checkpoint(function, *args):
     """Tests function on path
 
@@ -438,7 +455,8 @@ def file_number_of_lines(file_name):
 
     """
     try:
-        with open(file_name) as file_handler:
+        item = (0, None)
+        with open(file_name) as file_handler:  
             for item in enumerate(file_handler):
                 pass
         return item[0] + 1
