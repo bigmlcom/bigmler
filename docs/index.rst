@@ -411,6 +411,7 @@ Basic Functionality
 --objective OBJECTIVE_FIELD     The name of the Objective Field. The field that you want to predict.
 --output PREDICTIONS        Full path to a file to save predictions. If left unspecified, it will default to an auto-generated file created by BigMLer.
 --method METHOD             Prediction method used: plurality or "confidence weighted"
+--evaluate                  Turns on evaluation mode
 
 Content
 -------
@@ -435,23 +436,23 @@ Data Configuration
 Remote Resources
 ----------------
 --source SOURCE     BigML source Id
---dataset DATASET       BigML dataset Id
+--dataset DATASET   BigML dataset Id
 --datasets PATH     Path to a file containing a daaset Id
 --model MODEL       BigML model Id
---remote        Computes predictions remotely
---models PATH     Path to a file containing model/ids. One model per line (e.g., model/4f824203ce80053)
---model_tag MODEL_TAG
-                        Retrieve models that were tagged with tag
+--remote            Computes predictions remotely
+--models PATH       Path to a file containing model/ids. One model per line (e.g., model/4f824203ce80053)
+--model_tag MODEL_TAG   Retrieve models that were tagged with tag
 
 Delete Remote Resources
 -----------------------
---delete     Starts delete mode
+--delete            Starts delete mode
 --ids LIST_OF_IDS   Comma separated list of ids to be deleted
---all_tag TAG    Retrieves resources that were tagged with tag to be deleted
+--all_tag TAG       Retrieves resources that were tagged with tag to be deleted
 --source_tag TAG    Retrieves sources that were tagged with tag to be deleted
 --dataset_tag TAG   Retrieves datasets that were tagged with tag to be deleted
---model_tag TAG   Retrieves models that were tagged with tag to be deleted
+--model_tag TAG     Retrieves models that were tagged with tag to be deleted
 --prediction_tag TAG   Retrieves predictions that were tagged with tag to be deleted
+--evaluation_tag TAG   Retrieves evaluations that were tagged with tag to be deleted
 
 Ensembles
 ---------

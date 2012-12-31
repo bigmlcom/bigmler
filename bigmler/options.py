@@ -376,6 +376,11 @@ def create_parser(defaults={}):
                         help=("Select prediction tagged with tag to"
                               " be deleted"))
 
+    # Evaluations selected by tag to be deleted.
+    parser.add_argument('--evaluation_tag',
+                        help=("Select evaluation tagged with tag to"
+                              " be deleted"))
+
     # Resources selected by tag to be deleted.
     parser.add_argument('--all_tag',
                         help=("Select resources tagged with tag to"

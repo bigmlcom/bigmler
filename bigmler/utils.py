@@ -268,6 +268,27 @@ def list_prediction_ids(api, query_string):
     return ids
 
 
+def list_evaluation_ids(api, query_string):
+    """Lists BigML evaluations filtered by `query_string`.
+
+    """
+    q_s = 'status.code=%s;limit=%s;%s' % (
+          bigml.api.FINISHED, PAGE_LENGTH, query_string)
+    evaluations = api.list_evaluations(q_s)
+    ids = ([] if evaluations['objects'] is None else
+           [obj['resource'] for obj in evaluations['objects']])
+    while (not evaluations['objects'] is None and
+          (evaluations['meta']['total_count'] > (evaluations['meta']['offset']
+           + evaluations['meta']['limit']))):
+        offset = evaluations['meta']['offset'] + PAGE_LENGTH
+        q_s = 'status.code=%s;offset=%s;limit=%s;%s' % (
+              bigml.api.FINISHED, offset, PAGE_LENGTH, query_string)
+        evaluations = api.list_evaluations(q_s)
+        ids.extend(([] if evaluations['objects'] is None else
+                   [obj['resource'] for obj in evaluations['objects']]))
+    return ids
+
+
 def combine_votes(votes_files, to_prediction, to_file, method='plurality'):
     """Combines the votes found in the votes' files and stores predictions.
 
@@ -288,7 +309,8 @@ def delete(api, delete_list):
     delete_functions = {bigml.api.SOURCE_RE: api.delete_source,
                         bigml.api.DATASET_RE: api.delete_dataset,
                         bigml.api.MODEL_RE: api.delete_model,
-                        bigml.api.PREDICTION_RE: api.delete_prediction}
+                        bigml.api.PREDICTION_RE: api.delete_prediction,
+                        bigml.api.EVALUATION_RE: api.delete_evaluation}
     for resource_id in delete_list:
         for resource_type in delete_functions:
             try:

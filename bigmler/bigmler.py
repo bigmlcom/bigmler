@@ -71,7 +71,7 @@ from bigmler.utils import read_description, read_field_attributes, \
     list_model_ids, list_prediction_ids, combine_votes, delete, check_dir, \
     write_prediction, get_log_reversed, is_source_created, checkpoint, \
     is_dataset_created, are_models_created, are_predictions_created, \
-    file_number_of_lines, is_evaluation_created
+    file_number_of_lines, is_evaluation_created, list_evaluation_ids
 
 MAX_MODELS = 10
 EVALUATE_SAMPLE_RATE = 0.8
@@ -737,6 +737,7 @@ def main(args=sys.argv[1:]):
             delete_list.extend(list_dataset_ids(api, query_string))
             delete_list.extend(list_model_ids(api, query_string))
             delete_list.extend(list_prediction_ids(api, query_string))
+            delete_list.extend(list_evaluation_ids(api, query_string))
         # Retrieve sources/ids if provided
         if command_args.source_tag:
             query_string = "tags__in=%s" % command_args.source_tag
@@ -753,6 +754,10 @@ def main(args=sys.argv[1:]):
         if command_args.prediction_tag:
             query_string = "tags__in=%s" % command_args.prediction_tag
             delete_list.extend(list_prediction_ids(api, query_string))
+        # Retrieve evaluation/ids if provided
+        if command_args.evaluation_tag:
+            query_string = "tags__in=%s" % command_args.evaluation_tag
+            delete_list.extend(list_evaluation_ids(api, query_string))
         console_log("Deleting objects")
         delete(api, delete_list)
         console_log("")
