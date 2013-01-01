@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/env python
 #
 # Copyright 2012 BigML
@@ -75,7 +76,7 @@ def create_parser(defaults={}):
     parser.add_argument('--output',
                         action='store',
                         dest='predictions',
-                        default='%s%spredictions.csv' % (now, os.sep),
+                        default=None,
                         help="Path to the file to output predictions.")
 
     # The name of the field that represents the objective field (i.e., class or

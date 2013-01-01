@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/env python
 #
 # Copyright 2012 BigML
@@ -25,6 +26,7 @@ import ast
 import glob
 import os
 import sys
+import datetime
 
 try:
     import simplejson as json
@@ -484,3 +486,40 @@ def file_number_of_lines(file_name):
         return item[0] + 1
     except IOError:
         return 0
+
+
+def tree(dir, padding):
+    """Returns directory tree structure as a string
+
+    """
+    if padding != ' ':
+        output = padding[:-1] + '├─'
+    else:
+        output = padding 
+    output += os.path.basename(os.path.abspath(dir)) + '\n'
+    padding = padding + ' '
+    files = []
+    files = os.listdir(dir)
+    count = 0
+    for i in range(0, len(files)):
+        file = files[i]
+        count += 1
+        path = dir + os.sep + file
+        if os.path.isdir(path):
+            if count == len(files):
+                output += tree(path, padding + ' ')
+            else:
+                output += tree(path, padding + '|')
+        else:
+            if i < (len(files) - 1):
+                output += padding + '├─' + file + '\n'
+            else:
+                output += padding + '└─' + file + '\n'
+    return output
+
+
+def get_date():
+    """Returns string containing date in readable format
+
+    """
+    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
