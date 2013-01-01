@@ -453,7 +453,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             model_file.write("%s\n" % model_id)
         last_model = None
         if args.number_of_models > 0:
-            console_log("[%s] Creating models.\n" % get_date())
+            plural = "s" if args.number_of_models > 1 else ""
+            console_log("[%s] Creating model%s.\n" % (get_date(), plural))
             for i in range(1, args.number_of_models + 1):
                 if i > args.max_parallel_models:
                     api.check_resource(last_model, api.get_model)
@@ -478,8 +479,10 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if model_ids and test_set and not args.evaluate:
         if len(model_ids) < args.max_batch_models:
             models = []
+            plural = "s" if len(model_ids) > 1 else ""
+            console_log("[%s] Retrieving model%s.\n" %
+                        (get_date(), plural))
             for model in model_ids:
-                console_log("[%s] Retrieving models.\n" % get_date())
                 model = api.check_resource(model, api.get_model)
                 models.append(model)
             model = models[0]
