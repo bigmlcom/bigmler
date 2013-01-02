@@ -85,7 +85,7 @@ NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
 def predict(test_set, test_set_header, models, fields, output,
             objective_field, remote=False, api=None, log=None,
             max_models=MAX_MODELS, method='plurality', resume=False,
-            tags=None):
+            tags=None, verbosity=1):
     """Computes a prediction for each entry in the `test_set`
 
 
@@ -162,7 +162,8 @@ def predict(test_set, test_set_header, models, fields, output,
                 resume = checkpoint(are_predictions_created, predictions_file,
                                     number_of_tests)
             if not resume:
-                console_log("[%s] Creating remote predictions.\n" % get_date())
+                if verbosity:
+                    console_log("[%s] Creating remote predictions.\n" % get_date())
                 predictions_file = csv.writer(open(predictions_file, 'w', 0))
                 for row in test_reader:
                     for index in exclude:
@@ -186,7 +187,8 @@ def predict(test_set, test_set_header, models, fields, output,
                       Model(models[0]).to_prediction,
                       prediction_file, method)
     else:
-        console_log("[%s] Creating local predictions.\n" % get_date())
+        if verbosity:
+            console_log("[%s] Creating local predictions.\n" % get_date())
         models_total = len(models)
         if models_total < max_models:
             local_model = MultiModel(models)
@@ -232,7 +234,8 @@ def predict(test_set, test_set_header, models, fields, output,
                 models_count += max_models
                 if models_count > models_total:
                     models_count = models_total
-                draw_progress_bar(models_count, models_total)
+                if verbosity:
+                    draw_progress_bar(models_count, models_total)
                 if total_votes:
                     for index in range(len(votes)):
                         for prediction in votes[index].keys():
@@ -242,8 +245,8 @@ def predict(test_set, test_set_header, models, fields, output,
                                                                   [prediction])
                 else:
                     total_votes = votes
-
-            console_log("[%s] Combining predictions.\n" % get_date())
+            if verbosity:
+                console_log("[%s] Combining predictions.\n" % get_date())
             for predictions in total_votes:
                 write_prediction(predictions, method, output)
 
@@ -300,7 +303,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             "category": args.category,
             "tags": args.tag,
             "source_parser": {"header": data_set_header}}
-        console_log("[%s] Creating source.\n" % get_date())
+        if args.verbosity:
+            console_log("[%s] Creating source.\n" % get_date())
         source = api.create_source(data_set, source_args,
                                    progress_bar=args.progress_bar)
         source = api.check_resource(source, api.get_source)
@@ -324,7 +328,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # If we already have source, we check that is finished and extract the
     # fields, and update them if needed.
     if source:
-        console_log("[%s] Retrieving source.\n" % get_date())
+        if args.verbosity:
+            console_log("[%s] Retrieving source.\n" % get_date())
         source = api.check_resource(source, api.get_source)
         csv_properties = {'missing_tokens':
                           source['object']['source_parser']['missing_tokens'],
@@ -337,7 +342,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             for (column, value) in field_attributes.iteritems():
                 update_fields.update({
                     fields.field_id(column): value})
-            console_log("[%s] Updating source.\n" % get_date())
+            if args.verbosity:
+                console_log("[%s] Updating source.\n" % get_date())
             source = api.update_source(source, {"fields": update_fields})
 
         update_fields = {}
@@ -345,7 +351,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             for (column, value) in types.iteritems():
                 update_fields.update({
                     fields.field_id(column): {'optype': value}})
-            console_log("[%s] Updating source.\n" % get_date())
+            if args.verbosity:
+                console_log("[%s] Updating source.\n" % get_date())
             source = api.update_source(source, {"fields": update_fields})
 
     if resume:
@@ -373,7 +380,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             for name in dataset_fields:
                 input_fields.append(fields.field_id(name))
             dataset_args.update(input_fields=input_fields)
-        console_log("[%s] Creating dataset.\n" % get_date())
+        if args.verbosity:
+            console_log("[%s] Creating dataset.\n" % get_date())
         dataset = api.create_dataset(source, dataset_args)
         if log:
             log.write("%s\n" % dataset['resource'])
@@ -390,7 +398,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # If we already have a dataset, we check the status and get the fields if
     # we hadn't them yet.
     if dataset:
-        console_log("[%s] Retrieving dataset.\n" % get_date())
+        if args.verbosity:
+            console_log("[%s] Retrieving dataset.\n" % get_date())
         dataset = api.check_resource(dataset, api.get_dataset)
         if not csv_properties:
             csv_properties = {'data_locale':
@@ -398,9 +407,11 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if args.public_dataset:
             public_dataset = {"private": False}
             if args.dataset_price:
-                console_log("[%s] Updating dataset.\n" % get_date())
+                if args.verbosity:
+                    console_log("[%s] Updating dataset.\n" % get_date())
                 public_dataset.update(price=args.dataset_price)
-            console_log("[%s] Updating dataset.\n" % get_date())
+            if args.verbosity:
+                console_log("[%s] Updating dataset.\n" % get_date())
             dataset = api.update_dataset(dataset, public_dataset)
         fields = Fields(dataset['object']['fields'], **csv_properties)
 
@@ -454,7 +465,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         last_model = None
         if args.number_of_models > 0:
             plural = "s" if args.number_of_models > 1 else ""
-            console_log("[%s] Creating model%s.\n" % (get_date(), plural))
+            if args.verbosity:
+                console_log("[%s] Creating model%s.\n" % (get_date(), plural))
             for i in range(1, args.number_of_models + 1):
                 if i > args.max_parallel_models:
                     api.check_resource(last_model, api.get_model)
@@ -480,8 +492,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if len(model_ids) < args.max_batch_models:
             models = []
             plural = "s" if len(model_ids) > 1 else ""
-            console_log("[%s] Retrieving model%s.\n" %
-                        (get_date(), plural))
+            if args.verbosity:
+                console_log("[%s] Retrieving model%s.\n" %
+                            (get_date(), plural))
             for model in model_ids:
                 model = api.check_resource(model, api.get_model)
                 models.append(model)
@@ -500,10 +513,12 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if args.white_box:
             public_model = {"private": False, "white_box": True}
             if args.model_price:
-                console_log("[%s] Updating model.\n" % get_date())
+                if args.verbosity:
+                    console_log("[%s] Updating model.\n" % get_date())
                 public_model.update(price=args.model_price)
             if args.cpp:
-                console_log("[%s] Updating model.\n" % get_date())
+                if args.verbosity:
+                    console_log("[%s] Updating model.\n" % get_date())
                 public_model.update(credits_per_prediction=args.cpp)
             model = api.update_model(model, public_model)
         if not csv_properties:
@@ -524,14 +539,16 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             objective_field = objective_field[0]
         predict(test_set, test_set_header, models, fields, output,
                 objective_field, args.remote, api, log,
-                args.max_batch_models, args.method, resume, args.tag)
+                args.max_batch_models, args.method, resume, args.tag,
+                args.verbosity)
 
     if votes_files:
         model_id = re.sub(r'.*(model_[a-f0-9]{24})__predictions\.csv$',
                           r'\1', votes_files[0]).replace("_", "/")
         model = api.check_resource(model_id, api.get_model)
         local_model = Model(model)
-        console_log("[%s] Combining votes.\n" % get_date())
+        if args.verbosity:
+            console_log("[%s] Combining votes.\n" % get_date())
         combine_votes(votes_files, local_model.to_prediction,
                       output, args.method)
 
@@ -551,7 +568,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 seed = SEED
                 evaluation_args.update(out_of_bag=True, seed=seed,
                                        sample_rate=args.sample_rate)
-            console_log("[%s] Creating evaluation.\n" % get_date())
+            if args.verbosity:
+                console_log("[%s] Creating evaluation.\n" % get_date())
             evaluation = api.create_evaluation(model, dataset, evaluation_args)
             if log:
                 log.write("%s\n" % evaluation['resource'])
@@ -559,7 +577,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             evaluation_file.write("%s\n" % evaluation['resource'])
             evaluation_file.flush()
             evaluation_file.close()
-        console_log("[%s] Retrieving evaluation.\n" % get_date())
+        if args.verbosity:
+            console_log("[%s] Retrieving evaluation.\n" % get_date())
         evaluation = api.check_resource(evaluation, api.get_evaluation)
         evaluation_json = open(output + '.json', 'w', 0)
         evaluation_json.write(json.dumps(evaluation['object']['result']))
@@ -573,8 +592,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
     if args.log_file and log:
         log.close()
-
-    console_log("\nGenerated files:\n\n" + tree(path, " ") + "\n")
+    if args.verbosity:
+        console_log("\nGenerated files:\n\n" + tree(path, " ") + "\n")
 
 
 def main(args=sys.argv[1:]):
@@ -591,6 +610,7 @@ def main(args=sys.argv[1:]):
 
     # Parses command line arguments.
     command_args = parser.parse_args(args)
+        
     default_output = ('evaluation' if command_args.evaluate
                       else 'predictions.csv')
     if command_args.resume:
@@ -728,7 +748,8 @@ def main(args=sys.argv[1:]):
 
     # Parses resources ids if provided.
     if command_args.delete:
-        console_log("[%s] Retrieving objects to delete.\n" % get_date())
+        if command_args.verbosity:
+            console_log("[%s] Retrieving objects to delete.\n" % get_date())
         delete_list = []
         if command_args.delete_list:
             delete_list = map(lambda x: x.strip(),
@@ -765,10 +786,14 @@ def main(args=sys.argv[1:]):
         if command_args.evaluation_tag:
             query_string = "tags__in=%s" % command_args.evaluation_tag
             delete_list.extend(list_evaluation_ids(api, query_string))
-        console_log("[%s] Deleting objects.\n" % get_date())
+        if command_args.verbosity:
+            console_log("[%s] Deleting objects.\n" % get_date())
         delete(api, delete_list)
-        console_log("")
-    else:
+        if command_args.verbosity:
+            console_log("")
+    elif (command_args.training_set or command_args.test_set
+          or command_args.source or command_args.dataset
+          or command_args.datasets or command_args.votes_dirs):
         compute_output(**output_args)
 
 

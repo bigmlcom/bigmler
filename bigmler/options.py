@@ -24,6 +24,7 @@ from __future__ import absolute_import
 import argparse
 import os
 import datetime
+import pkg_resources
 
 
 def create_parser(defaults={}):
@@ -35,9 +36,11 @@ def create_parser(defaults={}):
 
     max_models = defaults.get('MAX_MODELS')
 
+    version = pkg_resources.require("BigMLer")[0].version
     parser = argparse.ArgumentParser(
         description="A higher level API to BigML's API.",
-        epilog="Happy predictive modeling!")
+        epilog="Happy predictive modeling!",
+        version=version)
 
     # Shows log info for each https request.
     parser.add_argument('--debug',
@@ -428,5 +431,13 @@ def create_parser(defaults={}):
     parser.add_argument('--evaluate',
                         action='store_true',
                         help="Evaluate command.")
+
+    # Turn on/off verbosity
+    parser.add_argument('--verbosity',
+                        action='store',
+                        dest='verbosity',
+                        default=1,
+                        type=int,
+                        help="Set verbosity: 0 to turn off, 1 to turn on.")
 
     return parser
