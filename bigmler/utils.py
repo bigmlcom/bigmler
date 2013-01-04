@@ -173,10 +173,10 @@ def read_votes_files(dirs_list, path):
     check_dir(file_name)
     group_predictions = open(file_name, "w", 0)
     current_directory = os.getcwd()
+    predictions_files = []
     for directory in dirs_list:
         directory = os.path.abspath(directory)
         os.chdir(directory)
-        predictions_files = []
         for predictions_file in glob.glob("model_*_predictions.csv"):
             predictions_files.append("%s%s%s" % (os.getcwd(),
                                      os.sep, predictions_file))
@@ -523,3 +523,25 @@ def get_date():
 
     """
     return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
+def prediction_to_row(prediction):
+    """Returns a csv row to store main prediction info in csv files.
+
+    """
+    prediction = prediction['object']
+    prediction_class = prediction['objective_fields'][0]
+    row = [prediction['prediction'][prediction_class],
+           prediction['prediction_path']['confidence']]
+    tree = prediction['prediction_path']
+    if ('objective_summary' in tree):
+        summary = tree['objective_summary']
+        if 'bins' in summary:
+            distribution = summary['bins']
+        elif 'counts' in summary:
+            distribution = summary['counts']
+        elif 'categories' in summary:
+            distribution = summary['categories']
+    if distribution:
+        row.extend([repr(distribution), sum([x[1] for x in distribution])])
+    return row

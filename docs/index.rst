@@ -100,7 +100,7 @@ The predictions generated when using this option will be stored in a file per mo
 models' id (e.g. `model_50c23e5e035d07305a00004f__predictions.csv"). Each line contains the prediction and its confidence. The default value for `max_batch_models` is 10.
 
 When using ensembles model's predictions are combined to issue a final prediction. There are several different methods
-to build the combination. For numeric objective fields the mean value method will be applied. For categorical objective fields you can choose `plurality` or `confidence weighted` using the `--method` flag::
+to build the combination. For numeric objective fields the mean value method will be applied. For categorical objective fields you can choose `plurality`, `confidence weighted` or `probability weighted` using the `--method` flag::
 
     bigmler --train data/iris.csv --test data/test_iris.csv  --number_of_models 10 --sample_rate 0.75 --method "confidence weighted"
 
@@ -481,7 +481,9 @@ Fancy Options
 --progress_bar  Shows an update on the bytes uploaded when creating a new source. This option might run into issues depending on the locale settings of your OS.
 
 --no_model  Does not create a model. BigMLer will only create a dataset.
---resources_log LOG_FILE   Keeps a log of the resources generated in each command. 
+--resources_log LOG_FILE   Keeps a log of the resources generated in each command.
+--version   Shows the version number
+--verbosity LEVEL  Turns on (1) or off (0) the verbosity.
 
 Building the Documentation
 ==========================

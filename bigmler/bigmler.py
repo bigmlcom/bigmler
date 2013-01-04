@@ -73,7 +73,7 @@ from bigmler.utils import read_description, read_field_attributes, \
     write_prediction, get_log_reversed, is_source_created, checkpoint, \
     is_dataset_created, are_models_created, are_predictions_created, \
     file_number_of_lines, is_evaluation_created, list_evaluation_ids, tree, \
-    get_date
+    get_date, prediction_to_row
 
 MAX_MODELS = 10
 EVALUATE_SAMPLE_RATE = 0.8
@@ -176,12 +176,7 @@ def predict(test_set, test_set_header, models, fields, output,
                     if log:
                         log.write("%s\n" % prediction['resource'])
                         log.flush()
-
-                    prediction_row = [prediction['object']['prediction']
-                                      [prediction['object']
-                                      ['objective_fields'][0]],
-                                      prediction['object']['prediction_path']
-                                      ['confidence']]
+                    prediction_row = prediction_to_row(prediction)
                     predictions_file.writerow(prediction_row)
         combine_votes(predictions_files,
                       Model(models[0]).to_prediction,

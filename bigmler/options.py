@@ -412,7 +412,8 @@ def create_parser(defaults={}):
                         default='plurality',
                         help="Method to combine votes from ensemble"
                              " predictions. Allowed methods: plurality"
-                             " or \"confidence weighted\".")
+                             ", \"confidence weighted\" or "
+                             " \"probability weighted\".")
 
     # Resume a partial execution
     parser.add_argument('--resume',
