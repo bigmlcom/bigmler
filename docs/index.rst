@@ -236,7 +236,7 @@ types to specific fields::
 
     bigml --train data/iris.csv --types types.txt
 
-where ``types.txt`` woud be::
+where ``types.txt`` would be::
 
     0, 'numeric'
     1, 'numeric'
@@ -251,6 +251,23 @@ You can specify the fields that you want to include in the dataset::
 or the fields that you want to include as predictors in the model::
 
     bigmler --train data/iris.csv --model_fields 'sepal length','sepal width'
+
+When evaluating, you can map the fields of the test dataset to those of
+the evaluated model by writing in a file the field column of the dataset and
+the field column of the model separated by a comma and using `--fields_map`
+flag to specify the name of the file::
+
+    bigmler --dataset dataset/50a1f441035d0706d9000371 --model model/50a1f43deabcb404d3000079 --evaluate --fields_map fields_map.txt
+
+where ``fields_map.txt`` would contain::
+
+    0, 1
+    1, 0
+    2, 2
+    3, 3
+    4, 4
+
+if the first two fields had been reversed.
 
 Finally, you can also tell BigML whether your training and test set come with a
 header row or not. For example, if both come without header::

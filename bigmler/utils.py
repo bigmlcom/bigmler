@@ -38,6 +38,7 @@ from bigml.multimodel import combine_predictions, read_votes
 
 PAGE_LENGTH = 200
 ATTRIBUTE_NAMES = ['name', 'label', 'description']
+NEW_DIRS_LOG = ".bigmler_dirs"
 
 
 def read_description(path):
@@ -102,6 +103,30 @@ def read_types(path):
         except SyntaxError:
             pass
     return types_dict
+
+
+def read_fields_map(path):
+    """Fields map from test dataset to evaluated model.
+
+    The test dataset field column and the evaluated model field column
+    separated by a comma per line.
+
+    For example:
+
+    0, 0
+    1, 2
+    2, 1
+
+    """
+    map_dict = {}
+    for line in fileinput.input([path]):
+        try:
+            pair = ast.literal_eval(line)
+            map_dict.update({
+                pair[0]: pair[1]})
+        except SyntaxError:
+            pass
+    return map_dict
 
 
 def read_models(path):
@@ -330,7 +355,7 @@ def check_dir(path):
     directory = os.path.dirname(path)
     if len(directory) > 0 and not os.path.exists(directory):
         os.makedirs(directory)
-        directory_log = open(".bigmler_dirs", "a", 0)
+        directory_log = open(NEW_DIRS_LOG, "a", 0)
         directory_log.write("%s\n" % os.path.abspath(directory))
         directory_log.close()
     return directory
@@ -354,28 +379,30 @@ def tail(file_handler, window=1):
     bufsiz = 1024
     file_handler.seek(0, 2)
     file_bytes = file_handler.tell()
-    size = window
+    size = window + 1
     block = -1
     data = []
-    while size > 0 and bytes > 0:
+    while size > 0 and file_bytes > 0:
         if (file_bytes - bufsiz > 0):
             # Seek back one whole bufsiz
             file_handler.seek(block * bufsiz, 2)
             # read BUFFER
-            data.append(file_handler.read(bufsiz))
+            new_data = [file_handler.read(bufsiz)]
+            new_data.extend(data)
+            data = new_data
         else:
             # file too small, start from begining
             file_handler.seek(0, 0)
             # only read what was not read
-            data.append(file_handler.read(bytes))
-        lines_found = data[-1].count('\n')
+            data.append(file_handler.read(file_bytes))
+        lines_found = data[0].count('\n')
         size -= lines_found
         file_bytes -= bufsiz
         block -= 1
-    return (''.join(data).splitlines()[-window:])
+    return ''.join(data).splitlines()[-window:]
 
 
-def get_log_reversed(file_name, stack_level=0):
+def get_log_reversed(file_name, stack_level):
     """Reads the line of a log file that has the chosen stack_level
 
     """
@@ -480,7 +507,7 @@ def file_number_of_lines(file_name):
     """
     try:
         item = (0, None)
-        with open(file_name) as file_handler:  
+        with open(file_name) as file_handler:
             for item in enumerate(file_handler):
                 pass
         return item[0] + 1
@@ -488,33 +515,33 @@ def file_number_of_lines(file_name):
         return 0
 
 
-def tree(dir, padding):
+def print_tree(directory, padding):
     """Returns directory tree structure as a string
 
     """
     if padding != ' ':
         output = padding[:-1] + '├─'
     else:
-        output = padding 
-    output += os.path.basename(os.path.abspath(dir)) + '\n'
+        output = padding
+    output += os.path.basename(os.path.abspath(directory)) + '\n'
     padding = padding + ' '
     files = []
-    files = os.listdir(dir)
+    files = os.listdir(directory)
     count = 0
     for i in range(0, len(files)):
-        file = files[i]
+        file_name = files[i]
         count += 1
-        path = dir + os.sep + file
+        path = directory + os.sep + file_name
         if os.path.isdir(path):
             if count == len(files):
-                output += tree(path, padding + ' ')
+                output += print_tree(path, padding + ' ')
             else:
-                output += tree(path, padding + '|')
+                output += print_tree(path, padding + '|')
         else:
             if i < (len(files) - 1):
-                output += padding + '├─' + file + '\n'
+                output += padding + '├─' + file_name + '\n'
             else:
-                output += padding + '└─' + file + '\n'
+                output += padding + '└─' + file_name + '\n'
     return output
 
 

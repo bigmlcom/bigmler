@@ -72,14 +72,16 @@ from bigmler.utils import read_description, read_field_attributes, \
     list_model_ids, list_prediction_ids, combine_votes, delete, check_dir, \
     write_prediction, get_log_reversed, is_source_created, checkpoint, \
     is_dataset_created, are_models_created, are_predictions_created, \
-    file_number_of_lines, is_evaluation_created, list_evaluation_ids, tree, \
-    get_date, prediction_to_row
+    file_number_of_lines, is_evaluation_created, list_evaluation_ids, \
+    get_date, prediction_to_row, read_fields_map, print_tree
 
 MAX_MODELS = 10
 EVALUATE_SAMPLE_RATE = 0.8
 SEED = "BigML, Machine Learning made easy"
 # Date and time in format SunNov0412_120510 to name and tag resources
 NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
+COMMAND_LOG = ".bigmler"
+DIRS_LOG = ".bigmler_dir_stack"
 
 
 def predict(test_set, test_set_header, models, fields, output,
@@ -163,7 +165,8 @@ def predict(test_set, test_set_header, models, fields, output,
                                     number_of_tests)
             if not resume:
                 if verbosity:
-                    console_log("[%s] Creating remote predictions.\n" % get_date())
+                    console_log("[%s] Creating remote predictions.\n" %
+                                get_date())
                 predictions_file = csv.writer(open(predictions_file, 'w', 0))
                 for row in test_reader:
                     for index in exclude:
@@ -258,7 +261,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                    model_fields=None,
                    name=None, training_set_header=True,
                    test_set_header=True, model_ids=None,
-                   votes_files=None, resume=False):
+                   votes_files=None, resume=False, fields_map=None):
     """ Creates one or models using the `training_set` or uses the ids
     of previous created BigML models to make predictions for the `test_set`.
 
@@ -276,9 +279,11 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if args.log_file:
         check_dir(args.log_file)
         log = open(args.log_file, 'a', 0)
-    if resume:
-        resume, args.source = checkpoint(is_source_created, path, bigml.api)
 
+    if (training_set or (args.evaluate and test_set)):
+        if resume:
+            resume, args.source = checkpoint(is_source_created,
+                                             path, bigml.api)
     # If neither a previous source, dataset or model are provided.
     # we create a new one. Also if --evaluate and test data are provided
     # we create a new dataset.
@@ -287,11 +292,12 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             not args.model and not args.models):
         data_set = training_set
         data_set_header = training_set_header
-    elif (args.evaluate and test_set):
+    elif (args.evaluate and test_set and not args.source):
         data_set = test_set
         data_set_header = test_set_header
 
     if not data_set is None:
+
         source_args = {
             "name": name,
             "description": description,
@@ -350,14 +356,16 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 console_log("[%s] Updating source.\n" % get_date())
             source = api.update_source(source, {"fields": update_fields})
 
-    if resume:
-        resume, args.dataset = checkpoint(is_dataset_created, path, bigml.api)
+    if (training_set or args.source or (args.evaluate and test_set)):
+        if resume:
+            resume, args.dataset = checkpoint(is_dataset_created,
+                                              path, bigml.api)
 
     # If we have a source but not dataset or model has been provided, we
     # create a new dataset if the no_dataset option isn't set up.
     if ((source and not args.dataset and not args.model and not model_ids and
             not args.no_dataset) or
-            (args.evaluate and args.test_set)):
+            (args.evaluate and args.test_set and not args.dataset)):
         dataset_args = {
             "name": name,
             "description": description,
@@ -558,6 +566,13 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 "description": description,
                 "tags": args.tag
             }
+            if not fields_map is None:
+                update_map = {}
+                for (dataset_column, model_column) in fields_map.iteritems():
+                    update_map.update({
+                        fields.field_id(dataset_column):
+                        fields.field_id(model_column)})
+                evaluation_args.update({"fields_map": update_map})
             if not ((args.dataset or args.test_set)
                     and (args.model or args.models or args.model_tag)):
                 seed = SEED
@@ -588,7 +603,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if args.log_file and log:
         log.close()
     if args.verbosity:
-        console_log("\nGenerated files:\n\n" + tree(path, " ") + "\n")
+        console_log("\nGenerated files:\n\n" + print_tree(path, " ") + "\n")
 
 
 def main(args=sys.argv[1:]):
@@ -596,7 +611,10 @@ def main(args=sys.argv[1:]):
 
     """
     if not "--resume" in args:
-        command_log = open(".bigmler", "a", 0)
+        command_log = open(COMMAND_LOG, "a", 0)
+        for i in range(0, len(args)):
+            if ' ' in args[i]:
+                args[i] = '"%s"' % args[i]
         command_log.write("bigmler %s\n" % " ".join(args))
         command_log.close()
         resume = False
@@ -605,19 +623,21 @@ def main(args=sys.argv[1:]):
 
     # Parses command line arguments.
     command_args = parser.parse_args(args)
-        
+
     default_output = ('evaluation' if command_args.evaluate
                       else 'predictions.csv')
     if command_args.resume:
-        command = get_log_reversed('.bigmler',
+        command = get_log_reversed(COMMAND_LOG,
                                    command_args.stack_level)
         args = shlex.split(command)[1:]
+        output_dir = get_log_reversed(DIRS_LOG,
+                                      command_args.stack_level)
+        console_log("\nResuming command:\n%s\n\n" % command)
         command_args = parser.parse_args(args)
-        command_args.predictions = get_log_reversed('.bigmler_dir_stack',
-                                                    command_args.stack_level)
-        command_args.predictions = ("%s%s%s" %
-                                    (command_args.predictions, os.sep,
-                                     default_output))
+        if command_args.predictions is None:
+            command_args.predictions = ("%s%s%s" %
+                                        (output_dir, os.sep,
+                                         default_output))
         resume = True
     else:
         if command_args.predictions is None:
@@ -629,7 +649,7 @@ def main(args=sys.argv[1:]):
                                         (NOW, os.sep,
                                          command_args.predictions))
         directory = check_dir(command_args.predictions)
-        directory_log = open(".bigmler_dir_stack", "a", 0)
+        directory_log = open(DIRS_LOG, "a", 0)
         directory_log.write("%s\n" % os.path.abspath(directory))
         directory_log.close()
 
@@ -740,6 +760,11 @@ def main(args=sys.argv[1:]):
         votes_path = os.path.dirname(command_args.predictions)
         votes_files = read_votes_files(dirs, votes_path)
         output_args.update(votes_files=votes_files)
+
+    # Parses fields map if provided.
+    if command_args.fields_map:
+        fields_map_arg = read_fields_map(command_args.fields_map)
+        output_args.update(fields_map=fields_map_arg)
 
     # Parses resources ids if provided.
     if command_args.delete:

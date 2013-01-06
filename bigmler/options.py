@@ -22,7 +22,6 @@
 from __future__ import absolute_import
 
 import argparse
-import os
 import datetime
 import pkg_resources
 
@@ -440,5 +439,13 @@ def create_parser(defaults={}):
                         default=1,
                         type=int,
                         help="Set verbosity: 0 to turn off, 1 to turn on.")
+
+    # The path to a file containing the mapping of fields' ids from
+    # the test dataset fields to the model fields.
+    parser.add_argument('--fields_map',
+                        action='store',
+                        dest='fields_map',
+                        help=("Path to a csv file describing fields mapping. "
+                              "One definition per line (e.g., 00000, 00000a)"))
 
     return parser
