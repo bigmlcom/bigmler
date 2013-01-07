@@ -73,7 +73,7 @@ from bigmler.utils import read_description, read_field_attributes, \
     write_prediction, get_log_reversed, is_source_created, checkpoint, \
     is_dataset_created, are_models_created, are_predictions_created, \
     file_number_of_lines, is_evaluation_created, list_evaluation_ids, \
-    get_date, prediction_to_row, read_fields_map, print_tree
+    get_date, prediction_to_row, read_fields_map, print_tree, get_url
 
 MAX_MODELS = 10
 EVALUATE_SAMPLE_RATE = 0.8
@@ -309,6 +309,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         source = api.create_source(data_set, source_args,
                                    progress_bar=args.progress_bar)
         source = api.check_resource(source, api.get_source)
+        if args.verbosity:
+            console_log("[%s] Source created: %s\n" %
+                        (get_date(), get_url(source, api)))
         if log:
             log.write("%s\n" % source['resource'])
             log.flush()
@@ -329,9 +332,11 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # If we already have source, we check that is finished and extract the
     # fields, and update them if needed.
     if source:
-        if args.verbosity:
-            console_log("[%s] Retrieving source.\n" % get_date())
-        source = api.check_resource(source, api.get_source)
+        if source['object']['status']['code'] != bigml.api.FINISHED:
+            if args.verbosity:
+                console_log("[%s] Retrieving source. %s\n" %
+                            (get_date(), get_url(source, api)))
+            source = api.check_resource(source, api.get_source)
         csv_properties = {'missing_tokens':
                           source['object']['source_parser']['missing_tokens'],
                           'data_locale':
@@ -344,7 +349,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 update_fields.update({
                     fields.field_id(column): value})
             if args.verbosity:
-                console_log("[%s] Updating source.\n" % get_date())
+                console_log("[%s] Updating source. %s\n" % 
+                            (get_date(), get_url(source, api)))
             source = api.update_source(source, {"fields": update_fields})
 
         update_fields = {}
@@ -353,7 +359,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 update_fields.update({
                     fields.field_id(column): {'optype': value}})
             if args.verbosity:
-                console_log("[%s] Updating source.\n" % get_date())
+                console_log("[%s] Updating source. %s\n" %
+                            (get_date(), get_url(source, api)))
             source = api.update_source(source, {"fields": update_fields})
 
     if (training_set or args.source or (args.evaluate and test_set)):
@@ -386,6 +393,10 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if args.verbosity:
             console_log("[%s] Creating dataset.\n" % get_date())
         dataset = api.create_dataset(source, dataset_args)
+        dataset = api.check_resource(dataset, api.get_dataset)
+        if args.verbosity:
+            console_log("[%s] Dataset created: %s\n" %
+                        (get_date(), get_url(dataset, api)))
         if log:
             log.write("%s\n" % dataset['resource'])
             log.flush()
@@ -401,9 +412,11 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # If we already have a dataset, we check the status and get the fields if
     # we hadn't them yet.
     if dataset:
-        if args.verbosity:
-            console_log("[%s] Retrieving dataset.\n" % get_date())
-        dataset = api.check_resource(dataset, api.get_dataset)
+        if dataset['object']['status']['code'] != bigml.api.FINISHED:
+            if args.verbosity:
+                console_log("[%s] Retrieving dataset. %s\n" %
+                            (get_date(), get_url(dataset, api)))
+            dataset = api.check_resource(dataset, api.get_dataset)
         if not csv_properties:
             csv_properties = {'data_locale':
                               dataset['object']['locale']}
@@ -411,10 +424,12 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             public_dataset = {"private": False}
             if args.dataset_price:
                 if args.verbosity:
-                    console_log("[%s] Updating dataset.\n" % get_date())
+                    console_log("[%s] Updating dataset. %s\n" %
+                                (get_date(), get_url(dataset, api)))
                 public_dataset.update(price=args.dataset_price)
             if args.verbosity:
-                console_log("[%s] Updating dataset.\n" % get_date())
+                    console_log("[%s] Updating dataset. %s\n" %
+                                (get_date(), get_url(dataset, api)))
             dataset = api.update_dataset(dataset, public_dataset)
         fields = Fields(dataset['object']['fields'], **csv_properties)
 
@@ -482,22 +497,35 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 models.append(model)
                 model_file.write("%s\n" % model['resource'])
                 model_file.flush()
+            if args.number_of_models < 2 and args.verbosity:
+                if model['object']['status']['code'] != bigml.api.FINISHED:
+                    model = api.check_resource(model, api.get_model)
+                    models[0] = model
+                console_log("[%s] Model created: %s.\n" %
+                            (get_date(), get_url(model, api)))
         model_file.close()
 
     # If a model is provided, we retrieve it.
     elif args.model:
+        if args.verbosity:
+            console_log("[%s] Retrieving model. %s\n" %
+                        (get_date(), get_url(args.model, api)))
         model = api.get_model(args.model)
 
     elif args.models or args.model_tag:
         models = model_ids[:]
 
     if model_ids and test_set and not args.evaluate:
+        plural, model_id = ("", "")
+        if len(model_ids) > 1:
+            plural = "s"
+        else:
+            model_id = model_ids[0]
+        if args.verbosity:
+            console_log("[%s] Retrieving model%s. %s\n" %
+                        (get_date(), plural, get_url(model_id, api)))
         if len(model_ids) < args.max_batch_models:
             models = []
-            plural = "s" if len(model_ids) > 1 else ""
-            if args.verbosity:
-                console_log("[%s] Retrieving model%s.\n" %
-                            (get_date(), plural))
             for model in model_ids:
                 model = api.check_resource(model, api.get_model)
                 models.append(model)
@@ -510,18 +538,24 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # them yet.
     if model and not args.evaluate and (test_set or args.black_box
                                         or args.white_box):
-        model = api.check_resource(model, api.get_model)
+        if model['object']['status']['code'] != bigml.api.FINISHED:
+            if args.verbosity:
+                console_log("[%s] Retrieving model. %s\n" %
+                            (get_date(), get_url(model, api)))
+            model = api.check_resource(model, api.get_model)
         if args.black_box:
             model = api.update_model(model, {"private": False})
         if args.white_box:
             public_model = {"private": False, "white_box": True}
             if args.model_price:
                 if args.verbosity:
-                    console_log("[%s] Updating model.\n" % get_date())
+                    console_log("[%s] Updating model. %s\n" %
+                                (get_date(), get_url(model, api)))
                 public_model.update(price=args.model_price)
             if args.cpp:
                 if args.verbosity:
-                    console_log("[%s] Updating model.\n" % get_date())
+                    console_log("[%s] Updating model. %s\n" %
+                                (get_date(), get_url(model, api)))
                 public_model.update(credits_per_prediction=args.cpp)
             model = api.update_model(model, public_model)
         if not csv_properties:
@@ -588,7 +622,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             evaluation_file.flush()
             evaluation_file.close()
         if args.verbosity:
-            console_log("[%s] Retrieving evaluation.\n" % get_date())
+            console_log("[%s] Retrieving evaluation. %s\n" %
+                        (get_date(), get_url(evaluation, api)))
         evaluation = api.check_resource(evaluation, api.get_evaluation)
         evaluation_json = open(output + '.json', 'w', 0)
         evaluation_json.write(json.dumps(evaluation['object']['result']))

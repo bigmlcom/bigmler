@@ -39,7 +39,7 @@ from bigml.multimodel import combine_predictions, read_votes
 PAGE_LENGTH = 200
 ATTRIBUTE_NAMES = ['name', 'label', 'description']
 NEW_DIRS_LOG = ".bigmler_dirs"
-
+RESOURCE_URL = "https://bigml.com/dashboard/"
 
 def read_description(path):
     """Reads a text description from a file.
@@ -572,3 +572,13 @@ def prediction_to_row(prediction):
     if distribution:
         row.extend([repr(distribution), sum([x[1] for x in distribution])])
     return row
+
+
+def get_url(resource, api):
+    """Returns the resource's url in bigml.com
+
+    """
+    resource_id = api.get_resource_id(resource)
+    if not resource_id:
+        return ""
+    return RESOURCE_URL + resource_id
