@@ -284,6 +284,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if resume:
             resume, args.source = checkpoint(is_source_created,
                                              path, bigml.api)
+            if not resume and args.verbosity:
+                console_log("[%s] Source not found. Resuming.\n" % get_date())
     # If neither a previous source, dataset or model are provided.
     # we create a new one. Also if --evaluate and test data are provided
     # we create a new dataset.
@@ -327,6 +329,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
     # If a source is provided, we retrieve it.
     elif args.source:
+        if args.verbosity:
+            console_log("[%s] Retrieving source. %s\n" %
+                        (get_date(), get_url(args.source, api)))
         source = api.get_source(args.source)
 
     # If we already have source, we check that is finished and extract the
@@ -367,7 +372,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if resume:
             resume, args.dataset = checkpoint(is_dataset_created,
                                               path, bigml.api)
-
+            if not resume and args.verbosity:
+                console_log("[%s] Dataset not found. Resuming.\n" % get_date())
     # If we have a source but not dataset or model has been provided, we
     # create a new dataset if the no_dataset option isn't set up.
     if ((source and not args.dataset and not args.model and not model_ids and
@@ -407,6 +413,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
     # If a dataset is provided, let's retrieve it.
     elif args.dataset:
+        if args.verbosity:
+            console_log("[%s] Retrieving dataset. %s\n" %
+                        (get_date(), get_url(args.dataset, api)))
         dataset = api.get_dataset(args.dataset)
 
     # If we already have a dataset, we check the status and get the fields if
@@ -474,6 +483,10 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             resume, model_ids = checkpoint(are_models_created, path,
                                            args.number_of_models,
                                            bigml.api)
+            if not resume and args.verbosity:
+                console_log("[%s] Found %s models out of %s. Resuming.\n" %
+                            (get_date(), len(model_ids),
+                             args.number_of_models))
             models = model_ids
             args.number_of_models -= len(model_ids)
 
@@ -593,6 +606,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if resume:
             resume, evaluation = checkpoint(is_evaluation_created,
                                             path, bigml.api)
+            if not resume and args.verbosity:
+                console_log("[%s] Evaluation not found. Resuming.\n" %
+                            get_date())
         if not resume:
             evaluation_file = open(path + '/evaluation', 'w', 0)
             evaluation_args = {
