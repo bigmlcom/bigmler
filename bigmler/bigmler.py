@@ -75,6 +75,8 @@ from bigmler.utils import read_description, read_field_attributes, \
     file_number_of_lines, is_evaluation_created, list_evaluation_ids, \
     get_date, prediction_to_row, read_fields_map, print_tree, get_url
 
+from bigmler.utils import NEW_DIRS_LOG
+
 MAX_MODELS = 10
 EVALUATE_SAMPLE_RATE = 0.8
 SEED = "BigML, Machine Learning made easy"
@@ -82,6 +84,7 @@ SEED = "BigML, Machine Learning made easy"
 NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
 COMMAND_LOG = ".bigmler"
 DIRS_LOG = ".bigmler_dir_stack"
+LOG_FILES = [COMMAND_LOG, DIRS_LOG, NEW_DIRS_LOG]
 
 
 def predict(test_set, test_set_header, models, fields, output,
@@ -292,6 +295,12 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     log = None
     if args.log_file:
         check_dir(args.log_file)
+        # If --clear_logs the log files are cleared
+        if args.clear_logs:
+            try:
+                open(log, 'w', 0).close()
+            except:
+                pass
         log = open(args.log_file, 'a', 0)
 
     if (training_set or (args.evaluate and test_set)):
@@ -680,6 +689,14 @@ def main(args=sys.argv[1:]):
     """Main process
 
     """
+    # If --clear_logs the log files are cleared
+    if "--clear_logs" in args:
+        for log_file in LOG_FILES:
+            try:
+                open(log_file, 'w', 0).close()
+            except:
+                pass
+
     if not "--resume" in args:
         command_log = open(COMMAND_LOG, "a", 0)
         for i in range(0, len(args)):

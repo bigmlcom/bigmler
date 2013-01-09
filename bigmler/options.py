@@ -448,4 +448,9 @@ def create_parser(defaults={}):
                         help=("Path to a csv file describing fields mapping. "
                               "One definition per line (e.g., 00000, 00000a)"))
 
+    # Clear global bigmler log files
+    parser.add_argument('--clear_logs',
+                        action='store_true',
+                        help="Clear global bigmler log files.")
+
     return parser
