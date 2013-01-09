@@ -59,7 +59,7 @@ except ImportError:
 import bigml.api
 from bigml.model import Model
 from bigml.multimodel import MultiModel
-from bigml.multimodel import COMBINATION_METHODS
+from bigml.prediction_combiners import COMBINATION_METHODS, PLURALITY
 from bigml.fields import Fields
 
 from bigml.util import localize, console_log, get_csv_delimiter, \
@@ -86,11 +86,13 @@ DIRS_LOG = ".bigmler_dir_stack"
 
 def predict(test_set, test_set_header, models, fields, output,
             objective_field, remote=False, api=None, log=None,
-            max_models=MAX_MODELS, method='plurality', resume=False,
+            max_models=MAX_MODELS, method=PLURALITY, resume=False,
             tags=None, verbosity=1):
-    """Computes a prediction for each entry in the `test_set`
+    """Computes a prediction for each entry in the `test_set`.
 
-
+       Predictions can be computed remotely, locally using MultiModels built
+       on all the models or locally using MultiModels on subgroups of models
+       to limit memory usage and save each model predictions for further use.
     """
 
     def draw_progress_bar(current, total):
@@ -148,6 +150,11 @@ def predict(test_set, test_set_header, models, fields, output,
         number_of_tests = file_number_of_lines(test_set)
         if test_set_header:
             number_of_tests -= 1
+    # Remote predictions: predictions are computed in bigml.com and stored
+    # in a file named after the model in the following syntax:
+    #     model_[id of the model]__predictions.csv
+    # For instance,
+    #     model_50c0de043b563519830001c2_predictions.csv
     if remote:
 
         predictions_files = []
@@ -184,10 +191,14 @@ def predict(test_set, test_set_header, models, fields, output,
         combine_votes(predictions_files,
                       Model(models[0]).to_prediction,
                       prediction_file, method)
+    # Local predictions: Predictions are computed locally using models' rules
+    # with MultiModel's predict method
     else:
         if verbosity:
             console_log("[%s] Creating local predictions.\n" % get_date())
         models_total = len(models)
+        # For a small number of models, we build a MultiModel using all of
+        # the given models and issue a combined prediction
         if models_total < max_models:
             local_model = MultiModel(models)
             for row in test_reader:
@@ -195,11 +206,15 @@ def predict(test_set, test_set_header, models, fields, output,
                     del row[index]
                 input_data = fields.pair(row, headers, objective_field)
                 prediction = local_model.predict(input_data,
-                                                 by_name=test_set_header)
+                                                 by_name=test_set_header,
+                                                 method=method)
                 if isinstance(prediction, basestring):
                     prediction = prediction.encode("utf-8")
                 output.write("%s\n" % prediction)
                 output.flush()
+        # For large numbers of models, we split the list of models in chunks
+        # and build a MultiModel for each chunk, issue and store predictions
+        # for each model and combine all of them eventually.
         else:
             models_splits = [models[index:(index + max_models)] for index
                              in range(0, models_total, max_models)]
@@ -216,7 +231,6 @@ def predict(test_set, test_set_header, models, fields, output,
                     for model in models_split:
                         pred_file = get_predictions_file_name(model,
                                                               output_path)
-
                         checkpoint(are_predictions_created,
                                    pred_file,
                                    number_of_tests)
@@ -262,8 +276,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                    name=None, training_set_header=True,
                    test_set_header=True, model_ids=None,
                    votes_files=None, resume=False, fields_map=None):
-    """ Creates one or models using the `training_set` or uses the ids
-    of previous created BigML models to make predictions for the `test_set`.
+    """ Creates one or more models using the `training_set` or uses the ids
+    of previously created BigML models to make predictions for the `test_set`.
 
     """
     source = None
@@ -288,7 +302,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 console_log("[%s] Source not found. Resuming.\n" % get_date())
     # If neither a previous source, dataset or model are provided.
     # we create a new one. Also if --evaluate and test data are provided
-    # we create a new dataset.
+    # we create a new dataset to test with.
     data_set = None
     if (training_set and not args.source and not args.dataset and
             not args.model and not args.models):
@@ -354,7 +368,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 update_fields.update({
                     fields.field_id(column): value})
             if args.verbosity:
-                console_log("[%s] Updating source. %s\n" % 
+                console_log("[%s] Updating source. %s\n" %
                             (get_date(), get_url(source, api)))
             source = api.update_source(source, {"fields": update_fields})
 
@@ -375,7 +389,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             if not resume and args.verbosity:
                 console_log("[%s] Dataset not found. Resuming.\n" % get_date())
     # If we have a source but not dataset or model has been provided, we
-    # create a new dataset if the no_dataset option isn't set up.
+    # create a new dataset if the no_dataset option isn't set up. Also
+    # if evaluate is set and test_set has been provided.
     if ((source and not args.dataset and not args.model and not model_ids and
             not args.no_dataset) or
             (args.evaluate and args.test_set and not args.dataset)):
@@ -437,8 +452,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                                 (get_date(), get_url(dataset, api)))
                 public_dataset.update(price=args.dataset_price)
             if args.verbosity:
-                    console_log("[%s] Updating dataset. %s\n" %
-                                (get_date(), get_url(dataset, api)))
+                console_log("[%s] Updating dataset. %s\n" %
+                            (get_date(), get_url(dataset, api)))
             dataset = api.update_dataset(dataset, public_dataset)
         fields = Fields(dataset['object']['fields'], **csv_properties)
 
@@ -454,7 +469,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if not objective_field is None:
             model_args.update({"objective_field":
                                fields.field_id(objective_field)})
-        # if evaluate flag is on we choose a deterministic sampling with 80%
+        # If evaluate flag is on, we choose a deterministic sampling with 80%
         # of the data to create the model
         if args.evaluate:
             if args.sample_rate == 1:
@@ -592,6 +607,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 args.max_batch_models, args.method, resume, args.tag,
                 args.verbosity)
 
+    # When combine_votes flag is used, retrieve the predictions files saved
+    # in the comma separated list of directories and combine them
     if votes_files:
         model_id = re.sub(r'.*(model_[a-f0-9]{24})__predictions\.csv$',
                           r'\1', votes_files[0]).replace("_", "/")
@@ -602,6 +619,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         combine_votes(votes_files, local_model.to_prediction,
                       output, args.method)
 
+    # If evaluate flag is on, create remote evaluation and save results in
+    # json and human-readable format.
     if args.evaluate:
         if resume:
             resume, evaluation = checkpoint(is_evaluation_created,
@@ -803,7 +822,7 @@ def main(args=sys.argv[1:]):
     # Checks combined votes method
     if (command_args.method and
             not command_args.method in COMBINATION_METHODS.keys()):
-        command_args.method = 'plurality'
+        command_args.method = PLURALITY
 
     # Reads votes files in the provided directories.
     if command_args.votes_dirs:

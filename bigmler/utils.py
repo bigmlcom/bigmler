@@ -41,6 +41,7 @@ ATTRIBUTE_NAMES = ['name', 'label', 'description']
 NEW_DIRS_LOG = ".bigmler_dirs"
 RESOURCE_URL = "https://bigml.com/dashboard/"
 
+
 def read_description(path):
     """Reads a text description from a file.
 
@@ -192,6 +193,8 @@ def read_votes_files(dirs_list, path):
     """Reads a list of directories to look for votes.
 
     If model's prediction files are found, they are retrieved to be combined.
+    Models' predictions files are expected to be named after the model id,
+    for instance: model_50974922035d0706da00003d__predictions.csv
     """
     file_name = "%s%scombined_predictions" % (path,
                                               os.sep)
@@ -319,6 +322,10 @@ def list_evaluation_ids(api, query_string):
 def combine_votes(votes_files, to_prediction, to_file, method='plurality'):
     """Combines the votes found in the votes' files and stores predictions.
 
+       votes_files: should contain the list of file names
+       to_prediction: is the Model method that casts prediction to numeric
+                      type if needed
+       to_file: is the name of the final output file.
     """
     votes = read_votes(votes_files, to_prediction)
 
@@ -495,7 +502,7 @@ def is_evaluation_created(path, api):
 
 
 def checkpoint(function, *args):
-    """Tests function on path
+    """Redirects to each checkpoint function
 
     """
     return function(*args)
@@ -516,7 +523,7 @@ def file_number_of_lines(file_name):
 
 
 def print_tree(directory, padding):
-    """Returns directory tree structure as a string
+    """Returns a graphical directory tree structure as a string
 
     """
     if padding != ' ':
@@ -546,7 +553,7 @@ def print_tree(directory, padding):
 
 
 def get_date():
-    """Returns string containing date in readable format
+    """Returns string containing date in log format
 
     """
     return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")

@@ -94,4 +94,7 @@ def cleanup_resources(feature):
     assert world.final_evaluations_count == world.init_evaluations_count
 
     for folder in world.folders:
-        shutil.rmtree(folder)
+        try:
+            shutil.rmtree(folder)
+        except:
+            pass

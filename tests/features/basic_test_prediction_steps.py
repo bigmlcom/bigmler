@@ -9,7 +9,7 @@ def i_create_all_resources(step, data=None, test=None, output=None):
     if data is None or test is None or output is None:
         assert False
     try:
-        retcode = call("bigmler --train " + data + " --test " + test + " --output " + output, shell=True)
+        retcode = call("bigmler --train " + data + " --test " + test + " --output " + output + " --max_batch_models 1", shell=True)
         if retcode < 0:
             assert False
         else:
@@ -151,6 +151,26 @@ def i_find_predictions_files(step, directory1=None, directory2=None, output=None
         assert False
     try:
         retcode = call("bigmler --combine_votes " + directory1 + "," + directory2 + " --output " + output, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.test_lines = 0
+            for line in open("%s%spredictions.csv" % (directory1, os.sep), "r"):
+                world.test_lines += 1
+            world.directory = os.path.dirname(output)
+            world.folders.append(world.directory)
+            world.output = output
+            assert True
+    except OSError as e:
+        assert False
+
+
+@step(r'I combine BigML predictions files in "(.*)" and "(.*)" into "(.*)" with method "(.*)"')
+def i_find_predictions_files(step, directory1=None, directory2=None, output=None, method=None):
+    if directory1 is None or directory2 is None or output is None or method is None:
+        assert False
+    try:
+        retcode = call("bigmler --combine_votes " + directory1 + "," + directory2 + " --output " + output + " --method " + method, shell=True)
         if retcode < 0:
             assert False
         else:
