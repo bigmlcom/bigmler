@@ -35,6 +35,7 @@ except ImportError:
 
 import bigml.api
 from bigml.multimodel import combine_predictions, read_votes
+from bigml.util import console_log
 
 PAGE_LENGTH = 200
 ATTRIBUTE_NAMES = ['name', 'label', 'description']
@@ -589,3 +590,18 @@ def get_url(resource, api):
     if not resource_id:
         return ""
     return RESOURCE_URL + resource_id
+
+
+def log_message(message, log_file=None, console=False):
+    """Logs a message in a file and/or to console
+
+       If log_file is set, logs the message in the file.
+       If console is True, sends the message to console.
+    """
+
+    if not log_file is None:
+        log_file = open(log_file, 'a', 0)
+        log_file.write(message)
+        log_file.close()
+    if console:
+        console_log(message)

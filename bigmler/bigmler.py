@@ -73,7 +73,8 @@ from bigmler.utils import read_description, read_field_attributes, \
     write_prediction, get_log_reversed, is_source_created, checkpoint, \
     is_dataset_created, are_models_created, are_predictions_created, \
     file_number_of_lines, is_evaluation_created, list_evaluation_ids, \
-    get_date, prediction_to_row, read_fields_map, print_tree, get_url
+    get_date, prediction_to_row, read_fields_map, print_tree, get_url, \
+    log_message
 
 from bigmler.utils import NEW_DIRS_LOG
 
@@ -84,13 +85,14 @@ SEED = "BigML, Machine Learning made easy"
 NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
 COMMAND_LOG = ".bigmler"
 DIRS_LOG = ".bigmler_dir_stack"
+SESSIONS_LOG = ".bigmler_sessions"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, NEW_DIRS_LOG]
 
 
 def predict(test_set, test_set_header, models, fields, output,
             objective_field, remote=False, api=None, log=None,
             max_models=MAX_MODELS, method=PLURALITY, resume=False,
-            tags=None, verbosity=1):
+            tags=None, verbosity=1, session_file=None):
     """Computes a prediction for each entry in the `test_set`.
 
        Predictions can be computed remotely, locally using MultiModels built
@@ -174,9 +176,9 @@ def predict(test_set, test_set_header, models, fields, output,
                 resume = checkpoint(are_predictions_created, predictions_file,
                                     number_of_tests)
             if not resume:
-                if verbosity:
-                    console_log("[%s] Creating remote predictions.\n" %
-                                get_date())
+                message = "[%s] Creating remote predictions.\n" % get_date()
+                log_message(message, log_file=session_file, console=verbosity)
+
                 predictions_file = csv.writer(open(predictions_file, 'w', 0))
                 for row in test_reader:
                     for index in exclude:
@@ -197,8 +199,8 @@ def predict(test_set, test_set_header, models, fields, output,
     # Local predictions: Predictions are computed locally using models' rules
     # with MultiModel's predict method
     else:
-        if verbosity:
-            console_log("[%s] Creating local predictions.\n" % get_date())
+        message = "[%s] Creating local predictions.\n" % get_date()
+        log_message(message, log_file=session_file, console=verbosity)
         models_total = len(models)
         # For a small number of models, we build a MultiModel using all of
         # the given models and issue a combined prediction
@@ -260,8 +262,8 @@ def predict(test_set, test_set_header, models, fields, output,
                                                                   [prediction])
                 else:
                     total_votes = votes
-            if verbosity:
-                console_log("[%s] Combining predictions.\n" % get_date())
+            message = "[%s] Combining predictions.\n" % get_date()
+            log_message(message, log_file=session_file, console=verbosity)
             for predictions in total_votes:
                 write_prediction(predictions, method, output)
 
@@ -290,6 +292,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     fields = None
 
     path = check_dir(output)
+    session_file = "%s%s%s" % (path, os.sep, SESSIONS_LOG)
     csv_properties = {}
     # If logging is required, open the file for logging
     log = None
@@ -307,8 +310,11 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if resume:
             resume, args.source = checkpoint(is_source_created,
                                              path, bigml.api)
-            if not resume and args.verbosity:
-                console_log("[%s] Source not found. Resuming.\n" % get_date())
+            if not resume:
+                message = "[%s] Source not found. Resuming.\n" % get_date()
+                log_message(message, log_file=session_file,
+                            console=args.verbosity)
+
     # If neither a previous source, dataset or model are provided.
     # we create a new one. Also if --evaluate and test data are provided
     # we create a new dataset to test with.
@@ -329,14 +335,14 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             "category": args.category,
             "tags": args.tag,
             "source_parser": {"header": data_set_header}}
-        if args.verbosity:
-            console_log("[%s] Creating source.\n" % get_date())
+        message = "[%s] Creating source.\n" % get_date()
+        log_message(message, log_file=session_file, console=args.verbosity)
         source = api.create_source(data_set, source_args,
                                    progress_bar=args.progress_bar)
         source = api.check_resource(source, api.get_source)
-        if args.verbosity:
-            console_log("[%s] Source created: %s\n" %
-                        (get_date(), get_url(source, api)))
+        message = "[%s] Source created: %s\n" % (get_date(),
+                                                 get_url(source, api))
+        log_message(message, log_file=session_file, console=args.verbosity)
         if log:
             log.write("%s\n" % source['resource'])
             log.flush()
@@ -352,18 +358,18 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
     # If a source is provided, we retrieve it.
     elif args.source:
-        if args.verbosity:
-            console_log("[%s] Retrieving source. %s\n" %
-                        (get_date(), get_url(args.source, api)))
+        message = "[%s] Retrieving source. %s\n" % (get_date(),
+                  get_url(args.source, api))
+        log_message(message, log_file=session_file, console=args.verbosity)
         source = api.get_source(args.source)
 
     # If we already have source, we check that is finished and extract the
     # fields, and update them if needed.
     if source:
         if source['object']['status']['code'] != bigml.api.FINISHED:
-            if args.verbosity:
-                console_log("[%s] Retrieving source. %s\n" %
-                            (get_date(), get_url(source, api)))
+            message = "[%s] Retrieving source. %s\n" % (get_date(),
+                                                        get_url(source, api))
+            log_message(message, log_file=session_file, console=args.verbosity)
             source = api.check_resource(source, api.get_source)
         csv_properties = {'missing_tokens':
                           source['object']['source_parser']['missing_tokens'],
@@ -376,9 +382,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             for (column, value) in field_attributes.iteritems():
                 update_fields.update({
                     fields.field_id(column): value})
-            if args.verbosity:
-                console_log("[%s] Updating source. %s\n" %
-                            (get_date(), get_url(source, api)))
+            message = "[%s] Updating source. %s\n" % (get_date(),
+                                                      get_url(source, api))
+            log_message(message, log_file=session_file, console=args.verbosity)
             source = api.update_source(source, {"fields": update_fields})
 
         update_fields = {}
@@ -386,17 +392,19 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             for (column, value) in types.iteritems():
                 update_fields.update({
                     fields.field_id(column): {'optype': value}})
-            if args.verbosity:
-                console_log("[%s] Updating source. %s\n" %
-                            (get_date(), get_url(source, api)))
+            message = "[%s] Updating source. %s\n" % (get_date(),
+                                                      get_url(source, api))
+            log_message(message, log_file=session_file, console=args.verbosity)
             source = api.update_source(source, {"fields": update_fields})
 
     if (training_set or args.source or (args.evaluate and test_set)):
         if resume:
             resume, args.dataset = checkpoint(is_dataset_created,
                                               path, bigml.api)
-            if not resume and args.verbosity:
-                console_log("[%s] Dataset not found. Resuming.\n" % get_date())
+            if not resume:
+                message = "[%s] Dataset not found. Resuming.\n" % get_date()
+                log_message(message, log_file=session_file,
+                            console=args.verbosity)
     # If we have a source but not dataset or model has been provided, we
     # create a new dataset if the no_dataset option isn't set up. Also
     # if evaluate is set and test_set has been provided.
@@ -420,13 +428,13 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             for name in dataset_fields:
                 input_fields.append(fields.field_id(name))
             dataset_args.update(input_fields=input_fields)
-        if args.verbosity:
-            console_log("[%s] Creating dataset.\n" % get_date())
+        message = "[%s] Creating dataset.\n" % get_date()
+        log_message(message, log_file=session_file, console=args.verbosity)
         dataset = api.create_dataset(source, dataset_args)
         dataset = api.check_resource(dataset, api.get_dataset)
-        if args.verbosity:
-            console_log("[%s] Dataset created: %s\n" %
-                        (get_date(), get_url(dataset, api)))
+        message = "[%s] Dataset created: %s\n" % (get_date(),
+                                                  get_url(dataset, api))
+        log_message(message, log_file=session_file, console=args.verbosity)
         if log:
             log.write("%s\n" % dataset['resource'])
             log.flush()
@@ -437,18 +445,18 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
     # If a dataset is provided, let's retrieve it.
     elif args.dataset:
-        if args.verbosity:
-            console_log("[%s] Retrieving dataset. %s\n" %
-                        (get_date(), get_url(args.dataset, api)))
+        message = "[%s] Retrieving dataset. %s\n" % (get_date(),
+                  get_url(args.dataset, api))
+        log_message(message, log_file=session_file, console=args.verbosity)
         dataset = api.get_dataset(args.dataset)
 
     # If we already have a dataset, we check the status and get the fields if
     # we hadn't them yet.
     if dataset:
         if dataset['object']['status']['code'] != bigml.api.FINISHED:
-            if args.verbosity:
-                console_log("[%s] Retrieving dataset. %s\n" %
-                            (get_date(), get_url(dataset, api)))
+            message = "[%s] Retrieving dataset. %s\n" % (get_date(),
+                      get_url(dataset, api))
+            log_message(message, log_file=session_file, console=args.verbosity)
             dataset = api.check_resource(dataset, api.get_dataset)
         if not csv_properties:
             csv_properties = {'data_locale':
@@ -456,13 +464,15 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if args.public_dataset:
             public_dataset = {"private": False}
             if args.dataset_price:
-                if args.verbosity:
-                    console_log("[%s] Updating dataset. %s\n" %
-                                (get_date(), get_url(dataset, api)))
+                message = "[%s] Updating dataset. %s\n" % (get_date(),
+                          get_url(dataset, api))
+                log_message(message, log_file=session_file,
+                            console=args.verbosity)
                 public_dataset.update(price=args.dataset_price)
-            if args.verbosity:
-                console_log("[%s] Updating dataset. %s\n" %
-                            (get_date(), get_url(dataset, api)))
+            message = "[%s] Updating dataset. %s\n" % (get_date(),
+                      get_url(dataset, api))
+            log_message(message, log_file=session_file,
+                        console=args.verbosity)
             dataset = api.update_dataset(dataset, public_dataset)
         fields = Fields(dataset['object']['fields'], **csv_properties)
 
@@ -507,10 +517,12 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             resume, model_ids = checkpoint(are_models_created, path,
                                            args.number_of_models,
                                            bigml.api)
-            if not resume and args.verbosity:
-                console_log("[%s] Found %s models out of %s. Resuming.\n" %
-                            (get_date(), len(model_ids),
-                             args.number_of_models))
+            if not resume:
+                message = ("[%s] Found %s models out of %s. Resuming.\n" %
+                           (get_date(), len(model_ids),
+                            args.number_of_models))
+                log_message(message, log_file=session_file,
+                            console=args.verbosity)
             models = model_ids
             args.number_of_models -= len(model_ids)
 
@@ -520,8 +532,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         last_model = None
         if args.number_of_models > 0:
             plural = "s" if args.number_of_models > 1 else ""
-            if args.verbosity:
-                console_log("[%s] Creating model%s.\n" % (get_date(), plural))
+            message = "[%s] Creating model%s.\n" % (get_date(), plural)
+            log_message(message, log_file=session_file, console=args.verbosity)
             for i in range(1, args.number_of_models + 1):
                 if i > args.max_parallel_models:
                     api.check_resource(last_model, api.get_model)
@@ -538,15 +550,17 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 if model['object']['status']['code'] != bigml.api.FINISHED:
                     model = api.check_resource(model, api.get_model)
                     models[0] = model
-                console_log("[%s] Model created: %s.\n" %
-                            (get_date(), get_url(model, api)))
+                message = "[%s] Model created: %s.\n" % (get_date(),
+                          get_url(model, api))
+                log_message(message, log_file=session_file,
+                            console=args.verbosity)
         model_file.close()
 
     # If a model is provided, we retrieve it.
     elif args.model:
-        if args.verbosity:
-            console_log("[%s] Retrieving model. %s\n" %
-                        (get_date(), get_url(args.model, api)))
+        message = "[%s] Retrieving model. %s\n" % (get_date(),
+                  get_url(args.model, api))
+        log_message(message, log_file=session_file, console=args.verbosity)
         model = api.get_model(args.model)
 
     elif args.models or args.model_tag:
@@ -558,9 +572,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             plural = "s"
         else:
             model_id = model_ids[0]
-        if args.verbosity:
-            console_log("[%s] Retrieving model%s. %s\n" %
-                        (get_date(), plural, get_url(model_id, api)))
+        message = "[%s] Retrieving model%s. %s\n" % (get_date(),
+                  plural, get_url(model_id, api))
+        log_message(message, log_file=session_file, console=args.verbosity)
         if len(model_ids) < args.max_batch_models:
             models = []
             for model in model_ids:
@@ -576,23 +590,25 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if model and not args.evaluate and (test_set or args.black_box
                                         or args.white_box):
         if model['object']['status']['code'] != bigml.api.FINISHED:
-            if args.verbosity:
-                console_log("[%s] Retrieving model. %s\n" %
-                            (get_date(), get_url(model, api)))
+            message = "[%s] Retrieving model. %s\n" % (get_date(),
+                      get_url(model, api))
+            log_message(message, log_file=session_file, console=args.verbosity)
             model = api.check_resource(model, api.get_model)
         if args.black_box:
             model = api.update_model(model, {"private": False})
         if args.white_box:
             public_model = {"private": False, "white_box": True}
             if args.model_price:
-                if args.verbosity:
-                    console_log("[%s] Updating model. %s\n" %
-                                (get_date(), get_url(model, api)))
+                message = "[%s] Updating model. %s\n" % (get_date(),
+                          get_url(model, api))
+                log_message(message, log_file=session_file,
+                            console=args.verbosity)
                 public_model.update(price=args.model_price)
             if args.cpp:
-                if args.verbosity:
-                    console_log("[%s] Updating model. %s\n" %
-                                (get_date(), get_url(model, api)))
+                message = "[%s] Updating model. %s\n" % (get_date(),
+                          get_url(model, api))
+                log_message(message, log_file=session_file,
+                            console=args.verbosity)
                 public_model.update(credits_per_prediction=args.cpp)
             model = api.update_model(model, public_model)
         if not csv_properties:
@@ -623,8 +639,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                           r'\1', votes_files[0]).replace("_", "/")
         model = api.check_resource(model_id, api.get_model)
         local_model = Model(model)
-        if args.verbosity:
-            console_log("[%s] Combining votes.\n" % get_date())
+        message = "[%s] Combining votes.\n" % get_date()
+        log_message(message, log_file=session_file,
+                    console=args.verbosity)    
         combine_votes(votes_files, local_model.to_prediction,
                       output, args.method)
 
@@ -634,9 +651,10 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if resume:
             resume, evaluation = checkpoint(is_evaluation_created,
                                             path, bigml.api)
-            if not resume and args.verbosity:
-                console_log("[%s] Evaluation not found. Resuming.\n" %
-                            get_date())
+            if not resume:
+                message = "[%s] Evaluation not found. Resuming.\n" % get_date()
+                log_message(message, log_file=session_file,
+                            console=args.verbosity) 
         if not resume:
             evaluation_file = open(path + '/evaluation', 'w', 0)
             evaluation_args = {
@@ -656,8 +674,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 seed = SEED
                 evaluation_args.update(out_of_bag=True, seed=seed,
                                        sample_rate=args.sample_rate)
-            if args.verbosity:
-                console_log("[%s] Creating evaluation.\n" % get_date())
+            message = "[%s] Creating evaluation.\n" % get_date()
+            log_message(message, log_file=session_file, console=args.verbosity) 
             evaluation = api.create_evaluation(model, dataset, evaluation_args)
             if log:
                 log.write("%s\n" % evaluation['resource'])
@@ -665,9 +683,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             evaluation_file.write("%s\n" % evaluation['resource'])
             evaluation_file.flush()
             evaluation_file.close()
-        if args.verbosity:
-            console_log("[%s] Retrieving evaluation. %s\n" %
-                        (get_date(), get_url(evaluation, api)))
+        message = "[%s] Retrieving evaluation. %s\n" % (get_date(),
+                  get_url(evaluation, api))
+        log_message(message, log_file=session_file, console=args.verbosity)
         evaluation = api.check_resource(evaluation, api.get_evaluation)
         evaluation_json = open(output + '.json', 'w', 0)
         evaluation_json.write(json.dumps(evaluation['object']['result']))
@@ -681,8 +699,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
     if args.log_file and log:
         log.close()
-    if args.verbosity:
-        console_log("\nGenerated files:\n\n" + print_tree(path, " ") + "\n")
+    message = "\nGenerated files:\n\n" + print_tree(path, " ") + "\n"
+    log_message(message, log_file=session_file, console=args.verbosity)
 
 
 def main(args=sys.argv[1:]):
@@ -696,13 +714,14 @@ def main(args=sys.argv[1:]):
                 open(log_file, 'w', 0).close()
             except:
                 pass
-
+    for i in range(0, len(args)):
+        if ' ' in args[i]:
+            args[i] = '"%s"' % args[i]
+    message = "bigmler %s\n" % " ".join(args)
+    
     if not "--resume" in args:
         command_log = open(COMMAND_LOG, "a", 0)
-        for i in range(0, len(args)):
-            if ' ' in args[i]:
-                args[i] = '"%s"' % args[i]
-        command_log.write("bigmler %s\n" % " ".join(args))
+        command_log.write(message)
         command_log.close()
         resume = False
 
@@ -718,13 +737,17 @@ def main(args=sys.argv[1:]):
                                    command_args.stack_level)
         args = shlex.split(command)[1:]
         output_dir = get_log_reversed(DIRS_LOG,
-                                      command_args.stack_level)
-        console_log("\nResuming command:\n%s\n\n" % command)
+                                      command_args.stack_level)       
         command_args = parser.parse_args(args)
         if command_args.predictions is None:
             command_args.predictions = ("%s%s%s" %
                                         (output_dir, os.sep,
                                          default_output))
+        # Logs the issued command and the resumed command
+        session_file = "%s%s%s" % (output_dir, os.sep, SESSIONS_LOG)
+        log_message(message, log_file=session_file)
+        message = "\nResuming command:\n%s\n\n" % command
+        log_message(message, log_file=session_file)
         resume = True
     else:
         if command_args.predictions is None:
@@ -736,6 +759,8 @@ def main(args=sys.argv[1:]):
                                         (NOW, os.sep,
                                          command_args.predictions))
         directory = check_dir(command_args.predictions)
+        session_file = "%s%s%s" % (directory, os.sep, SESSIONS_LOG)
+        log_message(message + "\n", log_file=session_file)
         directory_log = open(DIRS_LOG, "a", 0)
         directory_log.write("%s\n" % os.path.abspath(directory))
         directory_log.close()
@@ -855,8 +880,14 @@ def main(args=sys.argv[1:]):
 
     # Parses resources ids if provided.
     if command_args.delete:
-        if command_args.verbosity:
-            console_log("[%s] Retrieving objects to delete.\n" % get_date())
+        if command_args.predictions is None:
+            path = NOW
+        else:
+            path = check_dir(command_args.predictions)
+        session_file = "%s%s%s" % (path, os.sep, SESSIONS_LOG)
+        message = "[%s] Retrieving objects to delete.\n" % get_date()
+        log_message(message, log_file=session_file,
+                    console=command_args.verbosity)
         delete_list = []
         if command_args.delete_list:
             delete_list = map(lambda x: x.strip(),
@@ -893,16 +924,22 @@ def main(args=sys.argv[1:]):
         if command_args.evaluation_tag:
             query_string = "tags__in=%s" % command_args.evaluation_tag
             delete_list.extend(list_evaluation_ids(api, query_string))
-        if command_args.verbosity:
-            console_log("[%s] Deleting objects.\n" % get_date())
+        message = "[%s] Deleting objects.\n" % get_date()
+        log_message(message, log_file=session_file,
+                    console=command_args.verbosity)
+        message = "\n".join(delete_list)
+        log_message(message, log_file=session_file)
         delete(api, delete_list)
+        message = "\nGenerated files:\n\n" + print_tree(path, " ") + "\n"
+        log_message(message, log_file=session_file,
+                    console=command_args.verbosity)
         if command_args.verbosity:
             console_log("")
     elif (command_args.training_set or command_args.test_set
           or command_args.source or command_args.dataset
           or command_args.datasets or command_args.votes_dirs):
         compute_output(**output_args)
-
+    log_message("_" * 80 + "\n", log_file=session_file)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
