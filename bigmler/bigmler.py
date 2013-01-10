@@ -59,7 +59,7 @@ except ImportError:
 import bigml.api
 from bigml.model import Model
 from bigml.multimodel import MultiModel
-from bigml.prediction_combiners import COMBINATION_METHODS, PLURALITY
+from bigml.prediction_combiners import COMBINATION_WEIGHTS, PLURALITY
 from bigml.fields import Fields
 
 from bigml.util import localize, console_log, get_csv_delimiter, \
@@ -863,7 +863,7 @@ def main(args=sys.argv[1:]):
 
     # Checks combined votes method
     if (command_args.method and
-            not command_args.method in COMBINATION_METHODS.keys()):
+            not command_args.method in COMBINATION_WEIGHTS.keys()):
         command_args.method = PLURALITY
 
     # Reads votes files in the provided directories.
