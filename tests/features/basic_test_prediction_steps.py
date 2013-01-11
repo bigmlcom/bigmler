@@ -9,7 +9,7 @@ def i_create_all_resources(step, data=None, test=None, output=None):
     if data is None or test is None or output is None:
         assert False
     try:
-        retcode = call("bigmler --train " + data + " --test " + test + " --output " + output + " --max_batch_models 1", shell=True)
+        retcode = call("bigmler --train " + data + " --test " + test + " --output " + output + " --max-batch-models 1", shell=True)
         if retcode < 0:
             assert False
         else:
@@ -69,7 +69,7 @@ def i_create_resources_from_source(step, test=None, output=None):
     if test is None or output is None:
         assert False
     try:
-        retcode = call("bigmler --model " + world.model['resource'] + " --test " + test + " --output " + output + " --max_batch_models 1", shell=True)
+        retcode = call("bigmler --model " + world.model['resource'] + " --test " + test + " --output " + output + " --max-batch-models 1", shell=True)
         if retcode < 0:
             assert False
         else:
@@ -89,7 +89,7 @@ def i_create_resources_from_source(step, number_of_models=None, test=None, outpu
     if number_of_models is None or test is None or output is None:
         assert False
     try:
-        retcode = call("bigmler --dataset " + world.dataset['resource'] + " --test " + test + " --number_of_models " + number_of_models + " --tag my_ensemble --output " + output, shell=True)
+        retcode = call("bigmler --dataset " + world.dataset['resource'] + " --test " + test + " --number-of-models " + number_of_models + " --tag my_ensemble --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -150,7 +150,7 @@ def i_find_predictions_files(step, directory1=None, directory2=None, output=None
     if directory1 is None or directory2 is None or output is None:
         assert False
     try:
-        retcode = call("bigmler --combine_votes " + directory1 + "," + directory2 + " --output " + output, shell=True)
+        retcode = call("bigmler --combine-votes " + directory1 + "," + directory2 + " --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -170,7 +170,7 @@ def i_find_predictions_files(step, directory1=None, directory2=None, output=None
     if directory1 is None or directory2 is None or output is None or method is None:
         assert False
     try:
-        retcode = call("bigmler --combine_votes " + directory1 + "," + directory2 + " --output " + output + " --method " + method, shell=True)
+        retcode = call("bigmler --combine-votes " + directory1 + "," + directory2 + " --output " + output + " --method " + method, shell=True)
         if retcode < 0:
             assert False
         else:

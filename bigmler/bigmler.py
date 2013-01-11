@@ -66,6 +66,7 @@ from bigml.util import localize, console_log, get_csv_delimiter, \
     get_predictions_file_name
 
 from bigmler.options import create_parser
+from bigmler.defaults import get_user_defaults
 from bigmler.utils import read_description, read_field_attributes, \
     read_types, read_models, read_dataset, read_json_filter, \
     read_lisp_filter, read_votes_files, list_source_ids, list_dataset_ids, \
@@ -502,11 +503,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 input_fields.append(fields.field_id(name))
             model_args.update(input_fields=input_fields)
 
-        if args.stat_pruning:
-            model_args.update(stat_pruning=True)
-
-        if args.no_stat_pruning:
-            model_args.update(stat_pruning=False)
+        if args.pruning and args.pruning != 'smart':
+            model_args.update(stat_pruning=(args.pruning=='statistical'))
 
         model_args.update(sample_rate=args.sample_rate,
                           replacement=args.replacement,
@@ -725,7 +723,8 @@ def main(args=sys.argv[1:]):
         command_log.close()
         resume = False
 
-    parser = create_parser(defaults={'NOW': NOW, 'MAX_MODELS': MAX_MODELS})
+    parser = create_parser(defaults=get_user_defaults(), constants={'NOW': NOW,
+                           'MAX_MODELS': MAX_MODELS, 'PLURALITY': PLURALITY})
 
     # Parses command line arguments.
     command_args = parser.parse_args(args)
