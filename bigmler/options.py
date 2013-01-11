@@ -243,20 +243,6 @@ def create_parser(defaults={}, constants={}):
                               " one dataset"
                               " (e.g., dataset/50a20697035d0706da0004a4)"))
 
-    """
-    # Set to True to active statiscal pruning.
-    parser.add_argument('--stat_pruning',
-                        action='store_true',
-                        default=defaults.get('stat_pruning', False),
-                        help="Use statiscal pruning.")
-
-    # Set to False to deactivate statiscal pruning.
-    parser.add_argument('--no_stat_pruning',
-                        action='store_true',
-                        default=not defaults.get('no_stat_pruning', False),
-                        help="Do not use statistical pruning.")
-    """
-
     # Sets pruning.
     parser.add_argument('--pruning',
                         action='store',
@@ -532,5 +518,116 @@ def create_parser(defaults={}, constants={}):
                         default=defaults.get('clear_logs', False),
                         help="Clear global bigmler log files.")
 
+
+    # The following options are only useful to deactivate the corresponding oposed default values
+
+    # Hides log info for each https request.
+    parser.add_argument('--no-debug',
+                        action='store_false',
+                        dest='debug',
+                        default=defaults.get('debug', False),
+                        help="Deactivate debug level")
+
+    # Uses BigML standard environment.
+    parser.add_argument('--no-dev',
+                        action='store_false',
+                        dest='dev_mode',
+                        default=defaults.get('dev', False),
+                        help=("Compute a test output using BigML "
+                             "standard development environment"))  
+
+    # Set when the training set file does include a header on the first
+    # line.
+    parser.add_argument('--train-header',
+                        action='store_true',
+                        dest='train_header',
+                        default=defaults.get('train_header', True),
+                        help="The train set file has a header")
+
+    # Set when the test set file does include a header on the first
+    # line.
+    parser.add_argument('--test-header',
+                        action='store_true',
+                        dest='test_header',
+                        default=defaults.get('test_header', True),
+                        help="The test set file has a header")
+
+    # Use it to compute predictions locally.
+    parser.add_argument('--local',
+                        action='store_false',
+                        dest='remote',
+                        default=defaults.get('remote', False),
+                        help="Compute predictions locally")
+
+    # Deactivate replacement to use when using bagging.
+    parser.add_argument('--no-replacement',
+                        action='store_false',
+                        dest='replacement',
+                        default=defaults.get('replacement', False),
+                        help="Don't use replacement when sampling")
+
+    # Doesn't randomize feature selection at each split.
+    parser.add_argument('--no-randomize',
+                        action='store_false',
+                        dest='randomize',
+                        default=defaults.get('randomize', False),
+                        help="Doesn't randomize feature selection at each split.")
+
+    # Set default tagging of resources.
+    parser.add_argument('--no-no-tag',
+                        action='store_true',
+                        dest='no_tag',
+                        default=defaults.get('no_tag', False),
+                        help="No tag resources with default BigMLer tags")
+
+    # Doesn't make dataset public.
+    parser.add_argument('--no-public-dataset',
+                        action='store_false',
+                        dest='public_dataset',
+                        default=defaults.get('public_dataset', False),
+                        help="Doesn't make generated dataset public")
+
+    # Doesn't make model a public black-box model.
+    parser.add_argument('--no-black-box',
+                        action='store_false',
+                        dest='black_box',
+                        default=defaults.get('black_box', False),
+                        help="Doesn't make generated model black-box")
+
+    # Doesn't make model a public white-box model.
+    parser.add_argument('--no-white-box',
+                        action='store_false',
+                        dest='white_box',
+                        default=defaults.get('white_box', False),
+                        help="Doesn't make generated model white-box")
+
+    # Hides progress information when uploading a file.
+    parser.add_argument('--no-progress-bar',
+                        action='store_false',
+                        dest='progress_bar',
+                        default=defaults.get('progress_bar', False),
+                        help="Show progress details when creating a source.")
+
+    # Create a dataset.
+    parser.add_argument('--no-no-dataset',
+                        action='store_false',
+                        dest='no_dataset',
+                        default=defaults.get('no_dataset', False),
+                        help="Create a dataset.")
+
+
+    # Create a model just a dataset.
+    parser.add_argument('--no-no-model',
+                        action='store_false',
+                        dest='no_model',
+                        default=defaults.get('no_model', False),
+                        help="Do not create a model.")
+
+    # Don't clear global bigmler log files
+    parser.add_argument('--no-clear-logs',
+                        action='store_false',
+                        dest='clear_logs',
+                        default=defaults.get('clear_logs', False),
+                        help="Clear global bigmler log files.")
 
     return parser
