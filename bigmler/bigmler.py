@@ -59,7 +59,7 @@ except ImportError:
 import bigml.api
 from bigml.model import Model
 from bigml.multimodel import MultiModel
-from bigml.prediction_combiners import COMBINATION_WEIGHTS, PLURALITY
+from bigml.multivote import COMBINATION_WEIGHTS, COMBINER_MAP, PLURALITY
 from bigml.fields import Fields
 
 from bigml.util import localize, console_log, get_csv_delimiter, \
@@ -67,6 +67,7 @@ from bigml.util import localize, console_log, get_csv_delimiter, \
 
 from bigmler.options import create_parser
 from bigmler.defaults import get_user_defaults
+from bigmler.defaults import DEFAULTS_FILE
 from bigmler.utils import read_description, read_field_attributes, \
     read_types, read_models, read_dataset, read_json_filter, \
     read_lisp_filter, read_votes_files, list_source_ids, list_dataset_ids, \
@@ -92,7 +93,7 @@ LOG_FILES = [COMMAND_LOG, DIRS_LOG, NEW_DIRS_LOG]
 
 def predict(test_set, test_set_header, models, fields, output,
             objective_field, remote=False, api=None, log=None,
-            max_models=MAX_MODELS, method=PLURALITY, resume=False,
+            max_models=MAX_MODELS, method=0, resume=False,
             tags=None, verbosity=1, session_file=None):
     """Computes a prediction for each entry in the `test_set`.
 
@@ -214,10 +215,7 @@ def predict(test_set, test_set_header, models, fields, output,
                 prediction = local_model.predict(input_data,
                                                  by_name=test_set_header,
                                                  method=method)
-                if isinstance(prediction, basestring):
-                    prediction = prediction.encode("utf-8")
-                output.write("%s\n" % prediction)
-                output.flush()
+                write_prediction(prediction, output)
         # For large numbers of models, we split the list of models in chunks
         # and build a MultiModel for each chunk, issue and store predictions
         # for each model and combine all of them eventually.
@@ -255,18 +253,15 @@ def predict(test_set, test_set_header, models, fields, output,
                 if verbosity:
                     draw_progress_bar(models_count, models_total)
                 if total_votes:
-                    for index in range(len(votes)):
-                        for prediction in votes[index].keys():
-                            if not prediction in total_votes[index]:
-                                total_votes[index][prediction] = []
-                            total_votes[index][prediction].extend(votes[index]
-                                                                  [prediction])
+                    for index in range(0, len(votes)):
+                        predictions = total_votes[index].predictions
+                        predictions.extend(votes[index].predictions)
                 else:
                     total_votes = votes
             message = "[%s] Combining predictions.\n" % get_date()
             log_message(message, log_file=session_file, console=verbosity)
-            for predictions in total_votes:
-                write_prediction(predictions, method, output)
+            for multivote in total_votes:
+                write_prediction(multivote.combine(method), output)
 
     console_log("")
     output.close()
@@ -749,7 +744,16 @@ def main(args=sys.argv[1:]):
         session_file = "%s%s%s" % (output_dir, os.sep, SESSIONS_LOG)
         log_message(message, log_file=session_file)
         message = "\nResuming command:\n%s\n\n" % command
-        log_message(message, log_file=session_file)
+        log_message(message, log_file=session_file, console=True)
+        try:
+            defaults_file = open(DEFAULTS_FILE, 'r')
+            contents = defaults_file.read()
+            message = "\nUsing the following defaults:\n%s\n\n" % contents
+            log_message(message, log_file=session_file, console=True)
+            defaults_file.close()
+        except:
+            pass
+
         resume = True
     else:
         if command_args.predictions is None:
@@ -866,7 +870,11 @@ def main(args=sys.argv[1:]):
     # Checks combined votes method
     if (command_args.method and
             not command_args.method in COMBINATION_WEIGHTS.keys()):
-        command_args.method = PLURALITY
+        command_args.method = 0
+    else:
+        combiner_methods = dict([[value, key]
+                                for key, value in COMBINER_MAP.items()])
+        command_args.method = combiner_methods.get(command_args.method, 0)
 
     # Reads votes files in the provided directories.
     if command_args.votes_dirs:

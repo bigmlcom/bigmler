@@ -34,7 +34,8 @@ except ImportError:
     import json
 
 import bigml.api
-from bigml.multimodel import combine_predictions, read_votes
+from bigml.multimodel import read_votes
+from bigml.multivote import MultiVote
 from bigml.util import console_log
 
 PAGE_LENGTH = 200
@@ -320,7 +321,7 @@ def list_evaluation_ids(api, query_string):
     return ids
 
 
-def combine_votes(votes_files, to_prediction, to_file, method='plurality'):
+def combine_votes(votes_files, to_prediction, to_file, method=0):
     """Combines the votes found in the votes' files and stores predictions.
 
        votes_files: should contain the list of file names
@@ -332,8 +333,8 @@ def combine_votes(votes_files, to_prediction, to_file, method='plurality'):
 
     check_dir(to_file)
     output = open(to_file, 'w', 0)
-    for predictions in votes:
-        write_prediction(predictions, method, output)
+    for multivote in votes:
+        write_prediction(multivote.combine(method), output)
     output.close()
 
 
@@ -369,11 +370,10 @@ def check_dir(path):
     return directory
 
 
-def write_prediction(predictions, method, output=sys.stdout):
+def write_prediction(prediction, output=sys.stdout):
     """Writes the final combined prediction to the required output
 
     """
-    prediction = combine_predictions(predictions, method)
     if isinstance(prediction, basestring):
         prediction = prediction.encode("utf-8")
     output.write("%s\n" % prediction)
