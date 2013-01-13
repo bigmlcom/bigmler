@@ -298,7 +298,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if args.clear_logs:
             try:
                 open(log, 'w', 0).close()
-            except:
+            except IOError:
                 pass
         log = open(args.log_file, 'a', 0)
 
@@ -499,7 +499,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             model_args.update(input_fields=input_fields)
 
         if args.pruning and args.pruning != 'smart':
-            model_args.update(stat_pruning=(args.pruning=='statistical'))
+            model_args.update(stat_pruning=(args.pruning == 'statistical'))
 
         model_args.update(sample_rate=args.sample_rate,
                           replacement=args.replacement,
@@ -634,7 +634,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         local_model = Model(model)
         message = "[%s] Combining votes.\n" % get_date()
         log_message(message, log_file=session_file,
-                    console=args.verbosity)    
+                    console=args.verbosity)
         combine_votes(votes_files, local_model.to_prediction,
                       output, args.method)
 
@@ -647,7 +647,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             if not resume:
                 message = "[%s] Evaluation not found. Resuming.\n" % get_date()
                 log_message(message, log_file=session_file,
-                            console=args.verbosity) 
+                            console=args.verbosity)
         if not resume:
             evaluation_file = open(path + '/evaluation', 'w', 0)
             evaluation_args = {
@@ -668,7 +668,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 evaluation_args.update(out_of_bag=True, seed=seed,
                                        sample_rate=args.sample_rate)
             message = "[%s] Creating evaluation.\n" % get_date()
-            log_message(message, log_file=session_file, console=args.verbosity) 
+            log_message(message, log_file=session_file, console=args.verbosity)
             evaluation = api.create_evaluation(model, dataset, evaluation_args)
             if log:
                 log.write("%s\n" % evaluation['resource'])
@@ -708,13 +708,13 @@ def main(args=sys.argv[1:]):
         for log_file in LOG_FILES:
             try:
                 open(log_file, 'w', 0).close()
-            except:
+            except IOError:
                 pass
     for i in range(0, len(args)):
         if ' ' in args[i]:
             args[i] = '"%s"' % args[i]
     message = "bigmler %s\n" % " ".join(args)
-    
+
     if not "--resume" in args:
         command_log = open(COMMAND_LOG, "a", 0)
         command_log.write(message)
@@ -734,7 +734,7 @@ def main(args=sys.argv[1:]):
                                    command_args.stack_level)
         args = shlex.split(command)[1:]
         output_dir = get_log_reversed(DIRS_LOG,
-                                      command_args.stack_level)       
+                                      command_args.stack_level)
         command_args = parser.parse_args(args)
         if command_args.predictions is None:
             command_args.predictions = ("%s%s%s" %
@@ -751,7 +751,7 @@ def main(args=sys.argv[1:]):
             message = "\nUsing the following defaults:\n%s\n\n" % contents
             log_message(message, log_file=session_file, console=True)
             defaults_file.close()
-        except:
+        except IOError:
             pass
 
         resume = True

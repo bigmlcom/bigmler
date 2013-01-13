@@ -23,7 +23,7 @@ import ConfigParser
 
 DEFAULTS_FILE = '.bigmler_defaults'
 
-flags = {'BigMLer': [{'flag': 'debug', 'type': 'boolean'},
+FLAGS = {'BigMLer': [{'flag': 'debug', 'type': 'boolean'},
                      {'flag': 'dev', 'type': 'boolean'},
                      {'flag': 'username', 'type': 'string'},
                      {'flag': 'api_key', 'type': 'string'},
@@ -78,8 +78,7 @@ flags = {'BigMLer': [{'flag': 'debug', 'type': 'boolean'},
                      {'flag': 'plurality', 'type': 'string'},
                      {'flag': 'verbosity', 'type': 'int'},
                      {'flag': 'fields_map', 'type': 'string'},
-                     {'flag': 'clear_logs', 'type': 'boolean'},
-                    ]}
+                     {'flag': 'clear_logs', 'type': 'boolean'}]}
 
 
 def get_user_defaults():
@@ -91,7 +90,7 @@ def get_user_defaults():
         config = ConfigParser.ConfigParser()
         config.read(DEFAULTS_FILE)
         defaults = parse_user_defaults(config)
-    except:
+    except IOError:
         defaults = {}
 
     return defaults
@@ -106,12 +105,12 @@ def parse_user_defaults(config):
                   'int': config.getint,
                   'string': config.get}
     defaults = {}
-    for section in flags:
-        for argument in flags[section]:
+    for section in FLAGS:
+        for argument in FLAGS[section]:
             try:
                 value = config_get[argument['type']](section,
                                                      argument['flag'])
                 defaults.update({argument['flag']: value})
-            except Exception:
+            except ConfigParser.Error:
                 pass
     return defaults

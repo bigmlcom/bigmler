@@ -35,7 +35,6 @@ except ImportError:
 
 import bigml.api
 from bigml.multimodel import read_votes
-from bigml.multivote import MultiVote
 from bigml.util import console_log
 
 PAGE_LENGTH = 200

@@ -25,6 +25,7 @@ import argparse
 import datetime
 import pkg_resources
 
+
 def create_parser(defaults={}, constants={}):
     """Sets the accepted command options, variables, defaults and help
 
@@ -469,8 +470,8 @@ def create_parser(defaults={}, constants={}):
                         action='store',
                         dest='method',
                         default=defaults.get('method', plurality),
-                        choices = ["plurality", "\"confidence weighted\"",
-                                   "\"probability weighted\""],
+                        choices=["plurality", "\"confidence weighted\"",
+                                 "\"probability weighted\""],
                         help="Method to combine votes from ensemble"
                              " predictions. Allowed methods: plurality"
                              ", \"confidence weighted\" or "
@@ -518,9 +519,9 @@ def create_parser(defaults={}, constants={}):
                         default=defaults.get('clear_logs', False),
                         help="Clear global bigmler log files.")
 
-
-    # The following options are only useful to deactivate the corresponding oposed default values
-
+    # The following options are only useful to deactivate the corresponding
+    # oposed default values
+    #
     # Hides log info for each https request.
     parser.add_argument('--no-debug',
                         action='store_false',
@@ -534,7 +535,7 @@ def create_parser(defaults={}, constants={}):
                         dest='dev_mode',
                         default=defaults.get('dev', False),
                         help=("Compute a test output using BigML "
-                             "standard development environment"))  
+                             "standard development environment"))
 
     # Set when the training set file does include a header on the first
     # line.
@@ -571,7 +572,8 @@ def create_parser(defaults={}, constants={}):
                         action='store_false',
                         dest='randomize',
                         default=defaults.get('randomize', False),
-                        help="Doesn't randomize feature selection at each split.")
+                        help=("Doesn't randomize feature selection at each"
+                              " split."))
 
     # Set default tagging of resources.
     parser.add_argument('--no-no-tag',
@@ -614,7 +616,6 @@ def create_parser(defaults={}, constants={}):
                         dest='no_dataset',
                         default=defaults.get('no_dataset', False),
                         help="Create a dataset.")
-
 
     # Create a model just a dataset.
     parser.add_argument('--no-no-model',
