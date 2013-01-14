@@ -702,7 +702,7 @@ def main(args=sys.argv[1:]):
     """
     for i in range(0, len(args)):
         if args[i].startswith("--"):
-            args[i].replace("_", "-")
+            args[i] = args[i].replace("_", "-")
     # If --clear-logs the log files are cleared
     if "--clear-logs" in args:
         for log_file in LOG_FILES:
