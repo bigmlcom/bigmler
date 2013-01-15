@@ -81,14 +81,14 @@ FLAGS = {'BigMLer': [{'flag': 'debug', 'type': 'boolean'},
                      {'flag': 'clear_logs', 'type': 'boolean'}]}
 
 
-def get_user_defaults():
+def get_user_defaults(defaults_file=DEFAULTS_FILE):
     """Looks for a defaults file and returns its contents
 
     """
     try:
-        open(DEFAULTS_FILE).close()
+        open(defaults_file).close()
         config = ConfigParser.ConfigParser()
-        config.read(DEFAULTS_FILE)
+        config.read(defaults_file)
         defaults = parse_user_defaults(config)
     except IOError:
         defaults = {}

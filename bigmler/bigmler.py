@@ -735,6 +735,10 @@ def main(args=sys.argv[1:]):
         args = shlex.split(command)[1:]
         output_dir = get_log_reversed(DIRS_LOG,
                                       command_args.stack_level)
+        defaults_file = "%s%s%s" % (output_dir, os.sep, DEFAULTS_FILE)
+        parser = create_parser(defaults=get_user_defaults(defaults_file),
+                               constants={'NOW': NOW, 'MAX_MODELS': MAX_MODELS,
+                                          'PLURALITY': PLURALITY})
         command_args = parser.parse_args(args)
         if command_args.predictions is None:
             command_args.predictions = ("%s%s%s" %
@@ -746,11 +750,11 @@ def main(args=sys.argv[1:]):
         message = "\nResuming command:\n%s\n\n" % command
         log_message(message, log_file=session_file, console=True)
         try:
-            defaults_file = open(DEFAULTS_FILE, 'r')
-            contents = defaults_file.read()
+            defaults_handler = open(defaults_file, 'r')
+            contents = defaults_handler.read()
             message = "\nUsing the following defaults:\n%s\n\n" % contents
             log_message(message, log_file=session_file, console=True)
-            defaults_file.close()
+            defaults_handler.close()
         except IOError:
             pass
 
@@ -767,6 +771,16 @@ def main(args=sys.argv[1:]):
         directory = check_dir(command_args.predictions)
         session_file = "%s%s%s" % (directory, os.sep, SESSIONS_LOG)
         log_message(message + "\n", log_file=session_file)
+        try:
+            defaults_file = open(DEFAULTS_FILE, 'r')
+            contents = defaults_file.read()
+            defaults_file.close()
+            defaults_copy = open("%s%s%s" % (directory, os.sep, DEFAULTS_FILE),
+                                 'w', 0)
+            defaults_copy.write(contents)
+            defaults_copy.close()
+        except IOError:
+            pass
         directory_log = open(DIRS_LOG, "a", 0)
         directory_log.write("%s\n" % os.path.abspath(directory))
         directory_log.close()
