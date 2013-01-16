@@ -692,7 +692,16 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
     if args.log_file and log:
         log.close()
-    message = "\nGenerated files:\n\n" + print_tree(path, " ") + "\n"
+    # Workaround to restore windows console cp850 encoding to print the tree
+    if sys.platform == "win32" and sys.stdout.isatty():
+        import locale
+        data_locale = locale.getlocale()
+        if not data_locale[0] is None:
+            locale.setlocale(locale.LC_ALL, (data_locale[0], "850"))
+        message = (u"\nGenerated files:\n\n" +
+                   unicode(print_tree(path, " "), "utf-8") + u"\n")
+    else:
+        message = "\nGenerated files:\n\n" + print_tree(path, " ") + "\n"
     log_message(message, log_file=session_file, console=args.verbosity)
 
 
@@ -715,6 +724,7 @@ def main(args=sys.argv[1:]):
             args[i] = '"%s"' % args[i]
     message = "bigmler %s\n" % " ".join(args)
 
+    # Resume calls are not logged
     if not "--resume" in args:
         command_log = open(COMMAND_LOG, "a", 0)
         command_log.write(message)
@@ -954,7 +964,11 @@ def main(args=sys.argv[1:]):
         message = "\n".join(delete_list)
         log_message(message, log_file=session_file)
         delete(api, delete_list)
-        message = "\nGenerated files:\n\n" + print_tree(path, " ") + "\n"
+        if sys.platform == "win32" and sys.stdout.isatty():
+            message = (u"\nGenerated files:\n\n" +
+                       unicode(print_tree(path, " "), "utf-8") + u"\n")
+        else:
+            message = "\nGenerated files:\n\n" + print_tree(path, " ") + "\n"
         log_message(message, log_file=session_file,
                     console=command_args.verbosity)
         if command_args.verbosity:

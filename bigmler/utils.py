@@ -597,10 +597,11 @@ def log_message(message, log_file=None, console=False):
        If log_file is set, logs the message in the file.
        If console is True, sends the message to console.
     """
-
+    if console:
+        console_log(message)
     if not log_file is None:
+        if isinstance(message, unicode):
+            message = message.encode("utf-8")
         log_file = open(log_file, 'a', 0)
         log_file.write(message)
         log_file.close()
-    if console:
-        console_log(message)

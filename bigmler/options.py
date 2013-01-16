@@ -37,10 +37,24 @@ def create_parser(defaults={}, constants={}):
     plurality = constants.get('PLURALITY')
 
     version = pkg_resources.require("BigMLer")[0].version
+    version_text = """\
+BigMLer %s - A Higher Level API to BigML's API
+Copyright 2012 BigML
+
+Licensed under the Apache License, Version 2.0 (the \"License\"); you may
+not use this file except in compliance with the License. You may obtain
+a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an \"AS IS\" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations
+under the License.""" % version
     parser = argparse.ArgumentParser(
         description="A higher level API to BigML's API.",
         epilog="Happy predictive modeling!",
-        version=version)
+        version=version_text,
+        formatter_class=argparse.RawTextHelpFormatter)
 
     # Shows log info for each https request.
     parser.add_argument('--debug',
