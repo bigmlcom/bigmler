@@ -322,7 +322,7 @@ under the License.""" % version
     parser.add_argument('--no-tag',
                         action='store_false',
                         dest='no_tag',
-                        default=defaults.get('no_tag', False),
+                        default=defaults.get('no_tag', True),
                         help="No tag resources with default BigMLer tags")
 
     # Use it to retrieve models that were tagged with tag.
@@ -593,7 +593,7 @@ under the License.""" % version
     parser.add_argument('--no-no-tag',
                         action='store_true',
                         dest='no_tag',
-                        default=defaults.get('no_tag', False),
+                        default=defaults.get('no_tag', True),
                         help="No tag resources with default BigMLer tags")
 
     # Doesn't make dataset public.

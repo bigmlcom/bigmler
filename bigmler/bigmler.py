@@ -458,6 +458,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             csv_properties = {'data_locale':
                               dataset['object']['locale']}
         if args.public_dataset:
+            if not description:
+                raise Exception("You should provide a description to publish.")
             public_dataset = {"private": False}
             if args.dataset_price:
                 message = "[%s] Updating dataset. %s\n" % (get_date(),
@@ -588,8 +590,12 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             log_message(message, log_file=session_file, console=args.verbosity)
             model = api.check_resource(model, api.get_model)
         if args.black_box:
+            if not description:
+                raise Exception("You should provide a description to publish.")
             model = api.update_model(model, {"private": False})
         if args.white_box:
+            if not description:
+                raise Exception("You should provide a description to publish.")
             public_model = {"private": False, "white_box": True}
             if args.model_price:
                 message = "[%s] Updating model. %s\n" % (get_date(),
