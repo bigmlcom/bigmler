@@ -26,7 +26,7 @@ Requirements
 
 Python 2.6 and Python 2.7 are currently supported by BigMLer.
 
-BigMLer requires `bigml 0.4.9 <https://github.com/bigmlcom/python>`_  or higher.
+BigMLer requires `bigml 0.5.0 <https://github.com/bigmlcom/python>`_  or higher.
 
 BigMLer Installation
 ====================
@@ -137,7 +137,12 @@ generated (e.g., TueNov1312_003451/dataset).
 Prior Versions Compatibility Issues
 -----------------------------------
 
-BigMLer will accept flags written with underscore as word separator like `--clear_logs` for compatibility with prior versions. Also `--field-names` is accepted, although the more complete `--field-attributes` flag is preferred. `--stat_pruning` and `--no_stat_pruning` are discontinued and their effects can be achived by setting the actual `--pruning` flag to `statistical` or `no-pruning` values respectively.
+BigMLer will accept flags written with underscore as word separator like
+``--clear_logs`` for compatibility with prior versions. Also ``--field-names``
+is accepted, although the more complete ``--field-attributes`` flag is
+preferred. ``--stat_pruning`` and ``--no_stat_pruning`` are discontinued
+and their effects can be achived by setting the actual ``--pruning`` flag
+to ``statistical`` or ``no-pruning`` values respectively.
 
 Additional Information
 ----------------------

@@ -47,10 +47,7 @@ def read_description(path):
     """Reads a text description from a file.
 
     """
-    lines = ''
-    for line in fileinput.input([path]):
-        lines += line
-    return lines
+    return ''.join(fileinput.input([path]))
 
 
 def read_field_attributes(path):
@@ -73,15 +70,12 @@ def read_field_attributes(path):
         sys.exit("Error: cannot read field attributes %s" % path)
 
     for row in attributes_reader:
-        try:
-            attributes = {}
-            if len(row) > 1:
-                for index in range(0, len(row) - 1):
-                    attributes.update({ATTRIBUTE_NAMES[index]: row[index + 1]})
-                field_attributes.update({
-                    int(row[0]): attributes})
-        except ValueError:
-            pass
+        attributes = {}
+        if len(row) > 1:
+            for index in range(0, min(len(ATTRIBUTE_NAMES), len(row)) - 1):
+                attributes.update({ATTRIBUTE_NAMES[index]: row[index + 1]})
+            field_attributes.update({
+                int(row[0]): attributes})
     return field_attributes
 
 
@@ -103,7 +97,9 @@ def read_types(path):
             types_dict.update({
                 pair[0]: pair[1]})
         except SyntaxError:
-            pass
+            console_log("WARNING: The following line in file %s"
+                        " does not match the expected"
+                        " syntax: %s" % (path, line))
     return types_dict
 
 
@@ -127,7 +123,9 @@ def read_fields_map(path):
             map_dict.update({
                 pair[0]: pair[1]})
         except SyntaxError:
-            pass
+            console_log("WARNING: The following line in file %s"
+                        " does not match the expected"
+                        " syntax: %s" % (path, line))
     return map_dict
 
 
@@ -169,9 +167,8 @@ def read_json_filter(path):
     [">", 3.14, ["field", "000002"]]
 
     """
-    json_data = open(path)
-    json_filter = json.load(json_data)
-    json_data.close()
+    with open(path) as json_data:
+        return json.load(json_data)
     return json_filter
 
 
@@ -215,108 +212,23 @@ def read_votes_files(dirs_list, path):
     return predictions_files
 
 
-def list_source_ids(api, query_string):
-    """Lists BigML sources filtered by `query_string`.
+def list_ids(api_function, query_string):
+    """Lists BigML resources filtered by `query_string`.
 
     """
     q_s = 'status.code=%s;limit=%s;%s' % (
           bigml.api.FINISHED, PAGE_LENGTH, query_string)
-    sources = api.list_sources(q_s)
-    ids = ([] if sources['objects'] is None else
-           [obj['resource'] for obj in sources['objects']])
-    while (not sources['objects'] is None and
-          (sources['meta']['total_count'] > (sources['meta']['offset'] +
-           sources['meta']['limit']))):
-        offset = sources['meta']['offset'] + PAGE_LENGTH
+    resources = api_function(q_s)
+    ids = [obj['resource'] for obj in (resources['objects'] or [])]
+    while (resources['objects'] and
+          (resources['meta']['total_count'] > (resources['meta']['offset'] +
+           resources['meta']['limit']))):
+        offset = resources['meta']['offset'] + PAGE_LENGTH
         q_s = 'status.code=%s;offset=%s;limit=%s;%s' % (
               bigml.api.FINISHED, offset, PAGE_LENGTH, query_string)
-        sources = api.list_sources(q_s)
-        ids.extend(([] if sources['objects'] is None else
-                   [obj['resource'] for obj in sources['objects']]))
-    return ids
-
-
-def list_dataset_ids(api, query_string):
-    """Lists BigML datasets filtered by `query_string`.
-
-    """
-    q_s = 'status.code=%s;limit=%s;%s' % (
-          bigml.api.FINISHED, PAGE_LENGTH, query_string)
-    datasets = api.list_datasets(q_s)
-    ids = ([] if datasets['objects'] is None else
-           [obj['resource'] for obj in datasets['objects']])
-    while (not datasets['objects'] is None and
-          (datasets['meta']['total_count'] > (datasets['meta']['offset'] +
-           datasets['meta']['limit']))):
-        offset = datasets['meta']['offset'] + PAGE_LENGTH
-        q_s = 'status.code=%s;offset=%s;limit=%s;%s' % (
-              bigml.api.FINISHED, offset, PAGE_LENGTH, query_string)
-        datasets = api.list_datasets(q_s)
-        ids.extend(([] if datasets['objects'] is None else
-                   [obj['resource'] for obj in datasets['objects']]))
-    return ids
-
-
-def list_model_ids(api, query_string):
-    """Lists BigML models filtered by `query_string`.
-
-    """
-    q_s = 'status.code=%s;limit=%s;%s' % (
-          bigml.api.FINISHED, PAGE_LENGTH, query_string)
-    models = api.list_models(q_s)
-    ids = ([] if models['objects'] is None else
-           [obj['resource'] for obj in models['objects']])
-    while (not models['objects'] is None and
-          (models['meta']['total_count'] > (models['meta']['offset'] +
-           models['meta']['limit']))):
-        offset = models['meta']['offset'] + PAGE_LENGTH
-        q_s = 'status.code=%s;offset=%s;limit=%s;%s' % (
-              bigml.api.FINISHED, offset, PAGE_LENGTH, query_string)
-        models = api.list_models(q_s)
-        ids.extend(([] if models['objects'] is None else
-                   [obj['resource'] for obj in models['objects']]))
-    return ids
-
-
-def list_prediction_ids(api, query_string):
-    """Lists BigML predictions filtered by `query_string`.
-
-    """
-    q_s = 'status.code=%s;limit=%s;%s' % (
-          bigml.api.FINISHED, PAGE_LENGTH, query_string)
-    predictions = api.list_predictions(q_s)
-    ids = ([] if predictions['objects'] is None else
-           [obj['resource'] for obj in predictions['objects']])
-    while (not predictions['objects'] is None and
-          (predictions['meta']['total_count'] > (predictions['meta']['offset']
-           + predictions['meta']['limit']))):
-        offset = predictions['meta']['offset'] + PAGE_LENGTH
-        q_s = 'status.code=%s;offset=%s;limit=%s;%s' % (
-              bigml.api.FINISHED, offset, PAGE_LENGTH, query_string)
-        predictions = api.list_predictions(q_s)
-        ids.extend(([] if predictions['objects'] is None else
-                   [obj['resource'] for obj in predictions['objects']]))
-    return ids
-
-
-def list_evaluation_ids(api, query_string):
-    """Lists BigML evaluations filtered by `query_string`.
-
-    """
-    q_s = 'status.code=%s;limit=%s;%s' % (
-          bigml.api.FINISHED, PAGE_LENGTH, query_string)
-    evaluations = api.list_evaluations(q_s)
-    ids = ([] if evaluations['objects'] is None else
-           [obj['resource'] for obj in evaluations['objects']])
-    while (not evaluations['objects'] is None and
-          (evaluations['meta']['total_count'] > (evaluations['meta']['offset']
-           + evaluations['meta']['limit']))):
-        offset = evaluations['meta']['offset'] + PAGE_LENGTH
-        q_s = 'status.code=%s;offset=%s;limit=%s;%s' % (
-              bigml.api.FINISHED, offset, PAGE_LENGTH, query_string)
-        evaluations = api.list_evaluations(q_s)
-        ids.extend(([] if evaluations['objects'] is None else
-                   [obj['resource'] for obj in evaluations['objects']]))
+        resources = api_function(q_s)
+        if resources['objects']:
+            ids.extend([obj['resource'] for obj in resources['objects']])
     return ids
 
 
@@ -331,10 +243,9 @@ def combine_votes(votes_files, to_prediction, to_file, method=0):
     votes = read_votes(votes_files, to_prediction)
 
     check_dir(to_file)
-    output = open(to_file, 'w', 0)
-    for multivote in votes:
-        write_prediction(multivote.combine(method), output)
-    output.close()
+    with open(to_file, 'w', 0) as output:
+        for multivote in votes:
+            write_prediction(multivote.combine(method), output)
 
 
 def delete(api, delete_list):
@@ -347,13 +258,17 @@ def delete(api, delete_list):
                         bigml.api.PREDICTION_RE: api.delete_prediction,
                         bigml.api.EVALUATION_RE: api.delete_evaluation}
     for resource_id in delete_list:
-        for resource_type in delete_functions:
-            try:
-                bigml.api.get_resource(resource_type, resource_id)
-                delete_functions[resource_type](resource_id)
-                break
-            except ValueError:
-                pass
+        resource_type = None
+        try:
+            for resource_type in delete_functions:
+                try:
+                    bigml.api.get_resource(resource_type, resource_id)
+                    break
+                except ValueError:
+                    pass
+            delete_functions[resource_type](resource_id)
+        except ValueError:
+            console_log("Failed to delete resource %s" % resource_id)
 
 
 def check_dir(path):
@@ -363,9 +278,8 @@ def check_dir(path):
     directory = os.path.dirname(path)
     if len(directory) > 0 and not os.path.exists(directory):
         os.makedirs(directory)
-        directory_log = open(NEW_DIRS_LOG, "a", 0)
-        directory_log.write("%s\n" % os.path.abspath(directory))
-        directory_log.close()
+        with open(NEW_DIRS_LOG, "a", 0) as directory_log:
+            directory_log.write("%s\n" % os.path.abspath(directory))
     return directory
 
 
@@ -423,13 +337,13 @@ def is_source_created(path, api):
     """
     source_id = None
     try:
-        source_file = open("%s%ssource" % (path, os.sep))
-        source_id = source_file.readline().strip()
-        try:
-            source_id = api.get_source_id(source_id)
-            return True, source_id
-        except ValueError:
-            return False, None
+        with open("%s%ssource" % (path, os.sep)) as source_file:
+            source_id = source_file.readline().strip()
+            try:
+                source_id = api.get_source_id(source_id)
+                return True, source_id
+            except ValueError:
+                return False, None
     except IOError:
         return False, None
 
@@ -440,13 +354,13 @@ def is_dataset_created(path, api):
     """
     dataset_id = None
     try:
-        dataset_file = open("%s%sdataset" % (path, os.sep))
-        dataset_id = dataset_file.readline().strip()
-        try:
-            dataset_id = api.get_dataset_id(dataset_id)
-            return True, dataset_id
-        except ValueError:
-            return False, None
+        with open("%s%sdataset" % (path, os.sep)) as dataset_file:
+            dataset_id = dataset_file.readline().strip()
+            try:
+                dataset_id = api.get_dataset_id(dataset_id)
+                return True, dataset_id
+            except ValueError:
+                return False, None
     except IOError:
         return False, None
 
@@ -457,14 +371,14 @@ def are_models_created(path, number_of_models, api):
     """
     model_ids = []
     try:
-        models_file = open("%s%smodels" % (path, os.sep))
-        for line in models_file:
-            model = line.strip()
-            try:
-                model_id = api.get_model_id(model)
-                model_ids.append(model_id)
-            except ValueError:
-                return False, model_ids
+        with open("%s%smodels" % (path, os.sep)) as models_file:
+            for line in models_file:
+                model = line.strip()
+                try:
+                    model_id = api.get_model_id(model)
+                    model_ids.append(model_id)
+                except ValueError:
+                    return False, model_ids
         if len(model_ids) == number_of_models:
             return True, model_ids
         else:
@@ -490,22 +404,29 @@ def is_evaluation_created(path, api):
     """
     evaluation_id = None
     try:
-        evaluation_file = open("%s%sevaluation" % (path, os.sep))
-        evaluation_id = evaluation_file.readline().strip()
-        try:
-            evaluation_id = api.get_evaluation_id(evaluation_id)
-            return True, evaluation_id
-        except ValueError:
-            return False, None
+        with open("%s%sevaluation" % (path, os.sep)) as evaluation_file:
+            evaluation_id = evaluation_file.readline().strip()
+            try:
+                evaluation_id = api.get_evaluation_id(evaluation_id)
+                return True, evaluation_id
+            except ValueError:
+                return False, None
     except IOError:
         return False, None
 
 
-def checkpoint(function, *args):
+def checkpoint(function, *args, **kwargs):
     """Redirects to each checkpoint function
 
     """
-    return function(*args)
+
+    debug = kwargs.get('debug', False)
+    result = function(*args)
+    if debug:
+        console_log("Checkpoint: checking %s with args:\n%s\n\nResult:\n%s\n" %
+                    (function.__name__, "\n".join([repr(arg) for arg in args]),
+                     repr(result)))
+    return result
 
 
 def file_number_of_lines(file_name):
@@ -552,11 +473,12 @@ def print_tree(directory, padding):
     return output
 
 
-def get_date():
-    """Returns string containing date in log format
+def dated(message):
+    """Prepends date in log format in string
 
     """
-    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return "[%s] %s" % (datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        message)
 
 
 def prediction_to_row(prediction):
@@ -599,9 +521,15 @@ def log_message(message, log_file=None, console=False):
     """
     if console:
         console_log(message)
-    if not log_file is None:
+    if log_file is not None:
         if isinstance(message, unicode):
             message = message.encode("utf-8")
-        log_file = open(log_file, 'a', 0)
-        log_file.write(message)
-        log_file.close()
+        with open(log_file, 'a', 0) as log_file:
+            log_file.write(message)
+
+
+def plural(text, num):
+    """Pluralizer: adds "s" at the end of a string if a given number is > 1
+
+    """
+    return "%s%s" % (text, "s"[num == 1:])
