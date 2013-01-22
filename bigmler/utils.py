@@ -169,7 +169,6 @@ def read_json_filter(path):
     """
     with open(path) as json_data:
         return json.load(json_data)
-    return json_filter
 
 
 def read_lisp_filter(path):

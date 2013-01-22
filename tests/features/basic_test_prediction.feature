@@ -94,7 +94,7 @@ Feature: Upload source and produce test predictions
         Then the local prediction file is like "<predictions_file>"
 
         Examples:
-        | directory1  | directory2  | output                         |predictions_file                      | method                 |
+        | directory1  | directory2  | output                         |predictions_file                    | method                 |
         | ./scenario4 | ./scenario5 | ./scenario9/predictions_c.csv  | ./check_files/predictions_iris.csv | "confidence weighted"  |
         | ./scenario4 | ./scenario5 | ./scenario9/predictions_p.csv  | ./check_files/predictions_iris.csv | "probability weighted" |
         | ./scenario1_r | ./scenario1_r | ./scenario10/predictions_c.csv | ./check_files/predictions_grades.csv | "confidence weighted"  |

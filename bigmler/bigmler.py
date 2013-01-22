@@ -64,8 +64,8 @@ from bigml.multimodel import MultiModel
 from bigml.multivote import COMBINATION_WEIGHTS, COMBINER_MAP, PLURALITY
 from bigml.fields import Fields
 
-from bigml.util import localize, console_log, get_csv_delimiter, \
-    get_predictions_file_name
+from bigml.util import (localize, console_log, get_csv_delimiter,
+                        get_predictions_file_name)
 
 from bigmler.options import create_parser
 from bigmler.defaults import get_user_defaults
@@ -508,7 +508,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             "category": args.category,
             "tags": args.tag
         }
-        if not objective_field is None:
+        if objective_field is not None:
             model_args.update({"objective_field":
                                fields.field_id(objective_field)})
         # If evaluate flag is on, we choose a deterministic sampling with 80%
@@ -746,10 +746,11 @@ def main(args=sys.argv[1:]):
                 open(log_file, 'w', 0).close()
             except IOError:
                 pass
+    literal_args = args[:]
     for i in range(0, len(args)):
         if ' ' in args[i]:
-            args[i] = '"%s"' % args[i]
-    message = "bigmler %s\n" % " ".join(args)
+            literal_args[i] = '"%s"' % args[i]
+    message = "bigmler %s\n" % " ".join(literal_args)
 
     # Resume calls are not logged
     if not "--resume" in args:
@@ -766,6 +767,7 @@ def main(args=sys.argv[1:]):
     default_output = ('evaluation' if command_args.evaluate
                       else 'predictions.csv')
     if command_args.resume:
+        debug = command_args.debug
         command = u.get_log_reversed(COMMAND_LOG,
                                      command_args.stack_level)
         args = shlex.split(command)[1:]
@@ -820,12 +822,15 @@ def main(args=sys.argv[1:]):
         with open(DIRS_LOG, "a", 0) as directory_log:
             directory_log.write("%s\n" % os.path.abspath(directory))
 
+    if resume and debug:
+        command_args.debug = True
+
     api_command_args = {
         'username': command_args.username,
         'api_key': command_args.api_key,
         'dev_mode': command_args.dev_mode,
         'debug': command_args.debug}
-    print command_args.debug
+
     api = bigml.api.BigML(**api_command_args)
 
     if (command_args.evaluate
@@ -838,6 +843,13 @@ def main(args=sys.argv[1:]):
                      " --evaluate\nbigmler --model "
                      "model/5081d067035d076151000011 --dataset "
                      "dataset/5081d067035d076151003423 --evaluate")
+
+    if command_args.objective_field:
+        objective = command_args.objective_field
+        try:
+            command_args.objective_field = int(objective)
+        except ValueError:
+            pass
 
     output_args = {
         "api": api,

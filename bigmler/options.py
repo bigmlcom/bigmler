@@ -484,8 +484,8 @@ under the License.""" % version
                         action='store',
                         dest='method',
                         default=defaults.get('method', plurality),
-                        choices=["plurality", "\"confidence weighted\"",
-                                 "\"probability weighted\""],
+                        choices=["plurality", "confidence weighted",
+                                 "probability weighted"],
                         help="Method to combine votes from ensemble"
                              " predictions. Allowed methods: plurality"
                              ", \"confidence weighted\" or "

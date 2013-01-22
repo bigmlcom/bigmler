@@ -187,7 +187,7 @@ Before making your model public, probably you want to add a name, a category,
 a description, and tags to your resources. This is easy too. For example::
 
     bigmler --train data/iris.csv --name "My model" --category 6 \
-            --description data/description.txt --tag iris --tag my_tag
+    --description data/description.txt --tag iris --tag my_tag
 
 Please note:
 
@@ -295,7 +295,7 @@ source and is followed by the new field's name, label and description.
 Similarly you can also alter the auto-detect type behavior from BigML assigning
 specific types to specific fields::
 
-    bigml --train data/iris.csv --types types.txt
+    bigmler --train data/iris.csv --types types.txt
 
 where ``types.txt`` would be::
 
@@ -425,7 +425,7 @@ before the last.
 User Chosen Defaults
 --------------------
 
-BigMLer will look for `.bigmler_defaults` file in the working directory where
+BigMLer will look for ``.bigmler_defaults`` file in the working directory where
 users can personalize the default values they like for the most relevant flags.
 The options should be written in a config style, e.g.::
 
@@ -434,10 +434,10 @@ The options should be written in a config style, e.g.::
     dev = 1
     resources_log = ./my_log.log
 
-as you can see, under a `[BigMLer]` section the file should contain one line
+as you can see, under a ``[BigMLer]`` section the file should contain one line
 per option. Dashes in flags are transformed to undescores in options.
 The example would keep development mode on and would log all created
-resources to `my_log.log` for any new `bigmler` command issued under the
+resources to ``my_log.log`` for any new ``bigmler`` command issued under the
 same working directory if none of the related flags are set.
 
 Naturally, the default value options given in this file will be overriden by
