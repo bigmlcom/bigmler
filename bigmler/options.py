@@ -313,11 +313,12 @@ under the License.""" % version
                         help="Randomize feature selection at each split.")
 
     # Use it to add a tag to the new resources created.
+    defaults_tag = defaults.get('tag')
+    defaults_tag = [] if defaults_tag is None else defaults_tag.split(",")
     parser.add_argument('--tag',
                         action='append',
-                        default=[],
+                        default=defaults_tag,
                         help="Tag to later retrieve new resources")
-
     # Avoid default tagging of resources.
     parser.add_argument('--no-tag',
                         action='store_false',

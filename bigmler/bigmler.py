@@ -78,7 +78,7 @@ SEED = "BigML, Machine Learning made easy"
 NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
 COMMAND_LOG = ".bigmler"
 DIRS_LOG = ".bigmler_dir_stack"
-SESSIONS_LOG = ".bigmler_sessions"
+SESSIONS_LOG = "bigmler_sessions"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 
 

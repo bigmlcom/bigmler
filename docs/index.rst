@@ -66,7 +66,8 @@ with the
 model ids that have been generated (e.g., FriNov0912_223645/models).
 This file is handy if then you want to use those model ids to generate local
 predictions. BigMLer also creates a file with the dataset id that have been
-generated (e.g., TueNov1312_003451/dataset).
+generated (e.g., TueNov1312_003451/dataset). It also creates a file summarizing
+the steps taken in the session progress: ``bigmler_sessions``.
 
 Remote Sources
 --------------
@@ -425,13 +426,13 @@ before the last.
 User Chosen Defaults
 --------------------
 
-BigMLer will look for ``.bigmler_defaults`` file in the working directory where
+BigMLer will look for ``bigmler.ini`` file in the working directory where
 users can personalize the default values they like for the most relevant flags.
 The options should be written in a config style, e.g.::
 
 
     [BigMLer]
-    dev = 1
+    dev = true
     resources_log = ./my_log.log
 
 as you can see, under a ``[BigMLer]`` section the file should contain one line

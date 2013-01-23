@@ -21,7 +21,7 @@
 """
 import ConfigParser
 
-DEFAULTS_FILE = '.bigmler_defaults'
+DEFAULTS_FILE = 'bigmler.ini'
 
 FLAGS = {'BigMLer': [{'flag': 'debug', 'type': 'boolean'},
                      {'flag': 'dev', 'type': 'boolean'},
@@ -58,6 +58,7 @@ FLAGS = {'BigMLer': [{'flag': 'debug', 'type': 'boolean'},
                      {'flag': 'max_batch_models', 'type': 'int'},
                      {'flag': 'randomize', 'type': 'boolean'},
                      {'flag': 'no_tag', 'type': 'boolean'},
+                     {'flag': 'tag', 'type': 'string'},
                      {'flag': 'model_tag', 'type': 'string'},
                      {'flag': 'public_dataset', 'type': 'boolean'},
                      {'flag': 'black_box', 'type': 'boolean'},
