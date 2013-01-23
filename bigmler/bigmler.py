@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/env python
 #
 # Copyright 2012 BigML
@@ -13,7 +14,6 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
 
 """BigMLer - A Higher Level API to BigML's API
 
@@ -42,15 +42,14 @@ python bigmler.py \
     --no-test-header
 
 """
+from __future__ import absolute_import
+
 import sys
 import os
 import datetime
-import argparse
 import csv
-import fileinput
-import ast
-import glob
 import re
+import shlex
 
 try:
     import simplejson as json
@@ -58,264 +57,161 @@ except ImportError:
     import json
 
 import bigml.api
+import bigmler.utils as u
+
 from bigml.model import Model
 from bigml.multimodel import MultiModel
-from bigml.multimodel import combine_predictions
-from bigml.multimodel import COMBINATION_METHODS
+from bigml.multivote import COMBINATION_WEIGHTS, COMBINER_MAP, PLURALITY
 from bigml.fields import Fields
-from bigml.util import slugify, reset_progress_bar, localize, \
-    get_predictions_file_name, get_csv_delimiter, clear_progress_bar
 
+from bigml.util import (localize, console_log, get_csv_delimiter,
+                        get_predictions_file_name)
 
-PAGE_LENGTH = 200
+from bigmler.options import create_parser
+from bigmler.defaults import get_user_defaults
+from bigmler.defaults import DEFAULTS_FILE
+
 MAX_MODELS = 10
+EVALUATE_SAMPLE_RATE = 0.8
+SEED = "BigML, Machine Learning made easy"
+# Date and time in format SunNov0412_120510 to name and tag resources
+NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
+COMMAND_LOG = ".bigmler"
+DIRS_LOG = ".bigmler_dir_stack"
+SESSIONS_LOG = "bigmler_sessions"
+LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 
 
-def read_description(path):
-    """Reads a text description from a file.
-
-    """
-    lines = ''
-    for line in fileinput.input([path]):
-        lines += line
-    return lines
-
-
-def read_field_attributes(path):
-    """Reads field attributes from a csv file to update source fields.
-
-    A column number and a list of attributes separated by a comma per line.
-    The expected structure is:
-    column number, name, label, description
-
-    For example:
-
-    0,'first name','label for the first field','fist field full description'
-    1,'last name','label for the last field','last field full description'
+def remote_predict(models, headers, output_path, number_of_tests, resume,
+                   verbosity, test_reader, exclude, fields, api,
+                   prediction_file, method, tags, objective_field,
+                   session_file, test_set_header, log, debug):
+    """Retrieve predictions remotely, combine them and save predictions to file
 
     """
-    field_attributes = {}
-    ATTRIBUTE_NAMES = ['name', 'label', 'description']
-    try:
-        attributes_reader = csv.reader(open(path, "U"), quotechar="'",
-                                       lineterminator="\n")
-    except IOError:
-        sys.exit("Error: cannot read field attributes %s" % path)
 
-    for row in attributes_reader:
-        try:
-            attributes = {}
-            if len(row) > 1:
-                for index in range(0, len(row) - 1):
-                    attributes.update({ATTRIBUTE_NAMES[index]: row[index + 1]})
-                field_attributes.update({
-                    int(row[0]): attributes})
-        except ValueError:
-            pass
-    return field_attributes
+    predictions_files = []
+    prediction_args = {
+        "tags": tags
+    }
+    for model in models:
+        if not isinstance(model, basestring) and 'resource' in model:
+            model = model['resource']
+        predictions_file = get_predictions_file_name(model,
+                                                     output_path)
+        predictions_files.append(predictions_file)
+        if (not resume or
+            not u.checkpoint(u.are_predictions_created, predictions_file,
+                             number_of_tests, debug=debug)):
+            message = u.dated("Creating remote predictions.\n")
+            u.log_message(message, log_file=session_file,
+                          console=verbosity)
 
-
-def read_types(path):
-    """Types to update source fields types.
-
-    A column number and type separated by a comma per line.
-
-    For example:
-
-    0, 'categorical'
-    1, 'numeric'
-
-    """
-    types_dict = {}
-    for line in fileinput.input([path]):
-        try:
-            pair = ast.literal_eval(line)
-            types_dict.update({
-                pair[0]: pair[1]})
-        except SyntaxError:
-            pass
-    return types_dict
+            predictions_file = csv.writer(open(predictions_file, 'w', 0))
+            for row in test_reader:
+                for index in exclude:
+                    del row[index]
+                input_data = fields.pair(row, headers, objective_field)
+                prediction = api.create_prediction(model, input_data,
+                                                   by_name=test_set_header,
+                                                   wait_time=0,
+                                                   args=prediction_args)
+                u.log_message("%s\n" % prediction['resource'], log_file=log)
+                prediction_row = u.prediction_to_row(prediction)
+                predictions_file.writerow(prediction_row)
+    u.combine_votes(predictions_files,
+                    Model(models[0]).to_prediction,
+                    prediction_file, method)
 
 
-def read_models(path):
-    """Reads model ids from a file.
-
-    For example:
-
-    model/50974922035d0706da00003d
-    model/509748b7035d0706da000039
-    model/5097488b155268377a000059
+def local_predict(models, headers, test_reader, exclude, fields, method,
+                  objective_field, output, test_set_header):
+    """Get local predictions, combine them and save predictions to file
 
     """
-    models = []
-    for line in fileinput.input([path]):
-        models.append(line.rstrip())
-    return models
+    local_model = MultiModel(models)
+    for row in test_reader:
+        for index in exclude:
+            del row[index]
+        input_data = fields.pair(row, headers, objective_field)
+        prediction = local_model.predict(input_data,
+                                         by_name=test_set_header,
+                                         method=method)
+        u.write_prediction(prediction, output)
 
 
-def read_dataset(path):
-    """Reads dataset id from a file.
-
-    For example:
-
-    dataset/50978822035d0706da000069
-
-    """
-    datasets = []
-    for line in fileinput.input([path]):
-        datasets.append(line.rstrip())
-    return datasets[0]
-
-
-def read_json_filter(path):
-    """Reads a json filter from a file.
-
-    For example:
-
-    [">", 3.14, ["field", "000002"]]
+def local_batch_predict(models, headers, test_reader, exclude, fields, resume,
+                        output_path, max_models, number_of_tests, api, output,
+                        verbosity, method, objective_field, session_file,
+                        debug):
+    """Get local predictions form partial Multimodel, combine and save to file
 
     """
-    json_data = open(path)
-    json_filter = json.load(json_data)
-    json_data.close()
-    return json_filter
-
-
-def read_lisp_filter(path):
-    """Reads a lisp filter from a file.
-
-    For example:
-
-    (> (/ (+ (- (field "00000") 4.4)
-            (field 23)
-            (* 2 (field "Class") (field "00004")))
-       3)
-       5.5)
-
-    """
-    return read_description(path)
-
-
-def read_votes(dirs_list, path):
-    """Reads a list of directories to look for votes.
-
-    If model's prediction files are found, they are retrieved to be combined.
-    """
-    file_name = "%s%scombined_predictions" % (path,
-                                              os.sep)
-    check_dir(file_name)
-    group_predictions = open(file_name, "w", 0)
-    current_directory = os.getcwd()
-    for directory in dirs_list:
-        directory = os.path.abspath(directory)
-        os.chdir(directory)
-        predictions_files = []
-        for predictions_file in glob.glob("model_*_predictions.csv"):
-            predictions_files.append("%s%s%s" % (os.getcwd(),
-                                     os.sep, predictions_file))
-            group_predictions.write("%s\n" % predictions_file)
-        os.chdir(current_directory)
-    group_predictions.close()
-    return predictions_files
-
-
-def list_source_ids(api, query_string):
-    """Lists BigML sources filtered by `query_string`.
-
-    """
-    sources = api.list_sources('status.code=%s;limit=%s;%s' % (
-                               bigml.api.FINISHED, PAGE_LENGTH, query_string))
-    ids = ([] if sources['objects'] is None else
-           [obj['resource'] for obj in sources['objects']])
-    while (not sources['objects'] is None and
-          (sources['meta']['total_count'] > (sources['meta']['offset'] +
-           sources['meta']['limit']))):
-        offset = sources['meta']['offset'] + PAGE_LENGTH
-        sources = api.list_sources('offset=%s;limit=%s;%s' % (offset,
-                                   PAGE_LENGTH, query_string))
-        ids.extend(([] if sources['objects'] is None else
-                   [obj['resource'] for obj in sources['objects']]))
-    return ids
-
-
-def list_dataset_ids(api, query_string):
-    """Lists BigML datasets filtered by `query_string`.
-
-    """
-    datasets = api.list_datasets('status.code=%s;limit=%s;%s' % (
-                                 bigml.api.FINISHED, PAGE_LENGTH,
-                                 query_string))
-    ids = ([] if datasets['objects'] is None else
-           [obj['resource'] for obj in datasets['objects']])
-    while (not datasets['objects'] is None and
-          (datasets['meta']['total_count'] > (datasets['meta']['offset'] +
-           datasets['meta']['limit']))):
-        offset = datasets['meta']['offset'] + PAGE_LENGTH
-        datasets = api.list_datasets('offset=%s;limit=%s;%s' % (offset,
-                                     PAGE_LENGTH, query_string))
-        ids.extend(([] if datasets['objects'] is None else
-                   [obj['resource'] for obj in datasets['objects']]))
-    return ids
-
-
-def list_model_ids(api, query_string):
-    """Lists BigML models filtered by `query_string`.
-
-    """
-    models = api.list_models('status.code=%s;limit=%s;%s' % (
-                             bigml.api.FINISHED, PAGE_LENGTH, query_string))
-    ids = ([] if models['objects'] is None else
-           [obj['resource'] for obj in models['objects']])
-    while (not models['objects'] is None and
-          (models['meta']['total_count'] > (models['meta']['offset'] +
-           models['meta']['limit']))):
-        offset = models['meta']['offset'] + PAGE_LENGTH
-        models = api.list_models('offset=%s;limit=%s;%s' % (offset,
-                                 PAGE_LENGTH, query_string))
-        ids.extend(([] if models['objects'] is None else
-                   [obj['resource'] for obj in models['objects']]))
-    return ids
-
-
-def list_prediction_ids(api, query_string):
-    """Lists BigML predictions filtered by `query_string`.
-
-    """
-    predictions = api.list_predictions('status.code=%s;limit=%s;%s' % (
-                                       bigml.api.FINISHED, PAGE_LENGTH,
-                                       query_string))
-    ids = ([] if predictions['objects'] is None else
-           [obj['resource'] for obj in predictions['objects']])
-    while (not predictions['objects'] is None and
-          (predictions['meta']['total_count'] > (predictions['meta']['offset']
-           + predictions['meta']['limit']))):
-        offset = predictions['meta']['offset'] + PAGE_LENGTH
-        predictions = api.list_predictions('offset=%s;limit=%s;%s' % (offset,
-                                           PAGE_LENGTH, query_string))
-        ids.extend(([] if predictions['objects'] is None else
-                   [obj['resource'] for obj in predictions['objects']]))
-    return ids
-
-
-def predict(test_set, test_set_header, models, fields, output,
-            objective_field, remote=False, api=None, log=None,
-            max_models=MAX_MODELS, method='plurality'):
-    """Computes a prediction for each entry in the `test_set`
-
-
-    """
-    out = sys.stdout
-
     def draw_progress_bar(current, total):
         """Draws a text based progress report.
 
         """
         pct = 100 - ((total - current) * 100) / (total)
-        clear_progress_bar(out=out)
-        reset_progress_bar(out=out)
-        out.write("Predicted on %s out of %s models [%s%%]" % (
+        console_log("Predicted on %s out of %s models [%s%%]" % (
             localize(current), localize(total), pct))
-        reset_progress_bar(out=out)
+
+    models_total = len(models)
+    models_splits = [models[index:(index + max_models)] for index
+                     in range(0, models_total, max_models)]
+    input_data_list = []
+    for row in test_reader:
+        for index in exclude:
+            del row[index]
+        input_data_list.append(fields.pair(row, headers,
+                                           objective_field))
+    total_votes = []
+    models_count = 0
+    for models_split in models_splits:
+        if resume:
+            for model in models_split:
+                pred_file = get_predictions_file_name(model,
+                                                      output_path)
+                u.checkpoint(u.are_predictions_created,
+                             pred_file,
+                             number_of_tests, debug=debug)
+        complete_models = []
+        for index in range(len(models_split)):
+            complete_models.append(api.check_resource(
+                models_split[index], api.get_model))
+
+        local_model = MultiModel(complete_models)
+        local_model.batch_predict(input_data_list,
+                                  output_path, reuse=True)
+        votes = local_model.batch_votes(output_path)
+        models_count += max_models
+        if models_count > models_total:
+            models_count = models_total
+        if verbosity:
+            draw_progress_bar(models_count, models_total)
+        if total_votes:
+            for index in range(0, len(votes)):
+                predictions = total_votes[index].predictions
+                predictions.extend(votes[index].predictions)
+        else:
+            total_votes = votes
+    message = u.dated("Combining predictions.\n")
+    u.log_message(message, log_file=session_file, console=verbosity)
+    for multivote in total_votes:
+        u.write_prediction(multivote.combine(method), output)
+
+
+def predict(test_set, test_set_header, models, fields, output,
+            objective_field, remote=False, api=None, log=None,
+            max_models=MAX_MODELS, method=0, resume=False,
+            tags=None, verbosity=1, session_file=None, debug=False):
+    """Computes a prediction for each entry in the `test_set`.
+
+       Predictions can be computed remotely, locally using MultiModels built
+       on all the models or locally using MultiModels on subgroups of models.
+       Chosing a max_batch_models value not bigger than the number_of_models
+       flag will lead to the last case, where memory usage is bounded and each
+       model predictions are saved for further use.
+    """
 
     try:
         test_reader = csv.reader(open(test_set, "U"),
@@ -357,128 +253,43 @@ def predict(test_set, test_set_header, models, fields, output,
                                  (",".join(fields_names),
                                   ",".join(headers))).encode("utf-8"))
 
-    output_path = check_dir(output)
+    prediction_file = output
+    output_path = u.check_dir(output)
     output = open(output, 'w', 0)
+    number_of_tests = None
+    if resume:
+        number_of_tests = u.file_number_of_lines(test_set)
+        if test_set_header:
+            number_of_tests -= 1
+    # Remote predictions: predictions are computed in bigml.com and stored
+    # in a file named after the model in the following syntax:
+    #     model_[id of the model]__predictions.csv
+    # For instance,
+    #     model_50c0de043b563519830001c2_predictions.csv
     if remote:
-        for row in test_reader:
-            predictions = {}
-            for index in exclude:
-                del row[index]
-            input_data = fields.pair(row, headers, objective_field)
-
-            for model in models:
-                prediction = api.create_prediction(model, input_data,
-                                                   by_name=test_set_header,
-                                                   wait_time=0)
-                if log:
-                    log.write("%s\n" % prediction['resource'])
-                    log.flush()
-                prediction_key = (prediction['object']['prediction']
-                                  [prediction['object']
-                                  ['objective_fields'][0]])
-                if not prediction_key in predictions:
-                    predictions[prediction_key] = []
-                predictions[prediction_key].append(prediction['object']
-                                                   ['prediction_path']
-                                                   ['confidence'])
-            prediction = combine_predictions(predictions, method)
-            if isinstance(prediction, basestring):
-                prediction = prediction.encode("utf-8")
-            output.write("%s\n" % prediction)
-            output.flush()
+        remote_predict(models, headers, output_path, number_of_tests, resume,
+                       verbosity, test_reader, exclude, fields, api,
+                       prediction_file, method, tags, objective_field,
+                       session_file, test_set_header, log, debug)
+    # Local predictions: Predictions are computed locally using models' rules
+    # with MultiModel's predict method
     else:
-        models_total = len(models)
-        if models_total < max_models:
-            local_model = MultiModel(models)
-            for row in test_reader:
-                for index in exclude:
-                    del row[index]
-                input_data = fields.pair(row, headers, objective_field)
-                prediction = local_model.predict(input_data,
-                                                 by_name=test_set_header)
-                if isinstance(prediction, basestring):
-                    prediction = prediction.encode("utf-8")
-                output.write("%s\n" % prediction)
-                output.flush()
+        message = u.dated("Creating local predictions.\n")
+        u.log_message(message, log_file=session_file, console=verbosity)
+        # For a small number of models, we build a MultiModel using all of
+        # the given models and issue a combined prediction
+        if len(models) < max_models:
+            local_predict(models, headers, test_reader, exclude, fields,
+                          method, objective_field, output, test_set_header)
+        # For large numbers of models, we split the list of models in chunks
+        # and build a MultiModel for each chunk, issue and store predictions
+        # for each model and combine all of them eventually.
         else:
-            models_splits = [models[index:(index + max_models)] for index
-                             in range(0, models_total, max_models)]
-            input_data_list = []
-            for row in test_reader:
-                for index in exclude:
-                    del row[index]
-                input_data_list.append(fields.pair(row, headers,
-                                                   objective_field))
-            total_votes = []
-            models_count = 0
-            for models_split in models_splits:
-                complete_models = []
-                for index in range(len(models_split)):
-                    complete_models.append(api.check_resource(
-                        models_split[index], api.get_model))
-
-                local_model = MultiModel(complete_models)
-                local_model.batch_predict(input_data_list,
-                                          output_path, reuse=True)
-                votes = local_model.batch_votes(output_path)
-                models_count += max_models
-                if models_count > models_total:
-                    models_count = models_total
-                draw_progress_bar(models_count, models_total)
-                if total_votes:
-                    for index in range(len(votes)):
-                        for prediction in votes[index].keys():
-                            if not prediction in total_votes[index]:
-                                total_votes[index][prediction] = []
-                            total_votes[index][prediction].extend(votes[index]
-                                                                  [prediction])
-                else:
-                    total_votes = votes
-
-            clear_progress_bar(out=out)
-            reset_progress_bar(out=out)
-            out.write("Combining predictions.")
-            reset_progress_bar(out=out)
-            for predictions in total_votes:
-                prediction = combine_predictions(predictions, method)
-                if isinstance(prediction, basestring):
-                    prediction = prediction.encode("utf-8")
-                output.write("%s\n" % prediction)
-                output.flush()
-            clear_progress_bar(out=out)
-            reset_progress_bar(out=out)
-            out.write("Done.")
-            reset_progress_bar(out=out)
-            clear_progress_bar(out=out)
-            reset_progress_bar(out=out)
-    output.close()
-
-
-def combine_votes(votes_files, to_prediction, data_locale,
-                  to_file, method='plurality'):
-    """Combines the votes found in the votes' files and stores predictions.
-
-    """
-    votes = []
-    for votes_file in votes_files:
-        index = 0
-        for row in csv.reader(open(votes_file, "U"), lineterminator="\n"):
-            prediction = to_prediction(row[0])
-            if index > (len(votes) - 1):
-                votes.append({prediction: []})
-            if not prediction in votes[index]:
-                votes[index][prediction] = []
-            votes[index][prediction].append(float(row[1]))
-            index += 1
-
-    check_dir(to_file)
-    output = open(to_file, 'w', 0)
-    for predictions in votes:
-        prediction = combine_predictions(predictions, method)
-        if isinstance(prediction, basestring):
-            prediction = prediction.encode("utf-8")
-        output.write("%s\n" % prediction)
-        output.flush()
+            local_batch_predict(models, headers, test_reader, exclude, fields,
+                                resume, output_path, max_models,
+                                number_of_tests, api, output,
+                                verbosity, method, objective_field,
+                                session_file, debug)
     output.close()
 
 
@@ -491,9 +302,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                    model_fields=None,
                    name=None, training_set_header=True,
                    test_set_header=True, model_ids=None,
-                   votes_files=None):
-    """ Creates one or models using the `training_set` or uses the ids
-    of previous created BigML models to make predictions for the `test_set`.
+                   votes_files=None, resume=False, fields_map=None):
+    """ Creates one or more models using the `training_set` or uses the ids
+    of previously created BigML models to make predictions for the `test_set`.
 
     """
     source = None
@@ -502,43 +313,84 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     models = None
     fields = None
 
-    path = check_dir(output)
+    path = u.check_dir(output)
+    session_file = "%s%s%s" % (path, os.sep, SESSIONS_LOG)
     csv_properties = {}
     # If logging is required, open the file for logging
     log = None
     if args.log_file:
-        check_dir(args.log_file)
-        log = open(args.log_file, 'a', 0)
+        u.check_dir(args.log_file)
+        log = args.log_file
+        # If --clear_logs the log files are cleared
+        if args.clear_logs:
+            try:
+                open(log, 'w', 0).close()
+            except IOError:
+                pass
+
+    if (training_set or (args.evaluate and test_set)):
+        if resume:
+            resume, args.source = u.checkpoint(u.is_source_created, path,
+                                               bigml.api, debug=args.debug)
+            if not resume:
+                message = u.dated("Source not found. Resuming.\n")
+                u.log_message(message, log_file=session_file,
+                              console=args.verbosity)
 
     # If neither a previous source, dataset or model are provided.
-    # we create a new one
+    # we create a new one. Also if --evaluate and test data are provided
+    # we create a new dataset to test with.
+    data_set = None
     if (training_set and not args.source and not args.dataset and
             not args.model and not args.models):
+        data_set = training_set
+        data_set_header = training_set_header
+    elif (args.evaluate and test_set and not args.source):
+        data_set = test_set
+        data_set_header = test_set_header
+
+    if not data_set is None:
+
         source_args = {
             "name": name,
             "description": description,
             "category": args.category,
             "tags": args.tag,
-            "source_parser": {"header": training_set_header}}
-        source = api.create_source(training_set, source_args,
+            "source_parser": {"header": data_set_header}}
+        message = u.dated("Creating source.\n")
+        u.log_message(message, log_file=session_file, console=args.verbosity)
+        source = api.create_source(data_set, source_args,
                                    progress_bar=args.progress_bar)
         source = api.check_resource(source, api.get_source)
-        if log:
-            log.write("%s\n" % source['resource'])
-            log.flush()
+        message = u.dated("Source created: %s\n" % u.get_url(source, api))
+        u.log_message(message, log_file=session_file, console=args.verbosity)
+        u.log_message("%s\n" % source['resource'], log_file=log)
 
         fields = Fields(source['object']['fields'],
                         source['object']['source_parser']['missing_tokens'],
                         source['object']['source_parser']['locale'])
+        source_file = open(path + '/source', 'w', 0)
+        source_file.write("%s\n" % source['resource'])
+        source_file.write("%s\n" % source['object']['name'])
+        source_file.flush()
+        source_file.close()
 
     # If a source is provided, we retrieve it.
     elif args.source:
+        message = u.dated("Retrieving source. %s\n" %
+                          u.get_url(args.source, api))
+        u.log_message(message, log_file=session_file, console=args.verbosity)
         source = api.get_source(args.source)
 
     # If we already have source, we check that is finished and extract the
     # fields, and update them if needed.
     if source:
-        source = api.check_resource(source, api.get_source)
+        if source['object']['status']['code'] != bigml.api.FINISHED:
+            message = u.dated("Retrieving source. %s\n" %
+                              u.get_url(source, api))
+            u.log_message(message, log_file=session_file,
+                          console=args.verbosity)
+            source = api.check_resource(source, api.get_source)
         csv_properties = {'missing_tokens':
                           source['object']['source_parser']['missing_tokens'],
                           'data_locale':
@@ -550,6 +402,10 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             for (column, value) in field_attributes.iteritems():
                 update_fields.update({
                     fields.field_id(column): value})
+            message = u.dated("Updating source. %s\n" %
+                              u.get_url(source, api))
+            u.log_message(message, log_file=session_file,
+                          console=args.verbosity)
             source = api.update_source(source, {"fields": update_fields})
 
         update_fields = {}
@@ -557,17 +413,27 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             for (column, value) in types.iteritems():
                 update_fields.update({
                     fields.field_id(column): {'optype': value}})
+            message = u.dated("Updating source. %s\n" %
+                              u.get_url(source, api))
+            u.log_message(message, log_file=session_file,
+                          console=args.verbosity)
             source = api.update_source(source, {"fields": update_fields})
-        source_file = open(path + '/source', 'w', 0)
-        source_file.write("%s\n" % source['resource'])
-        source_file.write("%s\n" % source['object']['name'])
-        source_file.flush()
-        source_file.close()
 
+    if (training_set or args.source or (args.evaluate and test_set)):
+        if resume:
+            resume, args.dataset = u.checkpoint(u.is_dataset_created, path,
+                                                bigml.api,
+                                                debug=args.debug)
+            if not resume:
+                message = u.dated("Dataset not found. Resuming.\n")
+                u.log_message(message, log_file=session_file,
+                              console=args.verbosity)
     # If we have a source but not dataset or model has been provided, we
-    # create a new dataset if the no_dataset option isn't set up.
-    if (source and not args.dataset and not args.model and not model_ids and
-            not args.no_dataset):
+    # create a new dataset if the no_dataset option isn't set up. Also
+    # if evaluate is set and test_set has been provided.
+    if ((source and not args.dataset and not args.model and not model_ids and
+            not args.no_dataset) or
+            (args.evaluate and args.test_set and not args.dataset)):
         dataset_args = {
             "name": name,
             "description": description,
@@ -585,11 +451,13 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             for name in dataset_fields:
                 input_fields.append(fields.field_id(name))
             dataset_args.update(input_fields=input_fields)
-
+        message = u.dated("Creating dataset.\n")
+        u.log_message(message, log_file=session_file, console=args.verbosity)
         dataset = api.create_dataset(source, dataset_args)
-        if log:
-            log.write("%s\n" % dataset['resource'])
-            log.flush()
+        dataset = api.check_resource(dataset, api.get_dataset)
+        message = u.dated("Dataset created: %s\n" % u.get_url(dataset, api))
+        u.log_message(message, log_file=session_file, console=args.verbosity)
+        u.log_message("%s\n" % dataset['resource'], log_file=log)
         dataset_file = open(path + '/dataset', 'w', 0)
         dataset_file.write("%s\n" % dataset['resource'])
         dataset_file.flush()
@@ -597,19 +465,37 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
     # If a dataset is provided, let's retrieve it.
     elif args.dataset:
+        message = u.dated("Retrieving dataset. %s\n" %
+                          u.get_url(args.dataset, api))
+        u.log_message(message, log_file=session_file, console=args.verbosity)
         dataset = api.get_dataset(args.dataset)
 
     # If we already have a dataset, we check the status and get the fields if
     # we hadn't them yet.
     if dataset:
-        dataset = api.check_resource(dataset, api.get_dataset)
+        if dataset['object']['status']['code'] != bigml.api.FINISHED:
+            message = u.dated("Retrieving dataset. %s\n" %
+                              u.get_url(dataset, api))
+            u.log_message(message, log_file=session_file,
+                          console=args.verbosity)
+            dataset = api.check_resource(dataset, api.get_dataset)
         if not csv_properties:
             csv_properties = {'data_locale':
                               dataset['object']['locale']}
         if args.public_dataset:
+            if not description:
+                raise Exception("You should provide a description to publish.")
             public_dataset = {"private": False}
             if args.dataset_price:
+                message = u.dated("Updating dataset. %s\n" %
+                                  u.get_url(dataset, api))
+                u.log_message(message, log_file=session_file,
+                              console=args.verbosity)
                 public_dataset.update(price=args.dataset_price)
+            message = u.dated("Updating dataset. %s\n" %
+                              u.get_url(dataset, api))
+            u.log_message(message, log_file=session_file,
+                          console=args.verbosity)
             dataset = api.update_dataset(dataset, public_dataset)
         fields = Fields(dataset['object']['fields'], **csv_properties)
 
@@ -622,9 +508,16 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             "category": args.category,
             "tags": args.tag
         }
-        if not objective_field is None:
+        if objective_field is not None:
             model_args.update({"objective_field":
                                fields.field_id(objective_field)})
+        # If evaluate flag is on, we choose a deterministic sampling with 80%
+        # of the data to create the model
+        if args.evaluate:
+            if args.sample_rate == 1:
+                args.sample_rate = EVALUATE_SAMPLE_RATE
+            seed = SEED
+            model_args.update(seed=seed)
 
         input_fields = []
         if model_fields:
@@ -632,42 +525,75 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 input_fields.append(fields.field_id(name))
             model_args.update(input_fields=input_fields)
 
-        if args.stat_pruning:
-            model_args.update(stat_pruning=True)
-
-        if args.no_stat_pruning:
-            model_args.update(stat_pruning=False)
+        if args.pruning and args.pruning != 'smart':
+            model_args.update(stat_pruning=(args.pruning == 'statistical'))
 
         model_args.update(sample_rate=args.sample_rate,
                           replacement=args.replacement,
                           randomize=args.randomize)
         model_ids = []
         models = []
+        if resume:
+            resume, model_ids = u.checkpoint(u.are_models_created, path,
+                                             args.number_of_models,
+                                             bigml.api, debug=args.debug)
+            if not resume:
+                message = u.dated("Found %s models out of %s. Resuming.\n" %
+                                  (len(model_ids),
+                                   args.number_of_models))
+                u.log_message(message, log_file=session_file,
+                              console=args.verbosity)
+            models = model_ids
+            args.number_of_models -= len(model_ids)
+
         model_file = open(path + '/models', 'w', 0)
+        for model_id in model_ids:
+            model_file.write("%s\n" % model_id)
         last_model = None
-        for i in range(1, args.number_of_models + 1):
-            if i > args.max_parallel_models:
-                api.check_resource(last_model, api.get_model)
-            model = api.create_model(dataset, model_args)
-            if log:
-                log.write("%s\n" % model['resource'])
-                log.flush()
-            last_model = model
-            model_ids.append(model['resource'])
-            models.append(model)
-            model_file.write("%s\n" % model['resource'])
-            model_file.flush()
+        if args.number_of_models > 0:
+            message = u.dated("Creating %s.\n" %
+                              u.plural("model", args.number_of_models))
+            u.log_message(message, log_file=session_file,
+                          console=args.verbosity)
+            for i in range(1, args.number_of_models + 1):
+                if i > args.max_parallel_models:
+                    api.check_resource(last_model, api.get_model)
+                model = api.create_model(dataset, model_args)
+                u.log_message("%s\n" % model['resource'], log_file=log)
+                last_model = model
+                model_ids.append(model['resource'])
+                models.append(model)
+                model_file.write("%s\n" % model['resource'])
+                model_file.flush()
+            if args.number_of_models < 2 and args.verbosity:
+                if model['object']['status']['code'] != bigml.api.FINISHED:
+                    model = api.check_resource(model, api.get_model)
+                    models[0] = model
+                message = u.dated("Model created: %s.\n" %
+                                  u.get_url(model, api))
+                u.log_message(message, log_file=session_file,
+                              console=args.verbosity)
         model_file.close()
 
     # If a model is provided, we retrieve it.
     elif args.model:
+        message = u.dated("Retrieving model. %s\n" %
+                          u.get_url(args.model, api))
+        u.log_message(message, log_file=session_file, console=args.verbosity)
         model = api.get_model(args.model)
 
     elif args.models or args.model_tag:
         models = model_ids[:]
 
-    if model_ids and test_set:
-        if len(model_ids) < MAX_MODELS:
+    if model_ids and test_set and not args.evaluate:
+        model_id = ""
+        if len(model_ids) == 1:
+            model_id = model_ids[0]
+        message = u.dated("Retrieving %s. %s\n" %
+                          (u.plural("model", len(model_ids)),
+                           u.get_url(model_id, api)))
+        u.log_message(message, log_file=session_file, console=args.verbosity)
+        if len(model_ids) < args.max_batch_models:
             models = []
             for model in model_ids:
                 model = api.check_resource(model, api.get_model)
@@ -679,15 +605,33 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
     # We check that the model is finished and get the fields if haven't got
     # them yet.
-    if model and (test_set or args.black_box or args.white_box):
-        model = api.check_resource(model, api.get_model)
+    if model and not args.evaluate and (test_set or args.black_box
+                                        or args.white_box):
+        if model['object']['status']['code'] != bigml.api.FINISHED:
+            message = u.dated("Retrieving model. %s\n" %
+                              u.get_url(model, api))
+            u.log_message(message, log_file=session_file,
+                          console=args.verbosity)
+            model = api.check_resource(model, api.get_model)
         if args.black_box:
+            if not description:
+                raise Exception("You should provide a description to publish.")
             model = api.update_model(model, {"private": False})
         if args.white_box:
+            if not description:
+                raise Exception("You should provide a description to publish.")
             public_model = {"private": False, "white_box": True}
             if args.model_price:
+                message = u.dated("Updating model. %s\n" %
+                                  u.get_url(model, api))
+                u.log_message(message, log_file=session_file,
+                              console=args.verbosity)
                 public_model.update(price=args.model_price)
             if args.cpp:
+                message = u.dated("Updating model. %s\n" %
+                                  u.get_url(model, api))
+                u.log_message(message, log_file=session_file,
+                              console=args.verbosity)
                 public_model.update(credits_per_prediction=args.cpp)
             model = api.update_model(model, public_model)
         if not csv_properties:
@@ -702,573 +646,373 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if model and not models:
         models = [model]
 
-    if models and test_set:
+    if models and test_set and not args.evaluate:
         objective_field = models[0]['object']['objective_fields']
         if isinstance(objective_field, list):
             objective_field = objective_field[0]
         predict(test_set, test_set_header, models, fields, output,
                 objective_field, args.remote, api, log,
-                args.max_batch_models, args.method)
+                args.max_batch_models, args.method, resume, args.tag,
+                args.verbosity, session_file, args.debug)
 
+    # When combine_votes flag is used, retrieve the predictions files saved
+    # in the comma separated list of directories and combine them
     if votes_files:
         model_id = re.sub(r'.*(model_[a-f0-9]{24})__predictions\.csv$',
                           r'\1', votes_files[0]).replace("_", "/")
         model = api.check_resource(model_id, api.get_model)
-        data_locale = (model['object']['locale'] if not args.user_locale
-                       else args.user_locale)
         local_model = Model(model)
-        combine_votes(votes_files, local_model.to_prediction,
-                      data_locale, output, args.method)
+        message = u.dated("Combining votes.\n")
+        u.log_message(message, log_file=session_file,
+                      console=args.verbosity)
+        u.combine_votes(votes_files, local_model.to_prediction,
+                        output, args.method)
 
-    if args.log_file and log:
-        log.close()
+    # If evaluate flag is on, create remote evaluation and save results in
+    # json and human-readable format.
+    if args.evaluate:
+        if resume:
+            resume, evaluation = u.checkpoint(u.is_evaluation_created, path,
+                                              bigml.api,
+                                              debug=args.debug)
+            if not resume:
+                message = u.dated("Evaluation not found. Resuming.\n")
+                u.log_message(message, log_file=session_file,
+                              console=args.verbosity)
+        if not resume:
+            evaluation_file = open(path + '/evaluation', 'w', 0)
+            evaluation_args = {
+                "name": name,
+                "description": description,
+                "tags": args.tag
+            }
+            if not fields_map is None:
+                update_map = {}
+                for (dataset_column, model_column) in fields_map.iteritems():
+                    update_map.update({
+                        fields.field_id(dataset_column):
+                        fields.field_id(model_column)})
+                evaluation_args.update({"fields_map": update_map})
+            if not ((args.dataset or args.test_set)
+                    and (args.model or args.models or args.model_tag)):
+                evaluation_args.update(out_of_bag=True, seed=SEED,
+                                       sample_rate=args.sample_rate)
+            message = u.dated("Creating evaluation.\n")
+            u.log_message(message, log_file=session_file,
+                          console=args.verbosity)
+            evaluation = api.create_evaluation(model, dataset, evaluation_args)
+            u.log_message("%s\n" % evaluation['resource'], log_file=log)
+            evaluation_file.write("%s\n" % evaluation['resource'])
+            evaluation_file.flush()
+            evaluation_file.close()
+        message = u.dated("Retrieving evaluation. %s\n" %
+                          u.get_url(evaluation, api))
+        u.log_message(message, log_file=session_file, console=args.verbosity)
+        evaluation = api.check_resource(evaluation, api.get_evaluation)
+        evaluation_json = open(output + '.json', 'w', 0)
+        evaluation_json.write(json.dumps(evaluation['object']['result']))
+        evaluation_json.flush()
+        evaluation_json.close()
+        evaluation_txt = open(output + '.txt', 'w', 0)
+        api.pprint(evaluation['object']['result'],
+                   evaluation_txt)
+        evaluation_txt.flush()
+        evaluation_txt.close()
 
-
-def delete(api, delete_list):
-    """ Deletes the resources given in the list.
-
-    """
-
-    DELETE = {bigml.api.SOURCE_RE: api.delete_source,
-              bigml.api.DATASET_RE: api.delete_dataset,
-              bigml.api.MODEL_RE: api.delete_model,
-              bigml.api.PREDICTION_RE: api.delete_prediction}
-    for resource_id in delete_list:
-        for resource_type in DELETE:
-            try:
-                bigml.api.get_resource(resource_type, resource_id)
-                DELETE[resource_type](resource_id)
-                break
-            except ValueError:
-                pass
-
-
-def check_dir(path):
-    """Creates a directory if it doesn't exist
-    """
-    directory = os.path.dirname(path)
-    if len(directory) > 0 and not os.path.exists(directory):
-        os.makedirs(directory)
-        directory_log = open(".bigmler_dirs", "a", 0)
-        directory_log.write("%s\n" % directory)
-        directory_log.close()
-    return directory
+    # Workaround to restore windows console cp850 encoding to print the tree
+    if sys.platform == "win32" and sys.stdout.isatty():
+        import locale
+        data_locale = locale.getlocale()
+        if not data_locale[0] is None:
+            locale.setlocale(locale.LC_ALL, (data_locale[0], "850"))
+        message = (u"\nGenerated files:\n\n" +
+                   unicode(u.print_tree(path, " "), "utf-8") + u"\n")
+    else:
+        message = "\nGenerated files:\n\n" + u.print_tree(path, " ") + "\n"
+    u.log_message(message, log_file=session_file, console=args.verbosity)
 
 
 def main(args=sys.argv[1:]):
     """Main process
 
     """
-    command_log = open(".bigmler", "a", 0)
-    command_log.write("bigmler %s\n" % " ".join(args))
-    command_log.close()
-    # Date and time in format SunNov0412_120510 to name and tag resources
-    NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
+    for i in range(0, len(args)):
+        if args[i].startswith("--"):
+            args[i] = args[i].replace("_", "-")
+    # If --clear-logs the log files are cleared
+    if "--clear-logs" in args:
+        for log_file in LOG_FILES:
+            try:
+                open(log_file, 'w', 0).close()
+            except IOError:
+                pass
+    literal_args = args[:]
+    for i in range(0, len(args)):
+        if ' ' in args[i]:
+            literal_args[i] = '"%s"' % args[i]
+    message = "bigmler %s\n" % " ".join(literal_args)
 
-    parser = argparse.ArgumentParser(
-        description="A higher level API to BigML's API.",
-        epilog="Happy predictive modeling!")
+    # Resume calls are not logged
+    if not "--resume" in args:
+        with open(COMMAND_LOG, "a", 0) as command_log:
+            command_log.write(message)
+        resume = False
 
-    # Shows log info for each https request.
-    parser.add_argument('--debug',
-                        action='store_true',
-                        help="Activate debug level")
-
-    # Uses BigML dev environment. Sizes must be under 1MB though.
-    parser.add_argument('--dev',
-                        action='store_true',
-                        dest='dev_mode',
-                        help=("Compute a test output using BigML FREE"
-                             " development environment"))
-    # BigML's username.
-    parser.add_argument('--username',
-                        action='store',
-                        help="BigML's username")
-
-    # BigML's API key.
-    parser.add_argument('--api_key',
-                        action='store',
-                        help="BigML's API key")
-
-    # Path to the training set.
-    parser.add_argument('--train',
-                        action='store',
-                        dest='training_set',
-                        help="Training set path")
-
-    # Path to the test set.
-    parser.add_argument('--test',
-                        action='store',
-                        dest='test_set',
-                        help="Test set path")
-
-    # Name of the file to output predictions.
-    parser.add_argument('--output',
-                        action='store',
-                        dest='predictions',
-                        default='%s%spredictions.csv' % (NOW, os.sep),
-                        help="Path to the file to output predictions.")
-
-    # The name of the field that represents the objective field (i.e., class or
-    # label).
-    parser.add_argument('--objective',
-                        action='store',
-                        dest='objective_field',
-                        help="The column number of the Objective Field")
-
-    # Category code.
-    parser.add_argument('--category',
-                        action='store',
-                        dest='category',
-                        default=12,
-                        type=int,
-                        help="Category code")
-
-    # A file including a makdown description
-    parser.add_argument('--description',
-                        action='store',
-                        dest='description',
-                        help=("Path to a file with a description in plain"
-                              " text or markdown"))
-
-    # The path to a file containing names if you want to alter BigML's
-    # default field names or the ones provided by the train file header.
-    # Kept for backwards compatibility
-    parser.add_argument('--field_names',
-                        action='store',
-                        dest='field_attributes',
-                        help=("Path to a csv file describing field names. One"
-                              " definition per line (e.g., 0,'Last Name')"))
-
-    # The path to a file containing attributes if you want to alter BigML's
-    # default field attributes or the ones provided by the train file header.
-    parser.add_argument('--field_attributes',
-                        action='store',
-                        dest='field_attributes',
-                        help=("Path to a csv file describing field attributes."
-                              " One definition per line"
-                              " (e.g., 0,'Last Name')"))
-
-    # The path to a file containing types if you want to alter BigML's
-    # type auto-detect.
-    parser.add_argument('--types',
-                        action='store',
-                        dest='types',
-                        help=("Path to a file describing field types. One"
-                              " definition per line (e.g., 0, 'numeric')"))
-
-    # Fields to include in the dataset.
-    parser.add_argument('--dataset_fields',
-                        action='store',
-                        dest='dataset_fields',
-                        help=("Comma-separated list of field column numbers"
-                              " to include in the dataset"))
-
-    # Path to a file that includes a JSON filter.
-    parser.add_argument('--json_filter',
-                        action='store',
-                        help="File including a JSON filter")
-
-    # Path to a file that includes a lisp filter.
-    parser.add_argument('--lisp_filter',
-                        action='store',
-                        help="File including a Lisp filter")
-
-    # Input fields to include in the model.
-    parser.add_argument('--model_fields',
-                        action='store',
-                        dest='model_fields',
-                        help=("Comma-separated list of input fields"
-                              " (predictors) to create the model"))
-
-    # Set when the training set file doesn't include a header on the first
-    # line.
-    parser.add_argument('--no-train-header',
-                        action='store_false',
-                        dest='train_header',
-                        help="The train set file hasn't a header")
-
-    # Set when the test set file doesn't include a header on the first
-    # line.
-    parser.add_argument('--no-test-header',
-                        action='store_false',
-                        dest='test_header',
-                        help="The test set file hasn't a header")
-
-    # Name to be used with the source and then with datasets, models and
-    # predicitions.
-    parser.add_argument('--name',
-                        action='store',
-                        dest='name',
-                        default='BigMLer_%s' % NOW,
-                        help="Name for the resources in BigML")
-
-    # If a BigML source is provided, the script won't create a new one
-    parser.add_argument('--source',
-                        action='store',
-                        dest='source',
-                        help="BigML source Id")
-
-    # If a BigML dataset is provided, the script won't create a new one
-    parser.add_argument('--dataset',
-                        action='store',
-                        dest='dataset',
-                        help="BigML dataset Id")
-
-    # If a BigML model is provided, the script will use it to generate
-    # predictions.
-    parser.add_argument('--model',
-                        action='store',
-                        dest='model',
-                        help="BigML model Id")
-
-    # Use it to compute predictions remotely.
-    parser.add_argument('--remote',
-                        action='store_true',
-                        help="Compute predictions remotely")
-
-    # The path to a file containing model ids.
-    parser.add_argument('--models',
-                        action='store',
-                        dest='models',
-                        help=("Path to a file containing model/ids. One model"
-                              " per line (e.g., model/50a206a8035d0706dc000376"
-                              ")"))
-
-    # The path to a file containing a dataset id.
-    parser.add_argument('--datasets',
-                        action='store',
-                        dest='datasets',
-                        help=("Path to a file containing a dataset/id. Just"
-                              " one dataset"
-                              " (e.g., dataset/50a20697035d0706da0004a4)"))
-
-    # Set to True to active statiscal pruning.
-    parser.add_argument('--stat_pruning',
-                        action='store_true',
-                        help="Use statiscal pruning.")
-
-    # Set to False to deactivate statiscal pruning.
-    parser.add_argument('--no_stat_pruning',
-                        action='store_true',
-                        help="Do not use statistical pruning.")
-
-    # Number of models to create when using ensembles.
-    parser.add_argument('--number_of_models',
-                        action='store',
-                        dest='number_of_models',
-                        default=1,
-                        type=int,
-                        help="Number of models to create when using ensembles")
-
-    # Sampling to use when using bagging.
-    parser.add_argument('--sample_rate',
-                        action='store',
-                        dest='sample_rate',
-                        default=1,
-                        type=float,
-                        help="Sample rate to create models")
-
-    # Replacement to use when using bagging.
-    parser.add_argument('--replacement',
-                        action='store_true',
-                        help="Use replacement when sampling")
-
-    # Max number of models to create in parallel.
-    parser.add_argument('--max_parallel_models',
-                        action='store',
-                        dest='max_parallel_models',
-                        default=1,
-                        type=int,
-                        help="Max number of models to create in parallel")
-
-    # Max number of models to predict from in parallel.
-    parser.add_argument('--max_batch_models',
-                        action='store',
-                        dest='max_batch_models',
-                        default=MAX_MODELS,
-                        type=int,
-                        help=("Max number of models to predict from"
-                              "in parallel"))
-
-    # Randomize feature selection at each split.
-    parser.add_argument('--randomize',
-                        action='store_true',
-                        help="Randomize feature selection at each split.")
-
-    # Use it to add a tag to the new resources created.
-    parser.add_argument('--tag',
-                        action='append',
-                        default=[],
-                        help="Tag to later retrieve new resources")
-
-    # Avoid default tagging of resources.
-    parser.add_argument('--no_tag',
-                        action='store_false',
-                        help="No tag resources with default BigMLer tags")
-
-    # Use it to retrieve models that were tagged with tag.
-    parser.add_argument('--model_tag',
-                        help="Retrieve models that were tagged with tag")
-
-    # Make dataset public.
-    parser.add_argument('--public_dataset',
-                        action='store_true',
-                        help="Make generated dataset public")
-
-    # Make model a public black-box model.
-    parser.add_argument('--black_box',
-                        action='store_true',
-                        help="Make generated model black-box")
-
-    # Make model a public white-box model.
-    parser.add_argument('--white_box',
-                        action='store_true',
-                        help="Make generated model white-box")
-
-    # Set a price tag to your white-box model.
-    parser.add_argument('--model_price',
-                        action='store',
-                        type=float,
-                        default=0.0,
-                        help=("The price other users must pay to clone your"
-                              " model"))
-
-    # Set a price tag to your dataset.
-    parser.add_argument('--dataset_price',
-                        action='store',
-                        type=float,
-                        default=0.0,
-                        help="Price for the dataset")
-
-    # Set credits per prediction to your white box or black box models.
-    parser.add_argument('--cpp',
-                        action='store',
-                        type=float,
-                        default=0.0,
-                        help=("The number of credits that other users will"
-                              " consume to make a prediction with your"
-                              " model."))
-
-    # Shows progress information when uploading a file.
-    parser.add_argument('--progress_bar',
-                        action='store_true',
-                        help="Show progress details when creating a source.")
-
-    # Does not create a dataset.
-    parser.add_argument('--no_dataset',
-                        action='store_true',
-                        help="Do not create a dataset.")
-
-    # Does not create a model just a dataset.
-    parser.add_argument('--no_model',
-                        action='store_true',
-                        help="Do not create a model.")
-
-    # Log file to store resources ids.
-    parser.add_argument('--resources_log',
-                        action='store',
-                        dest='log_file',
-                        help=("Path to a file to store new resources ids."
-                              " One resource per line"
-                              " (e.g., model/50a206a8035d0706dc000376)"))
-    # Changes to delete mode.
-    parser.add_argument('--delete',
-                        action='store_true',
-                        help="Delete command.")
-
-    # Resources to be deleted.
-    parser.add_argument('--ids',
-                        action='store',
-                        dest='delete_list',
-                        help=("Select comma separated list of"
-                              " resources to be deleted."))
-
-    # Resources to be deleted are taken from file.
-    parser.add_argument('--from_file',
-                        action='store',
-                        dest='delete_file',
-                        help=("Path to a file containing resources ids."
-                              " One resource per line"
-                              " (e.g., model/50a206a8035d0706dc000376)"))
-
-    # Sources selected by tag to be deleted.
-    parser.add_argument('--source_tag',
-                        help=("Select sources tagged with tag to"
-                              " be deleted"))
-
-    # Datasets selected by tag to be deleted.
-    parser.add_argument('--dataset_tag',
-                        help=("Select datasets tagged with tag to"
-                              " be deleted"))
-
-    # Predictions selected by tag to be deleted.
-    parser.add_argument('--prediction_tag',
-                        help=("Select prediction tagged with tag to"
-                              " be deleted"))
-
-    # Resources selected by tag to be deleted.
-    parser.add_argument('--all_tag',
-                        help=("Select resources tagged with tag to"
-                              " be deleted"))
-
-    # Locale settings.
-    parser.add_argument('--locale',
-                        action='store',
-                        dest='user_locale',
-                        default=None,
-                        help="Chosen locale code string.")
-
-    # Prediction directories to be combined.
-    parser.add_argument('--combine_votes',
-                        action='store',
-                        dest='votes_dirs',
-                        help=("Comma separated list of"
-                              " directories that contain models' votes"
-                              " for the same test set."))
-
-    # Method to combine votes in multiple models predictions
-    parser.add_argument('--method',
-                        action='store',
-                        dest='method',
-                        default='plurality',
-                        help="Method to combine votes from ensemble"
-                             " predictions. Allowed methods: plurality"
-                             " or \"confidence weighted\".")
+    parser = create_parser(defaults=get_user_defaults(), constants={'NOW': NOW,
+                           'MAX_MODELS': MAX_MODELS, 'PLURALITY': PLURALITY})
 
     # Parses command line arguments.
-    ARGS = parser.parse_args(args)
+    command_args = parser.parse_args(args)
 
-    if len(os.path.dirname(ARGS.predictions).strip()) == 0:
-        ARGS.predictions = "%s%s%s" % (NOW, os.sep, ARGS.predictions)
+    default_output = ('evaluation' if command_args.evaluate
+                      else 'predictions.csv')
+    if command_args.resume:
+        debug = command_args.debug
+        command = u.get_log_reversed(COMMAND_LOG,
+                                     command_args.stack_level)
+        args = shlex.split(command)[1:]
+        output_dir = u.get_log_reversed(DIRS_LOG,
+                                        command_args.stack_level)
+        defaults_file = "%s%s%s" % (output_dir, os.sep, DEFAULTS_FILE)
+        parser = create_parser(defaults=get_user_defaults(defaults_file),
+                               constants={'NOW': NOW, 'MAX_MODELS': MAX_MODELS,
+                                          'PLURALITY': PLURALITY})
+        command_args = parser.parse_args(args)
+        if command_args.predictions is None:
+            command_args.predictions = ("%s%s%s" %
+                                        (output_dir, os.sep,
+                                         default_output))
+        # Logs the issued command and the resumed command
+        session_file = "%s%s%s" % (output_dir, os.sep, SESSIONS_LOG)
+        u.log_message(message, log_file=session_file)
+        message = "\nResuming command:\n%s\n\n" % command
+        u.log_message(message, log_file=session_file, console=True)
+        try:
+            defaults_handler = open(defaults_file, 'r')
+            contents = defaults_handler.read()
+            message = "\nUsing the following defaults:\n%s\n\n" % contents
+            u.log_message(message, log_file=session_file, console=True)
+            defaults_handler.close()
+        except IOError:
+            pass
 
-    API_ARGS = {
-        'username': ARGS.username,
-        'api_key': ARGS.api_key,
-        'dev_mode': ARGS.dev_mode,
-        'debug': ARGS.debug}
+        resume = True
+    else:
+        if command_args.predictions is None:
+            command_args.predictions = ("%s%s%s" %
+                                        (NOW, os.sep,
+                                         default_output))
+        if len(os.path.dirname(command_args.predictions).strip()) == 0:
+            command_args.predictions = ("%s%s%s" %
+                                        (NOW, os.sep,
+                                         command_args.predictions))
+        directory = u.check_dir(command_args.predictions)
+        session_file = "%s%s%s" % (directory, os.sep, SESSIONS_LOG)
+        u.log_message(message + "\n", log_file=session_file)
+        try:
+            defaults_file = open(DEFAULTS_FILE, 'r')
+            contents = defaults_file.read()
+            defaults_file.close()
+            defaults_copy = open("%s%s%s" % (directory, os.sep, DEFAULTS_FILE),
+                                 'w', 0)
+            defaults_copy.write(contents)
+            defaults_copy.close()
+        except IOError:
+            pass
+        with open(DIRS_LOG, "a", 0) as directory_log:
+            directory_log.write("%s\n" % os.path.abspath(directory))
 
-    API = bigml.api.BigML(**API_ARGS)
+    if resume and debug:
+        command_args.debug = True
+
+    api_command_args = {
+        'username': command_args.username,
+        'api_key': command_args.api_key,
+        'dev_mode': command_args.dev_mode,
+        'debug': command_args.debug}
+
+    api = bigml.api.BigML(**api_command_args)
+
+    if (command_args.evaluate
+        and not (command_args.training_set or command_args.source
+                 or command_args.dataset)
+        and not (command_args.test_set and (command_args.model or
+                 command_args.models or command_args.model_tag))):
+        parser.error("Evaluation wrong syntax.\n"
+                     "\nTry for instance:\n\nbigmler --train data/iris.csv"
+                     " --evaluate\nbigmler --model "
+                     "model/5081d067035d076151000011 --dataset "
+                     "dataset/5081d067035d076151003423 --evaluate")
+
+    if command_args.objective_field:
+        objective = command_args.objective_field
+        try:
+            command_args.objective_field = int(objective)
+        except ValueError:
+            pass
 
     output_args = {
-        "api": API,
-        "training_set": ARGS.training_set,
-        "test_set": ARGS.test_set,
-        "output": ARGS.predictions,
-        "objective_field": ARGS.objective_field,
-        "name": ARGS.name,
-        "training_set_header": ARGS.train_header,
-        "test_set_header": ARGS.test_header,
-        "args": ARGS,
+        "api": api,
+        "training_set": command_args.training_set,
+        "test_set": command_args.test_set,
+        "output": command_args.predictions,
+        "objective_field": command_args.objective_field,
+        "name": command_args.name,
+        "training_set_header": command_args.train_header,
+        "test_set_header": command_args.test_header,
+        "args": command_args,
+        "resume": resume,
     }
 
     # Reads description if provided.
-    if ARGS.description:
-        DESCRIPTION = read_description(ARGS.description)
-        output_args.update(description=DESCRIPTION)
+    if command_args.description:
+        description_arg = u.read_description(command_args.description)
+        output_args.update(description=description_arg)
     else:
         output_args.update(description="Created using BigMLer")
 
     # Parses fields if provided.
-    if ARGS.field_attributes:
-        FIELD_ATTRIBUTES = read_field_attributes(ARGS.field_attributes)
-        output_args.update(field_attributes=FIELD_ATTRIBUTES)
+    if command_args.field_attributes:
+        field_attributes_arg = (
+            u.read_field_attributes(command_args.field_attributes))
+        output_args.update(field_attributes=field_attributes_arg)
 
     # Parses types if provided.
-    if ARGS.types:
-        TYPES = read_types(ARGS.types)
-        output_args.update(types=TYPES)
+    if command_args.types:
+        types_arg = u.read_types(command_args.types)
+        output_args.update(types=types_arg)
 
     # Parses dataset fields if provided.
-    if ARGS.dataset_fields:
-        DATASET_FIELDS = map(lambda x: x.strip(),
-                             ARGS.dataset_fields.split(','))
-        output_args.update(dataset_fields=DATASET_FIELDS)
+    if command_args.dataset_fields:
+        dataset_fields_arg = map(lambda x: x.strip(),
+                                 command_args.dataset_fields.split(','))
+        output_args.update(dataset_fields=dataset_fields_arg)
 
     # Parses model input fields if provided.
-    if ARGS.model_fields:
-        MODEL_FIELDS = map(lambda x: x.strip(), ARGS.model_fields.split(','))
-        output_args.update(model_fields=MODEL_FIELDS)
+    if command_args.model_fields:
+        model_fields_arg = map(lambda x: x.strip(),
+                               command_args.model_fields.split(','))
+        output_args.update(model_fields=model_fields_arg)
 
     model_ids = []
     # Parses model/ids if provided.
-    if ARGS.models:
-        model_ids = read_models(ARGS.models)
+    if command_args.models:
+        model_ids = u.read_models(command_args.models)
         output_args.update(model_ids=model_ids)
 
     dataset_id = None
     # Parses dataset/id if provided.
-    if ARGS.datasets:
-        dataset_id = read_dataset(ARGS.datasets)
-        ARGS.dataset = dataset_id
+    if command_args.datasets:
+        dataset_id = u.read_dataset(command_args.datasets)
+        command_args.dataset = dataset_id
 
     # Retrieve model/ids if provided.
-    if ARGS.model_tag:
-        model_ids = model_ids + list_model_ids(API,
-                                               "tags__in=%s" % ARGS.model_tag)
+    if command_args.model_tag:
+        model_ids = (model_ids +
+                     u.list_ids(api.list_models,
+                                "tags__in=%s" % command_args.model_tag))
         output_args.update(model_ids=model_ids)
 
     # Reads a json filter if provided.
-    if ARGS.json_filter:
-        json_filter = read_json_filter(ARGS.json_filter)
-        ARGS.json_filter = json_filter
+    if command_args.json_filter:
+        json_filter = u.read_json_filter(command_args.json_filter)
+        command_args.json_filter = json_filter
 
     # Reads a lisp filter if provided.
-    if ARGS.lisp_filter:
-        lisp_filter = read_lisp_filter(ARGS.lisp_filter)
-        ARGS.lisp_filter = lisp_filter
+    if command_args.lisp_filter:
+        lisp_filter = u.read_lisp_filter(command_args.lisp_filter)
+        command_args.lisp_filter = lisp_filter
 
     # Adds default tags unless that it is requested not to do so.
-    if ARGS.no_tag:
-        ARGS.tag.append('BigMLer')
-        ARGS.tag.append('BigMLer_%s' % NOW)
+    if command_args.no_tag:
+        command_args.tag.append('BigMLer')
+        command_args.tag.append('BigMLer_%s' % NOW)
 
     # Checks combined votes method
-    if ARGS.method and not ARGS.method in COMBINATION_METHODS.keys():
-        ARGS.method = 'plurality'
+    if (command_args.method and
+            not command_args.method in COMBINATION_WEIGHTS.keys()):
+        command_args.method = 0
+    else:
+        combiner_methods = dict([[value, key]
+                                for key, value in COMBINER_MAP.items()])
+        command_args.method = combiner_methods.get(command_args.method, 0)
 
     # Reads votes files in the provided directories.
-    if ARGS.votes_dirs:
-        dirs = map(lambda x: x.strip(), ARGS.votes_dirs.split(','))
-        votes_files = read_votes(dirs, os.path.dirname(ARGS.predictions))
+    if command_args.votes_dirs:
+        dirs = map(lambda x: x.strip(), command_args.votes_dirs.split(','))
+        votes_path = os.path.dirname(command_args.predictions)
+        votes_files = u.read_votes_files(dirs, votes_path)
         output_args.update(votes_files=votes_files)
 
+    # Parses fields map if provided.
+    if command_args.fields_map:
+        fields_map_arg = u.read_fields_map(command_args.fields_map)
+        output_args.update(fields_map=fields_map_arg)
+
     # Parses resources ids if provided.
-    if ARGS.delete:
+    if command_args.delete:
+        if command_args.predictions is None:
+            path = NOW
+        else:
+            path = u.check_dir(command_args.predictions)
+        session_file = "%s%s%s" % (path, os.sep, SESSIONS_LOG)
+        message = u.dated("Retrieving objects to delete.\n")
+        u.log_message(message, log_file=session_file,
+                      console=command_args.verbosity)
         delete_list = []
-        if ARGS.delete_list:
-            delete_list = map(lambda x: x.strip(), ARGS.delete_list.split(','))
-        if ARGS.delete_file:
-            if not os.path.exists(ARGS.delete_file):
-                raise Exception("File %s not found" % ARGS.delete_file)
-            delete_list.extend([line for line in open(ARGS.delete_file, "r")])
-        if ARGS.all_tag:
-            query_string = "tags__in=%s" % ARGS.all_tag
-            delete_list.extend(list_source_ids(API, query_string))
-            delete_list.extend(list_dataset_ids(API, query_string))
-            delete_list.extend(list_model_ids(API, query_string))
-            delete_list.extend(list_prediction_ids(API, query_string))
+        if command_args.delete_list:
+            delete_list = map(lambda x: x.strip(),
+                              command_args.delete_list.split(','))
+        if command_args.delete_file:
+            if not os.path.exists(command_args.delete_file):
+                raise Exception("File %s not found" % command_args.delete_file)
+            delete_list.extend([line for line
+                                in open(command_args.delete_file, "r")])
+        if command_args.all_tag:
+            query_string = "tags__in=%s" % command_args.all_tag
+            delete_list.extend(u.list_ids(api.list_sources, query_string))
+            delete_list.extend(u.list_ids(api.list_datasets, query_string))
+            delete_list.extend(u.list_ids(api.list_models, query_string))
+            delete_list.extend(u.list_ids(api.list_predictions, query_string))
+            delete_list.extend(u.list_ids(api.list_evaluations, query_string))
         # Retrieve sources/ids if provided
-        if ARGS.source_tag:
-            query_string = "tags__in=%s" % ARGS.source_tag
-            delete_list.extend(list_source_ids(API, query_string))
+        if command_args.source_tag:
+            query_string = "tags__in=%s" % command_args.source_tag
+            delete_list.extend(u.list_ids(api.list_sources, query_string))
         # Retrieve datasets/ids if provided
-        if ARGS.dataset_tag:
-            query_string = "tags__in=%s" % ARGS.dataset_tag
-            delete_list.extend(list_dataset_ids(API, query_string))
+        if command_args.dataset_tag:
+            query_string = "tags__in=%s" % command_args.dataset_tag
+            delete_list.extend(u.list_ids(api.list_datasets, query_string))
         # Retrieve model/ids if provided
-        if ARGS.model_tag:
-            query_string = "tags__in=%s" % ARGS.model_tag
-            delete_list.extend(list_model_ids(API, query_string))
+        if command_args.model_tag:
+            query_string = "tags__in=%s" % command_args.model_tag
+            delete_list.extend(u.list_ids(api.list_models, query_string))
         # Retrieve prediction/ids if provided
-        if ARGS.prediction_tag:
-            query_string = "tags__in=%s" % ARGS.prediction_tag
-            delete_list.extend(list_prediction_ids(API, query_string))
-
-        delete(API, delete_list)
-    else:
+        if command_args.prediction_tag:
+            query_string = "tags__in=%s" % command_args.prediction_tag
+            delete_list.extend(u.list_ids(api.list_predictions, query_string))
+        # Retrieve evaluation/ids if provided
+        if command_args.evaluation_tag:
+            query_string = "tags__in=%s" % command_args.evaluation_tag
+            delete_list.extend(u.list_ids(api.list_evaluations, query_string))
+        message = u.dated("Deleting objects.\n")
+        u.log_message(message, log_file=session_file,
+                      console=command_args.verbosity)
+        message = "\n".join(delete_list)
+        u.log_message(message, log_file=session_file)
+        u.delete(api, delete_list)
+        if sys.platform == "win32" and sys.stdout.isatty():
+            message = (u"\nGenerated files:\n\n" +
+                       unicode(u.print_tree(path, " "), "utf-8") + u"\n")
+        else:
+            message = "\nGenerated files:\n\n" + u.print_tree(path, " ") + "\n"
+        u.log_message(message, log_file=session_file,
+                      console=command_args.verbosity)
+    elif (command_args.training_set or command_args.test_set
+          or command_args.source or command_args.dataset
+          or command_args.datasets or command_args.votes_dirs):
         compute_output(**output_args)
-
+    u.log_message("_" * 80 + "\n", log_file=session_file)
 
 if __name__ == '__main__':
     main(sys.argv[1:])

@@ -17,6 +17,10 @@ build
 *.coverage
 .tox/
 docs/_build/*
+.bigmler*
+tests/.bigmler*
+*~
+
 
 # Packages
 *.egg

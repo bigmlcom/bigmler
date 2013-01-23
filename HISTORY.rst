@@ -3,6 +3,14 @@
 History
 -------
 
+0.2.0 (2012-01-21)
+~~~~~~~~~~~~~~~~~~
+- Evaluations management
+- console monitoring of process advance
+- resume option
+- user defaults
+- Refactoring to improve readability
+
 0.1.4 (2012-12-21)
 ~~~~~~~~~~~~~~~~~~
 
