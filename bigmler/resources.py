@@ -37,7 +37,7 @@ def create_source(data_set, data_set_header, name, description,
                   api, args, path, session_file=None, log=None):
     """Creates remote source
 
-    """ 
+    """
     source_args = {
         "name": name,
         "description": description,
@@ -62,7 +62,7 @@ def create_source(data_set, data_set_header, name, description,
 
 
 def data_to_source(training_set, test_set,
-                  training_set_header, test_set_header, args):
+                   training_set_header, test_set_header, args):
     """Extracts the flags info to create a source object
 
     """
@@ -85,7 +85,7 @@ def get_source(source, api, verbosity=True, session_file=None):
     if (isinstance(source, basestring) or
             source['object']['status']['code'] != bigml.api.FINISHED):
         message = dated("Retrieving source. %s\n" %
-                          get_url(source, api))
+                        get_url(source, api))
         log_message(message, log_file=session_file,
                     console=verbosity)
         source = api.check_resource(source, api.get_source)
@@ -102,7 +102,7 @@ def update_source_fields(source, updated_values, api, fields, verbosity,
         update_fields.update({
             fields.field_id(column): value})
     message = dated("Updating source. %s\n" %
-                      get_url(source, api))
+                    get_url(source, api))
     log_message(message, log_file=session_file,
                 console=verbosity)
     source = api.update_source(source, {"fields": update_fields})
@@ -226,7 +226,7 @@ def create_models(dataset, model_ids, name, description, api,
                             (len(model_ids),
                              args.number_of_models))
             log_message(message, log_file=session_file,
-                          console=args.verbosity)
+                        console=args.verbosity)
         models = model_ids
         args.number_of_models -= len(model_ids)
 
@@ -256,9 +256,10 @@ def create_models(dataset, model_ids, name, description, api,
             message = dated("Model created: %s.\n" %
                             get_url(model, api))
             log_message(message, log_file=session_file,
-                          console=args.verbosity)
+                        console=args.verbosity)
     model_file.close()
     return models, model_ids, resume
+
 
 def get_models(model_ids, api, args, session_file=None):
     """Retrieves remote models in its actual status
@@ -281,6 +282,7 @@ def get_models(model_ids, api, args, session_file=None):
         model = api.check_resource(model_ids[0], api.get_model)
         models.append(model)
     return models, model_ids
+
 
 def publish_model(model, api, args, session_file=None):
     """Update model with publish info
@@ -315,8 +317,8 @@ def map_fields(fields_map, fields):
     return update_map
 
 
-def create_evaluation(model, dataset, name, description, api, args, path,
-                      fields_map=None, session_file=None, log=None):
+def create_evaluation(model, dataset, name, description, api, args, fields,
+                      path, fields_map=None, session_file=None, log=None):
     """Create evaluation
 
     """

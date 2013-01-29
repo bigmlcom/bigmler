@@ -96,8 +96,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # It is compulsory to have a description to publish either datasets or
     # models
     if (not description and
-        (args.black_box or args.white_box or args.public_dataset)):
-            raise Exception("You should provide a description to publish.")
+            (args.black_box or args.white_box or args.public_dataset)):
+        raise Exception("You should provide a description to publish.")
 
     path = u.check_dir(output)
     session_file = "%s%s%s" % (path, os.sep, SESSIONS_LOG)
@@ -154,7 +154,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         fields = Fields(source['object']['fields'], **csv_properties)
         if field_attributes:
             source = r.update_source_fields(source, field_attributes, api,
-                                            fields, args.verbosity, session_file)
+                                            fields, args.verbosity,
+                                            session_file)
         if types:
             source = r.update_source_fields(source, types, api, fields,
                                             args.verbosity, session_file)
@@ -178,7 +179,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if ((source and not args.dataset and not args.model and not model_ids and
             not args.no_dataset) or
             (args.evaluate and args.test_set and not args.dataset)):
-        dataset = r.create_dataset(source, name, description, api, args, fields,
+        dataset = r.create_dataset(source, name, description, api, args,
+                                   fields,
                                    dataset_fields, path, session_file, log)
 
     # If a dataset is provided, let's retrieve it.
@@ -194,7 +196,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                               dataset['object']['locale']}
         fields = Fields(dataset['object']['fields'], **csv_properties)
         if args.public_dataset:
-            publish_dataset(dataset, api, args, session_file)
+            r.publish_dataset(dataset, api, args, session_file)
 
     #end of dataset processing
 
@@ -231,7 +233,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if model and not args.evaluate and (test_set or args.black_box
                                         or args.white_box):
         if args.black_box or args.white_box:
-            model = publish_model(model, api, args, session_file)
+            model = r.publish_model(model, api, args, session_file)
             models[0] = model
         if not csv_properties:
             csv_properties = {'data_locale':
@@ -279,8 +281,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                               console=args.verbosity)
         if not resume:
             evaluation = r.create_evaluation(model, dataset, name, description,
-                                             api, args, path, fields_map,
-                                             session_file, log)
+                                             api, args, fields, path,
+                                             fields_map, session_file, log)
 
         evaluation = r.get_evaluation(evaluation, api, args.verbosity,
                                       session_file)

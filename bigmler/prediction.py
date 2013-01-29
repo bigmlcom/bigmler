@@ -20,14 +20,17 @@
 from __future__ import absolute_import
 
 import csv
+import sys
 
 import bigmler.utils as u
 
+from bigml.model import Model
 from bigml.multimodel import MultiModel
 from bigml.util import (localize, console_log, get_csv_delimiter,
                         get_predictions_file_name)
 
 MAX_MODELS = 10
+
 
 def remote_predict(models, headers, output_path, number_of_tests, resume,
                    verbosity, test_reader, exclude, fields, api,
