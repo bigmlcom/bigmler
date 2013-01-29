@@ -95,7 +95,7 @@ def read_types(path):
         try:
             pair = ast.literal_eval(line)
             types_dict.update({
-                pair[0]: pair[1]})
+                pair[0]: {'optype': pair[1]}})
         except SyntaxError:
             console_log("WARNING: The following line in file %s"
                         " does not match the expected"
@@ -330,7 +330,7 @@ def get_log_reversed(file_name, stack_level):
     return lines_list[0]
 
 
-def is_source_created(path, api):
+def is_source_created(path):
     """Reads the source id from the source file in the path directory
 
     """
@@ -339,7 +339,7 @@ def is_source_created(path, api):
         with open("%s%ssource" % (path, os.sep)) as source_file:
             source_id = source_file.readline().strip()
             try:
-                source_id = api.get_source_id(source_id)
+                source_id = bigml.api.get_source_id(source_id)
                 return True, source_id
             except ValueError:
                 return False, None
@@ -347,7 +347,7 @@ def is_source_created(path, api):
         return False, None
 
 
-def is_dataset_created(path, api):
+def is_dataset_created(path):
     """Reads the dataset id from the dataset file in the path directory
 
     """
@@ -356,7 +356,7 @@ def is_dataset_created(path, api):
         with open("%s%sdataset" % (path, os.sep)) as dataset_file:
             dataset_id = dataset_file.readline().strip()
             try:
-                dataset_id = api.get_dataset_id(dataset_id)
+                dataset_id = bigml.api.get_dataset_id(dataset_id)
                 return True, dataset_id
             except ValueError:
                 return False, None
@@ -364,7 +364,7 @@ def is_dataset_created(path, api):
         return False, None
 
 
-def are_models_created(path, number_of_models, api):
+def are_models_created(path, number_of_models):
     """Reads the model ids from the models file in the path directory
 
     """
@@ -374,7 +374,7 @@ def are_models_created(path, number_of_models, api):
             for line in models_file:
                 model = line.strip()
                 try:
-                    model_id = api.get_model_id(model)
+                    model_id = bigml.api.get_model_id(model)
                     model_ids.append(model_id)
                 except ValueError:
                     return False, model_ids
@@ -397,7 +397,7 @@ def are_predictions_created(predictions_file, number_of_tests):
     return True
 
 
-def is_evaluation_created(path, api):
+def is_evaluation_created(path):
     """Reads the evaluation id from the evaluation file in the path directory
 
     """
@@ -406,7 +406,7 @@ def is_evaluation_created(path, api):
         with open("%s%sevaluation" % (path, os.sep)) as evaluation_file:
             evaluation_id = evaluation_file.readline().strip()
             try:
-                evaluation_id = api.get_evaluation_id(evaluation_id)
+                evaluation_id = bigml.api.get_evaluation_id(evaluation_id)
                 return True, evaluation_id
             except ValueError:
                 return False, None
