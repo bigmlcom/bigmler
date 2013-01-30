@@ -22,6 +22,8 @@ from __future__ import absolute_import
 import csv
 import sys
 
+import bigml.api
+
 import bigmler.utils as u
 
 from bigml.model import Model
@@ -45,8 +47,7 @@ def remote_predict(models, headers, output_path, number_of_tests, resume,
         "tags": tags
     }
     for model in models:
-        if not isinstance(model, basestring) and 'resource' in model:
-            model = model['resource']
+        model = bigml.api.get_model_id(model)
         predictions_file = get_predictions_file_name(model,
                                                      output_path)
         predictions_files.append(predictions_file)

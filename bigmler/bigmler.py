@@ -46,9 +46,9 @@ from __future__ import absolute_import
 
 import sys
 import os
-import datetime
 import re
 import shlex
+import datetime
 
 import bigml.api
 import bigmler.utils as u
@@ -133,9 +133,10 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                                                  training_set_header,
                                                  test_set_header, args)
     if data_set is not None:
-        source = r.create_source(data_set, data_set_header, name,
-                                 description, api, args, path, session_file,
-                                 log)
+        source_args = r.set_source_args(data_set_header, name, description,
+                                        args)
+        source = r.create_source(data_set, source_args, args, api,
+                                 path, session_file, log)
 
     # If a source is provided either through the command line or in resume
     # steps, we use it.
@@ -153,11 +154,11 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
         fields = Fields(source['object']['fields'], **csv_properties)
         if field_attributes:
-            source = r.update_source_fields(source, field_attributes, api,
-                                            fields, args.verbosity,
+            source = r.update_source_fields(source, field_attributes, fields,
+                                            api, args.verbosity,
                                             session_file)
         if types:
-            source = r.update_source_fields(source, types, api, fields,
+            source = r.update_source_fields(source, types, fields, api,
                                             args.verbosity, session_file)
 
     # End of source processing
@@ -179,9 +180,10 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if ((source and not args.dataset and not args.model and not model_ids and
             not args.no_dataset) or
             (args.evaluate and args.test_set and not args.dataset)):
-        dataset = r.create_dataset(source, name, description, api, args,
-                                   fields,
-                                   dataset_fields, path, session_file, log)
+        dataset_args = r.set_dataset_args(name, description, args, fields,
+                                          dataset_fields)
+        dataset = r.create_dataset(source, dataset_args, args, api,
+                                   path, session_file, log)
 
     # If a dataset is provided, let's retrieve it.
     elif args.dataset:
@@ -205,12 +207,26 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # If we have a dataset but not a model, we create the model if the no_model
     # flag hasn't been set up.
     if (dataset and not args.model and not model_ids and not args.no_model):
-        models, model_ids, resume = r.create_models(dataset, model_ids, name,
-                                                    description, api, args,
-                                                    objective_field, fields,
-                                                    model_fields,
-                                                    path, resume, session_file,
-                                                    log)
+        model_ids = []
+        models = []
+        if resume:
+            resume, model_ids = checkpoint(are_models_created, path,
+                                           args.number_of_models,
+                                           debug=args.debug)
+            if not resume:
+                message = dated("Found %s models out of %s. Resuming.\n" %
+                                (len(model_ids),
+                                 args.number_of_models))
+                log_message(message, log_file=session_file,
+                            console=args.verbosity)
+            models = model_ids
+            args.number_of_models -= len(model_ids)
+
+        model_args = r.set_model_args(name, description, args,
+                                      objective_field, fields, model_fields)
+        models, model_ids = r.create_models(dataset, model_ids,
+                                            model_args, args, api,
+                                            path, session_file, log)
         model = models[0]
 
     # If a model is provided, we use it.
@@ -225,7 +241,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
     # If we are going to predict we must retrieve the models
     if model_ids and test_set and not args.evaluate:
-        models, model_ids = r.get_models(model_ids, api, args, session_file)
+        models, model_ids = r.get_models(model_ids, args, api, session_file)
         model = models[0]
 
     # We get the fields of the model if we haven't got
@@ -233,7 +249,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if model and not args.evaluate and (test_set or args.black_box
                                         or args.white_box):
         if args.black_box or args.white_box:
-            model = r.publish_model(model, api, args, session_file)
+            model = r.publish_model(model, args, api, session_file)
             models[0] = model
         if not csv_properties:
             csv_properties = {'data_locale':
@@ -280,13 +296,15 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 u.log_message(message, log_file=session_file,
                               console=args.verbosity)
         if not resume:
-            evaluation = r.create_evaluation(model, dataset, name, description,
-                                             api, args, fields, path,
-                                             fields_map, session_file, log)
+            evaluation_args = r.set_evaluation_args(name, description, args,
+                                                    fields, fields_map)
+            evaluation = r.create_evaluation(model, dataset, evaluation_args,
+                                             args, api, path, session_file,
+                                             log)
 
         evaluation = r.get_evaluation(evaluation, api, args.verbosity,
                                       session_file)
-        r.save_evaluation(evaluation, api, output)
+        r.save_evaluation(evaluation, output, api)
 
     # Workaround to restore windows console cp850 encoding to print the tree
     if sys.platform == "win32" and sys.stdout.isatty():
@@ -327,7 +345,8 @@ def main(args=sys.argv[1:]):
             command_log.write(message)
         resume = False
 
-    parser = create_parser(defaults=get_user_defaults(), constants={'NOW': NOW,
+    parser = create_parser(defaults=get_user_defaults(),
+                           constants={'NOW': NOW,
                            'MAX_MODELS': MAX_MODELS, 'PLURALITY': PLURALITY})
 
     # Parses command line arguments.
@@ -344,7 +363,8 @@ def main(args=sys.argv[1:]):
                                         command_args.stack_level)
         defaults_file = "%s%s%s" % (output_dir, os.sep, DEFAULTS_FILE)
         parser = create_parser(defaults=get_user_defaults(defaults_file),
-                               constants={'NOW': NOW, 'MAX_MODELS': MAX_MODELS,
+                               constants={'NOW': NOW,
+                                          'MAX_MODELS': MAX_MODELS,
                                           'PLURALITY': PLURALITY})
         command_args = parser.parse_args(args)
         if command_args.predictions is None:
