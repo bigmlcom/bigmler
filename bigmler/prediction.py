@@ -30,14 +30,16 @@ from bigml.model import Model
 from bigml.multimodel import MultiModel
 from bigml.util import (localize, console_log, get_csv_delimiter,
                         get_predictions_file_name)
+from bigml.multivote import PLURALITY_CODE
 
 MAX_MODELS = 10
 
 
-def remote_predict(models, headers, output_path, number_of_tests, resume,
-                   verbosity, test_reader, exclude, fields, api,
-                   prediction_file, method, tags, objective_field,
-                   session_file, test_set_header, log, debug):
+def remote_predict(models, test_reader, prediction_file, api,
+                   resume=False,
+                   verbosity=True, output_path=None,
+                   method=PLURALITY_CODE, tags="",
+                   session_file=None, log=None, debug=False):
     """Retrieve predictions remotely, combine them and save predictions to file
 
     """
@@ -46,6 +48,9 @@ def remote_predict(models, headers, output_path, number_of_tests, resume,
     prediction_args = {
         "tags": tags
     }
+    test_set_header = test_reader.has_headers()
+    if output_path is None:
+        output_path = u.check_dir(prediction_file)
     for model in models:
         model = bigml.api.get_model_id(model)
         predictions_file = get_predictions_file_name(model,
@@ -53,16 +58,13 @@ def remote_predict(models, headers, output_path, number_of_tests, resume,
         predictions_files.append(predictions_file)
         if (not resume or
             not u.checkpoint(u.are_predictions_created, predictions_file,
-                             number_of_tests, debug=debug)):
+                             test_reader.number_of_tests(), debug=debug)):
             message = u.dated("Creating remote predictions.\n")
             u.log_message(message, log_file=session_file,
                           console=verbosity)
 
             predictions_file = csv.writer(open(predictions_file, 'w', 0))
-            for row in test_reader:
-                for index in exclude:
-                    del row[index]
-                input_data = fields.pair(row, headers, objective_field)
+            for input_data in test_reader:
                 prediction = api.create_prediction(model, input_data,
                                                    by_name=test_set_header,
                                                    wait_time=0,
@@ -75,26 +77,24 @@ def remote_predict(models, headers, output_path, number_of_tests, resume,
                     prediction_file, method)
 
 
-def local_predict(models, headers, test_reader, exclude, fields, method,
-                  objective_field, output, test_set_header):
-    """Get local predictions, combine them and save predictions to file
+def local_predict(models, test_reader, output, method):
+    """Get local predictions and combine them to get a final prediction
 
     """
     local_model = MultiModel(models)
-    for row in test_reader:
-        for index in exclude:
-            del row[index]
-        input_data = fields.pair(row, headers, objective_field)
+    test_set_header = test_reader.has_headers()
+    for input_data in test_reader:
         prediction = local_model.predict(input_data,
                                          by_name=test_set_header,
                                          method=method)
         u.write_prediction(prediction, output)
 
 
-def local_batch_predict(models, headers, test_reader, exclude, fields, resume,
-                        output_path, max_models, number_of_tests, api, output,
-                        verbosity, method, objective_field, session_file,
-                        debug):
+def local_batch_predict(models, test_reader, prediction_file, api,
+                        max_models=MAX_MODELS,  
+                        resume=False, output_path=None, output = None,
+                        verbosity=True, method=PLURALITY_CODE,
+                        session_file=None, debug=False):
     """Get local predictions form partial Multimodel, combine and save to file
 
     """
@@ -106,15 +106,17 @@ def local_batch_predict(models, headers, test_reader, exclude, fields, resume,
         console_log("Predicted on %s out of %s models [%s%%]" % (
             localize(current), localize(total), pct))
 
+    test_set_header = test_reader.has_headers()
+    if output_path is None:
+        output_path = u.check_dir(prediction_file)
+    if output is None:
+        output = open(prediction_file, 'w', 0)
     models_total = len(models)
     models_splits = [models[index:(index + max_models)] for index
                      in range(0, models_total, max_models)]
     input_data_list = []
-    for row in test_reader:
-        for index in exclude:
-            del row[index]
-        input_data_list.append(fields.pair(row, headers,
-                                           objective_field))
+    for input_data in test_reader:
+        input_data_list.append(input_data)
     total_votes = []
     models_count = 0
     for models_split in models_splits:
@@ -124,7 +126,7 @@ def local_batch_predict(models, headers, test_reader, exclude, fields, resume,
                                                       output_path)
                 u.checkpoint(u.are_predictions_created,
                              pred_file,
-                             number_of_tests, debug=debug)
+                             test_set.number_of_tests(), debug=debug)
         complete_models = []
         for index in range(len(models_split)):
             complete_models.append(api.check_resource(
@@ -164,64 +166,21 @@ def predict(test_set, test_set_header, models, fields, output,
        model predictions are saved for further use.
     """
 
-    try:
-        test_reader = csv.reader(open(test_set, "U"),
-                                 delimiter=get_csv_delimiter(),
-                                 lineterminator="\n")
-    except IOError:
-        sys.exit("Error: cannot read test %s" % test_set)
-
-    headers = None
-    exclude = []
-    if test_set_header:
-        headers = test_reader.next()
-        # validate headers against model fields excluding objective_field,
-        # that may be present or not
-        fields_names = [fields.fields[fields.field_id(i)]
-                        ['name'] for i in
-                        sorted(fields.fields_by_column_number.keys())
-                        if i != fields.field_column_number(objective_field)]
-        headers = [unicode(header, "utf-8") for header in headers]
-        exclude = [i for i in range(len(headers)) if not headers[i]
-                   in fields_names]
-        exclude.reverse()
-        if len(exclude):
-            if (len(headers) - len(exclude)):
-                print (u"WARNING: predictions will be processed but some data"
-                       u" might not be used. The used fields will be:\n\n%s"
-                       u"\n\nwhile the headers found in the test file are:"
-                       u"\n\n%s" %
-                       (",".join(fields_names),
-                        ",".join(headers))).encode("utf-8")
-                for index in exclude:
-                    del headers[index]
-            else:
-                raise Exception((u"No test field matches the model fields.\n"
-                                 u"The expected fields are:\n\n%s\n\nwhile "
-                                 u"the headers found in the test file are:\n\n"
-                                 u"%s\n\nUse --no-test-header flag if first li"
-                                 u"ne should not be interpreted as headers." %
-                                 (",".join(fields_names),
-                                  ",".join(headers))).encode("utf-8"))
-
+    test_reader = TestReader(test_set, test_set_header, fields,
+                             objective_field)
     prediction_file = output
     output_path = u.check_dir(output)
     output = open(output, 'w', 0)
-    number_of_tests = None
-    if resume:
-        number_of_tests = u.file_number_of_lines(test_set)
-        if test_set_header:
-            number_of_tests -= 1
     # Remote predictions: predictions are computed in bigml.com and stored
     # in a file named after the model in the following syntax:
     #     model_[id of the model]__predictions.csv
     # For instance,
     #     model_50c0de043b563519830001c2_predictions.csv
     if remote:
-        remote_predict(models, headers, output_path, number_of_tests, resume,
-                       verbosity, test_reader, exclude, fields, api,
-                       prediction_file, method, tags, objective_field,
-                       session_file, test_set_header, log, debug)
+        remote_predict(models, test_reader, prediction_file, api, resume,
+                       verbosity, output_path,
+                       method, tags,
+                       session_file, log, debug)
     # Local predictions: Predictions are computed locally using models' rules
     # with MultiModel's predict method
     else:
@@ -230,15 +189,102 @@ def predict(test_set, test_set_header, models, fields, output,
         # For a small number of models, we build a MultiModel using all of
         # the given models and issue a combined prediction
         if len(models) < max_models:
-            local_predict(models, headers, test_reader, exclude, fields,
-                          method, objective_field, output, test_set_header)
+            local_predict(models, test_reader, output, method)
         # For large numbers of models, we split the list of models in chunks
         # and build a MultiModel for each chunk, issue and store predictions
         # for each model and combine all of them eventually.
         else:
-            local_batch_predict(models, headers, test_reader, exclude, fields,
-                                resume, output_path, max_models,
-                                number_of_tests, api, output,
-                                verbosity, method, objective_field,
-                                session_file, debug)
+            local_batch_predict(models, test_reader, prediction_file, api,
+                                max_models, resume, output_path, output,
+                                verbosity, method, session_file, debug)
+
     output.close()
+
+
+class TestReader(object):
+    """Retrieves csv info and builds a input data dict
+
+    """
+    def __init__(self, test_set, test_set_header, fields, objective_field):
+        """Builds a generator from a csv file and the fields' model structure
+
+        """
+        self.test_set = test_set
+        self.test_set_header = test_set_header
+        self.fields = fields
+        self.objective_field = objective_field
+        try:
+            self.test_reader = csv.reader(open(test_set, "U"),
+                                          delimiter=get_csv_delimiter(),
+                                          lineterminator="\n")
+        except IOError:
+            sys.exit("Error: cannot read test %s" % test_set)
+
+        self.headers = None
+        self.exclude = []
+        if test_set_header:
+            self.headers = self.test_reader.next()
+            # validate headers against model fields excluding objective_field,
+            # that may be present or not
+            objective_field = fields.field_column_number(objective_field)
+            fields_names = [fields.fields[fields.field_id(i)]
+                            ['name'] for i in
+                            sorted(fields.fields_by_column_number.keys())
+                            if i != objective_field]
+            self.headers = [unicode(header, "utf-8") 
+                            for header in self.headers]
+            self.exclude = [i for i in range(len(self.headers))
+                            if not self.headers[i] in fields_names]
+            self.exclude.reverse()
+            if len(self.exclude):
+                if (len(self.headers) - len(self.exclude)):
+                    print (u"WARNING: predictions will be processed but some "
+                           u"data might not be used. The used fields will be:"
+                           u"\n\n%s"
+                           u"\n\nwhile the headers found in the test file are:"
+                           u"\n\n%s" %
+                           (",".join(fields_names),
+                            ",".join(self.headers))).encode("utf-8")
+                    for index in self.exclude:
+                        del self.headers[index]
+                else:
+                    raise Exception((u"No test field matches the model fields."
+                                     u"\nThe expected fields are:\n\n%s\n\n"
+                                     u"while "
+                                     u"the headers found in the test file are:"
+                                     u"\n\n%s\n\n"
+                                     u"Use --no-test-header flag if first li"
+                                     u"ne should not be interpreted as"
+                                     u" headers." %
+                                     (",".join(fields_names),
+                                      ",".join(self.headers))).encode("utf-8"))
+
+    def __iter__(self): 
+        """Iterator method
+
+        """
+        return self
+
+    def next(self):
+        """Returns the next row in a dict format
+
+        """
+        row = self.test_reader.next()
+        for index in self.exclude:
+            del row[index]
+        return self.fields.pair(row, self.headers, self.objective_field)
+
+    def number_of_tests(self):
+        """Returns the number of tests in the test file
+
+        """
+        tests = u.file_number_of_lines(self.test_set)
+        if self.test_set_header:
+            tests -= 1
+        return tests
+
+    def has_headers(self):
+        """Returns wether the test set file has a headers row
+
+        """
+        return self.test_set_header
