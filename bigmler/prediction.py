@@ -88,7 +88,7 @@ def local_predict(models, test_reader, output, method):
                                          by_name=test_set_header,
                                          method=method)
         u.write_prediction(prediction, output)
-
+    output.close()
 
 def local_batch_predict(models, test_reader, prediction_file, api,
                         max_models=MAX_MODELS,  
@@ -110,15 +110,21 @@ def local_batch_predict(models, test_reader, prediction_file, api,
     if output_path is None:
         output_path = u.check_dir(prediction_file)
     if output is None:
-        output = open(prediction_file, 'w', 0)
+        try:
+            output = open(prediction_file, 'w', 0)
+        except IOError:
+            raise("Failed to write in %s" % prediction_file)
     models_total = len(models)
     models_splits = [models[index:(index + max_models)] for index
                      in range(0, models_total, max_models)]
+
     input_data_list = []
     for input_data in test_reader:
         input_data_list.append(input_data)
+
     total_votes = []
     models_count = 0
+
     for models_split in models_splits:
         if resume:
             for model in models_split:
@@ -134,7 +140,9 @@ def local_batch_predict(models, test_reader, prediction_file, api,
 
         local_model = MultiModel(complete_models)
         local_model.batch_predict(input_data_list,
-                                  output_path, reuse=True)
+                                  output_path,
+                                  by_name=test_set_header,
+                                  reuse=True)
         votes = local_model.batch_votes(output_path)
         models_count += max_models
         if models_count > models_total:
@@ -147,10 +155,12 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                 predictions.extend(votes[index].predictions)
         else:
             total_votes = votes
+
     message = u.dated("Combining predictions.\n")
     u.log_message(message, log_file=session_file, console=verbosity)
     for multivote in total_votes:
         u.write_prediction(multivote.combine(method), output)
+    output.close()
 
 
 def predict(test_set, test_set_header, models, fields, output,

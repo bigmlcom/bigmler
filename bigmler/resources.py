@@ -301,7 +301,7 @@ def get_models(model_ids, args, api, session_file=None):
     if api is None:
         api = bigml.api.BigML()
     model_id = ""
-    models = []
+    models = model_ids
     if len(model_ids) == 1:
         model_id = model_ids[0]
     message = dated("Retrieving %s. %s\n" %
@@ -309,13 +309,14 @@ def get_models(model_ids, args, api, session_file=None):
                      get_url(model_id, api)))
     log_message(message, log_file=session_file, console=args.verbosity)
     if len(model_ids) < args.max_batch_models:
+        models = []
         for model in model_ids:
             model = api.check_resource(model, api.get_model)
             models.append(model)
         model = models[0]
     else:
         model = api.check_resource(model_ids[0], api.get_model)
-        models.append(model)
+        models[0] = model
     return models, model_ids
 
 

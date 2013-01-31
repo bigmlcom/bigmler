@@ -224,11 +224,10 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
         model_args = r.set_model_args(name, description, args,
                                       objective_field, fields, model_fields)
-        models, model_ids = r.create_models(dataset, model_ids,
+        models, model_ids = r.create_models(dataset, models,
                                             model_args, args, api,
                                             path, session_file, log)
         model = models[0]
-
     # If a model is provided, we use it.
     elif args.model:
         model = args.model
@@ -241,7 +240,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
     # If we are going to predict we must retrieve the models
     if model_ids and test_set and not args.evaluate:
-        models, model_ids = r.get_models(model_ids, args, api, session_file)
+        models, model_ids = r.get_models(models, args, api, session_file)
         model = models[0]
 
     # We get the fields of the model if we haven't got
