@@ -210,15 +210,15 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         model_ids = []
         models = []
         if resume:
-            resume, model_ids = checkpoint(are_models_created, path,
-                                           args.number_of_models,
-                                           debug=args.debug)
+            resume, model_ids = u.checkpoint(u.are_models_created, path,
+                                             args.number_of_models,
+                                             debug=args.debug)
             if not resume:
-                message = dated("Found %s models out of %s. Resuming.\n" %
-                                (len(model_ids),
-                                 args.number_of_models))
-                log_message(message, log_file=session_file,
-                            console=args.verbosity)
+                message = u.dated("Found %s models out of %s. Resuming.\n" %
+                                  (len(model_ids),
+                                   args.number_of_models))
+                u.log_message(message, log_file=session_file,
+                              console=args.verbosity)
             models = model_ids
             args.number_of_models -= len(model_ids)
 

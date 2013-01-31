@@ -90,9 +90,10 @@ def local_predict(models, test_reader, output, method):
         u.write_prediction(prediction, output)
     output.close()
 
+
 def local_batch_predict(models, test_reader, prediction_file, api,
-                        max_models=MAX_MODELS,  
-                        resume=False, output_path=None, output = None,
+                        max_models=MAX_MODELS,
+                        resume=False, output_path=None, output=None,
                         verbosity=True, method=PLURALITY_CODE,
                         session_file=None, debug=False):
     """Get local predictions form partial Multimodel, combine and save to file
@@ -113,7 +114,7 @@ def local_batch_predict(models, test_reader, prediction_file, api,
         try:
             output = open(prediction_file, 'w', 0)
         except IOError:
-            raise("Failed to write in %s" % prediction_file)
+            raise IOError("Failed to write in %s" % prediction_file)
     models_total = len(models)
     models_splits = [models[index:(index + max_models)] for index
                      in range(0, models_total, max_models)]
@@ -132,7 +133,7 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                                                       output_path)
                 u.checkpoint(u.are_predictions_created,
                              pred_file,
-                             test_set.number_of_tests(), debug=debug)
+                             test_reader.number_of_tests(), debug=debug)
         complete_models = []
         for index in range(len(models_split)):
             complete_models.append(api.check_resource(
@@ -241,7 +242,7 @@ class TestReader(object):
                             ['name'] for i in
                             sorted(fields.fields_by_column_number.keys())
                             if i != objective_field]
-            self.headers = [unicode(header, "utf-8") 
+            self.headers = [unicode(header, "utf-8")
                             for header in self.headers]
             self.exclude = [i for i in range(len(self.headers))
                             if not self.headers[i] in fields_names]
@@ -269,7 +270,7 @@ class TestReader(object):
                                      (",".join(fields_names),
                                       ",".join(self.headers))).encode("utf-8"))
 
-    def __iter__(self): 
+    def __iter__(self):
         """Iterator method
 
         """

@@ -25,8 +25,7 @@ try:
 except ImportError:
     import json
 
-from bigmler.utils import (dated, get_url, log_message, checkpoint,
-                           are_models_created, plural)
+from bigmler.utils import (dated, get_url, log_message, plural)
 
 
 EVALUATE_SAMPLE_RATE = 0.8
@@ -69,7 +68,7 @@ def create_source(data_set, source_args,
                 source_file.write("%s\n" % source['resource'])
                 source_file.write("%s\n" % source['object']['name'])
         except IOError:
-            raise ("Failed to write %s/source" % path)
+            raise IOError("Failed to write %s/source" % path)
     return source
 
 
@@ -169,7 +168,7 @@ def create_dataset(source, dataset_args, args, api, path=None,
             with open(path + '/dataset', 'w', 0) as dataset_file:
                 dataset_file.write("%s\n" % dataset['resource'])
         except IOError:
-            raised("Failed to write %s/dataset" % path)
+            raise IOError("Failed to write %s/dataset" % path)
     return dataset
 
 
@@ -211,9 +210,9 @@ def publish_dataset(dataset, args, api,
     return dataset
 
 
-def set_model_args(name, description, 
-                  args, objective_field=None, fields=None,
-                  model_fields=None):
+def set_model_args(name, description,
+                   args, objective_field=None, fields=None,
+                   model_fields=None):
     """Return model arguments dict
 
     """
@@ -249,7 +248,7 @@ def set_model_args(name, description,
     return model_args
 
 
-def create_models(dataset, model_ids, model_args, 
+def create_models(dataset, model_ids, model_args,
                   args, api, path=None,
                   session_file=None, log=None):
     """Create remote models
@@ -290,7 +289,7 @@ def create_models(dataset, model_ids, model_args,
             with open(path + '/models', 'w', 0) as model_file:
                 model_file.write(models_info)
         except IOError:
-            raise("Fails to write %s/models" % path)
+            raise IOError("Fails to write %s/models" % path)
     return models, model_ids
 
 
@@ -392,7 +391,7 @@ def create_evaluation(model, dataset, evaluation_args, args, api,
             with open(path + '/evaluation', 'w', 0) as evaluation_file:
                 evaluation_file.write("%s\n" % evaluation['resource'])
         except IOError:
-            raise("Failed to write %s/evaluation" % path)
+            raise IOError("Failed to write %s/evaluation" % path)
 
     return evaluation
 
