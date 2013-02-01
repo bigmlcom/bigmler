@@ -46,251 +46,31 @@ from __future__ import absolute_import
 
 import sys
 import os
-import datetime
-import csv
 import re
 import shlex
-
-try:
-    import simplejson as json
-except ImportError:
-    import json
+import datetime
 
 import bigml.api
 import bigmler.utils as u
+import bigmler.resources as r
 
-from bigml.model import Model
-from bigml.multimodel import MultiModel
-from bigml.multivote import COMBINATION_WEIGHTS, COMBINER_MAP, PLURALITY
 from bigml.fields import Fields
-
-from bigml.util import (localize, console_log, get_csv_delimiter,
-                        get_predictions_file_name)
+from bigml.multivote import COMBINATION_WEIGHTS, COMBINER_MAP, PLURALITY
+from bigml.model import Model
 
 from bigmler.options import create_parser
 from bigmler.defaults import get_user_defaults
 from bigmler.defaults import DEFAULTS_FILE
+from bigmler.prediction import predict
+from bigmler.prediction import MAX_MODELS
 
-MAX_MODELS = 10
-EVALUATE_SAMPLE_RATE = 0.8
-SEED = "BigML, Machine Learning made easy"
+
 # Date and time in format SunNov0412_120510 to name and tag resources
 NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
 COMMAND_LOG = ".bigmler"
 DIRS_LOG = ".bigmler_dir_stack"
 SESSIONS_LOG = "bigmler_sessions"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
-
-
-def remote_predict(models, headers, output_path, number_of_tests, resume,
-                   verbosity, test_reader, exclude, fields, api,
-                   prediction_file, method, tags, objective_field,
-                   session_file, test_set_header, log, debug):
-    """Retrieve predictions remotely, combine them and save predictions to file
-
-    """
-
-    predictions_files = []
-    prediction_args = {
-        "tags": tags
-    }
-    for model in models:
-        if not isinstance(model, basestring) and 'resource' in model:
-            model = model['resource']
-        predictions_file = get_predictions_file_name(model,
-                                                     output_path)
-        predictions_files.append(predictions_file)
-        if (not resume or
-            not u.checkpoint(u.are_predictions_created, predictions_file,
-                             number_of_tests, debug=debug)):
-            message = u.dated("Creating remote predictions.\n")
-            u.log_message(message, log_file=session_file,
-                          console=verbosity)
-
-            predictions_file = csv.writer(open(predictions_file, 'w', 0))
-            for row in test_reader:
-                for index in exclude:
-                    del row[index]
-                input_data = fields.pair(row, headers, objective_field)
-                prediction = api.create_prediction(model, input_data,
-                                                   by_name=test_set_header,
-                                                   wait_time=0,
-                                                   args=prediction_args)
-                u.log_message("%s\n" % prediction['resource'], log_file=log)
-                prediction_row = u.prediction_to_row(prediction)
-                predictions_file.writerow(prediction_row)
-    u.combine_votes(predictions_files,
-                    Model(models[0]).to_prediction,
-                    prediction_file, method)
-
-
-def local_predict(models, headers, test_reader, exclude, fields, method,
-                  objective_field, output, test_set_header):
-    """Get local predictions, combine them and save predictions to file
-
-    """
-    local_model = MultiModel(models)
-    for row in test_reader:
-        for index in exclude:
-            del row[index]
-        input_data = fields.pair(row, headers, objective_field)
-        prediction = local_model.predict(input_data,
-                                         by_name=test_set_header,
-                                         method=method)
-        u.write_prediction(prediction, output)
-
-
-def local_batch_predict(models, headers, test_reader, exclude, fields, resume,
-                        output_path, max_models, number_of_tests, api, output,
-                        verbosity, method, objective_field, session_file,
-                        debug):
-    """Get local predictions form partial Multimodel, combine and save to file
-
-    """
-    def draw_progress_bar(current, total):
-        """Draws a text based progress report.
-
-        """
-        pct = 100 - ((total - current) * 100) / (total)
-        console_log("Predicted on %s out of %s models [%s%%]" % (
-            localize(current), localize(total), pct))
-
-    models_total = len(models)
-    models_splits = [models[index:(index + max_models)] for index
-                     in range(0, models_total, max_models)]
-    input_data_list = []
-    for row in test_reader:
-        for index in exclude:
-            del row[index]
-        input_data_list.append(fields.pair(row, headers,
-                                           objective_field))
-    total_votes = []
-    models_count = 0
-    for models_split in models_splits:
-        if resume:
-            for model in models_split:
-                pred_file = get_predictions_file_name(model,
-                                                      output_path)
-                u.checkpoint(u.are_predictions_created,
-                             pred_file,
-                             number_of_tests, debug=debug)
-        complete_models = []
-        for index in range(len(models_split)):
-            complete_models.append(api.check_resource(
-                models_split[index], api.get_model))
-
-        local_model = MultiModel(complete_models)
-        local_model.batch_predict(input_data_list,
-                                  output_path, reuse=True)
-        votes = local_model.batch_votes(output_path)
-        models_count += max_models
-        if models_count > models_total:
-            models_count = models_total
-        if verbosity:
-            draw_progress_bar(models_count, models_total)
-        if total_votes:
-            for index in range(0, len(votes)):
-                predictions = total_votes[index].predictions
-                predictions.extend(votes[index].predictions)
-        else:
-            total_votes = votes
-    message = u.dated("Combining predictions.\n")
-    u.log_message(message, log_file=session_file, console=verbosity)
-    for multivote in total_votes:
-        u.write_prediction(multivote.combine(method), output)
-
-
-def predict(test_set, test_set_header, models, fields, output,
-            objective_field, remote=False, api=None, log=None,
-            max_models=MAX_MODELS, method=0, resume=False,
-            tags=None, verbosity=1, session_file=None, debug=False):
-    """Computes a prediction for each entry in the `test_set`.
-
-       Predictions can be computed remotely, locally using MultiModels built
-       on all the models or locally using MultiModels on subgroups of models.
-       Chosing a max_batch_models value not bigger than the number_of_models
-       flag will lead to the last case, where memory usage is bounded and each
-       model predictions are saved for further use.
-    """
-
-    try:
-        test_reader = csv.reader(open(test_set, "U"),
-                                 delimiter=get_csv_delimiter(),
-                                 lineterminator="\n")
-    except IOError:
-        sys.exit("Error: cannot read test %s" % test_set)
-
-    headers = None
-    exclude = []
-    if test_set_header:
-        headers = test_reader.next()
-        # validate headers against model fields excluding objective_field,
-        # that may be present or not
-        fields_names = [fields.fields[fields.field_id(i)]
-                        ['name'] for i in
-                        sorted(fields.fields_by_column_number.keys())
-                        if i != fields.field_column_number(objective_field)]
-        headers = [unicode(header, "utf-8") for header in headers]
-        exclude = [i for i in range(len(headers)) if not headers[i]
-                   in fields_names]
-        exclude.reverse()
-        if len(exclude):
-            if (len(headers) - len(exclude)):
-                print (u"WARNING: predictions will be processed but some data"
-                       u" might not be used. The used fields will be:\n\n%s"
-                       u"\n\nwhile the headers found in the test file are:"
-                       u"\n\n%s" %
-                       (",".join(fields_names),
-                        ",".join(headers))).encode("utf-8")
-                for index in exclude:
-                    del headers[index]
-            else:
-                raise Exception((u"No test field matches the model fields.\n"
-                                 u"The expected fields are:\n\n%s\n\nwhile "
-                                 u"the headers found in the test file are:\n\n"
-                                 u"%s\n\nUse --no-test-header flag if first li"
-                                 u"ne should not be interpreted as headers." %
-                                 (",".join(fields_names),
-                                  ",".join(headers))).encode("utf-8"))
-
-    prediction_file = output
-    output_path = u.check_dir(output)
-    output = open(output, 'w', 0)
-    number_of_tests = None
-    if resume:
-        number_of_tests = u.file_number_of_lines(test_set)
-        if test_set_header:
-            number_of_tests -= 1
-    # Remote predictions: predictions are computed in bigml.com and stored
-    # in a file named after the model in the following syntax:
-    #     model_[id of the model]__predictions.csv
-    # For instance,
-    #     model_50c0de043b563519830001c2_predictions.csv
-    if remote:
-        remote_predict(models, headers, output_path, number_of_tests, resume,
-                       verbosity, test_reader, exclude, fields, api,
-                       prediction_file, method, tags, objective_field,
-                       session_file, test_set_header, log, debug)
-    # Local predictions: Predictions are computed locally using models' rules
-    # with MultiModel's predict method
-    else:
-        message = u.dated("Creating local predictions.\n")
-        u.log_message(message, log_file=session_file, console=verbosity)
-        # For a small number of models, we build a MultiModel using all of
-        # the given models and issue a combined prediction
-        if len(models) < max_models:
-            local_predict(models, headers, test_reader, exclude, fields,
-                          method, objective_field, output, test_set_header)
-        # For large numbers of models, we split the list of models in chunks
-        # and build a MultiModel for each chunk, issue and store predictions
-        # for each model and combine all of them eventually.
-        else:
-            local_batch_predict(models, headers, test_reader, exclude, fields,
-                                resume, output_path, max_models,
-                                number_of_tests, api, output,
-                                verbosity, method, objective_field,
-                                session_file, debug)
-    output.close()
 
 
 def compute_output(api, args, training_set, test_set=None, output=None,
@@ -313,6 +93,12 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     models = None
     fields = None
 
+    # It is compulsory to have a description to publish either datasets or
+    # models
+    if (not description and
+            (args.black_box or args.white_box or args.public_dataset)):
+        raise Exception("You should provide a description to publish.")
+
     path = u.check_dir(output)
     session_file = "%s%s%s" % (path, os.sep, SESSIONS_LOG)
     csv_properties = {}
@@ -328,10 +114,13 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             except IOError:
                 pass
 
+    # Starting source processing
+
     if (training_set or (args.evaluate and test_set)):
+        # If resuming, try to extract args.source form log files
         if resume:
             resume, args.source = u.checkpoint(u.is_source_created, path,
-                                               bigml.api, debug=args.debug)
+                                               debug=args.debug)
             if not resume:
                 message = u.dated("Source not found. Resuming.\n")
                 u.log_message(message, log_file=session_file,
@@ -340,89 +129,46 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # If neither a previous source, dataset or model are provided.
     # we create a new one. Also if --evaluate and test data are provided
     # we create a new dataset to test with.
-    data_set = None
-    if (training_set and not args.source and not args.dataset and
-            not args.model and not args.models):
-        data_set = training_set
-        data_set_header = training_set_header
-    elif (args.evaluate and test_set and not args.source):
-        data_set = test_set
-        data_set_header = test_set_header
+    data_set, data_set_header = r.data_to_source(training_set, test_set,
+                                                 training_set_header,
+                                                 test_set_header, args)
+    if data_set is not None:
+        source_args = r.set_source_args(data_set_header, name, description,
+                                        args)
+        source = r.create_source(data_set, source_args, args, api,
+                                 path, session_file, log)
 
-    if not data_set is None:
-
-        source_args = {
-            "name": name,
-            "description": description,
-            "category": args.category,
-            "tags": args.tag,
-            "source_parser": {"header": data_set_header}}
-        message = u.dated("Creating source.\n")
-        u.log_message(message, log_file=session_file, console=args.verbosity)
-        source = api.create_source(data_set, source_args,
-                                   progress_bar=args.progress_bar)
-        source = api.check_resource(source, api.get_source)
-        message = u.dated("Source created: %s\n" % u.get_url(source, api))
-        u.log_message(message, log_file=session_file, console=args.verbosity)
-        u.log_message("%s\n" % source['resource'], log_file=log)
-
-        fields = Fields(source['object']['fields'],
-                        source['object']['source_parser']['missing_tokens'],
-                        source['object']['source_parser']['locale'])
-        source_file = open(path + '/source', 'w', 0)
-        source_file.write("%s\n" % source['resource'])
-        source_file.write("%s\n" % source['object']['name'])
-        source_file.flush()
-        source_file.close()
-
-    # If a source is provided, we retrieve it.
+    # If a source is provided either through the command line or in resume
+    # steps, we use it.
     elif args.source:
-        message = u.dated("Retrieving source. %s\n" %
-                          u.get_url(args.source, api))
-        u.log_message(message, log_file=session_file, console=args.verbosity)
-        source = api.get_source(args.source)
+        source = bigml.api.get_source_id(args.source)
 
-    # If we already have source, we check that is finished and extract the
+    # If we already have source, we check that is finished, extract the
     # fields, and update them if needed.
     if source:
-        if source['object']['status']['code'] != bigml.api.FINISHED:
-            message = u.dated("Retrieving source. %s\n" %
-                              u.get_url(source, api))
-            u.log_message(message, log_file=session_file,
-                          console=args.verbosity)
-            source = api.check_resource(source, api.get_source)
+        source = r.get_source(source, api, args.verbosity, session_file)
         csv_properties = {'missing_tokens':
                           source['object']['source_parser']['missing_tokens'],
                           'data_locale':
                           source['object']['source_parser']['locale']}
 
         fields = Fields(source['object']['fields'], **csv_properties)
-        update_fields = {}
         if field_attributes:
-            for (column, value) in field_attributes.iteritems():
-                update_fields.update({
-                    fields.field_id(column): value})
-            message = u.dated("Updating source. %s\n" %
-                              u.get_url(source, api))
-            u.log_message(message, log_file=session_file,
-                          console=args.verbosity)
-            source = api.update_source(source, {"fields": update_fields})
-
-        update_fields = {}
+            source = r.update_source_fields(source, field_attributes, fields,
+                                            api, args.verbosity,
+                                            session_file)
         if types:
-            for (column, value) in types.iteritems():
-                update_fields.update({
-                    fields.field_id(column): {'optype': value}})
-            message = u.dated("Updating source. %s\n" %
-                              u.get_url(source, api))
-            u.log_message(message, log_file=session_file,
-                          console=args.verbosity)
-            source = api.update_source(source, {"fields": update_fields})
+            source = r.update_source_fields(source, types, fields, api,
+                                            args.verbosity, session_file)
+
+    # End of source processing
+
+    # Starting dataset processing
 
     if (training_set or args.source or (args.evaluate and test_set)):
+        # if resuming, try to extract args.dataset form log files
         if resume:
             resume, args.dataset = u.checkpoint(u.is_dataset_created, path,
-                                                bigml.api,
                                                 debug=args.debug)
             if not resume:
                 message = u.dated("Dataset not found. Resuming.\n")
@@ -434,109 +180,39 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if ((source and not args.dataset and not args.model and not model_ids and
             not args.no_dataset) or
             (args.evaluate and args.test_set and not args.dataset)):
-        dataset_args = {
-            "name": name,
-            "description": description,
-            "category": args.category,
-            "tags": args.tag
-        }
-
-        if args.json_filter:
-            dataset_args.update(json_filter=args.json_filter)
-        elif args.lisp_filter:
-            dataset_args.update(lisp_filter=args.lisp_filter)
-
-        input_fields = []
-        if dataset_fields:
-            for name in dataset_fields:
-                input_fields.append(fields.field_id(name))
-            dataset_args.update(input_fields=input_fields)
-        message = u.dated("Creating dataset.\n")
-        u.log_message(message, log_file=session_file, console=args.verbosity)
-        dataset = api.create_dataset(source, dataset_args)
-        dataset = api.check_resource(dataset, api.get_dataset)
-        message = u.dated("Dataset created: %s\n" % u.get_url(dataset, api))
-        u.log_message(message, log_file=session_file, console=args.verbosity)
-        u.log_message("%s\n" % dataset['resource'], log_file=log)
-        dataset_file = open(path + '/dataset', 'w', 0)
-        dataset_file.write("%s\n" % dataset['resource'])
-        dataset_file.flush()
-        dataset_file.close()
+        dataset_args = r.set_dataset_args(name, description, args, fields,
+                                          dataset_fields)
+        dataset = r.create_dataset(source, dataset_args, args, api,
+                                   path, session_file, log)
 
     # If a dataset is provided, let's retrieve it.
     elif args.dataset:
-        message = u.dated("Retrieving dataset. %s\n" %
-                          u.get_url(args.dataset, api))
-        u.log_message(message, log_file=session_file, console=args.verbosity)
-        dataset = api.get_dataset(args.dataset)
+        dataset = bigml.api.get_dataset_id(args.dataset)
 
     # If we already have a dataset, we check the status and get the fields if
     # we hadn't them yet.
     if dataset:
-        if dataset['object']['status']['code'] != bigml.api.FINISHED:
-            message = u.dated("Retrieving dataset. %s\n" %
-                              u.get_url(dataset, api))
-            u.log_message(message, log_file=session_file,
-                          console=args.verbosity)
-            dataset = api.check_resource(dataset, api.get_dataset)
+        dataset = r.get_dataset(dataset, api, args.verbosity, session_file)
         if not csv_properties:
             csv_properties = {'data_locale':
                               dataset['object']['locale']}
-        if args.public_dataset:
-            if not description:
-                raise Exception("You should provide a description to publish.")
-            public_dataset = {"private": False}
-            if args.dataset_price:
-                message = u.dated("Updating dataset. %s\n" %
-                                  u.get_url(dataset, api))
-                u.log_message(message, log_file=session_file,
-                              console=args.verbosity)
-                public_dataset.update(price=args.dataset_price)
-            message = u.dated("Updating dataset. %s\n" %
-                              u.get_url(dataset, api))
-            u.log_message(message, log_file=session_file,
-                          console=args.verbosity)
-            dataset = api.update_dataset(dataset, public_dataset)
         fields = Fields(dataset['object']['fields'], **csv_properties)
+        if args.public_dataset:
+            r.publish_dataset(dataset, api, args, session_file)
+
+    #end of dataset processing
+
+    #start of model processing
 
     # If we have a dataset but not a model, we create the model if the no_model
     # flag hasn't been set up.
     if (dataset and not args.model and not model_ids and not args.no_model):
-        model_args = {
-            "name": name,
-            "description": description,
-            "category": args.category,
-            "tags": args.tag
-        }
-        if objective_field is not None:
-            model_args.update({"objective_field":
-                               fields.field_id(objective_field)})
-        # If evaluate flag is on, we choose a deterministic sampling with 80%
-        # of the data to create the model
-        if args.evaluate:
-            if args.sample_rate == 1:
-                args.sample_rate = EVALUATE_SAMPLE_RATE
-            seed = SEED
-            model_args.update(seed=seed)
-
-        input_fields = []
-        if model_fields:
-            for name in model_fields:
-                input_fields.append(fields.field_id(name))
-            model_args.update(input_fields=input_fields)
-
-        if args.pruning and args.pruning != 'smart':
-            model_args.update(stat_pruning=(args.pruning == 'statistical'))
-
-        model_args.update(sample_rate=args.sample_rate,
-                          replacement=args.replacement,
-                          randomize=args.randomize)
         model_ids = []
         models = []
         if resume:
             resume, model_ids = u.checkpoint(u.are_models_created, path,
                                              args.number_of_models,
-                                             bigml.api, debug=args.debug)
+                                             debug=args.debug)
             if not resume:
                 message = u.dated("Found %s models out of %s. Resuming.\n" %
                                   (len(model_ids),
@@ -546,94 +222,34 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             models = model_ids
             args.number_of_models -= len(model_ids)
 
-        model_file = open(path + '/models', 'w', 0)
-        for model_id in model_ids:
-            model_file.write("%s\n" % model_id)
-        last_model = None
-        if args.number_of_models > 0:
-            message = u.dated("Creating %s.\n" %
-                              u.plural("model", args.number_of_models))
-            u.log_message(message, log_file=session_file,
-                          console=args.verbosity)
-            for i in range(1, args.number_of_models + 1):
-                if i > args.max_parallel_models:
-                    api.check_resource(last_model, api.get_model)
-                model = api.create_model(dataset, model_args)
-                u.log_message("%s\n" % model['resource'], log_file=log)
-                last_model = model
-                model_ids.append(model['resource'])
-                models.append(model)
-                model_file.write("%s\n" % model['resource'])
-                model_file.flush()
-            if args.number_of_models < 2 and args.verbosity:
-                if model['object']['status']['code'] != bigml.api.FINISHED:
-                    model = api.check_resource(model, api.get_model)
-                    models[0] = model
-                message = u.dated("Model created: %s.\n" %
-                                  u.get_url(model, api))
-                u.log_message(message, log_file=session_file,
-                              console=args.verbosity)
-        model_file.close()
-
-    # If a model is provided, we retrieve it.
+        model_args = r.set_model_args(name, description, args,
+                                      objective_field, fields, model_fields)
+        models, model_ids = r.create_models(dataset, models,
+                                            model_args, args, api,
+                                            path, session_file, log)
+        model = models[0]
+    # If a model is provided, we use it.
     elif args.model:
-        message = u.dated("Retrieving model. %s\n" %
-                          u.get_url(args.model, api))
-        u.log_message(message, log_file=session_file, console=args.verbosity)
-        model = api.get_model(args.model)
+        model = args.model
+        model_ids = [model]
+        models = [model]
 
     elif args.models or args.model_tag:
         models = model_ids[:]
+        model = models[0]
 
+    # If we are going to predict we must retrieve the models
     if model_ids and test_set and not args.evaluate:
-        model_id = ""
-        if len(model_ids) == 1:
-            model_id = model_ids[0]
-        message = u.dated("Retrieving %s. %s\n" %
-                          (u.plural("model", len(model_ids)),
-                           u.get_url(model_id, api)))
-        u.log_message(message, log_file=session_file, console=args.verbosity)
-        if len(model_ids) < args.max_batch_models:
-            models = []
-            for model in model_ids:
-                model = api.check_resource(model, api.get_model)
-                models.append(model)
-            model = models[0]
-        else:
-            model = api.check_resource(model_ids[0], api.get_model)
-            models[0] = model
+        models, model_ids = r.get_models(models, args, api, session_file)
+        model = models[0]
 
-    # We check that the model is finished and get the fields if haven't got
-    # them yet.
+    # We get the fields of the model if we haven't got
+    # them yet and update its public state if needed
     if model and not args.evaluate and (test_set or args.black_box
                                         or args.white_box):
-        if model['object']['status']['code'] != bigml.api.FINISHED:
-            message = u.dated("Retrieving model. %s\n" %
-                              u.get_url(model, api))
-            u.log_message(message, log_file=session_file,
-                          console=args.verbosity)
-            model = api.check_resource(model, api.get_model)
-        if args.black_box:
-            if not description:
-                raise Exception("You should provide a description to publish.")
-            model = api.update_model(model, {"private": False})
-        if args.white_box:
-            if not description:
-                raise Exception("You should provide a description to publish.")
-            public_model = {"private": False, "white_box": True}
-            if args.model_price:
-                message = u.dated("Updating model. %s\n" %
-                                  u.get_url(model, api))
-                u.log_message(message, log_file=session_file,
-                              console=args.verbosity)
-                public_model.update(price=args.model_price)
-            if args.cpp:
-                message = u.dated("Updating model. %s\n" %
-                                  u.get_url(model, api))
-                u.log_message(message, log_file=session_file,
-                              console=args.verbosity)
-                public_model.update(credits_per_prediction=args.cpp)
-            model = api.update_model(model, public_model)
+        if args.black_box or args.white_box:
+            model = r.publish_model(model, args, api, session_file)
+            models[0] = model
         if not csv_properties:
             csv_properties = {'data_locale':
                               model['object']['locale']}
@@ -643,9 +259,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
         fields = Fields(model['object']['model']['fields'], **csv_properties)
 
-    if model and not models:
-        models = [model]
+    # end of model processing
 
+    # If predicting
     if models and test_set and not args.evaluate:
         objective_field = models[0]['object']['objective_fields']
         if isinstance(objective_field, list):
@@ -673,51 +289,21 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if args.evaluate:
         if resume:
             resume, evaluation = u.checkpoint(u.is_evaluation_created, path,
-                                              bigml.api,
                                               debug=args.debug)
             if not resume:
                 message = u.dated("Evaluation not found. Resuming.\n")
                 u.log_message(message, log_file=session_file,
                               console=args.verbosity)
         if not resume:
-            evaluation_file = open(path + '/evaluation', 'w', 0)
-            evaluation_args = {
-                "name": name,
-                "description": description,
-                "tags": args.tag
-            }
-            if not fields_map is None:
-                update_map = {}
-                for (dataset_column, model_column) in fields_map.iteritems():
-                    update_map.update({
-                        fields.field_id(dataset_column):
-                        fields.field_id(model_column)})
-                evaluation_args.update({"fields_map": update_map})
-            if not ((args.dataset or args.test_set)
-                    and (args.model or args.models or args.model_tag)):
-                evaluation_args.update(out_of_bag=True, seed=SEED,
-                                       sample_rate=args.sample_rate)
-            message = u.dated("Creating evaluation.\n")
-            u.log_message(message, log_file=session_file,
-                          console=args.verbosity)
-            evaluation = api.create_evaluation(model, dataset, evaluation_args)
-            u.log_message("%s\n" % evaluation['resource'], log_file=log)
-            evaluation_file.write("%s\n" % evaluation['resource'])
-            evaluation_file.flush()
-            evaluation_file.close()
-        message = u.dated("Retrieving evaluation. %s\n" %
-                          u.get_url(evaluation, api))
-        u.log_message(message, log_file=session_file, console=args.verbosity)
-        evaluation = api.check_resource(evaluation, api.get_evaluation)
-        evaluation_json = open(output + '.json', 'w', 0)
-        evaluation_json.write(json.dumps(evaluation['object']['result']))
-        evaluation_json.flush()
-        evaluation_json.close()
-        evaluation_txt = open(output + '.txt', 'w', 0)
-        api.pprint(evaluation['object']['result'],
-                   evaluation_txt)
-        evaluation_txt.flush()
-        evaluation_txt.close()
+            evaluation_args = r.set_evaluation_args(name, description, args,
+                                                    fields, fields_map)
+            evaluation = r.create_evaluation(model, dataset, evaluation_args,
+                                             args, api, path, session_file,
+                                             log)
+
+        evaluation = r.get_evaluation(evaluation, api, args.verbosity,
+                                      session_file)
+        r.save_evaluation(evaluation, output, api)
 
     # Workaround to restore windows console cp850 encoding to print the tree
     if sys.platform == "win32" and sys.stdout.isatty():
@@ -758,7 +344,8 @@ def main(args=sys.argv[1:]):
             command_log.write(message)
         resume = False
 
-    parser = create_parser(defaults=get_user_defaults(), constants={'NOW': NOW,
+    parser = create_parser(defaults=get_user_defaults(),
+                           constants={'NOW': NOW,
                            'MAX_MODELS': MAX_MODELS, 'PLURALITY': PLURALITY})
 
     # Parses command line arguments.
@@ -775,7 +362,8 @@ def main(args=sys.argv[1:]):
                                         command_args.stack_level)
         defaults_file = "%s%s%s" % (output_dir, os.sep, DEFAULTS_FILE)
         parser = create_parser(defaults=get_user_defaults(defaults_file),
-                               constants={'NOW': NOW, 'MAX_MODELS': MAX_MODELS,
+                               constants={'NOW': NOW,
+                                          'MAX_MODELS': MAX_MODELS,
                                           'PLURALITY': PLURALITY})
         command_args = parser.parse_args(args)
         if command_args.predictions is None:

@@ -3,6 +3,12 @@
 History
 -------
 
+0.2.1 (2013-02-01)
+~~~~~~~~~~~~~~~~~~
+
+- Refactoring main resources management
+- Fixing bug in batch_predict for no headers test sets
+
 0.2.0 (2012-01-21)
 ~~~~~~~~~~~~~~~~~~
 - Evaluations management
