@@ -24,7 +24,7 @@ in our `Campfire chatroom <https://bigmlinc.campfirenow.com/f20a0>`_.
 Requirements
 ============
 
-Python 2.6 and Python 2.7 are currently supported by BigMLer.
+Python 2.7 is currently supported by BigMLer.
 
 BigMLer requires `bigml 0.5.0 <https://github.com/bigmlcom/python>`_  or higher.
 
