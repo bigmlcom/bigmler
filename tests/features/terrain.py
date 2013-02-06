@@ -98,3 +98,8 @@ def cleanup_resources(feature):
             shutil.rmtree(folder)
         except:
             pass
+
+
+@after.each_scenario
+def cleanup_output(scenario):
+    world.output = ""

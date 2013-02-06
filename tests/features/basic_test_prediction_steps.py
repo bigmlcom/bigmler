@@ -1,26 +1,26 @@
 import os
 import time
 from lettuce import step, world
-from subprocess import call
+from subprocess import check_call, CalledProcessError
 
 
 @step(r'I create BigML resources uploading train "(.*)" file to test "(.*)" and log predictions in "(.*)"')
 def i_create_all_resources(step, data=None, test=None, output=None):
     if data is None or test is None or output is None:
         assert False
+    world.directory = os.path.dirname(output)
+    world.folders.append(world.directory)
     try:
-        retcode = call("bigmler --train " + data + " --test " + test + " --output " + output + " --max-batch-models 1", shell=True)
+        retcode = check_call("bigmler --train " + data + " --test " + test + " --output " + output + " --max-batch-models 1", shell=True)
         if retcode < 0:
             assert False
         else:
             world.test_lines = 0
             for line in open(test, "r"):
                 world.test_lines += 1
-            world.directory = os.path.dirname(output)
-            world.folders.append(world.directory)
             world.output = output
             assert True
-    except OSError as e:
+    except (OSError, CalledProcessError, IOError) as e:
         assert False
 
 
@@ -28,19 +28,19 @@ def i_create_all_resources(step, data=None, test=None, output=None):
 def i_create_resources_from_source(step, test=None, output=None):
     if test is None or output is None:
         assert False
+    world.directory = os.path.dirname(output)
+    world.folders.append(world.directory)
     try:
-        retcode = call("bigmler --source " + world.source['resource'] + " --test " + test + " --output " + output, shell=True)
+        retcode = check_call("bigmler --source " + world.source['resource'] + " --test " + test + " --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:
             world.test_lines = 0
             for line in open(test, "r"):
                 world.test_lines += 1
-            world.directory = os.path.dirname(output)
-            world.folders.append(world.directory)
             world.output = output
             assert True
-    except OSError as e:
+    except (OSError, CalledProcessError, IOError) as e:
         assert False
 
 
@@ -48,57 +48,57 @@ def i_create_resources_from_source(step, test=None, output=None):
 def i_create_resources_from_source(step, test=None, output=None):
     if test is None or output is None:
         assert False
+    world.directory = os.path.dirname(output)
+    world.folders.append(world.directory)
     try:
-        retcode = call("bigmler --dataset " + world.dataset['resource'] + " --test " + test + " --output " + output, shell=True)
+        retcode = check_call("bigmler --dataset " + world.dataset['resource'] + " --test " + test + " --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:
             world.test_lines = 0
             for line in open(test, "r"):
                 world.test_lines += 1
-            world.directory = os.path.dirname(output)
-            world.folders.append(world.directory)
             world.output = output
             assert True
-    except OSError as e:
+    except (OSError, CalledProcessError, IOError) as e:
         assert False
 
 @step(r'I create BigML resources using dataset, objective field (.*) and model fields (.*) to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_source(step, objective=None, fields=None, test=None, output=None):
     if objective is None or fields is None or test is None or output is None:
         assert False
+    world.directory = os.path.dirname(output)
+    world.folders.append(world.directory)
     try:
-        retcode = call("bigmler --dataset " + world.dataset['resource'] + " --objective " + objective + " --model-fields " + fields + " --test " + test + " --output " + output, shell=True)
+        retcode = check_call("bigmler --dataset " + world.dataset['resource'] + " --objective " + objective + " --model-fields " + fields + " --test " + test + " --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:
             world.test_lines = 0
             for line in open(test, "r"):
                 world.test_lines += 1
-            world.directory = os.path.dirname(output)
-            world.folders.append(world.directory)
             world.output = output
             assert True
-    except OSError as e:
+    except (OSError, CalledProcessError, IOError) as e:
         assert False
 
 @step(r'I create BigML resources using model to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_source(step, test=None, output=None):
     if test is None or output is None:
         assert False
+    world.directory = os.path.dirname(output)
+    world.folders.append(world.directory)
     try:
-        retcode = call("bigmler --model " + world.model['resource'] + " --test " + test + " --output " + output + " --max-batch-models 1", shell=True)
+        retcode = check_call("bigmler --model " + world.model['resource'] + " --test " + test + " --output " + output + " --max-batch-models 1", shell=True)
         if retcode < 0:
             assert False
         else:
             world.test_lines = 0
             for line in open(test, "r"):
                 world.test_lines += 1
-            world.directory = os.path.dirname(output)
-            world.folders.append(world.directory)
             world.output = output
             assert True
-    except OSError as e:
+    except (OSError, CalledProcessError, IOError) as e:
         assert False
 
 
@@ -106,20 +106,20 @@ def i_create_resources_from_source(step, test=None, output=None):
 def i_create_resources_from_source(step, number_of_models=None, test=None, output=None):
     if number_of_models is None or test is None or output is None:
         assert False
+    world.directory = os.path.dirname(output)
+    world.folders.append(world.directory)
     try:
-        retcode = call("bigmler --dataset " + world.dataset['resource'] + " --test " + test + " --number-of-models " + number_of_models + " --tag my_ensemble --output " + output, shell=True)
+        retcode = check_call("bigmler --dataset " + world.dataset['resource'] + " --test " + test + " --number-of-models " + number_of_models + " --tag my_ensemble --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:
             world.test_lines = 0
             for line in open(test, "r"):
                 world.test_lines += 1
-            world.directory = os.path.dirname(output)
-            world.folders.append(world.directory)
             world.output = output
             world.number_of_models = int(number_of_models)
             assert True
-    except OSError as e:
+    except (OSError, CalledProcessError, IOError) as e:
         assert False
 
 
@@ -127,19 +127,19 @@ def i_create_resources_from_source(step, number_of_models=None, test=None, outpu
 def i_create_resources_from_source(step, models_file=None, test=None, output=None):
     if models_file is None or test is None or output is None:
         assert False
+    world.directory = os.path.dirname(output)
+    world.folders.append(world.directory)
     try:
-        retcode = call("bigmler --models " + models_file + " --test " + test + " --output " + output, shell=True)
+        retcode = check_call("bigmler --models " + models_file + " --test " + test + " --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:
             world.test_lines = 0
             for line in open(test, "r"):
                 world.test_lines += 1
-            world.directory = os.path.dirname(output)
-            world.folders.append(world.directory)
             world.output = output
             assert True
-    except OSError as e:
+    except (OSError, CalledProcessError, IOError) as e:
         assert False
 
 
@@ -147,19 +147,19 @@ def i_create_resources_from_source(step, models_file=None, test=None, output=Non
 def i_create_resources_from_source(step, dataset_file=None, test=None, output=None):
     if dataset_file is None or test is None or output is None:
         assert False
+    world.directory = os.path.dirname(output)
+    world.folders.append(world.directory)
     try:
-        retcode = call("bigmler --datasets " + dataset_file + " --test " + test + " --output " + output, shell=True)
+        retcode = check_call("bigmler --datasets " + dataset_file + " --test " + test + " --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:
             world.test_lines = 0
             for line in open(test, "r"):
                 world.test_lines += 1
-            world.directory = os.path.dirname(output)
-            world.folders.append(world.directory)
             world.output = output
             assert True
-    except OSError as e:
+    except (OSError, CalledProcessError, IOError) as e:
         assert False
 
 
@@ -167,19 +167,19 @@ def i_create_resources_from_source(step, dataset_file=None, test=None, output=No
 def i_find_predictions_files(step, directory1=None, directory2=None, output=None):
     if directory1 is None or directory2 is None or output is None:
         assert False
+    world.directory = os.path.dirname(output)
+    world.folders.append(world.directory)
     try:
-        retcode = call("bigmler --combine-votes " + directory1 + "," + directory2 + " --output " + output, shell=True)
+        retcode = check_call("bigmler --combine-votes " + directory1 + "," + directory2 + " --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:
             world.test_lines = 0
             for line in open("%s%spredictions.csv" % (directory1, os.sep), "r"):
                 world.test_lines += 1
-            world.directory = os.path.dirname(output)
-            world.folders.append(world.directory)
             world.output = output
             assert True
-    except OSError as e:
+    except (OSError, CalledProcessError, IOError) as e:
         assert False
 
 
@@ -187,19 +187,19 @@ def i_find_predictions_files(step, directory1=None, directory2=None, output=None
 def i_find_predictions_files(step, directory1=None, directory2=None, output=None, method=None):
     if directory1 is None or directory2 is None or output is None or method is None:
         assert False
+    world.directory = os.path.dirname(output)
+    world.folders.append(world.directory)
     try:
-        retcode = call("bigmler --combine-votes " + directory1 + "," + directory2 + " --output " + output + " --method " + method, shell=True)
+        retcode = check_call("bigmler --combine-votes " + directory1 + "," + directory2 + " --output " + output + " --method " + method, shell=True)
         if retcode < 0:
             assert False
         else:
             world.test_lines = 0
             for line in open("%s%spredictions.csv" % (directory1, os.sep), "r"):
                 world.test_lines += 1
-            world.directory = os.path.dirname(output)
-            world.folders.append(world.directory)
             world.output = output
             assert True
-    except OSError as e:
+    except (OSError, CalledProcessError, IOError) as e:
         assert False
 
 
@@ -209,12 +209,12 @@ def i_check_create_source(step):
     try:
         source_file = open(source_file, "r")
         source = world.api.check_resource(source_file.readline().strip(),
-                                             world.api.get_source)
+                                          world.api.get_source)
         world.sources.append(source['resource'])
         world.source = source
         source_file.close()
         assert True
-    except:
+    except Exception:
         assert False
 
 
@@ -229,7 +229,7 @@ def i_check_create_dataset(step):
         world.dataset = dataset
         dataset_file.close()
         assert True
-    except:
+    except Exception:
         assert False
 
 
@@ -244,7 +244,7 @@ def i_check_create_model(step):
         world.model = model
         model_file.close()
         assert True
-    except:
+    except Exception:
         assert False
 
 @step(r'I check that the models have been created')
@@ -270,7 +270,7 @@ def i_check_create_models(step):
             model = world.api.check_resource(model_id, world.api.get_model)
             world.models.append(model_id)
             assert True
-        except:
+        except Exception:
             assert False
 
 
@@ -292,7 +292,7 @@ def i_check_create_predictions(step):
                 previous_lines = predictions_lines
                 time.sleep(10)
             predictions_file.close()
-        except:
+        except Exception:
             assert False
 
 
@@ -310,5 +310,5 @@ def i_check_predictions(step, check_file):
         predictions_file.close()
         check_file.close()
         assert True
-    except:
+    except Exception:
         assert False

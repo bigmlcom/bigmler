@@ -269,11 +269,12 @@ def create_models(dataset, model_ids, model_args,
                     console=args.verbosity)
         for i in range(1, args.number_of_models + 1):
             if i > args.max_parallel_models:
-                api.check_resource(last_model, api.get_model,
-                                   query_string='limit=-1')
+                models[last_index] = api.check_resource(last_model,
+                    api.get_model, query_string='limit=-1')
             model = api.create_model(dataset, model_args)
             log_message("%s\n" % model['resource'], log_file=log)
             last_model = model
+            last_index = i - 1
             model_ids.append(model['resource'])
             models.append(model)
             models_info += "%s\n" % model['resource']
