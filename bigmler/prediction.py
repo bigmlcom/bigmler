@@ -135,7 +135,7 @@ def local_batch_predict(models, test_reader, prediction_file, api,
         complete_models = []
         for index in range(len(models_split)):
             complete_models.append(api.check_resource(
-                models_split[index], api.get_model))
+                models_split[index], api.get_model, 'limit=-1'))
 
         local_model = MultiModel(complete_models)
         local_model.batch_predict(input_data_list,
