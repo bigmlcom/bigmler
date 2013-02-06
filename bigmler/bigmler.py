@@ -251,21 +251,24 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             model = r.publish_model(model, args, api, session_file)
             models[0] = model
         if not csv_properties:
-            csv_properties = {'data_locale':
-                              model['object']['locale']}
+            csv_properties = {}
         csv_properties.update(verbose=True)
-        if args.user_locale:
-            csv_properties.update(data_locale=args.user_locale)
+        if args.user_locale is None:
+            args.user_locale = model['object']['locale']
+        csv_properties.update(data_locale=args.user_locale)
+        if 'model_fields' in model['object']['model']:
+            csv_properties.update(include=model['object']['model']['model_fields'].keys())
 
+        objective_field = models[0]['object']['objective_fields']
+        if isinstance(objective_field, list):
+            objective_field = objective_field[0]
+        csv_properties.update(objective_field=objective_field)
         fields = Fields(model['object']['model']['fields'], **csv_properties)
 
     # end of model processing
 
     # If predicting
     if models and test_set and not args.evaluate:
-        objective_field = models[0]['object']['objective_fields']
-        if isinstance(objective_field, list):
-            objective_field = objective_field[0]
         predict(test_set, test_set_header, models, fields, output,
                 objective_field, args.remote, api, log,
                 args.max_batch_models, args.method, resume, args.tag,

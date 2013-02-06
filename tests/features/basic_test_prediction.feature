@@ -99,4 +99,14 @@ Feature: Upload source and produce test predictions
         | ./scenario4 | ./scenario5 | ./scenario9/predictions_p.csv  | ./check_files/predictions_iris.csv | "probability weighted" |
         | ./scenario1_r | ./scenario1_r | ./scenario10/predictions_c.csv | ./check_files/predictions_grades.csv | "confidence weighted"  |
         | ./scenario1_r | ./scenario1_r | ./scenario10/predictions_p.csv | ./check_files/predictions_grades.csv | "probability weighted" |
+
+    Scenario: Successfully building test predictions from dataset specifying objective field and model fields
+        Given I create BigML resources using dataset, objective field <objective> and model fields <fields> to test "<test>" and log predictions in "<output>"
+        And I check that the model has been created
+        And I check that the predictions are ready
+        Then the local prediction file is like "<predictions_file>"
+
+        Examples:
+        | test                    | output                         |predictions_file                        | objective | fields   |
+        | ../data/test_iris.csv   | ./scenario11/predictions.csv   | ./check_files/predictions_iris_b.csv   | 0         | "petal length","petal width" |
         

@@ -63,6 +63,24 @@ def i_create_resources_from_source(step, test=None, output=None):
     except OSError as e:
         assert False
 
+@step(r'I create BigML resources using dataset, objective field (.*) and model fields (.*) to test "(.*)" and log predictions in "(.*)"')
+def i_create_resources_from_source(step, objective=None, fields=None, test=None, output=None):
+    if objective is None or fields is None or test is None or output is None:
+        assert False
+    try:
+        retcode = call("bigmler --dataset " + world.dataset['resource'] + " --objective " + objective + " --model-fields " + fields + " --test " + test + " --output " + output, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.test_lines = 0
+            for line in open(test, "r"):
+                world.test_lines += 1
+            world.directory = os.path.dirname(output)
+            world.folders.append(world.directory)
+            world.output = output
+            assert True
+    except OSError as e:
+        assert False
 
 @step(r'I create BigML resources using model to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_source(step, test=None, output=None):

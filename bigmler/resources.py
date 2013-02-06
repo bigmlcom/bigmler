@@ -225,8 +225,8 @@ def set_model_args(name, description,
     if objective_field is not None and fields is not None:
         model_args.update({"objective_field":
                            fields.field_id(objective_field)})
-    # If evaluate flag is on, we choose a deterministic sampling with 80%
-    # of the data to create the model
+    # If evaluate flag is on, we choose a deterministic sampling with 
+    # args.sample_rate (80% by default) of the data to create the model
     if args.evaluate:
         if args.sample_rate == 1:
             args.sample_rate = EVALUATE_SAMPLE_RATE
@@ -269,7 +269,8 @@ def create_models(dataset, model_ids, model_args,
                     console=args.verbosity)
         for i in range(1, args.number_of_models + 1):
             if i > args.max_parallel_models:
-                api.check_resource(last_model, api.get_model)
+                api.check_resource(last_model, api.get_model,
+                                   query_string='limit=-1')
             model = api.create_model(dataset, model_args)
             log_message("%s\n" % model['resource'], log_file=log)
             last_model = model
@@ -278,7 +279,8 @@ def create_models(dataset, model_ids, model_args,
             models_info += "%s\n" % model['resource']
         if args.number_of_models < 2 and args.verbosity:
             if model['object']['status']['code'] != bigml.api.FINISHED:
-                model = api.check_resource(model, api.get_model)
+                model = api.check_resource(model, api.get_model,
+                                           query_string='limit=-1')
                 models[0] = model
             message = dated("Model created: %s.\n" %
                             get_url(model, api))
@@ -310,11 +312,13 @@ def get_models(model_ids, args, api, session_file=None):
     if len(model_ids) < args.max_batch_models:
         models = []
         for model in model_ids:
-            model = api.check_resource(model, api.get_model)
+            model = api.check_resource(model, api.get_model,
+                                       query_string='limit=-1')
             models.append(model)
         model = models[0]
     else:
-        model = api.check_resource(model_ids[0], api.get_model)
+        model = api.check_resource(model_ids[0], api.get_model,
+                                   query_string='limit=-1')
         models[0] = model
     return models, model_ids
 

@@ -122,10 +122,8 @@ def local_batch_predict(models, test_reader, prediction_file, api,
     input_data_list = []
     for input_data in test_reader:
         input_data_list.append(input_data)
-
     total_votes = []
     models_count = 0
-
     for models_split in models_splits:
         if resume:
             for model in models_split:
@@ -156,7 +154,6 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                 predictions.extend(votes[index].predictions)
         else:
             total_votes = votes
-
     message = u.dated("Combining predictions.\n")
     u.log_message(message, log_file=session_file, console=verbosity)
     for multivote in total_votes:
@@ -246,9 +243,10 @@ class TestReader(object):
                             for header in self.headers]
             self.exclude = [i for i in range(len(self.headers))
                             if not self.headers[i] in fields_names]
+
             self.exclude.reverse()
-            if len(self.exclude):
-                if (len(self.headers) - len(self.exclude)):
+            if self.exclude:
+                if len(self.headers) > len(self.exclude):
                     print (u"WARNING: predictions will be processed but some "
                            u"data might not be used. The used fields will be:"
                            u"\n\n%s"
