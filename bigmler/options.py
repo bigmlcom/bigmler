@@ -87,6 +87,7 @@ under the License.""" % version
     parser.add_argument('--train',
                         action='store',
                         dest='training_set',
+                        nargs='?',
                         default=defaults.get('train', None),
                         help="Training set path")
 

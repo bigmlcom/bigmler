@@ -136,7 +136,7 @@ def local_batch_predict(models, test_reader, prediction_file, api,
         for index in range(len(models_split)):
             model = models_split[index]
             if (isinstance(model, basestring) or
-                model['object']['status']['code'] != bigml.api.FINISHED):
+                    model['object']['status']['code'] != bigml.api.FINISHED):
                 model = api.check_resource(model, api.get_model, 'limit=-1')
             complete_models.append(model)
 

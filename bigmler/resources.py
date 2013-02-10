@@ -19,11 +19,12 @@
 """
 from __future__ import absolute_import
 
-import bigml.api
 try:
     import simplejson as json
 except ImportError:
     import json
+
+import bigml.api
 
 from bigmler.utils import (dated, get_url, log_message, plural)
 
@@ -86,6 +87,7 @@ def data_to_source(training_set, test_set,
     elif (args.evaluate and test_set and not args.source):
         data_set = test_set
         data_set_header = test_set_header
+
     return data_set, data_set_header
 
 
@@ -225,7 +227,7 @@ def set_model_args(name, description,
     if objective_field is not None and fields is not None:
         model_args.update({"objective_field":
                            fields.field_id(objective_field)})
-    # If evaluate flag is on, we choose a deterministic sampling with 
+    # If evaluate flag is on, we choose a deterministic sampling with
     # args.sample_rate (80% by default) of the data to create the model
     if args.evaluate:
         if args.sample_rate == 1:
@@ -267,10 +269,13 @@ def create_models(dataset, model_ids, model_args,
                         plural("model", args.number_of_models))
         log_message(message, log_file=session_file,
                     console=args.verbosity)
+        last_index = 0
         for i in range(1, args.number_of_models + 1):
-            if i > args.max_parallel_models:
+            if i % args.max_parallel_models == 1 and i > 1:
+                qstr = 'limit=-1'
                 models[last_index] = api.check_resource(last_model,
-                    api.get_model, query_string='limit=-1')
+                                                        api.get_model,
+                                                        query_string=qstr)
             model = api.create_model(dataset, model_args)
             log_message("%s\n" % model['resource'], log_file=log)
             last_model = model
