@@ -72,7 +72,7 @@ def read_field_attributes(path):
     for row in attributes_reader:
         attributes = {}
         if len(row) > 1:
-            for index in range(0, min(len(ATTRIBUTE_NAMES), len(row)) - 1):
+            for index in range(0, min(len(ATTRIBUTE_NAMES), len(row) - 1)):
                 attributes.update({ATTRIBUTE_NAMES[index]: row[index + 1]})
             field_attributes.update({
                 int(row[0]): attributes})
