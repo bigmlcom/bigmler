@@ -3,11 +3,17 @@
 History
 -------
 
-0.2.1 (2013-02-01)
+0.2.1 (2013-02-12)
 ~~~~~~~~~~~~~~~~~~
 
-- Refactoring main resources management
+- Deep refactoring of main resources management
 - Fixing bug in batch_predict for no headers test sets
+- Fixing bug for wide dataset's models than need query-string to retrieve all fields
+- Fixing bug in test asserts to catch subprocess raise
+- Adding default missing tokens to models
+- Adding stdin input for --train flag
+- Fixing bug when reading descriptions in --field-attributes
+- Refactoring to get status from api function
 
 0.2.0 (2012-01-21)
 ~~~~~~~~~~~~~~~~~~

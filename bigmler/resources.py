@@ -99,7 +99,7 @@ def get_source(source, api=None, verbosity=True,
     if api is None:
         api = bigml.api.BigML()
     if (isinstance(source, basestring) or
-            source['object']['status']['code'] != bigml.api.FINISHED):
+            bigml.api.get_status(source)['code'] != bigml.api.FINISHED):
         message = dated("Retrieving source. %s\n" %
                         get_url(source, api))
         log_message(message, log_file=session_file,
@@ -181,7 +181,7 @@ def get_dataset(dataset, api, verbosity=True, session_file=None):
     if api is None:
         api = bigml.api.BigML()
     if (isinstance(dataset, basestring) or
-            dataset['object']['status']['code'] != bigml.api.FINISHED):
+            bigml.api.get_status(dataset)['code'] != bigml.api.FINISHED):
         message = dated("Retrieving dataset. %s\n" %
                         get_url(dataset, api))
         log_message(message, log_file=session_file,
@@ -284,7 +284,7 @@ def create_models(dataset, model_ids, model_args,
             models.append(model)
             models_info += "%s\n" % model['resource']
         if args.number_of_models < 2 and args.verbosity:
-            if model['object']['status']['code'] != bigml.api.FINISHED:
+            if bigml.api.get_status(model)['code'] != bigml.api.FINISHED:
                 model = api.check_resource(model, api.get_model,
                                            query_string='limit=-1')
                 models[0] = model
