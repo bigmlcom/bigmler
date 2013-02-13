@@ -539,5 +539,4 @@ def check_resource_error(resource, message):
 
     """
     if bigml.api.get_status(resource)['code'] == bigml.api.FAULTY:
-        print message, resource['error']
-        sys.exit(-1)
+        sys.exit(message, resource['error'])

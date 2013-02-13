@@ -291,8 +291,11 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if votes_files:
         model_id = re.sub(r'.*(model_[a-f0-9]{24})__predictions\.csv$',
                           r'\1', votes_files[0]).replace("_", "/")
-        model = api.check_resource(model_id, api.get_model)
-        u.check_resource_error(model, "Failed to get model %s: " % model_id)
+        try:
+            model = api.check_resource(model_id, api.get_model)
+        except ValueError, exception:
+            sys.exit("Failed to get model %s: %s" % (model_id, str(exception)))
+
         local_model = Model(model)
         message = u.dated("Combining votes.\n")
         u.log_message(message, log_file=session_file,
