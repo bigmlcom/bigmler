@@ -26,7 +26,8 @@ except ImportError:
 
 import bigml.api
 
-from bigmler.utils import (dated, get_url, log_message, plural)
+from bigmler.utils import (dated, get_url, log_message, plural,
+                           check_resource_error)
 
 
 EVALUATE_SAMPLE_RATE = 0.8
@@ -58,7 +59,9 @@ def create_source(data_set, source_args,
     log_message(message, log_file=session_file, console=args.verbosity)
     source = api.create_source(data_set, source_args,
                                progress_bar=args.progress_bar)
+    check_resource_error(source, "Failed to create source: ")
     source = api.check_resource(source, api.get_source)
+    check_resource_error(source, "Failed to get source: ")
     message = dated("Source created: %s\n" % get_url(source, api))
     log_message(message, log_file=session_file, console=args.verbosity)
     log_message("%s\n" % source['resource'], log_file=log)
@@ -105,6 +108,7 @@ def get_source(source, api=None, verbosity=True,
         log_message(message, log_file=session_file,
                     console=verbosity)
         source = api.check_resource(source, api.get_source)
+        check_resource_error(source, "Failed to get source: ")
     return source
 
 
@@ -124,6 +128,7 @@ def update_source_fields(source, updated_values, fields, api=None,
     log_message(message, log_file=session_file,
                 console=verbosity)
     source = api.update_source(source, {"fields": update_fields})
+    check_resource_error(source, "Failed to update source: ")
     return source
 
 
@@ -161,7 +166,9 @@ def create_dataset(source, dataset_args, args, api, path=None,
     message = dated("Creating dataset.\n")
     log_message(message, log_file=session_file, console=args.verbosity)
     dataset = api.create_dataset(source, dataset_args)
+    check_resource_error(dataset, "Failed to create dataset: ")
     dataset = api.check_resource(dataset, api.get_dataset)
+    check_resource_error(dataset, "Failed to get dataset: ")
     message = dated("Dataset created: %s\n" % get_url(dataset, api))
     log_message(message, log_file=session_file, console=args.verbosity)
     log_message("%s\n" % dataset['resource'], log_file=log)
@@ -187,6 +194,7 @@ def get_dataset(dataset, api, verbosity=True, session_file=None):
         log_message(message, log_file=session_file,
                     console=verbosity)
         dataset = api.check_resource(dataset, api.get_dataset)
+        check_resource_error(dataset, "Failed to get dataset: ")
     return dataset
 
 
@@ -209,6 +217,7 @@ def publish_dataset(dataset, args, api,
     log_message(message, log_file=session_file,
                 console=args.verbosity)
     dataset = api.update_dataset(dataset, public_dataset)
+    check_resource_error(dataset, "Failed to update dataset: ")
     return dataset
 
 
@@ -277,6 +286,8 @@ def create_models(dataset, model_ids, model_args,
                                                         api.get_model,
                                                         query_string=qstr)
             model = api.create_model(dataset, model_args)
+            check_resource_error(model, "Failed to create model %s:" %
+                                 model['resource'])
             log_message("%s\n" % model['resource'], log_file=log)
             last_model = model
             last_index = i - 1
@@ -287,6 +298,8 @@ def create_models(dataset, model_ids, model_args,
             if bigml.api.get_status(model)['code'] != bigml.api.FINISHED:
                 model = api.check_resource(model, api.get_model,
                                            query_string='limit=-1')
+                check_resource_error(model, "Failed to get model %s: " %
+                                     model['resource'])
                 models[0] = model
             message = dated("Model created: %s.\n" %
                             get_url(model, api))
@@ -320,11 +333,15 @@ def get_models(model_ids, args, api, session_file=None):
         for model in model_ids:
             model = api.check_resource(model, api.get_model,
                                        query_string='limit=-1')
+            check_resource_error(model, "Failed to get model %s: " %
+                                 model['resource'])
             models.append(model)
         model = models[0]
     else:
         model = api.check_resource(model_ids[0], api.get_model,
                                    query_string='limit=-1')
+        check_resource_error(model, "Failed to get model %s: " %
+                             model['resource'])
         models[0] = model
     return models, model_ids
 
@@ -350,6 +367,8 @@ def publish_model(model, args, api=None, session_file=None):
         log_message(message, log_file=session_file,
                     console=args.verbosity)
         model = api.update_model(model, public_model)
+        check_resource_error(model, "Failed to update model %s: " %
+                                 model['resource'])
     return model
 
 
@@ -395,6 +414,7 @@ def create_evaluation(model, dataset, evaluation_args, args, api,
     log_message(message, log_file=session_file,
                 console=args.verbosity)
     evaluation = api.create_evaluation(model, dataset, evaluation_args)
+    check_resource_error(evaluation, "Failed to create evaluation: ")
     log_message("%s\n" % evaluation['resource'], log_file=log)
     if path is not None:
         try:
@@ -416,6 +436,7 @@ def get_evaluation(evaluation, api=None, verbosity=True, session_file=None):
                     get_url(evaluation, api))
     log_message(message, log_file=session_file, console=verbosity)
     evaluation = api.check_resource(evaluation, api.get_evaluation)
+    check_resource_error(evaluation, "Failed to get evaluation: ")
     return evaluation
 
 

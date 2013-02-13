@@ -69,6 +69,8 @@ def remote_predict(models, test_reader, prediction_file, api,
                                                    by_name=test_set_header,
                                                    wait_time=0,
                                                    args=prediction_args)
+                u.check_resource_error(prediction,
+                                       "Failed to create prediction: ")
                 u.log_message("%s\n" % prediction['resource'], log_file=log)
                 prediction_row = u.prediction_to_row(prediction)
                 predictions_file.writerow(prediction_row)
@@ -138,6 +140,9 @@ def local_batch_predict(models, test_reader, prediction_file, api,
             if (isinstance(model, basestring) or
                     bigml.api.get_status(model)['code'] != bigml.api.FINISHED):
                 model = api.check_resource(model, api.get_model, 'limit=-1')
+                u.check_resource_error(model,
+                                       "Failed to get model %s: " %
+                                       model['resource'])
             complete_models.append(model)
 
         local_model = MultiModel(complete_models)

@@ -151,10 +151,13 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # fields, and update them if needed.
     if source:
         source = r.get_source(source, api, args.verbosity, session_file)
-        csv_properties = {'missing_tokens':
-                          source['object']['source_parser']['missing_tokens'],
-                          'data_locale':
-                          source['object']['source_parser']['locale']}
+        if 'source_parser' in source['object']:
+            source_parser = source['object']['source_parser']
+            if 'missing_tokens' in source_parser:
+                csv_properties['missing_tokens'] = (
+                    source_parser['missing_tokens'])
+            if 'data_locale' in source_parser:
+                csv_properties['data_locale'] = source_parser['locale']
 
         fields = Fields(source['object']['fields'], **csv_properties)
         if field_attributes:
@@ -197,7 +200,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # we hadn't them yet.
     if dataset:
         dataset = r.get_dataset(dataset, api, args.verbosity, session_file)
-        if not csv_properties:
+        if not csv_properties and 'locale' in dataset['object']:
             csv_properties = {
                 'data_locale': dataset['object']['locale']}
         fields = Fields(dataset['object']['fields'], **csv_properties)
@@ -258,7 +261,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             csv_properties = {}
         csv_properties.update(verbose=True)
         if args.user_locale is None:
-            args.user_locale = model['object']['locale']
+            args.user_locale = model['object'].get('locale', None)
         csv_properties.update(data_locale=args.user_locale)
         if 'model_fields' in model['object']['model']:
             model_fields = model['object']['model']['model_fields'].keys()
@@ -289,6 +292,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         model_id = re.sub(r'.*(model_[a-f0-9]{24})__predictions\.csv$',
                           r'\1', votes_files[0]).replace("_", "/")
         model = api.check_resource(model_id, api.get_model)
+        u.check_resource_error(model, "Failed to get model %s: " % model_id)
         local_model = Model(model)
         message = u.dated("Combining votes.\n")
         u.log_message(message, log_file=session_file,

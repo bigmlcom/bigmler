@@ -532,3 +532,12 @@ def plural(text, num):
 
     """
     return "%s%s" % (text, "s"[num == 1:])
+
+
+def check_resource_error(resource, message):
+    """Checks if a given resource is faulty and exits
+
+    """
+    if bigml.api.get_status(resource)['code'] == bigml.api.FAULTY:
+        print message, resource['error']
+        sys.exit(-1)
