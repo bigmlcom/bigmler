@@ -96,9 +96,9 @@ Feature: Upload source and produce test predictions
         Examples:
         | directory1  | directory2  | output                         |predictions_file                    | method                 |
         | ./scenario4 | ./scenario5 | ./scenario9/predictions_c.csv  | ./check_files/predictions_iris.csv | "confidence weighted"  |
-        | ./scenario4 | ./scenario5 | ./scenario9/predictions_p.csv  | ./check_files/predictions_iris.csv | "probability weighted" |
+        | ./scenario4 | ./scenario5 | ./scenario9/predictions_p.csv  | ./check_files/predictions_iris_p.csv | "probability weighted" |
         | ./scenario1_r | ./scenario1_r | ./scenario10/predictions_c.csv | ./check_files/predictions_grades.csv | "confidence weighted"  |
-        | ./scenario1_r | ./scenario1_r | ./scenario10/predictions_p.csv | ./check_files/predictions_grades.csv | "probability weighted" |
+        | ./scenario1_r | ./scenario1_r | ./scenario10/predictions_p.csv | ./check_files/predictions_grades_p.csv | "probability weighted" |
 
     Scenario: Successfully building test predictions from dataset specifying objective field and model fields
         Given I create BigML resources using dataset, objective field <objective> and model fields <fields> to test "<test>" and log predictions in "<output>"

@@ -242,10 +242,10 @@ def combine_votes(votes_files, to_prediction, to_file, method=0):
     votes = read_votes(votes_files, to_prediction)
 
     check_dir(to_file)
-    with open(to_file, 'w', 0) as output:
-        for multivote in votes:
-            write_prediction(multivote.combine(method), output)
-
+    output = csv.writer(open(to_file, 'w', 0),
+                        lineterminator="\n")
+    for multivote in votes:
+        write_prediction(multivote.combine(method, True), output)
 
 def delete(api, delete_list):
     """ Deletes the resources given in the list.
@@ -286,10 +286,15 @@ def write_prediction(prediction, output=sys.stdout):
     """Writes the final combined prediction to the required output
 
     """
+    confidence = False
+    if isinstance(prediction, tuple):
+        prediction, confidence = prediction
     if isinstance(prediction, basestring):
         prediction = prediction.encode("utf-8")
-    output.write("%s\n" % prediction)
-    output.flush()
+    row = [prediction]
+    if confidence:
+        row.append(confidence)
+    output.writerow(row)
 
 
 def tail(file_handler, window=1):
