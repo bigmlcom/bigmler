@@ -3,7 +3,7 @@
 History
 -------
 
-0.2.1 (2013-02-12)
+0.2.1 (2013-03-03)
 ~~~~~~~~~~~~~~~~~~
 
 - Deep refactoring of main resources management
@@ -14,6 +14,7 @@ History
 - Adding stdin input for --train flag
 - Fixing bug when reading descriptions in --field-attributes
 - Refactoring to get status from api function
+- Adding confidence to combined predictions
 
 0.2.0 (2012-01-21)
 ~~~~~~~~~~~~~~~~~~
