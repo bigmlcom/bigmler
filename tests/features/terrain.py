@@ -92,13 +92,12 @@ def cleanup_resources(feature):
     assert world.final_models_count == world.init_models_count
     assert world.final_predictions_count == world.init_predictions_count
     assert world.final_evaluations_count == world.init_evaluations_count
-    
+ 
     for folder in world.folders:
         try:
             shutil.rmtree(folder)
         except:
             pass
-    
 
 @after.each_scenario
 def cleanup_output(scenario):
