@@ -1,6 +1,7 @@
 import os
 import time
 import csv
+import json
 from lettuce import step, world
 from subprocess import check_call, CalledProcessError
 
@@ -46,7 +47,7 @@ def i_create_resources_from_source(step, test=None, output=None):
 
 
 @step(r'I create BigML resources using dataset to test "(.*)" and log predictions in "(.*)"')
-def i_create_resources_from_source(step, test=None, output=None):
+def i_create_resources_from_dataset(step, test=None, output=None):
     if test is None or output is None:
         assert False
     world.directory = os.path.dirname(output)
@@ -65,7 +66,7 @@ def i_create_resources_from_source(step, test=None, output=None):
         assert False, str(exc)
 
 @step(r'I create BigML resources using dataset, objective field (.*) and model fields (.*) to test "(.*)" and log predictions in "(.*)"')
-def i_create_resources_from_source(step, objective=None, fields=None, test=None, output=None):
+def i_create_resources_from_dataset_objective_model(step, objective=None, fields=None, test=None, output=None):
     if objective is None or fields is None or test is None or output is None:
         assert False
     world.directory = os.path.dirname(output)
@@ -84,7 +85,7 @@ def i_create_resources_from_source(step, objective=None, fields=None, test=None,
         assert False, str(exc)
 
 @step(r'I create BigML resources using model to test "(.*)" and log predictions in "(.*)"')
-def i_create_resources_from_source(step, test=None, output=None):
+def i_create_resources_from_model(step, test=None, output=None):
     if test is None or output is None:
         assert False
     world.directory = os.path.dirname(output)
@@ -104,13 +105,13 @@ def i_create_resources_from_source(step, test=None, output=None):
 
 
 @step(r'I create BigML resources using ensemble of (.*) models to test "(.*)" and log predictions in "(.*)"')
-def i_create_resources_from_source(step, number_of_models=None, test=None, output=None):
+def i_create_resources_from_ensemble(step, number_of_models=None, test=None, output=None):
     if number_of_models is None or test is None or output is None:
         assert False
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
-        retcode = check_call("bigmler --dataset " + world.dataset['resource'] + " --test " + test + " --number-of-models " + number_of_models + " --tag my_ensemble --output " + output, shell=True)
+        retcode = check_call("bigmler --dataset " + world.dataset['resource'] + " --test " + test + " --number-of-models " + str(number_of_models) + " --tag my_ensemble --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -125,7 +126,7 @@ def i_create_resources_from_source(step, number_of_models=None, test=None, outpu
 
 
 @step(r'I create BigML resources using models in file "(.*)" to test "(.*)" and log predictions in "(.*)"')
-def i_create_resources_from_source(step, models_file=None, test=None, output=None):
+def i_create_resources_from_models_file(step, models_file=None, test=None, output=None):
     if models_file is None or test is None or output is None:
         assert False
     world.directory = os.path.dirname(output)
@@ -145,7 +146,7 @@ def i_create_resources_from_source(step, models_file=None, test=None, output=Non
 
 
 @step(r'I create BigML resources using dataset in file "(.*)" to test "(.*)" and log predictions in "(.*)"')
-def i_create_resources_from_source(step, dataset_file=None, test=None, output=None):
+def i_create_resources_from_dataset_file(step, dataset_file=None, test=None, output=None):
     if dataset_file is None or test is None or output is None:
         assert False
     world.directory = os.path.dirname(output)
@@ -274,6 +275,20 @@ def i_check_create_models(step):
         except Exception, exc:
             assert False, str(exc)
 
+@step(r'I check that the evaluation has been created')
+def i_check_create_evaluation(step):
+    evaluation_file = "%s%sevaluation" % (world.directory, os.sep)
+    try:
+        evaluation_file = open(evaluation_file, "r")
+        evaluation = world.api.check_resource(evaluation_file.readline().strip(),
+                                              world.api.get_evaluation)
+        world.evaluations.append(evaluation['resource'])
+        world.evaluation = evaluation
+        evaluation_file.close()
+        assert True
+    except:
+        assert False
+
 
 @step(r'I check that the predictions are ready')
 def i_check_create_predictions(step):
@@ -322,3 +337,39 @@ def i_check_predictions(step, check_file):
         assert True
     except Exception, exc:
         assert False, str(exc)
+
+@step(r'I create BigML resources uploading train "(.*)" file to evaluate and log evaluation in "(.*)"')
+def i_create_all_resources_to_evaluate(step, data=None, output=None):
+    if data is None or output is None:
+        assert False
+    try:
+        retcode = check_call("bigmler --evaluate --train " + data + " --output " + output, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.directory = os.path.dirname(output)
+            world.folders.append(world.directory)
+            world.output = output
+            assert True
+    except OSError as e:
+        assert False
+
+
+@step(r'I have previously executed "(.*)" or reproduce it with arguments (.*)$')
+def i_have_previous_scenario_or_reproduce_it(step, scenario, kwargs):
+    scenarios = {'scenario1': [(i_create_all_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_model, False)],
+                 'scenario1_r': [(i_create_all_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_model, False)],
+                 'scenario5': [(i_create_resources_from_ensemble, True), (i_check_create_models, False)], 
+                 'scenario_e1': [(i_create_all_resources_to_evaluate, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_model, False), (i_check_create_evaluation, False)]}
+    if os.path.exists("./%s/" % scenario):
+        assert True
+    else:
+        try:
+            kwargs = json.loads(kwargs)
+        except Exception, exc:
+            print str(exc)
+        for function, with_args in scenarios[scenario]:
+            if with_args:
+                function(step, **kwargs)
+            else:
+                function(step)
