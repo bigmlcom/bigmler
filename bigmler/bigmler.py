@@ -49,6 +49,7 @@ import os
 import re
 import shlex
 import datetime
+import StringIO
 
 import bigml.api
 import bigmler.utils as u
@@ -71,6 +72,9 @@ COMMAND_LOG = ".bigmler"
 DIRS_LOG = ".bigmler_dir_stack"
 SESSIONS_LOG = "bigmler_sessions"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
+MISSING_TOKENS = ['', 'N/A', 'n/a', 'NULL', 'null', '-', '#DIV/0', '#REF!',
+                  '#NAME?', 'NIL', 'nil', 'NA', 'na', '#VALUE!', '#NULL!',
+                  'NaN', '#N/A', '#NUM!', '?']
 
 
 def compute_output(api, args, training_set, test_set=None, output=None,
@@ -147,10 +151,13 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # fields, and update them if needed.
     if source:
         source = r.get_source(source, api, args.verbosity, session_file)
-        csv_properties = {'missing_tokens':
-                          source['object']['source_parser']['missing_tokens'],
-                          'data_locale':
-                          source['object']['source_parser']['locale']}
+        if 'source_parser' in source['object']:
+            source_parser = source['object']['source_parser']
+            if 'missing_tokens' in source_parser:
+                csv_properties['missing_tokens'] = (
+                    source_parser['missing_tokens'])
+            if 'data_locale' in source_parser:
+                csv_properties['data_locale'] = source_parser['locale']
 
         fields = Fields(source['object']['fields'], **csv_properties)
         if field_attributes:
@@ -193,9 +200,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # we hadn't them yet.
     if dataset:
         dataset = r.get_dataset(dataset, api, args.verbosity, session_file)
-        if not csv_properties:
-            csv_properties = {'data_locale':
-                              dataset['object']['locale']}
+        if not csv_properties and 'locale' in dataset['object']:
+            csv_properties = {
+                'data_locale': dataset['object']['locale']}
         fields = Fields(dataset['object']['fields'], **csv_properties)
         if args.public_dataset:
             r.publish_dataset(dataset, api, args, session_file)
@@ -251,21 +258,29 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             model = r.publish_model(model, args, api, session_file)
             models[0] = model
         if not csv_properties:
-            csv_properties = {'data_locale':
-                              model['object']['locale']}
+            csv_properties = {}
         csv_properties.update(verbose=True)
-        if args.user_locale:
-            csv_properties.update(data_locale=args.user_locale)
-
+        if args.user_locale is None:
+            args.user_locale = model['object'].get('locale', None)
+        csv_properties.update(data_locale=args.user_locale)
+        if 'model_fields' in model['object']['model']:
+            model_fields = model['object']['model']['model_fields'].keys()
+            csv_properties.update(include=model_fields)
+        if 'missing_tokens' in model['object']['model']:
+            missing_tokens = model['object']['model']['missing_tokens']
+        else:
+            missing_tokens = MISSING_TOKENS
+        csv_properties.update(missing_tokens=missing_tokens)
+        objective_field = models[0]['object']['objective_fields']
+        if isinstance(objective_field, list):
+            objective_field = objective_field[0]
+        csv_properties.update(objective_field=objective_field)
         fields = Fields(model['object']['model']['fields'], **csv_properties)
 
     # end of model processing
 
     # If predicting
     if models and test_set and not args.evaluate:
-        objective_field = models[0]['object']['objective_fields']
-        if isinstance(objective_field, list):
-            objective_field = objective_field[0]
         predict(test_set, test_set_header, models, fields, output,
                 objective_field, args.remote, api, log,
                 args.max_batch_models, args.method, resume, args.tag,
@@ -276,7 +291,11 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if votes_files:
         model_id = re.sub(r'.*(model_[a-f0-9]{24})__predictions\.csv$',
                           r'\1', votes_files[0]).replace("_", "/")
-        model = api.check_resource(model_id, api.get_model)
+        try:
+            model = api.check_resource(model_id, api.get_model)
+        except ValueError, exception:
+            sys.exit("Failed to get model %s: %s" % (model_id, str(exception)))
+
         local_model = Model(model)
         message = u.dated("Combining votes.\n")
         u.log_message(message, log_file=session_file,
@@ -322,9 +341,14 @@ def main(args=sys.argv[1:]):
     """Main process
 
     """
+    train_stdin = False
     for i in range(0, len(args)):
         if args[i].startswith("--"):
             args[i] = args[i].replace("_", "-")
+            if (args[i] == '--train' and
+                    (i == len(args) - 1 or args[i + 1].startswith("--"))):
+                train_stdin = True
+
     # If --clear-logs the log files are cleared
     if "--clear-logs" in args:
         for log_file in LOG_FILES:
@@ -358,6 +382,13 @@ def main(args=sys.argv[1:]):
         command = u.get_log_reversed(COMMAND_LOG,
                                      command_args.stack_level)
         args = shlex.split(command)[1:]
+        try:
+            position = args.index("--train")
+            if (position == (len(args) - 1) or
+                    args[position + 1].startswith("--")):
+                train_stdin = True
+        except:
+            pass
         output_dir = u.get_log_reversed(DIRS_LOG,
                                         command_args.stack_level)
         defaults_file = "%s%s%s" % (output_dir, os.sep, DEFAULTS_FILE)
@@ -412,6 +443,9 @@ def main(args=sys.argv[1:]):
 
     if resume and debug:
         command_args.debug = True
+
+    if train_stdin:
+        command_args.training_set = StringIO.StringIO(sys.stdin.read())
 
     api_command_args = {
         'username': command_args.username,

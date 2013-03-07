@@ -51,6 +51,7 @@ def remote_predict(models, test_reader, prediction_file, api,
     test_set_header = test_reader.has_headers()
     if output_path is None:
         output_path = u.check_dir(prediction_file)
+    message_logged = False
     for model in models:
         model = bigml.api.get_model_id(model)
         predictions_file = get_predictions_file_name(model,
@@ -59,9 +60,11 @@ def remote_predict(models, test_reader, prediction_file, api,
         if (not resume or
             not u.checkpoint(u.are_predictions_created, predictions_file,
                              test_reader.number_of_tests(), debug=debug)):
-            message = u.dated("Creating remote predictions.\n")
-            u.log_message(message, log_file=session_file,
-                          console=verbosity)
+            if not message_logged:
+                message = u.dated("Creating remote predictions.")
+                u.log_message(message, log_file=session_file,
+                              console=verbosity)
+            message_logged = True
 
             predictions_file = csv.writer(open(predictions_file, 'w', 0))
             for input_data in test_reader:
@@ -69,6 +72,8 @@ def remote_predict(models, test_reader, prediction_file, api,
                                                    by_name=test_set_header,
                                                    wait_time=0,
                                                    args=prediction_args)
+                u.check_resource_error(prediction,
+                                       "Failed to create prediction: ")
                 u.log_message("%s\n" % prediction['resource'], log_file=log)
                 prediction_row = u.prediction_to_row(prediction)
                 predictions_file.writerow(prediction_row)
@@ -86,9 +91,9 @@ def local_predict(models, test_reader, output, method):
     for input_data in test_reader:
         prediction = local_model.predict(input_data,
                                          by_name=test_set_header,
-                                         method=method)
+                                         method=method,
+                                         with_confidence=True)
         u.write_prediction(prediction, output)
-    output.close()
 
 
 def local_batch_predict(models, test_reader, prediction_file, api,
@@ -122,10 +127,8 @@ def local_batch_predict(models, test_reader, prediction_file, api,
     input_data_list = []
     for input_data in test_reader:
         input_data_list.append(input_data)
-
     total_votes = []
     models_count = 0
-
     for models_split in models_splits:
         if resume:
             for model in models_split:
@@ -136,8 +139,16 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                              test_reader.number_of_tests(), debug=debug)
         complete_models = []
         for index in range(len(models_split)):
-            complete_models.append(api.check_resource(
-                models_split[index], api.get_model))
+            model = models_split[index]
+            if (isinstance(model, basestring) or
+                    bigml.api.get_status(model)['code'] != bigml.api.FINISHED):
+                try:
+                    model = api.check_resource(model, api.get_model,
+                                               'limit=-1')
+                except ValueError, exception:
+                    sys.exit("Failed to get model: %s" % (model,
+                                                          str(exception)))
+            complete_models.append(model)
 
         local_model = MultiModel(complete_models)
         local_model.batch_predict(input_data_list,
@@ -156,12 +167,10 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                 predictions.extend(votes[index].predictions)
         else:
             total_votes = votes
-
     message = u.dated("Combining predictions.\n")
     u.log_message(message, log_file=session_file, console=verbosity)
     for multivote in total_votes:
-        u.write_prediction(multivote.combine(method), output)
-    output.close()
+        u.write_prediction(multivote.combine(method, True), output)
 
 
 def predict(test_set, test_set_header, models, fields, output,
@@ -181,7 +190,7 @@ def predict(test_set, test_set_header, models, fields, output,
                              objective_field)
     prediction_file = output
     output_path = u.check_dir(output)
-    output = open(output, 'w', 0)
+    output = csv.writer(open(output, 'w', 0), lineterminator="\n")
     # Remote predictions: predictions are computed in bigml.com and stored
     # in a file named after the model in the following syntax:
     #     model_[id of the model]__predictions.csv
@@ -208,8 +217,6 @@ def predict(test_set, test_set_header, models, fields, output,
             local_batch_predict(models, test_reader, prediction_file, api,
                                 max_models, resume, output_path, output,
                                 verbosity, method, session_file, debug)
-
-    output.close()
 
 
 class TestReader(object):
@@ -246,9 +253,10 @@ class TestReader(object):
                             for header in self.headers]
             self.exclude = [i for i in range(len(self.headers))
                             if not self.headers[i] in fields_names]
+
             self.exclude.reverse()
-            if len(self.exclude):
-                if (len(self.headers) - len(self.exclude)):
+            if self.exclude:
+                if len(self.headers) > len(self.exclude):
                     print (u"WARNING: predictions will be processed but some "
                            u"data might not be used. The used fields will be:"
                            u"\n\n%s"

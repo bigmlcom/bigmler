@@ -53,6 +53,11 @@ If you do not explicitly specify an objective field, BigML will default to the
 last
 column in your dataset.
 
+If you don't provide a file name for your training source, BigMLer will try to
+read it from the standard input::
+
+    cat data/iris.csv | bigmler --train
+
 BigMLer will try to use the locale of the model to interpret test data. In case
 it fails, it will try `en_US.UTF-8`
 or `English_United States.1252` and a warning message will be printed.
@@ -489,7 +494,7 @@ Requirements
 
 Python 2.7 is currently supported by BigMLer.
 
-BigMLer requires `bigml 0.5.0 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 0.5.2 <https://github.com/bigmlcom/python>`_  or
 higher.
 
 BigMLer Installation
