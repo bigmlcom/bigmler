@@ -535,6 +535,15 @@ under the License.""" % version
                         default=defaults.get('clear_logs', False),
                         help="Clear global bigmler log files.")
 
+    # Set the part of training data to be held out for cross-validation
+    parser.add_argument('--cross-validation-rate',
+                        action='store',
+                        dest='cross_validation_rate',
+                        type=float,
+                        default=defaults.get('cross_validation_rate', 0.0),
+                        help=("Part of training data to be held out for "
+                              "cross-validation."))
+
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #

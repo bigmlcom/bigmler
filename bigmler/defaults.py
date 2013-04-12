@@ -79,7 +79,8 @@ FLAGS = {'BigMLer': [{'flag': 'debug', 'type': 'boolean'},
                      {'flag': 'plurality', 'type': 'string'},
                      {'flag': 'verbosity', 'type': 'int'},
                      {'flag': 'fields_map', 'type': 'string'},
-                     {'flag': 'clear_logs', 'type': 'boolean'}]}
+                     {'flag': 'clear_logs', 'type': 'boolean'},
+                     {'flag': 'cross_validation_rate', 'type': 'float'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):

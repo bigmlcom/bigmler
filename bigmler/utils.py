@@ -419,6 +419,30 @@ def is_evaluation_created(path):
         return False, None
 
 
+def are_evaluations_created(path, number_of_evaluations):
+    """Reads the evaluation ids from the evaluations file in the path directory
+       and checks the corresponding evaluations
+
+    """
+    evaluation_ids = []
+    
+    try:
+        with open("%s%sevaluations" % (path, os.sep)) as evaluations_file:
+            for line in evaluations_file:
+                evaluation = line.strip()
+                try:
+                    evaluation_id = bigml.api.get_evaluation_id(evaluation)
+                    evaluation_ids.append(evaluation_id)
+                except ValueError:
+                    return False, evaluation_ids
+        if len(evaluation_ids) == number_of_evaluations:
+            return True, evaluation_ids
+        else:
+            return False, evaluation_ids
+    except IOError:
+        return False, evaluation_ids
+
+
 def checkpoint(function, *args, **kwargs):
     """Redirects to each checkpoint function
 
@@ -544,4 +568,4 @@ def check_resource_error(resource, message):
 
     """
     if bigml.api.get_status(resource)['code'] == bigml.api.FAULTY:
-        sys.exit(message, resource['error'])
+        sys.exit("%s: %s" % (message, resource['error']))

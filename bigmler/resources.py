@@ -20,6 +20,7 @@
 from __future__ import absolute_import
 
 import sys
+import time
 
 try:
     import simplejson as json
@@ -245,11 +246,16 @@ def set_model_args(name, description,
                            fields.field_id(objective_field)})
     # If evaluate flag is on, we choose a deterministic sampling with
     # args.sample_rate (80% by default) of the data to create the model
-    if args.evaluate:
-        if args.sample_rate == 1:
+    # If cross_validation_rate = n/100, then we choose to run 2 * n evaluations
+    # by holding out a n% of randomly sampled data. 
+    if args.evaluate or args.cross_validation_rate > 0.0:
+        model_args.update(seed=SEED)
+        if args.cross_validation_rate > 0.0:
+            args.sample_rate = 1 - args.cross_validation_rate
+            args.replacement = False
+        elif args.sample_rate == 1:
             args.sample_rate = EVALUATE_SAMPLE_RATE
-        seed = SEED
-        model_args.update(seed=seed)
+
 
     input_fields = []
     if model_fields and fields is not None:
@@ -276,6 +282,7 @@ def create_models(dataset, model_ids, model_args,
         api = bigml.api.BigML()
 
     models = model_ids[:]
+    existing_models = len(models)
     models_info = ""
     for model_id in model_ids:
         models_info += "%s\n" % model_id
@@ -296,6 +303,9 @@ def create_models(dataset, model_ids, model_args,
                 except ValueError, exception:
                     sys.exit("Failed to get a finished model: %s" %
                              str(exception))
+            if args.cross_validation_rate > 0.0:
+                new_seed = "%s - %s" % (SEED, i + existing_models)
+                model_args.update(seed=new_seed)
             model = api.create_model(dataset, model_args)
             check_resource_error(model, "Failed to create model %s:" %
                                  model['resource'])
@@ -305,6 +315,12 @@ def create_models(dataset, model_ids, model_args,
             model_ids.append(model['resource'])
             models.append(model)
             models_info += "%s\n" % model['resource']
+            if path is not None:
+                try:
+                    with open(path + '/models', 'a', 0) as model_file:
+                        model_file.write(models_info)
+                except IOError:
+                    raise IOError("Fails to write %s/models" % path)
         if args.number_of_models < 2 and args.verbosity:
             if bigml.api.get_status(model)['code'] != bigml.api.FINISHED:
                 try:
@@ -318,12 +334,7 @@ def create_models(dataset, model_ids, model_args,
                             get_url(model, api))
             log_message(message, log_file=session_file,
                         console=args.verbosity)
-    if path is not None:
-        try:
-            with open(path + '/models', 'w', 0) as model_file:
-                model_file.write(models_info)
-        except IOError:
-            raise IOError("Fails to write %s/models" % path)
+
     return models, model_ids
 
 
@@ -411,21 +422,27 @@ def set_evaluation_args(name, description, args, fields=None, fields_map=None):
     }
     if fields_map is not None and fields is not None:
         evaluation_args.update({"fields_map": map_fields(fields_map, fields)})
-    if not ((args.dataset or args.test_set)
-            and (args.model or args.models or args.model_tag)):
+    # Two cases to use out_of_bag and sample_rate: standard evaluations where
+    # only the training set is provided, and cross_validation
+    if ((not ((args.dataset or args.test_set)
+            and (args.model or args.models or args.model_tag))) or
+        ((args.training_set or args.dataset) and
+            args.cross_validation_rate > 0.0)):
         evaluation_args.update(out_of_bag=True, seed=SEED,
                                sample_rate=args.sample_rate)
+
     return evaluation_args
 
 
 def create_evaluation(model, dataset, evaluation_args, args, api,
-                      path=None, session_file=None, log=None):
+                      path=None, session_file=None, log=None, seed=SEED):
     """Create evaluation
 
     """
     if api is None:
         api = bigml.api.BigML()
-
+    if args.cross_validation_rate > 0.0:
+        evaluation_args.update(seed=seed)
     message = dated("Creating evaluation.\n")
     log_message(message, log_file=session_file,
                 console=args.verbosity)
@@ -440,6 +457,36 @@ def create_evaluation(model, dataset, evaluation_args, args, api,
             raise IOError("Failed to write %s/evaluation" % path)
 
     return evaluation
+
+
+def create_evaluations(model_ids, dataset, evaluation_args, args, api,
+                       path=None, session_file=None, log=None,
+                       existing_evaluations=0):
+    """Create evaluations for a list of models
+
+    """
+    evaluations = []
+    if api is None:
+        api = bigml.api.BigML()
+    message = dated("Creating evaluations.\n")
+    log_message(message, log_file=session_file,
+                console=args.verbosity)
+    for i in range(0, len(model_ids)):
+        model = model_ids[i]
+        if args.cross_validation_rate > 0.0:
+            new_seed = "%s - %s" % (SEED, i + existing_evaluations)
+            evaluation_args.update(seed=new_seed)
+        evaluation = api.create_evaluation(model, dataset, evaluation_args)
+        check_resource_error(evaluation, "Failed to create evaluation: ")
+        evaluations.append(evaluation)
+        log_message("%s\n" % evaluation['resource'], log_file=log)
+        if path is not None:
+            try:
+                with open(path + '/evaluations', 'a', 0) as evaluation_file:
+                    evaluation_file.write("%s\n" % evaluation['resource'])
+            except IOError:
+                raise IOError("Failed to write %s/evaluations" % path)
+    return evaluations
 
 
 def get_evaluation(evaluation, api=None, verbosity=True, session_file=None):
