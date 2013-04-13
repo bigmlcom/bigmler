@@ -77,6 +77,7 @@ MISSING_TOKENS = ['', 'N/A', 'n/a', 'NULL', 'null', '-', '#DIV/0', '#REF!',
                   'NaN', '#N/A', '#NUM!', '?']
 MONTECARLO_FACTOR = 200
 
+
 def compute_output(api, args, training_set, test_set=None, output=None,
                    objective_field=None,
                    description=None,
@@ -330,7 +331,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         r.save_evaluation(evaluation, output, api)
 
     # If cross_validation_rate is > 0.0, create remote evaluations and save
-    # results in json and human-readable format. Then average the results to 
+    # results in json and human-readable format. Then average the results to
     # issue a cross_validation measure set.
     if args.cross_validation_rate > 0.0:
         args.sample_rate = 1 - args.cross_validation_rate
@@ -359,16 +360,18 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                                                     args, api, path,
                                                     session_file, log,
                                                     existing_evaluations))
+            evaluations_files = []
             for evaluation in evaluations:
                 evaluation = r.get_evaluation(evaluation, api, args.verbosity,
                                               session_file)
                 model_id = evaluation['object']['model']
                 file_name = "%s%s%s__evaluation" % (path, os.sep,
                                                     model_id.replace("/", "_"))
+                evaluations_files.append(file_name + ".json")
                 r.save_evaluation(evaluation, file_name, api)
-
-    # TODO: change output to model_[id]__evaluation.json and .txt and 
-    # making averaged final evaluation
+            cross_validation = u.average_evaluations(evaluations_files)
+            file_name = "%s%scross_validation" % (path, os.sep)
+            r.save_evaluation(cross_validation, file_name, api)
 
     # Workaround to restore windows console cp850 encoding to print the tree
     if sys.platform == "win32" and sys.stdout.isatty():
@@ -420,6 +423,16 @@ def main(args=sys.argv[1:]):
 
     # Parses command line arguments.
     command_args = parser.parse_args(args)
+
+    if command_args.cross_validation_rate > 0.0 and (
+            command_args.test_set or command_args.evaluate or
+            command_args.model or command_args.models or
+            command_args.model_tag):
+        parser.error("Non compatible flags: --cross-validation-rate"
+                     " cannot be used with --evaluate, --model,"
+                     " --models or --model-tag. Usage:\n\n"
+                     "bigmler --train data/iris.csv "
+                     "--cross-validation-rate 0.1")
 
     default_output = ('evaluation' if command_args.evaluate
                       else 'predictions.csv')

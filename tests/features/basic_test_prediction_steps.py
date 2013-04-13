@@ -256,16 +256,16 @@ def i_check_create_models(step):
     number_of_lines = 0
     count = 0
     while world.number_of_models != number_of_lines and count < 10:
+        number_of_lines = 0
         for line in open(model_file, "r"):
             number_of_lines += 1
             model_id = line.strip()
             model_ids.append(model_id)
         if world.number_of_models != number_of_lines:
-            number_of_lines = 0
             time.sleep(10)
             count += 1
     if world.number_of_models != number_of_lines:
-        assert False, "number of models %s and number of lines in models file %s" % (number_of_models, number_of_lines)
+        assert False, "number of models %s and number of lines in models file %s: %s" % (world.number_of_models, model_file, number_of_lines)
     world.model_ids = model_ids
     for model_id in model_ids:
         try:

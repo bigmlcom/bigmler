@@ -27,6 +27,7 @@ import glob
 import os
 import sys
 import datetime
+import numbers
 
 try:
     import simplejson as json
@@ -247,6 +248,7 @@ def combine_votes(votes_files, to_prediction, to_file, method=0):
     for multivote in votes:
         write_prediction(multivote.combine(method, True), output)
 
+
 def delete(api, delete_list):
     """ Deletes the resources given in the list.
 
@@ -294,7 +296,13 @@ def write_prediction(prediction, output=sys.stdout):
     row = [prediction]
     if confidence:
         row.append(confidence)
-    output.writerow(row)
+    try:
+        output.writerow(row)
+    except AttributeError:
+        try:
+            output.write(row)
+        except AttributeError:
+            raise AttributeError("You should provide a writeable object")
 
 
 def tail(file_handler, window=1):
@@ -425,7 +433,6 @@ def are_evaluations_created(path, number_of_evaluations):
 
     """
     evaluation_ids = []
-    
     try:
         with open("%s%sevaluations" % (path, os.sep)) as evaluations_file:
             for line in evaluations_file:
@@ -569,3 +576,122 @@ def check_resource_error(resource, message):
     """
     if bigml.api.get_status(resource)['code'] == bigml.api.FAULTY:
         sys.exit("%s: %s" % (message, resource['error']))
+
+
+def average_evaluations(evaluation_files):
+    """Reads the contents of the evaluations files and averages its measures
+
+    """
+    special_keys = ["class_names", "per_class_statistics",
+                    "confusion_matrix", "present_in_test_data"]
+    averaged_evaluation = {}
+    number_of_evaluations = float(len(evaluation_files))
+    for evaluation_file in evaluation_files:
+        with open(evaluation_file, 'U') as evaluation_file:
+            evaluation = json.loads(evaluation_file.read())
+            avg_evaluation(averaged_evaluation, evaluation,
+                           number_of_evaluations, special_keys)
+    return averaged_evaluation
+
+
+def avg_evaluation(total, component, number_of_evaluations, special_keys):
+    """Adds a new set of evaluation measures to the cumulative average
+
+    """
+
+    for key in component:
+        value = component[key]
+        # Handle the non-averageable values in
+        # classifications' evaluation data
+        if key in special_keys:
+            if key == "class_names":
+                if not key in total:
+                    total[key] = []
+                total[key].extend(component[key])
+                total[key] = list(set(total[key]))
+            if key == "confusion_matrix":
+                if not key in total:
+                    total[key] = component[key]
+                else:
+                    total[key] = add_matrices(total[key], component[key])
+            if key == "per_class_statistics":
+                if not key in total:
+                    total[key] = []
+                total[key] = avg_class_statistics(total[key], component[key],
+                                                  number_of_evaluations)
+        else:
+            # Average numerical values
+            if isinstance(value, numbers.Number):
+                new_key = (key if key.startswith("average_")
+                           else ("average_%s" % key))
+                if not new_key in total:
+                    total[new_key] = 0
+                total[new_key] += component[key] / number_of_evaluations
+            # Handle grouping keys
+            elif isinstance(value, list) or isinstance(value, dict):
+                if not key in total:
+                    total[key] = [] if isinstance(value, list) else {}
+                avg_evaluation(total[key], component[key],
+                               number_of_evaluations, special_keys)
+
+
+def add_matrices(matrix_a, matrix_b):
+    """Add two n x n matrices
+
+    """
+    return map(lambda i: map(lambda x, y: x + y, matrix_a[i], matrix_b[i]),
+               xrange(len(matrix_a)))
+
+
+def avg_class_statistics(total, component, number_of_evaluations):
+    """Adds a new set of per class evaluation measures to the total average
+
+    """
+    special_keys = ['class_name', 'present_in_test_data', 'occurrences']
+    for class_info in component:
+        class_name = class_info['class_name']
+        found = False
+        for total_class_info in total:
+            if class_name == total_class_info['class_name']:
+                found = True
+                flag = class_info['present_in_test_data']
+                # If the class is not present in the evaluation test data set,
+                # the measures for that class are not affected by it
+                if not flag:
+                    total_class_info['occurrences'] -= 1
+                    occurrences = total_class_info['occurrences']
+                    for key in total_class_info:
+                        # renormalizing previous average count
+                        if not key in special_keys:
+                            total_class_info[key] *= ((occurrences + 1) /
+                                                      occurrences)
+                total_class_info['present_in_test_data'] = flag
+                occurrences = total_class_info['occurrences']
+                for key in class_info:
+                    if not key in special_keys:
+                        new_key = (key if key.startswith("average_")
+                                   else ("average_%s" % key))
+                        if new_key in total_class_info:
+                            total_class_info[new_key] += (class_info[key] /
+                                                          occurrences)
+                        else:
+                            total_class_info[new_key] = (class_info[key] /
+                                                         occurrences)
+                break
+        if not found:
+            flag = class_info['present_in_test_data']
+            class_info['occurrences'] = number_of_evaluations
+            if not flag:
+                class_info['occurrences'] -= 1
+            for key in class_info:
+                if not key in special_keys:
+                    if not key.startswith("average_"):
+                        new_key = "average_%s" % key
+                        class_info[new_key] = (class_info[key] /
+                                               class_info['occurrences'])
+                        del class_info[key]
+                    else:
+                        class_info[key] = (class_info[key] /
+                                           class_info['occurrences'])
+            total.append(class_info)
+    return total

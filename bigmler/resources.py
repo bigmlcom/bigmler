@@ -247,7 +247,7 @@ def set_model_args(name, description,
     # If evaluate flag is on, we choose a deterministic sampling with
     # args.sample_rate (80% by default) of the data to create the model
     # If cross_validation_rate = n/100, then we choose to run 2 * n evaluations
-    # by holding out a n% of randomly sampled data. 
+    # by holding out a n% of randomly sampled data.
     if args.evaluate or args.cross_validation_rate > 0.0:
         model_args.update(seed=SEED)
         if args.cross_validation_rate > 0.0:
@@ -255,7 +255,6 @@ def set_model_args(name, description,
             args.replacement = False
         elif args.sample_rate == 1:
             args.sample_rate = EVALUATE_SAMPLE_RATE
-
 
     input_fields = []
     if model_fields and fields is not None:
@@ -314,7 +313,7 @@ def create_models(dataset, model_ids, model_args,
             last_index = i - 1
             model_ids.append(model['resource'])
             models.append(model)
-            models_info += "%s\n" % model['resource']
+            models_info = "%s\n" % model['resource']
             if path is not None:
                 try:
                     with open(path + '/models', 'a', 0) as model_file:
@@ -425,9 +424,9 @@ def set_evaluation_args(name, description, args, fields=None, fields_map=None):
     # Two cases to use out_of_bag and sample_rate: standard evaluations where
     # only the training set is provided, and cross_validation
     if ((not ((args.dataset or args.test_set)
-            and (args.model or args.models or args.model_tag))) or
+              and (args.model or args.models or args.model_tag))) or
         ((args.training_set or args.dataset) and
-            args.cross_validation_rate > 0.0)):
+         args.cross_validation_rate > 0.0)):
         evaluation_args.update(out_of_bag=True, seed=SEED,
                                sample_rate=args.sample_rate)
 
@@ -468,10 +467,11 @@ def create_evaluations(model_ids, dataset, evaluation_args, args, api,
     evaluations = []
     if api is None:
         api = bigml.api.BigML()
+    number_of_evaluations = len(model_ids)
     message = dated("Creating evaluations.\n")
     log_message(message, log_file=session_file,
                 console=args.verbosity)
-    for i in range(0, len(model_ids)):
+    for i in range(0, number_of_evaluations):
         model = model_ids[i]
         if args.cross_validation_rate > 0.0:
             new_seed = "%s - %s" % (SEED, i + existing_evaluations)
@@ -512,11 +512,12 @@ def save_evaluation(evaluation, output, api=None):
     if api is None:
         api = bigml.api.BigML()
     evaluation_json = open(output + '.json', 'w', 0)
-    evaluation_json.write(json.dumps(evaluation['object']['result']))
+    evaluation = evaluation.get('object', evaluation).get('result', evaluation)
+    evaluation_json.write(json.dumps(evaluation))
     evaluation_json.flush()
     evaluation_json.close()
     evaluation_txt = open(output + '.txt', 'w', 0)
-    api.pprint(evaluation['object']['result'],
+    api.pprint(evaluation,
                evaluation_txt)
     evaluation_txt.flush()
     evaluation_txt.close()
