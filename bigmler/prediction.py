@@ -143,8 +143,8 @@ def local_batch_predict(models, test_reader, prediction_file, api,
             if (isinstance(model, basestring) or
                     bigml.api.get_status(model)['code'] != bigml.api.FINISHED):
                 try:
-                    model = api.check_resource(model, api.get_model,
-                                               'limit=-1')
+                    model = bigml.api.check_resource(model, api.get_model,
+                                                     'limit=-1')
                 except ValueError, exception:
                     sys.exit("Failed to get model: %s" % (model,
                                                           str(exception)))

@@ -298,7 +298,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         model_id = re.sub(r'.*(model_[a-f0-9]{24})__predictions\.csv$',
                           r'\1', votes_files[0]).replace("_", "/")
         try:
-            model = api.check_resource(model_id, api.get_model)
+            model = bigml.api.check_resource(model_id, api.get_model)
         except ValueError, exception:
             sys.exit("Failed to get model %s: %s" % (model_id, str(exception)))
 

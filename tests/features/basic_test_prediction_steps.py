@@ -4,7 +4,7 @@ import csv
 import json
 from lettuce import step, world
 from subprocess import check_call, CalledProcessError
-
+from bigml.api import check_resource
 
 @step(r'I create BigML resources uploading train "(.*)" file to test "(.*)" and log predictions in "(.*)"')
 def i_create_all_resources(step, data=None, test=None, output=None):
@@ -210,8 +210,8 @@ def i_check_create_source(step):
     source_file = "%s%ssource" % (world.directory, os.sep)
     try:
         source_file = open(source_file, "r")
-        source = world.api.check_resource(source_file.readline().strip(),
-                                          world.api.get_source)
+        source = check_resource(source_file.readline().strip(),
+                                world.api.get_source)
         world.sources.append(source['resource'])
         world.source = source
         source_file.close()
@@ -225,8 +225,8 @@ def i_check_create_dataset(step):
     dataset_file = "%s%sdataset" % (world.directory, os.sep)
     try:
         dataset_file = open(dataset_file, "r")
-        dataset = world.api.check_resource(dataset_file.readline().strip(),
-                                             world.api.get_dataset)
+        dataset = check_resource(dataset_file.readline().strip(),
+                                 world.api.get_dataset)
         world.datasets.append(dataset['resource'])
         world.dataset = dataset
         dataset_file.close()
@@ -240,8 +240,8 @@ def i_check_create_model(step):
     model_file = "%s%smodels" % (world.directory, os.sep)
     try:
         model_file = open(model_file, "r")
-        model = world.api.check_resource(model_file.readline().strip(),
-                                             world.api.get_model)
+        model = check_resource(model_file.readline().strip(),
+                               world.api.get_model)
         world.models.append(model['resource'])
         world.model = model
         model_file.close()
@@ -269,7 +269,7 @@ def i_check_create_models(step):
     world.model_ids = model_ids
     for model_id in model_ids:
         try:
-            model = world.api.check_resource(model_id, world.api.get_model)
+            model = check_resource(model_id, world.api.get_model)
             world.models.append(model_id)
             assert True
         except Exception, exc:
@@ -280,8 +280,8 @@ def i_check_create_evaluation(step):
     evaluation_file = "%s%sevaluation" % (world.directory, os.sep)
     try:
         evaluation_file = open(evaluation_file, "r")
-        evaluation = world.api.check_resource(evaluation_file.readline().strip(),
-                                              world.api.get_evaluation)
+        evaluation = check_resource(evaluation_file.readline().strip(),
+                                    world.api.get_evaluation)
         world.evaluations.append(evaluation['resource'])
         world.evaluation = evaluation
         evaluation_file.close()

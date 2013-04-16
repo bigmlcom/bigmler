@@ -538,11 +538,11 @@ def prediction_to_row(prediction):
     return row
 
 
-def get_url(resource, api):
+def get_url(resource):
     """Returns the resource's url in bigml.com
 
     """
-    resource_id = api.get_resource_id(resource)
+    resource_id = bigml.api.get_resource_id(resource)
     if not resource_id:
         return ""
     return RESOURCE_URL + resource_id
