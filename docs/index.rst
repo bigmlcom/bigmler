@@ -58,9 +58,10 @@ read it from the standard input::
 
     cat data/iris.csv | bigmler --train
 
-BigMLer will try to use the locale of the model to interpret test data. In case
-it fails, it will try `en_US.UTF-8`
-or `English_United States.1252` and a warning message will be printed.
+BigMLer will try to use the locale of the model both to create a new source
+(if ``--train`` flag is used) and to interpret test data. In case
+it fails, it will try ``en_US.UTF-8``
+or ``English_United States.1252`` and a warning message will be printed.
 If you want to change this behaviour you can specify your preferred locale::
 
     bigmler --train data/iris.csv --test data/test_iris.csv \
@@ -70,9 +71,12 @@ If you check your working directory you will see that BigMLer creates a file
 with the
 model ids that have been generated (e.g., FriNov0912_223645/models).
 This file is handy if then you want to use those model ids to generate local
-predictions. BigMLer also creates a file with the dataset id that have been
-generated (e.g., TueNov1312_003451/dataset). It also creates a file summarizing
-the steps taken in the session progress: ``bigmler_sessions``.
+predictions. BigMLer also creates a file with the dataset id that has been
+generated (e.g., TueNov1312_003451/dataset) and another one summarizing
+the steps taken in the session progress: ``bigmler_sessions``. You can also
+store a copy of every created or retrieved resource in your output directory
+(e.g., TueNov1312_003451/model_50c23e5e035d07305a00004f) by setting the flag
+``--store``.
 
 Remote Sources
 --------------
@@ -271,6 +275,26 @@ As for predictions, you can specify a particular file name to store the
 evaluation in::
 
     bigmler --train data/iris.csv --evaluate --output my_dir/evaluation
+
+Cross-validation
+----------------
+
+If you need cross-validation techniques to ponder which parameters (like
+the ones related to different kinds of pruning) can improve the quality of your
+models, you can use the ``--cross-validation-rate`` flag to settle the
+part of your training data that will be separated for cross validation. BigMLer
+will use a Monte-Carlo cross-validation variant, building ``2*n`` different
+models, each of which is constructed by a subset of the training data,
+holding out randomly a ``n%`` of the instances. The held-out data will then be
+used to evaluate the corresponding model. For instance, both::
+
+    bigmler --train data/iris.csv --cross-validation-rate 0.02
+    bigmler --dataset dataset/xxxx --cross-validation-rate 0.02
+
+will hold out a 2% of the training data to evaluate a model built upon the 98%
+left. The evaluations will be averaged and the result saved
+in json and human-readable format in ``cross-validation.json`` and
+``cross-validation.txt`` respectively. 
 
 Configuring Datasets and Models
 -------------------------------
@@ -590,6 +614,8 @@ value is ``smart``
 --evaluate                  Turns on evaluation mode
 --resume                    Retries command execution.
 --stack-level LEVEL         Level of the retried command in the stack
+--cross-validation-rate RATE    Fraction of the training data held out for
+Monte-Carlo cross-validation
 
 Content
 -------
@@ -697,6 +723,8 @@ command.
 --verbosity LEVEL           Turns on (1) or off (0) the verbosity.
 --clear-logs                Clears the ``.bigmler``, ``.bigmler_dir_stack``,
 ``.bigmler_dirs`` and user log file given in ``--resources-log`` (if any).
+--store                     Stores every created or retrieved resource in your
+output directory
 
 Prior Versions Compatibility Issues
 -----------------------------------
