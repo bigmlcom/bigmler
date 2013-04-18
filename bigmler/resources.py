@@ -31,10 +31,11 @@ import bigml.api
 
 from bigmler.utils import (dated, get_url, log_message, plural,
                            check_resource_error)
+from bigml.util import bigml_locale
 
 EVALUATE_SAMPLE_RATE = 0.8
 SEED = "BigML, Machine Learning made easy"
-
+LOCALE_DEFAULT = "en_US"
 
 def set_source_args(data_set_header, name, description, args):
     """Returns a source arguments dict
@@ -46,6 +47,15 @@ def set_source_args(data_set_header, name, description, args):
         "category": args.category,
         "tags": args.tag,
         "source_parser": {"header": data_set_header}}
+    # If user has given an OS locale, try to add the locale used in bigml.com
+    if args.user_locale is not None:
+        source_locale = bigml_locale(args.user_locale)
+        if source_locale is None:
+            log_message("WARNING: %s locale equivalence not found."
+                        " Using %s instead.\n" % (args.user_locale,
+                        LOCALE_DEFAULT), log_file=None, console=True)
+            source_locale = LOCALE_DEFAULT
+        source_args["source_parser"].update({'locale': source_locale})
     return source_args
 
 

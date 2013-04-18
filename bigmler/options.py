@@ -544,6 +544,14 @@ under the License.""" % version
                         help=("Part of training data to be held out for "
                               "cross-validation."))
 
+    # Stores the retrieved resources in the output directory
+    parser.add_argument('--store',
+                        action='store_true',
+                        dest='store',
+                        default=defaults.get('store', False),
+                        help=("Store the retrieved resources in the"
+                              " output directory."))
+
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #
@@ -647,13 +655,21 @@ under the License.""" % version
                         action='store_false',
                         dest='no_model',
                         default=defaults.get('no_model', False),
-                        help="Do not create a model.")
+                        help="Create a model.")
 
     # Don't clear global bigmler log files
     parser.add_argument('--no-clear-logs',
                         action='store_false',
                         dest='clear_logs',
                         default=defaults.get('clear_logs', False),
-                        help="Clear global bigmler log files.")
+                        help="Don't clear global bigmler log files.")
+
+    # Stores the retrieved resources in the output directory
+    parser.add_argument('--no-store',
+                        action='store_false',
+                        dest='store',
+                        default=defaults.get('store', False),
+                        help=("Don't store the retrieved resources in the"
+                              " output directory."))
 
     return parser

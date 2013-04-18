@@ -512,6 +512,9 @@ def main(args=sys.argv[1:]):
         'dev_mode': command_args.dev_mode,
         'debug': command_args.debug}
 
+    if command_args.store:
+        api_command_args.update({'storage': u.check_dir(session_file)})
+
     api = bigml.api.BigML(**api_command_args)
 
     if (command_args.evaluate
