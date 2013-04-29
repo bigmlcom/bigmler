@@ -552,6 +552,15 @@ under the License.""" % version
                         help=("Store the retrieved resources in the"
                               " output directory."))
 
+    # Set the part of training data to be held out for testing
+    parser.add_argument('--test-split',
+                        action='store',
+                        dest='test_split',
+                        type=float,
+                        default=defaults.get('test_split', 0.0),
+                        help=("Part of training data to be held out for "
+                              "testing."))
+
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #

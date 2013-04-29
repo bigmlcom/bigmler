@@ -360,13 +360,13 @@ def is_source_created(path):
         return False, None
 
 
-def is_dataset_created(path):
+def is_dataset_created(path, suffix=""):
     """Reads the dataset id from the dataset file in the path directory
 
     """
     dataset_id = None
     try:
-        with open("%s%sdataset" % (path, os.sep)) as dataset_file:
+        with open("%s%sdataset%s" % (path, os.sep, suffix)) as dataset_file:
             dataset_id = dataset_file.readline().strip()
             try:
                 dataset_id = bigml.api.get_dataset_id(dataset_id)

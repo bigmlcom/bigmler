@@ -72,6 +72,13 @@ def create_source(data_set, source_args,
     log_message(message, log_file=session_file, console=args.verbosity)
     source = api.create_source(data_set, source_args,
                                progress_bar=args.progress_bar)
+    if path is not None:
+        try:
+            with open(path + '/source', 'w', 0) as source_file:
+                source_file.write("%s\n" % source['resource'])
+                source_file.write("%s\n" % source['object']['name'])
+        except IOError:
+            raise IOError("Failed to write %s/source" % path)
     check_resource_error(source, "Failed to create source: ")
     try:
         source = bigml.api.check_resource(source, api.get_source)
@@ -81,13 +88,6 @@ def create_source(data_set, source_args,
     log_message(message, log_file=session_file, console=args.verbosity)
     log_message("%s\n" % source['resource'], log_file=log)
 
-    if path is not None:
-        try:
-            with open(path + '/source', 'w', 0) as source_file:
-                source_file.write("%s\n" % source['resource'])
-                source_file.write("%s\n" % source['object']['name'])
-        except IOError:
-            raise IOError("Failed to write %s/source" % path)
     return source
 
 
@@ -173,8 +173,24 @@ def set_dataset_args(name, description, args, fields, dataset_fields):
     return dataset_args
 
 
-def create_dataset(source, dataset_args, args, api, path=None,
-                   session_file=None, log=None):
+def set_dataset_split_args(name, description, args, sample_rate,
+                           out_of_bag=False):
+    """Return dataset arguments dict to split a dataset
+
+    """
+    return {
+        "name": name,
+        "description": description,
+        "category": args.category,
+        "tags": args.tag,
+        "seed": SEED,
+        "sample_rate": sample_rate,
+        "out_of_bag": out_of_bag
+    }
+
+
+def create_dataset(source_or_dataset, dataset_args, args, api, path=None,
+                   session_file=None, log=None, dataset_type=None):
     """Creates remote dataset
 
     """
@@ -182,7 +198,16 @@ def create_dataset(source, dataset_args, args, api, path=None,
         api = bigml.api.BigML()
     message = dated("Creating dataset.\n")
     log_message(message, log_file=session_file, console=args.verbosity)
-    dataset = api.create_dataset(source, dataset_args)
+    dataset = api.create_dataset(source_or_dataset, dataset_args)
+    if path is not None:
+        suffix = "_" + dataset_type if dataset_type else ""
+        dataset_file_name = "%s/dataset%s" % (path, suffix)
+        try:
+
+            with open(dataset_file_name, 'w', 0) as dataset_file:
+                dataset_file.write("%s\n" % dataset['resource'])
+        except IOError:
+            raise IOError("Failed to write %s" % dataset_file_name)
     check_resource_error(dataset, "Failed to create dataset: ")
     try:
         dataset = bigml.api.check_resource(dataset, api.get_dataset)
@@ -191,12 +216,6 @@ def create_dataset(source, dataset_args, args, api, path=None,
     message = dated("Dataset created: %s\n" % get_url(dataset))
     log_message(message, log_file=session_file, console=args.verbosity)
     log_message("%s\n" % dataset['resource'], log_file=log)
-    if path is not None:
-        try:
-            with open(path + '/dataset', 'w', 0) as dataset_file:
-                dataset_file.write("%s\n" % dataset['resource'])
-        except IOError:
-            raise IOError("Failed to write %s/dataset" % path)
     return dataset
 
 
@@ -316,8 +335,6 @@ def create_models(dataset, model_ids, model_args,
                 new_seed = "%s - %s" % (SEED, i + existing_models)
                 model_args.update(seed=new_seed)
             model = api.create_model(dataset, model_args)
-            check_resource_error(model, "Failed to create model %s:" %
-                                 model['resource'])
             log_message("%s\n" % model['resource'], log_file=log)
             last_model = model
             last_index = i - 1
@@ -330,6 +347,8 @@ def create_models(dataset, model_ids, model_args,
                         model_file.write(models_info)
                 except IOError:
                     raise IOError("Fails to write %s/models" % path)
+            check_resource_error(model, "Failed to create model %s:" %
+                                 model['resource'])
         if args.number_of_models < 2 and args.verbosity:
             if bigml.api.get_status(model)['code'] != bigml.api.FINISHED:
                 try:
@@ -456,14 +475,14 @@ def create_evaluation(model, dataset, evaluation_args, args, api,
     log_message(message, log_file=session_file,
                 console=args.verbosity)
     evaluation = api.create_evaluation(model, dataset, evaluation_args)
-    check_resource_error(evaluation, "Failed to create evaluation: ")
-    log_message("%s\n" % evaluation['resource'], log_file=log)
     if path is not None:
         try:
             with open(path + '/evaluation', 'w', 0) as evaluation_file:
                 evaluation_file.write("%s\n" % evaluation['resource'])
         except IOError:
             raise IOError("Failed to write %s/evaluation" % path)
+    check_resource_error(evaluation, "Failed to create evaluation: ")
+    log_message("%s\n" % evaluation['resource'], log_file=log)
 
     return evaluation
 
@@ -487,15 +506,16 @@ def create_evaluations(model_ids, dataset, evaluation_args, args, api,
             new_seed = "%s - %s" % (SEED, i + existing_evaluations)
             evaluation_args.update(seed=new_seed)
         evaluation = api.create_evaluation(model, dataset, evaluation_args)
-        check_resource_error(evaluation, "Failed to create evaluation: ")
-        evaluations.append(evaluation)
-        log_message("%s\n" % evaluation['resource'], log_file=log)
         if path is not None:
             try:
                 with open(path + '/evaluations', 'a', 0) as evaluation_file:
                     evaluation_file.write("%s\n" % evaluation['resource'])
             except IOError:
                 raise IOError("Failed to write %s/evaluations" % path)
+        check_resource_error(evaluation, "Failed to create evaluation: ")
+        evaluations.append(evaluation)
+        log_message("%s\n" % evaluation['resource'], log_file=log)
+
     return evaluations
 
 

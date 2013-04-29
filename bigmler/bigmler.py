@@ -197,6 +197,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     elif args.dataset:
         dataset = bigml.api.get_dataset_id(args.dataset)
 
+
     # If we already have a dataset, we check the status and get the fields if
     # we hadn't them yet.
     if dataset:
@@ -207,6 +208,57 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         fields = Fields(dataset['object']['fields'], **csv_properties)
         if args.public_dataset:
             r.publish_dataset(dataset, api, args, session_file)
+
+    # If test_split is used, split the dataset in a training and a test dataset
+    # according to the given split
+
+    if args.test_split > 0:
+        train_dataset = None
+        test_dataset = None
+        sample_rate = 1 - args.test_split
+        # if resuming, try to extract train dataset form log files
+        if resume:
+            resume, train_dataset = u.checkpoint(u.is_dataset_created, path,
+                                                 "_train",
+                                                 debug=args.debug)
+            if not resume:
+                message = u.dated("Dataset not found. Resuming.\n")
+                u.log_message(message, log_file=session_file,
+                              console=args.verbosity)
+
+        if train_dataset is None: 
+            dataset_split_args = r.set_dataset_split_args(
+                "%s - train (%s %%)" % (name,
+                int(sample_rate * 100)), description, args,
+                sample_rate, out_of_bag=False)
+            train_dataset = r.create_dataset(
+                dataset, dataset_split_args, args, api, path, session_file, log,
+                "train")
+            if train_dataset:
+                train_dataset = r.get_dataset(train_dataset, api, args.verbosity,
+                                              session_file)
+
+        # if resuming, try to extract test dataset form log files
+        if resume:
+            resume, test_dataset = u.checkpoint(u.is_dataset_created, path,
+                                                "_test",
+                                                debug=args.debug)
+            if not resume:
+                message = u.dated("Dataset not found. Resuming.\n")
+                u.log_message(message, log_file=session_file,
+                              console=args.verbosity)
+        if test_dataset is None:
+            dataset_split_args = r.set_dataset_split_args(
+                "%s - test (%s %%)" % (name,
+                int(args.test_split * 100)), description, args,
+                sample_rate, out_of_bag=True)
+            test_dataset = r.create_dataset(
+                dataset, dataset_split_args, args, api, path, session_file, log,
+                "test")
+            if test_dataset:
+                test_dataset = r.get_dataset(test_dataset, api, args.verbosity,
+                                              session_file)
+        dataset = train_dataset
 
     #end of dataset processing
 
@@ -320,6 +372,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 u.log_message(message, log_file=session_file,
                               console=args.verbosity)
         if not resume:
+            if args.test_split > 0:
+                dataset = test_dataset
             evaluation_args = r.set_evaluation_args(name, description, args,
                                                     fields, fields_map)
             evaluation = r.create_evaluation(model, dataset, evaluation_args,
