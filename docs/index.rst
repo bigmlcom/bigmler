@@ -251,7 +251,7 @@ simplest way to build a model and evaluate it all at once is::
 
 which will build the source, dataset and model objects for you using 80% of
 the data in your training file chosen at random. After that, the remaining 20%
-of the data will be run through the mode to obtain
+of the data will be run through the model to obtain
 the corresponding evaluation. You can use the same procedure with a previously
 existing source or dataset::
 
@@ -368,6 +368,23 @@ header row or not. For example, if both come without header::
 
     bigmler --train data/iris_nh.csv --test data/test_iris_nh.csv \
     --no-train-header --no-test-header
+
+
+Splitting Datasets
+------------------
+
+When following the usual proceedings to evaluate your models you'll need to
+part the available data in two sets: the training set and the test set. With
+BigMLer you won't need to create two separate physical files. Instead, you
+can set a ``--test-split`` flag that will set the percentage of data used to
+build the test set and leave the rest for training. For instance::
+
+    bigmler --train data/iris.csv --test-split 0.2 --name iris --evaluate
+
+will build a source with your entire file contents, create the corresponding
+dataset and split it in two: a test dataset with a 20% of instances and a
+training dataset with the 80% left. Then, a model will be created based on the
+training set data and evaluated using the test set.
 
 Fitering Sources
 ----------------

@@ -274,11 +274,16 @@ def set_model_args(name, description,
     if objective_field is not None and fields is not None:
         model_args.update({"objective_field":
                            fields.field_id(objective_field)})
-    # If evaluate flag is on, we choose a deterministic sampling with
+    # If evaluate flag is on and no test_split flag is provided, 
+    # we choose a deterministic sampling with
     # args.sample_rate (80% by default) of the data to create the model
     # If cross_validation_rate = n/100, then we choose to run 2 * n evaluations
     # by holding out a n% of randomly sampled data.
+<<<<<<< HEAD
     if args.evaluate or args.cross_validation_rate > 0:
+=======
+    if (args.evaluate and args.test_split == 0) or args.cross_validation_rate > 0:
+>>>>>>> Test_split bug fixing, docs and new test
         model_args.update(seed=SEED)
         if args.cross_validation_rate > 0:
             args.sample_rate = 1 - args.cross_validation_rate
@@ -452,13 +457,17 @@ def set_evaluation_args(name, description, args, fields=None, fields_map=None):
         evaluation_args.update({"fields_map": map_fields(fields_map, fields)})
     # Two cases to use out_of_bag and sample_rate: standard evaluations where
     # only the training set is provided, and cross_validation
-    if ((not ((args.dataset or args.test_set)
-              and (args.model or args.models or args.model_tag))) or
-        ((args.training_set or args.dataset) and
-         args.cross_validation_rate > 0)):
-        evaluation_args.update(out_of_bag=True, seed=SEED,
-                               sample_rate=args.sample_rate)
 
+    # [--dataset|--test] [--model|--models|--model-tag] --evaluate
+    if ((args.dataset or args.test_set)
+            and (args.model or args.models or args.model_tag)):
+        return evaluation_args
+    # [--train|--dataset] --test-split --evaluate
+    if (args.test_split > 0 and (args.training_set or args.dataset)):
+        return evaluation_args
+
+    evaluation_args.update(out_of_bag=True, seed=SEED,
+                           sample_rate=args.sample_rate)
     return evaluation_args
 
 
