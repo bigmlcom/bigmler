@@ -561,6 +561,15 @@ under the License.""" % version
                         help=("Part of training data to be held out for "
                               "testing."))
 
+    # If a BigML ensemble is provided, the script will use it to generate
+    # predictions.
+    parser.add_argument('--ensemble',
+                        action='store',
+                        dest='ensemble',
+                        default=defaults.get('ensemble', None),
+                        help="BigML ensemble Id")
+
+
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #

@@ -266,7 +266,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
     # If we have a dataset but not a model, we create the model if the no_model
     # flag hasn't been set up.
-    if (dataset and not args.model and not model_ids and not args.no_model):
+    if (dataset and not args.model and not model_ids and not args.no_model
+        and not args.ensemble):
         # Cross-validation case: we create 2 * n models to be validated
         # holding out an n% of data
         if args.cross_validation_rate > 0:
@@ -298,6 +299,13 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         model = args.model
         model_ids = [model]
         models = [model]
+
+    elif args.ensemble:
+        ensemble = r.get_ensemble(args.ensemble, api, args.verbosity,
+                                  session_file)
+        model_ids = ensemble['object']['models']
+        models = model_ids[:]
+        model = models[0]
 
     elif args.models or args.model_tag:
         models = model_ids[:]
@@ -376,7 +384,12 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 dataset = test_dataset
             evaluation_args = r.set_evaluation_args(name, description, args,
                                                     fields, fields_map)
-            evaluation = r.create_evaluation(model, dataset, evaluation_args,
+            if args.ensemble:
+                model_or_ensemble = args.ensemble
+            else:
+                model_or_ensemble = model
+            evaluation = r.create_evaluation(model_or_ensemble, dataset,
+                                             evaluation_args,
                                              args, api, path, session_file,
                                              log)
 
@@ -575,12 +588,15 @@ def main(args=sys.argv[1:]):
         and not (command_args.training_set or command_args.source
                  or command_args.dataset)
         and not (command_args.test_set and (command_args.model or
-                 command_args.models or command_args.model_tag))):
+                 command_args.models or command_args.model_tag or
+                 command_args.ensemble))):
         parser.error("Evaluation wrong syntax.\n"
                      "\nTry for instance:\n\nbigmler --train data/iris.csv"
                      " --evaluate\nbigmler --model "
                      "model/5081d067035d076151000011 --dataset "
-                     "dataset/5081d067035d076151003423 --evaluate")
+                     "dataset/5081d067035d076151003423 --evaluate\n"
+                     "bigmler --ensemble ensemble/5081d067035d076151003443"
+                     " --evaluate")
 
     if command_args.objective_field:
         objective = command_args.objective_field

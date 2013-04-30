@@ -406,6 +406,23 @@ def get_models(model_ids, args, api, session_file=None):
     return models, model_ids
 
 
+def get_ensemble(ensemble, api, verbosity=True, session_file=None):
+    """Retrieves remote ensemble in its actual status
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+    if (isinstance(ensemble, basestring) or
+            bigml.api.get_status(ensemble)['code'] != bigml.api.FINISHED):
+        message = dated("Retrieving ensemble. %s\n" %
+                        get_url(ensemble))
+        log_message(message, log_file=session_file,
+                    console=verbosity)
+        ensemble = bigml.api.check_resource(ensemble, api.get_ensemble)
+        check_resource_error(ensemble, "Failed to get ensemble: ")
+    return ensemble
+
+
 def publish_model(model, args, api=None, session_file=None):
     """Update model with publish info
 
@@ -460,7 +477,8 @@ def set_evaluation_args(name, description, args, fields=None, fields_map=None):
 
     # [--dataset|--test] [--model|--models|--model-tag] --evaluate
     if ((args.dataset or args.test_set)
-            and (args.model or args.models or args.model_tag)):
+            and (args.model or args.models or args.model_tag or
+                 args.ensemble)):
         return evaluation_args
     # [--train|--dataset] --test-split --evaluate
     if (args.test_split > 0 and (args.training_set or args.dataset)):
@@ -471,7 +489,7 @@ def set_evaluation_args(name, description, args, fields=None, fields_map=None):
     return evaluation_args
 
 
-def create_evaluation(model, dataset, evaluation_args, args, api,
+def create_evaluation(model_or_ensemble, dataset, evaluation_args, args, api,
                       path=None, session_file=None, log=None, seed=SEED):
     """Create evaluation
 
@@ -483,7 +501,8 @@ def create_evaluation(model, dataset, evaluation_args, args, api,
     message = dated("Creating evaluation.\n")
     log_message(message, log_file=session_file,
                 console=args.verbosity)
-    evaluation = api.create_evaluation(model, dataset, evaluation_args)
+    evaluation = api.create_evaluation(model_or_ensemble, dataset,
+                                       evaluation_args)
     if path is not None:
         try:
             with open(path + '/evaluation', 'w', 0) as evaluation_file:
