@@ -20,6 +20,7 @@
 from __future__ import absolute_import
 
 import sys
+import time
 
 try:
     import simplejson as json
@@ -30,9 +31,11 @@ import bigml.api
 
 from bigmler.utils import (dated, get_url, log_message, plural,
                            check_resource_error)
+from bigml.util import bigml_locale
 
 EVALUATE_SAMPLE_RATE = 0.8
 SEED = "BigML, Machine Learning made easy"
+LOCALE_DEFAULT = "en_US"
 
 
 def set_source_args(data_set_header, name, description, args):
@@ -45,6 +48,15 @@ def set_source_args(data_set_header, name, description, args):
         "category": args.category,
         "tags": args.tag,
         "source_parser": {"header": data_set_header}}
+    # If user has given an OS locale, try to add the locale used in bigml.com
+    if args.user_locale is not None:
+        source_locale = bigml_locale(args.user_locale)
+        if source_locale is None:
+            log_message("WARNING: %s locale equivalence not found."
+                        " Using %s instead.\n" % (args.user_locale,
+                        LOCALE_DEFAULT), log_file=None, console=True)
+            source_locale = LOCALE_DEFAULT
+        source_args["source_parser"].update({'locale': source_locale})
     return source_args
 
 
@@ -62,10 +74,10 @@ def create_source(data_set, source_args,
                                progress_bar=args.progress_bar)
     check_resource_error(source, "Failed to create source: ")
     try:
-        source = api.check_resource(source, api.get_source)
+        source = bigml.api.check_resource(source, api.get_source)
     except ValueError, exception:
         sys.exit("Failed to get a finished source: %s" % str(exception))
-    message = dated("Source created: %s\n" % get_url(source, api))
+    message = dated("Source created: %s\n" % get_url(source))
     log_message(message, log_file=session_file, console=args.verbosity)
     log_message("%s\n" % source['resource'], log_file=log)
 
@@ -107,11 +119,11 @@ def get_source(source, api=None, verbosity=True,
     if (isinstance(source, basestring) or
             bigml.api.get_status(source)['code'] != bigml.api.FINISHED):
         message = dated("Retrieving source. %s\n" %
-                        get_url(source, api))
+                        get_url(source))
         log_message(message, log_file=session_file,
                     console=verbosity)
         try:
-            source = api.check_resource(source, api.get_source)
+            source = bigml.api.check_resource(source, api.get_source)
         except ValueError, exception:
             sys.exit("Failed to get a finished source: %s" % str(exception))
     return source
@@ -129,7 +141,7 @@ def update_source_fields(source, updated_values, fields, api=None,
         update_fields.update({
             fields.field_id(column): value})
     message = dated("Updating source. %s\n" %
-                    get_url(source, api))
+                    get_url(source))
     log_message(message, log_file=session_file,
                 console=verbosity)
     source = api.update_source(source, {"fields": update_fields})
@@ -173,10 +185,10 @@ def create_dataset(source, dataset_args, args, api, path=None,
     dataset = api.create_dataset(source, dataset_args)
     check_resource_error(dataset, "Failed to create dataset: ")
     try:
-        dataset = api.check_resource(dataset, api.get_dataset)
+        dataset = bigml.api.check_resource(dataset, api.get_dataset)
     except ValueError, exception:
         sys.exit("Failed to get a finished dataset: %s" % str(exception))
-    message = dated("Dataset created: %s\n" % get_url(dataset, api))
+    message = dated("Dataset created: %s\n" % get_url(dataset))
     log_message(message, log_file=session_file, console=args.verbosity)
     log_message("%s\n" % dataset['resource'], log_file=log)
     if path is not None:
@@ -197,10 +209,10 @@ def get_dataset(dataset, api, verbosity=True, session_file=None):
     if (isinstance(dataset, basestring) or
             bigml.api.get_status(dataset)['code'] != bigml.api.FINISHED):
         message = dated("Retrieving dataset. %s\n" %
-                        get_url(dataset, api))
+                        get_url(dataset))
         log_message(message, log_file=session_file,
                     console=verbosity)
-        dataset = api.check_resource(dataset, api.get_dataset)
+        dataset = bigml.api.check_resource(dataset, api.get_dataset)
         check_resource_error(dataset, "Failed to get dataset: ")
     return dataset
 
@@ -215,12 +227,12 @@ def publish_dataset(dataset, args, api,
     public_dataset = {"private": False}
     if args.dataset_price:
         message = dated("Updating dataset. %s\n" %
-                        get_url(dataset, api))
+                        get_url(dataset))
         log_message(message, log_file=session_file,
                     console=args.verbosity)
         public_dataset.update(price=args.dataset_price)
     message = dated("Updating dataset. %s\n" %
-                    get_url(dataset, api))
+                    get_url(dataset))
     log_message(message, log_file=session_file,
                 console=args.verbosity)
     dataset = api.update_dataset(dataset, public_dataset)
@@ -245,11 +257,15 @@ def set_model_args(name, description,
                            fields.field_id(objective_field)})
     # If evaluate flag is on, we choose a deterministic sampling with
     # args.sample_rate (80% by default) of the data to create the model
-    if args.evaluate:
-        if args.sample_rate == 1:
+    # If cross_validation_rate = n/100, then we choose to run 2 * n evaluations
+    # by holding out a n% of randomly sampled data.
+    if args.evaluate or args.cross_validation_rate > 0:
+        model_args.update(seed=SEED)
+        if args.cross_validation_rate > 0:
+            args.sample_rate = 1 - args.cross_validation_rate
+            args.replacement = False
+        elif args.sample_rate == 1:
             args.sample_rate = EVALUATE_SAMPLE_RATE
-        seed = SEED
-        model_args.update(seed=seed)
 
     input_fields = []
     if model_fields and fields is not None:
@@ -276,6 +292,7 @@ def create_models(dataset, model_ids, model_args,
         api = bigml.api.BigML()
 
     models = model_ids[:]
+    existing_models = len(models)
     models_info = ""
     for model_id in model_ids:
         models_info += "%s\n" % model_id
@@ -290,12 +307,14 @@ def create_models(dataset, model_ids, model_args,
             if i % args.max_parallel_models == 1 and i > 1:
                 qstr = 'limit=-1'
                 try:
-                    models[last_index] = api.check_resource(last_model,
-                                                            api.get_model,
-                                                            query_string=qstr)
+                    models[last_index] = bigml.api.check_resource(
+                        last_model, api.get_model, query_string=qstr)
                 except ValueError, exception:
                     sys.exit("Failed to get a finished model: %s" %
                              str(exception))
+            if args.cross_validation_rate > 0:
+                new_seed = "%s - %s" % (SEED, i + existing_models)
+                model_args.update(seed=new_seed)
             model = api.create_model(dataset, model_args)
             check_resource_error(model, "Failed to create model %s:" %
                                  model['resource'])
@@ -304,26 +323,27 @@ def create_models(dataset, model_ids, model_args,
             last_index = i - 1
             model_ids.append(model['resource'])
             models.append(model)
-            models_info += "%s\n" % model['resource']
+            models_info = "%s\n" % model['resource']
+            if path is not None:
+                try:
+                    with open(path + '/models', 'a', 0) as model_file:
+                        model_file.write(models_info)
+                except IOError:
+                    raise IOError("Fails to write %s/models" % path)
         if args.number_of_models < 2 and args.verbosity:
             if bigml.api.get_status(model)['code'] != bigml.api.FINISHED:
                 try:
-                    model = api.check_resource(model, api.get_model,
-                                               query_string='limit=-1')
+                    model = bigml.api.check_resource(model, api.get_model,
+                                                     query_string='limit=-1')
                 except ValueError, exception:
                     sys.exit("Failed to get a finished model: %s" %
                              str(exception))
                 models[0] = model
             message = dated("Model created: %s.\n" %
-                            get_url(model, api))
+                            get_url(model))
             log_message(message, log_file=session_file,
                         console=args.verbosity)
-    if path is not None:
-        try:
-            with open(path + '/models', 'w', 0) as model_file:
-                model_file.write(models_info)
-        except IOError:
-            raise IOError("Fails to write %s/models" % path)
+
     return models, model_ids
 
 
@@ -339,14 +359,14 @@ def get_models(model_ids, args, api, session_file=None):
         model_id = model_ids[0]
     message = dated("Retrieving %s. %s\n" %
                     (plural("model", len(model_ids)),
-                     get_url(model_id, api)))
+                     get_url(model_id)))
     log_message(message, log_file=session_file, console=args.verbosity)
     if len(model_ids) < args.max_batch_models:
         models = []
         for model in model_ids:
             try:
-                model = api.check_resource(model, api.get_model,
-                                           query_string='limit=-1')
+                model = bigml.api.check_resource(model, api.get_model,
+                                                 query_string='limit=-1')
             except ValueError, exception:
                 sys.exit("Failed to get a finished model: %s" %
                          str(exception))
@@ -354,8 +374,8 @@ def get_models(model_ids, args, api, session_file=None):
         model = models[0]
     else:
         try:
-            model = api.check_resource(model_ids[0], api.get_model,
-                                       query_string='limit=-1')
+            model = bigml.api.check_resource(model_ids[0], api.get_model,
+                                             query_string='limit=-1')
         except ValueError, exception:
             sys.exit("Failed to get a finished model: %s" % str(exception))
         models[0] = model
@@ -379,7 +399,7 @@ def publish_model(model, args, api=None, session_file=None):
             public_model.update(credits_per_prediction=args.cpp)
     if public_model:
         message = dated("Updating model. %s\n" %
-                        get_url(model, api))
+                        get_url(model))
         log_message(message, log_file=session_file,
                     console=args.verbosity)
         model = api.update_model(model, public_model)
@@ -411,21 +431,27 @@ def set_evaluation_args(name, description, args, fields=None, fields_map=None):
     }
     if fields_map is not None and fields is not None:
         evaluation_args.update({"fields_map": map_fields(fields_map, fields)})
-    if not ((args.dataset or args.test_set)
-            and (args.model or args.models or args.model_tag)):
+    # Two cases to use out_of_bag and sample_rate: standard evaluations where
+    # only the training set is provided, and cross_validation
+    if ((not ((args.dataset or args.test_set)
+              and (args.model or args.models or args.model_tag))) or
+        ((args.training_set or args.dataset) and
+         args.cross_validation_rate > 0)):
         evaluation_args.update(out_of_bag=True, seed=SEED,
                                sample_rate=args.sample_rate)
+
     return evaluation_args
 
 
 def create_evaluation(model, dataset, evaluation_args, args, api,
-                      path=None, session_file=None, log=None):
+                      path=None, session_file=None, log=None, seed=SEED):
     """Create evaluation
 
     """
     if api is None:
         api = bigml.api.BigML()
-
+    if args.cross_validation_rate > 0:
+        evaluation_args.update(seed=seed)
     message = dated("Creating evaluation.\n")
     log_message(message, log_file=session_file,
                 console=args.verbosity)
@@ -442,6 +468,37 @@ def create_evaluation(model, dataset, evaluation_args, args, api,
     return evaluation
 
 
+def create_evaluations(model_ids, dataset, evaluation_args, args, api,
+                       path=None, session_file=None, log=None,
+                       existing_evaluations=0):
+    """Create evaluations for a list of models
+
+    """
+    evaluations = []
+    if api is None:
+        api = bigml.api.BigML()
+    number_of_evaluations = len(model_ids)
+    message = dated("Creating evaluations.\n")
+    log_message(message, log_file=session_file,
+                console=args.verbosity)
+    for i in range(0, number_of_evaluations):
+        model = model_ids[i]
+        if args.cross_validation_rate > 0:
+            new_seed = "%s - %s" % (SEED, i + existing_evaluations)
+            evaluation_args.update(seed=new_seed)
+        evaluation = api.create_evaluation(model, dataset, evaluation_args)
+        check_resource_error(evaluation, "Failed to create evaluation: ")
+        evaluations.append(evaluation)
+        log_message("%s\n" % evaluation['resource'], log_file=log)
+        if path is not None:
+            try:
+                with open(path + '/evaluations', 'a', 0) as evaluation_file:
+                    evaluation_file.write("%s\n" % evaluation['resource'])
+            except IOError:
+                raise IOError("Failed to write %s/evaluations" % path)
+    return evaluations
+
+
 def get_evaluation(evaluation, api=None, verbosity=True, session_file=None):
     """Retrieves evaluation in its actual state
 
@@ -449,10 +506,10 @@ def get_evaluation(evaluation, api=None, verbosity=True, session_file=None):
     if api is None:
         api = bigml.api.BigML()
     message = dated("Retrieving evaluation. %s\n" %
-                    get_url(evaluation, api))
+                    get_url(evaluation))
     log_message(message, log_file=session_file, console=verbosity)
     try:
-        evaluation = api.check_resource(evaluation, api.get_evaluation)
+        evaluation = bigml.api.check_resource(evaluation, api.get_evaluation)
     except ValueError, exception:
         sys.exit("Failed to get a finished evaluation: %s" % str(exception))
     return evaluation
@@ -465,11 +522,12 @@ def save_evaluation(evaluation, output, api=None):
     if api is None:
         api = bigml.api.BigML()
     evaluation_json = open(output + '.json', 'w', 0)
-    evaluation_json.write(json.dumps(evaluation['object']['result']))
+    evaluation = evaluation.get('object', evaluation).get('result', evaluation)
+    evaluation_json.write(json.dumps(evaluation))
     evaluation_json.flush()
     evaluation_json.close()
     evaluation_txt = open(output + '.txt', 'w', 0)
-    api.pprint(evaluation['object']['result'],
+    api.pprint(evaluation,
                evaluation_txt)
     evaluation_txt.flush()
     evaluation_txt.close()

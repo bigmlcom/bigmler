@@ -75,6 +75,7 @@ LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 MISSING_TOKENS = ['', 'N/A', 'n/a', 'NULL', 'null', '-', '#DIV/0', '#REF!',
                   '#NAME?', 'NIL', 'nil', 'NA', 'na', '#VALUE!', '#NULL!',
                   'NaN', '#N/A', '#NUM!', '?']
+MONTECARLO_FACTOR = 200
 
 
 def compute_output(api, args, training_set, test_set=None, output=None,
@@ -181,7 +182,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 message = u.dated("Dataset not found. Resuming.\n")
                 u.log_message(message, log_file=session_file,
                               console=args.verbosity)
-    # If we have a source but not dataset or model has been provided, we
+    # If we have a source but no dataset or model has been provided, we
     # create a new dataset if the no_dataset option isn't set up. Also
     # if evaluate is set and test_set has been provided.
     if ((source and not args.dataset and not args.model and not model_ids and
@@ -214,6 +215,11 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # If we have a dataset but not a model, we create the model if the no_model
     # flag hasn't been set up.
     if (dataset and not args.model and not model_ids and not args.no_model):
+        # Cross-validation case: we create 2 * n models to be validated
+        # holding out an n% of data
+        if args.cross_validation_rate > 0:
+            args.number_of_models = int(MONTECARLO_FACTOR *
+                                        args.cross_validation_rate)
         model_ids = []
         models = []
         if resume:
@@ -292,7 +298,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         model_id = re.sub(r'.*(model_[a-f0-9]{24})__predictions\.csv$',
                           r'\1', votes_files[0]).replace("_", "/")
         try:
-            model = api.check_resource(model_id, api.get_model)
+            model = bigml.api.check_resource(model_id, api.get_model)
         except ValueError, exception:
             sys.exit("Failed to get model %s: %s" % (model_id, str(exception)))
 
@@ -323,6 +329,49 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         evaluation = r.get_evaluation(evaluation, api, args.verbosity,
                                       session_file)
         r.save_evaluation(evaluation, output, api)
+
+    # If cross_validation_rate is > 0, create remote evaluations and save
+    # results in json and human-readable format. Then average the results to
+    # issue a cross_validation measure set.
+    if args.cross_validation_rate > 0:
+        args.sample_rate = 1 - args.cross_validation_rate
+        number_of_evaluations = int(MONTECARLO_FACTOR *
+                                    args.cross_validation_rate)
+        existing_evaluations = 0
+        evaluations = []
+        if resume:
+            resume, evaluations = u.checkpoint(u.are_evaluations_created, path,
+                                               number_of_evaluations,
+                                               debug=args.debug)
+            if not resume:
+                existing_evaluations = len(evaluations)
+                message = u.dated("Found %s evaluations from %s. Resuming.\n" %
+                                  (existing_evaluations,
+                                   number_of_evaluations))
+                number_of_evaluations -= existing_evaluations
+                u.log_message(message, log_file=session_file,
+                              console=args.verbosity)
+        if not resume:
+            evaluation_args = r.set_evaluation_args(name, description, args,
+                                                    fields, fields_map)
+
+            evaluations.extend(r.create_evaluations(models, dataset,
+                                                    evaluation_args,
+                                                    args, api, path,
+                                                    session_file, log,
+                                                    existing_evaluations))
+            evaluations_files = []
+            for evaluation in evaluations:
+                evaluation = r.get_evaluation(evaluation, api, args.verbosity,
+                                              session_file)
+                model_id = evaluation['object']['model']
+                file_name = "%s%s%s__evaluation" % (path, os.sep,
+                                                    model_id.replace("/", "_"))
+                evaluations_files.append(file_name + ".json")
+                r.save_evaluation(evaluation, file_name, api)
+            cross_validation = u.average_evaluations(evaluations_files)
+            file_name = "%s%scross_validation" % (path, os.sep)
+            r.save_evaluation(cross_validation, file_name, api)
 
     # Workaround to restore windows console cp850 encoding to print the tree
     if sys.platform == "win32" and sys.stdout.isatty():
@@ -374,6 +423,16 @@ def main(args=sys.argv[1:]):
 
     # Parses command line arguments.
     command_args = parser.parse_args(args)
+
+    if command_args.cross_validation_rate > 0 and (
+            command_args.test_set or command_args.evaluate or
+            command_args.model or command_args.models or
+            command_args.model_tag):
+        parser.error("Non compatible flags: --cross-validation-rate"
+                     " cannot be used with --evaluate, --model,"
+                     " --models or --model-tag. Usage:\n\n"
+                     "bigmler --train data/iris.csv "
+                     "--cross-validation-rate 0.1")
 
     default_output = ('evaluation' if command_args.evaluate
                       else 'predictions.csv')
@@ -452,6 +511,9 @@ def main(args=sys.argv[1:]):
         'api_key': command_args.api_key,
         'dev_mode': command_args.dev_mode,
         'debug': command_args.debug}
+
+    if command_args.store:
+        api_command_args.update({'storage': u.check_dir(session_file)})
 
     api = bigml.api.BigML(**api_command_args)
 

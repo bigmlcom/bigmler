@@ -4,7 +4,8 @@ import csv
 import json
 from lettuce import step, world
 from subprocess import check_call, CalledProcessError
-
+from bigml.api import check_resource
+from bigmler.bigmler import MONTECARLO_FACTOR
 
 @step(r'I create BigML resources uploading train "(.*)" file to test "(.*)" and log predictions in "(.*)"')
 def i_create_all_resources(step, data=None, test=None, output=None):
@@ -165,6 +166,25 @@ def i_create_resources_from_dataset_file(step, dataset_file=None, test=None, out
         assert False, str(exc)
 
 
+@step(r'I create a BigML cross-validation with rate (0\.\d+) using a dataset and log results in "(.*)"')
+def i_create_cross_validation_from_dataset(step, rate=None, output=None):
+    if rate is None or output is None:
+        assert False
+    world.directory = os.path.dirname(output)
+    world.folders.append(world.directory)
+    world.number_of_models = int(MONTECARLO_FACTOR * float(rate))
+    world.number_of_evaluations = world.number_of_models
+    try:
+        retcode = check_call("bigmler --dataset " + world.dataset['resource'] + " --cross-validation-rate " + rate + " --output " + output, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.output = output
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+
 @step(r'I combine BigML predictions files in "(.*)" and "(.*)" into "(.*)"')
 def i_find_predictions_files(step, directory1=None, directory2=None, output=None):
     if directory1 is None or directory2 is None or output is None:
@@ -210,8 +230,8 @@ def i_check_create_source(step):
     source_file = "%s%ssource" % (world.directory, os.sep)
     try:
         source_file = open(source_file, "r")
-        source = world.api.check_resource(source_file.readline().strip(),
-                                          world.api.get_source)
+        source = check_resource(source_file.readline().strip(),
+                                world.api.get_source)
         world.sources.append(source['resource'])
         world.source = source
         source_file.close()
@@ -225,8 +245,8 @@ def i_check_create_dataset(step):
     dataset_file = "%s%sdataset" % (world.directory, os.sep)
     try:
         dataset_file = open(dataset_file, "r")
-        dataset = world.api.check_resource(dataset_file.readline().strip(),
-                                             world.api.get_dataset)
+        dataset = check_resource(dataset_file.readline().strip(),
+                                 world.api.get_dataset)
         world.datasets.append(dataset['resource'])
         world.dataset = dataset
         dataset_file.close()
@@ -240,8 +260,8 @@ def i_check_create_model(step):
     model_file = "%s%smodels" % (world.directory, os.sep)
     try:
         model_file = open(model_file, "r")
-        model = world.api.check_resource(model_file.readline().strip(),
-                                             world.api.get_model)
+        model = check_resource(model_file.readline().strip(),
+                               world.api.get_model)
         world.models.append(model['resource'])
         world.model = model
         model_file.close()
@@ -256,20 +276,20 @@ def i_check_create_models(step):
     number_of_lines = 0
     count = 0
     while world.number_of_models != number_of_lines and count < 10:
+        number_of_lines = 0
         for line in open(model_file, "r"):
             number_of_lines += 1
             model_id = line.strip()
             model_ids.append(model_id)
         if world.number_of_models != number_of_lines:
-            number_of_lines = 0
             time.sleep(10)
             count += 1
     if world.number_of_models != number_of_lines:
-        assert False, "number of models %s and number of lines in models file %s" % (number_of_models, number_of_lines)
+        assert False, "number of models %s and number of lines in models file %s: %s" % (world.number_of_models, model_file, number_of_lines)
     world.model_ids = model_ids
     for model_id in model_ids:
         try:
-            model = world.api.check_resource(model_id, world.api.get_model)
+            model = check_resource(model_id, world.api.get_model)
             world.models.append(model_id)
             assert True
         except Exception, exc:
@@ -280,14 +300,41 @@ def i_check_create_evaluation(step):
     evaluation_file = "%s%sevaluation" % (world.directory, os.sep)
     try:
         evaluation_file = open(evaluation_file, "r")
-        evaluation = world.api.check_resource(evaluation_file.readline().strip(),
-                                              world.api.get_evaluation)
+        evaluation = check_resource(evaluation_file.readline().strip(),
+                                    world.api.get_evaluation)
         world.evaluations.append(evaluation['resource'])
         world.evaluation = evaluation
         evaluation_file.close()
         assert True
     except:
         assert False
+
+
+@step(r'I check that the evaluations have been created')
+def i_check_create_evaluations(step):
+    evaluations_file = "%s%sevaluations" % (world.directory, os.sep)
+    evaluation_ids = []
+    number_of_lines = 0
+    count = 0
+    while world.number_of_evaluations != number_of_lines and count < 10:
+        number_of_lines = 0
+        for line in open(evaluations_file, "r"):
+            number_of_lines += 1
+            evaluation_id = line.strip()
+            evaluation_ids.append(evaluation_id)
+        if world.number_of_evaluations != number_of_lines:
+            time.sleep(10)
+            count += 1
+    if world.number_of_evaluations != number_of_lines:
+        assert False, "number of evaluations %s and number of lines in evaluations file %s: %s" % (world.number_of_evaluations, evaluation_file, number_of_lines)
+    world.evaluation_ids = evaluation_ids
+    for evaluation_id in evaluation_ids:
+        try:
+            evaluation = check_resource(evaluation_id, world.api.get_evaluation)
+            world.evaluations.append(evaluation_id)
+            assert True
+        except Exception, exc:
+            assert False, str(exc)
 
 
 @step(r'I check that the predictions are ready')
@@ -338,12 +385,74 @@ def i_check_predictions(step, check_file):
     except Exception, exc:
         assert False, str(exc)
 
+
+@step(r'the cross-validation json model info is like the one in "(.*)"')
+def i_check_cross_validation(step, check_file):
+    cv_file = "%s/cross_validation.json" % world.directory
+    try:
+        with open(cv_file, "U") as cv_handler:
+            cv_content = json.loads(cv_handler.read())
+        with open(check_file, "U") as check_handler:
+            check_content = json.loads(check_handler.read())
+        if cv_content['model'] == check_content['model']: 
+            assert True
+        else:
+            assert False, "content: %s, check: %s" % (cv_content, check_content)
+    except Exception, exc:
+        assert False, str(exc)
+
+
+@step(r'I check that the stored source file exists')
+def i_check_stored_source(step):
+    try:
+        with open("%s%ssource" % (world.directory, os.sep), "r") as source_file:
+            source_id = source_file.readline().strip()
+            world.sources.append(source_id)
+        storage_source_file = "%s%s%s" % (world.directory, os.sep, source_id.replace("/", "_"))
+        if os.path.exists(storage_source_file):
+            with open(storage_source_file, "r") as storage_source_file:
+                world.source = json.loads(storage_source_file.read().strip())
+            assert True
+        else:
+            assert False
+    except Exception, exc:
+        assert False, str(exc)
+
+
+@step(r'And the locale of the source is "(.*)"')
+def i_check_source_locale(step, bigml_locale):
+    try:
+        if bigml_locale == world.source['object']["source_parser"]["locale"]:
+            assert True
+        else:
+            assert False
+    except KeyError, exc:
+        assert False, str(exc)
+
+
 @step(r'I create BigML resources uploading train "(.*)" file to evaluate and log evaluation in "(.*)"')
 def i_create_all_resources_to_evaluate(step, data=None, output=None):
     if data is None or output is None:
         assert False
     try:
         retcode = check_call("bigmler --evaluate --train " + data + " --output " + output, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.directory = os.path.dirname(output)
+            world.folders.append(world.directory)
+            world.output = output
+            assert True
+    except OSError as e:
+        assert False
+
+
+@step(r'I create a BigML source from file "(.*)" with locale "(.*)" storing results in "(.*)"')
+def i_create_all_resources_to_evaluate(step, data=None, locale=None, output=None):
+    if data is None or locale is None or output is None:
+        assert False
+    try:
+        retcode = check_call("bigmler --train " + data + " --locale " + locale + " --output " + output + " --no-dataset --no-model --store", shell=True)
         if retcode < 0:
             assert False
         else:
