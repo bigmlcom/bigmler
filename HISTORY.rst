@@ -3,6 +3,12 @@
 History
 -------
 
+0.2.2 (2013-04-30)
+~~~~~~~~~~~~~~~~~~
+
+- Adding cross-validation feature
+- Using user locale to create new resources in BigML
+
 0.2.1 (2013-03-03)
 ~~~~~~~~~~~~~~~~~~
 

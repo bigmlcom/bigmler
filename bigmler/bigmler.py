@@ -217,7 +217,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if (dataset and not args.model and not model_ids and not args.no_model):
         # Cross-validation case: we create 2 * n models to be validated
         # holding out an n% of data
-        if args.cross_validation_rate > 0.0:
+        if args.cross_validation_rate > 0:
             args.number_of_models = int(MONTECARLO_FACTOR *
                                         args.cross_validation_rate)
         model_ids = []
@@ -330,10 +330,10 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                                       session_file)
         r.save_evaluation(evaluation, output, api)
 
-    # If cross_validation_rate is > 0.0, create remote evaluations and save
+    # If cross_validation_rate is > 0, create remote evaluations and save
     # results in json and human-readable format. Then average the results to
     # issue a cross_validation measure set.
-    if args.cross_validation_rate > 0.0:
+    if args.cross_validation_rate > 0:
         args.sample_rate = 1 - args.cross_validation_rate
         number_of_evaluations = int(MONTECARLO_FACTOR *
                                     args.cross_validation_rate)
@@ -424,7 +424,7 @@ def main(args=sys.argv[1:]):
     # Parses command line arguments.
     command_args = parser.parse_args(args)
 
-    if command_args.cross_validation_rate > 0.0 and (
+    if command_args.cross_validation_rate > 0 and (
             command_args.test_set or command_args.evaluate or
             command_args.model or command_args.models or
             command_args.model_tag):

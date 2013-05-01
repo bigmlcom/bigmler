@@ -37,6 +37,7 @@ EVALUATE_SAMPLE_RATE = 0.8
 SEED = "BigML, Machine Learning made easy"
 LOCALE_DEFAULT = "en_US"
 
+
 def set_source_args(data_set_header, name, description, args):
     """Returns a source arguments dict
 
@@ -258,9 +259,9 @@ def set_model_args(name, description,
     # args.sample_rate (80% by default) of the data to create the model
     # If cross_validation_rate = n/100, then we choose to run 2 * n evaluations
     # by holding out a n% of randomly sampled data.
-    if args.evaluate or args.cross_validation_rate > 0.0:
+    if args.evaluate or args.cross_validation_rate > 0:
         model_args.update(seed=SEED)
-        if args.cross_validation_rate > 0.0:
+        if args.cross_validation_rate > 0:
             args.sample_rate = 1 - args.cross_validation_rate
             args.replacement = False
         elif args.sample_rate == 1:
@@ -311,7 +312,7 @@ def create_models(dataset, model_ids, model_args,
                 except ValueError, exception:
                     sys.exit("Failed to get a finished model: %s" %
                              str(exception))
-            if args.cross_validation_rate > 0.0:
+            if args.cross_validation_rate > 0:
                 new_seed = "%s - %s" % (SEED, i + existing_models)
                 model_args.update(seed=new_seed)
             model = api.create_model(dataset, model_args)
@@ -435,7 +436,7 @@ def set_evaluation_args(name, description, args, fields=None, fields_map=None):
     if ((not ((args.dataset or args.test_set)
               and (args.model or args.models or args.model_tag))) or
         ((args.training_set or args.dataset) and
-         args.cross_validation_rate > 0.0)):
+         args.cross_validation_rate > 0)):
         evaluation_args.update(out_of_bag=True, seed=SEED,
                                sample_rate=args.sample_rate)
 
@@ -449,7 +450,7 @@ def create_evaluation(model, dataset, evaluation_args, args, api,
     """
     if api is None:
         api = bigml.api.BigML()
-    if args.cross_validation_rate > 0.0:
+    if args.cross_validation_rate > 0:
         evaluation_args.update(seed=seed)
     message = dated("Creating evaluation.\n")
     log_message(message, log_file=session_file,
@@ -482,7 +483,7 @@ def create_evaluations(model_ids, dataset, evaluation_args, args, api,
                 console=args.verbosity)
     for i in range(0, number_of_evaluations):
         model = model_ids[i]
-        if args.cross_validation_rate > 0.0:
+        if args.cross_validation_rate > 0:
             new_seed = "%s - %s" % (SEED, i + existing_evaluations)
             evaluation_args.update(seed=new_seed)
         evaluation = api.create_evaluation(model, dataset, evaluation_args)
