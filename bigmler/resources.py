@@ -274,16 +274,14 @@ def set_model_args(name, description,
     if objective_field is not None and fields is not None:
         model_args.update({"objective_field":
                            fields.field_id(objective_field)})
-    # If evaluate flag is on and no test_split flag is provided, 
+    # If evaluate flag is on and no test_split flag is provided,
     # we choose a deterministic sampling with
     # args.sample_rate (80% by default) of the data to create the model
     # If cross_validation_rate = n/100, then we choose to run 2 * n evaluations
     # by holding out a n% of randomly sampled data.
-<<<<<<< HEAD
-    if args.evaluate or args.cross_validation_rate > 0:
-=======
-    if (args.evaluate and args.test_split == 0) or args.cross_validation_rate > 0:
->>>>>>> Test_split bug fixing, docs and new test
+
+    if ((args.evaluate and args.test_split == 0) or
+            args.cross_validation_rate > 0):
         model_args.update(seed=SEED)
         if args.cross_validation_rate > 0:
             args.sample_rate = 1 - args.cross_validation_rate

@@ -569,7 +569,6 @@ under the License.""" % version
                         default=defaults.get('ensemble', None),
                         help="BigML ensemble Id")
 
-
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #

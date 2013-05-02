@@ -197,7 +197,6 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     elif args.dataset:
         dataset = bigml.api.get_dataset_id(args.dataset)
 
-
     # If we already have a dataset, we check the status and get the fields if
     # we hadn't them yet.
     if dataset:
@@ -226,17 +225,17 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 u.log_message(message, log_file=session_file,
                               console=args.verbosity)
 
-        if train_dataset is None: 
+        if train_dataset is None:
             dataset_split_args = r.set_dataset_split_args(
                 "%s - train (%s %%)" % (name,
                 int(sample_rate * 100)), description, args,
                 sample_rate, out_of_bag=False)
             train_dataset = r.create_dataset(
-                dataset, dataset_split_args, args, api, path, session_file, log,
-                "train")
+                dataset, dataset_split_args, args, api, path, session_file,
+                log, "train")
             if train_dataset:
-                train_dataset = r.get_dataset(train_dataset, api, args.verbosity,
-                                              session_file)
+                train_dataset = r.get_dataset(train_dataset, api,
+                                              args.verbosity, session_file)
 
         # if resuming, try to extract test dataset form log files
         if resume:
@@ -253,11 +252,11 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 int(args.test_split * 100)), description, args,
                 sample_rate, out_of_bag=True)
             test_dataset = r.create_dataset(
-                dataset, dataset_split_args, args, api, path, session_file, log,
-                "test")
+                dataset, dataset_split_args, args, api, path, session_file,
+                log, "test")
             if test_dataset:
                 test_dataset = r.get_dataset(test_dataset, api, args.verbosity,
-                                              session_file)
+                                             session_file)
         dataset = train_dataset
 
     #end of dataset processing
@@ -267,7 +266,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # If we have a dataset but not a model, we create the model if the no_model
     # flag hasn't been set up.
     if (dataset and not args.model and not model_ids and not args.no_model
-        and not args.ensemble):
+            and not args.ensemble):
         # Cross-validation case: we create 2 * n models to be validated
         # holding out an n% of data
         if args.cross_validation_rate > 0:
@@ -513,7 +512,7 @@ def main(args=sys.argv[1:]):
             if (position == (len(args) - 1) or
                     args[position + 1].startswith("--")):
                 train_stdin = True
-        except:
+        except ValueError:
             pass
         output_dir = u.get_log_reversed(DIRS_LOG,
                                         command_args.stack_level)
