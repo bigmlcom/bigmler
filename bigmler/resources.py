@@ -20,7 +20,6 @@
 from __future__ import absolute_import
 
 import sys
-import time
 
 try:
     import simplejson as json
@@ -488,7 +487,7 @@ def set_evaluation_args(name, description, args, fields=None, fields_map=None):
     return evaluation_args
 
 
-def create_evaluation(model_or_ensemble, dataset, evaluation_args, args, 
+def create_evaluation(model_or_ensemble, dataset, evaluation_args, args,
                       api=None,
                       path=None, session_file=None, log=None, seed=SEED):
     """Create evaluation

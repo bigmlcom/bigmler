@@ -54,11 +54,13 @@ import StringIO
 import bigml.api
 import bigmler.utils as u
 import bigmler.resources as r
+import bigmler.checkpoint as c
 
 from bigml.fields import Fields
 from bigml.multivote import COMBINATION_WEIGHTS, COMBINER_MAP, PLURALITY
 from bigml.model import Model
 
+from bigmler.evaluation import evaluate, cross_validate
 from bigmler.options import create_parser
 from bigmler.defaults import get_user_defaults
 from bigmler.defaults import DEFAULTS_FILE
@@ -90,7 +92,7 @@ def source_processing(training_set, test_set, training_set_header,
     if (training_set or (args.evaluate and test_set)):
         # If resuming, try to extract args.source form log files
         if resume:
-            resume, args.source = u.checkpoint(u.is_source_created, path,
+            resume, args.source = c.checkpoint(c.is_source_created, path,
                                                debug=args.debug)
             if not resume:
                 message = u.dated("Source not found. Resuming.\n")
@@ -148,7 +150,7 @@ def dataset_processing(source, training_set, test_set, model_ids, name,
     if (training_set or args.source or (args.evaluate and test_set)):
         # if resuming, try to extract args.dataset form log files
         if resume:
-            resume, args.dataset = u.checkpoint(u.is_dataset_created, path,
+            resume, args.dataset = c.checkpoint(c.is_dataset_created, path,
                                                 debug=args.debug)
             if not resume:
                 message = u.dated("Dataset not found. Resuming.\n")
@@ -182,7 +184,7 @@ def dataset_processing(source, training_set, test_set, model_ids, name,
     return dataset, resume, csv_properties, fields
 
 
-def split_processing(dataset, name, description, api, args, resume, 
+def split_processing(dataset, name, description, api, args, resume,
                      session_file=None, path=None, log=None):
     """Splits a dataset into train and test datasets
     """
@@ -191,7 +193,7 @@ def split_processing(dataset, name, description, api, args, resume,
     sample_rate = 1 - args.test_split
     # if resuming, try to extract train dataset form log files
     if resume:
-        resume, train_dataset = u.checkpoint(u.is_dataset_created, path,
+        resume, train_dataset = c.checkpoint(c.is_dataset_created, path,
                                              "_train",
                                              debug=args.debug)
         if not resume:
@@ -213,7 +215,7 @@ def split_processing(dataset, name, description, api, args, resume,
 
     # if resuming, try to extract test dataset form log files
     if resume:
-        resume, test_dataset = u.checkpoint(u.is_dataset_created, path,
+        resume, test_dataset = c.checkpoint(c.is_dataset_created, path,
                                             "_test",
                                             debug=args.debug)
         if not resume:
@@ -252,7 +254,7 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
         model_ids = []
         models = []
         if resume:
-            resume, model_ids = u.checkpoint(u.are_models_created, path,
+            resume, model_ids = c.checkpoint(c.are_models_created, path,
                                              args.number_of_models,
                                              debug=args.debug)
             if not resume:
@@ -317,80 +319,6 @@ def get_model_fields(model, model_fields, csv_properties, args):
     return fields, objective_field
 
 
-def evaluate(model, dataset, name, description, fields, fields_map, output,
-             api, args, resume,
-             session_file=None, path=None, log=None):
-    """Evaluates a model or an ensemble with the given dataset
-
-    """
-    if resume:
-        resume, evaluation = u.checkpoint(u.is_evaluation_created, path,
-                                          debug=args.debug)
-        if not resume:
-            message = u.dated("Evaluation not found. Resuming.\n")
-            u.log_message(message, log_file=session_file,
-                          console=args.verbosity)
-    if not resume:
-        evaluation_args = r.set_evaluation_args(name, description, args,
-                                                fields, fields_map)
-        if args.ensemble:
-            model_or_ensemble = args.ensemble
-        else:
-            model_or_ensemble = model
-        evaluation = r.create_evaluation(model_or_ensemble, dataset,
-                                         evaluation_args,
-                                         args, api, path, session_file,
-                                         log)
-
-    evaluation = r.get_evaluation(evaluation, api, args.verbosity,
-                                  session_file)
-    r.save_evaluation(evaluation, output, api)
-    return resume
-
-
-def cross_validate(models, dataset, number_or_evaluations, name, description,
-                   fields, fields_map, api, args, resume,
-                   session_file=None, path=None, log=None):
-    """Cross-validates using a MONTE-CARLO variant
-
-    """
-    existing_evaluations = 0
-    evaluations = []
-    if resume:
-        resume, evaluations = u.checkpoint(u.are_evaluations_created, path,
-                                           number_of_evaluations,
-                                           debug=args.debug)
-        if not resume:
-            existing_evaluations = len(evaluations)
-            message = u.dated("Found %s evaluations from %s. Resuming.\n" %
-                              (existing_evaluations,
-                               number_of_evaluations))
-            number_of_evaluations -= existing_evaluations
-            u.log_message(message, log_file=session_file,
-                          console=args.verbosity)
-    if not resume:
-        evaluation_args = r.set_evaluation_args(name, description, args,
-                                                fields, fields_map)
-
-        evaluations.extend(r.create_evaluations(models, dataset,
-                                                evaluation_args,
-                                                args, api, path,
-                                                session_file, log,
-                                                existing_evaluations))
-        evaluations_files = []
-        for evaluation in evaluations:
-            evaluation = r.get_evaluation(evaluation, api, args.verbosity,
-                                          session_file)
-            model_id = evaluation['object']['model']
-            file_name = "%s%s%s__evaluation" % (path, os.sep,
-                                                model_id.replace("/", "_"))
-            evaluations_files.append(file_name + ".json")
-            r.save_evaluation(evaluation, file_name, api)
-        cross_validation = u.average_evaluations(evaluations_files)
-        file_name = "%s%scross_validation" % (path, os.sep)
-        r.save_evaluation(cross_validation, file_name, api)
-
-
 def compute_output(api, args, training_set, test_set=None, output=None,
                    objective_field=None,
                    description=None,
@@ -442,7 +370,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         source, training_set, test_set, model_ids, name, description, fields,
         dataset_fields, api, args, resume, csv_properties=csv_properties,
         session_file=session_file, path=path, log=log)
-    
+
     # If test_split is used, split the dataset in a training and a test dataset
     # according to the given split
     if args.test_split > 0:
@@ -499,7 +427,6 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         resume = evaluate(model, dataset, name, description, fields,
                           fields_map, output, api, args, resume,
                           session_file=session_file, path=path, log=log)
-
 
     # If cross_validation_rate is > 0, create remote evaluations and save
     # results in json and human-readable format. Then average the results to

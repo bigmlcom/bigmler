@@ -25,6 +25,7 @@ import sys
 import bigml.api
 
 import bigmler.utils as u
+import bigmler.checkpoint as c
 
 from bigml.model import Model
 from bigml.multimodel import MultiModel
@@ -58,7 +59,7 @@ def remote_predict(models, test_reader, prediction_file, api,
                                                      output_path)
         predictions_files.append(predictions_file)
         if (not resume or
-            not u.checkpoint(u.are_predictions_created, predictions_file,
+            not c.checkpoint(c.are_predictions_created, predictions_file,
                              test_reader.number_of_tests(), debug=debug)):
             if not message_logged:
                 message = u.dated("Creating remote predictions.")
@@ -134,7 +135,7 @@ def local_batch_predict(models, test_reader, prediction_file, api,
             for model in models_split:
                 pred_file = get_predictions_file_name(model,
                                                       output_path)
-                u.checkpoint(u.are_predictions_created,
+                c.checkpoint(c.are_predictions_created,
                              pred_file,
                              test_reader.number_of_tests(), debug=debug)
         complete_models = []
@@ -297,7 +298,7 @@ class TestReader(object):
         """Returns the number of tests in the test file
 
         """
-        tests = u.file_number_of_lines(self.test_set)
+        tests = c.file_number_of_lines(self.test_set)
         if self.test_set_header:
             tests -= 1
         return tests
