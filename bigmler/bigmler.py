@@ -78,49 +78,15 @@ MISSING_TOKENS = ['', 'N/A', 'n/a', 'NULL', 'null', '-', '#DIV/0', '#REF!',
 MONTECARLO_FACTOR = 200
 
 
-def compute_output(api, args, training_set, test_set=None, output=None,
-                   objective_field=None,
-                   description=None,
-                   field_attributes=None,
-                   types=None,
-                   dataset_fields=None,
-                   model_fields=None,
-                   name=None, training_set_header=True,
-                   test_set_header=True, model_ids=None,
-                   votes_files=None, resume=False, fields_map=None):
-    """ Creates one or more models using the `training_set` or uses the ids
-    of previously created BigML models to make predictions for the `test_set`.
+def source_processing(training_set, test_set, training_set_header,
+                      test_set_header, name, description, api, args, resume,
+                      csv_properties=None, field_attributes=None, types=None,
+                      session_file=None, path=None, log=None):
+    """Creating or retrieving a data source from input arguments
 
     """
     source = None
-    dataset = None
-    model = None
-    models = None
     fields = None
-
-    # It is compulsory to have a description to publish either datasets or
-    # models
-    if (not description and
-            (args.black_box or args.white_box or args.public_dataset)):
-        raise Exception("You should provide a description to publish.")
-
-    path = u.check_dir(output)
-    session_file = "%s%s%s" % (path, os.sep, SESSIONS_LOG)
-    csv_properties = {}
-    # If logging is required, open the file for logging
-    log = None
-    if args.log_file:
-        u.check_dir(args.log_file)
-        log = args.log_file
-        # If --clear_logs the log files are cleared
-        if args.clear_logs:
-            try:
-                open(log, 'w', 0).close()
-            except IOError:
-                pass
-
-    # Starting source processing
-
     if (training_set or (args.evaluate and test_set)):
         # If resuming, try to extract args.source form log files
         if resume:
@@ -168,11 +134,17 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if types:
             source = r.update_source_fields(source, types, fields, api,
                                             args.verbosity, session_file)
+    return source, resume, csv_properties, fields
 
-    # End of source processing
 
-    # Starting dataset processing
+def dataset_processing(source, training_set, test_set, model_ids, name,
+                       description, fields, dataset_fields, api, args,
+                       resume, csv_properties=None,
+                       session_file=None, path=None, log=None):
+    """Creating or retrieving dataset from input arguments
 
+    """
+    dataset = None
     if (training_set or args.source or (args.evaluate and test_set)):
         # if resuming, try to extract args.dataset form log files
         if resume:
@@ -207,62 +179,67 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         fields = Fields(dataset['object']['fields'], **csv_properties)
         if args.public_dataset:
             r.publish_dataset(dataset, api, args, session_file)
+    return dataset, resume, csv_properties, fields
 
-    # If test_split is used, split the dataset in a training and a test dataset
-    # according to the given split
 
-    if args.test_split > 0:
-        train_dataset = None
-        test_dataset = None
-        sample_rate = 1 - args.test_split
-        # if resuming, try to extract train dataset form log files
-        if resume:
-            resume, train_dataset = u.checkpoint(u.is_dataset_created, path,
-                                                 "_train",
-                                                 debug=args.debug)
-            if not resume:
-                message = u.dated("Dataset not found. Resuming.\n")
-                u.log_message(message, log_file=session_file,
-                              console=args.verbosity)
+def split_processing(dataset, name, description, api, args, resume, 
+                     session_file=None, path=None, log=None):
+    """Splits a dataset into train and test datasets
+    """
+    train_dataset = None
+    test_dataset = None
+    sample_rate = 1 - args.test_split
+    # if resuming, try to extract train dataset form log files
+    if resume:
+        resume, train_dataset = u.checkpoint(u.is_dataset_created, path,
+                                             "_train",
+                                             debug=args.debug)
+        if not resume:
+            message = u.dated("Dataset not found. Resuming.\n")
+            u.log_message(message, log_file=session_file,
+                          console=args.verbosity)
 
-        if train_dataset is None:
-            dataset_split_args = r.set_dataset_split_args(
-                "%s - train (%s %%)" % (name,
-                int(sample_rate * 100)), description, args,
-                sample_rate, out_of_bag=False)
-            train_dataset = r.create_dataset(
-                dataset, dataset_split_args, args, api, path, session_file,
-                log, "train")
-            if train_dataset:
-                train_dataset = r.get_dataset(train_dataset, api,
-                                              args.verbosity, session_file)
+    if train_dataset is None:
+        dataset_split_args = r.set_dataset_split_args(
+            "%s - train (%s %%)" % (name,
+            int(sample_rate * 100)), description, args,
+            sample_rate, out_of_bag=False)
+        train_dataset = r.create_dataset(
+            dataset, dataset_split_args, args, api, path, session_file,
+            log, "train")
+        if train_dataset:
+            train_dataset = r.get_dataset(train_dataset, api,
+                                          args.verbosity, session_file)
 
-        # if resuming, try to extract test dataset form log files
-        if resume:
-            resume, test_dataset = u.checkpoint(u.is_dataset_created, path,
-                                                "_test",
-                                                debug=args.debug)
-            if not resume:
-                message = u.dated("Dataset not found. Resuming.\n")
-                u.log_message(message, log_file=session_file,
-                              console=args.verbosity)
-        if test_dataset is None:
-            dataset_split_args = r.set_dataset_split_args(
-                "%s - test (%s %%)" % (name,
-                int(args.test_split * 100)), description, args,
-                sample_rate, out_of_bag=True)
-            test_dataset = r.create_dataset(
-                dataset, dataset_split_args, args, api, path, session_file,
-                log, "test")
-            if test_dataset:
-                test_dataset = r.get_dataset(test_dataset, api, args.verbosity,
-                                             session_file)
-        dataset = train_dataset
+    # if resuming, try to extract test dataset form log files
+    if resume:
+        resume, test_dataset = u.checkpoint(u.is_dataset_created, path,
+                                            "_test",
+                                            debug=args.debug)
+        if not resume:
+            message = u.dated("Dataset not found. Resuming.\n")
+            u.log_message(message, log_file=session_file,
+                          console=args.verbosity)
+    if test_dataset is None:
+        dataset_split_args = r.set_dataset_split_args(
+            "%s - test (%s %%)" % (name,
+            int(args.test_split * 100)), description, args,
+            sample_rate, out_of_bag=True)
+        test_dataset = r.create_dataset(
+            dataset, dataset_split_args, args, api, path, session_file,
+            log, "test")
+        if test_dataset:
+            test_dataset = r.get_dataset(test_dataset, api, args.verbosity,
+                                         session_file)
+    return train_dataset, test_dataset, resume
 
-    #end of dataset processing
 
-    #start of model processing
+def models_processing(dataset, models, model_ids, name, description, test_set,
+                      objective_field, fields, model_fields, api, args, resume,
+                      session_file=None, path=None, log=None):
+    """Creates or retrieves models from the input data
 
+    """
     # If we have a dataset but not a model, we create the model if the no_model
     # flag hasn't been set up.
     if (dataset and not args.model and not model_ids and not args.no_model
@@ -292,27 +269,192 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         models, model_ids = r.create_models(dataset, models,
                                             model_args, args, api,
                                             path, session_file, log)
-        model = models[0]
     # If a model is provided, we use it.
     elif args.model:
-        model = args.model
-        model_ids = [model]
-        models = [model]
+        model_ids = [args.model]
+        models = model_ids[:]
 
     elif args.ensemble:
         ensemble = r.get_ensemble(args.ensemble, api, args.verbosity,
                                   session_file)
         model_ids = ensemble['object']['models']
         models = model_ids[:]
-        model = models[0]
 
     elif args.models or args.model_tag:
         models = model_ids[:]
-        model = models[0]
 
     # If we are going to predict we must retrieve the models
     if model_ids and test_set and not args.evaluate:
         models, model_ids = r.get_models(models, args, api, session_file)
+
+    return models, model_ids, resume
+
+
+def get_model_fields(model, model_fields, csv_properties, args):
+    """Retrieves fields info from model resource
+
+    """
+    if not csv_properties:
+        csv_properties = {}
+    csv_properties.update(verbose=True)
+    if args.user_locale is None:
+        args.user_locale = model['object'].get('locale', None)
+    csv_properties.update(data_locale=args.user_locale)
+    if 'model_fields' in model['object']['model']:
+        model_fields = model['object']['model']['model_fields'].keys()
+        csv_properties.update(include=model_fields)
+    if 'missing_tokens' in model['object']['model']:
+        missing_tokens = model['object']['model']['missing_tokens']
+    else:
+        missing_tokens = MISSING_TOKENS
+    csv_properties.update(missing_tokens=missing_tokens)
+    objective_field = model['object']['objective_fields']
+    if isinstance(objective_field, list):
+        objective_field = objective_field[0]
+    csv_properties.update(objective_field=objective_field)
+    fields = Fields(model['object']['model']['fields'], **csv_properties)
+
+    return fields, objective_field
+
+
+def evaluate(model, dataset, name, description, fields, fields_map, output,
+             api, args, resume,
+             session_file=None, path=None, log=None):
+    """Evaluates a model or an ensemble with the given dataset
+
+    """
+    if resume:
+        resume, evaluation = u.checkpoint(u.is_evaluation_created, path,
+                                          debug=args.debug)
+        if not resume:
+            message = u.dated("Evaluation not found. Resuming.\n")
+            u.log_message(message, log_file=session_file,
+                          console=args.verbosity)
+    if not resume:
+        evaluation_args = r.set_evaluation_args(name, description, args,
+                                                fields, fields_map)
+        if args.ensemble:
+            model_or_ensemble = args.ensemble
+        else:
+            model_or_ensemble = model
+        evaluation = r.create_evaluation(model_or_ensemble, dataset,
+                                         evaluation_args,
+                                         args, api, path, session_file,
+                                         log)
+
+    evaluation = r.get_evaluation(evaluation, api, args.verbosity,
+                                  session_file)
+    r.save_evaluation(evaluation, output, api)
+    return resume
+
+
+def cross_validate(models, dataset, number_or_evaluations, name, description,
+                   fields, fields_map, api, args, resume,
+                   session_file=None, path=None, log=None):
+    """Cross-validates using a MONTE-CARLO variant
+
+    """
+    existing_evaluations = 0
+    evaluations = []
+    if resume:
+        resume, evaluations = u.checkpoint(u.are_evaluations_created, path,
+                                           number_of_evaluations,
+                                           debug=args.debug)
+        if not resume:
+            existing_evaluations = len(evaluations)
+            message = u.dated("Found %s evaluations from %s. Resuming.\n" %
+                              (existing_evaluations,
+                               number_of_evaluations))
+            number_of_evaluations -= existing_evaluations
+            u.log_message(message, log_file=session_file,
+                          console=args.verbosity)
+    if not resume:
+        evaluation_args = r.set_evaluation_args(name, description, args,
+                                                fields, fields_map)
+
+        evaluations.extend(r.create_evaluations(models, dataset,
+                                                evaluation_args,
+                                                args, api, path,
+                                                session_file, log,
+                                                existing_evaluations))
+        evaluations_files = []
+        for evaluation in evaluations:
+            evaluation = r.get_evaluation(evaluation, api, args.verbosity,
+                                          session_file)
+            model_id = evaluation['object']['model']
+            file_name = "%s%s%s__evaluation" % (path, os.sep,
+                                                model_id.replace("/", "_"))
+            evaluations_files.append(file_name + ".json")
+            r.save_evaluation(evaluation, file_name, api)
+        cross_validation = u.average_evaluations(evaluations_files)
+        file_name = "%s%scross_validation" % (path, os.sep)
+        r.save_evaluation(cross_validation, file_name, api)
+
+
+def compute_output(api, args, training_set, test_set=None, output=None,
+                   objective_field=None,
+                   description=None,
+                   field_attributes=None,
+                   types=None,
+                   dataset_fields=None,
+                   model_fields=None,
+                   name=None, training_set_header=True,
+                   test_set_header=True, model_ids=None,
+                   votes_files=None, resume=False, fields_map=None):
+    """ Creates one or more models using the `training_set` or uses the ids
+    of previously created BigML models to make predictions for the `test_set`.
+
+    """
+    source = None
+    dataset = None
+    model = None
+    models = None
+    fields = None
+
+    # It is compulsory to have a description to publish either datasets or
+    # models
+    if (not description and
+            (args.black_box or args.white_box or args.public_dataset)):
+        raise Exception("You should provide a description to publish.")
+
+    path = u.check_dir(output)
+    session_file = "%s%s%s" % (path, os.sep, SESSIONS_LOG)
+    csv_properties = {}
+    # If logging is required, open the file for logging
+    log = None
+    if args.log_file:
+        u.check_dir(args.log_file)
+        log = args.log_file
+        # If --clear_logs the log files are cleared
+        if args.clear_logs:
+            try:
+                open(log, 'w', 0).close()
+            except IOError:
+                pass
+
+    source, resume, csv_properties, fields = source_processing(
+        training_set, test_set, training_set_header, test_set_header,
+        name, description, api, args, resume, csv_properties=csv_properties,
+        field_attributes=field_attributes,
+        types=types, session_file=session_file, path=path, log=log)
+
+    dataset, resume, csv_properties, fields = dataset_processing(
+        source, training_set, test_set, model_ids, name, description, fields,
+        dataset_fields, api, args, resume, csv_properties=csv_properties,
+        session_file=session_file, path=path, log=log)
+    
+    # If test_split is used, split the dataset in a training and a test dataset
+    # according to the given split
+    if args.test_split > 0:
+        dataset, test_dataset, resume = split_processing(
+            dataset, name, description, api, args, resume,
+            session_file=session_file, path=path, log=log)
+
+    models, models_ids, resume = models_processing(
+        dataset, models, model_ids, name, description, test_set,
+        objective_field, fields, model_fields, api, args, resume,
+        session_file=session_file, path=path, log=log)
+    if models:
         model = models[0]
 
     # We get the fields of the model if we haven't got
@@ -322,27 +464,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if args.black_box or args.white_box:
             model = r.publish_model(model, args, api, session_file)
             models[0] = model
-        if not csv_properties:
-            csv_properties = {}
-        csv_properties.update(verbose=True)
-        if args.user_locale is None:
-            args.user_locale = model['object'].get('locale', None)
-        csv_properties.update(data_locale=args.user_locale)
-        if 'model_fields' in model['object']['model']:
-            model_fields = model['object']['model']['model_fields'].keys()
-            csv_properties.update(include=model_fields)
-        if 'missing_tokens' in model['object']['model']:
-            missing_tokens = model['object']['model']['missing_tokens']
-        else:
-            missing_tokens = MISSING_TOKENS
-        csv_properties.update(missing_tokens=missing_tokens)
-        objective_field = models[0]['object']['objective_fields']
-        if isinstance(objective_field, list):
-            objective_field = objective_field[0]
-        csv_properties.update(objective_field=objective_field)
-        fields = Fields(model['object']['model']['fields'], **csv_properties)
-
-    # end of model processing
+        fields, objective_field = get_model_fields(model, model_fields,
+                                                   csv_properties, args)
 
     # If predicting
     if models and test_set and not args.evaluate:
@@ -371,30 +494,12 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # If evaluate flag is on, create remote evaluation and save results in
     # json and human-readable format.
     if args.evaluate:
-        if resume:
-            resume, evaluation = u.checkpoint(u.is_evaluation_created, path,
-                                              debug=args.debug)
-            if not resume:
-                message = u.dated("Evaluation not found. Resuming.\n")
-                u.log_message(message, log_file=session_file,
-                              console=args.verbosity)
-        if not resume:
-            if args.test_split > 0:
-                dataset = test_dataset
-            evaluation_args = r.set_evaluation_args(name, description, args,
-                                                    fields, fields_map)
-            if args.ensemble:
-                model_or_ensemble = args.ensemble
-            else:
-                model_or_ensemble = model
-            evaluation = r.create_evaluation(model_or_ensemble, dataset,
-                                             evaluation_args,
-                                             args, api, path, session_file,
-                                             log)
+        if args.test_split > 0:
+            dataset = test_dataset
+        resume = evaluate(model, dataset, name, description, fields,
+                          fields_map, output, api, args, resume,
+                          session_file=session_file, path=path, log=log)
 
-        evaluation = r.get_evaluation(evaluation, api, args.verbosity,
-                                      session_file)
-        r.save_evaluation(evaluation, output, api)
 
     # If cross_validation_rate is > 0, create remote evaluations and save
     # results in json and human-readable format. Then average the results to
@@ -403,41 +508,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         args.sample_rate = 1 - args.cross_validation_rate
         number_of_evaluations = int(MONTECARLO_FACTOR *
                                     args.cross_validation_rate)
-        existing_evaluations = 0
-        evaluations = []
-        if resume:
-            resume, evaluations = u.checkpoint(u.are_evaluations_created, path,
-                                               number_of_evaluations,
-                                               debug=args.debug)
-            if not resume:
-                existing_evaluations = len(evaluations)
-                message = u.dated("Found %s evaluations from %s. Resuming.\n" %
-                                  (existing_evaluations,
-                                   number_of_evaluations))
-                number_of_evaluations -= existing_evaluations
-                u.log_message(message, log_file=session_file,
-                              console=args.verbosity)
-        if not resume:
-            evaluation_args = r.set_evaluation_args(name, description, args,
-                                                    fields, fields_map)
-
-            evaluations.extend(r.create_evaluations(models, dataset,
-                                                    evaluation_args,
-                                                    args, api, path,
-                                                    session_file, log,
-                                                    existing_evaluations))
-            evaluations_files = []
-            for evaluation in evaluations:
-                evaluation = r.get_evaluation(evaluation, api, args.verbosity,
-                                              session_file)
-                model_id = evaluation['object']['model']
-                file_name = "%s%s%s__evaluation" % (path, os.sep,
-                                                    model_id.replace("/", "_"))
-                evaluations_files.append(file_name + ".json")
-                r.save_evaluation(evaluation, file_name, api)
-            cross_validation = u.average_evaluations(evaluations_files)
-            file_name = "%s%scross_validation" % (path, os.sep)
-            r.save_evaluation(cross_validation, file_name, api)
+        cross_validate(models, dataset, number_of_evaluations, name,
+                       description, fields, fields_map, api, args, resume,
+                       session_file=session_file, path=path, log=log)
 
     # Workaround to restore windows console cp850 encoding to print the tree
     if sys.platform == "win32" and sys.stdout.isatty():

@@ -582,57 +582,54 @@ def average_evaluations(evaluation_files):
     """Reads the contents of the evaluations files and averages its measures
 
     """
-    special_keys = ["class_names", "per_class_statistics",
-                    "confusion_matrix", "present_in_test_data"]
     averaged_evaluation = {}
     number_of_evaluations = float(len(evaluation_files))
-    for evaluation_file in evaluation_files:
-        with open(evaluation_file, 'U') as evaluation_file:
-            evaluation = json.loads(evaluation_file.read())
-            avg_evaluation(averaged_evaluation, evaluation,
-                           number_of_evaluations, special_keys)
+    if number_of_evaluations > 0:
+        for evaluation_file in evaluation_files:
+            with open(evaluation_file, 'U') as evaluation_file:
+                evaluation = json.loads(evaluation_file.read())
+                avg_evaluation(averaged_evaluation, evaluation,
+                               number_of_evaluations)
     return averaged_evaluation
 
 
-def avg_evaluation(total, component, number_of_evaluations, special_keys):
+def avg_evaluation(total, component, number_of_evaluations):
     """Adds a new set of evaluation measures to the cumulative average
 
     """
-
-    for key in component:
-        value = component[key]
-        # Handle the non-averageable values in
-        # classifications' evaluation data
-        if key in special_keys:
+    if number_of_evaluations > 0:
+        for key, value in component.items():
+            # Handle the non-averageable values in
+            # classifications' evaluation data
             if key == "class_names":
                 if not key in total:
                     total[key] = []
-                total[key].extend(component[key])
+                total[key].extend(value)
                 total[key] = list(set(total[key]))
-            if key == "confusion_matrix":
+            elif key == "confusion_matrix":
                 if not key in total:
-                    total[key] = component[key]
+                    total[key] = value
                 else:
-                    total[key] = add_matrices(total[key], component[key])
-            if key == "per_class_statistics":
+                    total[key] = add_matrices(total[key], value)
+            elif key == "per_class_statistics":
                 if not key in total:
                     total[key] = []
-                total[key] = avg_class_statistics(total[key], component[key],
+                total[key] = avg_class_statistics(total[key], value,
                                                   number_of_evaluations)
-        else:
-            # Average numerical values
-            if isinstance(value, numbers.Number):
-                new_key = (key if key.startswith("average_")
-                           else ("average_%s" % key))
-                if not new_key in total:
-                    total[new_key] = 0
-                total[new_key] += component[key] / number_of_evaluations
-            # Handle grouping keys
-            elif isinstance(value, list) or isinstance(value, dict):
-                if not key in total:
-                    total[key] = [] if isinstance(value, list) else {}
-                avg_evaluation(total[key], component[key],
-                               number_of_evaluations, special_keys)
+            else:
+                # Average numerical values
+                if isinstance(value, numbers.Number):
+                    new_key = (key if key.startswith("average_")
+                               else ("average_%s" % key))
+                    if not new_key in total:
+                        total[new_key] = 0
+                    total[new_key] += value / number_of_evaluations
+                # Handle grouping keys
+                elif isinstance(value, list) or isinstance(value, dict):
+                    if not key in total:
+                        total[key] = [] if isinstance(value, list) else {}
+                    avg_evaluation(total[key], value,
+                                   number_of_evaluations)
 
 
 def add_matrices(matrix_a, matrix_b):

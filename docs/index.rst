@@ -59,7 +59,7 @@ read it from the standard input::
     cat data/iris.csv | bigmler --train
 
 BigMLer will try to use the locale of the model both to create a new source
-(if ``--train`` flag is used) and to interpret test data. In case
+(if the ``--train`` flag is used) and to interpret test data. In case
 it fails, it will try ``en_US.UTF-8``
 or ``English_United States.1252`` and a warning message will be printed.
 If you want to change this behaviour you can specify your preferred locale::
@@ -285,15 +285,15 @@ models, you can use the ``--cross-validation-rate`` flag to settle the
 part of your training data that will be separated for cross validation. BigMLer
 will use a Monte-Carlo cross-validation variant, building ``2*n`` different
 models, each of which is constructed by a subset of the training data,
-holding out randomly a ``n%`` of the instances. The held-out data will then be
+holding out randomly ``n%`` of the instances. The held-out data will then be
 used to evaluate the corresponding model. For instance, both::
 
     bigmler --train data/iris.csv --cross-validation-rate 0.02
     bigmler --dataset dataset/xxxx --cross-validation-rate 0.02
 
-will hold out a 2% of the training data to evaluate a model built upon the 98%
-left. The evaluations will be averaged and the result saved
-in json and human-readable format in ``cross-validation.json`` and
+will hold out 2% of the training data to evaluate a model built upon the
+remaining 98%. The evaluations will be averaged and the result saved
+in json and human-readable formats in ``cross-validation.json`` and
 ``cross-validation.txt`` respectively. 
 
 Configuring Datasets and Models
@@ -374,7 +374,7 @@ Splitting Datasets
 ------------------
 
 When following the usual proceedings to evaluate your models you'll need to
-part the available data in two sets: the training set and the test set. With
+separate the available data in two sets: the training set and the test set. With
 BigMLer you won't need to create two separate physical files. Instead, you
 can set a ``--test-split`` flag that will set the percentage of data used to
 build the test set and leave the rest for training. For instance::
@@ -382,8 +382,8 @@ build the test set and leave the rest for training. For instance::
     bigmler --train data/iris.csv --test-split 0.2 --name iris --evaluate
 
 will build a source with your entire file contents, create the corresponding
-dataset and split it in two: a test dataset with a 20% of instances and a
-training dataset with the 80% left. Then, a model will be created based on the
+dataset and split it in two: a test dataset with 20% of instances and a
+training dataset with the remaining 80%. Then, a model will be created based on the
 training set data and evaluated using the test set.
 
 Fitering Sources
@@ -535,7 +535,7 @@ Requirements
 
 Python 2.7 is currently supported by BigMLer.
 
-BigMLer requires `bigml 0.6.1 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 0.7.0 <https://github.com/bigmlcom/python>`_  or
 higher.
 
 BigMLer Installation

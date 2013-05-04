@@ -61,7 +61,7 @@ def set_source_args(data_set_header, name, description, args):
 
 
 def create_source(data_set, source_args,
-                  args, api, path=None,
+                  args, api=None, path=None,
                   session_file=None, log=None):
     """Creates remote source
 
@@ -77,8 +77,8 @@ def create_source(data_set, source_args,
             with open(path + '/source', 'w', 0) as source_file:
                 source_file.write("%s\n" % source['resource'])
                 source_file.write("%s\n" % source['object']['name'])
-        except IOError:
-            raise IOError("Failed to write %s/source" % path)
+        except IOError, exc:
+            raise IOError("%s: Failed to write %s/source" % (str(exc), path))
     check_resource_error(source, "Failed to create source: ")
     try:
         source = bigml.api.check_resource(source, api.get_source)
@@ -189,7 +189,7 @@ def set_dataset_split_args(name, description, args, sample_rate,
     }
 
 
-def create_dataset(source_or_dataset, dataset_args, args, api, path=None,
+def create_dataset(source_or_dataset, dataset_args, args, api=None, path=None,
                    session_file=None, log=None, dataset_type=None):
     """Creates remote dataset
 
@@ -206,8 +206,9 @@ def create_dataset(source_or_dataset, dataset_args, args, api, path=None,
 
             with open(dataset_file_name, 'w', 0) as dataset_file:
                 dataset_file.write("%s\n" % dataset['resource'])
-        except IOError:
-            raise IOError("Failed to write %s" % dataset_file_name)
+        except IOError, exc:
+            raise IOError("%s: Failed to write %s" % (str(exc),
+                          dataset_file_name))
     check_resource_error(dataset, "Failed to create dataset: ")
     try:
         dataset = bigml.api.check_resource(dataset, api.get_dataset)
@@ -219,7 +220,7 @@ def create_dataset(source_or_dataset, dataset_args, args, api, path=None,
     return dataset
 
 
-def get_dataset(dataset, api, verbosity=True, session_file=None):
+def get_dataset(dataset, api=None, verbosity=True, session_file=None):
     """Retrieves the dataset in its actual state
 
     """
@@ -236,8 +237,7 @@ def get_dataset(dataset, api, verbosity=True, session_file=None):
     return dataset
 
 
-def publish_dataset(dataset, args, api,
-                    session_file=None):
+def publish_dataset(dataset, args, api=None, session_file=None):
     """Publishes dataset and sets its price (if any)
 
     """
@@ -305,7 +305,7 @@ def set_model_args(name, description,
 
 
 def create_models(dataset, model_ids, model_args,
-                  args, api, path=None,
+                  args, api=None, path=None,
                   session_file=None, log=None):
     """Create remote models
 
@@ -348,8 +348,9 @@ def create_models(dataset, model_ids, model_args,
                 try:
                     with open(path + '/models', 'a', 0) as model_file:
                         model_file.write(models_info)
-                except IOError:
-                    raise IOError("Fails to write %s/models" % path)
+                except IOError, exc:
+                    raise IOError("%s: Fails to write %s/models" % (str(exc),
+                                  path))
             check_resource_error(model, "Failed to create model %s:" %
                                  model['resource'])
         if args.number_of_models < 2 and args.verbosity:
@@ -369,7 +370,7 @@ def create_models(dataset, model_ids, model_args,
     return models, model_ids
 
 
-def get_models(model_ids, args, api, session_file=None):
+def get_models(model_ids, args, api=None, session_file=None):
     """Retrieves remote models in its actual status
 
     """
@@ -404,7 +405,7 @@ def get_models(model_ids, args, api, session_file=None):
     return models, model_ids
 
 
-def get_ensemble(ensemble, api, verbosity=True, session_file=None):
+def get_ensemble(ensemble, api=None, verbosity=True, session_file=None):
     """Retrieves remote ensemble in its actual status
 
     """
@@ -487,7 +488,8 @@ def set_evaluation_args(name, description, args, fields=None, fields_map=None):
     return evaluation_args
 
 
-def create_evaluation(model_or_ensemble, dataset, evaluation_args, args, api,
+def create_evaluation(model_or_ensemble, dataset, evaluation_args, args, 
+                      api=None,
                       path=None, session_file=None, log=None, seed=SEED):
     """Create evaluation
 
@@ -505,15 +507,16 @@ def create_evaluation(model_or_ensemble, dataset, evaluation_args, args, api,
         try:
             with open(path + '/evaluation', 'w', 0) as evaluation_file:
                 evaluation_file.write("%s\n" % evaluation['resource'])
-        except IOError:
-            raise IOError("Failed to write %s/evaluation" % path)
+        except IOError, exc:
+            raise IOError("%s: Failed to write %s/evaluation" % (str(exc),
+                          path))
     check_resource_error(evaluation, "Failed to create evaluation: ")
     log_message("%s\n" % evaluation['resource'], log_file=log)
 
     return evaluation
 
 
-def create_evaluations(model_ids, dataset, evaluation_args, args, api,
+def create_evaluations(model_ids, dataset, evaluation_args, args, api=None,
                        path=None, session_file=None, log=None,
                        existing_evaluations=0):
     """Create evaluations for a list of models
@@ -536,8 +539,9 @@ def create_evaluations(model_ids, dataset, evaluation_args, args, api,
             try:
                 with open(path + '/evaluations', 'a', 0) as evaluation_file:
                     evaluation_file.write("%s\n" % evaluation['resource'])
-            except IOError:
-                raise IOError("Failed to write %s/evaluations" % path)
+            except IOError, exc:
+                raise IOError("%s: Failed to write %s/evaluations" % (str(exc),
+                              path))
         check_resource_error(evaluation, "Failed to create evaluation: ")
         evaluations.append(evaluation)
         log_message("%s\n" % evaluation['resource'], log_file=log)
@@ -573,7 +577,6 @@ def save_evaluation(evaluation, output, api=None):
     evaluation_json.flush()
     evaluation_json.close()
     evaluation_txt = open(output + '.txt', 'w', 0)
-    api.pprint(evaluation,
-               evaluation_txt)
+    api.pprint(evaluation, evaluation_txt)
     evaluation_txt.flush()
     evaluation_txt.close()
