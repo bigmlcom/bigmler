@@ -492,6 +492,17 @@ def create_evaluation(model_or_ensemble, dataset, evaluation_args, args,
                       path=None, session_file=None, log=None, seed=SEED):
     """Create evaluation
 
+       ``model_or_ensemble``: resource object or id for the model or ensemble
+                              that should be evaluated
+       ``dataset``: dataset object or id to evaluate with
+       ``evaluation_args``: arguments for the ``create_evaluation`` call
+       ``args``: input values for bigmler flags
+       ``api``: api to remote objects in BigML
+       ``path``: directory to store the BigMLer generated files in
+       ``session_file``: file to store the messages of that session
+       ``log``: user provided log file
+       ``seed``: seed for the dataset sampling (when needed)
+
     """
     if api is None:
         api = bigml.api.BigML()
@@ -520,6 +531,15 @@ def create_evaluations(model_ids, dataset, evaluation_args, args, api=None,
                        existing_evaluations=0):
     """Create evaluations for a list of models
 
+       ``model_ids``: list of model ids to create an evaluation of
+       ``dataset``: dataset object or id to evaluate with
+       ``evaluation_args``: arguments for the ``create_evaluation`` call
+       ``args``: input values for bigmler flags
+       ``api``: api to remote objects in BigML
+       ``path``: directory to store the BigMLer generated files in
+       ``session_file``: file to store the messages of that session
+       ``log``: user provided log file
+       ``seed``: seed for the dataset sampling (when needed)
     """
     evaluations = []
     if api is None:

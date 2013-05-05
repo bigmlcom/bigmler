@@ -91,13 +91,13 @@ def source_processing(training_set, test_set, training_set_header,
     fields = None
     if (training_set or (args.evaluate and test_set)):
         # If resuming, try to extract args.source form log files
+
         if resume:
-            resume, args.source = c.checkpoint(c.is_source_created, path,
-                                               debug=args.debug)
-            if not resume:
-                message = u.dated("Source not found. Resuming.\n")
-                u.log_message(message, log_file=session_file,
-                              console=args.verbosity)
+            message = u.dated("Source not found. Resuming.\n")
+            resume, args.source = c.checkpoint(
+                c.is_source_created, path, debug=args.debug, message=message,
+                log_file=session_file, console=args.verbosity)
+
 
     # If neither a previous source, dataset or model are provided.
     # we create a new one. Also if --evaluate and test data are provided
@@ -150,12 +150,11 @@ def dataset_processing(source, training_set, test_set, model_ids, name,
     if (training_set or args.source or (args.evaluate and test_set)):
         # if resuming, try to extract args.dataset form log files
         if resume:
-            resume, args.dataset = c.checkpoint(c.is_dataset_created, path,
-                                                debug=args.debug)
-            if not resume:
-                message = u.dated("Dataset not found. Resuming.\n")
-                u.log_message(message, log_file=session_file,
-                              console=args.verbosity)
+            message = u.dated("Dataset not found. Resuming.\n")
+            resume, args.dataset = c.checkpoint(
+                c.is_dataset_created, path, debug=args.debug, message=message,
+                log_file=session_file, console=args.verbosity)
+
     # If we have a source but no dataset or model has been provided, we
     # create a new dataset if the no_dataset option isn't set up. Also
     # if evaluate is set and test_set has been provided.
@@ -193,13 +192,10 @@ def split_processing(dataset, name, description, api, args, resume,
     sample_rate = 1 - args.test_split
     # if resuming, try to extract train dataset form log files
     if resume:
-        resume, train_dataset = c.checkpoint(c.is_dataset_created, path,
-                                             "_train",
-                                             debug=args.debug)
-        if not resume:
-            message = u.dated("Dataset not found. Resuming.\n")
-            u.log_message(message, log_file=session_file,
-                          console=args.verbosity)
+        message = u.dated("Dataset not found. Resuming.\n")
+        resume, train_dataset = c.checkpoint(
+            c.is_dataset_created, path, "_train", debug=args.debug,
+            message=message, log_file=session_file, console=args.verbosity)
 
     if train_dataset is None:
         dataset_split_args = r.set_dataset_split_args(
@@ -215,13 +211,11 @@ def split_processing(dataset, name, description, api, args, resume,
 
     # if resuming, try to extract test dataset form log files
     if resume:
-        resume, test_dataset = c.checkpoint(c.is_dataset_created, path,
-                                            "_test",
-                                            debug=args.debug)
-        if not resume:
-            message = u.dated("Dataset not found. Resuming.\n")
-            u.log_message(message, log_file=session_file,
-                          console=args.verbosity)
+        message = u.dated("Dataset not found. Resuming.\n")
+        resume, test_dataset = c.checkpoint(
+            c.is_dataset_created, path, "_test", debug=args.debug,
+            message=message, log_file=session_file, console=args.verbosity)
+
     if test_dataset is None:
         dataset_split_args = r.set_dataset_split_args(
             "%s - test (%s %%)" % (name,
@@ -254,15 +248,15 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
         model_ids = []
         models = []
         if resume:
-            resume, model_ids = c.checkpoint(c.are_models_created, path,
-                                             args.number_of_models,
-                                             debug=args.debug)
+            resume, model_ids = c.checkpoint(
+                c.are_models_created, path, args.number_of_models,
+                debug=args.debug)
             if not resume:
                 message = u.dated("Found %s models out of %s. Resuming.\n" %
-                                  (len(model_ids),
-                                   args.number_of_models))
+                                  (len(model_ids), args.number_of_models))
                 u.log_message(message, log_file=session_file,
                               console=args.verbosity)
+
             models = model_ids
             args.number_of_models -= len(model_ids)
 
