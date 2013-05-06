@@ -247,6 +247,7 @@ def combine_votes(votes_files, to_prediction, to_file, method=0):
     for multivote in votes:
         write_prediction(multivote.combine(method, True), output)
 
+
 def delete(api, delete_list):
     """ Deletes the resources given in the list.
 
@@ -294,7 +295,13 @@ def write_prediction(prediction, output=sys.stdout):
     row = [prediction]
     if confidence:
         row.append(confidence)
-    output.writerow(row)
+    try:
+        output.writerow(row)
+    except AttributeError:
+        try:
+            output.write(row)
+        except AttributeError:
+            raise AttributeError("You should provide a writeable object")
 
 
 def tail(file_handler, window=1):
@@ -333,118 +340,6 @@ def get_log_reversed(file_name, stack_level):
     """
     lines_list = tail(open(file_name, "r"), window=(stack_level + 1))
     return lines_list[0]
-
-
-def is_source_created(path):
-    """Reads the source id from the source file in the path directory
-
-    """
-    source_id = None
-    try:
-        with open("%s%ssource" % (path, os.sep)) as source_file:
-            source_id = source_file.readline().strip()
-            try:
-                source_id = bigml.api.get_source_id(source_id)
-                return True, source_id
-            except ValueError:
-                return False, None
-    except IOError:
-        return False, None
-
-
-def is_dataset_created(path):
-    """Reads the dataset id from the dataset file in the path directory
-
-    """
-    dataset_id = None
-    try:
-        with open("%s%sdataset" % (path, os.sep)) as dataset_file:
-            dataset_id = dataset_file.readline().strip()
-            try:
-                dataset_id = bigml.api.get_dataset_id(dataset_id)
-                return True, dataset_id
-            except ValueError:
-                return False, None
-    except IOError:
-        return False, None
-
-
-def are_models_created(path, number_of_models):
-    """Reads the model ids from the models file in the path directory
-
-    """
-    model_ids = []
-    try:
-        with open("%s%smodels" % (path, os.sep)) as models_file:
-            for line in models_file:
-                model = line.strip()
-                try:
-                    model_id = bigml.api.get_model_id(model)
-                    model_ids.append(model_id)
-                except ValueError:
-                    return False, model_ids
-        if len(model_ids) == number_of_models:
-            return True, model_ids
-        else:
-            return False, model_ids
-    except IOError:
-        return False, model_ids
-
-
-def are_predictions_created(predictions_file, number_of_tests):
-    """Reads the predictions from the predictions file in the path directory
-
-    """
-    predictions = file_number_of_lines(predictions_file)
-    if predictions != number_of_tests:
-        os.remove(predictions_file)
-        return False
-    return True
-
-
-def is_evaluation_created(path):
-    """Reads the evaluation id from the evaluation file in the path directory
-
-    """
-    evaluation_id = None
-    try:
-        with open("%s%sevaluation" % (path, os.sep)) as evaluation_file:
-            evaluation_id = evaluation_file.readline().strip()
-            try:
-                evaluation_id = bigml.api.get_evaluation_id(evaluation_id)
-                return True, evaluation_id
-            except ValueError:
-                return False, None
-    except IOError:
-        return False, None
-
-
-def checkpoint(function, *args, **kwargs):
-    """Redirects to each checkpoint function
-
-    """
-
-    debug = kwargs.get('debug', False)
-    result = function(*args)
-    if debug:
-        console_log("Checkpoint: checking %s with args:\n%s\n\nResult:\n%s\n" %
-                    (function.__name__, "\n".join([repr(arg) for arg in args]),
-                     repr(result)))
-    return result
-
-
-def file_number_of_lines(file_name):
-    """Counts the number of lines in a file
-
-    """
-    try:
-        item = (0, None)
-        with open(file_name) as file_handler:
-            for item in enumerate(file_handler):
-                pass
-        return item[0] + 1
-    except IOError:
-        return 0
 
 
 def print_tree(directory, padding):
@@ -507,11 +402,11 @@ def prediction_to_row(prediction):
     return row
 
 
-def get_url(resource, api):
+def get_url(resource):
     """Returns the resource's url in bigml.com
 
     """
-    resource_id = api.get_resource_id(resource)
+    resource_id = bigml.api.get_resource_id(resource)
     if not resource_id:
         return ""
     return RESOURCE_URL + resource_id
@@ -544,4 +439,4 @@ def check_resource_error(resource, message):
 
     """
     if bigml.api.get_status(resource)['code'] == bigml.api.FAULTY:
-        sys.exit(message, resource['error'])
+        sys.exit("%s: %s" % (message, resource['error']))

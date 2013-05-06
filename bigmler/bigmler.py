@@ -54,11 +54,13 @@ import StringIO
 import bigml.api
 import bigmler.utils as u
 import bigmler.resources as r
+import bigmler.checkpoint as c
 
 from bigml.fields import Fields
 from bigml.multivote import COMBINATION_WEIGHTS, COMBINER_MAP, PLURALITY
 from bigml.model import Model
 
+from bigmler.evaluation import evaluate, cross_validate
 from bigmler.options import create_parser
 from bigmler.defaults import get_user_defaults
 from bigmler.defaults import DEFAULTS_FILE
@@ -75,6 +77,240 @@ LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 MISSING_TOKENS = ['', 'N/A', 'n/a', 'NULL', 'null', '-', '#DIV/0', '#REF!',
                   '#NAME?', 'NIL', 'nil', 'NA', 'na', '#VALUE!', '#NULL!',
                   'NaN', '#N/A', '#NUM!', '?']
+MONTECARLO_FACTOR = 200
+
+
+def source_processing(training_set, test_set, training_set_header,
+                      test_set_header, name, description, api, args, resume,
+                      csv_properties=None, field_attributes=None, types=None,
+                      session_file=None, path=None, log=None):
+    """Creating or retrieving a data source from input arguments
+
+    """
+    source = None
+    fields = None
+    if (training_set or (args.evaluate and test_set)):
+        # If resuming, try to extract args.source form log files
+
+        if resume:
+            message = u.dated("Source not found. Resuming.\n")
+            resume, args.source = c.checkpoint(
+                c.is_source_created, path, debug=args.debug, message=message,
+                log_file=session_file, console=args.verbosity)
+
+
+    # If neither a previous source, dataset or model are provided.
+    # we create a new one. Also if --evaluate and test data are provided
+    # we create a new dataset to test with.
+    data_set, data_set_header = r.data_to_source(training_set, test_set,
+                                                 training_set_header,
+                                                 test_set_header, args)
+    if data_set is not None:
+        source_args = r.set_source_args(data_set_header, name, description,
+                                        args)
+        source = r.create_source(data_set, source_args, args, api,
+                                 path, session_file, log)
+
+    # If a source is provided either through the command line or in resume
+    # steps, we use it.
+    elif args.source:
+        source = bigml.api.get_source_id(args.source)
+
+    # If we already have source, we check that is finished, extract the
+    # fields, and update them if needed.
+    if source:
+        source = r.get_source(source, api, args.verbosity, session_file)
+        if 'source_parser' in source['object']:
+            source_parser = source['object']['source_parser']
+            if 'missing_tokens' in source_parser:
+                csv_properties['missing_tokens'] = (
+                    source_parser['missing_tokens'])
+            if 'data_locale' in source_parser:
+                csv_properties['data_locale'] = source_parser['locale']
+
+        fields = Fields(source['object']['fields'], **csv_properties)
+        if field_attributes:
+            source = r.update_source_fields(source, field_attributes, fields,
+                                            api, args.verbosity,
+                                            session_file)
+        if types:
+            source = r.update_source_fields(source, types, fields, api,
+                                            args.verbosity, session_file)
+    return source, resume, csv_properties, fields
+
+
+def dataset_processing(source, training_set, test_set, model_ids, name,
+                       description, fields, dataset_fields, api, args,
+                       resume, csv_properties=None,
+                       session_file=None, path=None, log=None):
+    """Creating or retrieving dataset from input arguments
+
+    """
+    dataset = None
+    if (training_set or args.source or (args.evaluate and test_set)):
+        # if resuming, try to extract args.dataset form log files
+        if resume:
+            message = u.dated("Dataset not found. Resuming.\n")
+            resume, args.dataset = c.checkpoint(
+                c.is_dataset_created, path, debug=args.debug, message=message,
+                log_file=session_file, console=args.verbosity)
+
+    # If we have a source but no dataset or model has been provided, we
+    # create a new dataset if the no_dataset option isn't set up. Also
+    # if evaluate is set and test_set has been provided.
+    if ((source and not args.dataset and not args.model and not model_ids and
+            not args.no_dataset) or
+            (args.evaluate and args.test_set and not args.dataset)):
+        dataset_args = r.set_dataset_args(name, description, args, fields,
+                                          dataset_fields)
+        dataset = r.create_dataset(source, dataset_args, args, api,
+                                   path, session_file, log)
+
+    # If a dataset is provided, let's retrieve it.
+    elif args.dataset:
+        dataset = bigml.api.get_dataset_id(args.dataset)
+
+    # If we already have a dataset, we check the status and get the fields if
+    # we hadn't them yet.
+    if dataset:
+        dataset = r.get_dataset(dataset, api, args.verbosity, session_file)
+        if not csv_properties and 'locale' in dataset['object']:
+            csv_properties = {
+                'data_locale': dataset['object']['locale']}
+        fields = Fields(dataset['object']['fields'], **csv_properties)
+        if args.public_dataset:
+            r.publish_dataset(dataset, api, args, session_file)
+    return dataset, resume, csv_properties, fields
+
+
+def split_processing(dataset, name, description, api, args, resume,
+                     session_file=None, path=None, log=None):
+    """Splits a dataset into train and test datasets
+    """
+    train_dataset = None
+    test_dataset = None
+    sample_rate = 1 - args.test_split
+    # if resuming, try to extract train dataset form log files
+    if resume:
+        message = u.dated("Dataset not found. Resuming.\n")
+        resume, train_dataset = c.checkpoint(
+            c.is_dataset_created, path, "_train", debug=args.debug,
+            message=message, log_file=session_file, console=args.verbosity)
+
+    if train_dataset is None:
+        dataset_split_args = r.set_dataset_split_args(
+            "%s - train (%s %%)" % (name,
+            int(sample_rate * 100)), description, args,
+            sample_rate, out_of_bag=False)
+        train_dataset = r.create_dataset(
+            dataset, dataset_split_args, args, api, path, session_file,
+            log, "train")
+        if train_dataset:
+            train_dataset = r.get_dataset(train_dataset, api,
+                                          args.verbosity, session_file)
+
+    # if resuming, try to extract test dataset form log files
+    if resume:
+        message = u.dated("Dataset not found. Resuming.\n")
+        resume, test_dataset = c.checkpoint(
+            c.is_dataset_created, path, "_test", debug=args.debug,
+            message=message, log_file=session_file, console=args.verbosity)
+
+    if test_dataset is None:
+        dataset_split_args = r.set_dataset_split_args(
+            "%s - test (%s %%)" % (name,
+            int(args.test_split * 100)), description, args,
+            sample_rate, out_of_bag=True)
+        test_dataset = r.create_dataset(
+            dataset, dataset_split_args, args, api, path, session_file,
+            log, "test")
+        if test_dataset:
+            test_dataset = r.get_dataset(test_dataset, api, args.verbosity,
+                                         session_file)
+    return train_dataset, test_dataset, resume
+
+
+def models_processing(dataset, models, model_ids, name, description, test_set,
+                      objective_field, fields, model_fields, api, args, resume,
+                      session_file=None, path=None, log=None):
+    """Creates or retrieves models from the input data
+
+    """
+    # If we have a dataset but not a model, we create the model if the no_model
+    # flag hasn't been set up.
+    if (dataset and not args.model and not model_ids and not args.no_model
+            and not args.ensemble):
+        # Cross-validation case: we create 2 * n models to be validated
+        # holding out an n% of data
+        if args.cross_validation_rate > 0:
+            args.number_of_models = int(MONTECARLO_FACTOR *
+                                        args.cross_validation_rate)
+        model_ids = []
+        models = []
+        if resume:
+            resume, model_ids = c.checkpoint(
+                c.are_models_created, path, args.number_of_models,
+                debug=args.debug)
+            if not resume:
+                message = u.dated("Found %s models out of %s. Resuming.\n" %
+                                  (len(model_ids), args.number_of_models))
+                u.log_message(message, log_file=session_file,
+                              console=args.verbosity)
+
+            models = model_ids
+            args.number_of_models -= len(model_ids)
+
+        model_args = r.set_model_args(name, description, args,
+                                      objective_field, fields, model_fields)
+        models, model_ids = r.create_models(dataset, models,
+                                            model_args, args, api,
+                                            path, session_file, log)
+    # If a model is provided, we use it.
+    elif args.model:
+        model_ids = [args.model]
+        models = model_ids[:]
+
+    elif args.ensemble:
+        ensemble = r.get_ensemble(args.ensemble, api, args.verbosity,
+                                  session_file)
+        model_ids = ensemble['object']['models']
+        models = model_ids[:]
+
+    elif args.models or args.model_tag:
+        models = model_ids[:]
+
+    # If we are going to predict we must retrieve the models
+    if model_ids and test_set and not args.evaluate:
+        models, model_ids = r.get_models(models, args, api, session_file)
+
+    return models, model_ids, resume
+
+
+def get_model_fields(model, model_fields, csv_properties, args):
+    """Retrieves fields info from model resource
+
+    """
+    if not csv_properties:
+        csv_properties = {}
+    csv_properties.update(verbose=True)
+    if args.user_locale is None:
+        args.user_locale = model['object'].get('locale', None)
+    csv_properties.update(data_locale=args.user_locale)
+    if 'model_fields' in model['object']['model']:
+        model_fields = model['object']['model']['model_fields'].keys()
+        csv_properties.update(include=model_fields)
+    if 'missing_tokens' in model['object']['model']:
+        missing_tokens = model['object']['model']['missing_tokens']
+    else:
+        missing_tokens = MISSING_TOKENS
+    csv_properties.update(missing_tokens=missing_tokens)
+    objective_field = model['object']['objective_fields']
+    if isinstance(objective_field, list):
+        objective_field = objective_field[0]
+    csv_properties.update(objective_field=objective_field)
+    fields = Fields(model['object']['model']['fields'], **csv_properties)
+
+    return fields, objective_field
 
 
 def compute_output(api, args, training_set, test_set=None, output=None,
@@ -118,136 +354,29 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             except IOError:
                 pass
 
-    # Starting source processing
+    source, resume, csv_properties, fields = source_processing(
+        training_set, test_set, training_set_header, test_set_header,
+        name, description, api, args, resume, csv_properties=csv_properties,
+        field_attributes=field_attributes,
+        types=types, session_file=session_file, path=path, log=log)
 
-    if (training_set or (args.evaluate and test_set)):
-        # If resuming, try to extract args.source form log files
-        if resume:
-            resume, args.source = u.checkpoint(u.is_source_created, path,
-                                               debug=args.debug)
-            if not resume:
-                message = u.dated("Source not found. Resuming.\n")
-                u.log_message(message, log_file=session_file,
-                              console=args.verbosity)
+    dataset, resume, csv_properties, fields = dataset_processing(
+        source, training_set, test_set, model_ids, name, description, fields,
+        dataset_fields, api, args, resume, csv_properties=csv_properties,
+        session_file=session_file, path=path, log=log)
 
-    # If neither a previous source, dataset or model are provided.
-    # we create a new one. Also if --evaluate and test data are provided
-    # we create a new dataset to test with.
-    data_set, data_set_header = r.data_to_source(training_set, test_set,
-                                                 training_set_header,
-                                                 test_set_header, args)
-    if data_set is not None:
-        source_args = r.set_source_args(data_set_header, name, description,
-                                        args)
-        source = r.create_source(data_set, source_args, args, api,
-                                 path, session_file, log)
+    # If test_split is used, split the dataset in a training and a test dataset
+    # according to the given split
+    if args.test_split > 0:
+        dataset, test_dataset, resume = split_processing(
+            dataset, name, description, api, args, resume,
+            session_file=session_file, path=path, log=log)
 
-    # If a source is provided either through the command line or in resume
-    # steps, we use it.
-    elif args.source:
-        source = bigml.api.get_source_id(args.source)
-
-    # If we already have source, we check that is finished, extract the
-    # fields, and update them if needed.
-    if source:
-        source = r.get_source(source, api, args.verbosity, session_file)
-        if 'source_parser' in source['object']:
-            source_parser = source['object']['source_parser']
-            if 'missing_tokens' in source_parser:
-                csv_properties['missing_tokens'] = (
-                    source_parser['missing_tokens'])
-            if 'data_locale' in source_parser:
-                csv_properties['data_locale'] = source_parser['locale']
-
-        fields = Fields(source['object']['fields'], **csv_properties)
-        if field_attributes:
-            source = r.update_source_fields(source, field_attributes, fields,
-                                            api, args.verbosity,
-                                            session_file)
-        if types:
-            source = r.update_source_fields(source, types, fields, api,
-                                            args.verbosity, session_file)
-
-    # End of source processing
-
-    # Starting dataset processing
-
-    if (training_set or args.source or (args.evaluate and test_set)):
-        # if resuming, try to extract args.dataset form log files
-        if resume:
-            resume, args.dataset = u.checkpoint(u.is_dataset_created, path,
-                                                debug=args.debug)
-            if not resume:
-                message = u.dated("Dataset not found. Resuming.\n")
-                u.log_message(message, log_file=session_file,
-                              console=args.verbosity)
-    # If we have a source but not dataset or model has been provided, we
-    # create a new dataset if the no_dataset option isn't set up. Also
-    # if evaluate is set and test_set has been provided.
-    if ((source and not args.dataset and not args.model and not model_ids and
-            not args.no_dataset) or
-            (args.evaluate and args.test_set and not args.dataset)):
-        dataset_args = r.set_dataset_args(name, description, args, fields,
-                                          dataset_fields)
-        dataset = r.create_dataset(source, dataset_args, args, api,
-                                   path, session_file, log)
-
-    # If a dataset is provided, let's retrieve it.
-    elif args.dataset:
-        dataset = bigml.api.get_dataset_id(args.dataset)
-
-    # If we already have a dataset, we check the status and get the fields if
-    # we hadn't them yet.
-    if dataset:
-        dataset = r.get_dataset(dataset, api, args.verbosity, session_file)
-        if not csv_properties and 'locale' in dataset['object']:
-            csv_properties = {
-                'data_locale': dataset['object']['locale']}
-        fields = Fields(dataset['object']['fields'], **csv_properties)
-        if args.public_dataset:
-            r.publish_dataset(dataset, api, args, session_file)
-
-    #end of dataset processing
-
-    #start of model processing
-
-    # If we have a dataset but not a model, we create the model if the no_model
-    # flag hasn't been set up.
-    if (dataset and not args.model and not model_ids and not args.no_model):
-        model_ids = []
-        models = []
-        if resume:
-            resume, model_ids = u.checkpoint(u.are_models_created, path,
-                                             args.number_of_models,
-                                             debug=args.debug)
-            if not resume:
-                message = u.dated("Found %s models out of %s. Resuming.\n" %
-                                  (len(model_ids),
-                                   args.number_of_models))
-                u.log_message(message, log_file=session_file,
-                              console=args.verbosity)
-            models = model_ids
-            args.number_of_models -= len(model_ids)
-
-        model_args = r.set_model_args(name, description, args,
-                                      objective_field, fields, model_fields)
-        models, model_ids = r.create_models(dataset, models,
-                                            model_args, args, api,
-                                            path, session_file, log)
-        model = models[0]
-    # If a model is provided, we use it.
-    elif args.model:
-        model = args.model
-        model_ids = [model]
-        models = [model]
-
-    elif args.models or args.model_tag:
-        models = model_ids[:]
-        model = models[0]
-
-    # If we are going to predict we must retrieve the models
-    if model_ids and test_set and not args.evaluate:
-        models, model_ids = r.get_models(models, args, api, session_file)
+    models, models_ids, resume = models_processing(
+        dataset, models, model_ids, name, description, test_set,
+        objective_field, fields, model_fields, api, args, resume,
+        session_file=session_file, path=path, log=log)
+    if models:
         model = models[0]
 
     # We get the fields of the model if we haven't got
@@ -257,27 +386,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if args.black_box or args.white_box:
             model = r.publish_model(model, args, api, session_file)
             models[0] = model
-        if not csv_properties:
-            csv_properties = {}
-        csv_properties.update(verbose=True)
-        if args.user_locale is None:
-            args.user_locale = model['object'].get('locale', None)
-        csv_properties.update(data_locale=args.user_locale)
-        if 'model_fields' in model['object']['model']:
-            model_fields = model['object']['model']['model_fields'].keys()
-            csv_properties.update(include=model_fields)
-        if 'missing_tokens' in model['object']['model']:
-            missing_tokens = model['object']['model']['missing_tokens']
-        else:
-            missing_tokens = MISSING_TOKENS
-        csv_properties.update(missing_tokens=missing_tokens)
-        objective_field = models[0]['object']['objective_fields']
-        if isinstance(objective_field, list):
-            objective_field = objective_field[0]
-        csv_properties.update(objective_field=objective_field)
-        fields = Fields(model['object']['model']['fields'], **csv_properties)
-
-    # end of model processing
+        fields, objective_field = get_model_fields(model, model_fields,
+                                                   csv_properties, args)
 
     # If predicting
     if models and test_set and not args.evaluate:
@@ -292,7 +402,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         model_id = re.sub(r'.*(model_[a-f0-9]{24})__predictions\.csv$',
                           r'\1', votes_files[0]).replace("_", "/")
         try:
-            model = api.check_resource(model_id, api.get_model)
+            model = bigml.api.check_resource(model_id, api.get_model)
         except ValueError, exception:
             sys.exit("Failed to get model %s: %s" % (model_id, str(exception)))
 
@@ -306,23 +416,22 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # If evaluate flag is on, create remote evaluation and save results in
     # json and human-readable format.
     if args.evaluate:
-        if resume:
-            resume, evaluation = u.checkpoint(u.is_evaluation_created, path,
-                                              debug=args.debug)
-            if not resume:
-                message = u.dated("Evaluation not found. Resuming.\n")
-                u.log_message(message, log_file=session_file,
-                              console=args.verbosity)
-        if not resume:
-            evaluation_args = r.set_evaluation_args(name, description, args,
-                                                    fields, fields_map)
-            evaluation = r.create_evaluation(model, dataset, evaluation_args,
-                                             args, api, path, session_file,
-                                             log)
+        if args.test_split > 0:
+            dataset = test_dataset
+        resume = evaluate(model, dataset, name, description, fields,
+                          fields_map, output, api, args, resume,
+                          session_file=session_file, path=path, log=log)
 
-        evaluation = r.get_evaluation(evaluation, api, args.verbosity,
-                                      session_file)
-        r.save_evaluation(evaluation, output, api)
+    # If cross_validation_rate is > 0, create remote evaluations and save
+    # results in json and human-readable format. Then average the results to
+    # issue a cross_validation measure set.
+    if args.cross_validation_rate > 0:
+        args.sample_rate = 1 - args.cross_validation_rate
+        number_of_evaluations = int(MONTECARLO_FACTOR *
+                                    args.cross_validation_rate)
+        cross_validate(models, dataset, number_of_evaluations, name,
+                       description, fields, fields_map, api, args, resume,
+                       session_file=session_file, path=path, log=log)
 
     # Workaround to restore windows console cp850 encoding to print the tree
     if sys.platform == "win32" and sys.stdout.isatty():
@@ -375,6 +484,16 @@ def main(args=sys.argv[1:]):
     # Parses command line arguments.
     command_args = parser.parse_args(args)
 
+    if command_args.cross_validation_rate > 0 and (
+            command_args.test_set or command_args.evaluate or
+            command_args.model or command_args.models or
+            command_args.model_tag):
+        parser.error("Non compatible flags: --cross-validation-rate"
+                     " cannot be used with --evaluate, --model,"
+                     " --models or --model-tag. Usage:\n\n"
+                     "bigmler --train data/iris.csv "
+                     "--cross-validation-rate 0.1")
+
     default_output = ('evaluation' if command_args.evaluate
                       else 'predictions.csv')
     if command_args.resume:
@@ -387,7 +506,7 @@ def main(args=sys.argv[1:]):
             if (position == (len(args) - 1) or
                     args[position + 1].startswith("--")):
                 train_stdin = True
-        except:
+        except ValueError:
             pass
         output_dir = u.get_log_reversed(DIRS_LOG,
                                         command_args.stack_level)
@@ -453,18 +572,24 @@ def main(args=sys.argv[1:]):
         'dev_mode': command_args.dev_mode,
         'debug': command_args.debug}
 
+    if command_args.store:
+        api_command_args.update({'storage': u.check_dir(session_file)})
+
     api = bigml.api.BigML(**api_command_args)
 
     if (command_args.evaluate
         and not (command_args.training_set or command_args.source
                  or command_args.dataset)
         and not (command_args.test_set and (command_args.model or
-                 command_args.models or command_args.model_tag))):
+                 command_args.models or command_args.model_tag or
+                 command_args.ensemble))):
         parser.error("Evaluation wrong syntax.\n"
                      "\nTry for instance:\n\nbigmler --train data/iris.csv"
                      " --evaluate\nbigmler --model "
                      "model/5081d067035d076151000011 --dataset "
-                     "dataset/5081d067035d076151003423 --evaluate")
+                     "dataset/5081d067035d076151003423 --evaluate\n"
+                     "bigmler --ensemble ensemble/5081d067035d076151003443"
+                     " --evaluate")
 
     if command_args.objective_field:
         objective = command_args.objective_field

@@ -26,7 +26,7 @@ Requirements
 
 Python 2.7 is currently supported by BigMLer.
 
-BigMLer requires `bigml 0.5.2 <https://github.com/bigmlcom/python>`_  or higher.
+BigMLer requires `bigml 0.7.0 <https://github.com/bigmlcom/python>`_  or higher.
 
 BigMLer Installation
 ====================
@@ -121,18 +121,25 @@ A different ``objective field`` (the field that you want to predict) can be sele
 If you do not explicitly specify an objective field, BigML will default to the last
 column in your dataset.
 
-BigMLer will try to use the locale of the model to interpret test data. In case
-it fails, it will try `en_US.UTF-8`
-or 'English_United States.1252' and a warning message will be printed.
+BigMLer will try to use the locale of the model both to create a new source
+(if ``--train`` flag is used) and to interpret test data. In case
+it fails, it will try ``en_US.UTF-8``
+or ``English_United States.1252`` and a warning message will be printed.
 If you want to change this behaviour you can specify your preferred locale::
 
-    bigmler --train data/iris.csv --test data/test_iris.csv --locale "English_United States.1252"
+    bigmler --train data/iris.csv --test data/test_iris.csv \
+    --locale "English_United States.1252"
 
-If you check your working directory you will see that BigMLer creates a file with the
+If you check your working directory you will see that BigMLer creates a file
+with the
 model ids that have been generated (e.g., FriNov0912_223645/models).
 This file is handy if then you want to use those model ids to generate local
-predictions. BigMLer also creates a file with the dataset id that have been
-generated (e.g., TueNov1312_003451/dataset).
+predictions. BigMLer also creates a file with the dataset id that has been
+generated (e.g., TueNov1312_003451/dataset) and another one summarizing
+the steps taken in the session progress: ``bigmler_sessions``. You can also
+store a copy of every created or retrieved resource in your output directory
+(e.g., TueNov1312_003451/model_50c23e5e035d07305a00004f) by setting the flag
+``--store``.
 
 Prior Versions Compatibility Issues
 -----------------------------------

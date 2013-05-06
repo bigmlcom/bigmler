@@ -58,9 +58,10 @@ read it from the standard input::
 
     cat data/iris.csv | bigmler --train
 
-BigMLer will try to use the locale of the model to interpret test data. In case
-it fails, it will try `en_US.UTF-8`
-or `English_United States.1252` and a warning message will be printed.
+BigMLer will try to use the locale of the model both to create a new source
+(if the ``--train`` flag is used) and to interpret test data. In case
+it fails, it will try ``en_US.UTF-8``
+or ``English_United States.1252`` and a warning message will be printed.
 If you want to change this behaviour you can specify your preferred locale::
 
     bigmler --train data/iris.csv --test data/test_iris.csv \
@@ -70,9 +71,12 @@ If you check your working directory you will see that BigMLer creates a file
 with the
 model ids that have been generated (e.g., FriNov0912_223645/models).
 This file is handy if then you want to use those model ids to generate local
-predictions. BigMLer also creates a file with the dataset id that have been
-generated (e.g., TueNov1312_003451/dataset). It also creates a file summarizing
-the steps taken in the session progress: ``bigmler_sessions``.
+predictions. BigMLer also creates a file with the dataset id that has been
+generated (e.g., TueNov1312_003451/dataset) and another one summarizing
+the steps taken in the session progress: ``bigmler_sessions``. You can also
+store a copy of every created or retrieved resource in your output directory
+(e.g., TueNov1312_003451/model_50c23e5e035d07305a00004f) by setting the flag
+``--store``.
 
 Remote Sources
 --------------
@@ -247,7 +251,7 @@ simplest way to build a model and evaluate it all at once is::
 
 which will build the source, dataset and model objects for you using 80% of
 the data in your training file chosen at random. After that, the remaining 20%
-of the data will be run through the mode to obtain
+of the data will be run through the model to obtain
 the corresponding evaluation. You can use the same procedure with a previously
 existing source or dataset::
 
@@ -271,6 +275,26 @@ As for predictions, you can specify a particular file name to store the
 evaluation in::
 
     bigmler --train data/iris.csv --evaluate --output my_dir/evaluation
+
+Cross-validation
+----------------
+
+If you need cross-validation techniques to ponder which parameters (like
+the ones related to different kinds of pruning) can improve the quality of your
+models, you can use the ``--cross-validation-rate`` flag to settle the
+part of your training data that will be separated for cross validation. BigMLer
+will use a Monte-Carlo cross-validation variant, building ``2*n`` different
+models, each of which is constructed by a subset of the training data,
+holding out randomly ``n%`` of the instances. The held-out data will then be
+used to evaluate the corresponding model. For instance, both::
+
+    bigmler --train data/iris.csv --cross-validation-rate 0.02
+    bigmler --dataset dataset/xxxx --cross-validation-rate 0.02
+
+will hold out 2% of the training data to evaluate a model built upon the
+remaining 98%. The evaluations will be averaged and the result saved
+in json and human-readable formats in ``cross-validation.json`` and
+``cross-validation.txt`` respectively. 
 
 Configuring Datasets and Models
 -------------------------------
@@ -344,6 +368,23 @@ header row or not. For example, if both come without header::
 
     bigmler --train data/iris_nh.csv --test data/test_iris_nh.csv \
     --no-train-header --no-test-header
+
+
+Splitting Datasets
+------------------
+
+When following the usual proceedings to evaluate your models you'll need to
+separate the available data in two sets: the training set and the test set. With
+BigMLer you won't need to create two separate physical files. Instead, you
+can set a ``--test-split`` flag that will set the percentage of data used to
+build the test set and leave the rest for training. For instance::
+
+    bigmler --train data/iris.csv --test-split 0.2 --name iris --evaluate
+
+will build a source with your entire file contents, create the corresponding
+dataset and split it in two: a test dataset with 20% of instances and a
+training dataset with the remaining 80%. Then, a model will be created based on the
+training set data and evaluated using the test set.
 
 Fitering Sources
 ----------------
@@ -494,7 +535,7 @@ Requirements
 
 Python 2.7 is currently supported by BigMLer.
 
-BigMLer requires `bigml 0.5.2 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 0.7.0 <https://github.com/bigmlcom/python>`_  or
 higher.
 
 BigMLer Installation
@@ -590,6 +631,8 @@ value is ``smart``
 --evaluate                  Turns on evaluation mode
 --resume                    Retries command execution.
 --stack-level LEVEL         Level of the retried command in the stack
+--cross-validation-rate RATE    Fraction of the training data held out for
+Monte-Carlo cross-validation
 
 Content
 -------
@@ -697,6 +740,8 @@ command.
 --verbosity LEVEL           Turns on (1) or off (0) the verbosity.
 --clear-logs                Clears the ``.bigmler``, ``.bigmler_dir_stack``,
 ``.bigmler_dirs`` and user log file given in ``--resources-log`` (if any).
+--store                     Stores every created or retrieved resource in your
+output directory
 
 Prior Versions Compatibility Issues
 -----------------------------------

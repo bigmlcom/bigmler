@@ -3,6 +3,13 @@
 History
 -------
 
+0.3.0 (2013-04-30)
+~~~~~~~~~~~~~~~~~~
+
+- Adding cross-validation feature
+- Using user locale to create new resources in BigML
+- Adding --ensemble flag to use ensembles in predictions and evaluations
+
 0.2.1 (2013-03-03)
 ~~~~~~~~~~~~~~~~~~
 

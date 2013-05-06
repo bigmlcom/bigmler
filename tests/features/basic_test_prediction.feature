@@ -121,4 +121,25 @@ Feature: Upload source and produce test predictions
         Examples:
         |scenario    | kwargs                                                  | test                    | output                         |predictions_file                        | objective | fields   |
         | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | ../data/test_iris.csv   | ./scenario11/predictions.csv   | ./check_files/predictions_iris_b.csv   | 0         | "petal length","petal width" |
-        
+
+
+    Scenario: Successfully building cross-validation from dataset
+        Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
+        And I create a BigML cross-validation with rate <rate> using a dataset and log results in "<output>"
+        And I check that the models have been created
+        And I check that the evaluations have been created
+        Then the cross-validation json model info is like the one in "<cv_file>"
+
+        Examples:
+        |scenario    | kwargs                                                  | rate | output                         |cv_file |
+        | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | 0.02 | ./scenario12/cross-validation   | ./check_files/cross_validation.json   |
+
+    Scenario: Successfully building a source with a given locale and storing its result
+        Given I create a BigML source from file "<data>" with locale "<locale>" storing results in "<output>"
+        Then I check that the stored source file exists
+        And the locale of the source is "<bigml_locale>"
+
+        Examples:
+        |data             | locale        | output                    | bigml_locale |
+        | ../data/iris.csv| es_ES.UTF-8   | ./scenario13/store_file   | es_ES        |
+
