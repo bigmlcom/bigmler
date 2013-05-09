@@ -458,6 +458,13 @@ under the License.""" % version
                         help=("Select evaluation tagged with tag to"
                               " be deleted"))
 
+    # Ensembles selected by tag to be deleted.
+    parser.add_argument('--ensemble-tag',
+                        dest='ensemble_tag',
+                        default=defaults.get('ensemble_tag', None),
+                        help=("Select ensemble tagged with tag to"
+                              " be deleted"))
+
     # Resources selected by tag to be deleted.
     parser.add_argument('--all-tag',
                         dest='all_tag',

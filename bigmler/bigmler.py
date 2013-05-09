@@ -742,6 +742,10 @@ def main(args=sys.argv[1:]):
         if command_args.evaluation_tag:
             query_string = "tags__in=%s" % command_args.evaluation_tag
             delete_list.extend(u.list_ids(api.list_evaluations, query_string))
+        # Retrieve ensembles/ids if provided
+        if command_args.ensemble_tag:
+            query_string = "tags__in=%s" % command_args.ensemble_tag
+            delete_list.extend(u.list_ids(api.list_ensembles, query_string))
         message = u.dated("Deleting objects.\n")
         u.log_message(message, log_file=session_file,
                       console=command_args.verbosity)

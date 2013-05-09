@@ -448,6 +448,7 @@ or restricting the operation to a specific type::
     bigmler --delete --model-tag my_tag
     bigmler --delete --prediction-tag my_tag
     bigmler --delete --evaluation-tag my_tag
+    bigmler --delete --ensemble-tag my_tag
 
 Resuming Previous Commands
 --------------------------

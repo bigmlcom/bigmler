@@ -256,7 +256,8 @@ def delete(api, delete_list):
                         bigml.api.DATASET_RE: api.delete_dataset,
                         bigml.api.MODEL_RE: api.delete_model,
                         bigml.api.PREDICTION_RE: api.delete_prediction,
-                        bigml.api.EVALUATION_RE: api.delete_evaluation}
+                        bigml.api.EVALUATION_RE: api.delete_evaluation,
+                        bigml.api.ENSEMBLE_RE: api.delete_ensemble}
     for resource_id in delete_list:
         resource_type = None
         try:
