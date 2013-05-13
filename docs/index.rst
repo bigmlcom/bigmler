@@ -109,12 +109,8 @@ You can also easily create ensembles. For example, using
     bigmler --train data/iris.csv --test data/test_iris.csv \
     --number-of-models 10 --sample-rate 0.75 --replacement --tag my_ensemble
 
-We recommend to tag resources when you create multiple models at the same
-time so that you can retrieve them together to generate predictions locally
-using the multiple models feature from BigML's Python binding.
-
 To create a
-`random decision forest<http://www.quora.com/Machine-Learning/How-do-random-forests-work-in-laymans-terms>`_
+`random decision forest <http://www.quora.com/Machine-Learning/How-do-random-forests-work-in-laymans-terms>`_
 just use the `--randomize` option::
 
      bigmler --train data/iris.csv --test data/test_iris.csv \
@@ -125,7 +121,19 @@ The fields to choose from will be randomized at each split creating a random
 decision forest that when used together will increase the prediction
 performance of the individual models.
 
-There are some more advance options that can help you build your ensembles.
+Once you have an existing ensemble, you can use it to predict.
+You can do so with the command::
+
+    bigmler --ensemble ensemble/51901f4337203f3a9a000215 \
+            --test data/test_iris.csv
+
+Or if you want to evaluate it::
+
+    bigmler --ensemble ensemble/51901f4337203f3a9a000215 \
+            --test data/iris.csv --evaluate
+
+There are some more advance options that can help you build local predictions
+with your ensembles.
 When the number of local models becomes quite large holding all the models in
 memory may exhaust your resources. To avoid this problem you can use the
 ``--max_batch_models`` flag which controls how many local models are held
@@ -140,7 +148,7 @@ models' id (e.g. `model_50c23e5e035d07305a00004f__predictions.csv"). Each line
 contains the prediction, its confidence, the node's distribution and the node's
 total number of instances. The default value for ``max-batch-models`` is 10.
 
-When using ensembles model's predictions are combined to issue a final
+When using ensembles, model's predictions are combined to issue a final
 prediction. There are several different methods
 to build the combination. You can choose ``plurality``, ``confidence weighted``
 or ``probability weighted`` using the ``--method`` flag::
@@ -201,14 +209,11 @@ a description, and tags to your resources. This is easy too. For example::
 
 Please note:
 
-    - You can get a full list of BigML category codes
-`here <https://bigml.com/developers/sources#s_categories>`_.
-    - Descriptions are provided in a text file that can also include
-`markdown <http://en.wikipedia.org/wiki/Markdown>`_.
+    - You can get a full list of BigML category codes `here <https://bigml.com/developers/sources#s_categories>`_.
+    - Descriptions are provided in a text file that can also include `markdown <http://en.wikipedia.org/wiki/Markdown>`_.
     - Many tags can be added to the same resource.
-    - Use --no_tag if you do not want default BigMLer tags to be added.
-    - BigMLer will add the name, category, description, and tags to all the
-newly created resources in each request.
+    - Use ``--no_tag`` if you do not want default BigMLer tags to be added.
+    - BigMLer will add the name, category, description, and tags to all the newly created resources in each request.
 
 
 Using previous Sources, Datasets, and Models
@@ -289,12 +294,20 @@ holding out randomly ``n%`` of the instances. The held-out data will then be
 used to evaluate the corresponding model. For instance, both::
 
     bigmler --train data/iris.csv --cross-validation-rate 0.02
-    bigmler --dataset dataset/xxxx --cross-validation-rate 0.02
+    bigmler --dataset dataset/519029ae37203f3a9a0002bf \
+    --cross-validation-rate 0.02
 
 will hold out 2% of the training data to evaluate a model built upon the
 remaining 98%. The evaluations will be averaged and the result saved
 in json and human-readable formats in ``cross-validation.json`` and
-``cross-validation.txt`` respectively. 
+``cross-validation.txt`` respectively. Of course, in this kind of
+cross-validation you can choose the number of evaluations yourself by
+setting the ``--number-of-evaluations`` flag. You should just keep in mind
+that it must be high enough to ensure low variance, for instance::
+
+    bigmler --train data/iris.csv --cross-validation-rate 0.1 \
+    --number-of-evaluations 20
+
 
 Configuring Datasets and Models
 -------------------------------
@@ -634,6 +647,8 @@ value is ``smart``
 --stack-level LEVEL         Level of the retried command in the stack
 --cross-validation-rate RATE    Fraction of the training data held out for
 Monte-Carlo cross-validation
+--number-of-evaluations NUMBER_OF_EVALUATIONS    Number of runs that will be
+used in cross-validation
 
 Content
 -------
@@ -707,12 +722,11 @@ are stored in files as they are computed and retrived and combined eventually.
 --randomize           Use a random set of fields to split on.
 --combine-votes LIST_OF_DIRS    Combines the votes of models generated in a
 list of directories.
+--tlp LEVEL           Task-level parallelization
 
-Ensembles aren't
-`first-class citizen <http://en.wikipedia.org/wiki/First-class_citizen>`_ in
-BigML yet. So make sure that you tag your models conveniently so that you can
-then retrieve them later to generate predictions. We expect to have ensembles
-at the first level of our API pretty soon.
+If you are not choosing to create an ensemble,
+make sure that you tag your models conveniently so that you can
+then retrieve them later to generate predictions.
 
 Public Resources
 ----------------

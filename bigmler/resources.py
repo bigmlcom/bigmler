@@ -29,7 +29,7 @@ except ImportError:
 import bigml.api
 
 from bigmler.utils import (dated, get_url, log_message, plural,
-                           check_resource_error)
+                           check_resource_error, log_created_resources)
 from bigml.util import bigml_locale
 
 EVALUATE_SAMPLE_RATE = 0.8
@@ -198,16 +198,9 @@ def create_dataset(source_or_dataset, dataset_args, args, api=None, path=None,
     message = dated("Creating dataset.\n")
     log_message(message, log_file=session_file, console=args.verbosity)
     dataset = api.create_dataset(source_or_dataset, dataset_args)
-    if path is not None:
-        suffix = "_" + dataset_type if dataset_type else ""
-        dataset_file_name = "%s/dataset%s" % (path, suffix)
-        try:
-
-            with open(dataset_file_name, 'w', 0) as dataset_file:
-                dataset_file.write("%s\n" % dataset['resource'])
-        except IOError, exc:
-            raise IOError("%s: Failed to write %s" % (str(exc),
-                          dataset_file_name))
+    suffix = "_" + dataset_type if dataset_type else ""
+    log_created_resources("dataset%s" % suffix, path,
+                          bigml.api.get_dataset_id(dataset))
     check_resource_error(dataset, "Failed to create dataset: ")
     try:
         dataset = bigml.api.check_resource(dataset, api.get_dataset)
@@ -314,9 +307,7 @@ def create_models(dataset, model_ids, model_args,
 
     models = model_ids[:]
     existing_models = len(models)
-    models_info = ""
-    for model_id in model_ids:
-        models_info += "%s\n" % model_id
+
     last_model = None
     if args.number_of_models > 0:
         message = dated("Creating %s.\n" %
@@ -342,14 +333,8 @@ def create_models(dataset, model_ids, model_args,
             last_index = i - 1
             model_ids.append(model['resource'])
             models.append(model)
-            models_info = "%s\n" % model['resource']
-            if path is not None:
-                try:
-                    with open(path + '/models', 'a', 0) as model_file:
-                        model_file.write(models_info)
-                except IOError, exc:
-                    raise IOError("%s: Fails to write %s/models" % (str(exc),
-                                  path))
+            log_created_resources("models", path,
+                                  bigml.api.get_model_id(model), open_mode='a')
             check_resource_error(model, "Failed to create model %s:" %
                                  model['resource'])
         if args.number_of_models < 2 and args.verbosity:
@@ -402,6 +387,48 @@ def get_models(model_ids, args, api=None, session_file=None):
             sys.exit("Failed to get a finished model: %s" % str(exception))
         models[0] = model
     return models, model_ids
+
+
+def set_ensemble_args(name, description, args,
+                      objective_field=None, fields=None):
+    """Return ensemble arguments dict
+
+    """
+    ensemble_args = {
+        "name": name,
+        "description": description,
+        "number_of_models": args.number_of_models,
+        "category": args.category,
+        "tags": args.tag
+    }
+    if objective_field is not None and fields is not None:
+        ensemble_args.update({"objective_field":
+                              fields.field_id(objective_field)})
+
+    ensemble_args.update(sample_rate=args.sample_rate,
+                         replacement=args.replacement,
+                         randomize=args.randomize,
+                         tlp=args.tlp)
+    return ensemble_args
+
+
+def create_ensemble(dataset, ensemble_args, args, api=None, path=None,
+                    session_file=None, log=None):
+    """Create ensemble from input data
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+    message = dated("Creating ensemble.\n")
+    log_message(message, log_file=session_file,
+                console=args.verbosity)
+    ensemble = api.create_ensemble(dataset, ensemble_args)
+    log_created_resources("ensemble", path,
+                          bigml.api.get_ensemble_id(ensemble))
+    check_resource_error(ensemble, "Failed to create ensemble: ")
+    log_message("%s\n" % ensemble['resource'], log_file=log)
+
+    return ensemble
 
 
 def get_ensemble(ensemble, api=None, verbosity=True, session_file=None):
@@ -513,13 +540,8 @@ def create_evaluation(model_or_ensemble, dataset, evaluation_args, args,
                 console=args.verbosity)
     evaluation = api.create_evaluation(model_or_ensemble, dataset,
                                        evaluation_args)
-    if path is not None:
-        try:
-            with open(path + '/evaluation', 'w', 0) as evaluation_file:
-                evaluation_file.write("%s\n" % evaluation['resource'])
-        except IOError, exc:
-            raise IOError("%s: Failed to write %s/evaluation" % (str(exc),
-                          path))
+    log_created_resources("evaluation", path,
+                          bigml.api.get_evaluation_id(evaluation))
     check_resource_error(evaluation, "Failed to create evaluation: ")
     log_message("%s\n" % evaluation['resource'], log_file=log)
 
@@ -554,13 +576,9 @@ def create_evaluations(model_ids, dataset, evaluation_args, args, api=None,
             new_seed = "%s - %s" % (SEED, i + existing_evaluations)
             evaluation_args.update(seed=new_seed)
         evaluation = api.create_evaluation(model, dataset, evaluation_args)
-        if path is not None:
-            try:
-                with open(path + '/evaluations', 'a', 0) as evaluation_file:
-                    evaluation_file.write("%s\n" % evaluation['resource'])
-            except IOError, exc:
-                raise IOError("%s: Failed to write %s/evaluations" % (str(exc),
-                              path))
+        log_created_resources("evaluations", path,
+                              bigml.api.get_evaluation_id(evaluation),
+                              open_mode='a')
         check_resource_error(evaluation, "Failed to create evaluation: ")
         evaluations.append(evaluation)
         log_message("%s\n" % evaluation['resource'], log_file=log)

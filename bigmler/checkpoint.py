@@ -136,6 +136,23 @@ def are_evaluations_created(path, number_of_evaluations):
         return False, evaluation_ids
 
 
+def is_ensemble_created(path):
+    """Reads the ensemble id from the ensemble file in the path directory
+
+    """
+    ensemble_id = None
+    try:
+        with open("%s%sensemble%s" % (path, os.sep, suffix)) as ensemble_file:
+            ensemble_id = ensemble_file.readline().strip()
+            try:
+                ensemble_id = bigml.api.get_ensemble_id(ensemble_id)
+                return True, ensemble_id
+            except ValueError:
+                return False, None
+    except IOError:
+        return False, None
+
+
 def checkpoint(function, *args, **kwargs):
     """Redirects to each checkpoint function
 
