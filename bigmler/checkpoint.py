@@ -142,7 +142,7 @@ def is_ensemble_created(path):
     """
     ensemble_id = None
     try:
-        with open("%s%sensemble%s" % (path, os.sep, suffix)) as ensemble_file:
+        with open("%s%sensemble" % (path, os.sep)) as ensemble_file:
             ensemble_id = ensemble_file.readline().strip()
             try:
                 ensemble_id = bigml.api.get_ensemble_id(ensemble_id)

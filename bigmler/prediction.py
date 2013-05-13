@@ -67,7 +67,8 @@ def remote_predict(models, test_reader, prediction_file, api,
                               console=verbosity)
             message_logged = True
 
-            predictions_file = csv.writer(open(predictions_file, 'w', 0))
+            predictions_file = csv.writer(open(predictions_file, 'w', 0),
+                                          lineterminator="\n")
             for input_data in test_reader:
                 prediction = api.create_prediction(model, input_data,
                                                    by_name=test_set_header,
@@ -92,7 +93,6 @@ def remote_predict_ensemble(ensemble_id, test_reader, prediction_file, api,
 
     """
 
-    predictions_files = []
     prediction_args = {
         "tags": tags,
         "combiner": method
@@ -104,23 +104,24 @@ def remote_predict_ensemble(ensemble_id, test_reader, prediction_file, api,
     if (not resume or
         not c.checkpoint(c.are_predictions_created, prediction_file,
                          test_reader.number_of_tests(), debug=debug)):
-            message = u.dated("Creating remote predictions.")
-            u.log_message(message, log_file=session_file,
-                          console=verbosity)
+        message = u.dated("Creating remote predictions.")
+        u.log_message(message, log_file=session_file,
+                      console=verbosity)
 
-            predictions_file = csv.writer(open(prediction_file, 'w', 0))
-            for input_data in test_reader:
-                prediction = api.create_prediction(ensemble_id, input_data,
-                                                   by_name=test_set_header,
-                                                   wait_time=0,
-                                                   args=prediction_args)
-                prediction = bigml.api.check_resource(prediction,
-                                                      api.get_prediction)
-                u.check_resource_error(prediction,
-                                       "Failed to create prediction: ")
-                u.log_message("%s\n" % prediction['resource'], log_file=log)
-                prediction_row = u.prediction_to_row(prediction)
-                predictions_file.writerow(prediction_row)
+        predictions_file = csv.writer(open(prediction_file, 'w', 0),
+                                      lineterminator="\n")
+        for input_data in test_reader:
+            prediction = api.create_prediction(ensemble_id, input_data,
+                                               by_name=test_set_header,
+                                               wait_time=0,
+                                               args=prediction_args)
+            prediction = bigml.api.check_resource(prediction,
+                                                  api.get_prediction)
+            u.check_resource_error(prediction,
+                                   "Failed to create prediction: ")
+            u.log_message("%s\n" % prediction['resource'], log_file=log)
+            prediction_row = u.prediction_to_row(prediction)
+            predictions_file.writerow(prediction_row)
 
 
 def local_predict(models, test_reader, output, method):

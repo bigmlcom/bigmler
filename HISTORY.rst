@@ -3,6 +3,13 @@
 History
 -------
 
+0.3.1 (2013-05-14)
+~~~~~~~~~~~~~~~~~~
+
+- Adding delete for ensembles
+- Creating ensembles when the number of models is greater than one
+- Remote predictions using ensembles
+
 0.3.0 (2013-04-30)
 ~~~~~~~~~~~~~~~~~~
 

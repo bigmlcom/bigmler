@@ -98,7 +98,6 @@ def source_processing(training_set, test_set, training_set_header,
                 c.is_source_created, path, debug=args.debug, message=message,
                 log_file=session_file, console=args.verbosity)
 
-
     # If neither a previous source, dataset or model are provided.
     # we create a new one. Also if --evaluate and test data are provided
     # we create a new dataset to test with.
@@ -249,6 +248,7 @@ def ensemble_processing(dataset, name, description, objective_field, fields,
                                      path, session_file, log)
     return ensemble, resume
 
+
 def models_processing(dataset, models, model_ids, name, description, test_set,
                       objective_field, fields, model_fields, api, args, resume,
                       session_file=None, path=None, log=None):
@@ -285,8 +285,9 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
                     c.are_models_created, path, args.number_of_models,
                     debug=args.debug)
                 if not resume:
-                    message = u.dated("Found %s models out of %s. Resuming.\n" %
-                                      (len(model_ids), args.number_of_models))
+                    message = u.dated("Found %s models out of %s. Resuming.\n"
+                                      % (len(model_ids),
+                                         args.number_of_models))
                     u.log_message(message, log_file=session_file,
                                   console=args.verbosity)
 
@@ -294,7 +295,8 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
                 args.number_of_models -= len(model_ids)
 
             model_args = r.set_model_args(name, description, args,
-                                          objective_field, fields, model_fields)
+                                          objective_field, fields,
+                                          model_fields)
             models, model_ids = r.create_models(dataset, models,
                                                 model_args, args, api,
                                                 path, session_file, log)
@@ -311,10 +313,9 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
                                   session_file)
         model_ids = ensemble['object']['models']
         if log_models:
-            for model_id in model_ids:     
+            for model_id in model_ids:
                 u.log_created_resources("models", path, model_id,
                                         open_mode='a')
-
 
         models = model_ids[:]
 
@@ -411,7 +412,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             dataset, name, description, api, args, resume,
             session_file=session_file, path=path, log=log)
 
-    models, models_ids, resume = models_processing(
+    models, model_ids, resume = models_processing(
         dataset, models, model_ids, name, description, test_set,
         objective_field, fields, model_fields, api, args, resume,
         session_file=session_file, path=path, log=log)

@@ -558,7 +558,7 @@ under the License.""" % version
                         type=int,
                         default=defaults.get('number_of_evaluations', 0),
                         help=("Number of evaluations used for"
-                              "cross-validation."))
+                              " cross-validation."))
 
     # Stores the retrieved resources in the output directory
     parser.add_argument('--store',

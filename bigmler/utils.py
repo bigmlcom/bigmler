@@ -390,7 +390,7 @@ def prediction_to_row(prediction):
     tree = prediction.get('prediction_path', prediction)
     row = [prediction['prediction'][prediction_class],
            tree['confidence']]
-    distribution=None
+    distribution = None
     if ('objective_summary' in tree):
         summary = tree['objective_summary']
         if 'bins' in summary:
@@ -442,6 +442,7 @@ def check_resource_error(resource, message):
     """
     if bigml.api.get_status(resource)['code'] == bigml.api.FAULTY:
         sys.exit("%s: %s" % (message, resource['error']))
+
 
 def log_created_resources(file_name, path, resource_id, open_mode='w'):
     """Logs the created resources ids in the given file
