@@ -67,7 +67,8 @@ def remote_predict(models, test_reader, prediction_file, api,
                               console=verbosity)
             message_logged = True
 
-            predictions_file = csv.writer(open(predictions_file, 'w', 0))
+            predictions_file = csv.writer(open(predictions_file, 'w', 0),
+                                          lineterminator="\n")
             for input_data in test_reader:
                 prediction = api.create_prediction(model, input_data,
                                                    by_name=test_set_header,
@@ -81,6 +82,46 @@ def remote_predict(models, test_reader, prediction_file, api,
     u.combine_votes(predictions_files,
                     Model(models[0]).to_prediction,
                     prediction_file, method)
+
+
+def remote_predict_ensemble(ensemble_id, test_reader, prediction_file, api,
+                            resume=False,
+                            verbosity=True, output_path=None,
+                            method=PLURALITY_CODE, tags="",
+                            session_file=None, log=None, debug=False):
+    """Retrieve predictions remotely and save predictions to file
+
+    """
+
+    prediction_args = {
+        "tags": tags,
+        "combiner": method
+    }
+    test_set_header = test_reader.has_headers()
+    if output_path is None:
+        output_path = u.check_dir(prediction_file)
+
+    if (not resume or
+        not c.checkpoint(c.are_predictions_created, prediction_file,
+                         test_reader.number_of_tests(), debug=debug)):
+        message = u.dated("Creating remote predictions.")
+        u.log_message(message, log_file=session_file,
+                      console=verbosity)
+
+        predictions_file = csv.writer(open(prediction_file, 'w', 0),
+                                      lineterminator="\n")
+        for input_data in test_reader:
+            prediction = api.create_prediction(ensemble_id, input_data,
+                                               by_name=test_set_header,
+                                               wait_time=0,
+                                               args=prediction_args)
+            prediction = bigml.api.check_resource(prediction,
+                                                  api.get_prediction)
+            u.check_resource_error(prediction,
+                                   "Failed to create prediction: ")
+            u.log_message("%s\n" % prediction['resource'], log_file=log)
+            prediction_row = u.prediction_to_row(prediction)
+            predictions_file.writerow(prediction_row)
 
 
 def local_predict(models, test_reader, output, method):
@@ -177,7 +218,8 @@ def local_batch_predict(models, test_reader, prediction_file, api,
 def predict(test_set, test_set_header, models, fields, output,
             objective_field, remote=False, api=None, log=None,
             max_models=MAX_MODELS, method=0, resume=False,
-            tags=None, verbosity=1, session_file=None, debug=False):
+            tags=None, verbosity=1, session_file=None, debug=False,
+            ensemble_id=None):
     """Computes a prediction for each entry in the `test_set`.
 
        Predictions can be computed remotely, locally using MultiModels built
@@ -198,10 +240,15 @@ def predict(test_set, test_set_header, models, fields, output,
     # For instance,
     #     model_50c0de043b563519830001c2_predictions.csv
     if remote:
-        remote_predict(models, test_reader, prediction_file, api, resume,
-                       verbosity, output_path,
-                       method, tags,
-                       session_file, log, debug)
+        if ensemble_id is not None:
+            remote_predict_ensemble(ensemble_id, test_reader, prediction_file,
+                                    api, resume, verbosity, output_path,
+                                    method, tags, session_file, log, debug)
+        else:
+            remote_predict(models, test_reader, prediction_file, api, resume,
+                           verbosity, output_path,
+                           method, tags,
+                           session_file, log, debug)
     # Local predictions: Predictions are computed locally using models' rules
     # with MultiModel's predict method
     else:

@@ -47,7 +47,7 @@ A different ``objective field`` (the field that you want to predict) can be
 selected using::
 
     bigmler --train data/iris.csv --test data/test_iris.csv \
-    --objective 'sepal length'
+            --objective 'sepal length'
 
 If you do not explicitly specify an objective field, BigML will default to the
 last
@@ -65,7 +65,7 @@ or ``English_United States.1252`` and a warning message will be printed.
 If you want to change this behaviour you can specify your preferred locale::
 
     bigmler --train data/iris.csv --test data/test_iris.csv \
-    --locale "English_United States.1252"
+            --locale "English_United States.1252"
 
 If you check your working directory you will see that BigMLer creates a file
 with the
@@ -107,32 +107,41 @@ You can also easily create ensembles. For example, using
 `bagging <http://en.wikipedia.org/wiki/Bootstrap_aggregating>`_ is as easy as::
 
     bigmler --train data/iris.csv --test data/test_iris.csv \
-    --number-of-models 10 --sample-rate 0.75 --replacement --tag my_ensemble
-
-We recommend to tag resources when you create multiple models at the same
-time so that you can retrieve them together to generate predictions locally
-using the multiple models feature from BigML's Python binding.
+            --number-of-models 10 --sample-rate 0.75 --replacement \
+            --tag my_ensemble
 
 To create a
-`random decision forest<http://www.quora.com/Machine-Learning/How-do-random-forests-work-in-laymans-terms>`_
+`random decision forest <http://www.quora.com/Machine-Learning/How-do-random-forests-work-in-laymans-terms>`_
 just use the `--randomize` option::
 
      bigmler --train data/iris.csv --test data/test_iris.csv \
-     --number-of-models 10 --sample-rate 0.75 --replacement \
-     --tag my_ensemble --randomize
+             --number-of-models 10 --sample-rate 0.75 --replacement \
+             --tag my_ensemble --randomize
 
 The fields to choose from will be randomized at each split creating a random
 decision forest that when used together will increase the prediction
 performance of the individual models.
 
-There are some more advance options that can help you build your ensembles.
+Once you have an existing ensemble, you can use it to predict.
+You can do so with the command::
+
+    bigmler --ensemble ensemble/51901f4337203f3a9a000215 \
+            --test data/test_iris.csv
+
+Or if you want to evaluate it::
+
+    bigmler --ensemble ensemble/51901f4337203f3a9a000215 \
+            --test data/iris.csv --evaluate
+
+There are some more advanced options that can help you build local predictions
+with your ensembles.
 When the number of local models becomes quite large holding all the models in
 memory may exhaust your resources. To avoid this problem you can use the
 ``--max_batch_models`` flag which controls how many local models are held
 in memory at the same time::
 
     bigmler --train data/iris.csv --test data/test_iris.csv \
-    --number-of-models 10 --sample-rate 0.75 --max-batch-models 5
+            --number-of-models 10 --sample-rate 0.75 --max-batch-models 5
 
 The predictions generated when using this option will be stored in a file per
 model and named after the
@@ -140,13 +149,14 @@ models' id (e.g. `model_50c23e5e035d07305a00004f__predictions.csv"). Each line
 contains the prediction, its confidence, the node's distribution and the node's
 total number of instances. The default value for ``max-batch-models`` is 10.
 
-When using ensembles model's predictions are combined to issue a final
+When using ensembles, model's predictions are combined to issue a final
 prediction. There are several different methods
 to build the combination. You can choose ``plurality``, ``confidence weighted``
 or ``probability weighted`` using the ``--method`` flag::
 
     bigmler --train data/iris.csv --test data/test_iris.csv \
-    --number-of-models 10 --sample-rate 0.75 --method "confidence weighted"
+            --number-of-models 10 --sample-rate 0.75 \
+            --method "confidence weighted"
 
 For classification ensembles, the combination is made by majority vote:
 ``plurality`` weights each model's prediction as one vote,
@@ -164,10 +174,11 @@ followed by the comma separated list of directories where predictions are
 stored. For instance::
 
     bigmler --train data/iris.csv --test data/test_iris.csv \
-    --number-of-models 20 --sample-rate 0.75 --output ./dir1/predictions.csv
+            --number-of-models 20 --sample-rate 0.75 \
+            --output ./dir1/predictions.csv
     bigmler --dataset dataset/50c23e5e035d07305a000056 \
-    --test data/test_iris.csv  --number-of-models 20 --sample-rate 0.75 \
-    --output ./dir2/predictions.csv
+            --test data/test_iris.csv  --number-of-models 20 \ 
+            --sample-rate 0.75 --output ./dir2/predictions.csv
     bigmler --combine-votes ./dir1,./dir2
 
 would generate a set of 20 prediction files, one for each model, in ``./dir1``,
@@ -197,18 +208,15 @@ Before making your model public, probably you want to add a name, a category,
 a description, and tags to your resources. This is easy too. For example::
 
     bigmler --train data/iris.csv --name "My model" --category 6 \
-    --description data/description.txt --tag iris --tag my_tag
+            --description data/description.txt --tag iris --tag my_tag
 
 Please note:
 
-    - You can get a full list of BigML category codes
-`here <https://bigml.com/developers/sources#s_categories>`_.
-    - Descriptions are provided in a text file that can also include
-`markdown <http://en.wikipedia.org/wiki/Markdown>`_.
+    - You can get a full list of BigML category codes `here <https://bigml.com/developers/sources#s_categories>`_.
+    - Descriptions are provided in a text file that can also include `markdown <http://en.wikipedia.org/wiki/Markdown>`_.
     - Many tags can be added to the same resource.
-    - Use --no_tag if you do not want default BigMLer tags to be added.
-    - BigMLer will add the name, category, description, and tags to all the
-newly created resources in each request.
+    - Use ``--no_tag`` if you do not want default BigMLer tags to be added.
+    - BigMLer will add the name, category, description, and tags to all the newly created resources in each request.
 
 
 Using previous Sources, Datasets, and Models
@@ -267,9 +275,9 @@ Finally, you can also evaluate a preexisting model using a separate set of
 data stored in a file or a previous dataset::
 
     bigmler --model model/50a1f43deabcb404d3000079 --test data/iris.csv \
-    --evaluate
+            --evaluate
     bigmler --model model/50a1f43deabcb404d3000079 \
-    --dataset dataset/50a1f441035d0706d9000371 --evaluate
+            --dataset dataset/50a1f441035d0706d9000371 --evaluate
 
 As for predictions, you can specify a particular file name to store the
 evaluation in::
@@ -289,12 +297,20 @@ holding out randomly ``n%`` of the instances. The held-out data will then be
 used to evaluate the corresponding model. For instance, both::
 
     bigmler --train data/iris.csv --cross-validation-rate 0.02
-    bigmler --dataset dataset/xxxx --cross-validation-rate 0.02
+    bigmler --dataset dataset/519029ae37203f3a9a0002bf \
+            --cross-validation-rate 0.02
 
 will hold out 2% of the training data to evaluate a model built upon the
 remaining 98%. The evaluations will be averaged and the result saved
 in json and human-readable formats in ``cross-validation.json`` and
-``cross-validation.txt`` respectively. 
+``cross-validation.txt`` respectively. Of course, in this kind of
+cross-validation you can choose the number of evaluations yourself by
+setting the ``--number-of-evaluations`` flag. You should just keep in mind
+that it must be high enough to ensure low variance, for instance::
+
+    bigmler --train data/iris.csv --cross-validation-rate 0.1 \
+            --number-of-evaluations 20
+
 
 Configuring Datasets and Models
 -------------------------------
@@ -338,7 +354,7 @@ where ``types.txt`` would be::
 You can specify the fields that you want to include in the dataset::
 
     bigmler --train data/iris.csv \
-    --dataset-fields 'sepal length','sepal width','species'
+            --dataset-fields 'sepal length','sepal width','species'
 
 or the fields that you want to include as predictors in the model::
 
@@ -350,8 +366,8 @@ the field column of the model separated by a comma and using `--fields-map`
 flag to specify the name of the file::
 
     bigmler --dataset dataset/50a1f441035d0706d9000371 \
-    --model model/50a1f43deabcb404d3000079 --evaluate \
-    --fields-map fields_map.txt
+            --model model/50a1f43deabcb404d3000079 --evaluate \
+            --fields-map fields_map.txt
 
 where ``fields_map.txt`` would contain::
 
@@ -367,7 +383,7 @@ Finally, you can also tell BigML whether your training and test set come with a
 header row or not. For example, if both come without header::
 
     bigmler --train data/iris_nh.csv --test data/test_iris_nh.csv \
-    --no-train-header --no-test-header
+            --no-train-header --no-test-header
 
 
 Splitting Datasets
@@ -429,7 +445,7 @@ tag there are many options available. For instance, deleting a comma separated
 list of ids::
 
     bigmler --delete \
-    --ids source/50a2bb64035d0706db0006cc,dataset/50a1f441035d0706d9000371
+            --ids source/50a2bb64035d0706db0006cc,dataset/50a1f441035d0706d9000371
 
 deleting resources listed in a file::
 
@@ -448,6 +464,7 @@ or restricting the operation to a specific type::
     bigmler --delete --model-tag my_tag
     bigmler --delete --prediction-tag my_tag
     bigmler --delete --evaluation-tag my_tag
+    bigmler --delete --ensemble-tag my_tag
 
 Resuming Previous Commands
 --------------------------
@@ -570,7 +587,7 @@ Otherwise, you can initialize directly when running the BigMLer
 script as follows::
 
     bigmler --train data/iris.csv --username myusername \
-    --api-key ae579e7e53fb9abd646a6ff8aa99d4afe83ac291
+            --api-key ae579e7e53fb9abd646a6ff8aa99d4afe83ac291
 
 BigML Development Mode
 ======================
@@ -633,6 +650,8 @@ value is ``smart``
 --stack-level LEVEL         Level of the retried command in the stack
 --cross-validation-rate RATE    Fraction of the training data held out for
 Monte-Carlo cross-validation
+--number-of-evaluations NUMBER_OF_EVALUATIONS    Number of runs that will be
+used in cross-validation
 
 Content
 -------
@@ -706,12 +725,11 @@ are stored in files as they are computed and retrived and combined eventually.
 --randomize           Use a random set of fields to split on.
 --combine-votes LIST_OF_DIRS    Combines the votes of models generated in a
 list of directories.
+--tlp LEVEL           Task-level parallelization
 
-Ensembles aren't
-`first-class citizen <http://en.wikipedia.org/wiki/First-class_citizen>`_ in
-BigML yet. So make sure that you tag your models conveniently so that you can
-then retrieve them later to generate predictions. We expect to have ensembles
-at the first level of our API pretty soon.
+If you are not choosing to create an ensemble,
+make sure that you tag your models conveniently so that you can
+then retrieve them later to generate predictions.
 
 Public Resources
 ----------------

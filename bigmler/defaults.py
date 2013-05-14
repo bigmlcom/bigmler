@@ -73,6 +73,7 @@ FLAGS = {'BigMLer': [{'flag': 'debug', 'type': 'boolean'},
                      {'flag': 'dataset_tag', 'type': 'string'},
                      {'flag': 'prediction_tag', 'type': 'string'},
                      {'flag': 'evaluation_tag', 'type': 'string'},
+                     {'flag': 'ensemble_tag', 'type': 'string'},
                      {'flag': 'all_tag', 'type': 'string'},
                      {'flag': 'locale', 'type': 'string'},
                      {'flag': 'combine_votes', 'type': 'string'},
@@ -81,9 +82,11 @@ FLAGS = {'BigMLer': [{'flag': 'debug', 'type': 'boolean'},
                      {'flag': 'fields_map', 'type': 'string'},
                      {'flag': 'clear_logs', 'type': 'boolean'},
                      {'flag': 'cross_validation_rate', 'type': 'float'},
+                     {'flag': 'number_of_evaluations', 'type': 'int'},
                      {'flag': 'store', 'type': 'boolean'},
                      {'flag': 'test_split', 'type': 'float'},
-                     {'flag': 'ensemble', 'type': 'string'}]}
+                     {'flag': 'ensemble', 'type': 'string'},
+                     {'flag': 'tlp', 'type': 'int'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):

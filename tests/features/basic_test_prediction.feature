@@ -55,7 +55,7 @@ Feature: Upload source and produce test predictions
     Scenario: Successfully building test predictions from ensemble
         Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs> 
         And I create BigML resources using ensemble of <number_of_models> models to test "<test>" and log predictions in "<output>"
-        And I check that the models have been created
+        And I check that the ensemble has been created
         And I check that the predictions are ready
         Then the local prediction file is like "<predictions_file>"
 

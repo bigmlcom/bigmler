@@ -98,7 +98,6 @@ def source_processing(training_set, test_set, training_set_header,
                 c.is_source_created, path, debug=args.debug, message=message,
                 log_file=session_file, console=args.verbosity)
 
-
     # If neither a previous source, dataset or model are provided.
     # we create a new one. Also if --evaluate and test data are provided
     # we create a new dataset to test with.
@@ -230,53 +229,94 @@ def split_processing(dataset, name, description, api, args, resume,
     return train_dataset, test_dataset, resume
 
 
+def ensemble_processing(dataset, name, description, objective_field, fields,
+                        api, args, resume, session_file=None,
+                        path=None, log=None):
+    """Creates an ensemble of models from the input data
+
+    """
+    ensemble = None
+    if resume:
+        message = u.dated("Ensemble not found. Resuming.\n")
+        resume, ensemble = c.checkpoint(
+            c.is_ensemble_created, path, debug=args.debug,
+            message=message, log_file=session_file, console=args.verbosity)
+    if ensemble is None:
+        ensemble_args = r.set_ensemble_args(name, description, args,
+                                            objective_field, fields)
+        ensemble = r.create_ensemble(dataset, ensemble_args, args, api,
+                                     path, session_file, log)
+    return ensemble, resume
+
+
 def models_processing(dataset, models, model_ids, name, description, test_set,
                       objective_field, fields, model_fields, api, args, resume,
                       session_file=None, path=None, log=None):
     """Creates or retrieves models from the input data
 
     """
+    log_models = False
     # If we have a dataset but not a model, we create the model if the no_model
     # flag hasn't been set up.
     if (dataset and not args.model and not model_ids and not args.no_model
             and not args.ensemble):
-        # Cross-validation case: we create 2 * n models to be validated
-        # holding out an n% of data
-        if args.cross_validation_rate > 0:
-            args.number_of_models = int(MONTECARLO_FACTOR *
-                                        args.cross_validation_rate)
+
         model_ids = []
         models = []
-        if resume:
-            resume, model_ids = c.checkpoint(
-                c.are_models_created, path, args.number_of_models,
-                debug=args.debug)
-            if not resume:
-                message = u.dated("Found %s models out of %s. Resuming.\n" %
-                                  (len(model_ids), args.number_of_models))
-                u.log_message(message, log_file=session_file,
-                              console=args.verbosity)
+        if args.number_of_models > 1:
+            # Ensemble of models
+            ensemble, resume = ensemble_processing(
+                dataset, name, description, objective_field, fields,
+                api, args, resume,
+                session_file=session_file, path=path, log=log)
+            args.ensemble = bigml.api.get_ensemble_id(ensemble)
+            log_models = True
+        else:
+            # Cross-validation case: we create 2 * n models to be validated
+            # holding out an n% of data
+            if args.cross_validation_rate > 0:
+                if args.number_of_evaluations > 0:
+                    args.number_of_models = args.number_of_evaluations
+                else:
+                    args.number_of_models = int(MONTECARLO_FACTOR *
+                                                args.cross_validation_rate)
+            if resume:
+                resume, model_ids = c.checkpoint(
+                    c.are_models_created, path, args.number_of_models,
+                    debug=args.debug)
+                if not resume:
+                    message = u.dated("Found %s models out of %s. Resuming.\n"
+                                      % (len(model_ids),
+                                         args.number_of_models))
+                    u.log_message(message, log_file=session_file,
+                                  console=args.verbosity)
 
-            models = model_ids
-            args.number_of_models -= len(model_ids)
+                models = model_ids
+                args.number_of_models -= len(model_ids)
 
-        model_args = r.set_model_args(name, description, args,
-                                      objective_field, fields, model_fields)
-        models, model_ids = r.create_models(dataset, models,
-                                            model_args, args, api,
-                                            path, session_file, log)
+            model_args = r.set_model_args(name, description, args,
+                                          objective_field, fields,
+                                          model_fields)
+            models, model_ids = r.create_models(dataset, models,
+                                                model_args, args, api,
+                                                path, session_file, log)
     # If a model is provided, we use it.
     elif args.model:
         model_ids = [args.model]
         models = model_ids[:]
 
-    elif args.ensemble:
+    elif args.models or args.model_tag:
+        models = model_ids[:]
+
+    if args.ensemble:
         ensemble = r.get_ensemble(args.ensemble, api, args.verbosity,
                                   session_file)
         model_ids = ensemble['object']['models']
-        models = model_ids[:]
+        if log_models:
+            for model_id in model_ids:
+                u.log_created_resources("models", path, model_id,
+                                        open_mode='a')
 
-    elif args.models or args.model_tag:
         models = model_ids[:]
 
     # If we are going to predict we must retrieve the models
@@ -372,7 +412,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             dataset, name, description, api, args, resume,
             session_file=session_file, path=path, log=log)
 
-    models, models_ids, resume = models_processing(
+    models, model_ids, resume = models_processing(
         dataset, models, model_ids, name, description, test_set,
         objective_field, fields, model_fields, api, args, resume,
         session_file=session_file, path=path, log=log)
@@ -394,7 +434,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         predict(test_set, test_set_header, models, fields, output,
                 objective_field, args.remote, api, log,
                 args.max_batch_models, args.method, resume, args.tag,
-                args.verbosity, session_file, args.debug)
+                args.verbosity, session_file, args.debug, args.ensemble)
 
     # When combine_votes flag is used, retrieve the predictions files saved
     # in the comma separated list of directories and combine them
@@ -427,8 +467,11 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # issue a cross_validation measure set.
     if args.cross_validation_rate > 0:
         args.sample_rate = 1 - args.cross_validation_rate
-        number_of_evaluations = int(MONTECARLO_FACTOR *
-                                    args.cross_validation_rate)
+        if args.number_of_evaluations > 0:
+            number_of_evaluations = args.number_of_evaluations
+        else:
+            number_of_evaluations = int(MONTECARLO_FACTOR *
+                                        args.cross_validation_rate)
         cross_validate(models, dataset, number_of_evaluations, name,
                        description, fields, fields_map, api, args, resume,
                        session_file=session_file, path=path, log=log)
@@ -742,6 +785,10 @@ def main(args=sys.argv[1:]):
         if command_args.evaluation_tag:
             query_string = "tags__in=%s" % command_args.evaluation_tag
             delete_list.extend(u.list_ids(api.list_evaluations, query_string))
+        # Retrieve ensembles/ids if provided
+        if command_args.ensemble_tag:
+            query_string = "tags__in=%s" % command_args.ensemble_tag
+            delete_list.extend(u.list_ids(api.list_ensembles, query_string))
         message = u.dated("Deleting objects.\n")
         u.log_message(message, log_file=session_file,
                       console=command_args.verbosity)

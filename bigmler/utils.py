@@ -256,7 +256,8 @@ def delete(api, delete_list):
                         bigml.api.DATASET_RE: api.delete_dataset,
                         bigml.api.MODEL_RE: api.delete_model,
                         bigml.api.PREDICTION_RE: api.delete_prediction,
-                        bigml.api.EVALUATION_RE: api.delete_evaluation}
+                        bigml.api.EVALUATION_RE: api.delete_evaluation,
+                        bigml.api.ENSEMBLE_RE: api.delete_ensemble}
     for resource_id in delete_list:
         resource_type = None
         try:
@@ -386,9 +387,10 @@ def prediction_to_row(prediction):
     """
     prediction = prediction['object']
     prediction_class = prediction['objective_fields'][0]
+    tree = prediction.get('prediction_path', prediction)
     row = [prediction['prediction'][prediction_class],
-           prediction['prediction_path']['confidence']]
-    tree = prediction['prediction_path']
+           tree['confidence']]
+    distribution = None
     if ('objective_summary' in tree):
         summary = tree['objective_summary']
         if 'bins' in summary:
@@ -440,3 +442,17 @@ def check_resource_error(resource, message):
     """
     if bigml.api.get_status(resource)['code'] == bigml.api.FAULTY:
         sys.exit("%s: %s" % (message, resource['error']))
+
+
+def log_created_resources(file_name, path, resource_id, open_mode='w'):
+    """Logs the created resources ids in the given file
+
+    """
+    if path is not None:
+        file_name = "%s%s%s" % (path, os.sep, file_name)
+        try:
+            with open(file_name, open_mode, 0) as resource_file:
+                resource_file.write("%s\n" % resource_id)
+        except IOError, exc:
+            raise IOError("%s: Failed to write %s" % (str(exc),
+                          file_name))

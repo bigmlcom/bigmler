@@ -269,6 +269,20 @@ def i_check_create_model(step):
     except Exception, exc:
         assert False, str(exc)
 
+@step(r'I check that the ensemble has been created')
+def i_check_create_ensemble(step):
+    ensemble_file = "%s%sensemble" % (world.directory, os.sep)
+    try:
+        ensemble_file = open(ensemble_file, "r")
+        ensemble = check_resource(ensemble_file.readline().strip(),
+                               world.api.get_ensemble)
+        world.ensembles.append(ensemble['resource'])
+        world.ensemble = ensemble
+        ensemble_file.close()
+        assert True
+    except Exception, exc:
+        assert False, str(exc)
+
 @step(r'I check that the models have been created')
 def i_check_create_models(step):
     model_file = "%s%smodels" % (world.directory, os.sep)

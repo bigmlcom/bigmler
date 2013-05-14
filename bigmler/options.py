@@ -458,6 +458,13 @@ under the License.""" % version
                         help=("Select evaluation tagged with tag to"
                               " be deleted"))
 
+    # Ensembles selected by tag to be deleted.
+    parser.add_argument('--ensemble-tag',
+                        dest='ensemble_tag',
+                        default=defaults.get('ensemble_tag', None),
+                        help=("Select ensemble tagged with tag to"
+                              " be deleted"))
+
     # Resources selected by tag to be deleted.
     parser.add_argument('--all-tag',
                         dest='all_tag',
@@ -544,6 +551,15 @@ under the License.""" % version
                         help=("Part of training data to be held out for "
                               "cross-validation."))
 
+    # Number of evaluations used in cross-validation
+    parser.add_argument('--number-of-evaluations',
+                        action='store',
+                        dest='number_of_evaluations',
+                        type=int,
+                        default=defaults.get('number_of_evaluations', 0),
+                        help=("Number of evaluations used for"
+                              " cross-validation."))
+
     # Stores the retrieved resources in the output directory
     parser.add_argument('--store',
                         action='store_true',
@@ -568,6 +584,16 @@ under the License.""" % version
                         dest='ensemble',
                         default=defaults.get('ensemble', None),
                         help="BigML ensemble Id")
+
+    # If a BigML ensemble is created, creation will use this task-level
+    # parallelism
+    parser.add_argument('--tlp',
+                        action='store',
+                        dest='tlp',
+                        default=defaults.get('tlp', 1),
+                        type=int,
+                        help=("BigML ensemble's creation task-level"
+                              " parallelism"))
 
     # The following options are only useful to deactivate the corresponding
     # oposed default values
