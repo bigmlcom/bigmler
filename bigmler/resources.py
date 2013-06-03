@@ -404,6 +404,14 @@ def set_ensemble_args(name, description, args,
     if objective_field is not None and fields is not None:
         ensemble_args.update({"objective_field":
                               fields.field_id(objective_field)})
+    # If evaluate flag is on and no test_split flag is provided,
+    # we choose a deterministic sampling with
+    # args.sample_rate (80% by default) of the data to create the model
+
+    if (args.evaluate and args.test_split == 0):
+        ensemble_args.update(seed=SEED)
+        if args.sample_rate == 1:
+            args.sample_rate = EVALUATE_SAMPLE_RATE
 
     ensemble_args.update(sample_rate=args.sample_rate,
                          replacement=args.replacement,
@@ -509,6 +517,8 @@ def set_evaluation_args(name, description, args, fields=None, fields_map=None):
     if (args.test_split > 0 and (args.training_set or args.dataset)):
         return evaluation_args
 
+    if args.sample_rate == 1:
+        args.sample_rate = EVALUATE_SAMPLE_RATE
     evaluation_args.update(out_of_bag=True, seed=SEED,
                            sample_rate=args.sample_rate)
     return evaluation_args

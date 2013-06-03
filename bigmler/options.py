@@ -575,7 +575,7 @@ under the License.""" % version
                         type=float,
                         default=defaults.get('test_split', 0.0),
                         help=("Part of training data to be held out for "
-                              "testing."))
+                              "testing (e.g. --test-split 0.2)."))
 
     # If a BigML ensemble is provided, the script will use it to generate
     # predictions.
