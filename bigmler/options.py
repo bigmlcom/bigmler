@@ -595,6 +595,16 @@ under the License.""" % version
                         help=("BigML ensemble's creation task-level"
                               " parallelism"))
 
+    # Prediction log format: `short` will only log predictions, `long` will 
+    # log also confidence information
+    parser.add_argument('--prediction-info',
+                        action='store',
+                        dest='prediction_info',
+                        default=defaults.get('prediction_info', 'normal'),
+                        help=("Prediction log format: 'brief' will only "
+                              "log predictions, 'normal' will write confidence"
+                              " too"))
+
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #

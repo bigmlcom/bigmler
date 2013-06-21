@@ -41,7 +41,7 @@ PAGE_LENGTH = 200
 ATTRIBUTE_NAMES = ['name', 'label', 'description']
 NEW_DIRS_LOG = ".bigmler_dirs"
 RESOURCE_URL = "https://bigml.com/dashboard/"
-
+BRIEF_FORMAT = 'brief'
 
 def read_description(path):
     """Reads a text description from a file.
@@ -231,7 +231,8 @@ def list_ids(api_function, query_string):
     return ids
 
 
-def combine_votes(votes_files, to_prediction, to_file, method=0):
+def combine_votes(votes_files, to_prediction, to_file, method=0,
+                  prediction_info=None):
     """Combines the votes found in the votes' files and stores predictions.
 
        votes_files: should contain the list of file names
@@ -245,7 +246,8 @@ def combine_votes(votes_files, to_prediction, to_file, method=0):
     output = csv.writer(open(to_file, 'w', 0),
                         lineterminator="\n")
     for multivote in votes:
-        write_prediction(multivote.combine(method, True), output)
+        write_prediction(multivote.combine(method, True), output,
+                         prediction_info)
 
 
 def delete(api, delete_list):
@@ -284,7 +286,7 @@ def check_dir(path):
     return directory
 
 
-def write_prediction(prediction, output=sys.stdout):
+def write_prediction(prediction, output=sys.stdout, prediction_info=None):
     """Writes the final combined prediction to the required output
 
     """
@@ -294,8 +296,8 @@ def write_prediction(prediction, output=sys.stdout):
     if isinstance(prediction, basestring):
         prediction = prediction.encode("utf-8")
     row = [prediction]
-    if confidence:
-        row.append(confidence)
+    if prediction_info != BRIEF_FORMAT and confidence:
+       row.append(confidence)
     try:
         output.writerow(row)
     except AttributeError:
@@ -381,26 +383,27 @@ def dated(message):
                         message)
 
 
-def prediction_to_row(prediction):
+def prediction_to_row(prediction, prediction_info=None):
     """Returns a csv row to store main prediction info in csv files.
 
     """
     prediction = prediction['object']
     prediction_class = prediction['objective_fields'][0]
     tree = prediction.get('prediction_path', prediction)
-    row = [prediction['prediction'][prediction_class],
-           tree['confidence']]
-    distribution = None
-    if ('objective_summary' in tree):
-        summary = tree['objective_summary']
-        if 'bins' in summary:
-            distribution = summary['bins']
-        elif 'counts' in summary:
-            distribution = summary['counts']
-        elif 'categories' in summary:
-            distribution = summary['categories']
-    if distribution:
-        row.extend([repr(distribution), sum([x[1] for x in distribution])])
+    row = [prediction['prediction'][prediction_class]]
+    if not prediction_info == BRIEF_FORMAT:
+        row.append(tree['confidence'])
+        distribution = None
+        if ('objective_summary' in tree):
+            summary = tree['objective_summary']
+            if 'bins' in summary:
+                distribution = summary['bins']
+            elif 'counts' in summary:
+                distribution = summary['counts']
+            elif 'categories' in summary:
+                distribution = summary['categories']
+        if distribution:
+            row.extend([repr(distribution), sum([x[1] for x in distribution])])
     return row
 
 

@@ -40,7 +40,8 @@ def remote_predict(models, test_reader, prediction_file, api,
                    resume=False,
                    verbosity=True, output_path=None,
                    method=PLURALITY_CODE, tags="",
-                   session_file=None, log=None, debug=False):
+                   session_file=None, log=None, debug=False,
+                   prediction_info=None):
     """Retrieve predictions remotely, combine them and save predictions to file
 
     """
@@ -81,14 +82,15 @@ def remote_predict(models, test_reader, prediction_file, api,
                 predictions_file.writerow(prediction_row)
     u.combine_votes(predictions_files,
                     Model(models[0]).to_prediction,
-                    prediction_file, method)
+                    prediction_file, method, prediction_info)
 
 
 def remote_predict_ensemble(ensemble_id, test_reader, prediction_file, api,
                             resume=False,
                             verbosity=True, output_path=None,
                             method=PLURALITY_CODE, tags="",
-                            session_file=None, log=None, debug=False):
+                            session_file=None, log=None, debug=False,
+                            prediction_info=None):
     """Retrieve predictions remotely and save predictions to file
 
     """
@@ -120,11 +122,11 @@ def remote_predict_ensemble(ensemble_id, test_reader, prediction_file, api,
             u.check_resource_error(prediction,
                                    "Failed to create prediction: ")
             u.log_message("%s\n" % prediction['resource'], log_file=log)
-            prediction_row = u.prediction_to_row(prediction)
+            prediction_row = u.prediction_to_row(prediction, prediction_info)
             predictions_file.writerow(prediction_row)
 
 
-def local_predict(models, test_reader, output, method):
+def local_predict(models, test_reader, output, method, prediction_info=None):
     """Get local predictions and combine them to get a final prediction
 
     """
@@ -135,14 +137,14 @@ def local_predict(models, test_reader, output, method):
                                          by_name=test_set_header,
                                          method=method,
                                          with_confidence=True)
-        u.write_prediction(prediction, output)
+        u.write_prediction(prediction, output, prediction_info)
 
 
 def local_batch_predict(models, test_reader, prediction_file, api,
                         max_models=MAX_MODELS,
                         resume=False, output_path=None, output=None,
                         verbosity=True, method=PLURALITY_CODE,
-                        session_file=None, debug=False):
+                        session_file=None, debug=False, prediction_info=None):
     """Get local predictions form partial Multimodel, combine and save to file
 
     """
@@ -212,14 +214,15 @@ def local_batch_predict(models, test_reader, prediction_file, api,
     message = u.dated("Combining predictions.\n")
     u.log_message(message, log_file=session_file, console=verbosity)
     for multivote in total_votes:
-        u.write_prediction(multivote.combine(method, True), output)
+        u.write_prediction(multivote.combine(method, True), output,
+                           prediction_info)
 
 
 def predict(test_set, test_set_header, models, fields, output,
             objective_field, remote=False, api=None, log=None,
             max_models=MAX_MODELS, method=0, resume=False,
             tags=None, verbosity=1, session_file=None, debug=False,
-            ensemble_id=None):
+            ensemble_id=None, prediction_info=None):
     """Computes a prediction for each entry in the `test_set`.
 
        Predictions can be computed remotely, locally using MultiModels built
@@ -243,12 +246,13 @@ def predict(test_set, test_set_header, models, fields, output,
         if ensemble_id is not None:
             remote_predict_ensemble(ensemble_id, test_reader, prediction_file,
                                     api, resume, verbosity, output_path,
-                                    method, tags, session_file, log, debug)
+                                    method, tags, session_file, log, debug,
+                                    prediction_info)
         else:
             remote_predict(models, test_reader, prediction_file, api, resume,
                            verbosity, output_path,
                            method, tags,
-                           session_file, log, debug)
+                           session_file, log, debug, prediction_info)
     # Local predictions: Predictions are computed locally using models' rules
     # with MultiModel's predict method
     else:
@@ -257,14 +261,15 @@ def predict(test_set, test_set_header, models, fields, output,
         # For a small number of models, we build a MultiModel using all of
         # the given models and issue a combined prediction
         if len(models) < max_models:
-            local_predict(models, test_reader, output, method)
+            local_predict(models, test_reader, output, method, prediction_info)
         # For large numbers of models, we split the list of models in chunks
         # and build a MultiModel for each chunk, issue and store predictions
         # for each model and combine all of them eventually.
         else:
             local_batch_predict(models, test_reader, prediction_file, api,
                                 max_models, resume, output_path, output,
-                                verbosity, method, session_file, debug)
+                                verbosity, method, session_file, debug,
+                                prediction_info)
 
 
 class TestReader(object):
