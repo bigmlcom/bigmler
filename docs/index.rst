@@ -46,7 +46,6 @@ flag set to ``brief`` only the prediction result will be stored (default is
 ``normal`` and includes confidence information).
 
 
-
 A different ``objective field`` (the field that you want to predict) can be
 selected using::
 
@@ -556,7 +555,7 @@ Requirements
 
 Python 2.7 is currently supported by BigMLer.
 
-BigMLer requires `bigml 0.7.0 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 0.7.1 <https://github.com/bigmlcom/python>`_  or
 higher.
 
 BigMLer Installation

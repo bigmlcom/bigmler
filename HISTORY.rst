@@ -3,6 +3,11 @@
 History
 -------
 
+0.3.2 (2013-05-14)
+~~~~~~~~~~~~~~~~~~
+- Adding new flag to control predictions file information
+- Bug fixing: using default sample-rate in ensemble evaluations
+
 0.3.1 (2013-05-14)
 ~~~~~~~~~~~~~~~~~~
 
