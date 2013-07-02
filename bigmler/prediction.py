@@ -27,11 +27,14 @@ import bigml.api
 import bigmler.utils as u
 import bigmler.checkpoint as c
 
+
 from bigml.model import Model
 from bigml.multimodel import MultiModel
 from bigml.util import (localize, console_log, get_csv_delimiter,
                         get_predictions_file_name)
 from bigml.multivote import PLURALITY_CODE
+
+from bigmler.resources import FIELDS_QS
 
 MAX_MODELS = 10
 
@@ -188,7 +191,7 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                     bigml.api.get_status(model)['code'] != bigml.api.FINISHED):
                 try:
                     model = bigml.api.check_resource(model, api.get_model,
-                                                     'limit=-1')
+                                                     FIELDS_QS)
                 except ValueError, exception:
                     sys.exit("Failed to get model: %s" % (model,
                                                           str(exception)))
