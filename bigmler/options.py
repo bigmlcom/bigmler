@@ -575,7 +575,7 @@ under the License.""" % version
                         type=float,
                         default=defaults.get('test_split', 0.0),
                         help=("Part of training data to be held out for "
-                              "testing."))
+                              "testing (e.g. --test-split 0.2)."))
 
     # If a BigML ensemble is provided, the script will use it to generate
     # predictions.
@@ -594,6 +594,16 @@ under the License.""" % version
                         type=int,
                         help=("BigML ensemble's creation task-level"
                               " parallelism"))
+
+    # Prediction log format: `short` will only log predictions, `long` will 
+    # log also confidence information
+    parser.add_argument('--prediction-info',
+                        action='store',
+                        dest='prediction_info',
+                        default=defaults.get('prediction_info', 'normal'),
+                        help=("Prediction log format: 'brief' will only "
+                              "log predictions, 'normal' will write confidence"
+                              " too"))
 
     # The following options are only useful to deactivate the corresponding
     # oposed default values

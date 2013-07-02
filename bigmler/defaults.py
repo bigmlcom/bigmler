@@ -86,7 +86,8 @@ FLAGS = {'BigMLer': [{'flag': 'debug', 'type': 'boolean'},
                      {'flag': 'store', 'type': 'boolean'},
                      {'flag': 'test_split', 'type': 'float'},
                      {'flag': 'ensemble', 'type': 'string'},
-                     {'flag': 'tlp', 'type': 'int'}]}
+                     {'flag': 'tlp', 'type': 'int'},
+                     {'flag': 'prediction_info', 'type': 'string'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):

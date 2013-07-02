@@ -26,7 +26,7 @@ Requirements
 
 Python 2.7 is currently supported by BigMLer.
 
-BigMLer requires `bigml 0.7.0 <https://github.com/bigmlcom/python>`_  or higher.
+BigMLer requires `bigml 0.7.1 <https://github.com/bigmlcom/python>`_  or higher.
 
 BigMLer Installation
 ====================
@@ -113,6 +113,9 @@ You can also specify a file name to save the newly created predictions::
 
 If you do not specify the path to an output file, BigMLer will auto-generate one for you under a
 new directory named after the current date and time (e.g., `MonNov1212_174715/predictions.csv`).
+With ``--predictions-info``
+flag set to ``brief`` only the prediction result will be stored (default is
+``normal`` and includes confidence information).
 
 A different ``objective field`` (the field that you want to predict) can be selected using::
 

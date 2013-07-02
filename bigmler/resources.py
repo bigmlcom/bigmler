@@ -35,7 +35,7 @@ from bigml.util import bigml_locale
 EVALUATE_SAMPLE_RATE = 0.8
 SEED = "BigML, Machine Learning made easy"
 LOCALE_DEFAULT = "en_US"
-
+FIELDS_QS = 'only_model=true'
 
 def set_source_args(data_set_header, name, description, args):
     """Returns a source arguments dict
@@ -317,10 +317,9 @@ def create_models(dataset, model_ids, model_args,
         last_index = 0
         for i in range(1, args.number_of_models + 1):
             if i % args.max_parallel_models == 1 and i > 1:
-                qstr = 'limit=-1'
                 try:
                     models[last_index] = bigml.api.check_resource(
-                        last_model, api.get_model, query_string=qstr)
+                        last_model, api.get_model, query_string=FIELDS_QS)
                 except ValueError, exception:
                     sys.exit("Failed to get a finished model: %s" %
                              str(exception))
@@ -341,7 +340,7 @@ def create_models(dataset, model_ids, model_args,
             if bigml.api.get_status(model)['code'] != bigml.api.FINISHED:
                 try:
                     model = bigml.api.check_resource(model, api.get_model,
-                                                     query_string='limit=-1')
+                                                     query_string=FIELDS_QS)
                 except ValueError, exception:
                     sys.exit("Failed to get a finished model: %s" %
                              str(exception))
@@ -373,7 +372,7 @@ def get_models(model_ids, args, api=None, session_file=None):
         for model in model_ids:
             try:
                 model = bigml.api.check_resource(model, api.get_model,
-                                                 query_string='limit=-1')
+                                                 query_string=FIELDS_QS)
             except ValueError, exception:
                 sys.exit("Failed to get a finished model: %s" %
                          str(exception))
@@ -382,7 +381,7 @@ def get_models(model_ids, args, api=None, session_file=None):
     else:
         try:
             model = bigml.api.check_resource(model_ids[0], api.get_model,
-                                             query_string='limit=-1')
+                                             query_string=FIELDS_QS)
         except ValueError, exception:
             sys.exit("Failed to get a finished model: %s" % str(exception))
         models[0] = model
@@ -404,6 +403,14 @@ def set_ensemble_args(name, description, args,
     if objective_field is not None and fields is not None:
         ensemble_args.update({"objective_field":
                               fields.field_id(objective_field)})
+    # If evaluate flag is on and no test_split flag is provided,
+    # we choose a deterministic sampling with
+    # args.sample_rate (80% by default) of the data to create the model
+
+    if (args.evaluate and args.test_split == 0):
+        ensemble_args.update(seed=SEED)
+        if args.sample_rate == 1:
+            args.sample_rate = EVALUATE_SAMPLE_RATE
 
     ensemble_args.update(sample_rate=args.sample_rate,
                          replacement=args.replacement,
@@ -509,6 +516,8 @@ def set_evaluation_args(name, description, args, fields=None, fields_map=None):
     if (args.test_split > 0 and (args.training_set or args.dataset)):
         return evaluation_args
 
+    if args.sample_rate == 1:
+        args.sample_rate = EVALUATE_SAMPLE_RATE
     evaluation_args.update(out_of_bag=True, seed=SEED,
                            sample_rate=args.sample_rate)
     return evaluation_args
