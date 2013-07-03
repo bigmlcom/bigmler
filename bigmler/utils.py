@@ -43,6 +43,7 @@ NEW_DIRS_LOG = ".bigmler_dirs"
 RESOURCE_URL = "https://bigml.com/dashboard/"
 BRIEF_FORMAT = 'brief'
 
+
 def read_description(path):
     """Reads a text description from a file.
 
@@ -297,7 +298,7 @@ def write_prediction(prediction, output=sys.stdout, prediction_info=None):
         prediction = prediction.encode("utf-8")
     row = [prediction]
     if prediction_info != BRIEF_FORMAT and confidence:
-       row.append(confidence)
+        row.append(confidence)
     try:
         output.writerow(row)
     except AttributeError:

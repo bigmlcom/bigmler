@@ -37,6 +37,7 @@ SEED = "BigML, Machine Learning made easy"
 LOCALE_DEFAULT = "en_US"
 FIELDS_QS = 'only_model=true'
 
+
 def set_source_args(data_set_header, name, description, args):
     """Returns a source arguments dict
 
