@@ -23,6 +23,7 @@ from __future__ import absolute_import
 import os
 import json
 import numbers
+import math
 
 import bigml.api
 import bigmler.utils as u
@@ -103,6 +104,36 @@ def cross_validate(models, dataset, number_of_evaluations, name, description,
         r.save_evaluation(cross_validation, file_name, api)
 
 
+def standard_deviation(points, mean):
+    """Computes the standard deviation
+
+    """
+    total = float(len(points))
+    if total > 0:
+        return math.sqrt(sum([(point - mean) ** 2 for point in points]) /
+                         total)
+    else:
+        return float('nan')
+
+
+def traverse_for_std_dev(tree):
+    """Traverses the tree to find measure lists and compute standard deviation
+
+    """
+    if isinstance(tree, dict):
+        keys = tree.keys()
+        for key in keys:
+            if (isinstance(key, tuple) and
+                    key[0].endswith('_standard_deviation')):
+                tree[key[0]] = standard_deviation(tree[key], tree[key[1]])
+                del tree[key]
+            else:
+                traverse_for_std_dev(tree[key])
+    elif isinstance(tree, list):
+        for subtree in tree:
+            traverse_for_std_dev(subtree)
+
+
 def average_evaluations(evaluation_files):
     """Reads the contents of the evaluations files and averages its measures
 
@@ -113,8 +144,9 @@ def average_evaluations(evaluation_files):
         for evaluation_file in evaluation_files:
             with open(evaluation_file, 'U') as evaluation_file:
                 evaluation = json.loads(evaluation_file.read())
-                avg_evaluation(averaged_evaluation, evaluation,
-                               number_of_evaluations)
+                avg_evaluation(averaged_evaluation,
+                               evaluation, number_of_evaluations)
+        traverse_for_std_dev(averaged_evaluation)
     return averaged_evaluation
 
 
@@ -149,6 +181,10 @@ def avg_evaluation(total, component, number_of_evaluations):
                     if not new_key in total:
                         total[new_key] = 0
                     total[new_key] += value / number_of_evaluations
+                    sd_key = "%s_standard_deviation" % key
+                    if not (sd_key, new_key) in total:
+                        total[(sd_key, new_key)] = []
+                    total[(sd_key, new_key)].append(value)
                 # Handle grouping keys
                 elif isinstance(value, list) or isinstance(value, dict):
                     if not key in total:
@@ -184,14 +220,14 @@ def avg_class_statistics(total, component, number_of_evaluations):
                     occurrences = float(total_class_info['occurrences'])
                     for key in total_class_info:
                         # renormalizing previous average count
-                        if not key in special_keys:
+                        if not (isinstance(key, tuple) or key in special_keys):
                             total_class_info[key] *= ((occurrences + 1) /
                                                       occurrences)
                 if not total_class_info['present_in_test_data']:
                     total_class_info['present_in_test_data'] = flag
                 occurrences = float(total_class_info['occurrences'])
                 for key in class_info:
-                    if not key in special_keys:
+                    if not (isinstance(key, tuple) or key in special_keys):
                         new_key = (key if key.startswith("average_")
                                    else ("average_%s" % key))
                         if new_key in total_class_info:
@@ -200,21 +236,35 @@ def avg_class_statistics(total, component, number_of_evaluations):
                         else:
                             total_class_info[new_key] = (class_info[key] /
                                                          occurrences)
+                        sd_key = "%s_standard_deviation" % key
+                        if not (sd_key, new_key) in total_class_info:
+                            total_class_info[(sd_key, new_key)] = []
+                        total_class_info[
+                            (sd_key, new_key)].append(class_info[key])
                 break
         if not found:
             flag = class_info['present_in_test_data']
             class_info['occurrences'] = int(number_of_evaluations)
             if not flag:
                 class_info['occurrences'] -= 1
-            for key in class_info:
+            keys = class_info.keys()
+            for key in keys:
                 if not key in special_keys:
+                    sd_key = "%s_standard_deviation" % key
                     if not key.startswith("average_"):
                         new_key = "average_%s" % key
-                        class_info[new_key] = (class_info[key] /
+                        class_info[new_key] = (float(class_info[key]) /
                                                class_info['occurrences'])
+                        if not (sd_key, new_key) in class_info:
+                            class_info[(sd_key, new_key)] = []
+                        class_info[(sd_key, new_key)].append(class_info[key])
                         del class_info[key]
                     else:
-                        class_info[key] = (class_info[key] /
+                        new_key = key
+                        class_info[key] = (float(class_info[key]) /
                                            class_info['occurrences'])
+                        if not (sd_key, new_key) in class_info:
+                            class_info[(sd_key, new_key)] = []
+                        class_info[(sd_key, new_key)].append(class_info[key])
             total.append(class_info)
     return total

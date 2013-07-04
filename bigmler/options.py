@@ -595,7 +595,7 @@ under the License.""" % version
                         help=("BigML ensemble's creation task-level"
                               " parallelism"))
 
-    # Prediction log format: `short` will only log predictions, `long` will 
+    # Prediction log format: `short` will only log predictions, `long` will
     # log also confidence information
     parser.add_argument('--prediction-info',
                         action='store',
