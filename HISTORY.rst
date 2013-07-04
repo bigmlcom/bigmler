@@ -3,7 +3,12 @@
 History
 -------
 
-0.3.2 (2013-05-14)
+0.3.3 (2013-07-04)
+~~~~~~~~~~~~~~~~~~
+- Adding standard deviation to evaluation measures in cross-validation
+- Bug fixing: using only-model argument to download fields in models
+
+0.3.2 (2013-06-21)
 ~~~~~~~~~~~~~~~~~~
 - Adding new flag to control predictions file information
 - Bug fixing: using default sample-rate in ensemble evaluations
