@@ -41,7 +41,7 @@ You can also specify a file name to save the newly created predictions::
 If you do not specify the path to an output file, BigMLer will auto-generate
 one for you under a
 new directory named after the current date and time
-(e.g., `MonNov1212_174715/predictions.csv`). With ``--predictions-info``
+(e.g., `MonNov1212_174715/predictions.csv`). With ``--prediction-info``
 flag set to ``brief`` only the prediction result will be stored (default is
 ``normal`` and includes confidence information).
 
@@ -623,13 +623,13 @@ Optional Arguments
 
 General configuration
 ---------------------
---username  BigML's username. If left unspecified, it will default to the
-values of the ``BIGML_USERNAME`` environment variable.
---api-key   BigML's api_key. If left unspecified, it will default to the
-values of the ``BIGML_API_KEY`` environment variable.
---dev       Uses BigML FREE development environment. Sizes must be under 1MB
-though.
---debug     Activates debug level and shows log info for each https request.
+--username      BigML's username. If left unspecified, it will default to the
+                values of the ``BIGML_USERNAME`` environment variable.
+--api-key       BigML's api_key. If left unspecified, it will default to the
+                values of the ``BIGML_API_KEY`` environment variable.
+--dev           Uses FREE development environment. Sizes must be under 1MB
+                though.
+--debug         Activates debug level and shows log info for each https request.
 
 Basic Functionality
 -------------------

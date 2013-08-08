@@ -113,7 +113,7 @@ You can also specify a file name to save the newly created predictions::
 
 If you do not specify the path to an output file, BigMLer will auto-generate one for you under a
 new directory named after the current date and time (e.g., `MonNov1212_174715/predictions.csv`).
-With ``--predictions-info``
+With ``--prediction-info``
 flag set to ``brief`` only the prediction result will be stored (default is
 ``normal`` and includes confidence information).
 
