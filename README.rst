@@ -26,7 +26,7 @@ Requirements
 
 Python 2.7 is currently supported by BigMLer.
 
-BigMLer requires `bigml 0.7.1 <https://github.com/bigmlcom/python>`_  or higher.
+BigMLer requires `bigml 0.7.2 <https://github.com/bigmlcom/python>`_  or higher.
 
 BigMLer Installation
 ====================
@@ -40,6 +40,10 @@ You can also install the development version of bigmler directly
 from the Git repository::
 
     $ pip install -e git://github.com/bigmlcom/bigmler.git#egg=bigmler
+
+For a detailed description of install instructions on Windows see the
+`BigMLer on Windows <#bigmler-on-windows>`_ section.
+
 
 BigML Authentication
 ====================
@@ -60,6 +64,47 @@ Otherwise, you can initialize directly when running the BigMLer
 script as follows::
 
     bigmler --train data/iris.csv --username myusername --api_key ae579e7e53fb9abd646a6ff8aa99d4afe83ac291
+
+For a detailed description of authentication instructions on Windows see the
+`BigMLer on Windows <#bigmler-on-windows>`_ section.
+
+
+BigMLer on Windows
+==================
+
+To install BigMLer on Windows environments, you'll need `Python for Windows
+(v.2.7.x) <http://www.python.org/download/>`_ installed.
+
+In addition to that, you'll need the ``pip`` tool to install BigMLer. To
+install pip, first you need to open your command line window (write ``cmd`` in
+the input field that appears when you click on ``Start`` and hit ``enter``),
+download this `python file <http://python-distribute.org/distribute_setup.py>`_ 
+and execute it::
+
+    c:\Python27\python.exe distribute_setup.py
+
+After that, you'll be able to install ``pip`` by typing the following command::
+
+    c:\Python27\Scripts\easy_install.exe pip
+
+And finally, to install BigMLer, just type::
+
+    c:\Python27\Scripts\pip.exe install bigmler
+
+and BigMLer should be installed in your computer. Then
+issuing::
+
+    bigmler --version
+
+should show BigMLer version information.
+
+Finally, to start using BigMLer to handle your BigML resources, you need to
+set your credentials in BigML for authentication. If you want them to be
+permanently stored in your system, use::
+
+    setx BIGML_USERNAME myusername
+    setx BIGML_API_KEY ae579e7e53fb9abd646a6ff8aa99d4afe83ac291
+
 
 BigML Development Mode
 ======================

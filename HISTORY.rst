@@ -3,6 +3,11 @@
 History
 -------
 
+0.3.3 (2013-08-09)
+~~~~~~~~~~~~~~~~~~
+- Adding new flag to control predictions file information
+- Fixing errors in documentation and adding install for windows info
+
 0.3.2 (2013-07-04)
 ~~~~~~~~~~~~~~~~~~
 - Adding new flag to control predictions file information
