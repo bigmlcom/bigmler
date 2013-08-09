@@ -354,7 +354,8 @@ where ``types.txt`` would be::
     3, 'numeric'
     4, 'categorical'
 
-You can specify the fields that you want to include in the dataset::
+You can specify the fields that you want to include in the dataset by naming
+them explicitly::
 
     bigmler --train data/iris.csv \
             --dataset-fields 'sepal length','sepal width','species'
@@ -362,6 +363,16 @@ You can specify the fields that you want to include in the dataset::
 or the fields that you want to include as predictors in the model::
 
     bigmler --train data/iris.csv --model-fields 'sepal length','sepal width'
+
+You can also specify the chosen fields by adding or removing the ones you
+choose to the list of preferred fields of the previous resource. Just prefix
+their names with ``+`` or ``-`` respectively. For example,
+you could create a model from an existing dataset using all their fields but
+the ``sepal length`` by saying::
+
+    bigmler --dataset dataset/50a1f441035d0706d9000371 \
+            --model-fields -'sepal length'
+
 
 When evaluating, you can map the fields of the test dataset to those of
 the evaluated model by writing in a file the field column of the dataset and
