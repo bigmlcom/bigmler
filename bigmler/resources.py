@@ -36,7 +36,9 @@ EVALUATE_SAMPLE_RATE = 0.8
 SEED = "BigML, Machine Learning made easy"
 LOCALE_DEFAULT = "en_US"
 FIELDS_QS = 'only_model=true'
-
+ADD_PREFIX = '+'
+REMOVE_PREFIX = '-'
+ADD_REMOVE_PREFIX = [ADD_PREFIX, REMOVE_PREFIX]
 
 def set_source_args(data_set_header, name, description, args):
     """Returns a source arguments dict
@@ -284,8 +286,22 @@ def set_model_args(name, description,
 
     input_fields = []
     if model_fields and fields is not None:
-        for name in model_fields:
-            input_fields.append(fields.field_id(name))
+        # case of adding and removing fields to the dataset preferred field set
+        if all([name[0] in ADD_REMOVE_PREFIX for name in model_fields]):   
+            preferred_fields = fields.preferred_fields()
+            input_fields = preferred_fields.keys()
+            for name in model_fields:
+                field_id = fields.field_id(name[1:])
+                if name[0] == ADD_PREFIX:
+                    if not field_id in input_fields:
+                        input_fields.append(field_id)
+                elif field_id in input_fields:
+                    input_fields.remove(field_id)
+        # case of user given entire list of fields
+        else:
+            for name in model_fields:
+                input_fields.append(fields.field_id(name))
+
         model_args.update(input_fields=input_fields)
 
     if args.pruning and args.pruning != 'smart':
