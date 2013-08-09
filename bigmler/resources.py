@@ -63,6 +63,7 @@ def configure_input_fields(fields, user_given_fields):
     else:
         for name in user_given_fields:
             input_fields.append(fields.field_id(name))
+    return input_fields
 
 
 def set_source_args(data_set_header, name, description, args):
@@ -191,7 +192,6 @@ def set_dataset_args(name, description, args, fields, dataset_fields):
         dataset_args.update(json_filter=args.json_filter)
     elif args.lisp_filter:
         dataset_args.update(lisp_filter=args.lisp_filter)
-
 
     if dataset_fields and fields is not None:
         input_fields = configure_input_fields(fields, dataset_fields)
