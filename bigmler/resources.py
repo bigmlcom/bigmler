@@ -36,6 +36,35 @@ EVALUATE_SAMPLE_RATE = 0.8
 SEED = "BigML, Machine Learning made easy"
 LOCALE_DEFAULT = "en_US"
 FIELDS_QS = 'only_model=true'
+ADD_PREFIX = '+'
+REMOVE_PREFIX = '-'
+ADD_REMOVE_PREFIX = [ADD_PREFIX, REMOVE_PREFIX]
+
+
+def configure_input_fields(fields, user_given_fields):
+    """ Returns the input fields used in the new resource creation as given
+
+        The user can choose to write all the fields that will be used in the
+        new resource or add/remove on the set of fields retrieved from the 
+        resource that will be used to create the new one.
+    """
+    # case of adding and removing fields to the dataset preferred field set
+    if all([name[0] in ADD_REMOVE_PREFIX for name in user_given_fields]):   
+        preferred_fields = fields.preferred_fields()
+        input_fields = preferred_fields.keys()
+        for name in user_given_fields:
+            field_id = fields.field_id(name[1:])
+            if name[0] == ADD_PREFIX:
+                if not field_id in input_fields:
+                    input_fields.append(field_id)
+            elif field_id in input_fields:
+                input_fields.remove(field_id)
+    # case of user given entire list of fields
+    else:
+        input_fields = []
+        for name in user_given_fields:
+            input_fields.append(fields.field_id(name))
+    return input_fields
 
 
 def set_source_args(data_set_header, name, description, args):
@@ -165,10 +194,8 @@ def set_dataset_args(name, description, args, fields, dataset_fields):
     elif args.lisp_filter:
         dataset_args.update(lisp_filter=args.lisp_filter)
 
-    input_fields = []
-    if dataset_fields:
-        for name in dataset_fields:
-            input_fields.append(fields.field_id(name))
+    if dataset_fields and fields is not None:
+        input_fields = configure_input_fields(fields, dataset_fields)
         dataset_args.update(input_fields=input_fields)
     return dataset_args
 
@@ -282,10 +309,8 @@ def set_model_args(name, description,
         elif args.sample_rate == 1:
             args.sample_rate = EVALUATE_SAMPLE_RATE
 
-    input_fields = []
     if model_fields and fields is not None:
-        for name in model_fields:
-            input_fields.append(fields.field_id(name))
+        input_fields = configure_input_fields(fields, model_fields)
         model_args.update(input_fields=input_fields)
 
     if args.pruning and args.pruning != 'smart':

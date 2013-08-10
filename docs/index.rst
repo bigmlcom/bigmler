@@ -41,7 +41,7 @@ You can also specify a file name to save the newly created predictions::
 If you do not specify the path to an output file, BigMLer will auto-generate
 one for you under a
 new directory named after the current date and time
-(e.g., `MonNov1212_174715/predictions.csv`). With ``--predictions-info``
+(e.g., `MonNov1212_174715/predictions.csv`). With ``--prediction-info``
 flag set to ``brief`` only the prediction result will be stored (default is
 ``normal`` and includes confidence information).
 
@@ -354,7 +354,8 @@ where ``types.txt`` would be::
     3, 'numeric'
     4, 'categorical'
 
-You can specify the fields that you want to include in the dataset::
+You can specify the fields that you want to include in the dataset by naming
+them explicitly::
 
     bigmler --train data/iris.csv \
             --dataset-fields 'sepal length','sepal width','species'
@@ -362,6 +363,16 @@ You can specify the fields that you want to include in the dataset::
 or the fields that you want to include as predictors in the model::
 
     bigmler --train data/iris.csv --model-fields 'sepal length','sepal width'
+
+You can also specify the chosen fields by adding or removing the ones you
+choose to the list of preferred fields of the previous resource. Just prefix
+their names with ``+`` or ``-`` respectively. For example,
+you could create a model from an existing dataset using all their fields but
+the ``sepal length`` by saying::
+
+    bigmler --dataset dataset/50a1f441035d0706d9000371 \
+            --model-fields -'sepal length'
+
 
 When evaluating, you can map the fields of the test dataset to those of
 the evaluated model by writing in a file the field column of the dataset and
@@ -555,7 +566,7 @@ Requirements
 
 Python 2.7 is currently supported by BigMLer.
 
-BigMLer requires `bigml 0.7.1 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 0.7.3 <https://github.com/bigmlcom/python>`_  or
 higher.
 
 BigMLer Installation
@@ -570,6 +581,10 @@ You can also install the development version of bigmler directly
 from the Git repository::
 
     $ pip install -e git://github.com/bigmlcom/bigmler.git#egg=bigmler
+
+For a detailed description of install instructions on Windows see the
+`BigMLer on Windows <#bigmler-on-windows>`_ section.
+
 
 BigML Authentication
 ====================
@@ -589,8 +604,47 @@ those variables automatically when you log in::
 Otherwise, you can initialize directly when running the BigMLer
 script as follows::
 
-    bigmler --train data/iris.csv --username myusername \
-            --api-key ae579e7e53fb9abd646a6ff8aa99d4afe83ac291
+    bigmler --train data/iris.csv --username myusername --api_key ae579e7e53fb9abd646a6ff8aa99d4afe83ac291
+
+For a detailed description of authentication instructions on Windows see the
+`BigMLer on Windows <#bigmler-on-windows>`_ section.
+
+
+BigMLer on Windows
+==================
+
+To install BigMLer on Windows environments, you'll need `Python for Windows
+(v.2.7.x) <http://www.python.org/download/>`_ installed.
+
+In addition to that, you'll need the ``pip`` tool to install BigMLer. To
+install pip, first you need to open your command line window (write ``cmd`` in
+the input field that appears when you click on ``Start`` and hit ``enter``),
+download this `python file <http://python-distribute.org/distribute_setup.py>`_ 
+and execute it::
+
+    c:\Python27\python.exe distribute_setup.py
+
+After that, you'll be able to install ``pip`` by typing the following command::
+
+    c:\Python27\Scripts\easy_install.exe pip
+
+And finally, to install BigMLer, just type::
+
+    c:\Python27\Scripts\pip.exe install bigmler
+
+and BigMLer should be installed in your computer. Then
+issuing::
+
+    bigmler --version
+
+should show BigMLer version information.
+
+Finally, to start using BigMLer to handle your BigML resources, you need to
+set your credentials in BigML for authentication. If you want them to be
+permanently stored in your system, use::
+
+    setx BIGML_USERNAME myusername
+    setx BIGML_API_KEY ae579e7e53fb9abd646a6ff8aa99d4afe83ac291
 
 BigML Development Mode
 ======================
@@ -623,68 +677,75 @@ Optional Arguments
 
 General configuration
 ---------------------
---username  BigML's username. If left unspecified, it will default to the
-values of the ``BIGML_USERNAME`` environment variable.
---api-key   BigML's api_key. If left unspecified, it will default to the
-values of the ``BIGML_API_KEY`` environment variable.
---dev       Uses BigML FREE development environment. Sizes must be under 1MB
-though.
---debug     Activates debug level and shows log info for each https request.
+--username      BigML's username. If left unspecified, it will default to the
+                values of the ``BIGML_USERNAME`` environment variable.
+--api-key       BigML's api_key. If left unspecified, it will default to the
+                values of the ``BIGML_API_KEY`` environment variable.
+--dev           Uses FREE development environment. Sizes must be under 1MB
+                though.
+--debug         Activates debug level and shows log info for each https request.
 
 Basic Functionality
 -------------------
 
---train TRAINING_SET        Full path to a training set. It can be a remote URL
-to a (gzipped or compressed) csv file. The protocol schemes can be http, https,
-s3, azure, odata.
---test TEST_SET     Full path to a test set. A file containing the data that
-you want to input to generate predictions.
---objective OBJECTIVE_FIELD     The name of the Objective Field. The field that
-you want to predict.
---output PREDICTIONS        Full path to a file to save predictions. If left
-unspecified, it will default to an auto-generated file created by BigMLer.
---method METHOD             Prediction method used: ``plurality``,
-``"confidence weighted"`` or ``"probability weighted"``.
---pruning PRUNING_TYPE      The pruning applied in building the model. It's
-allowed values are ``smart``, ``statistical`` and ``no-pruning``. The default
-value is ``smart``
---evaluate                  Turns on evaluation mode
---resume                    Retries command execution.
---stack-level LEVEL         Level of the retried command in the stack
---cross-validation-rate RATE    Fraction of the training data held out for
-Monte-Carlo cross-validation
+--train TRAINING_SET                Full path to a training set. It can be a
+                                    remote URL to a (gzipped or compressed) csv
+                                    file. The protocol schemes can be http,
+                                    https, s3, azure, odata.
+--test TEST_SET                     Full path to a test set. A file containing
+                                    the data that
+                                    you want to input to generate predictions.
+--objective OBJECTIVE_FIELD         The name of the Objective Field. The field that
+                                    you want to predict.
+--output PREDICTIONS                Full path to a file to save predictions.
+                                    If left unspecified, it will default to an
+                                    auto-generated file created by BigMLer.
+--method METHOD                     Prediction method used: ``plurality``,
+                                    ``"confidence weighted"`` or
+                                    ``"probability weighted"``.
+--pruning PRUNING_TYPE              The pruning applied in building the model.
+                                    It's allowed values are ``smart``,
+                                    ``statistical`` and ``no-pruning``.
+                                    The default value is ``smart``
+--evaluate                          Turns on evaluation mode
+--resume                            Retries command execution.
+--stack-level LEVEL                 Level of the retried command in the stack
+--cross-validation-rate RATE        Fraction of the training data held out for
+                                    Monte-Carlo cross-validation
 --number-of-evaluations NUMBER_OF_EVALUATIONS    Number of runs that will be
-used in cross-validation
+                                                 used in cross-validation
 
 Content
 -------
---name NAME     Name for the resources in BigML.
---category CATEGORY     Category code. See
-`full list <https://bigml.com/developers/sources#s_categories>`_.
+--name NAME                     Name for the resources in BigML.
+--category CATEGORY             Category code. See
+                                `full list <https://bigml.com/developers/sources#s_categories>`_.
 --description DESCRIPTION       Path to a file with a description in plain text
-or markdown.
---tag TAG   Tag to later retrieve new resources
---no-tag    Puts BigMLer default tag if no other tag is given
+                                or markdown.
+--tag TAG                       Tag to later retrieve new resources
+--no-tag                        Puts BigMLer default tag if no other tag is given
 
 Data Configuration
 ------------------
---no-train-header   The train set file hasn't a header
---no-test-header    The test set file hasn't a header
---field-attribute PATH  Path to a file describing field attributes. One
-definition per line (e.g., 0,'Last Name')
---types PATH        Path to a file describing field types. One definition per
-line (e.g., 0, 'numeric')
+--no-train-header                   The train set file hasn't a header
+--no-test-header                    The test set file hasn't a header
+--field-attribute PATH              Path to a file describing field attributes.
+                                    One definition per line
+                                    (e.g., 0,'Last Name')
+--types PATH                        Path to a file describing field types.
+                                    One definition per line
+                                    (e.g., 0, 'numeric')
 --dataset-fields DATASET_FIELDS     Comma-separated list of field column
-numbers to include in the dataset
---model-fields MODEL_FIELDS     Comma-separated list of input fields
-(predictors) to create the model
---json-filter PATH  Path to a file containing a JSON expression to filter
-the source
---lisp-filter PATH  Path to a file containing a LISP expression to filter
-the source
---locale LOCALE     Locale code string
---fields-map PATH   Path to a file containing the dataset to model fields map
-for evaluation
+                                    numbers to include in the dataset
+--model-fields MODEL_FIELDS         Comma-separated list of input fields
+                                    (predictors) to create the model
+--json-filter PATH                  Path to a file containing a JSON expression
+                                    to filter the source
+--lisp-filter PATH                  Path to a file containing a LISP expression
+                                    to filter the source
+--locale LOCALE                     Locale code string
+--fields-map PATH                   Path to a file containing the dataset to
+                                    model fields map for evaluation
 
 
 Remote Resources
@@ -695,7 +756,7 @@ Remote Resources
 --model MODEL       BigML model Id
 --remote            Computes predictions remotely
 --models PATH       Path to a file containing model/ids. One model per line
-(e.g., model/4f824203ce80053)
+                    (e.g., model/4f824203ce80053)
 --model-tag MODEL_TAG   Retrieve models that were tagged with tag
 
 Delete Remote Resources
@@ -703,32 +764,34 @@ Delete Remote Resources
 --delete            Starts delete mode
 --ids LIST_OF_IDS   Comma separated list of ids to be deleted
 --from-file FILE_OF_IDS  Path to a file containing the resources' ids to be
-deleted
+                         deleted
 --all-tag TAG       Retrieves resources that were tagged with tag to be deleted
 --source-tag TAG    Retrieves sources that were tagged with tag to be deleted
 --dataset-tag TAG   Retrieves datasets that were tagged with tag to be deleted
 --model-tag TAG     Retrieves models that were tagged with tag to be deleted
 --prediction-tag TAG   Retrieves predictions that were tagged with tag to be
-deleted
+                       deleted
 --evaluation-tag TAG   Retrieves evaluations that were tagged with tag to be
-deleted
+                       deleted
 
 Ensembles
 ---------
---number-of-models NUMBER_OF_MODELS
-                        Number of models to create.
---sample-rate SAMPLE_RATE
-                        Sample rate to use (a float between 0.01 and 1)
---replacement         Use replacement when sampling
+--number-of-models NUMBER_OF_MODELS     Number of models to create.
+--sample-rate SAMPLE_RATE               Sample rate to use (a float between
+                                        0.01 and 1)
+--replacement                           Use replacement when sampling
 --max-parallel-models MAX_PARALLEL_MODELS    Max number of models to create in
-parallel
---max-batch-models MAX_BATCH_MODELS  Max number of local models to be predicted
-from in parallel. For ensembles with a number of models over it, predictions
-are stored in files as they are computed and retrived and combined eventually.
---randomize           Use a random set of fields to split on.
---combine-votes LIST_OF_DIRS    Combines the votes of models generated in a
-list of directories.
---tlp LEVEL           Task-level parallelization
+                                             parallel
+--max-batch-models MAX_BATCH_MODELS     Max number of local models to be
+                                        predicted from in parallel. For
+                                        ensembles with a number of models over
+                                        it, predictions are stored in files as
+                                        they are computed and retrived and
+                                        combined eventually.
+--randomize                             Use a random set of fields to split on.
+--combine-votes LIST_OF_DIRS            Combines the votes of models generated
+                                        in a list of directories.
+--tlp LEVEL                             Task-level parallelization
 
 If you are not choosing to create an ensemble,
 make sure that you tag your models conveniently so that you can
@@ -749,20 +812,22 @@ to them.
 Fancy Options
 -------------    
 --progress-bar              Shows an update on the bytes uploaded when creating
-a new source. This option might run into issues depending on the locale
-settings of your OS.
+                            a new source. This option might run into issues
+                            depending on the locale
+                            settings of your OS.
 --no-dataset                Does not create a model. BigMLer will only create
-a source.
+                            a source.
 --no-model                  Does not create a model. BigMLer will only create
-a dataset.
+                            a dataset.
 --resources-log LOG_FILE    Keeps a log of the resources generated in each
-command.
+                            command.
 --version                   Shows the version number
 --verbosity LEVEL           Turns on (1) or off (0) the verbosity.
 --clear-logs                Clears the ``.bigmler``, ``.bigmler_dir_stack``,
-``.bigmler_dirs`` and user log file given in ``--resources-log`` (if any).
+                            ``.bigmler_dirs`` and user log file given in
+                            ``--resources-log`` (if any).
 --store                     Stores every created or retrieved resource in your
-output directory
+                            output directory
 
 Prior Versions Compatibility Issues
 -----------------------------------

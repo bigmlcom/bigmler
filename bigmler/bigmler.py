@@ -80,6 +80,7 @@ MISSING_TOKENS = ['', 'N/A', 'n/a', 'NULL', 'null', '-', '#DIV/0', '#REF!',
 MONTECARLO_FACTOR = 200
 
 
+
 def source_processing(training_set, test_set, training_set_header,
                       test_set_header, name, description, api, args, resume,
                       csv_properties=None, field_attributes=None, types=None,
@@ -511,8 +512,15 @@ def main(args=sys.argv[1:]):
                 pass
     literal_args = args[:]
     for i in range(0, len(args)):
+        # quoting literals with blanks: 'petal length'
         if ' ' in args[i]:
-            literal_args[i] = '"%s"' % args[i]
+            prefix = ""
+            literal = args[i]
+            # literals with blanks after "+" or "-": +'petal length'
+            if args[i][0] in r.ADD_REMOVE_PREFIX:
+                prefix = args[i][0]
+                literal = args[i][1:]
+            literal_args[i] = '%s"%s"' % (prefix, literal)
     message = "bigmler %s\n" % " ".join(literal_args)
 
     # Resume calls are not logged
