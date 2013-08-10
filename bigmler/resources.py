@@ -61,6 +61,7 @@ def configure_input_fields(fields, user_given_fields):
                 input_fields.remove(field_id)
     # case of user given entire list of fields
     else:
+        input_fields = []
         for name in user_given_fields:
             input_fields.append(fields.field_id(name))
     return input_fields
