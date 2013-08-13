@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 #
-# Copyright 2012 BigML
+# Copyright 2013 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -45,11 +45,11 @@ def configure_input_fields(fields, user_given_fields):
     """ Returns the input fields used in the new resource creation as given
 
         The user can choose to write all the fields that will be used in the
-        new resource or add/remove on the set of fields retrieved from the 
+        new resource or add/remove on the set of fields retrieved from the
         resource that will be used to create the new one.
     """
     # case of adding and removing fields to the dataset preferred field set
-    if all([name[0] in ADD_REMOVE_PREFIX for name in user_given_fields]):   
+    if all([name[0] in ADD_REMOVE_PREFIX for name in user_given_fields]):
         preferred_fields = fields.preferred_fields()
         input_fields = preferred_fields.keys()
         for name in user_given_fields:

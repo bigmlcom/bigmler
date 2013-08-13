@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 #
-# Copyright 2012 BigML
+# Copyright 2013 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -78,7 +78,6 @@ MISSING_TOKENS = ['', 'N/A', 'n/a', 'NULL', 'null', '-', '#DIV/0', '#REF!',
                   '#NAME?', 'NIL', 'nil', 'NA', 'na', '#VALUE!', '#NULL!',
                   'NaN', '#N/A', '#NUM!', '?']
 MONTECARLO_FACTOR = 200
-
 
 
 def source_processing(training_set, test_set, training_set_header,
