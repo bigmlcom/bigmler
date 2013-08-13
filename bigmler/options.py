@@ -603,7 +603,9 @@ under the License.""" % version
                         default=defaults.get('prediction_info', 'normal'),
                         help=("Prediction log format: 'brief' will only "
                               "log predictions, 'normal' will write confidence"
-                              " too"))
+                              " too, 'full data' will write in a row the"
+                              " input data that generates the prediction"
+                              " followed by it"))
 
     # The following options are only useful to deactivate the corresponding
     # oposed default values

@@ -73,8 +73,11 @@ def remote_predict(models, test_reader, prediction_file, api,
 
             predictions_file = csv.writer(open(predictions_file, 'w', 0),
                                           lineterminator="\n")
+            raw_input_data_list = []
             for input_data in test_reader:
-                prediction = api.create_prediction(model, input_data,
+                raw_input_data_list.append(input_data)
+                input_data_dict = test_reader.dict(input_data)
+                prediction = api.create_prediction(model, input_data_dict,
                                                    by_name=test_set_header,
                                                    wait_time=0,
                                                    args=prediction_args)
@@ -85,7 +88,8 @@ def remote_predict(models, test_reader, prediction_file, api,
                 predictions_file.writerow(prediction_row)
     u.combine_votes(predictions_files,
                     Model(models[0]).to_prediction,
-                    prediction_file, method, prediction_info)
+                    prediction_file, method,
+                    prediction_info, raw_input_data_list)
 
 
 def remote_predict_ensemble(ensemble_id, test_reader, prediction_file, api,
@@ -116,7 +120,8 @@ def remote_predict_ensemble(ensemble_id, test_reader, prediction_file, api,
         predictions_file = csv.writer(open(prediction_file, 'w', 0),
                                       lineterminator="\n")
         for input_data in test_reader:
-            prediction = api.create_prediction(ensemble_id, input_data,
+            input_data_dict = test_reader.dict(input_data)
+            prediction = api.create_prediction(ensemble_id, input_data_dict,
                                                by_name=test_set_header,
                                                wait_time=0,
                                                args=prediction_args)
@@ -126,6 +131,9 @@ def remote_predict_ensemble(ensemble_id, test_reader, prediction_file, api,
                                    "Failed to create prediction: ")
             u.log_message("%s\n" % prediction['resource'], log_file=log)
             prediction_row = u.prediction_to_row(prediction, prediction_info)
+            if prediction_info == u.FULL_FORMAT:
+                input_data.append(prediction_row[0])
+                prediction_row = input_data
             predictions_file.writerow(prediction_row)
 
 
@@ -136,11 +144,13 @@ def local_predict(models, test_reader, output, method, prediction_info=None):
     local_model = MultiModel(models)
     test_set_header = test_reader.has_headers()
     for input_data in test_reader:
-        prediction = local_model.predict(input_data,
+        input_data_dict = test_reader.dict(input_data)
+        prediction = local_model.predict(input_data_dict,
                                          by_name=test_set_header,
                                          method=method,
                                          with_confidence=True)
-        u.write_prediction(prediction, output, prediction_info)
+        u.write_prediction(prediction, output,
+                           prediction_info, input_data)
 
 
 def local_batch_predict(models, test_reader, prediction_file, api,
@@ -172,8 +182,10 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                      in range(0, models_total, max_models)]
 
     input_data_list = []
+    raw_input_data_list = []
     for input_data in test_reader:
-        input_data_list.append(input_data)
+        raw_input_data_list.append(input_data)
+        input_data_list.append(test_reader.dict(input_data))
     total_votes = []
     models_count = 0
     for models_split in models_splits:
@@ -216,9 +228,11 @@ def local_batch_predict(models, test_reader, prediction_file, api,
             total_votes = votes
     message = u.dated("Combining predictions.\n")
     u.log_message(message, log_file=session_file, console=verbosity)
-    for multivote in total_votes:
+    for index in range(0, len(total_votes)):
+        multivote = total_votes[index]
+        input_data = raw_input_data_list[index]
         u.write_prediction(multivote.combine(method, True), output,
-                           prediction_info)
+                           prediction_info, input_data)
 
 
 def predict(test_set, test_set_header, models, fields, output,
@@ -341,10 +355,15 @@ class TestReader(object):
         return self
 
     def next(self):
-        """Returns the next row in a dict format
+        """Returns the next row
 
         """
-        row = self.test_reader.next()
+        return self.test_reader.next()
+
+    def dict(self, row):
+        """Returns the row in a dict format according to the given headers
+
+        """
         for index in self.exclude:
             del row[index]
         return self.fields.pair(row, self.headers, self.objective_field)

@@ -42,6 +42,7 @@ ATTRIBUTE_NAMES = ['name', 'label', 'description']
 NEW_DIRS_LOG = ".bigmler_dirs"
 RESOURCE_URL = "https://bigml.com/dashboard/"
 BRIEF_FORMAT = 'brief'
+FULL_FORMAT = 'full data'
 
 
 def read_description(path):
@@ -233,7 +234,7 @@ def list_ids(api_function, query_string):
 
 
 def combine_votes(votes_files, to_prediction, to_file, method=0,
-                  prediction_info=None):
+                  prediction_info=None, input_data_list=None):
     """Combines the votes found in the votes' files and stores predictions.
 
        votes_files: should contain the list of file names
@@ -246,9 +247,14 @@ def combine_votes(votes_files, to_prediction, to_file, method=0,
     check_dir(to_file)
     output = csv.writer(open(to_file, 'w', 0),
                         lineterminator="\n")
-    for multivote in votes:
+    for index in range(0, len(votes)):
+        multivote = votes[index]
+        if input_data_list is not None:
+            input_data = input_data_list[index]
+        else:
+            input_data = None
         write_prediction(multivote.combine(method, True), output,
-                         prediction_info)
+                         prediction_info, input_data)
 
 
 def delete(api, delete_list):
@@ -287,8 +293,15 @@ def check_dir(path):
     return directory
 
 
-def write_prediction(prediction, output=sys.stdout, prediction_info=None):
+def write_prediction(prediction, output=sys.stdout,
+                     prediction_info=None, input_data=None):
     """Writes the final combined prediction to the required output
+
+       The format of the output depends on the `prediction_info` value.
+       There's a brief format, that writes only the predicted value,
+       a normal format (default) that writes the prediction followed by its
+       confidence, and a full data format that writes first the input data
+       used to predict followed by the prediction.
 
     """
     confidence = False
@@ -297,8 +310,13 @@ def write_prediction(prediction, output=sys.stdout, prediction_info=None):
     if isinstance(prediction, basestring):
         prediction = prediction.encode("utf-8")
     row = [prediction]
-    if prediction_info != BRIEF_FORMAT and confidence:
+    if not prediction_info in [BRIEF_FORMAT, FULL_FORMAT] and confidence:
         row.append(confidence)
+    elif prediction_info == FULL_FORMAT:
+        if input_data is None:
+            input_data = []
+        row = input_data
+        row.append(prediction)
     try:
         output.writerow(row)
     except AttributeError:
