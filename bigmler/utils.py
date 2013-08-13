@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 #
-# Copyright 2012 BigML
+# Copyright 2012, 2013 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -34,14 +34,12 @@ except ImportError:
     import json
 
 import bigml.api
-from bigml.multimodel import read_votes
 from bigml.util import console_log
 
 PAGE_LENGTH = 200
 ATTRIBUTE_NAMES = ['name', 'label', 'description']
 NEW_DIRS_LOG = ".bigmler_dirs"
 RESOURCE_URL = "https://bigml.com/dashboard/"
-BRIEF_FORMAT = 'brief'
 
 
 def read_description(path):
@@ -232,25 +230,6 @@ def list_ids(api_function, query_string):
     return ids
 
 
-def combine_votes(votes_files, to_prediction, to_file, method=0,
-                  prediction_info=None):
-    """Combines the votes found in the votes' files and stores predictions.
-
-       votes_files: should contain the list of file names
-       to_prediction: is the Model method that casts prediction to numeric
-                      type if needed
-       to_file: is the name of the final output file.
-    """
-    votes = read_votes(votes_files, to_prediction)
-
-    check_dir(to_file)
-    output = csv.writer(open(to_file, 'w', 0),
-                        lineterminator="\n")
-    for multivote in votes:
-        write_prediction(multivote.combine(method, True), output,
-                         prediction_info)
-
-
 def delete(api, delete_list):
     """ Deletes the resources given in the list.
 
@@ -285,27 +264,6 @@ def check_dir(path):
         with open(NEW_DIRS_LOG, "a", 0) as directory_log:
             directory_log.write("%s\n" % os.path.abspath(directory))
     return directory
-
-
-def write_prediction(prediction, output=sys.stdout, prediction_info=None):
-    """Writes the final combined prediction to the required output
-
-    """
-    confidence = False
-    if isinstance(prediction, tuple):
-        prediction, confidence = prediction
-    if isinstance(prediction, basestring):
-        prediction = prediction.encode("utf-8")
-    row = [prediction]
-    if prediction_info != BRIEF_FORMAT and confidence:
-        row.append(confidence)
-    try:
-        output.writerow(row)
-    except AttributeError:
-        try:
-            output.write(row)
-        except AttributeError:
-            raise AttributeError("You should provide a writeable object")
 
 
 def tail(file_handler, window=1):
@@ -384,30 +342,6 @@ def dated(message):
                         message)
 
 
-def prediction_to_row(prediction, prediction_info=None):
-    """Returns a csv row to store main prediction info in csv files.
-
-    """
-    prediction = prediction['object']
-    prediction_class = prediction['objective_fields'][0]
-    tree = prediction.get('prediction_path', prediction)
-    row = [prediction['prediction'][prediction_class]]
-    if not prediction_info == BRIEF_FORMAT:
-        row.append(tree['confidence'])
-        distribution = None
-        if ('objective_summary' in tree):
-            summary = tree['objective_summary']
-            if 'bins' in summary:
-                distribution = summary['bins']
-            elif 'counts' in summary:
-                distribution = summary['counts']
-            elif 'categories' in summary:
-                distribution = summary['categories']
-        if distribution:
-            row.extend([repr(distribution), sum([x[1] for x in distribution])])
-    return row
-
-
 def get_url(resource):
     """Returns the resource's url in bigml.com
 
@@ -460,3 +394,14 @@ def log_created_resources(file_name, path, resource_id, open_mode='w'):
         except IOError, exc:
             raise IOError("%s: Failed to write %s" % (str(exc),
                           file_name))
+
+
+def check_resource(*args, **kwargs):
+    """Wrapper to catch errors in resource retrieval
+
+    """
+    try:
+        result = bigml.api.check_resource(*args, **kwargs)
+        return result
+    except ValueError, exc:
+        sys.exit("\nFailed to obtain a finished resource:\n%s" % str(exc))
