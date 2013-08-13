@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 #
-# Copyright 2013 BigML
+# Copyright 2012, 2013 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -64,7 +64,7 @@ from bigmler.evaluation import evaluate, cross_validate
 from bigmler.options import create_parser
 from bigmler.defaults import get_user_defaults
 from bigmler.defaults import DEFAULTS_FILE
-from bigmler.prediction import predict
+from bigmler.prediction import predict, combine_votes
 from bigmler.prediction import MAX_MODELS
 
 
@@ -443,7 +443,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         model_id = re.sub(r'.*(model_[a-f0-9]{24})__predictions\.csv$',
                           r'\1', votes_files[0]).replace("_", "/")
         try:
-            model = bigml.api.check_resource(model_id, api.get_model)
+            model = u.check_resource(model_id, api.get_model)
         except ValueError, exception:
             sys.exit("Failed to get model %s: %s" % (model_id, str(exception)))
 
@@ -451,8 +451,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         message = u.dated("Combining votes.\n")
         u.log_message(message, log_file=session_file,
                       console=args.verbosity)
-        u.combine_votes(votes_files, local_model.to_prediction,
-                        output, args.method)
+        combine_votes(votes_files, local_model.to_prediction,
+                      output, args.method)
 
     # If evaluate flag is on, create remote evaluation and save results in
     # json and human-readable format.

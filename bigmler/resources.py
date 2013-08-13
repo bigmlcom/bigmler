@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 #
-# Copyright 2013 BigML
+# Copyright 2012, 2013 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -28,7 +28,7 @@ except ImportError:
 
 import bigml.api
 
-from bigmler.utils import (dated, get_url, log_message, plural,
+from bigmler.utils import (dated, get_url, log_message, plural, check_resource,
                            check_resource_error, log_created_resources)
 from bigml.util import bigml_locale
 
@@ -45,7 +45,7 @@ def configure_input_fields(fields, user_given_fields):
     """ Returns the input fields used in the new resource creation as given
 
         The user can choose to write all the fields that will be used in the
-        new resource or add/remove on the set of fields retrieved from the
+        new resource or modify the set of fields retrieved from the
         resource that will be used to create the new one.
     """
     # case of adding and removing fields to the dataset preferred field set
@@ -110,7 +110,7 @@ def create_source(data_set, source_args,
             raise IOError("%s: Failed to write %s/source" % (str(exc), path))
     check_resource_error(source, "Failed to create source: ")
     try:
-        source = bigml.api.check_resource(source, api.get_source)
+        source = check_resource(source, api.get_source)
     except ValueError, exception:
         sys.exit("Failed to get a finished source: %s" % str(exception))
     message = dated("Source created: %s\n" % get_url(source))
@@ -152,7 +152,7 @@ def get_source(source, api=None, verbosity=True,
         log_message(message, log_file=session_file,
                     console=verbosity)
         try:
-            source = bigml.api.check_resource(source, api.get_source)
+            source = check_resource(source, api.get_source)
         except ValueError, exception:
             sys.exit("Failed to get a finished source: %s" % str(exception))
     return source
@@ -231,7 +231,7 @@ def create_dataset(source_or_dataset, dataset_args, args, api=None, path=None,
                           bigml.api.get_dataset_id(dataset))
     check_resource_error(dataset, "Failed to create dataset: ")
     try:
-        dataset = bigml.api.check_resource(dataset, api.get_dataset)
+        dataset = check_resource(dataset, api.get_dataset)
     except ValueError, exception:
         sys.exit("Failed to get a finished dataset: %s" % str(exception))
     message = dated("Dataset created: %s\n" % get_url(dataset))
@@ -252,7 +252,7 @@ def get_dataset(dataset, api=None, verbosity=True, session_file=None):
                         get_url(dataset))
         log_message(message, log_file=session_file,
                     console=verbosity)
-        dataset = bigml.api.check_resource(dataset, api.get_dataset)
+        dataset = check_resource(dataset, api.get_dataset)
         check_resource_error(dataset, "Failed to get dataset: ")
     return dataset
 
@@ -344,7 +344,7 @@ def create_models(dataset, model_ids, model_args,
         for i in range(1, args.number_of_models + 1):
             if i % args.max_parallel_models == 1 and i > 1:
                 try:
-                    models[last_index] = bigml.api.check_resource(
+                    models[last_index] = check_resource(
                         last_model, api.get_model, query_string=FIELDS_QS)
                 except ValueError, exception:
                     sys.exit("Failed to get a finished model: %s" %
@@ -365,8 +365,8 @@ def create_models(dataset, model_ids, model_args,
         if args.number_of_models < 2 and args.verbosity:
             if bigml.api.get_status(model)['code'] != bigml.api.FINISHED:
                 try:
-                    model = bigml.api.check_resource(model, api.get_model,
-                                                     query_string=FIELDS_QS)
+                    model = check_resource(model, api.get_model,
+                                           query_string=FIELDS_QS)
                 except ValueError, exception:
                     sys.exit("Failed to get a finished model: %s" %
                              str(exception))
@@ -397,8 +397,8 @@ def get_models(model_ids, args, api=None, session_file=None):
         models = []
         for model in model_ids:
             try:
-                model = bigml.api.check_resource(model, api.get_model,
-                                                 query_string=FIELDS_QS)
+                model = check_resource(model, api.get_model,
+                                       query_string=FIELDS_QS)
             except ValueError, exception:
                 sys.exit("Failed to get a finished model: %s" %
                          str(exception))
@@ -406,8 +406,8 @@ def get_models(model_ids, args, api=None, session_file=None):
         model = models[0]
     else:
         try:
-            model = bigml.api.check_resource(model_ids[0], api.get_model,
-                                             query_string=FIELDS_QS)
+            model = check_resource(model_ids[0], api.get_model,
+                                   query_string=FIELDS_QS)
         except ValueError, exception:
             sys.exit("Failed to get a finished model: %s" % str(exception))
         models[0] = model
@@ -476,7 +476,7 @@ def get_ensemble(ensemble, api=None, verbosity=True, session_file=None):
                         get_url(ensemble))
         log_message(message, log_file=session_file,
                     console=verbosity)
-        ensemble = bigml.api.check_resource(ensemble, api.get_ensemble)
+        ensemble = check_resource(ensemble, api.get_ensemble)
         check_resource_error(ensemble, "Failed to get ensemble: ")
     return ensemble
 
@@ -631,7 +631,7 @@ def get_evaluation(evaluation, api=None, verbosity=True, session_file=None):
                     get_url(evaluation))
     log_message(message, log_file=session_file, console=verbosity)
     try:
-        evaluation = bigml.api.check_resource(evaluation, api.get_evaluation)
+        evaluation = check_resource(evaluation, api.get_evaluation)
     except ValueError, exception:
         sys.exit("Failed to get a finished evaluation: %s" % str(exception))
     return evaluation

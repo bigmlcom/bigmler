@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 #
-# Copyright 2013 BigML
+# Copyright 2012, 2013 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -605,7 +605,7 @@ under the License.""" % version
                               "log predictions, 'normal' will write confidence"
                               " too, 'full data' will write in a row the"
                               " input data that generates the prediction"
-                              " followed by it"))
+                              " followed by the latter"))
 
     # The following options are only useful to deactivate the corresponding
     # oposed default values

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 #
-# Copyright 2013 BigML
+# Copyright 2012, 2013 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -29,14 +29,104 @@ import bigmler.checkpoint as c
 
 
 from bigml.model import Model
-from bigml.multimodel import MultiModel
-from bigml.util import (localize, console_log, get_csv_delimiter,
-                        get_predictions_file_name)
+from bigml.multimodel import MultiModel, read_votes
+from bigml.util import (localize, console_log, get_predictions_file_name)
 from bigml.multivote import PLURALITY_CODE
 
+from bigmler.test_reader import TestReader
 from bigmler.resources import FIELDS_QS
 
 MAX_MODELS = 10
+BRIEF_FORMAT = 'brief'
+FULL_FORMAT = 'full data'
+
+
+def write_prediction(prediction, output=sys.stdout,
+                     prediction_info=None, input_data=None):
+    """Writes the final combined prediction to the required output
+
+       The format of the output depends on the `prediction_info` value.
+       There's a brief format, that writes only the predicted value,
+       a normal format (default) that writes the prediction followed by its
+       confidence, and a full data format that writes first the input data
+       used to predict followed by the prediction.
+
+    """
+    confidence = False
+    # handles (prediction, confidence) input
+    if isinstance(prediction, tuple):
+        prediction, confidence = prediction
+    # handles "prediction" input
+    if isinstance(prediction, basestring):
+        prediction = prediction.encode("utf-8")
+    # handles [prediction] or [prediction, confidence, ...] input
+    if isinstance(prediction, list):
+        prediction, confidence = ((prediction[0], None) if len(prediction) == 1
+                                  else prediction)
+    row = [prediction]
+    if not prediction_info in [BRIEF_FORMAT, FULL_FORMAT] and confidence:
+        row.append(confidence)
+    elif prediction_info == FULL_FORMAT:
+        if input_data is None:
+            input_data = []
+        row = input_data
+        row.append(prediction)
+    try:
+        output.writerow(row)
+    except AttributeError:
+        try:
+            output.write(row)
+        except AttributeError:
+            raise AttributeError("You should provide a writeable object")
+
+
+def prediction_to_row(prediction, prediction_info=None):
+    """Returns a csv row to store main prediction info in csv files.
+
+    """
+    prediction = prediction['object']
+    prediction_class = prediction['objective_fields'][0]
+    tree = prediction.get('prediction_path', prediction)
+    row = [prediction['prediction'][prediction_class]]
+    if not prediction_info == BRIEF_FORMAT:
+        row.append(tree['confidence'])
+        distribution = None
+        if ('objective_summary' in tree):
+            summary = tree['objective_summary']
+            if 'bins' in summary:
+                distribution = summary['bins']
+            elif 'counts' in summary:
+                distribution = summary['counts']
+            elif 'categories' in summary:
+                distribution = summary['categories']
+        if distribution:
+            row.extend([repr(distribution), sum([x[1] for x in distribution])])
+    return row
+
+
+def combine_votes(votes_files, to_prediction, to_file, method=0,
+                  prediction_info=None, input_data_list=None):
+    """Combines the votes found in the votes' files and stores predictions.
+
+       votes_files: should contain the list of file names
+       to_prediction: is the Model method that casts prediction to numeric
+                      type if needed
+       to_file: is the name of the final output file.
+    """
+    votes = read_votes(votes_files, to_prediction)
+
+    u.check_dir(to_file)
+    output = csv.writer(open(to_file, 'w', 0),
+                        lineterminator="\n")
+    number_of_tests = len(votes)
+    if input_data_list is None or len(input_data_list) != number_of_tests:
+        input_data_list = None
+    for index in range(0, number_of_tests):
+        multivote = votes[index]
+        input_data = (None if input_data_list is None
+                      else input_data_list[index])
+        write_prediction(multivote.combine(method, True), output,
+                         prediction_info, input_data)
 
 
 def remote_predict(models, test_reader, prediction_file, api,
@@ -57,6 +147,7 @@ def remote_predict(models, test_reader, prediction_file, api,
     if output_path is None:
         output_path = u.check_dir(prediction_file)
     message_logged = False
+    raw_input_data_list = []
     for model in models:
         model = bigml.api.get_model_id(model)
         predictions_file = get_predictions_file_name(model,
@@ -73,7 +164,7 @@ def remote_predict(models, test_reader, prediction_file, api,
 
             predictions_file = csv.writer(open(predictions_file, 'w', 0),
                                           lineterminator="\n")
-            raw_input_data_list = []
+
             for input_data in test_reader:
                 raw_input_data_list.append(input_data)
                 input_data_dict = test_reader.dict(input_data)
@@ -84,12 +175,12 @@ def remote_predict(models, test_reader, prediction_file, api,
                 u.check_resource_error(prediction,
                                        "Failed to create prediction: ")
                 u.log_message("%s\n" % prediction['resource'], log_file=log)
-                prediction_row = u.prediction_to_row(prediction)
+                prediction_row = prediction_to_row(prediction)
                 predictions_file.writerow(prediction_row)
-    u.combine_votes(predictions_files,
-                    Model(models[0]).to_prediction,
-                    prediction_file, method,
-                    prediction_info, raw_input_data_list)
+    combine_votes(predictions_files,
+                  Model(models[0]).to_prediction,
+                  prediction_file, method,
+                  prediction_info, raw_input_data_list)
 
 
 def remote_predict_ensemble(ensemble_id, test_reader, prediction_file, api,
@@ -125,16 +216,14 @@ def remote_predict_ensemble(ensemble_id, test_reader, prediction_file, api,
                                                by_name=test_set_header,
                                                wait_time=0,
                                                args=prediction_args)
-            prediction = bigml.api.check_resource(prediction,
-                                                  api.get_prediction)
+            prediction = u.check_resource(prediction,
+                                          api.get_prediction)
             u.check_resource_error(prediction,
                                    "Failed to create prediction: ")
             u.log_message("%s\n" % prediction['resource'], log_file=log)
-            prediction_row = u.prediction_to_row(prediction, prediction_info)
-            if prediction_info == u.FULL_FORMAT:
-                input_data.append(prediction_row[0])
-                prediction_row = input_data
-            predictions_file.writerow(prediction_row)
+            prediction_row = prediction_to_row(prediction, prediction_info)
+            write_prediction(prediction_row, predictions_file,
+                             prediction_info, input_data)
 
 
 def local_predict(models, test_reader, output, method, prediction_info=None):
@@ -149,8 +238,8 @@ def local_predict(models, test_reader, output, method, prediction_info=None):
                                          by_name=test_set_header,
                                          method=method,
                                          with_confidence=True)
-        u.write_prediction(prediction, output,
-                           prediction_info, input_data)
+        write_prediction(prediction, output,
+                         prediction_info, input_data)
 
 
 def local_batch_predict(models, test_reader, prediction_file, api,
@@ -202,8 +291,7 @@ def local_batch_predict(models, test_reader, prediction_file, api,
             if (isinstance(model, basestring) or
                     bigml.api.get_status(model)['code'] != bigml.api.FINISHED):
                 try:
-                    model = bigml.api.check_resource(model, api.get_model,
-                                                     FIELDS_QS)
+                    model = u.check_resource(model, api.get_model, FIELDS_QS)
                 except ValueError, exception:
                     sys.exit("Failed to get model: %s" % (model,
                                                           str(exception)))
@@ -231,8 +319,8 @@ def local_batch_predict(models, test_reader, prediction_file, api,
     for index in range(0, len(total_votes)):
         multivote = total_votes[index]
         input_data = raw_input_data_list[index]
-        u.write_prediction(multivote.combine(method, True), output,
-                           prediction_info, input_data)
+        write_prediction(multivote.combine(method, True), output,
+                         prediction_info, input_data)
 
 
 def predict(test_set, test_set_header, models, fields, output,
@@ -287,98 +375,3 @@ def predict(test_set, test_set_header, models, fields, output,
                                 max_models, resume, output_path, output,
                                 verbosity, method, session_file, debug,
                                 prediction_info)
-
-
-class TestReader(object):
-    """Retrieves csv info and builds a input data dict
-
-    """
-    def __init__(self, test_set, test_set_header, fields, objective_field):
-        """Builds a generator from a csv file and the fields' model structure
-
-        """
-        self.test_set = test_set
-        self.test_set_header = test_set_header
-        self.fields = fields
-        self.objective_field = objective_field
-        try:
-            self.test_reader = csv.reader(open(test_set, "U"),
-                                          delimiter=get_csv_delimiter(),
-                                          lineterminator="\n")
-        except IOError:
-            sys.exit("Error: cannot read test %s" % test_set)
-
-        self.headers = None
-        self.exclude = []
-        if test_set_header:
-            self.headers = self.test_reader.next()
-            # validate headers against model fields excluding objective_field,
-            # that may be present or not
-            objective_field = fields.field_column_number(objective_field)
-            fields_names = [fields.fields[fields.field_id(i)]
-                            ['name'] for i in
-                            sorted(fields.fields_by_column_number.keys())
-                            if i != objective_field]
-            self.headers = [unicode(header, "utf-8")
-                            for header in self.headers]
-            self.exclude = [i for i in range(len(self.headers))
-                            if not self.headers[i] in fields_names]
-
-            self.exclude.reverse()
-            if self.exclude:
-                if len(self.headers) > len(self.exclude):
-                    print (u"WARNING: predictions will be processed but some "
-                           u"data might not be used. The used fields will be:"
-                           u"\n\n%s"
-                           u"\n\nwhile the headers found in the test file are:"
-                           u"\n\n%s" %
-                           (",".join(fields_names),
-                            ",".join(self.headers))).encode("utf-8")
-                    for index in self.exclude:
-                        del self.headers[index]
-                else:
-                    raise Exception((u"No test field matches the model fields."
-                                     u"\nThe expected fields are:\n\n%s\n\n"
-                                     u"while "
-                                     u"the headers found in the test file are:"
-                                     u"\n\n%s\n\n"
-                                     u"Use --no-test-header flag if first li"
-                                     u"ne should not be interpreted as"
-                                     u" headers." %
-                                     (",".join(fields_names),
-                                      ",".join(self.headers))).encode("utf-8"))
-
-    def __iter__(self):
-        """Iterator method
-
-        """
-        return self
-
-    def next(self):
-        """Returns the next row
-
-        """
-        return self.test_reader.next()
-
-    def dict(self, row):
-        """Returns the row in a dict format according to the given headers
-
-        """
-        for index in self.exclude:
-            del row[index]
-        return self.fields.pair(row, self.headers, self.objective_field)
-
-    def number_of_tests(self):
-        """Returns the number of tests in the test file
-
-        """
-        tests = c.file_number_of_lines(self.test_set)
-        if self.test_set_header:
-            tests -= 1
-        return tests
-
-    def has_headers(self):
-        """Returns wether the test set file has a headers row
-
-        """
-        return self.test_set_header
