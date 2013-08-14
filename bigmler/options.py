@@ -524,7 +524,7 @@ under the License.""" % version
                         dest='verbosity',
                         default=defaults.get('verbosity', 1),
                         type=int,
-                        choices=[0,1],
+                        choices=[0, 1],
                         help="Set verbosity: 0 to turn off, 1 to turn on.")
 
     # The path to a file containing the mapping of fields' ids from

@@ -316,6 +316,12 @@ that it must be high enough to ensure low variance, for instance::
     bigmler --train data/iris.csv --cross-validation-rate 0.1 \
             --number-of-evaluations 20
 
+The ``--max-parallel-evaluations`` flag will help you limit the number of
+parallel evaluation creation calls.
+
+    bigmler --train data/iris.csv --cross-validation-rate 0.1 \
+            --number-of-evaluations 20 --max-parallel-evaluations 2
+
 
 Configuring Datasets and Models
 -------------------------------
@@ -716,6 +722,9 @@ Basic Functionality
                                     Monte-Carlo cross-validation
 --number-of-evaluations NUMBER_OF_EVALUATIONS    Number of runs that will be
                                                  used in cross-validation
+--max-parallel-evaluations MAX_PARALLEL_EVALUATIONS   Maximum number of 
+                                                      evaluations
+                                                      to create in parallel
 
 Content
 -------
