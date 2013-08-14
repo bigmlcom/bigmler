@@ -347,7 +347,7 @@ def create_models(dataset, model_ids, model_args,
                         plural("model", args.number_of_models))
         log_message(message, log_file=session_file,
                     console=args.verbosity)
-        #last_index = 0
+
         for i in range(0, args.number_of_models):
             if i % args.max_parallel_models == 0 and i > 0:
                 try:
