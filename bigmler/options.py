@@ -304,7 +304,7 @@ under the License.""" % version
                         default=defaults.get('max_batch_models', max_models),
                         type=int,
                         help=("Max number of models to predict from"
-                              "in parallel"))
+                              " in parallel"))
 
     # Randomize feature selection at each split.
     parser.add_argument('--randomize',
@@ -524,6 +524,7 @@ under the License.""" % version
                         dest='verbosity',
                         default=defaults.get('verbosity', 1),
                         type=int,
+                        choices=[0,1],
                         help="Set verbosity: 0 to turn off, 1 to turn on.")
 
     # The path to a file containing the mapping of fields' ids from
@@ -601,6 +602,7 @@ under the License.""" % version
                         action='store',
                         dest='prediction_info',
                         default=defaults.get('prediction_info', 'normal'),
+                        choices=["brief", "normal", "full data"],
                         help=("Prediction log format: 'brief' will only "
                               "log predictions, 'normal' will write confidence"
                               " too, 'full data' will write in a row the"

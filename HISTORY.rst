@@ -7,6 +7,9 @@ History
 ~~~~~~~~~~~~~~~~~~
 - Changing --model-fields and --dataset-fields flag to allow adding/removing
   fields with +/- prefix
+- Refactoring local and remote prediction functions
+- Adding 'full data' option to the --prediction-info flag to join test input
+  data with prediction results in predictions file
 - Fixing errors in documentation and adding install for windows info
 
 0.3.2 (2013-07-04)

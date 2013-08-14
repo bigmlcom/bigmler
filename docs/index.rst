@@ -43,7 +43,9 @@ one for you under a
 new directory named after the current date and time
 (e.g., `MonNov1212_174715/predictions.csv`). With ``--prediction-info``
 flag set to ``brief`` only the prediction result will be stored (default is
-``normal`` and includes confidence information).
+``normal`` and includes confidence information). You can also set it to ``full
+data`` if you prefer the result to be presented as a row with your test
+input data followed by the corresponding prediction.
 
 
 A different ``objective field`` (the field that you want to predict) can be
