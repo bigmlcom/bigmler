@@ -609,6 +609,14 @@ under the License.""" % version
                               " input data that generates the prediction"
                               " followed by the latter"))
 
+    # Max number of evaluations to create in parallel.
+    parser.add_argument('--max-parallel-evaluations',
+                        action='store',
+                        dest='max_parallel_evaluations',
+                        default=defaults.get('max_parallel_evaluations', 1),
+                        type=int,
+                        help="Max number of evaluations to create in parallel")
+
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #

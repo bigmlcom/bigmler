@@ -607,6 +607,14 @@ def create_evaluations(model_ids, dataset, evaluation_args, args, api=None,
                 console=args.verbosity)
     for i in range(0, number_of_evaluations):
         model = model_ids[i]
+
+        if i % args.max_parallel_evaluations == 0 and i > 0:
+            try:
+                evaluations[last_index] = check_resource(
+                    last_evaluation, api.get_evaluation)
+            except ValueError, exception:
+                sys.exit("Failed to get a finished evaluation: %s" %
+                         str(exception))
         if args.cross_validation_rate > 0:
             new_seed = "%s - %s" % (SEED, i + existing_evaluations)
             evaluation_args.update(seed=new_seed)
@@ -617,6 +625,8 @@ def create_evaluations(model_ids, dataset, evaluation_args, args, api=None,
         check_resource_error(evaluation, "Failed to create evaluation: ")
         evaluations.append(evaluation)
         log_message("%s\n" % evaluation['resource'], log_file=log)
+        last_evaluation = evaluation
+        last_index = i
 
     return evaluations
 
