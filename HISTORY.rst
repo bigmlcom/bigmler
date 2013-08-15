@@ -3,6 +3,12 @@
 History
 -------
 
+0.3.4 (2013-08-09)
+~~~~~~~~~~~~~~~~~~
+
+- Adding --max-parallel-evaluations flag
+- Bug fixing: matching seeds in models and evaluations for cross validation
+
 0.3.3 (2013-08-09)
 ~~~~~~~~~~~~~~~~~~
 - Changing --model-fields and --dataset-fields flag to allow adding/removing

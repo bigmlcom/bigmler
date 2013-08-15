@@ -41,6 +41,13 @@ REMOVE_PREFIX = '-'
 ADD_REMOVE_PREFIX = [ADD_PREFIX, REMOVE_PREFIX]
 
 
+def get_basic_seed(order):
+    """ Builds a standard seed from a text adding the order
+
+    """
+    return "%s - %s" % (SEED, order)
+
+
 def configure_input_fields(fields, user_given_fields):
     """ Returns the input fields used in the new resource creation as given
 
@@ -340,22 +347,21 @@ def create_models(dataset, model_ids, model_args,
                         plural("model", args.number_of_models))
         log_message(message, log_file=session_file,
                     console=args.verbosity)
-        last_index = 0
-        for i in range(1, args.number_of_models + 1):
-            if i % args.max_parallel_models == 1 and i > 1:
+
+        for i in range(0, args.number_of_models):
+            if i % args.max_parallel_models == 0 and i > 0:
                 try:
-                    models[last_index] = check_resource(
-                        last_model, api.get_model, query_string=FIELDS_QS)
+                    models[i - 1] = check_resource(
+                        models[i - 1], api.get_model, query_string=FIELDS_QS)
                 except ValueError, exception:
                     sys.exit("Failed to get a finished model: %s" %
                              str(exception))
             if args.cross_validation_rate > 0:
-                new_seed = "%s - %s" % (SEED, i + existing_models)
+                new_seed = get_basic_seed(i + existing_models)
                 model_args.update(seed=new_seed)
+
             model = api.create_model(dataset, model_args)
             log_message("%s\n" % model['resource'], log_file=log)
-            last_model = model
-            last_index = i - 1
             model_ids.append(model['resource'])
             models.append(model)
             log_created_resources("models", path,
@@ -607,8 +613,16 @@ def create_evaluations(model_ids, dataset, evaluation_args, args, api=None,
                 console=args.verbosity)
     for i in range(0, number_of_evaluations):
         model = model_ids[i]
+
+        if i % args.max_parallel_evaluations == 0 and i > 0:
+            try:
+                evaluations[i - 1] = check_resource(
+                    evaluations[i - 1], api.get_evaluation)
+            except ValueError, exception:
+                sys.exit("Failed to get a finished evaluation: %s" %
+                         str(exception))
         if args.cross_validation_rate > 0:
-            new_seed = "%s - %s" % (SEED, i + existing_evaluations)
+            new_seed = get_basic_seed(i + existing_evaluations)
             evaluation_args.update(seed=new_seed)
         evaluation = api.create_evaluation(model, dataset, evaluation_args)
         log_created_resources("evaluations", path,

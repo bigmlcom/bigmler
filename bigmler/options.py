@@ -524,7 +524,7 @@ under the License.""" % version
                         dest='verbosity',
                         default=defaults.get('verbosity', 1),
                         type=int,
-                        choices=[0,1],
+                        choices=[0, 1],
                         help="Set verbosity: 0 to turn off, 1 to turn on.")
 
     # The path to a file containing the mapping of fields' ids from
@@ -608,6 +608,14 @@ under the License.""" % version
                               " too, 'full data' will write in a row the"
                               " input data that generates the prediction"
                               " followed by the latter"))
+
+    # Max number of evaluations to create in parallel.
+    parser.add_argument('--max-parallel-evaluations',
+                        action='store',
+                        dest='max_parallel_evaluations',
+                        default=defaults.get('max_parallel_evaluations', 1),
+                        type=int,
+                        help="Max number of evaluations to create in parallel")
 
     # The following options are only useful to deactivate the corresponding
     # oposed default values
