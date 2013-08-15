@@ -7,6 +7,7 @@ History
 ~~~~~~~~~~~~~~~~~~
 
 - Adding --max-parallel-evaluations flag
+- Bug fixing: matching seeds in models and evaluations for cross validation
 
 0.3.3 (2013-08-09)
 ~~~~~~~~~~~~~~~~~~
