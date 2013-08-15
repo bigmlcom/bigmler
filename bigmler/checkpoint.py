@@ -92,8 +92,8 @@ def are_predictions_created(predictions_file, number_of_tests):
     predictions = file_number_of_lines(predictions_file)
     if predictions != number_of_tests:
         os.remove(predictions_file)
-        return False
-    return True
+        return False, None
+    return True, None
 
 
 def is_evaluation_created(path):
