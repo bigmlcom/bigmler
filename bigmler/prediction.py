@@ -155,7 +155,7 @@ def remote_predict(models, test_reader, prediction_file, api,
         predictions_files.append(predictions_file)
         if (not resume or
             not c.checkpoint(c.are_predictions_created, predictions_file,
-                             test_reader.number_of_tests(), debug=debug)):
+                             test_reader.number_of_tests(), debug=debug)[0]):
             if not message_logged:
                 message = u.dated("Creating remote predictions.")
                 u.log_message(message, log_file=session_file,
@@ -203,7 +203,7 @@ def remote_predict_ensemble(ensemble_id, test_reader, prediction_file, api,
 
     if (not resume or
         not c.checkpoint(c.are_predictions_created, prediction_file,
-                         test_reader.number_of_tests(), debug=debug)):
+                         test_reader.number_of_tests(), debug=debug)[0]):
         message = u.dated("Creating remote predictions.")
         u.log_message(message, log_file=session_file,
                       console=verbosity)
