@@ -36,6 +36,7 @@ EVALUATE_SAMPLE_RATE = 0.8
 SEED = "BigML, Machine Learning made easy"
 LOCALE_DEFAULT = "en_US"
 FIELDS_QS = 'only_model=true'
+ALL_FIELDS_QS = "limit=-1"
 ADD_PREFIX = '+'
 REMOVE_PREFIX = '-'
 ADD_REMOVE_PREFIX = [ADD_PREFIX, REMOVE_PREFIX]
@@ -393,7 +394,8 @@ def get_models(model_ids, args, api=None, session_file=None):
         api = bigml.api.BigML()
     model_id = ""
     models = model_ids
-    if len(model_ids) == 1:
+    single_model = len(model_ids) == 1
+    if single_model:
         model_id = model_ids[0]
     message = dated("Retrieving %s. %s\n" %
                     (plural("model", len(model_ids)),
@@ -403,8 +405,12 @@ def get_models(model_ids, args, api=None, session_file=None):
         models = []
         for model in model_ids:
             try:
+                # if there's more than one model the first one must contain
+                # the entire field structure to be used as reference.
+                query_string = (ALL_FIELDS_QS if not single_model 
+                                and len(models) == 0 else FIELDS_QS)
                 model = check_resource(model, api.get_model,
-                                       query_string=FIELDS_QS)
+                                       query_string=query_string)
             except ValueError, exception:
                 sys.exit("Failed to get a finished model: %s" %
                          str(exception))
@@ -412,8 +418,10 @@ def get_models(model_ids, args, api=None, session_file=None):
         model = models[0]
     else:
         try:
+            query_string = (ALL_FIELDS_QS if not single_model 
+                            else FIELDS_QS)
             model = check_resource(model_ids[0], api.get_model,
-                                   query_string=FIELDS_QS)
+                                   query_string=query_string)
         except ValueError, exception:
             sys.exit("Failed to get a finished model: %s" % str(exception))
         models[0] = model

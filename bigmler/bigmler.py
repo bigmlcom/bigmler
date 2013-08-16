@@ -326,7 +326,7 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
     return models, model_ids, resume
 
 
-def get_model_fields(model, model_fields, csv_properties, args):
+def get_model_fields(model, csv_properties, args, single_model=True):
     """Retrieves fields info from model resource
 
     """
@@ -336,9 +336,11 @@ def get_model_fields(model, model_fields, csv_properties, args):
     if args.user_locale is None:
         args.user_locale = model['object'].get('locale', None)
     csv_properties.update(data_locale=args.user_locale)
-    if 'model_fields' in model['object']['model']:
-        model_fields = model['object']['model']['model_fields'].keys()
-        csv_properties.update(include=model_fields)
+    if single_model and 'model_fields' in model['object']['model']:
+            model_fields = model['object']['model']['model_fields'].keys()
+            csv_properties.update(include=model_fields)
+    else:
+        csv_properties.update(include=None)
     if 'missing_tokens' in model['object']['model']:
         missing_tokens = model['object']['model']['missing_tokens']
     else:
@@ -426,8 +428,10 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if args.black_box or args.white_box:
             model = r.publish_model(model, args, api, session_file)
             models[0] = model
-        fields, objective_field = get_model_fields(model, model_fields,
-                                                   csv_properties, args)
+        # If more than one model, use the full field structure
+        single_model = len(models) == 1
+        fields, objective_field = get_model_fields(
+            model, csv_properties, args, single_model=single_model)
 
     # If predicting
     if models and test_set and not args.evaluate:
