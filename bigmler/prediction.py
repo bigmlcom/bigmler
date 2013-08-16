@@ -147,7 +147,14 @@ def remote_predict(models, test_reader, prediction_file, api,
     if output_path is None:
         output_path = u.check_dir(prediction_file)
     message_logged = False
+
     raw_input_data_list = []
+    for input_data in test_reader:
+        raw_input_data_list.append(input_data)
+    single_model = len(models) == 1
+    if single_model:
+        prediction_file = csv.writer(open(prediction_file, 'w', 0),
+                                     lineterminator="\n")
     for model in models:
         model = bigml.api.get_model_id(model)
         predictions_file = get_predictions_file_name(model,
@@ -157,16 +164,14 @@ def remote_predict(models, test_reader, prediction_file, api,
             not c.checkpoint(c.are_predictions_created, predictions_file,
                              test_reader.number_of_tests(), debug=debug)[0]):
             if not message_logged:
-                message = u.dated("Creating remote predictions.")
+                message = u.dated("Creating remote predictions.\n")
                 u.log_message(message, log_file=session_file,
                               console=verbosity)
             message_logged = True
-
             predictions_file = csv.writer(open(predictions_file, 'w', 0),
                                           lineterminator="\n")
 
-            for input_data in test_reader:
-                raw_input_data_list.append(input_data)
+            for input_data in raw_input_data_list:
                 input_data_dict = test_reader.dict(input_data)
                 prediction = api.create_prediction(model, input_data_dict,
                                                    by_name=test_set_header,
@@ -177,10 +182,14 @@ def remote_predict(models, test_reader, prediction_file, api,
                 u.log_message("%s\n" % prediction['resource'], log_file=log)
                 prediction_row = prediction_to_row(prediction)
                 predictions_file.writerow(prediction_row)
-    combine_votes(predictions_files,
-                  Model(models[0]).to_prediction,
-                  prediction_file, method,
-                  prediction_info, raw_input_data_list)
+                if single_model:
+                    write_prediction(prediction_row[0:2], prediction_file,
+                                     prediction_info, input_data_dict)
+    if not single_model:
+        combine_votes(predictions_files,
+                      Model(models[0]).to_prediction,
+                      prediction_file, method,
+                      prediction_info, raw_input_data_list)
 
 
 def remote_predict_ensemble(ensemble_id, test_reader, prediction_file, api,
