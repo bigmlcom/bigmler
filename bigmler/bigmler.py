@@ -499,9 +499,11 @@ def main(args=sys.argv[1:]):
 
     """
     train_stdin = False
+    flags = []
     for i in range(0, len(args)):
         if args[i].startswith("--"):
             args[i] = args[i].replace("_", "-")
+            flags.append(args[i])
             if (args[i] == '--train' and
                     (i == len(args) - 1 or args[i + 1].startswith("--"))):
                 train_stdin = True
@@ -531,7 +533,7 @@ def main(args=sys.argv[1:]):
         with open(COMMAND_LOG, "a", 0) as command_log:
             command_log.write(message)
         resume = False
-
+    user_defaults = get_user_defaults()
     parser = create_parser(defaults=get_user_defaults(),
                            constants={'NOW': NOW,
                            'MAX_MODELS': MAX_MODELS, 'PLURALITY': PLURALITY})
@@ -566,7 +568,8 @@ def main(args=sys.argv[1:]):
         output_dir = u.get_log_reversed(DIRS_LOG,
                                         command_args.stack_level)
         defaults_file = "%s%s%s" % (output_dir, os.sep, DEFAULTS_FILE)
-        parser = create_parser(defaults=get_user_defaults(defaults_file),
+        user_defaults = get_user_defaults(defaults_file)
+        parser = create_parser(defaults=user_defaults,
                                constants={'NOW': NOW,
                                           'MAX_MODELS': MAX_MODELS,
                                           'PLURALITY': PLURALITY})
@@ -738,6 +741,17 @@ def main(args=sys.argv[1:]):
         combiner_methods = dict([[value, key]
                                 for key, value in COMBINER_MAP.items()])
         command_args.method = combiner_methods.get(command_args.method, 0)
+
+    # Adds replacement=True if creating ensemble and nothing is specified
+    if (command_args.number_of_models > 1 and
+        not command_args.replacement and
+        not '--no-replacement' in flags and
+        not 'replacement' in user_defaults and
+        not '--no-randomize' in flags and
+        not 'randomize' in user_defaults and
+        not '--sample-rate' in flags and
+        not 'sample_rate' in user_defaults):
+        command_args.replacement = True
 
     # Reads votes files in the provided directories.
     if command_args.votes_dirs:
