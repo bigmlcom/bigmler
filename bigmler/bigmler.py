@@ -337,8 +337,8 @@ def get_model_fields(model, csv_properties, args, single_model=True):
         args.user_locale = model['object'].get('locale', None)
     csv_properties.update(data_locale=args.user_locale)
     if single_model and 'model_fields' in model['object']['model']:
-            model_fields = model['object']['model']['model_fields'].keys()
-            csv_properties.update(include=model_fields)
+        model_fields = model['object']['model']['model_fields'].keys()
+        csv_properties.update(include=model_fields)
     else:
         csv_properties.update(include=None)
     if 'missing_tokens' in model['object']['model']:
@@ -744,13 +744,13 @@ def main(args=sys.argv[1:]):
 
     # Adds replacement=True if creating ensemble and nothing is specified
     if (command_args.number_of_models > 1 and
-        not command_args.replacement and
-        not '--no-replacement' in flags and
-        not 'replacement' in user_defaults and
-        not '--no-randomize' in flags and
-        not 'randomize' in user_defaults and
-        not '--sample-rate' in flags and
-        not 'sample_rate' in user_defaults):
+            not command_args.replacement and
+            not '--no-replacement' in flags and
+            not 'replacement' in user_defaults and
+            not '--no-randomize' in flags and
+            not 'randomize' in user_defaults and
+            not '--sample-rate' in flags and
+            not 'sample_rate' in user_defaults):
         command_args.replacement = True
 
     # Reads votes files in the provided directories.

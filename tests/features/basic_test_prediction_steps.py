@@ -112,7 +112,7 @@ def i_create_resources_from_ensemble(step, number_of_models=None, test=None, out
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
-        retcode = check_call("bigmler --dataset " + world.dataset['resource'] + " --test " + test + " --number-of-models " + str(number_of_models) + " --tag my_ensemble --output " + output, shell=True)
+        retcode = check_call("bigmler --dataset " + world.dataset['resource'] + " --test " + test + " --number-of-models " + str(number_of_models) + " --no-replacement --tag my_ensemble --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:

@@ -25,7 +25,6 @@ import json
 import numbers
 import math
 
-import bigml.api
 import bigmler.utils as u
 import bigmler.resources as r
 import bigmler.checkpoint as c

@@ -342,7 +342,6 @@ def create_models(dataset, model_ids, model_args,
     models = model_ids[:]
     existing_models = len(models)
 
-    last_model = None
     if args.number_of_models > 0:
         message = dated("Creating %s.\n" %
                         plural("model", args.number_of_models))
@@ -407,7 +406,7 @@ def get_models(model_ids, args, api=None, session_file=None):
             try:
                 # if there's more than one model the first one must contain
                 # the entire field structure to be used as reference.
-                query_string = (ALL_FIELDS_QS if not single_model 
+                query_string = (ALL_FIELDS_QS if not single_model
                                 and len(models) == 0 else FIELDS_QS)
                 model = check_resource(model, api.get_model,
                                        query_string=query_string)
@@ -418,7 +417,7 @@ def get_models(model_ids, args, api=None, session_file=None):
         model = models[0]
     else:
         try:
-            query_string = (ALL_FIELDS_QS if not single_model 
+            query_string = (ALL_FIELDS_QS if not single_model
                             else FIELDS_QS)
             model = check_resource(model_ids[0], api.get_model,
                                    query_string=query_string)
