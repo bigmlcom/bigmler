@@ -230,7 +230,7 @@ def split_processing(dataset, name, description, api, args, resume,
 
 
 def ensemble_processing(dataset, name, description, objective_field, fields,
-                        api, args, resume, session_file=None,
+                        model_fields, api, args, resume, session_file=None,
                         path=None, log=None):
     """Creates an ensemble of models from the input data
 
@@ -243,7 +243,8 @@ def ensemble_processing(dataset, name, description, objective_field, fields,
             message=message, log_file=session_file, console=args.verbosity)
     if ensemble is None:
         ensemble_args = r.set_ensemble_args(name, description, args,
-                                            objective_field, fields)
+                                            model_fields, objective_field,
+                                            fields)
         ensemble = r.create_ensemble(dataset, ensemble_args, args, api,
                                      path, session_file, log)
     return ensemble, resume
@@ -267,7 +268,7 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
             # Ensemble of models
             ensemble, resume = ensemble_processing(
                 dataset, name, description, objective_field, fields,
-                api, args, resume,
+                model_fields, api, args, resume,
                 session_file=session_file, path=path, log=log)
             args.ensemble = bigml.api.get_ensemble_id(ensemble)
             log_models = True

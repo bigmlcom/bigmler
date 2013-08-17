@@ -14,7 +14,7 @@ def i_create_all_resources(step, data=None, test=None, output=None):
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
-        retcode = check_call("bigmler --train " + data + " --test " + test + " --output " + output + " --max-batch-models 1", shell=True)
+        retcode = check_call("bigmler --train " + data + " --test " + test + " --store --output " + output + " --max-batch-models 1", shell=True)
         if retcode < 0:
             assert False
         else:
@@ -34,7 +34,7 @@ def i_create_resources_from_source(step, test=None, output=None):
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
-        retcode = check_call("bigmler --source " + world.source['resource'] + " --test " + test + " --output " + output, shell=True)
+        retcode = check_call("bigmler --source " + world.source['resource'] + " --test " + test + " --store --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -54,7 +54,7 @@ def i_create_resources_from_dataset(step, test=None, output=None):
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
-        retcode = check_call("bigmler --dataset " + world.dataset['resource'] + " --test " + test + " --output " + output, shell=True)
+        retcode = check_call("bigmler --dataset " + world.dataset['resource'] + " --test " + test + " --store --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -73,7 +73,7 @@ def i_create_resources_from_dataset_objective_model(step, objective=None, fields
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
-        retcode = check_call("bigmler --dataset " + world.dataset['resource'] + " --objective " + objective + " --model-fields " + fields + " --test " + test + " --output " + output, shell=True)
+        retcode = check_call("bigmler --dataset " + world.dataset['resource'] + " --objective " + objective + " --model-fields " + fields + " --test " + test + " --store --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -92,7 +92,7 @@ def i_create_resources_from_model(step, test=None, output=None):
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
-        retcode = check_call("bigmler --model " + world.model['resource'] + " --test " + test + " --output " + output + " --max-batch-models 1", shell=True)
+        retcode = check_call("bigmler --model " + world.model['resource'] + " --test " + test + " --store --output " + output + " --max-batch-models 1", shell=True)
         if retcode < 0:
             assert False
         else:
@@ -112,7 +112,7 @@ def i_create_resources_from_ensemble(step, number_of_models=None, test=None, out
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
-        retcode = check_call("bigmler --dataset " + world.dataset['resource'] + " --test " + test + " --number-of-models " + str(number_of_models) + " --no-replacement --tag my_ensemble --output " + output, shell=True)
+        retcode = check_call("bigmler --dataset " + world.dataset['resource'] + " --test " + test + " --number-of-models " + str(number_of_models) + " --no-replacement --tag my_ensemble --store --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -133,7 +133,7 @@ def i_create_resources_from_models_file(step, models_file=None, test=None, outpu
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
-        retcode = check_call("bigmler --models " + models_file + " --test " + test + " --output " + output, shell=True)
+        retcode = check_call("bigmler --models " + models_file + " --test " + test + " --store --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -153,7 +153,7 @@ def i_create_resources_from_dataset_file(step, dataset_file=None, test=None, out
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
-        retcode = check_call("bigmler --datasets " + dataset_file + " --test " + test + " --output " + output, shell=True)
+        retcode = check_call("bigmler --datasets " + dataset_file + " --test " + test + " --store --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -175,7 +175,7 @@ def i_create_cross_validation_from_dataset(step, rate=None, output=None):
     world.number_of_models = int(MONTECARLO_FACTOR * float(rate))
     world.number_of_evaluations = world.number_of_models
     try:
-        retcode = check_call("bigmler --dataset " + world.dataset['resource'] + " --cross-validation-rate " + rate + " --output " + output, shell=True)
+        retcode = check_call("bigmler --dataset " + world.dataset['resource'] + " --cross-validation-rate " + rate + " --store --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -192,7 +192,7 @@ def i_find_predictions_files(step, directory1=None, directory2=None, output=None
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
-        retcode = check_call("bigmler --combine-votes " + directory1 + "," + directory2 + " --output " + output, shell=True)
+        retcode = check_call("bigmler --combine-votes " + directory1 + "," + directory2 + " --store --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -212,7 +212,7 @@ def i_find_predictions_files(step, directory1=None, directory2=None, output=None
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
-        retcode = check_call("bigmler --combine-votes " + directory1 + "," + directory2 + " --output " + output + " --method " + method, shell=True)
+        retcode = check_call("bigmler --combine-votes " + directory1 + "," + directory2 + " --store --output " + output + " --method " + method, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -449,7 +449,7 @@ def i_create_all_resources_to_evaluate(step, data=None, output=None):
     if data is None or output is None:
         assert False
     try:
-        retcode = check_call("bigmler --evaluate --train " + data + " --output " + output, shell=True)
+        retcode = check_call("bigmler --evaluate --train " + data + " --store --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -466,7 +466,7 @@ def i_create_all_resources_to_evaluate(step, data=None, locale=None, output=None
     if data is None or locale is None or output is None:
         assert False
     try:
-        retcode = check_call("bigmler --train " + data + " --locale " + locale + " --output " + output + " --no-dataset --no-model --store", shell=True)
+        retcode = check_call("bigmler --train " + data + " --locale " + locale + " --store --output " + output + " --no-dataset --no-model --store", shell=True)
         if retcode < 0:
             assert False
         else:

@@ -427,7 +427,7 @@ def get_models(model_ids, args, api=None, session_file=None):
     return models, model_ids
 
 
-def set_ensemble_args(name, description, args,
+def set_ensemble_args(name, description, args, model_fields,
                       objective_field=None, fields=None):
     """Return ensemble arguments dict
 
@@ -451,6 +451,9 @@ def set_ensemble_args(name, description, args,
         if args.sample_rate == 1:
             args.sample_rate = EVALUATE_SAMPLE_RATE
 
+    if model_fields and fields is not None:
+        input_fields = configure_input_fields(fields, model_fields)
+        ensemble_args.update(input_fields=input_fields)
     ensemble_args.update(sample_rate=args.sample_rate,
                          replacement=args.replacement,
                          randomize=args.randomize,
