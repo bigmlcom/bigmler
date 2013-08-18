@@ -3,6 +3,14 @@
 History
 -------
 
+0.3.5 (2013-08-16)
+~~~~~~~~~~~~~~~~~~
+
+- Bug fixing: resume crash when remote predictions were not completed
+- Bug fixing: Fields object for input data dict building lacked fields
+- Bug fixing: test data was repeated in remote prediction function
+- Bug fixing: Adding replacement=True as default for ensembles' creation
+
 0.3.4 (2013-08-09)
 ~~~~~~~~~~~~~~~~~~
 

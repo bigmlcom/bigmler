@@ -37,6 +37,11 @@ class TestReader(object):
     def __init__(self, test_set, test_set_header, fields, objective_field):
         """Builds a generator from a csv file and the fields' model structure
 
+           `test_set`: path to the test data file
+           `test_set_header`: boolean, True means that headers are first row
+                              in the file
+           `fields`: Fields object with the expected fields structure.
+           `objective_field`: field_id of the objective field
         """
         self.test_set = test_set
         self.test_set_header = test_set_header

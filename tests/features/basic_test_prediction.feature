@@ -132,7 +132,7 @@ Feature: Upload source and produce test predictions
 
         Examples:
         |scenario    | kwargs                                                  | rate | output                         |cv_file |
-        | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | 0.02 | ./scenario12/cross-validation   | ./check_files/cross_validation.json   |
+        | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | 0.05 | ./scenario12/cross-validation   | ./check_files/cross_validation.json   |
 
     Scenario: Successfully building a source with a given locale and storing its result
         Given I create a BigML source from file "<data>" with locale "<locale>" storing results in "<output>"

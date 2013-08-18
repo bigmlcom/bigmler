@@ -574,7 +574,7 @@ Requirements
 
 Python 2.7 is currently supported by BigMLer.
 
-BigMLer requires `bigml 0.7.3 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 0.7.4 <https://github.com/bigmlcom/python>`_  or
 higher.
 
 BigMLer Installation

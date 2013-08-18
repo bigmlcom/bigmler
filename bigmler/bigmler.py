@@ -230,7 +230,7 @@ def split_processing(dataset, name, description, api, args, resume,
 
 
 def ensemble_processing(dataset, name, description, objective_field, fields,
-                        api, args, resume, session_file=None,
+                        model_fields, api, args, resume, session_file=None,
                         path=None, log=None):
     """Creates an ensemble of models from the input data
 
@@ -243,7 +243,8 @@ def ensemble_processing(dataset, name, description, objective_field, fields,
             message=message, log_file=session_file, console=args.verbosity)
     if ensemble is None:
         ensemble_args = r.set_ensemble_args(name, description, args,
-                                            objective_field, fields)
+                                            model_fields, objective_field,
+                                            fields)
         ensemble = r.create_ensemble(dataset, ensemble_args, args, api,
                                      path, session_file, log)
     return ensemble, resume
@@ -267,7 +268,7 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
             # Ensemble of models
             ensemble, resume = ensemble_processing(
                 dataset, name, description, objective_field, fields,
-                api, args, resume,
+                model_fields, api, args, resume,
                 session_file=session_file, path=path, log=log)
             args.ensemble = bigml.api.get_ensemble_id(ensemble)
             log_models = True
@@ -326,7 +327,7 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
     return models, model_ids, resume
 
 
-def get_model_fields(model, model_fields, csv_properties, args):
+def get_model_fields(model, csv_properties, args, single_model=True):
     """Retrieves fields info from model resource
 
     """
@@ -336,9 +337,11 @@ def get_model_fields(model, model_fields, csv_properties, args):
     if args.user_locale is None:
         args.user_locale = model['object'].get('locale', None)
     csv_properties.update(data_locale=args.user_locale)
-    if 'model_fields' in model['object']['model']:
+    if single_model and 'model_fields' in model['object']['model']:
         model_fields = model['object']['model']['model_fields'].keys()
         csv_properties.update(include=model_fields)
+    else:
+        csv_properties.update(include=None)
     if 'missing_tokens' in model['object']['model']:
         missing_tokens = model['object']['model']['missing_tokens']
     else:
@@ -426,8 +429,10 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if args.black_box or args.white_box:
             model = r.publish_model(model, args, api, session_file)
             models[0] = model
-        fields, objective_field = get_model_fields(model, model_fields,
-                                                   csv_properties, args)
+        # If more than one model, use the full field structure
+        single_model = len(models) == 1
+        fields, objective_field = get_model_fields(
+            model, csv_properties, args, single_model=single_model)
 
     # If predicting
     if models and test_set and not args.evaluate:
@@ -495,9 +500,11 @@ def main(args=sys.argv[1:]):
 
     """
     train_stdin = False
+    flags = []
     for i in range(0, len(args)):
         if args[i].startswith("--"):
             args[i] = args[i].replace("_", "-")
+            flags.append(args[i])
             if (args[i] == '--train' and
                     (i == len(args) - 1 or args[i + 1].startswith("--"))):
                 train_stdin = True
@@ -527,7 +534,7 @@ def main(args=sys.argv[1:]):
         with open(COMMAND_LOG, "a", 0) as command_log:
             command_log.write(message)
         resume = False
-
+    user_defaults = get_user_defaults()
     parser = create_parser(defaults=get_user_defaults(),
                            constants={'NOW': NOW,
                            'MAX_MODELS': MAX_MODELS, 'PLURALITY': PLURALITY})
@@ -562,7 +569,8 @@ def main(args=sys.argv[1:]):
         output_dir = u.get_log_reversed(DIRS_LOG,
                                         command_args.stack_level)
         defaults_file = "%s%s%s" % (output_dir, os.sep, DEFAULTS_FILE)
-        parser = create_parser(defaults=get_user_defaults(defaults_file),
+        user_defaults = get_user_defaults(defaults_file)
+        parser = create_parser(defaults=user_defaults,
                                constants={'NOW': NOW,
                                           'MAX_MODELS': MAX_MODELS,
                                           'PLURALITY': PLURALITY})
@@ -734,6 +742,17 @@ def main(args=sys.argv[1:]):
         combiner_methods = dict([[value, key]
                                 for key, value in COMBINER_MAP.items()])
         command_args.method = combiner_methods.get(command_args.method, 0)
+
+    # Adds replacement=True if creating ensemble and nothing is specified
+    if (command_args.number_of_models > 1 and
+            not command_args.replacement and
+            not '--no-replacement' in flags and
+            not 'replacement' in user_defaults and
+            not '--no-randomize' in flags and
+            not 'randomize' in user_defaults and
+            not '--sample-rate' in flags and
+            not 'sample_rate' in user_defaults):
+        command_args.replacement = True
 
     # Reads votes files in the provided directories.
     if command_args.votes_dirs:
