@@ -50,6 +50,7 @@ import re
 import shlex
 import datetime
 import StringIO
+import csv
 
 import bigml.api
 import bigmler.utils as u
@@ -66,6 +67,7 @@ from bigmler.defaults import get_user_defaults
 from bigmler.defaults import DEFAULTS_FILE
 from bigmler.prediction import predict, combine_votes
 from bigmler.prediction import MAX_MODELS
+from bigmler.train_reader import TrainReader
 
 
 # Date and time in format SunNov0412_120510 to name and tag resources
@@ -356,6 +358,43 @@ def get_model_fields(model, csv_properties, args, single_model=True):
     return fields, objective_field
 
 
+def multi_label_expansion(training_set, training_set_header, objective_field,
+                          args, output_path,
+                          session_file=None, path=None, log=None):
+    """Splitting the labels in a multi-label objective field to create
+       a source with column per label
+
+    """
+    # find out column number corresponding to the objective field
+    training_reader = TrainReader(training_set, training_set_header,
+                                  objective_field, multi_label=True,
+                                  labels=args.labels)
+    # read file to get all the different labels if no --labels flag is given
+    # or use labels given in --labels
+    new_headers = training_reader.headers
+    new_headers.extend(training_reader.get_labels())
+    file_name = os.path.basename(training_set)
+    output_file = "%s%sextended_%s" % (output_path, os.sep, file_name)
+    output = csv.writer(open(output_file, 'w', 0),
+                        lineterminator="\n")
+    output.writerow(new_headers)
+    # read to write new source file with column per label
+    training_reader.reset()
+    if training_set_header:
+        training_reader.next()
+    while True:
+        try:
+            row = training_reader.next(extended=True) 
+            output.writerow(row)         
+        except StopIteration:
+            break
+    
+    # create source
+    # create dataset
+    # create one model per column choosing only the label column
+    pass
+
+
 def compute_output(api, args, training_set, test_set=None, output=None,
                    objective_field=None,
                    description=None,
@@ -396,6 +435,12 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 open(log, 'w', 0).close()
             except IOError:
                 pass
+
+    # multi_label files must be preprocessed
+    if args.multi_label:
+        multi_label_expansion(training_set, training_set_header,
+                              objective_field, args, path,
+                              session_file=session_file, path=path, log=log)
 
     source, resume, csv_properties, fields = source_processing(
         training_set, test_set, training_set_header, test_set_header,
@@ -653,6 +698,12 @@ def main(args=sys.argv[1:]):
         try:
             command_args.objective_field = int(objective)
         except ValueError:
+            if not command_args.train_header:
+                sys.exit("The %s has been set as objective field but"
+                         " the file has not been marked as containing"
+                         " headers.\nPlease set the --train-header flag if"
+                         " the file has headers or use a column number"
+                         " to set the objective field." % objective)
             pass
 
     output_args = {

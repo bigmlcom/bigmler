@@ -625,6 +625,22 @@ under the License.""" % version
                         default=defaults.get('test_separator', None),
                         help="Separator used in the test set file")
 
+    # Multi-label. The objective field has multiple labels.
+    parser.add_argument('--multi-label',
+                        action='store_true',
+                        dest='multi_label',
+                        default=defaults.get('multi_label', False),
+                        help=("The objective field has multiple labels that"
+                              " should be treated independently."))
+
+    # Multi-label labels. If set, only the given labels are expanded
+    parser.add_argument('--labels',
+                        action='store',
+                        dest='labels',
+                        default=defaults.get('labels', None),
+                        help=("Comma-separated list of the labels"
+                              " to be expanded from a multi-label field"))
+
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #
