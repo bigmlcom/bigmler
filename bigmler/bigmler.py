@@ -437,10 +437,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # If predicting
     if models and test_set and not args.evaluate:
         predict(test_set, test_set_header, models, fields, output,
-                objective_field, args.remote, api, log,
-                args.max_batch_models, args.method, resume, args.tag,
-                args.verbosity, session_file, args.debug, args.ensemble,
-                args.prediction_info, args.test_separator)
+                objective_field, args, api, log,
+                args.max_batch_models, resume, session_file)
 
     # When combine_votes flag is used, retrieve the predictions files saved
     # in the comma separated list of directories and combine them

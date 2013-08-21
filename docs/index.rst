@@ -57,7 +57,10 @@ If you do not explicitly specify an objective field, BigML will default to the
 last
 column in your dataset.
 
-Also a particular test file separator can be chosen using ``--test-separator``::
+Also, if your test file uses a particular field separator for its data,
+you can tell BigMLer using ``--test-separator``.
+For example, if your test file uses the tab character as field separator the
+call should be like::
 
     bigmler --train data/iris.csv --test data/test_iris.tsv \
             --test-separator '\t'

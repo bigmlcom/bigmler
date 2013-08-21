@@ -333,10 +333,8 @@ def local_batch_predict(models, test_reader, prediction_file, api,
 
 
 def predict(test_set, test_set_header, models, fields, output,
-            objective_field, remote=False, api=None, log=None,
-            max_models=MAX_MODELS, method=0, resume=False,
-            tags=None, verbosity=1, session_file=None, debug=False,
-            ensemble_id=None, prediction_info=None, test_separator=None):
+            objective_field, args, api=None, log=None,
+            max_models=MAX_MODELS, resume=False, session_file=None):
     """Computes a prediction for each entry in the `test_set`.
 
        Predictions can be computed remotely, locally using MultiModels built
@@ -347,7 +345,8 @@ def predict(test_set, test_set_header, models, fields, output,
     """
 
     test_reader = TestReader(test_set, test_set_header, fields,
-                             objective_field, test_separator=test_separator)
+                             objective_field, 
+                             test_separator=args.test_separator)
     prediction_file = output
     output_path = u.check_dir(output)
     output = csv.writer(open(output, 'w', 0), lineterminator="\n")
@@ -356,31 +355,33 @@ def predict(test_set, test_set_header, models, fields, output,
     #     model_[id of the model]__predictions.csv
     # For instance,
     #     model_50c0de043b563519830001c2_predictions.csv
-    if remote:
-        if ensemble_id is not None:
-            remote_predict_ensemble(ensemble_id, test_reader, prediction_file,
-                                    api, resume, verbosity, output_path,
-                                    method, tags, session_file, log, debug,
-                                    prediction_info)
+    if args.remote:
+        if args.ensemble is not None:
+            remote_predict_ensemble(args.ensemble, test_reader, prediction_file,
+                                    api, resume, args.verbosity, output_path,
+                                    args.method, args.tag, session_file, log, args.debug,
+                                    args.prediction_info)
         else:
             remote_predict(models, test_reader, prediction_file, api, resume,
-                           verbosity, output_path,
-                           method, tags,
-                           session_file, log, debug, prediction_info)
+                           args.verbosity, output_path,
+                           args.method, args.tag,
+                           session_file, log, args.debug, args.prediction_info)
     # Local predictions: Predictions are computed locally using models' rules
     # with MultiModel's predict method
     else:
         message = u.dated("Creating local predictions.\n")
-        u.log_message(message, log_file=session_file, console=verbosity)
+        u.log_message(message, log_file=session_file, console=args.verbosity)
         # For a small number of models, we build a MultiModel using all of
         # the given models and issue a combined prediction
         if len(models) < max_models:
-            local_predict(models, test_reader, output, method, prediction_info)
+            local_predict(models, test_reader, output,
+                          args.method, args.prediction_info)
         # For large numbers of models, we split the list of models in chunks
         # and build a MultiModel for each chunk, issue and store predictions
         # for each model and combine all of them eventually.
         else:
             local_batch_predict(models, test_reader, prediction_file, api,
-                                max_models, resume, output_path, output,
-                                verbosity, method, session_file, debug,
-                                prediction_info)
+                                max_models, resume, output_path,
+                                output,
+                                args.verbosity, args.method, session_file, args.debug,
+                                args.prediction_info)
