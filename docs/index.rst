@@ -53,10 +53,17 @@ selected using::
 
     bigmler --train data/iris.csv --test data/test_iris.csv \
             --objective 'sepal length'
-
 If you do not explicitly specify an objective field, BigML will default to the
 last
 column in your dataset.
+
+Also, if your test file uses a particular field separator for its data,
+you can tell BigMLer using ``--test-separator``.
+For example, if your test file uses the tab character as field separator the
+call should be like::
+
+    bigmler --train data/iris.csv --test data/test_iris.tsv \
+            --test-separator '\t'
 
 If you don't provide a file name for your training source, BigMLer will try to
 read it from the standard input::

@@ -7,6 +7,7 @@ from subprocess import check_call, CalledProcessError
 from bigml.api import check_resource
 from bigmler.bigmler import MONTECARLO_FACTOR
 
+
 @step(r'I create BigML resources uploading train "(.*)" file to test "(.*)" and log predictions in "(.*)"')
 def i_create_all_resources(step, data=None, test=None, output=None):
     if data is None or test is None or output is None:
@@ -15,6 +16,26 @@ def i_create_all_resources(step, data=None, test=None, output=None):
     world.folders.append(world.directory)
     try:
         retcode = check_call("bigmler --train " + data + " --test " + test + " --store --output " + output + " --max-batch-models 1", shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.test_lines = 0
+            for line in open(test, "r"):
+                world.test_lines += 1
+            world.output = output
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+
+@step(r'I create BigML resources uploading train "(.*)" file to test "(.*)" with "(.*)" separator and log predictions in "(.*)"')
+def i_create_all_resources_with_separator(step, data=None, test=None, separator=None, output=None):
+    if data is None or test is None or separator is None or output is None:
+        assert False
+    world.directory = os.path.dirname(output)
+    world.folders.append(world.directory)
+    try:
+        retcode = check_call("bigmler --train " + data + " --test " + test + " --test-separator " + separator + " --store --output " + output + " --max-batch-models 1", shell=True)
         if retcode < 0:
             assert False
         else:

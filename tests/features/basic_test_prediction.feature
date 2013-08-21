@@ -143,3 +143,16 @@ Feature: Upload source and produce test predictions
         |data             | locale        | output                    | bigml_locale |
         | ../data/iris.csv| es_ES.UTF-8   | ./scenario13/store_file   | es_ES        |
 
+
+    Scenario: Successfully building test predictions from start with user-given separator:
+        Given I create BigML resources uploading train "<data>" file to test "<test>" with "<separator>" separator and log predictions in "<output>"
+        And I check that the source has been created
+        And I check that the dataset has been created 
+        And I check that the model has been created 
+        And I check that the predictions are ready
+        Then the local prediction file is like "<predictions_file>"
+
+        Examples:
+        | data               | test                    | separator | output                        |predictions_file           |
+        | ../data/iris.csv   | ../data/test_iris.tsv   | "\t"        |./scenario14/predictions.csv   | ./check_files/predictions_iris.csv   |
+
