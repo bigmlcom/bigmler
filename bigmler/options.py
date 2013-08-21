@@ -617,6 +617,14 @@ under the License.""" % version
                         type=int,
                         help="Max number of evaluations to create in parallel")
 
+    # Separator used in the test set file. Defaults to the locale csv
+    # separator.
+    parser.add_argument('--test-separator',
+                        action='store',
+                        dest='test_separator',
+                        default=defaults.get('test_separator', None),
+                        help="Separator used in the test set file")
+
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #

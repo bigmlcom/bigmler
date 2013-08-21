@@ -440,7 +440,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 objective_field, args.remote, api, log,
                 args.max_batch_models, args.method, resume, args.tag,
                 args.verbosity, session_file, args.debug, args.ensemble,
-                args.prediction_info)
+                args.prediction_info, args.test_separator)
 
     # When combine_votes flag is used, retrieve the predictions files saved
     # in the comma separated list of directories and combine them

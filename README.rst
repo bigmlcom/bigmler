@@ -169,6 +169,16 @@ A different ``objective field`` (the field that you want to predict) can be sele
 If you do not explicitly specify an objective field, BigML will default to the last
 column in your dataset.
 
+Also a particular test file separator can be chosen using ``--test-separator``::
+
+    bigmler --train data/iris.csv --test data/test_iris.tsv \
+            --test-separator '\t'
+
+If you don't provide a file name for your training source, BigMLer will try to
+read it from the standard input::
+
+    cat data/iris.csv | bigmler --train
+
 BigMLer will try to use the locale of the model both to create a new source
 (if ``--train`` flag is used) and to interpret test data. In case
 it fails, it will try ``en_US.UTF-8``

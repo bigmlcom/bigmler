@@ -336,7 +336,7 @@ def predict(test_set, test_set_header, models, fields, output,
             objective_field, remote=False, api=None, log=None,
             max_models=MAX_MODELS, method=0, resume=False,
             tags=None, verbosity=1, session_file=None, debug=False,
-            ensemble_id=None, prediction_info=None):
+            ensemble_id=None, prediction_info=None, test_separator=None):
     """Computes a prediction for each entry in the `test_set`.
 
        Predictions can be computed remotely, locally using MultiModels built
@@ -347,7 +347,7 @@ def predict(test_set, test_set_header, models, fields, output,
     """
 
     test_reader = TestReader(test_set, test_set_header, fields,
-                             objective_field)
+                             objective_field, test_separator=test_separator)
     prediction_file = output
     output_path = u.check_dir(output)
     output = csv.writer(open(output, 'w', 0), lineterminator="\n")

@@ -34,7 +34,8 @@ class TestReader(object):
     """Retrieves csv info and builds a input data dict
 
     """
-    def __init__(self, test_set, test_set_header, fields, objective_field):
+    def __init__(self, test_set, test_set_header, fields, objective_field,
+                 test_separator=None):
         """Builds a generator from a csv file and the fields' model structure
 
            `test_set`: path to the test data file
@@ -47,9 +48,14 @@ class TestReader(object):
         self.test_set_header = test_set_header
         self.fields = fields
         self.objective_field = objective_field
+        self.test_separator = (test_separator.decode("string_escape")
+                               if test_separator is not None
+                               else get_csv_delimiter())
+        if len(self.test_separator) > 1:
+            sys.exit("Only one character can be used as test data separator.")
         try:
             self.test_reader = csv.reader(open(test_set, "U"),
-                                          delimiter=get_csv_delimiter(),
+                                          delimiter=self.test_separator,
                                           lineterminator="\n")
         except IOError:
             sys.exit("Error: cannot read test %s" % test_set)
