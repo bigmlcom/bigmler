@@ -21,6 +21,7 @@ from __future__ import absolute_import
 
 import csv
 import sys
+import ast
 
 import bigml.api
 
@@ -39,7 +40,7 @@ from bigmler.resources import FIELDS_QS
 MAX_MODELS = 10
 BRIEF_FORMAT = 'brief'
 FULL_FORMAT = 'full data'
-
+AGGREGATION = -1
 
 def write_prediction(prediction, output=sys.stdout,
                      prediction_info=None, input_data=None):
@@ -255,7 +256,8 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                         max_models=MAX_MODELS,
                         resume=False, output_path=None, output=None,
                         verbosity=True, method=PLURALITY_CODE,
-                        session_file=None, debug=False, prediction_info=None):
+                        session_file=None, debug=False, prediction_info=None,
+                        labels=None, label_separator=','):
     """Get local predictions form partial Multimodel, combine and save to file
 
     """
@@ -266,7 +268,8 @@ def local_batch_predict(models, test_reader, prediction_file, api,
         pct = 100 - ((total - current) * 100) / (total)
         console_log("Predicted on %s out of %s models [%s%%]" % (
             localize(current), localize(total), pct))
-
+    if labels is None:
+        labels = []
     test_set_header = test_reader.has_headers()
     if output_path is None:
         output_path = u.check_dir(prediction_file)
@@ -325,16 +328,34 @@ def local_batch_predict(models, test_reader, prediction_file, api,
             total_votes = votes
     message = u.dated("Combining predictions.\n")
     u.log_message(message, log_file=session_file, console=verbosity)
+    
+    # as multi-labelled models are created from end to start labels must be
+    # reversed to match
+    labels.reverse()
     for index in range(0, len(total_votes)):
         multivote = total_votes[index]
         input_data = raw_input_data_list[index]
-        write_prediction(multivote.combine(method, True), output,
-                         prediction_info, input_data)
+        if method == AGGREGATION:
+            predictions = multivote.predictions
+            if labels is None or len(labels) != len(predictions):
+                sys.exit("Failed to make a multi-label prediction. No"
+                         " valid label info is found.")
+            prediction_list = []
+            for vote_index in range(0, len(predictions)):
+                if ast.literal_eval(predictions[vote_index]['prediction']):
+                    prediction_list.append(labels[vote_index])
+            # TODO: implement label_separator and training_separator as flags
+            prediction = label_separator.join(prediction_list)
+        else:
+            prediction = multivote.combine(method, True)
+
+        write_prediction(prediction, output, prediction_info, input_data)
 
 
 def predict(test_set, test_set_header, models, fields, output,
             objective_field, args, api=None, log=None,
-            max_models=MAX_MODELS, resume=False, session_file=None):
+            max_models=MAX_MODELS, resume=False, session_file=None,
+            labels=None):
     """Computes a prediction for each entry in the `test_set`.
 
        Predictions can be computed remotely, locally using MultiModels built
@@ -350,17 +371,19 @@ def predict(test_set, test_set_header, models, fields, output,
     prediction_file = output
     output_path = u.check_dir(output)
     output = csv.writer(open(output, 'w', 0), lineterminator="\n")
+
     # Remote predictions: predictions are computed in bigml.com and stored
     # in a file named after the model in the following syntax:
     #     model_[id of the model]__predictions.csv
     # For instance,
     #     model_50c0de043b563519830001c2_predictions.csv
-    if args.remote:
+    if args.remote and not args.multi_label:
         if args.ensemble is not None:
-            remote_predict_ensemble(args.ensemble, test_reader, prediction_file,
-                                    api, resume, args.verbosity, output_path,
-                                    args.method, args.tag, session_file, log, args.debug,
-                                    args.prediction_info)
+            remote_predict_ensemble(args.ensemble, test_reader,
+                                    prediction_file, api, resume,
+                                    args.verbosity, output_path,
+                                    args.method, args.tag, session_file, log,
+                                    args.debug, args.prediction_info)
         else:
             remote_predict(models, test_reader, prediction_file, api, resume,
                            args.verbosity, output_path,
@@ -373,15 +396,22 @@ def predict(test_set, test_set_header, models, fields, output,
         u.log_message(message, log_file=session_file, console=args.verbosity)
         # For a small number of models, we build a MultiModel using all of
         # the given models and issue a combined prediction
-        if len(models) < max_models:
+        if len(models) < max_models and not args.multi_label:
             local_predict(models, test_reader, output,
                           args.method, args.prediction_info)
         # For large numbers of models, we split the list of models in chunks
         # and build a MultiModel for each chunk, issue and store predictions
         # for each model and combine all of them eventually.
         else:
+            # Local predictions: predictions are computed locally using
+            # models' rules with MultiModel's predict method and combined using
+            # aggregation if the objective field is a multi-labelled field
+            # or one of the available combination methods: plurality,
+            # confidence weighted and probability weighted
+            method = AGGREGATION if args.multi_label else args.method
             local_batch_predict(models, test_reader, prediction_file, api,
                                 max_models, resume, output_path,
                                 output,
-                                args.verbosity, args.method, session_file, args.debug,
-                                args.prediction_info)
+                                args.verbosity, method,
+                                session_file, args.debug,
+                                args.prediction_info, labels)

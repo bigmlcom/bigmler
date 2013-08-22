@@ -254,7 +254,7 @@ def ensemble_processing(dataset, name, description, objective_field, fields,
 
 def models_processing(dataset, models, model_ids, name, description, test_set,
                       objective_field, fields, model_fields, api, args, resume,
-                      session_file=None, path=None, log=None):
+                      session_file=None, path=None, log=None, labels=None):
     """Creates or retrieves models from the input data
 
     """
@@ -266,7 +266,47 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
 
         model_ids = []
         models = []
-        if args.number_of_models > 1:
+        if args.multi_label:
+            # create one model per column choosing only the label column
+            args.number_of_models = len(labels)
+            if resume:
+                resume, model_ids = c.checkpoint(
+                    c.are_models_created, path, args.number_of_models,
+                    debug=args.debug)
+                if not resume:
+                    message = u.dated("Found %s models out of %s. Resuming.\n"
+                                      % (len(model_ids),
+                                         args.number_of_models))
+                    u.log_message(message, log_file=session_file,
+                                  console=args.verbosity)
+
+                models = model_ids
+            last_label = len(labels) - len(model_ids) - 1
+            args.number_of_models = 1
+            if model_fields is None:
+                model_fields = []
+
+            for index in range(last_label, -1, -1):
+                single_label_fields = model_fields[:]
+                single_label_fields.extend(
+                    map(lambda x: ("-%s" % x if x != labels[index]
+                                   else "+%s" % x),
+                        labels))
+                objective_field = labels[index]
+                new_name = "%s for %s" % (name, labels[index])
+                model_args = r.set_model_args(new_name, description, args,
+                                              objective_field, fields,
+                                              single_label_fields)
+                # create models one by one changing the input_field to select
+                # only one label at a time
+                sub_models = []
+                sub_models, sub_model_ids = r.create_models(
+                    dataset, sub_models, model_args, args, api,
+                    path, session_file, log)
+                models.append(sub_models[0])
+                model_ids.append(sub_model_ids[0])
+
+        elif args.number_of_models > 1:
             # Ensemble of models
             ensemble, resume = ensemble_processing(
                 dataset, name, description, objective_field, fields,
@@ -371,28 +411,25 @@ def multi_label_expansion(training_set, training_set_header, objective_field,
                                   labels=args.labels)
     # read file to get all the different labels if no --labels flag is given
     # or use labels given in --labels
-    new_headers = training_reader.headers
+    new_headers = training_reader.get_headers(objective_field=False)
     new_headers.extend(training_reader.get_labels())
     file_name = os.path.basename(training_set)
     output_file = "%s%sextended_%s" % (output_path, os.sep, file_name)
-    output = csv.writer(open(output_file, 'w', 0),
-                        lineterminator="\n")
-    output.writerow(new_headers)
-    # read to write new source file with column per label
-    training_reader.reset()
-    if training_set_header:
-        training_reader.next()
-    while True:
-        try:
-            row = training_reader.next(extended=True) 
-            output.writerow(row)         
-        except StopIteration:
-            break
-    
-    # create source
-    # create dataset
-    # create one model per column choosing only the label column
-    pass
+    with open(output_file, 'w', 0) as output_handler:
+        output = csv.writer(output_handler, lineterminator="\n")
+        output.writerow(new_headers)
+        # read to write new source file with column per label
+        training_reader.reset()
+        if training_set_header:
+            training_reader.next()
+        while True:
+            try:
+                row = training_reader.next(extended=True) 
+                output.writerow(row)         
+            except StopIteration:
+                break
+
+    return output_file, training_reader.labels
 
 
 def compute_output(api, args, training_set, test_set=None, output=None,
@@ -436,11 +473,17 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             except IOError:
                 pass
 
-    # multi_label files must be preprocessed
+    # multi_label file must be preprocessed to obtain a new extended file
     if args.multi_label:
-        multi_label_expansion(training_set, training_set_header,
-                              objective_field, args, path,
-                              session_file=session_file, path=path, log=log)
+        if training_set is None:
+            sys.exit("A training set file is needed"
+                     " to use multi-label expansion.")
+        training_set, labels = multi_label_expansion(
+            training_set, training_set_header, objective_field, args, path,
+            session_file=session_file, path=path, log=log)
+        training_set_header = True
+    else:
+        labels = None
 
     source, resume, csv_properties, fields = source_processing(
         training_set, test_set, training_set_header, test_set_header,
@@ -463,7 +506,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     models, model_ids, resume = models_processing(
         dataset, models, model_ids, name, description, test_set,
         objective_field, fields, model_fields, api, args, resume,
-        session_file=session_file, path=path, log=log)
+        session_file=session_file, path=path, log=log, labels=labels)
     if models:
         model = models[0]
 
@@ -483,7 +526,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if models and test_set and not args.evaluate:
         predict(test_set, test_set_header, models, fields, output,
                 objective_field, args, api, log,
-                args.max_batch_models, resume, session_file)
+                args.max_batch_models, resume, session_file, labels=labels)
 
     # When combine_votes flag is used, retrieve the predictions files saved
     # in the comma separated list of directories and combine them
