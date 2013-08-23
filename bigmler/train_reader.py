@@ -35,7 +35,8 @@ class TrainReader(object):
 
     """
     def __init__(self, training_set, training_set_header, objective_field,
-                 multi_label=False, labels=None):
+                 multi_label=False, labels=None, label_separator=None,
+                 training_separator=None):
         """Builds a generator from a csv file 
 
            `training_set`: path to the training data file
@@ -48,11 +49,18 @@ class TrainReader(object):
         self.training_set_header = training_set_header
         self.training_set_handler = None
         self.multi_label = multi_label
-        self.labels = map(lambda x: x.strip(),
-                          labels.split(','))
+
+        self.training_separator = (training_separator.decode("string_escape")
+                                   if training_separator is not None
+                                   else get_csv_delimiter())
+        if len(self.training_separator) > 1:
+            sys.exit("Only one character can be used as test data separator.")
+        # opening csv reader
         self.reset()
-        self.separator = (self.multi_label 
-            if isinstance(self.multi_label, basestring) else ',')
+        self.label_separator = (label_separator.decode("string_escape")
+                                if label_separator is not None
+                                else get_csv_delimiter())
+
         if training_set_header:
             self.headers = [unicode(header, "utf-8") for header in
                             self.training_reader.next()]
@@ -77,6 +85,10 @@ class TrainReader(object):
                          (objective_field, 
                           ", ".join(self.headers.encode("utf-8"))))
 
+        self.labels = (map(lambda x: x.strip(), labels.split(',')) 
+                       if labels is not None else None)
+        self.labels = self.get_labels()
+
 
     def reset(self):
         """Starts a new csv reader object
@@ -88,9 +100,9 @@ class TrainReader(object):
             pass
         self.training_set_handler = open(self.training_set, "U")
         try:
-            self.training_reader = csv.reader(self.training_set_handler,
-                                              delimiter=get_csv_delimiter(),
-                                              lineterminator="\n")
+            self.training_reader = csv.reader(
+                self.training_set_handler, delimiter=self.training_separator,
+                lineterminator="\n")
         except IOError:
             sys.exit("Error: cannot read training %s" % training_set)
 
@@ -110,7 +122,8 @@ class TrainReader(object):
         if extended:
             if self.multi_label and self.labels is None:
                 self.labels = self.get_labels()
-            objective_values = row[self.objective_column].split(self.separator)
+            aggregated_value = row[self.objective_column]
+            objective_values = aggregated_value.split(self.label_separator)
             del(row[self.objective_column])
             labels_row = [label in objective_values for label in self.labels]
             row.extend(labels_row)
@@ -142,15 +155,14 @@ class TrainReader(object):
                 if self.multi_label == False:
                     labels.append(objective_value)
                 else:
-                    # TODO: get separator from another flag
-                    new_labels = objective_value.split(self.separator)
+                    new_labels = objective_value.split(self.label_separator)
                     # TODO: clean user given missing tokens
                     for index in range(0, len(new_labels)):
                         if new_labels[index] == '':
                             del(new_labels[index])
                     if new_labels != []:
                         labels.extend(new_labels)
-            self.labels = list(set(labels))
+            self.labels = list(set(labels)) 
         return self.labels
 
     def get_headers(self, objective_field=True):

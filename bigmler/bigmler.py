@@ -408,7 +408,9 @@ def multi_label_expansion(training_set, training_set_header, objective_field,
     # find out column number corresponding to the objective field
     training_reader = TrainReader(training_set, training_set_header,
                                   objective_field, multi_label=True,
-                                  labels=args.labels)
+                                  labels=args.labels,
+                                  label_separator=args.label_separator,
+                                  training_separator=args.training_separator)
     # read file to get all the different labels if no --labels flag is given
     # or use labels given in --labels
     new_headers = training_reader.get_headers(objective_field=False)

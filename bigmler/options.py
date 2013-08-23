@@ -68,20 +68,20 @@ under the License.""" % version
                         dest='dev_mode',
                         default=defaults.get('dev', False),
                         help=("Compute a test output using BigML FREE"
-                             " development environment"))
+                             " development environment."))
 
     # BigML's username.
     parser.add_argument('--username',
                         action='store',
                         default=defaults.get('username', None),
-                        help="BigML's username")
+                        help="BigML's username.")
 
     # BigML's API key.
     parser.add_argument('--api-key',
                         action='store',
                         dest='api_key',
                         default=defaults.get('api-key', None),
-                        help="BigML's API key")
+                        help="BigML's API key.")
 
     # Path to the training set.
     parser.add_argument('--train',
@@ -89,14 +89,14 @@ under the License.""" % version
                         dest='training_set',
                         nargs='?',
                         default=defaults.get('train', None),
-                        help="Training set path")
+                        help="Training set path.")
 
     # Path to the test set.
     parser.add_argument('--test',
                         action='store',
                         dest='test_set',
                         default=defaults.get('test', None),
-                        help="Test set path")
+                        help="Test set path.")
 
     # Name of the file to output predictions.
     parser.add_argument('--output',
@@ -111,7 +111,7 @@ under the License.""" % version
                         action='store',
                         dest='objective_field',
                         default=defaults.get('objective', None),
-                        help="The column number of the Objective Field")
+                        help="The column number of the Objective Field.")
 
     # Category code.
     parser.add_argument('--category',
@@ -119,7 +119,7 @@ under the License.""" % version
                         dest='category',
                         default=defaults.get('category', 12),
                         type=int,
-                        help="Category code")
+                        help="Category code.")
 
     # A file including a makdown description
     parser.add_argument('--description',
@@ -127,7 +127,7 @@ under the License.""" % version
                         dest='description',
                         default=defaults.get('description', None),
                         help=("Path to a file with a description in plain"
-                              " text or markdown"))
+                              " text or markdown."))
 
     # The path to a file containing names if you want to alter BigML's
     # default field names or the ones provided by the train file header.
@@ -137,7 +137,7 @@ under the License.""" % version
                         dest='field_attributes',
                         default=defaults.get('field_names', None),
                         help=("Path to a csv file describing field names. One"
-                              " definition per line (e.g., 0,'Last Name')"))
+                              " definition per line (e.g., 0,'Last Name')."))
 
     # The path to a file containing attributes if you want to alter BigML's
     # default field attributes or the ones provided by the train file header.
@@ -147,7 +147,7 @@ under the License.""" % version
                         default=defaults.get('field_attributes', None),
                         help=("Path to a csv file describing field attributes."
                               " One definition per line"
-                              " (e.g., 0,'Last Name')"))
+                              " (e.g., 0,'Last Name')."))
 
     # The path to a file containing types if you want to alter BigML's
     # type auto-detect.
@@ -156,7 +156,7 @@ under the License.""" % version
                         dest='types',
                         default=defaults.get('types', None),
                         help=("Path to a file describing field types. One"
-                              " definition per line (e.g., 0, 'numeric')"))
+                              " definition per line (e.g., 0, 'numeric')."))
 
     # Fields to include in the dataset.
     parser.add_argument('--dataset-fields',
@@ -164,21 +164,21 @@ under the License.""" % version
                         dest='dataset_fields',
                         default=defaults.get('dataset_fields', None),
                         help=("Comma-separated list of field column numbers"
-                              " to include in the dataset"))
+                              " to include in the dataset."))
 
     # Path to a file that includes a JSON filter.
     parser.add_argument('--json-filter',
                         action='store',
                         dest='json_filter',
                         default=defaults.get('json_filter', None),
-                        help="File including a JSON filter")
+                        help="File including a JSON filter.")
 
     # Path to a file that includes a lisp filter.
     parser.add_argument('--lisp-filter',
                         action='store',
                         dest='lisp_filter',
                         default=defaults.get('lisp_filter', None),
-                        help="File including a Lisp filter")
+                        help="File including a Lisp filter.")
 
     # Input fields to include in the model.
     parser.add_argument('--model-fields',
@@ -186,7 +186,7 @@ under the License.""" % version
                         dest='model_fields',
                         default=defaults.get('model_fields', None),
                         help=("Comma-separated list of input fields"
-                              " (predictors) to create the model"))
+                              " (predictors) to create the model."))
 
     # Set when the training set file doesn't include a header on the first
     # line.
@@ -194,7 +194,7 @@ under the License.""" % version
                         action='store_false',
                         dest='train_header',
                         default=defaults.get('train_header', True),
-                        help="The train set file hasn't a header")
+                        help="The train set file hasn't a header.")
 
     # Set when the test set file doesn't include a header on the first
     # line.
@@ -202,7 +202,7 @@ under the License.""" % version
                         action='store_false',
                         dest='test_header',
                         default=defaults.get('test_header', True),
-                        help="The test set file hasn't a header")
+                        help="The test set file hasn't a header.")
 
     # Name to be used with the source and then with datasets, models and
     # predicitions.
@@ -210,21 +210,21 @@ under the License.""" % version
                         action='store',
                         dest='name',
                         default=defaults.get('name', 'BigMLer_%s' % now),
-                        help="Name for the resources in BigML")
+                        help="Name for the resources in BigML.")
 
     # If a BigML source is provided, the script won't create a new one
     parser.add_argument('--source',
                         action='store',
                         dest='source',
                         default=defaults.get('source', None),
-                        help="BigML source Id")
+                        help="BigML source Id.")
 
     # If a BigML dataset is provided, the script won't create a new one
     parser.add_argument('--dataset',
                         action='store',
                         dest='dataset',
                         default=defaults.get('dataset', None),
-                        help="BigML dataset Id")
+                        help="BigML dataset Id.")
 
     # If a BigML model is provided, the script will use it to generate
     # predictions.
@@ -232,14 +232,14 @@ under the License.""" % version
                         action='store',
                         dest='model',
                         default=defaults.get('model', None),
-                        help="BigML model Id")
+                        help="BigML model Id.")
 
     # Use it to compute predictions remotely.
     parser.add_argument('--remote',
                         action='store_true',
                         dest='remote',
                         default=defaults.get('remote', False),
-                        help="Compute predictions remotely")
+                        help="Compute predictions remotely.")
 
     # The path to a file containing model ids.
     parser.add_argument('--models',
@@ -248,7 +248,7 @@ under the License.""" % version
                         default=defaults.get('models', None),
                         help=("Path to a file containing model/ids. One model"
                               " per line (e.g., model/50a206a8035d0706dc000376"
-                              ")"))
+                              ")."))
 
     # The path to a file containing a dataset id.
     parser.add_argument('--datasets',
@@ -257,7 +257,7 @@ under the License.""" % version
                         default=defaults.get('datasets', None),
                         help=("Path to a file containing a dataset/id. Just"
                               " one dataset"
-                              " (e.g., dataset/50a20697035d0706da0004a4)"))
+                              " (e.g., dataset/50a20697035d0706da0004a4)."))
 
     # Sets pruning.
     parser.add_argument('--pruning',
@@ -273,7 +273,7 @@ under the License.""" % version
                         dest='number_of_models',
                         default=defaults.get('number_of_models', 1),
                         type=int,
-                        help="Number of models to create when using ensembles")
+                        help="Number of models to create when using ensembles.")
 
     # Sampling to use when using bagging.
     parser.add_argument('--sample-rate',
@@ -281,13 +281,13 @@ under the License.""" % version
                         dest='sample_rate',
                         default=defaults.get('sample_rate', 1.0),
                         type=float,
-                        help="Sample rate to create models")
+                        help="Sample rate to create models.")
 
     # Replacement to use when using bagging.
     parser.add_argument('--replacement',
                         action='store_true',
                         default=defaults.get('replacement', False),
-                        help="Use replacement when sampling")
+                        help="Use replacement when sampling.")
 
     # Max number of models to create in parallel.
     parser.add_argument('--max-parallel-models',
@@ -295,7 +295,7 @@ under the License.""" % version
                         dest='max_parallel_models',
                         default=defaults.get('max_parallel_models', 1),
                         type=int,
-                        help="Max number of models to create in parallel")
+                        help="Max number of models to create in parallel.")
 
     # Max number of models to predict from in parallel.
     parser.add_argument('--max-batch-models',
@@ -304,7 +304,7 @@ under the License.""" % version
                         default=defaults.get('max_batch_models', max_models),
                         type=int,
                         help=("Max number of models to predict from"
-                              " in parallel"))
+                              " in parallel."))
 
     # Randomize feature selection at each split.
     parser.add_argument('--randomize',
@@ -319,40 +319,40 @@ under the License.""" % version
     parser.add_argument('--tag',
                         action='append',
                         default=defaults_tag,
-                        help="Tag to later retrieve new resources")
+                        help="Tag to later retrieve new resources.")
     # Avoid default tagging of resources.
     parser.add_argument('--no-tag',
                         action='store_false',
                         dest='no_tag',
                         default=defaults.get('no_tag', True),
-                        help="No tag resources with default BigMLer tags")
+                        help="No tag resources with default BigMLer tags.")
 
     # Use it to retrieve models that were tagged with tag.
     parser.add_argument('--model-tag',
                         dest='model_tag',
                         default=defaults.get('model_tag', None),
-                        help="Retrieve models that were tagged with tag")
+                        help="Retrieve models that were tagged with tag.")
 
     # Make dataset public.
     parser.add_argument('--public-dataset',
                         action='store_true',
                         dest='public_dataset',
                         default=defaults.get('public_dataset', False),
-                        help="Make generated dataset public")
+                        help="Make generated dataset public.")
 
     # Make model a public black-box model.
     parser.add_argument('--black-box',
                         action='store_true',
                         dest='black_box',
                         default=defaults.get('black_box', False),
-                        help="Make generated model black-box")
+                        help="Make generated model black-box.")
 
     # Make model a public white-box model.
     parser.add_argument('--white-box',
                         action='store_true',
                         dest='white_box',
                         default=defaults.get('white_box', False),
-                        help="Make generated model white-box")
+                        help="Make generated model white-box.")
 
     # Set a price tag to your white-box model.
     parser.add_argument('--model-price',
@@ -361,7 +361,7 @@ under the License.""" % version
                         type=float,
                         default=defaults.get('model_price', 0.0),
                         help=("The price other users must pay to clone your"
-                              " model"))
+                              " model."))
 
     # Set a price tag to your dataset.
     parser.add_argument('--dataset-price',
@@ -369,7 +369,7 @@ under the License.""" % version
                         dest='dataset_price',
                         type=float,
                         default=defaults.get('dataset_price', 0.0),
-                        help="Price for the dataset")
+                        help="Price for the dataset.")
 
     # Set credits per prediction to your white box or black box models.
     parser.add_argument('--cpp',
@@ -408,7 +408,7 @@ under the License.""" % version
                         default=defaults.get('resources_log', None),
                         help=("Path to a file to store new resources ids."
                               " One resource per line"
-                              " (e.g., model/50a206a8035d0706dc000376)"))
+                              " (e.g., model/50a206a8035d0706dc000376)."))
     # Changes to delete mode.
     parser.add_argument('--delete',
                         action='store_true',
@@ -428,7 +428,7 @@ under the License.""" % version
                         default=defaults.get('from_file', None),
                         help=("Path to a file containing resources ids."
                               " One resource per line"
-                              " (e.g., model/50a206a8035d0706dc000376)"))
+                              " (e.g., model/50a206a8035d0706dc000376)."))
 
     # Sources selected by tag to be deleted.
     parser.add_argument('--source-tag',
@@ -449,28 +449,28 @@ under the License.""" % version
                         dest='prediction_tag',
                         default=defaults.get('prediction_tag', None),
                         help=("Select prediction tagged with tag to"
-                              " be deleted"))
+                              " be deleted."))
 
     # Evaluations selected by tag to be deleted.
     parser.add_argument('--evaluation-tag',
                         dest='evaluation_tag',
                         default=defaults.get('evaluation_tag', None),
                         help=("Select evaluation tagged with tag to"
-                              " be deleted"))
+                              " be deleted."))
 
     # Ensembles selected by tag to be deleted.
     parser.add_argument('--ensemble-tag',
                         dest='ensemble_tag',
                         default=defaults.get('ensemble_tag', None),
                         help=("Select ensemble tagged with tag to"
-                              " be deleted"))
+                              " be deleted."))
 
     # Resources selected by tag to be deleted.
     parser.add_argument('--all-tag',
                         dest='all_tag',
                         default=defaults.get('all_tag', None),
                         help=("Select resources tagged with tag to"
-                              " be deleted"))
+                              " be deleted."))
 
     # Locale settings.
     parser.add_argument('--locale',
@@ -534,7 +534,7 @@ under the License.""" % version
                         dest='fields_map',
                         default=defaults.get('fields_map', None),
                         help=("Path to a csv file describing fields mapping. "
-                              "One definition per line (e.g., 00000, 00000a)"))
+                              "One definition per line (e.g., 00000, 00000a)."))
 
     # Clear global bigmler log files
     parser.add_argument('--clear-logs',
@@ -584,7 +584,7 @@ under the License.""" % version
                         action='store',
                         dest='ensemble',
                         default=defaults.get('ensemble', None),
-                        help="BigML ensemble Id")
+                        help="BigML ensemble Id.")
 
     # If a BigML ensemble is created, creation will use this task-level
     # parallelism
@@ -594,7 +594,7 @@ under the License.""" % version
                         default=defaults.get('tlp', 1),
                         type=int,
                         help=("BigML ensemble's creation task-level"
-                              " parallelism"))
+                              " parallelism."))
 
     # Prediction log format: `short` will only log predictions, `long` will
     # log also confidence information
@@ -607,7 +607,7 @@ under the License.""" % version
                               "log predictions, 'normal' will write confidence"
                               " too, 'full data' will write in a row the"
                               " input data that generates the prediction"
-                              " followed by the latter"))
+                              " followed by the latter."))
 
     # Max number of evaluations to create in parallel.
     parser.add_argument('--max-parallel-evaluations',
@@ -615,15 +615,15 @@ under the License.""" % version
                         dest='max_parallel_evaluations',
                         default=defaults.get('max_parallel_evaluations', 1),
                         type=int,
-                        help="Max number of evaluations to create in parallel")
+                        help="Max number of evaluations to create in parallel.")
 
-    # Separator used in the test set file. Defaults to the locale csv
+    # Test set field separator. Defaults to the locale csv
     # separator.
     parser.add_argument('--test-separator',
                         action='store',
                         dest='test_separator',
                         default=defaults.get('test_separator', None),
-                        help="Separator used in the test set file")
+                        help="Test set field separator.")
 
     # Multi-label. The objective field has multiple labels.
     parser.add_argument('--multi-label',
@@ -639,7 +639,24 @@ under the License.""" % version
                         dest='labels',
                         default=defaults.get('labels', None),
                         help=("Comma-separated list of the labels"
-                              " to be expanded from a multi-label field"))
+                              " to be expanded from a multi-label field."))
+
+    # Multi-label label separator. Separator used when splitting labels in the
+    # objective field.
+    parser.add_argument('--label-separator',
+                        action='store',
+                        dest='label_separator',
+                        default=defaults.get('label_separator', None),
+                        help=("Separator used when splitting labels in the"
+                              " objective field."))
+
+    # Training set field separator. Defaults to the locale csv
+    # separator.
+    parser.add_argument('--training-separator',
+                        action='store',
+                        dest='training_separator',
+                        default=defaults.get('training_separator', None),
+                        help=("Training set field separator."))
 
     # The following options are only useful to deactivate the corresponding
     # oposed default values
@@ -649,7 +666,7 @@ under the License.""" % version
                         action='store_false',
                         dest='debug',
                         default=defaults.get('debug', False),
-                        help="Deactivate debug level")
+                        help="Deactivate debug level.")
 
     # Uses BigML standard environment.
     parser.add_argument('--no-dev',
@@ -657,7 +674,7 @@ under the License.""" % version
                         dest='dev_mode',
                         default=defaults.get('dev', False),
                         help=("Compute a test output using BigML "
-                             "standard development environment"))
+                             "standard development environment."))
 
     # Set when the training set file does include a header on the first
     # line.
@@ -665,7 +682,7 @@ under the License.""" % version
                         action='store_true',
                         dest='train_header',
                         default=defaults.get('train_header', True),
-                        help="The train set file has a header")
+                        help="The train set file has a header.")
 
     # Set when the test set file does include a header on the first
     # line.
@@ -673,7 +690,7 @@ under the License.""" % version
                         action='store_true',
                         dest='test_header',
                         default=defaults.get('test_header', True),
-                        help="The test set file has a header")
+                        help="The test set file has a header.")
 
     # Use it to compute predictions locally.
     parser.add_argument('--local',
@@ -687,7 +704,7 @@ under the License.""" % version
                         action='store_false',
                         dest='replacement',
                         default=defaults.get('replacement', False),
-                        help="Don't use replacement when sampling")
+                        help="Don't use replacement when sampling.")
 
     # Doesn't randomize feature selection at each split.
     parser.add_argument('--no-randomize',
@@ -702,28 +719,28 @@ under the License.""" % version
                         action='store_true',
                         dest='no_tag',
                         default=defaults.get('no_tag', True),
-                        help="No tag resources with default BigMLer tags")
+                        help="No tag resources with default BigMLer tags.")
 
     # Doesn't make dataset public.
     parser.add_argument('--no-public-dataset',
                         action='store_false',
                         dest='public_dataset',
                         default=defaults.get('public_dataset', False),
-                        help="Doesn't make generated dataset public")
+                        help="Doesn't make generated dataset public.")
 
     # Doesn't make model a public black-box model.
     parser.add_argument('--no-black-box',
                         action='store_false',
                         dest='black_box',
                         default=defaults.get('black_box', False),
-                        help="Doesn't make generated model black-box")
+                        help="Doesn't make generated model black-box.")
 
     # Doesn't make model a public white-box model.
     parser.add_argument('--no-white-box',
                         action='store_false',
                         dest='white_box',
                         default=defaults.get('white_box', False),
-                        help="Doesn't make generated model white-box")
+                        help="Doesn't make generated model white-box.")
 
     # Hides progress information when uploading a file.
     parser.add_argument('--no-progress-bar',
