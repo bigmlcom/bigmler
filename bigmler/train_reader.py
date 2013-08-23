@@ -48,8 +48,11 @@ class TrainReader(object):
         self.training_set_header = training_set_header
         self.training_set_handler = None
         self.multi_label = multi_label
-        self.labels = labels
+        self.labels = map(lambda x: x.strip(),
+                          labels.split(','))
         self.reset()
+        self.separator = (self.multi_label 
+            if isinstance(self.multi_label, basestring) else ',')
         if training_set_header:
             self.headers = [unicode(header, "utf-8") for header in
                             self.training_reader.next()]
@@ -140,8 +143,6 @@ class TrainReader(object):
                     labels.append(objective_value)
                 else:
                     # TODO: get separator from another flag
-                    self.separator = (self.multi_label 
-                        if isinstance(self.multi_label, basestring) else ',')
                     new_labels = objective_value.split(self.separator)
                     # TODO: clean user given missing tokens
                     for index in range(0, len(new_labels)):
