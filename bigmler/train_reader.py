@@ -98,8 +98,8 @@ class TrainReader(object):
             self.training_set_handler.close()
         except (IOError, AttributeError):
             pass
-        self.training_set_handler = open(self.training_set, "U")
         try:
+            self.training_set_handler = open(self.training_set, "U")
             self.training_reader = csv.reader(
                 self.training_set_handler, delimiter=self.training_separator,
                 lineterminator="\n")
