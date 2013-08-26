@@ -257,7 +257,7 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                         resume=False, output_path=None, output=None,
                         verbosity=True, method=PLURALITY_CODE,
                         session_file=None, debug=False, prediction_info=None,
-                        labels=None, label_separator=','):
+                        labels=None):
     """Get local predictions form partial Multimodel, combine and save to file
 
     """
@@ -329,9 +329,10 @@ def local_batch_predict(models, test_reader, prediction_file, api,
     message = u.dated("Combining predictions.\n")
     u.log_message(message, log_file=session_file, console=verbosity)
     
-    # as multi-labelled models are created from end to start labels must be
+    # as multi-labelled models are created from end to start votes must be
     # reversed to match
-    labels.reverse()
+    if method==AGGREGATION:
+        total_votes.reverse()
     for index in range(0, len(total_votes)):
         multivote = total_votes[index]
         input_data = raw_input_data_list[index]
@@ -341,11 +342,14 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                 sys.exit("Failed to make a multi-label prediction. No"
                          " valid label info is found.")
             prediction_list = []
+            confidence_list = []
             for vote_index in range(0, len(predictions)):
                 if ast.literal_eval(predictions[vote_index]['prediction']):
                     prediction_list.append(labels[vote_index])
+                    confidence = str(predictions[vote_index]['confidence'])
+                    confidence_list.append(confidence)
             # TODO: implement label_separator and training_separator as flags
-            prediction = label_separator.join(prediction_list)
+            prediction = [','.join(prediction_list),','.join(confidence_list)] 
         else:
             prediction = multivote.combine(method, True)
 

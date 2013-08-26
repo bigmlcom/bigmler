@@ -266,6 +266,7 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
 
         model_ids = []
         models = []
+
         if args.multi_label:
             # create one model per column choosing only the label column
             args.number_of_models = len(labels)
@@ -285,17 +286,20 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
             args.number_of_models = 1
             if model_fields is None:
                 model_fields = []
-
+            
             for index in range(last_label, -1, -1):
+                label_field = "%s:%s" % (objective_field, labels[index])
                 single_label_fields = model_fields[:]
                 single_label_fields.extend(
-                    map(lambda x: ("-%s" % x if x != labels[index]
-                                   else "+%s" % x),
+                    map(lambda x: ("-%s:%s" % (objective_field, x)
+                                   if x != label_field
+                                   else "+%s:%s" % (objective_field, x)),
                         labels))
-                objective_field = labels[index]
-                new_name = "%s for %s" % (name, labels[index])
+                new_name = "%s for %s" % (name, label_field)
+                print label_field
+                print single_label_fields
                 model_args = r.set_model_args(new_name, description, args,
-                                              objective_field, fields,
+                                              label_field, fields,
                                               single_label_fields)
                 # create models one by one changing the input_field to select
                 # only one label at a time
@@ -412,9 +416,12 @@ def multi_label_expansion(training_set, training_set_header, objective_field,
                                   label_separator=args.label_separator,
                                   training_separator=args.training_separator)
     # read file to get all the different labels if no --labels flag is given
-    # or use labels given in --labels
+    # or use labels given in --labels and generate the new field names
     new_headers = training_reader.get_headers(objective_field=False)
-    new_headers.extend(training_reader.get_labels())
+    
+    new_field_names = ["%s:%s" % (training_reader.objective_name, label) for
+                       label in training_reader.labels]
+    new_headers.extend(new_field_names)
     file_name = os.path.basename(training_set)
     output_file = "%s%sextended_%s" % (output_path, os.sep, file_name)
     with open(output_file, 'w', 0) as output_handler:
@@ -430,8 +437,8 @@ def multi_label_expansion(training_set, training_set_header, objective_field,
                 output.writerow(row)         
             except StopIteration:
                 break
-
-    return output_file, training_reader.labels
+    objective_field = training_reader.headers[training_reader.objective_column]
+    return output_file, training_reader.labels, objective_field
 
 
 def compute_output(api, args, training_set, test_set=None, output=None,
@@ -480,7 +487,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if training_set is None:
             sys.exit("A training set file is needed"
                      " to use multi-label expansion.")
-        training_set, labels = multi_label_expansion(
+        training_set, labels, objective_field = multi_label_expansion(
             training_set, training_set_header, objective_field, args, path,
             session_file=session_file, path=path, log=log)
         training_set_header = True

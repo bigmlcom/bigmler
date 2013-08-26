@@ -88,7 +88,7 @@ class TrainReader(object):
         self.labels = (map(lambda x: x.strip(), labels.split(',')) 
                        if labels is not None else None)
         self.labels = self.get_labels()
-
+        self.objective_name = self.headers[self.objective_column]
 
     def reset(self):
         """Starts a new csv reader object
@@ -104,7 +104,7 @@ class TrainReader(object):
                 self.training_set_handler, delimiter=self.training_separator,
                 lineterminator="\n")
         except IOError:
-            sys.exit("Error: cannot read training %s" % training_set)
+            sys.exit("Error: cannot read training %s" % self.training_set)
 
     def __iter__(self):
         """Iterator method
