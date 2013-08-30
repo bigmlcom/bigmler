@@ -275,7 +275,7 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
             # Create one model per column choosing only the label column
             if args.training_set is None:
                 labels = u.retrieve_labels(fields.fields, labels)
-            args.number_of_models = len(labels)
+            args.number_of_models = len(labels)F
             if resume:
                 resume, model_ids = c.checkpoint(
                     c.are_models_created, path, args.number_of_models,
@@ -701,6 +701,10 @@ def main(args=sys.argv[1:]):
                      " --models or --model-tag. Usage:\n\n"
                      "bigmler --train data/iris.csv "
                      "--cross-validation-rate 0.1")
+
+    if command_args.multi_label and command_args.evaluate:
+        parser.error("Evaluation for multi-label models is not "
+                     "available still.")
 
     default_output = ('evaluation' if command_args.evaluate
                       else 'predictions.csv')
