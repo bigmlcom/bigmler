@@ -341,21 +341,31 @@ def create_models(dataset, model_ids, model_args,
 
     models = model_ids[:]
     existing_models = len(models)
-
+    model_args_list = []
+    if isinstance(model_args, list):
+        model_args_list = model_args
     if args.number_of_models > 0:
         message = dated("Creating %s.\n" %
                         plural("model", args.number_of_models))
         log_message(message, log_file=session_file,
                     console=args.verbosity)
 
+        single_model = args.number_of_models == 1 and existing_models == 0
+        # if there's more than one model the first one must contain
+        # the entire field structure to be used as reference.
+        query_string = (FIELDS_QS if single_model
+                        else ALL_FIELDS_QS)
         for i in range(0, args.number_of_models):
             if i % args.max_parallel_models == 0 and i > 0:
                 try:
                     models[i - 1] = check_resource(
-                        models[i - 1], api.get_model, query_string=FIELDS_QS)
+                        models[i - 1], api.get_model,
+                        query_string=query_string)
                 except ValueError, exception:
                     sys.exit("Failed to get a finished model: %s" %
                              str(exception))
+            if model_args_list:
+                model_args = model_args_list[i]
             if args.cross_validation_rate > 0:
                 new_seed = get_basic_seed(i + existing_models)
                 model_args.update(seed=new_seed)
@@ -372,7 +382,7 @@ def create_models(dataset, model_ids, model_args,
             if bigml.api.get_status(model)['code'] != bigml.api.FINISHED:
                 try:
                     model = check_resource(model, api.get_model,
-                                           query_string=FIELDS_QS)
+                                           query_string=query_string)
                 except ValueError, exception:
                     sys.exit("Failed to get a finished model: %s" %
                              str(exception))
@@ -407,7 +417,8 @@ def get_models(model_ids, args, api=None, session_file=None):
                 # if there's more than one model the first one must contain
                 # the entire field structure to be used as reference.
                 query_string = (ALL_FIELDS_QS if not single_model
-                                and len(models) == 0 else FIELDS_QS)
+                                and (len(models) == 0 or args.multi_label)
+                                else FIELDS_QS)
                 model = check_resource(model, api.get_model,
                                        query_string=query_string)
             except ValueError, exception:

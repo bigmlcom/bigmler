@@ -51,6 +51,7 @@ import shlex
 import datetime
 import StringIO
 import csv
+import copy
 
 import bigml.api
 import bigmler.utils as u
@@ -137,6 +138,9 @@ def source_processing(training_set, test_set, training_set_header,
         if types:
             source = r.update_source_fields(source, types, fields, api,
                                             args.verbosity, session_file)
+        if field_attributes or types:
+            fields = Fields(source['object']['fields'], **csv_properties)
+
     return source, resume, csv_properties, fields
 
 
@@ -259,6 +263,7 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
 
     """
     log_models = False
+
     # If we have a dataset but not a model, we create the model if the no_model
     # flag hasn't been set up.
     if (dataset and not args.model and not model_ids and not args.no_model
@@ -266,9 +271,10 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
 
         model_ids = []
         models = []
-
         if args.multi_label:
-            # create one model per column choosing only the label column
+            # Create one model per column choosing only the label column
+            if args.training_set is None:
+                labels = u.retrieve_labels(fields.fields, labels)
             args.number_of_models = len(labels)
             if resume:
                 resume, model_ids = c.checkpoint(
@@ -286,29 +292,35 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
             args.number_of_models = 1
             if model_fields is None:
                 model_fields = []
-            
-            for index in range(last_label, -1, -1):
-                label_field = "%s:%s" % (objective_field, labels[index])
+            if objective_field is None:
+                objective_id = fields.field_id(fields.objective_field)
+                objective_field = fields.fields[objective_id]['name']
+            model_args_list = []
+            labels.reverse()
+            for label in labels:
+                label_field = u.get_label_field(objective_field, label)
+                # TODO: modify fields if user set it absolutely
                 single_label_fields = model_fields[:]
                 single_label_fields.extend(
-                    map(lambda x: ("-%s:%s" % (objective_field, x)
+                    map(lambda x: ("-%s" % u.get_label_field(objective_field, x)
                                    if x != label_field
-                                   else "+%s:%s" % (objective_field, x)),
+                                   else 
+                                   "+%s" % u.get_label_field(objective_field,
+                                                           x)),
                         labels))
+                single_label_fields.append("-%s" % objective_field)
                 new_name = "%s for %s" % (name, label_field)
-                print label_field
-                print single_label_fields
                 model_args = r.set_model_args(new_name, description, args,
                                               label_field, fields,
                                               single_label_fields)
-                # create models one by one changing the input_field to select
-                # only one label at a time
-                sub_models = []
-                sub_models, sub_model_ids = r.create_models(
-                    dataset, sub_models, model_args, args, api,
-                    path, session_file, log)
-                models.append(sub_models[0])
-                model_ids.append(sub_model_ids[0])
+                model_args_list.append(model_args)
+            labels.reverse()
+            args.number_of_models = last_label + 1
+            # create models changing the input_field to select
+            # only one label at a time
+            models, model_ids = r.create_models(
+                dataset, models, model_args_list, args, api,
+                path, session_file, log)
 
         elif args.number_of_models > 1:
             # Ensemble of models
@@ -393,17 +405,26 @@ def get_model_fields(model, csv_properties, args, single_model=True):
     else:
         missing_tokens = MISSING_TOKENS
     csv_properties.update(missing_tokens=missing_tokens)
+    # if the model belongs to a multi-label set of models, the real objective
+    # field is never amongst the set of fields of each individual model, so
+    # we must add it.
+    fields_dict = copy.deepcopy(model['object']['model']['fields'])
     objective_field = model['object']['objective_fields']
     if isinstance(objective_field, list):
         objective_field = objective_field[0]
+    if args.multi_label:
+        # Changes fields_dict objective field attributes to the real 
+        # multi-label objective
+        set_multi_label_objective(fields_dict, objective_field)
     csv_properties.update(objective_field=objective_field)
-    fields = Fields(model['object']['model']['fields'], **csv_properties)
 
+    fields = Fields(fields_dict, **csv_properties)
+    
     return fields, objective_field
 
 
 def multi_label_expansion(training_set, training_set_header, objective_field,
-                          args, output_path,
+                          args, output_path, field_attributes, labels,
                           session_file=None, path=None, log=None):
     """Splitting the labels in a multi-label objective field to create
        a source with column per label
@@ -412,16 +433,16 @@ def multi_label_expansion(training_set, training_set_header, objective_field,
     # find out column number corresponding to the objective field
     training_reader = TrainReader(training_set, training_set_header,
                                   objective_field, multi_label=True,
-                                  labels=args.labels,
+                                  labels=labels,
                                   label_separator=args.label_separator,
                                   training_separator=args.training_separator)
     # read file to get all the different labels if no --labels flag is given
     # or use labels given in --labels and generate the new field names
-    new_headers = training_reader.get_headers(objective_field=False)
-    
-    new_field_names = ["%s:%s" % (training_reader.objective_name, label) for
-                       label in training_reader.labels]
+    new_headers = training_reader.get_headers(objective_field=False)   
+    new_field_names = [u.get_label_field(training_reader.objective_name, label)
+                       for label in training_reader.labels]
     new_headers.extend(new_field_names)
+    new_headers.append(training_reader.objective_name)
     file_name = os.path.basename(training_set)
     output_file = "%s%sextended_%s" % (output_path, os.sep, file_name)
     with open(output_file, 'w', 0) as output_handler:
@@ -438,7 +459,29 @@ def multi_label_expansion(training_set, training_set_header, objective_field,
             except StopIteration:
                 break
     objective_field = training_reader.headers[training_reader.objective_column]
-    return output_file, training_reader.labels, objective_field
+    if args.field_attributes is None:
+        field_attributes = {}
+    for label_column, label in training_reader.labels_columns():
+        field_attributes.update({label_column: {"label":
+            "%s%s" % (u.MULTI_LABEL_LABEL, label)}})
+    # setting field label to mark objective and label fields
+    return (output_file, training_reader.labels, field_attributes)
+
+
+def set_multi_label_objective(fields_dict, objective):
+    """Changes the field information for the objective field
+       in the fields_dict dictionnary to the real objective attributes for
+       multi-label models.
+
+    """
+    target_field = fields_dict[objective]
+    if target_field['label'].startswith(u.MULTI_LABEL_LABEL):
+        label = target_field['label'][len(u.MULTI_LABEL_LABEL):]
+        objective_name = target_field['name']
+        suffix_length = len(label) + 3
+        objective_name = objective_name[0: -suffix_length]
+        target_field['name'] = objective_name
+        target_field['label'] = 'multi-label objective'
 
 
 def compute_output(api, args, training_set, test_set=None, output=None,
@@ -482,17 +525,20 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             except IOError:
                 pass
 
+    # labels to be used in multi-label expansion
+    labels = (map(lambda x: x.strip(), args.labels.split(',')) 
+                  if args.labels is not None else None)
+    if labels is not None:
+        labels = sorted(labels)
+
     # multi_label file must be preprocessed to obtain a new extended file
-    if args.multi_label:
-        if training_set is None:
-            sys.exit("A training set file is needed"
-                     " to use multi-label expansion.")
-        training_set, labels, objective_field = multi_label_expansion(
-            training_set, training_set_header, objective_field, args, path,
+    if args.multi_label and training_set is not None:
+        (training_set, labels,
+         field_attributes) = multi_label_expansion(training_set,
+            training_set_header, objective_field, args, path,
+            field_attributes, labels,
             session_file=session_file, path=path, log=log)
         training_set_header = True
-    else:
-        labels = None
 
     source, resume, csv_properties, fields = source_processing(
         training_set, test_set, training_set_header, test_set_header,
@@ -530,6 +576,15 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         single_model = len(models) == 1
         fields, objective_field = get_model_fields(
             model, csv_properties, args, single_model=single_model)
+
+    # If multi-label flag is set and no training_set was provided, label
+    # info is extracted from the fields structure
+    if args.multi_label and training_set is None:
+        fields_list = []
+        for model in models:
+            fields_list.append(model['object']['model']['fields'])
+        fields_list.reverse()
+        labels = u.retrieve_labels(fields_list, labels)
 
     # If predicting
     if models and test_set and not args.evaluate:

@@ -85,8 +85,7 @@ class TrainReader(object):
                          (objective_field, 
                           ", ".join(self.headers.encode("utf-8"))))
 
-        self.labels = (map(lambda x: x.strip(), labels.split(',')) 
-                       if labels is not None else None)
+        self.labels = labels
         self.labels = self.get_labels()
         self.objective_name = self.headers[self.objective_column]
 
@@ -123,10 +122,11 @@ class TrainReader(object):
             if self.multi_label and self.labels is None:
                 self.labels = self.get_labels()
             aggregated_value = row[self.objective_column]
+            del row[self.objective_column]
             objective_values = aggregated_value.split(self.label_separator)
-            del(row[self.objective_column])
             labels_row = [label in objective_values for label in self.labels]
             row.extend(labels_row)
+            row.append(aggregated_value)
         return row
 
     def number_of_rows(self):
@@ -162,16 +162,28 @@ class TrainReader(object):
                             del(new_labels[index])
                     if new_labels != []:
                         labels.extend(new_labels)
-            self.labels = list(set(labels)) 
+            self.labels = sorted(list(set(labels)))
         return self.labels
 
     def get_headers(self, objective_field=True):
-        """Returns headers. If objective_field is False, it is excluded from
-           the headers set
+        """Returns headers. If objective_field is False, the objective field
+           header is removed.
 
         """
         if objective_field:
-            return self.headers
+            return self.headers[:]
         new_headers = self.headers[:]
         del new_headers[self.objective_column]
         return new_headers
+
+    def labels_columns(self):
+        """List of tuples (label_column, label) describing the label extension
+
+        """
+        columns = []
+        column = len(self.headers) - 1
+        for label in self.labels:
+            columns.append((column, label))
+            column += 1
+        return columns
+        

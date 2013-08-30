@@ -35,7 +35,7 @@ from bigml.util import (localize, console_log, get_predictions_file_name)
 from bigml.multivote import PLURALITY_CODE
 
 from bigmler.test_reader import TestReader
-from bigmler.resources import FIELDS_QS
+from bigmler.resources import FIELDS_QS, ALL_FIELDS_QS
 
 MAX_MODELS = 10
 BRIEF_FORMAT = 'brief'
@@ -289,6 +289,8 @@ def local_batch_predict(models, test_reader, prediction_file, api,
         input_data_list.append(test_reader.dict(input_data))
     total_votes = []
     models_count = 0
+    single_model = models_total == 1
+    query_string = FIELDS_QS if single_model else ALL_FIELDS_QS
     for models_split in models_splits:
         if resume:
             for model in models_split:
@@ -303,7 +305,8 @@ def local_batch_predict(models, test_reader, prediction_file, api,
             if (isinstance(model, basestring) or
                     bigml.api.get_status(model)['code'] != bigml.api.FINISHED):
                 try:
-                    model = u.check_resource(model, api.get_model, FIELDS_QS)
+                    model = u.check_resource(model, api.get_model,
+                                             query_string)
                 except ValueError, exception:
                     sys.exit("Failed to get model: %s" % (model,
                                                           str(exception)))
@@ -329,15 +332,14 @@ def local_batch_predict(models, test_reader, prediction_file, api,
     message = u.dated("Combining predictions.\n")
     u.log_message(message, log_file=session_file, console=verbosity)
     
-    # as multi-labelled models are created from end to start votes must be
-    # reversed to match
-    if method==AGGREGATION:
-        total_votes.reverse()
     for index in range(0, len(total_votes)):
         multivote = total_votes[index]
         input_data = raw_input_data_list[index]
         if method == AGGREGATION:
             predictions = multivote.predictions
+            # as multi-labelled models are created from end to start votes must be
+            # reversed to match
+            predictions.reverse()
             if labels is None or len(labels) != len(predictions):
                 sys.exit("Failed to make a multi-label prediction. No"
                          " valid label info is found.")
@@ -418,4 +420,4 @@ def predict(test_set, test_set_header, models, fields, output,
                                 output,
                                 args.verbosity, method,
                                 session_file, args.debug,
-                                args.prediction_info, labels)
+                                args.prediction_info, labels)       
