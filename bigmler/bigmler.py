@@ -275,7 +275,7 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
             # Create one model per column choosing only the label column
             if args.training_set is None:
                 labels = u.retrieve_labels(fields.fields, labels)
-            args.number_of_models = len(labels)F
+            args.number_of_models = len(labels)
             if resume:
                 resume, model_ids = c.checkpoint(
                     c.are_models_created, path, args.number_of_models,
