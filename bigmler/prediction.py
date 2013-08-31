@@ -310,25 +310,36 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                 except ValueError, exception:
                     sys.exit("Failed to get model: %s" % (model,
                                                           str(exception)))
-            complete_models.append(model)
+            # When user selects the labels in multi-label predictions, we must
+            # filter the models that will be used to predict
+            if labels is not None:
+                model_objective_id = model['object']['objective_fields'][0]
+                model_fields = model['object']['model']['fields']
+                model_label = model_fields[model_objective_id]['label']
+                if (model_label.startswith(u.MULTI_LABEL_LABEL) and
+                        model_label[len(u.MULTI_LABEL_LABEL):] in labels):
+                    complete_models.append(model)
+            else:
+                complete_models.append(model)
 
-        local_model = MultiModel(complete_models)
-        local_model.batch_predict(input_data_list,
-                                  output_path,
-                                  by_name=test_set_header,
-                                  reuse=True)
-        votes = local_model.batch_votes(output_path)
-        models_count += max_models
-        if models_count > models_total:
-            models_count = models_total
-        if verbosity:
-            draw_progress_bar(models_count, models_total)
-        if total_votes:
-            for index in range(0, len(votes)):
-                predictions = total_votes[index].predictions
-                predictions.extend(votes[index].predictions)
-        else:
-            total_votes = votes
+        if complete_models:
+            local_model = MultiModel(complete_models)
+            local_model.batch_predict(input_data_list,
+                                      output_path,
+                                      by_name=test_set_header,
+                                      reuse=True)
+            votes = local_model.batch_votes(output_path)
+            models_count += max_models
+            if models_count > models_total:
+                models_count = models_total
+            if verbosity:
+                draw_progress_bar(models_count, models_total)
+            if total_votes:
+                for index in range(0, len(votes)):
+                    predictions = total_votes[index].predictions
+                    predictions.extend(votes[index].predictions)
+            else:
+                total_votes = votes
     message = u.dated("Combining predictions.\n")
     u.log_message(message, log_file=session_file, console=verbosity)
     

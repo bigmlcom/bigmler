@@ -461,4 +461,4 @@ def retrieve_labels(fields, labels):
                    ", ".join(missing_labels))
     else:
         labels = fields_labels
-    return sorted(labels)
+    return fields_labels, sorted(labels)

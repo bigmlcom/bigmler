@@ -258,7 +258,8 @@ def ensemble_processing(dataset, name, description, objective_field, fields,
 
 def models_processing(dataset, models, model_ids, name, description, test_set,
                       objective_field, fields, model_fields, api, args, resume,
-                      session_file=None, path=None, log=None, labels=None):
+                      session_file=None, path=None, log=None, labels=None,
+                      all_labels=None):
     """Creates or retrieves models from the input data
 
     """
@@ -274,7 +275,7 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
         if args.multi_label:
             # Create one model per column choosing only the label column
             if args.training_set is None:
-                labels = u.retrieve_labels(fields.fields, labels)
+                all_labels, labels = u.retrieve_labels(fields.fields, labels)
             args.number_of_models = len(labels)
             if resume:
                 resume, model_ids = c.checkpoint(
@@ -308,6 +309,10 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
                                    "+%s" % u.get_label_field(objective_field,
                                                            x)),
                         labels))
+                for label in all_labels:
+                    if not label in labels:
+                        single_label_fields.append("-%s" %
+                            u.get_label_field(objective_field, label))
                 single_label_fields.append("-%s" % objective_field)
                 new_name = "%s for %s" % (name, label_field)
                 model_args = r.set_model_args(new_name, description, args,
@@ -539,6 +544,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             field_attributes, labels,
             session_file=session_file, path=path, log=log)
         training_set_header = True
+    all_labels = labels
 
     source, resume, csv_properties, fields = source_processing(
         training_set, test_set, training_set_header, test_set_header,
@@ -561,7 +567,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     models, model_ids, resume = models_processing(
         dataset, models, model_ids, name, description, test_set,
         objective_field, fields, model_fields, api, args, resume,
-        session_file=session_file, path=path, log=log, labels=labels)
+        session_file=session_file, path=path, log=log, labels=labels,
+        all_labels=all_labels)
     if models:
         model = models[0]
 
@@ -584,7 +591,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         for model in models:
             fields_list.append(model['object']['model']['fields'])
         fields_list.reverse()
-        labels = u.retrieve_labels(fields_list, labels)
+        all_labels, labels = u.retrieve_labels(fields_list, labels)
 
     # If predicting
     if models and test_set and not args.evaluate:
