@@ -257,7 +257,7 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                         resume=False, output_path=None, output=None,
                         verbosity=True, method=PLURALITY_CODE,
                         session_file=None, debug=False, prediction_info=None,
-                        labels=None):
+                        labels=None, label_separator=None):
     """Get local predictions form partial Multimodel, combine and save to file
 
     """
@@ -312,7 +312,7 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                                                           str(exception)))
             # When user selects the labels in multi-label predictions, we must
             # filter the models that will be used to predict
-            if labels is not None:
+            if labels:
                 model_objective_id = model['object']['objective_fields'][0]
                 model_fields = model['object']['model']['fields']
                 model_label = model_fields[model_objective_id]['label']
@@ -342,7 +342,9 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                 total_votes = votes
     message = u.dated("Combining predictions.\n")
     u.log_message(message, log_file=session_file, console=verbosity)
-    
+
+    if label_separator is None:
+        label_separator = ","
     for index in range(0, len(total_votes)):
         multivote = total_votes[index]
         input_data = raw_input_data_list[index]
@@ -361,8 +363,8 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                     prediction_list.append(labels[vote_index])
                     confidence = str(predictions[vote_index]['confidence'])
                     confidence_list.append(confidence)
-            # TODO: implement label_separator and training_separator as flags
-            prediction = [','.join(prediction_list),','.join(confidence_list)] 
+            prediction = [label_separator.join(prediction_list),
+                          label_separator.join(confidence_list)] 
         else:
             prediction = multivote.combine(method, True)
 
@@ -431,4 +433,5 @@ def predict(test_set, test_set_header, models, fields, output,
                                 output,
                                 args.verbosity, method,
                                 session_file, args.debug,
-                                args.prediction_info, labels)       
+                                args.prediction_info, labels,
+                                args.label_separator)       

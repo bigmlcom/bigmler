@@ -6,6 +6,7 @@ from lettuce import step, world
 from subprocess import check_call, CalledProcessError
 from bigml.api import check_resource
 from bigmler.bigmler import MONTECARLO_FACTOR
+from ml_test_prediction_steps import i_create_all_ml_resources
 
 
 @step(r'I create BigML resources uploading train "(.*)" file to test "(.*)" and log predictions in "(.*)"')
@@ -48,14 +49,15 @@ def i_create_all_resources_with_separator(step, data=None, test=None, separator=
         assert False, str(exc)
 
 
-@step(r'I create BigML resources using source to test "(.*)" and log predictions in "(.*)"')
-def i_create_resources_from_source(step, test=None, output=None):
+@step(r'I create BigML (multi-label\s)?resources using source to test "(.*)" and log predictions in "(.*)"')
+def i_create_resources_from_source(step, multi_label=None, test=None, output=None):
     if test is None or output is None:
         assert False
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
+    multi_label = "" if multi_label is None else " --multi-label " 
     try:
-        retcode = check_call("bigmler --source " + world.source['resource'] + " --test " + test + " --store --output " + output, shell=True)
+        retcode = check_call("bigmler "+ multi_label +"--source " + world.source['resource'] + " --test " + test + " --store --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -68,14 +70,15 @@ def i_create_resources_from_source(step, test=None, output=None):
         assert False, str(exc)
 
 
-@step(r'I create BigML resources using dataset to test "(.*)" and log predictions in "(.*)"')
-def i_create_resources_from_dataset(step, test=None, output=None):
+@step(r'I create BigML (multi-label\s)?resources using dataset to test "(.*)" and log predictions in "(.*)"')
+def i_create_resources_from_dataset(step, multi_label=None, test=None, output=None):
     if test is None or output is None:
         assert False
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
+    multi_label = "" if multi_label is None else " --multi-label " 
     try:
-        retcode = check_call("bigmler --dataset " + world.dataset['resource'] + " --test " + test + " --store --output " + output, shell=True)
+        retcode = check_call("bigmler "+ multi_label +"--dataset " + world.dataset['resource'] + " --test " + test + " --store --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -147,14 +150,15 @@ def i_create_resources_from_ensemble(step, number_of_models=None, test=None, out
         assert False, str(exc)
 
 
-@step(r'I create BigML resources using models in file "(.*)" to test "(.*)" and log predictions in "(.*)"')
-def i_create_resources_from_models_file(step, models_file=None, test=None, output=None):
+@step(r'I create BigML (multi-label\s)?resources using models in file "(.*)" to test "(.*)" and log predictions in "(.*)"')
+def i_create_resources_from_models_file(step, multi_label=None, models_file=None, test=None, output=None):
     if models_file is None or test is None or output is None:
         assert False
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
+    multi_label = "" if multi_label is None else " --multi-label "
     try:
-        retcode = check_call("bigmler --models " + models_file + " --test " + test + " --store --output " + output, shell=True)
+        retcode = check_call("bigmler "+ multi_label +"--models " + models_file + " --test " + test + " --store --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -307,11 +311,11 @@ def i_check_create_ensemble(step):
 @step(r'I check that the models have been created')
 def i_check_create_models(step):
     model_file = "%s%smodels" % (world.directory, os.sep)
-    model_ids = []
     number_of_lines = 0
     count = 0
     while world.number_of_models != number_of_lines and count < 10:
         number_of_lines = 0
+        model_ids = []
         for line in open(model_file, "r"):
             number_of_lines += 1
             model_id = line.strip()
@@ -504,7 +508,8 @@ def i_have_previous_scenario_or_reproduce_it(step, scenario, kwargs):
     scenarios = {'scenario1': [(i_create_all_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_model, False)],
                  'scenario1_r': [(i_create_all_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_model, False)],
                  'scenario5': [(i_create_resources_from_ensemble, True), (i_check_create_models, False)], 
-                 'scenario_e1': [(i_create_all_resources_to_evaluate, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_model, False), (i_check_create_evaluation, False)]}
+                 'scenario_e1': [(i_create_all_resources_to_evaluate, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_model, False), (i_check_create_evaluation, False)],
+                 'scenario_ml_1': [(i_create_all_ml_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models, False)]}
     if os.path.exists("./%s/" % scenario):
         assert True
     else:
