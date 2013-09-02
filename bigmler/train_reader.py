@@ -61,21 +61,19 @@ class TrainReader(object):
                                 if label_separator is not None
                                 else get_csv_delimiter())
 
+        first_row = self.next(reset=not training_set_header)
+        row_length = len(first_row)
+
         if training_set_header:
-            self.headers = [unicode(header, "utf-8") for header in
-                            self.training_reader.next()]
+            self.headers = [unicode(header, "utf-8") for header in first_row]
         else:
             self.headers = [("field_%s" % index) for index in
-                            range(0, len(self.training_reader.next()))]
-            self.reset()
+                            range(0, row_length)]
+
         if isinstance(objective_field, int):
             self.objective_column = self.objective_field
         elif objective_field is None:
-            if self.headers is not None:
-                self.objective_column = len(self.headers) - 1
-            else:
-                self.objective_column = len(self.training_reader.next()) - 1
-                self.reset()
+            self.objective_column = row_length - 1
         else:
             try:
                 self.objective_column = self.headers.index(objective_field)
@@ -111,10 +109,11 @@ class TrainReader(object):
         """
         return self
 
-    def next(self, extended=False):
+    def next(self, extended=False, reset=False):
         """Returns the next row. If extended is True, the row is extended with
            a list of booleans depending on whether the label is in the
-           objective field value or not.
+           objective field value or not. If reset is True, the file is
+           reopened and pointer starts at the beginning of the file.
 
         """
         row = self.training_reader.next()
@@ -127,6 +126,8 @@ class TrainReader(object):
             labels_row = [label in objective_values for label in self.labels]
             row.extend(labels_row)
             row.append(aggregated_value)
+        if reset:
+            self.reset()
         return row
 
     def number_of_rows(self):

@@ -456,9 +456,18 @@ def set_multi_label_objective(fields_dict, objective):
         label = target_field['label'][len(u.MULTI_LABEL_LABEL):]
         objective_name = target_field['name']
         suffix_length = len(label) + 3
-        objective_name = objective_name[0: -suffix_length]
-        target_field['name'] = objective_name
-        target_field['label'] = 'multi-label objective'
+        try:
+            objective_name = objective_name[0: -suffix_length]
+            target_field['name'] = objective_name
+            target_field['label'] = 'multi-label objective'
+        except IndexError:
+            sys.exit("It seems that the label of multi-labelled fields has"
+                     " been altered. You should not change the labels of"
+                     " generated fields.")
+    else:
+        sys.exit("It seems that the label of multi-labelled fields has been"
+                 " altered. You should not change the labels of generated"
+                 " fields.")
 
 
 def compute_output(api, args, training_set, test_set=None, output=None,
