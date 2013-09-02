@@ -153,9 +153,7 @@ class TrainReader(object):
             labels = []
             for row in self:
                 objective_value = row[self.objective_column]
-                if self.multi_label == False:
-                    labels.append(objective_value)
-                else:
+                if self.multi_label:
                     new_labels = objective_value.split(self.label_separator)
                     # TODO: clean user given missing tokens
                     for index in range(0, len(new_labels)):
@@ -163,6 +161,8 @@ class TrainReader(object):
                             del(new_labels[index])
                     if new_labels != []:
                         labels.extend(new_labels)
+                else:
+                    labels.append(objective_value)
             self.labels = sorted(list(set(labels)))
         return self.labels
 
