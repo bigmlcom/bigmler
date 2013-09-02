@@ -289,38 +289,10 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
                                   console=args.verbosity)
 
                 models = model_ids
-            last_label = len(labels) - len(model_ids) - 1
-            args.number_of_models = 1
-            if model_fields is None:
-                model_fields = []
-            if objective_field is None:
-                objective_id = fields.field_id(fields.objective_field)
-                objective_field = fields.fields[objective_id]['name']
-            model_args_list = []
-            labels.reverse()
-            for label in labels:
-                label_field = u.get_label_field(objective_field, label)
-                # TODO: modify fields if user set it absolutely
-                single_label_fields = model_fields[:]
-                single_label_fields.extend(
-                    map(lambda x: ("-%s" % u.get_label_field(objective_field, x)
-                                   if x != label_field
-                                   else 
-                                   "+%s" % u.get_label_field(objective_field,
-                                                           x)),
-                        labels))
-                for label in all_labels:
-                    if not label in labels:
-                        single_label_fields.append("-%s" %
-                            u.get_label_field(objective_field, label))
-                single_label_fields.append("-%s" % objective_field)
-                new_name = "%s for %s" % (name, label_field)
-                model_args = r.set_model_args(new_name, description, args,
-                                              label_field, fields,
-                                              single_label_fields)
-                model_args_list.append(model_args)
-            labels.reverse()
-            args.number_of_models = last_label + 1
+            args.number_of_models = len(labels) - len(model_ids)
+            model_args_list = r.set_label_model_args(name, description, args,
+                labels, all_labels, fields, model_fields, objective_field)
+
             # create models changing the input_field to select
             # only one label at a time
             models, model_ids = r.create_models(

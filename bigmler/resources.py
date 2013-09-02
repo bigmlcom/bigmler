@@ -30,6 +30,7 @@ import bigml.api
 
 from bigmler.utils import (dated, get_url, log_message, plural, check_resource,
                            check_resource_error, log_created_resources)
+from bigmler.labels import label_model_args
 from bigml.util import bigml_locale
 
 EVALUATE_SAMPLE_RATE = 0.8
@@ -328,6 +329,33 @@ def set_model_args(name, description,
                       replacement=args.replacement,
                       randomize=args.randomize)
     return model_args
+
+
+def set_label_model_args(name, description, args, labels, all_labels, fields,
+                         model_fields, objective_field):
+    """Set of args needed to build a model per label
+
+    """
+    if model_fields is None:
+        model_fields = []
+    if objective_field is None:
+        objective_id = fields.field_id(fields.objective_field)
+        objective_field = fields.fields[objective_id]['name']
+    model_args_list = []
+    labels.reverse()
+    label_counter = len(labels) - args.number_of_models
+    for label in labels:
+        if label_counter < 1:
+            (new_name, label_field,
+             single_label_fields) = label_model_args(
+                name, label, all_labels, model_fields, objective_field)
+            model_args = set_model_args(new_name, description, args,
+                                        label_field, fields,
+                                        single_label_fields)
+            model_args_list.append(model_args)
+        label_counter -= 1
+    labels.reverse()
+    return model_args_list
 
 
 def create_models(dataset, model_ids, model_args,
