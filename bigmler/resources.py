@@ -30,6 +30,7 @@ import bigml.api
 
 from bigmler.utils import (dated, get_url, log_message, plural, check_resource,
                            check_resource_error, log_created_resources)
+from bigmler.labels import label_model_args
 from bigml.util import bigml_locale
 
 EVALUATE_SAMPLE_RATE = 0.8
@@ -330,6 +331,33 @@ def set_model_args(name, description,
     return model_args
 
 
+def set_label_model_args(name, description, args, labels, all_labels, fields,
+                         model_fields, objective_field):
+    """Set of args needed to build a model per label
+
+    """
+    if model_fields is None:
+        model_fields = []
+    if objective_field is None:
+        objective_id = fields.field_id(fields.objective_field)
+        objective_field = fields.fields[objective_id]['name']
+    model_args_list = []
+    labels.reverse()
+    label_counter = len(labels) - args.number_of_models
+    for label in labels:
+        if label_counter < 1:
+            (new_name, label_field,
+             single_label_fields) = label_model_args(
+                name, label, all_labels, model_fields, objective_field)
+            model_args = set_model_args(new_name, description, args,
+                                        label_field, fields,
+                                        single_label_fields)
+            model_args_list.append(model_args)
+        label_counter -= 1
+    labels.reverse()
+    return model_args_list
+
+
 def create_models(dataset, model_ids, model_args,
                   args, api=None, path=None,
                   session_file=None, log=None):
@@ -341,21 +369,31 @@ def create_models(dataset, model_ids, model_args,
 
     models = model_ids[:]
     existing_models = len(models)
-
+    model_args_list = []
+    if isinstance(model_args, list):
+        model_args_list = model_args
     if args.number_of_models > 0:
         message = dated("Creating %s.\n" %
                         plural("model", args.number_of_models))
         log_message(message, log_file=session_file,
                     console=args.verbosity)
 
+        single_model = args.number_of_models == 1 and existing_models == 0
+        # if there's more than one model the first one must contain
+        # the entire field structure to be used as reference.
+        query_string = (FIELDS_QS if single_model
+                        else ALL_FIELDS_QS)
         for i in range(0, args.number_of_models):
             if i % args.max_parallel_models == 0 and i > 0:
                 try:
                     models[i - 1] = check_resource(
-                        models[i - 1], api.get_model, query_string=FIELDS_QS)
+                        models[i - 1], api.get_model,
+                        query_string=query_string)
                 except ValueError, exception:
                     sys.exit("Failed to get a finished model: %s" %
                              str(exception))
+            if model_args_list:
+                model_args = model_args_list[i]
             if args.cross_validation_rate > 0:
                 new_seed = get_basic_seed(i + existing_models)
                 model_args.update(seed=new_seed)
@@ -372,7 +410,7 @@ def create_models(dataset, model_ids, model_args,
             if bigml.api.get_status(model)['code'] != bigml.api.FINISHED:
                 try:
                     model = check_resource(model, api.get_model,
-                                           query_string=FIELDS_QS)
+                                           query_string=query_string)
                 except ValueError, exception:
                     sys.exit("Failed to get a finished model: %s" %
                              str(exception))
@@ -407,7 +445,8 @@ def get_models(model_ids, args, api=None, session_file=None):
                 # if there's more than one model the first one must contain
                 # the entire field structure to be used as reference.
                 query_string = (ALL_FIELDS_QS if not single_model
-                                and len(models) == 0 else FIELDS_QS)
+                                and (len(models) == 0 or args.multi_label)
+                                else FIELDS_QS)
                 model = check_resource(model, api.get_model,
                                        query_string=query_string)
             except ValueError, exception:

@@ -3,6 +3,11 @@
 History
 -------
 
+0.3.7 (2013-08-31)
+~~~~~~~~~~~~~~~~~~
+
+- Adding support for multi-label objective fields
+
 0.3.6 (2013-08-21)
 ~~~~~~~~~~~~~~~~~~
 

@@ -130,7 +130,7 @@ class TestReader(object):
         return tests
 
     def has_headers(self):
-        """Returns wether the test set file has a headers row
+        """Returns whether the test set file has a headers row
 
         """
         return self.test_set_header
