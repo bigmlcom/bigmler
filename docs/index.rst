@@ -467,21 +467,21 @@ also handle this scenario.
 Let's say you have a simple file::
 
     color,year,sex,class
-    red,2000,male,"student,teenager"
-    green,1990,female,"student,adult"
-    red,1995,female,"teenager,adult"
+    red,2000,male,"Student,Teenager"
+    green,1990,female,"Student,Adult"
+    red,1995,female,"Teenager,Adult"
 
 with information about a group of people and we want to predict the ``class``
 another person will fall into. As you can see, each record has more
 than one ``class`` per person (for example, the first person is labelled as
-being both a ``student`` and a ``teenager``) and they are all stored in the
+being both a ``Student`` and a ``Teenager``) and they are all stored in the
 ``class`` field by concatenating the all the applicable labels using ``,`` as
 separator. Each of these labels is, 'per se', an objective to be predicted, and
 that's what we can rely on BigMLer to do.
 
 The simplest multi-label command in BigMLer is::
 
-    bigmler --multi-label --train data/multilabel.csv
+    bigmler --multi-label --train data/tiny_multilabel.csv
 
 First, it will analyze the training file to extract all the ``labels`` stored
 in the objective field. Then, a new extended file will be generated
@@ -490,7 +490,7 @@ a boolean set to
 ``True`` if the associated label is in the objective field and ``False``
 otherwise::
 
-    color,year,sex,class - adult,class - student,class -teenager
+    color,year,sex,class - Adult,class - Student,class - Teenager
     red,2000,male,False,True,True
     green,1990,female,True,True,False
     red,1995,female,True,False,True
@@ -507,32 +507,32 @@ the training data records. That's also what BigMLer does. The syntax to
 predict using
 multi-labelled training data sets is similar to the single labelled case::
 
-    bigmler --multi-label --train data/multilabel.csv \
-            --test data/test_multilabel.csv
+    bigmler --multi-label --train data/tiny_multilabel.csv \
+            --test data/tiny_test_multilabel.csv
 
 the main difference being that the ouput ``predictions.csv`` file will have
 the following structure::
 
-    "adult,student","0.736,0.248"
-    teenager,0.9312
+    "Adult,Student","0.34237,0.20654"
+    "Adult,Teenager","0.34237,0.34237"
 
-where first column contains the ``class`` prediction as a sequence of all the
-different labels predicted for the test record and the second one the
-confidences for each label prediction. If the record predicts ``True`` for
+where first column contains the ``class`` prediction and the second one the
+confidences for each label prediction. If the models predict ``True`` for
 more than one label, the prediction is presented as a sequence of labels
 (and their corresponding confidences) delimited by ``,``.
 
 As you may have noted, BigMLer uses ``,`` both as default training data fields
 separator and as label separator. You can change this behaviour by using the
 ``--training-separator``, ``--label-separator`` and ``--test-separator`` flags
-to use other one-character separators::
+to use different one-character separators::
 
-    bigmler --multi-label --train data/multilable.csv \
-            --test data/test_multilabel.csv --training-separator '\t' \
+    bigmler --multi-label --train data/multilabel.tsv \
+            --test data/test_multilabel.tsv --training-separator '\t' \
             --test-separator '\t' --label-separator ':'
 
 This command would use the ``tab`` character as train and test data field
-delimiter and the ``comma`` as label delimiter.
+delimiter and ``:`` as label delimiter (the examples in the tests set use
+``,`` as field delimiter and ':' as label separator).
 
 You can also choose to restrict the prediction to a subset of labels using
 the ``--labels`` flag. The flag should be set to a comma-separated list of
@@ -542,11 +542,11 @@ version of the training file. Be careful, thought, to avoid typos in the labels
 in this case, or no objective fields will be created. Following the previous
 example::
 
-    bigmler --multi-label --train data/multilable.csv \
-            --test data/test_multilabel.csv --labels adult,student
+    bigmler --multi-label --train data/multilabel.csv \
+            --test data/test_multilabel.csv --labels Adult,Student
 
-Will limit the predictions to the ``adult`` and ``student`` classes, leaving
-out the ``teenager`` information.
+Will limit the predictions to the ``Adult`` and ``Student`` classes, leaving
+out the ``Teenager`` classification.
 
 Multi-labelled resources
 ------------------------
