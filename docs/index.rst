@@ -455,6 +455,134 @@ where ``filter.lisp`` is a file containing a expression like this::
 For more details, see the BigML's API documentation on
 `filtering rows <https://bigml.com/developers/datasets#d_filteringrows>`_.
 
+Multi-labelled categories in training data 
+------------------------------------------
+
+Sometimes the information you want to predict is not a single category but a
+set of complementary categories. In this case, training data is usually
+presented as a row of features and an objective field that contains the
+associated set of categories joined by some kind of delimiter. BigMLer can
+also handle this scenario.
+
+Let's say you have a simple file::
+
+    color,year,sex,class
+    red,2000,male,"student,teenager"
+    green,1990,female,"student,adult"
+    red,1995,female,"teenager,adult"
+
+with information about a group of people and we want to predict the ``class``
+another person will fall into. As you can see, each record has more
+than one ``class`` per person (for example, the first person is labelled as
+being both a ``student`` and a ``teenager``) and they are all stored in the
+``class`` field by concatenating the all the applicable labels using ``,`` as
+separator. Each of these labels is, 'per se', an objective to be predicted, and
+that's what we can rely on BigMLer to do.
+
+The simplest multi-label command in BigMLer is::
+
+    bigmler --multi-label --train data/multilabel.csv
+
+First, it will analyze the training file to extract all the ``labels`` stored
+in the objective field. Then, a new extended file will be generated
+from it by adding a new field per label. Each generated field will contain
+a boolean set to
+``True`` if the associated label is in the objective field and ``False``
+otherwise::
+
+    color,year,sex,class - adult,class - student,class -teenager
+    red,2000,male,False,True,True
+    green,1990,female,True,True,False
+    red,1995,female,True,False,True
+
+This new file will be fed to BigML to build a ``source``, a ``dataset`` and
+a set of ``models`` using four input_fields: the first three fields as
+input features and one of the label associated fields as objective. Thus, each
+of the classes that label the training set can be predicted independently using
+one of the models.
+
+But, naturally, when predicting a multi-labelled field you expect to obtain
+all the labels that qualify the input features at once, as you provide them in
+the training data records. That's also what BigMLer does. The syntax to
+predict using
+multi-labelled training data sets is similar to the single labelled case::
+
+    bigmler --multi-label --train data/multilabel.csv \
+            --test data/test_multilabel.csv
+
+the main difference being that the ouput ``predictions.csv`` file will have
+the following structure::
+
+    "adult,student","0.736,0.248"
+    teenager,0.9312
+
+where first column contains the ``class`` prediction as a sequence of all the
+different labels predicted for the test record and the second one the
+confidences for each label prediction. If the record predicts ``True`` for
+more than one label, the prediction is presented as a sequence of labels
+(and their corresponding confidences) delimited by ``,``.
+
+As you may have noted, BigMLer uses ``,`` both as default training data fields
+separator and as label separator. You can change this behaviour by using the
+``--training-separator``, ``--label-separator`` and ``--test-separator`` flags
+to use other one-character separators::
+
+    bigmler --multi-label --train data/multilable.csv \
+            --test data/test_multilabel.csv --training-separator '\t' \
+            --test-separator '\t' --label-separator ':'
+
+This command would use the ``tab`` character as train and test data field
+delimiter and the ``comma`` as label delimiter.
+
+You can also choose to restrict the prediction to a subset of labels using
+the ``--labels`` flag. The flag should be set to a comma-separated list of
+labels. Setting this flag can also reduce the processing time for the
+training file, because BigMLer will rely on them to produce the extended
+version of the training file. Be careful, thought, to avoid typos in the labels
+in this case, or no objective fields will be created. Following the previous
+example::
+
+    bigmler --multi-label --train data/multilable.csv \
+            --test data/test_multilabel.csv --labels adult,student
+
+Will limit the predictions to the ``adult`` and ``student`` classes, leaving
+out the ``teenager`` information.
+
+Multi-labelled resources
+------------------------
+
+The resources generated from a multi-labelled training data file can also be
+recovered and used to generate more multi-labelled predictions. As in the
+single-labelled case::
+
+    bigmler --multi-label --source source/522521bf37203f412f000100 \
+            --test data/test_multilabel.csv
+
+would generate a dataset and the corresponding set of models needed to create
+a ``predictions.csv`` file that contains the multi-labelled predictions.
+
+Similarly, starting from a previously created multi-labelled dataset::
+
+    bigmler --multi-label --dataset source/522521bf37203f412fac0135 \
+            --test data/test_multilabel.csv --output multilabel/predictions.csv
+
+creates a bunch of models, one per label, and predicts storing the results
+of each operation in the ``multilabel`` directory, and finally::
+
+    bigmler --multi-label --models multilabel/models \
+            --test data/test_multilabel.csv
+
+will retrieve the set of models created in last example and use them in new
+predictions. For these three cases too, the ``--labels`` flag can be set to a
+comma-separated subset of the labels to restrict the labels we want consider
+when predicting.
+
+
+
+
+
+
+
 Deleting Remote Resources
 -------------------------
 

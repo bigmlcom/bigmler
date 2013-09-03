@@ -516,6 +516,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                   if args.labels is not None else None)
     if labels is not None:
         labels = sorted(labels)
+        # create a new list with the index order equal to the sorted order
+        labels = [label for label in labels]
 
     # multi_label file must be preprocessed to obtain a new extended file
     if args.multi_label and training_set is not None:
@@ -553,6 +555,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if models:
         model = models[0]
 
+    single_model = len(models) == 1
     # We get the fields of the model if we haven't got
     # them yet and update its public state if needed
     if model and not args.evaluate and (test_set or args.black_box
@@ -561,7 +564,6 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             model = r.publish_model(model, args, api, session_file)
             models[0] = model
         # If more than one model, use the full field structure
-        single_model = len(models) == 1
         fields, objective_field = get_model_fields(
             model, csv_properties, args, single_model=single_model)
 
@@ -570,6 +572,13 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if args.multi_label and training_set is None:
         fields_list = []
         for model in models:
+            if isinstance(model, basestring):
+                # if there's more than one model the first one must contain
+                # the entire field structure to be used as reference.
+                query_string = (r.FIELDS_QS if single_model
+                                else r.ALL_FIELDS_QS)
+                model = bigml.api.check_resource(model, api.get_model,
+                                                 query_string=query_string)
             fields_list.append(model['object']['model']['fields'])
         fields_list.reverse()
         all_labels, labels = u.retrieve_labels(fields_list, labels)

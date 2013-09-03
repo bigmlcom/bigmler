@@ -164,6 +164,8 @@ class TrainReader(object):
                 else:
                     labels.append(objective_value)
             self.labels = sorted(list(set(labels)))
+            # create a new list with index order as sorted order
+            self.labels = [label for label in self.labels]
         return self.labels
 
     def get_headers(self, objective_field=True):
