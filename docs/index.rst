@@ -574,13 +574,13 @@ of each operation in the ``multilabel`` directory, and finally::
 
 will retrieve the set of models created in last example and use them in new
 predictions. For these three cases too, the ``--labels`` flag can be set to a
-comma-separated subset of the labels to restrict the labels we want consider
-when predicting.
+comma-separated subset of the labels to restrict the labels we want to predict.
 
-
-
-
-
+Also, the ``--model-tag`` can be used as well to retrieve multi-labelled
+models and predict with them::
+    
+    bigmler --multi-label --model-tag my_multilabel \
+            --test data/test_multilabel.csv
 
 
 Deleting Remote Resources
