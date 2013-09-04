@@ -55,7 +55,8 @@ selected using::
             --objective 'sepal length'
 If you do not explicitly specify an objective field, BigML will default to the
 last
-column in your dataset.
+column in your dataset. You can also use as selector the field column number
+instead of the name (when --no-train-header is used, for instance).
 
 Also, if your test file uses a particular field separator for its data,
 you can tell BigMLer using ``--test-separator``.
@@ -455,6 +456,136 @@ where ``filter.lisp`` is a file containing a expression like this::
 For more details, see the BigML's API documentation on
 `filtering rows <https://bigml.com/developers/datasets#d_filteringrows>`_.
 
+Multi-labelled categories in training data 
+------------------------------------------
+
+Sometimes the information you want to predict is not a single category but a
+set of complementary categories. In this case, training data is usually
+presented as a row of features and an objective field that contains the
+associated set of categories joined by some kind of delimiter. BigMLer can
+also handle this scenario.
+
+Let's say you have a simple file::
+
+    color,year,sex,class
+    red,2000,male,"Student,Teenager"
+    green,1990,female,"Student,Adult"
+    red,1995,female,"Teenager,Adult"
+
+with information about a group of people and we want to predict the ``class``
+another person will fall into. As you can see, each record has more
+than one ``class`` per person (for example, the first person is labelled as
+being both a ``Student`` and a ``Teenager``) and they are all stored in the
+``class`` field by concatenating the all the applicable labels using ``,`` as
+separator. Each of these labels is, 'per se', an objective to be predicted, and
+that's what we can rely on BigMLer to do.
+
+The simplest multi-label command in BigMLer is::
+
+    bigmler --multi-label --train data/tiny_multilabel.csv
+
+First, it will analyze the training file to extract all the ``labels`` stored
+in the objective field. Then, a new extended file will be generated
+from it by adding a new field per label. Each generated field will contain
+a boolean set to
+``True`` if the associated label is in the objective field and ``False``
+otherwise::
+
+    color,year,sex,class - Adult,class - Student,class - Teenager
+    red,2000,male,False,True,True
+    green,1990,female,True,True,False
+    red,1995,female,True,False,True
+
+This new file will be fed to BigML to build a ``source``, a ``dataset`` and
+a set of ``models`` using four input fields: the first three fields as
+input features and one of the label fields as objective. Thus, each
+of the classes that label the training set can be predicted independently using
+one of the models.
+
+But, naturally, when predicting a multi-labelled field you expect to obtain
+all the labels that qualify the input features at once, as you provide them in
+the training data records. That's also what BigMLer does. The syntax to
+predict using
+multi-labelled training data sets is similar to the single labelled case::
+
+    bigmler --multi-label --train data/tiny_multilabel.csv \
+            --test data/tiny_test_multilabel.csv
+
+the main difference being that the ouput file ``predictions.csv`` will have
+the following structure::
+
+    "Adult,Student","0.34237,0.20654"
+    "Adult,Teenager","0.34237,0.34237"
+
+where the first column contains the ``class`` prediction and the second one the
+confidences for each label prediction. If the models predict ``True`` for
+more than one label, the prediction is presented as a sequence of labels
+(and their corresponding confidences) delimited by ``,``.
+
+As you may have noted, BigMLer uses ``,`` both as default training data fields
+separator and as label separator. You can change this behaviour by using the
+``--training-separator``, ``--label-separator`` and ``--test-separator`` flags
+to use different one-character separators::
+
+    bigmler --multi-label --train data/multilabel.tsv \
+            --test data/test_multilabel.tsv --training-separator '\t' \
+            --test-separator '\t' --label-separator ':'
+
+This command would use the ``tab`` character as train and test data field
+delimiter and ``:`` as label delimiter (the examples in the tests set use
+``,`` as field delimiter and ':' as label separator).
+
+You can also choose to restrict the prediction to a subset of labels using
+the ``--labels`` flag. The flag should be set to a comma-separated list of
+labels. Setting this flag can also reduce the processing time for the
+training file, because BigMLer will rely on them to produce the extended
+version of the training file. Be careful, though, to avoid typos in the labels
+in this case, or no objective fields will be created. Following the previous
+example::
+
+    bigmler --multi-label --train data/multilabel.csv \
+            --test data/test_multilabel.csv --labels Adult,Student
+
+will limit the predictions to the ``Adult`` and ``Student`` classes, leaving
+out the ``Teenager`` classification.
+
+Multi-labelled resources
+------------------------
+
+The resources generated from a multi-labelled training data file can also be
+recovered and used to generate more multi-labelled predictions. As in the
+single-labelled case::
+
+    bigmler --multi-label --source source/522521bf37203f412f000100 \
+            --test data/test_multilabel.csv
+
+would generate a dataset and the corresponding set of models needed to create
+a ``predictions.csv`` file that contains the multi-labelled predictions.
+
+Similarly, starting from a previously created multi-labelled dataset::
+
+    bigmler --multi-label --dataset source/522521bf37203f412fac0135 \
+            --test data/test_multilabel.csv --output multilabel/predictions.csv
+
+creates a bunch of models, one per label, and predicts storing the results
+of each operation in the ``multilabel`` directory, and finally::
+
+    bigmler --multi-label --models multilabel/models \
+            --test data/test_multilabel.csv
+
+will retrieve the set of models created in the last example and use them in new
+predictions. In addition, for these three cases you can restrict the labels
+to predict to a subset of the complete list available in the original objective
+field. The ``--labels`` option can be set to a comma-separated list of the
+selected labels in order to do so.
+
+Finally, the ``--model-tag`` can be used as well to retrieve multi-labelled
+models and predict with them::
+    
+    bigmler --multi-label --model-tag my_multilabel \
+            --test data/test_multilabel.csv
+
+
 Deleting Remote Resources
 -------------------------
 
@@ -710,8 +841,9 @@ Basic Functionality
 --test TEST_SET                     Full path to a test set. A file containing
                                     the data that
                                     you want to input to generate predictions.
---objective OBJECTIVE_FIELD         The name of the Objective Field. The field that
-                                    you want to predict.
+--objective OBJECTIVE_FIELD         The column number  of the Objective Field
+                                    (the field that you want to predict) or its
+                                    name.
 --output PREDICTIONS                Full path to a file to save predictions.
                                     If left unspecified, it will default to an
                                     auto-generated file created by BigMLer.
@@ -764,6 +896,7 @@ Data Configuration
 --locale LOCALE                     Locale code string
 --fields-map PATH                   Path to a file containing the dataset to
                                     model fields map for evaluation
+--test-separator SEPARATOR          Character used as test data field separator.
 
 
 Remote Resources
@@ -779,27 +912,27 @@ Remote Resources
 
 Delete Remote Resources
 -----------------------
---delete            Starts delete mode
---ids LIST_OF_IDS   Comma separated list of ids to be deleted
+--delete            Starts delete mode.
+--ids LIST_OF_IDS   Comma separated list of ids to be deleted.
 --from-file FILE_OF_IDS  Path to a file containing the resources' ids to be
-                         deleted
---all-tag TAG       Retrieves resources that were tagged with tag to be deleted
---source-tag TAG    Retrieves sources that were tagged with tag to be deleted
---dataset-tag TAG   Retrieves datasets that were tagged with tag to be deleted
---model-tag TAG     Retrieves models that were tagged with tag to be deleted
+                         deleted.
+--all-tag TAG       Retrieves resources that were tagged with tag to be deleted.
+--source-tag TAG    Retrieves sources that were tagged with tag to be deleted.
+--dataset-tag TAG   Retrieves datasets that were tagged with tag to be deleted.
+--model-tag TAG     Retrieves models that were tagged with tag to be deleted.
 --prediction-tag TAG   Retrieves predictions that were tagged with tag to be
-                       deleted
+                       deleted.
 --evaluation-tag TAG   Retrieves evaluations that were tagged with tag to be
-                       deleted
+                       deleted.
 
 Ensembles
 ---------
 --number-of-models NUMBER_OF_MODELS     Number of models to create.
 --sample-rate SAMPLE_RATE               Sample rate to use (a float between
-                                        0.01 and 1)
---replacement                           Use replacement when sampling
+                                        0.01 and 1).
+--replacement                           Use replacement when sampling.
 --max-parallel-models MAX_PARALLEL_MODELS    Max number of models to create in
-                                             parallel
+                                             parallel.
 --max-batch-models MAX_BATCH_MODELS     Max number of local models to be
                                         predicted from in parallel. For
                                         ensembles with a number of models over
@@ -809,11 +942,20 @@ Ensembles
 --randomize                             Use a random set of fields to split on.
 --combine-votes LIST_OF_DIRS            Combines the votes of models generated
                                         in a list of directories.
---tlp LEVEL                             Task-level parallelization
+--tlp LEVEL                             Task-level parallelization.
 
 If you are not choosing to create an ensemble,
 make sure that you tag your models conveniently so that you can
 then retrieve them later to generate predictions.
+
+Multi-labels
+----------------
+--multi-label                       Use multiple labels in the objective field.
+--labels                            Comma-separated list of labels used.
+--training-separator SEPARATOR      Character used as field separator in train
+                                    data field.
+--label-separator SEPARATOR         Character used as label separator in the
+                                    multi-labelled objective field.
 
 Public Resources
 ----------------

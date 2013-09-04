@@ -36,11 +36,13 @@ from bigml.multivote import PLURALITY_CODE
 
 from bigmler.test_reader import TestReader
 from bigmler.resources import FIELDS_QS, ALL_FIELDS_QS
+from bigmler.labels import MULTI_LABEL_LABEL
 
 MAX_MODELS = 10
 BRIEF_FORMAT = 'brief'
 FULL_FORMAT = 'full data'
 AGGREGATION = -1
+
 
 def write_prediction(prediction, output=sys.stdout,
                      prediction_info=None, input_data=None):
@@ -257,7 +259,7 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                         resume=False, output_path=None, output=None,
                         verbosity=True, method=PLURALITY_CODE,
                         session_file=None, debug=False, prediction_info=None,
-                        labels=None):
+                        labels=None, label_separator=None, ordered=True):
     """Get local predictions form partial Multimodel, combine and save to file
 
     """
@@ -289,6 +291,8 @@ def local_batch_predict(models, test_reader, prediction_file, api,
         input_data_list.append(test_reader.dict(input_data))
     total_votes = []
     models_count = 0
+    if not ordered:
+        models_order = []
     single_model = models_total == 1
     query_string = FIELDS_QS if single_model else ALL_FIELDS_QS
     for models_split in models_splits:
@@ -312,12 +316,21 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                                                           str(exception)))
             # When user selects the labels in multi-label predictions, we must
             # filter the models that will be used to predict
-            if labels is not None:
+            if labels:
                 model_objective_id = model['object']['objective_fields'][0]
                 model_fields = model['object']['model']['fields']
                 model_label = model_fields[model_objective_id]['label']
-                if (model_label.startswith(u.MULTI_LABEL_LABEL) and
-                        model_label[len(u.MULTI_LABEL_LABEL):] in labels):
+                if (model_label.startswith(MULTI_LABEL_LABEL) and
+                        model_label[len(MULTI_LABEL_LABEL):] in labels):
+                    # When the list of models comes from a --model-tag
+                    # selection, the models are not retrieved in the same
+                    # order they were created. We must keep track of the
+                    # label they are associated with to label their
+                    # predictions properly
+                    if not ordered:
+                        label = model_label[len(MULTI_LABEL_LABEL):]
+                        label_index = labels.index(label)
+                        models_order.append(label_index)
                     complete_models.append(model)
             else:
                 complete_models.append(model)
@@ -340,17 +353,24 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                     predictions.extend(votes[index].predictions)
             else:
                 total_votes = votes
+
     message = u.dated("Combining predictions.\n")
     u.log_message(message, log_file=session_file, console=verbosity)
-    
+
+    if label_separator is None:
+        label_separator = ","
     for index in range(0, len(total_votes)):
         multivote = total_votes[index]
         input_data = raw_input_data_list[index]
         if method == AGGREGATION:
             predictions = multivote.predictions
-            # as multi-labelled models are created from end to start votes must be
-            # reversed to match
-            predictions.reverse()
+            if ordered:
+                # as multi-labelled models are created from end to start votes
+                # must be reversed to match
+                predictions.reverse()
+            else:
+                predictions = [prediction for (order, prediction)
+                               in sorted(zip(models_order, predictions))]
             if labels is None or len(labels) != len(predictions):
                 sys.exit("Failed to make a multi-label prediction. No"
                          " valid label info is found.")
@@ -361,8 +381,8 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                     prediction_list.append(labels[vote_index])
                     confidence = str(predictions[vote_index]['confidence'])
                     confidence_list.append(confidence)
-            # TODO: implement label_separator and training_separator as flags
-            prediction = [','.join(prediction_list),','.join(confidence_list)] 
+            prediction = [label_separator.join(prediction_list),
+                          label_separator.join(confidence_list)]
         else:
             prediction = multivote.combine(method, True)
 
@@ -383,7 +403,7 @@ def predict(test_set, test_set_header, models, fields, output,
     """
 
     test_reader = TestReader(test_set, test_set_header, fields,
-                             objective_field, 
+                             objective_field,
                              test_separator=args.test_separator)
     prediction_file = output
     output_path = u.check_dir(output)
@@ -426,9 +446,17 @@ def predict(test_set, test_set_header, models, fields, output,
             # or one of the available combination methods: plurality,
             # confidence weighted and probability weighted
             method = AGGREGATION if args.multi_label else args.method
+            # For multi-labelled models, the --models flag keeps the order
+            # of the labels and the models but the --model-tag flag
+            # retrieves the models with no order, so the correspondence with
+            # each label must be restored.
+            ordered = True
+            if args.multi_label and args.model_tag is not None:
+                ordered = False
             local_batch_predict(models, test_reader, prediction_file, api,
                                 max_models, resume, output_path,
                                 output,
                                 args.verbosity, method,
                                 session_file, args.debug,
-                                args.prediction_info, labels)       
+                                args.prediction_info, labels,
+                                args.label_separator, ordered)

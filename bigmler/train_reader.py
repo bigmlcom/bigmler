@@ -37,7 +37,7 @@ class TrainReader(object):
     def __init__(self, training_set, training_set_header, objective_field,
                  multi_label=False, labels=None, label_separator=None,
                  training_separator=None):
-        """Builds a generator from a csv file 
+        """Builds a generator from a csv file
 
            `training_set`: path to the training data file
            `training_set_header`: boolean, True means that headers are first
@@ -48,6 +48,7 @@ class TrainReader(object):
         self.training_set = training_set
         self.training_set_header = training_set_header
         self.training_set_handler = None
+        self.training_reader = None
         self.multi_label = multi_label
 
         self.training_separator = (training_separator.decode("string_escape")
@@ -71,7 +72,7 @@ class TrainReader(object):
                             range(0, row_length)]
 
         if isinstance(objective_field, int):
-            self.objective_column = self.objective_field
+            self.objective_column = objective_field
         elif objective_field is None:
             self.objective_column = row_length - 1
         else:
@@ -80,7 +81,7 @@ class TrainReader(object):
             except ValueError:
                 sys.exit("The %s has been set as objective field but"
                          " it cannot be found in the headers row: \n %s" %
-                         (objective_field, 
+                         (objective_field,
                           ", ".join(self.headers.encode("utf-8"))))
 
         self.labels = labels
@@ -187,4 +188,3 @@ class TrainReader(object):
             columns.append((column, label))
             column += 1
         return columns
-        

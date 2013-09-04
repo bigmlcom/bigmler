@@ -106,12 +106,13 @@ under the License.""" % version
                         help="Path to the file to output predictions.")
 
     # The name of the field that represents the objective field (i.e., class or
-    # label).
+    # label) or its column number.
     parser.add_argument('--objective',
                         action='store',
                         dest='objective_field',
                         default=defaults.get('objective', None),
-                        help="The column number of the Objective Field.")
+                        help=("The column number of the Objective Field"
+                              " or its name, if headers are given."))
 
     # Category code.
     parser.add_argument('--category',
@@ -273,7 +274,8 @@ under the License.""" % version
                         dest='number_of_models',
                         default=defaults.get('number_of_models', 1),
                         type=int,
-                        help="Number of models to create when using ensembles.")
+                        help=("Number of models to create when using"
+                              " ensembles."))
 
     # Sampling to use when using bagging.
     parser.add_argument('--sample-rate',
@@ -534,7 +536,8 @@ under the License.""" % version
                         dest='fields_map',
                         default=defaults.get('fields_map', None),
                         help=("Path to a csv file describing fields mapping. "
-                              "One definition per line (e.g., 00000, 00000a)."))
+                              "One definition per line (e.g., 00000,"
+                              "00000a)."))
 
     # Clear global bigmler log files
     parser.add_argument('--clear-logs',
@@ -615,7 +618,8 @@ under the License.""" % version
                         dest='max_parallel_evaluations',
                         default=defaults.get('max_parallel_evaluations', 1),
                         type=int,
-                        help="Max number of evaluations to create in parallel.")
+                        help=("Max number of evaluations to create in"
+                              " parallel."))
 
     # Test set field separator. Defaults to the locale csv
     # separator.
@@ -778,4 +782,10 @@ under the License.""" % version
                         help=("Don't store the retrieved resources in the"
                               " output directory."))
 
+    # Multi-label. The objective field has multiple labels.
+    parser.add_argument('--no-multi-label',
+                        action='store_false',
+                        dest='multi_label',
+                        default=defaults.get('multi_label', False),
+                        help=("The objective field has not multiple labels."))
     return parser

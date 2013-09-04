@@ -342,19 +342,15 @@ def set_label_model_args(name, description, args, labels, all_labels, fields,
         objective_id = fields.field_id(fields.objective_field)
         objective_field = fields.fields[objective_id]['name']
     model_args_list = []
-    labels.reverse()
-    label_counter = len(labels) - args.number_of_models
-    for label in labels:
-        if label_counter < 1:
-            (new_name, label_field,
-             single_label_fields) = label_model_args(
-                name, label, all_labels, model_fields, objective_field)
-            model_args = set_model_args(new_name, description, args,
-                                        label_field, fields,
-                                        single_label_fields)
-            model_args_list.append(model_args)
-        label_counter -= 1
-    labels.reverse()
+
+    for index in range(args.number_of_models - 1, -1, -1):
+        label = labels[index]
+        (new_name, label_field, single_label_fields) = label_model_args(
+            name, label, all_labels, model_fields, objective_field)
+        model_args = set_model_args(new_name, description, args,
+                                    label_field, fields,
+                                    single_label_fields)
+        model_args_list.append(model_args)
     return model_args_list
 
 
