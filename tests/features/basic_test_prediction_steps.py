@@ -509,7 +509,8 @@ def i_have_previous_scenario_or_reproduce_it(step, scenario, kwargs):
                  'scenario1_r': [(i_create_all_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_model, False)],
                  'scenario5': [(i_create_resources_from_ensemble, True), (i_check_create_models, False)], 
                  'scenario_e1': [(i_create_all_resources_to_evaluate, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_model, False), (i_check_create_evaluation, False)],
-                 'scenario_ml_1': [(i_create_all_ml_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models, False)]}
+                 'scenario_ml_1': [(i_create_all_ml_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models, False)],
+                 'scenario_ml_6': [(i_create_all_ml_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models, False)]}
     if os.path.exists("./%s/" % scenario):
         assert True
     else:

@@ -36,11 +36,13 @@ from bigml.multivote import PLURALITY_CODE
 
 from bigmler.test_reader import TestReader
 from bigmler.resources import FIELDS_QS, ALL_FIELDS_QS
+from bigmler.labels import MULTI_LABEL_LABEL
 
 MAX_MODELS = 10
 BRIEF_FORMAT = 'brief'
 FULL_FORMAT = 'full data'
 AGGREGATION = -1
+
 
 def write_prediction(prediction, output=sys.stdout,
                      prediction_info=None, input_data=None):
@@ -318,15 +320,15 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                 model_objective_id = model['object']['objective_fields'][0]
                 model_fields = model['object']['model']['fields']
                 model_label = model_fields[model_objective_id]['label']
-                if (model_label.startswith(u.MULTI_LABEL_LABEL) and
-                        model_label[len(u.MULTI_LABEL_LABEL):] in labels):
+                if (model_label.startswith(MULTI_LABEL_LABEL) and
+                        model_label[len(MULTI_LABEL_LABEL):] in labels):
                     # When the list of models comes from a --model-tag
                     # selection, the models are not retrieved in the same
                     # order they were created. We must keep track of the
                     # label they are associated with to label their
                     # predictions properly
                     if not ordered:
-                        label = model_label[len(u.MULTI_LABEL_LABEL):]
+                        label = model_label[len(MULTI_LABEL_LABEL):]
                         label_index = labels.index(label)
                         models_order.append(label_index)
                     complete_models.append(model)
@@ -380,7 +382,7 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                     confidence = str(predictions[vote_index]['confidence'])
                     confidence_list.append(confidence)
             prediction = [label_separator.join(prediction_list),
-                          label_separator.join(confidence_list)] 
+                          label_separator.join(confidence_list)]
         else:
             prediction = multivote.combine(method, True)
 
@@ -401,7 +403,7 @@ def predict(test_set, test_set_header, models, fields, output,
     """
 
     test_reader = TestReader(test_set, test_set_header, fields,
-                             objective_field, 
+                             objective_field,
                              test_separator=args.test_separator)
     prediction_file = output
     output_path = u.check_dir(output)
@@ -457,4 +459,4 @@ def predict(test_set, test_set_header, models, fields, output,
                                 args.verbosity, method,
                                 session_file, args.debug,
                                 args.prediction_info, labels,
-                                args.label_separator, ordered)       
+                                args.label_separator, ordered)

@@ -57,6 +57,7 @@ import bigml.api
 import bigmler.utils as u
 import bigmler.resources as r
 import bigmler.checkpoint as c
+import bigmler.labels as l
 
 from bigml.fields import Fields
 from bigml.multivote import COMBINATION_WEIGHTS, COMBINER_MAP, PLURALITY
@@ -275,7 +276,7 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
         if args.multi_label:
             # Create one model per column choosing only the label column
             if args.training_set is None:
-                all_labels, labels = u.retrieve_labels(fields.fields, labels)
+                all_labels, labels = l.retrieve_labels(fields.fields, labels)
             args.number_of_models = len(labels)
             if resume:
                 resume, model_ids = c.checkpoint(
@@ -290,7 +291,8 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
 
                 models = model_ids
             args.number_of_models = len(labels) - len(model_ids)
-            model_args_list = r.set_label_model_args(name, description, args,
+            model_args_list = r.set_label_model_args(
+                name, description, args,
                 labels, all_labels, fields, model_fields, objective_field)
 
             # create models changing the input_field to select
@@ -390,19 +392,19 @@ def get_model_fields(model, csv_properties, args, single_model=True):
     if isinstance(objective_field, list):
         objective_field = objective_field[0]
     if args.multi_label:
-        # Changes fields_dict objective field attributes to the real 
+        # Changes fields_dict objective field attributes to the real
         # multi-label objective
         set_multi_label_objective(fields_dict, objective_field)
     csv_properties.update(objective_field=objective_field)
 
     fields = Fields(fields_dict, **csv_properties)
-    
+
     return fields, objective_field
 
 
 def multi_label_expansion(training_set, training_set_header, objective_field,
                           args, output_path, field_attributes, labels,
-                          session_file=None, path=None, log=None):
+                          session_file=None):
     """Splitting the labels in a multi-label objective field to create
        a source with column per label
 
@@ -415,13 +417,16 @@ def multi_label_expansion(training_set, training_set_header, objective_field,
                                   training_separator=args.training_separator)
     # read file to get all the different labels if no --labels flag is given
     # or use labels given in --labels and generate the new field names
-    new_headers = training_reader.get_headers(objective_field=False)   
-    new_field_names = [u.get_label_field(training_reader.objective_name, label)
+    new_headers = training_reader.get_headers(objective_field=False)
+    new_field_names = [l.get_label_field(training_reader.objective_name, label)
                        for label in training_reader.labels]
     new_headers.extend(new_field_names)
     new_headers.append(training_reader.objective_name)
     file_name = os.path.basename(training_set)
     output_file = "%s%sextended_%s" % (output_path, os.sep, file_name)
+    message = u.dated("Transforming to extended source.\n")
+    u.log_message(message, log_file=session_file,
+                  console=args.verbosity)
     with open(output_file, 'w', 0) as output_handler:
         output = csv.writer(output_handler, lineterminator="\n")
         output.writerow(new_headers)
@@ -431,16 +436,16 @@ def multi_label_expansion(training_set, training_set_header, objective_field,
             training_reader.next()
         while True:
             try:
-                row = training_reader.next(extended=True) 
-                output.writerow(row)         
+                row = training_reader.next(extended=True)
+                output.writerow(row)
             except StopIteration:
                 break
     objective_field = training_reader.headers[training_reader.objective_column]
     if args.field_attributes is None:
         field_attributes = {}
     for label_column, label in training_reader.labels_columns():
-        field_attributes.update({label_column: {"label":
-            "%s%s" % (u.MULTI_LABEL_LABEL, label)}})
+        field_attributes.update({label_column: {
+            "label": "%s%s" % (l.MULTI_LABEL_LABEL, label)}})
     # setting field label to mark objective and label fields
     return (output_file, training_reader.labels, field_attributes)
 
@@ -452,8 +457,8 @@ def set_multi_label_objective(fields_dict, objective):
 
     """
     target_field = fields_dict[objective]
-    if target_field['label'].startswith(u.MULTI_LABEL_LABEL):
-        label = target_field['label'][len(u.MULTI_LABEL_LABEL):]
+    if target_field['label'].startswith(l.MULTI_LABEL_LABEL):
+        label = target_field['label'][len(l.MULTI_LABEL_LABEL):]
         objective_name = target_field['name']
         suffix_length = len(label) + 3
         try:
@@ -512,8 +517,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 pass
 
     # labels to be used in multi-label expansion
-    labels = (map(lambda x: x.strip(), args.labels.split(',')) 
-                  if args.labels is not None else None)
+    labels = (map(lambda x: x.strip(), args.labels.split(','))
+              if args.labels is not None else None)
     if labels is not None:
         labels = sorted(labels)
         # create a new list with the index order equal to the sorted order
@@ -521,11 +526,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
     # multi_label file must be preprocessed to obtain a new extended file
     if args.multi_label and training_set is not None:
-        (training_set, labels,
-         field_attributes) = multi_label_expansion(training_set,
-            training_set_header, objective_field, args, path,
-            field_attributes, labels,
-            session_file=session_file, path=path, log=log)
+        (training_set, labels, field_attributes) = multi_label_expansion(
+            training_set, training_set_header, objective_field, args, path,
+            field_attributes, labels, session_file=session_file)
         training_set_header = True
     all_labels = labels
 
@@ -554,8 +557,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         all_labels=all_labels)
     if models:
         model = models[0]
+        single_model = len(models) == 1
 
-    single_model = len(models) == 1
     # We get the fields of the model if we haven't got
     # them yet and update its public state if needed
     if model and not args.evaluate and (test_set or args.black_box
@@ -581,7 +584,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                                                  query_string=query_string)
             fields_list.append(model['object']['model']['fields'])
         fields_list.reverse()
-        all_labels, labels = u.retrieve_labels(fields_list, labels)
+        all_labels, labels = l.retrieve_labels(fields_list, labels)
 
     # If predicting
     if models and test_set and not args.evaluate:
@@ -812,7 +815,6 @@ def main(args=sys.argv[1:]):
                          " headers.\nPlease set the --train-header flag if"
                          " the file has headers or use a column number"
                          " to set the objective field." % objective)
-            pass
 
     output_args = {
         "api": api,

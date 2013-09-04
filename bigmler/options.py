@@ -273,7 +273,8 @@ under the License.""" % version
                         dest='number_of_models',
                         default=defaults.get('number_of_models', 1),
                         type=int,
-                        help="Number of models to create when using ensembles.")
+                        help=("Number of models to create when using"
+                              " ensembles."))
 
     # Sampling to use when using bagging.
     parser.add_argument('--sample-rate',
@@ -534,7 +535,8 @@ under the License.""" % version
                         dest='fields_map',
                         default=defaults.get('fields_map', None),
                         help=("Path to a csv file describing fields mapping. "
-                              "One definition per line (e.g., 00000, 00000a)."))
+                              "One definition per line (e.g., 00000,"
+                              "00000a)."))
 
     # Clear global bigmler log files
     parser.add_argument('--clear-logs',
@@ -615,7 +617,8 @@ under the License.""" % version
                         dest='max_parallel_evaluations',
                         default=defaults.get('max_parallel_evaluations', 1),
                         type=int,
-                        help="Max number of evaluations to create in parallel.")
+                        help=("Max number of evaluations to create in"
+                              " parallel."))
 
     # Test set field separator. Defaults to the locale csv
     # separator.

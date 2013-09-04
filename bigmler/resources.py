@@ -345,8 +345,7 @@ def set_label_model_args(name, description, args, labels, all_labels, fields,
 
     for index in range(args.number_of_models - 1, -1, -1):
         label = labels[index]
-        (new_name, label_field,
-         single_label_fields) = label_model_args(
+        (new_name, label_field, single_label_fields) = label_model_args(
             name, label, all_labels, model_fields, objective_field)
         model_args = set_model_args(new_name, description, args,
                                     label_field, fields,

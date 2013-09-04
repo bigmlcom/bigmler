@@ -58,5 +58,5 @@ Feature: Upload multi-label source and produce test predictions
 
         Examples:
         |scenario    | kwargs                                                  | tag       | test                  | output                      |predictions_file                    |
-        | scenario_ml_1| {"tag": "my_multilabel_5", "data": "../data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "./scenario_ml_1/predictions.csv", "test": "../data/test_multilabel.csv"}    | my_multilabel_5 | ../data/test_multilabel.csv | ./scenario_ml_5/predictions.csv | ./check_files/predictions_ml_comma.csv |
+        | scenario_ml_6| {"tag": "my_multilabel_5", "data": "../data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "./scenario_ml_6/predictions.csv", "test": "../data/test_multilabel.csv"}    | my_multilabel_5 | ../data/test_multilabel.csv | ./scenario_ml_5/predictions.csv | ./check_files/predictions_ml_comma.csv |
 
