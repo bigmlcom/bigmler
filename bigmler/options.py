@@ -781,4 +781,10 @@ under the License.""" % version
                         help=("Don't store the retrieved resources in the"
                               " output directory."))
 
+    # Multi-label. The objective field has multiple labels.
+    parser.add_argument('--no-multi-label',
+                        action='store_false',
+                        dest='multi_label',
+                        default=defaults.get('multi_label', False),
+                        help=("The objective field has not multiple labels."))
     return parser

@@ -521,8 +521,6 @@ def compute_output(api, args, training_set, test_set=None, output=None,
               if args.labels is not None else None)
     if labels is not None:
         labels = sorted(labels)
-        # create a new list with the index order equal to the sorted order
-        labels = [label for label in labels]
 
     # multi_label file must be preprocessed to obtain a new extended file
     if args.multi_label and training_set is not None:

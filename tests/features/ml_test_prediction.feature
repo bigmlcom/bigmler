@@ -1,5 +1,5 @@
 Feature: Upload multi-label source and produce test predictions
-    In order produce test predictions
+    In order to produce test predictions
     I need to upload a train set
     Then I need to create a dataset a model and local model per label to predict
 
@@ -60,3 +60,12 @@ Feature: Upload multi-label source and produce test predictions
         |scenario    | kwargs                                                  | tag       | test                  | output                      |predictions_file                    |
         | scenario_ml_6| {"tag": "my_multilabel_5", "data": "../data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "./scenario_ml_6/predictions.csv", "test": "../data/test_multilabel.csv"}    | my_multilabel_5 | ../data/test_multilabel.csv | ./scenario_ml_5/predictions.csv | ./check_files/predictions_ml_comma.csv |
 
+    Scenario: Successfully building test predictions from models retrieved by tag
+        Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
+        And I create BigML multi-label resources with labels "<labels>" using models tagged as "<tag>" to test "<test>" and log predictions in "<output>"
+        And I check that the predictions are ready
+        Then the local prediction file is like "<predictions_file>"
+
+        Examples:
+        |scenario    | kwargs                                                  |labels      | tag       | test                  | output                      |predictions_file                    |
+        | scenario_ml_6| {"tag": "my_multilabel_5", "data": "../data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "./scenario_ml_6/predictions.csv", "test": "../data/test_multilabel.csv"}    | Adult,Student | my_multilabel_5 | ../data/test_multilabel.csv | ./scenario_ml_7/predictions.csv | ./check_files/predictions_ml_labels.csv |
