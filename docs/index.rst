@@ -55,7 +55,8 @@ selected using::
             --objective 'sepal length'
 If you do not explicitly specify an objective field, BigML will default to the
 last
-column in your dataset.
+column in your dataset. You can also use as selector the field column number
+instead of the name (when --no-train-header is used, for instance).
 
 Also, if your test file uses a particular field separator for its data,
 you can tell BigMLer using ``--test-separator``.
@@ -840,8 +841,9 @@ Basic Functionality
 --test TEST_SET                     Full path to a test set. A file containing
                                     the data that
                                     you want to input to generate predictions.
---objective OBJECTIVE_FIELD         The name of the Objective Field. The field that
-                                    you want to predict.
+--objective OBJECTIVE_FIELD         The column number  of the Objective Field
+                                    (the field that you want to predict) or its
+                                    name.
 --output PREDICTIONS                Full path to a file to save predictions.
                                     If left unspecified, it will default to an
                                     auto-generated file created by BigMLer.

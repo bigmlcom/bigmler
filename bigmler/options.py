@@ -106,12 +106,13 @@ under the License.""" % version
                         help="Path to the file to output predictions.")
 
     # The name of the field that represents the objective field (i.e., class or
-    # label).
+    # label) or its column number.
     parser.add_argument('--objective',
                         action='store',
                         dest='objective_field',
                         default=defaults.get('objective', None),
-                        help="The column number of the Objective Field.")
+                        help=("The column number of the Objective Field"
+                              " or its name, if headers are given."))
 
     # Category code.
     parser.add_argument('--category',
