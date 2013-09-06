@@ -40,12 +40,57 @@ from bigmler.labels import MULTI_LABEL_LABEL
 
 MAX_MODELS = 10
 BRIEF_FORMAT = 'brief'
+NORMAL_FORMAT = 'normal'
 FULL_FORMAT = 'full data'
 AGGREGATION = -1
 
 
+def write_prediction_headers(output, test_reader,
+                             fields, args, objective_field):
+    """Add headers to the prediction file selected format
+
+    """
+    exclude = []
+    objective_name = fields.fields[objective_field]['name']
+    headers = [objective_name]
+
+    if args.prediction_info == NORMAL_FORMAT:
+        headers.append("confidence")
+    if (args.prediction_info == FULL_FORMAT or
+        args.prediction_fields is not None):
+        # Try to retrieve headers from the test file
+        if test_reader.has_headers():
+            input_headers = test_reader.raw_headers
+            if objective_name in input_headers:
+                exclude.append(input_headers.index(objective_name))
+        else:
+            # if no headers are found in the test file we assume it has the
+            # same model input_field structure removing the objective field
+            input_headers = [fields[field]['name'] for field in
+                             fields.fields_columns if not
+                             field == objective_id]
+
+        if args.prediction_fields is not None:
+            prediction_fields = map(lambda x: x.strip(),
+                                    args.prediction_fields.split(','))
+            # Filter input_headers adding only those chosen by the user
+            number_of_headers = len(input_headers)
+            for index in range(0, number_of_headers):
+                if not input_headers[index] in prediction_fields:
+                    exclude.append(index)
+        if exclude:
+            input_headers = [input_headers[index] for index in
+                             range(0, number_of_headers)
+                             if not index in exclude]
+        input_headers.extend(headers)
+        headers = input_headers
+    output.writerow(headers)
+    return exclude
+
+
 def write_prediction(prediction, output=sys.stdout,
-                     prediction_info=None, input_data=None):
+                     prediction_info=NORMAL_FORMAT, input_data=None,
+                     exclude=None):
     """Writes the final combined prediction to the required output
 
        The format of the output depends on the `prediction_info` value.
@@ -67,12 +112,15 @@ def write_prediction(prediction, output=sys.stdout,
         prediction, confidence = ((prediction[0], None) if len(prediction) == 1
                                   else prediction)
     row = [prediction]
-    if not prediction_info in [BRIEF_FORMAT, FULL_FORMAT] and confidence:
+    if prediction_info == NORMAL_FORMAT:
         row.append(confidence)
     elif prediction_info == FULL_FORMAT:
         if input_data is None:
             input_data = []
         row = input_data
+        if exclude:
+            for index in exclude:
+                del row[index]
         row.append(prediction)
     try:
         output.writerow(row)
@@ -83,7 +131,7 @@ def write_prediction(prediction, output=sys.stdout,
             raise AttributeError("You should provide a writeable object")
 
 
-def prediction_to_row(prediction, prediction_info=None):
+def prediction_to_row(prediction, prediction_info=NORMAL_FORMAT):
     """Returns a csv row to store main prediction info in csv files.
 
     """
@@ -108,7 +156,8 @@ def prediction_to_row(prediction, prediction_info=None):
 
 
 def combine_votes(votes_files, to_prediction, to_file, method=0,
-                  prediction_info=None, input_data_list=None):
+                  prediction_info=NORMAL_FORMAT, input_data_list=None,
+                  exclude=None):
     """Combines the votes found in the votes' files and stores predictions.
 
        votes_files: should contain the list of file names
@@ -129,7 +178,7 @@ def combine_votes(votes_files, to_prediction, to_file, method=0,
         input_data = (None if input_data_list is None
                       else input_data_list[index])
         write_prediction(multivote.combine(method, True), output,
-                         prediction_info, input_data)
+                         prediction_info, input_data, exclude)
 
 
 def remote_predict(models, test_reader, prediction_file, api,
@@ -137,7 +186,7 @@ def remote_predict(models, test_reader, prediction_file, api,
                    verbosity=True, output_path=None,
                    method=PLURALITY_CODE, tags="",
                    session_file=None, log=None, debug=False,
-                   prediction_info=None):
+                   prediction_info=NORMAL_FORMAT, exclude=None):
     """Retrieve predictions remotely, combine them and save predictions to file
 
     """
@@ -187,12 +236,12 @@ def remote_predict(models, test_reader, prediction_file, api,
                 predictions_file.writerow(prediction_row)
                 if single_model:
                     write_prediction(prediction_row[0:2], prediction_file,
-                                     prediction_info, input_data_dict)
+                                     prediction_info, input_data, exclude)
     if not single_model:
         combine_votes(predictions_files,
                       Model(models[0]).to_prediction,
                       prediction_file, method,
-                      prediction_info, raw_input_data_list)
+                      prediction_info, raw_input_data_list, exclude)
 
 
 def remote_predict_ensemble(ensemble_id, test_reader, prediction_file, api,
@@ -200,7 +249,7 @@ def remote_predict_ensemble(ensemble_id, test_reader, prediction_file, api,
                             verbosity=True, output_path=None,
                             method=PLURALITY_CODE, tags="",
                             session_file=None, log=None, debug=False,
-                            prediction_info=None):
+                            prediction_info=NORMAL_FORMAT, exclude=None):
     """Retrieve predictions remotely and save predictions to file
 
     """
@@ -235,10 +284,11 @@ def remote_predict_ensemble(ensemble_id, test_reader, prediction_file, api,
             u.log_message("%s\n" % prediction['resource'], log_file=log)
             prediction_row = prediction_to_row(prediction, prediction_info)
             write_prediction(prediction_row, predictions_file,
-                             prediction_info, input_data)
+                             prediction_info, input_data, exclude)
 
 
-def local_predict(models, test_reader, output, method, prediction_info=None):
+def local_predict(models, test_reader, output, method,
+                  prediction_info=NORMAL_FORMAT, exclude=None):
     """Get local predictions and combine them to get a final prediction
 
     """
@@ -251,15 +301,17 @@ def local_predict(models, test_reader, output, method, prediction_info=None):
                                          method=method,
                                          with_confidence=True)
         write_prediction(prediction, output,
-                         prediction_info, input_data)
+                         prediction_info, input_data, exclude)
 
 
 def local_batch_predict(models, test_reader, prediction_file, api,
                         max_models=MAX_MODELS,
                         resume=False, output_path=None, output=None,
                         verbosity=True, method=PLURALITY_CODE,
-                        session_file=None, debug=False, prediction_info=None,
-                        labels=None, label_separator=None, ordered=True):
+                        session_file=None, debug=False,
+                        prediction_info=NORMAL_FORMAT,
+                        labels=None, label_separator=None, ordered=True,
+                        exclude=None):
     """Get local predictions form partial Multimodel, combine and save to file
 
     """
@@ -386,7 +438,8 @@ def local_batch_predict(models, test_reader, prediction_file, api,
         else:
             prediction = multivote.combine(method, True)
 
-        write_prediction(prediction, output, prediction_info, input_data)
+        write_prediction(prediction, output, prediction_info, input_data,
+                         exclude)
 
 
 def predict(test_set, test_set_header, models, fields, output,
@@ -408,6 +461,11 @@ def predict(test_set, test_set_header, models, fields, output,
     prediction_file = output
     output_path = u.check_dir(output)
     output = csv.writer(open(output, 'w', 0), lineterminator="\n")
+    # columns to exclude if input_data is added to the prediction field
+    exclude = (write_prediction_headers(
+        output, test_reader, fields, args, objective_field) if
+        args.prediction_header else [])
+    exclude.reverse()
 
     # Remote predictions: predictions are computed in bigml.com and stored
     # in a file named after the model in the following syntax:
@@ -420,12 +478,13 @@ def predict(test_set, test_set_header, models, fields, output,
                                     prediction_file, api, resume,
                                     args.verbosity, output_path,
                                     args.method, args.tag, session_file, log,
-                                    args.debug, args.prediction_info)
+                                    args.debug, args.prediction_info, exclude)
         else:
             remote_predict(models, test_reader, prediction_file, api, resume,
                            args.verbosity, output_path,
                            args.method, args.tag,
-                           session_file, log, args.debug, args.prediction_info)
+                           session_file, log, args.debug, args.prediction_info,
+                           exclude)
     # Local predictions: Predictions are computed locally using models' rules
     # with MultiModel's predict method
     else:
@@ -435,7 +494,7 @@ def predict(test_set, test_set_header, models, fields, output,
         # the given models and issue a combined prediction
         if len(models) < max_models and not args.multi_label:
             local_predict(models, test_reader, output,
-                          args.method, args.prediction_info)
+                          args.method, args.prediction_info, exclude)
         # For large numbers of models, we split the list of models in chunks
         # and build a MultiModel for each chunk, issue and store predictions
         # for each model and combine all of them eventually.
@@ -459,4 +518,4 @@ def predict(test_set, test_set_header, models, fields, output,
                                 args.verbosity, method,
                                 session_file, args.debug,
                                 args.prediction_info, labels,
-                                args.label_separator, ordered)
+                                args.label_separator, ordered, exclude)

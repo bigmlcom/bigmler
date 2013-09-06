@@ -422,7 +422,10 @@ def multi_label_expansion(training_set, training_set_header, objective_field,
                        for label in training_reader.labels]
     new_headers.extend(new_field_names)
     new_headers.append(training_reader.objective_name)
-    file_name = os.path.basename(training_set)
+    try:
+        file_name = os.path.basename(training_set)
+    except AttributeError:
+        file_name = "file.csv"
     output_file = "%s%sextended_%s" % (output_path, os.sep, file_name)
     message = u.dated("Transforming to extended source.\n")
     u.log_message(message, log_file=session_file,
@@ -648,14 +651,22 @@ def main(args=sys.argv[1:]):
 
     """
     train_stdin = False
+    test_stdin = False
     flags = []
     for i in range(0, len(args)):
         if args[i].startswith("--"):
-            args[i] = args[i].replace("_", "-")
-            flags.append(args[i])
-            if (args[i] == '--train' and
+            flag = args[i]
+            # syntax --flag=value
+            if "=" in flag:
+                flag = args[i][0: flag.index("=")]
+            flag = flag.replace("_", "-")
+            flags.append(flag)
+            if (flag == '--train' and
                     (i == len(args) - 1 or args[i + 1].startswith("--"))):
                 train_stdin = True
+            elif (flag == '--test' and
+                    (i == len(args) - 1 or args[i + 1].startswith("--"))):
+                test_stdin = True
 
     # If --clear-logs the log files are cleared
     if "--clear-logs" in args:
@@ -704,6 +715,13 @@ def main(args=sys.argv[1:]):
         parser.error("Evaluation for multi-label models is not "
                      "available still.")
 
+    if train_stdin and command_args.multi_label:
+        parser.error("Stream reading the training set for multi-label "
+                     "is not available still.")
+
+    if test_stdin and command_args.resume:
+        parser.error("Can't resume when using stream reading test sets.")
+
     default_output = ('evaluation' if command_args.evaluate
                       else 'predictions.csv')
     if command_args.resume:
@@ -716,6 +734,13 @@ def main(args=sys.argv[1:]):
             if (position == (len(args) - 1) or
                     args[position + 1].startswith("--")):
                 train_stdin = True
+        except ValueError:
+            pass
+        try:
+            position = args.index("--test")
+            if (position == (len(args) - 1) or
+                    args[position + 1].startswith("--")):
+                test_stdin = True
         except ValueError:
             pass
         output_dir = u.get_log_reversed(DIRS_LOG,
@@ -775,7 +800,12 @@ def main(args=sys.argv[1:]):
         command_args.debug = True
 
     if train_stdin:
+        if test_stdin:
+            sys.exit("The standard input can't be used both for training and"
+                     " testing. Choose one of them")
         command_args.training_set = StringIO.StringIO(sys.stdin.read())
+    elif test_stdin:
+        command_args.test_set = StringIO.StringIO(sys.stdin.read())
 
     api_command_args = {
         'username': command_args.username,

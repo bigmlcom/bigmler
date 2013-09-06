@@ -24,10 +24,12 @@ from __future__ import absolute_import
 
 import csv
 import sys
+import cStringIO
 
 from bigml.util import get_csv_delimiter
 
 from bigmler.checkpoint import file_number_of_lines
+from bigmler.utf8recoder import UTF8Recoder
 
 
 class TestReader(object):
@@ -45,6 +47,12 @@ class TestReader(object):
            `objective_field`: field_id of the objective field
         """
         self.test_set = test_set
+        if test_set.__class__.__name__ == "StringIO":
+            self.encode = "utf-8"
+            self.test_set_handler = UTF8Recoder(test_set, self.encode)
+        else:
+            self.encode = None
+            self.test_set_handler = open(test_set, "U")
         self.test_set_header = test_set_header
         self.fields = fields
         self.objective_field = objective_field
@@ -54,16 +62,18 @@ class TestReader(object):
         if len(self.test_separator) > 1:
             sys.exit("Only one character can be used as test data separator.")
         try:
-            self.test_reader = csv.reader(open(test_set, "U"),
+            self.test_reader = csv.reader(self.test_set_handler,
                                           delimiter=self.test_separator,
                                           lineterminator="\n")
         except IOError:
             sys.exit("Error: cannot read test %s" % test_set)
 
         self.headers = None
+        self.raw_headers = None
         self.exclude = []
         if test_set_header:
             self.headers = self.test_reader.next()
+            self.raw_headers = self.headers
             # validate headers against model fields excluding objective_field,
             # that may be present or not
             objective_field = fields.field_column_number(objective_field)
@@ -110,15 +120,19 @@ class TestReader(object):
         """Returns the next row
 
         """
-        return self.test_reader.next()
+        row = self.test_reader.next()
+        if self.encode:
+            row = [unicode(item, self.encode) for item in row]
+        return row
 
     def dict(self, row):
         """Returns the row in a dict format according to the given headers
 
         """
+        new_row = row[:]
         for index in self.exclude:
-            del row[index]
-        return self.fields.pair(row, self.headers, self.objective_field)
+            del new_row[index]
+        return self.fields.pair(new_row, self.headers, self.objective_field)
 
     def number_of_tests(self):
         """Returns the number of tests in the test file
