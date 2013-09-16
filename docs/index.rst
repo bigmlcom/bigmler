@@ -43,10 +43,24 @@ one for you under a
 new directory named after the current date and time
 (e.g., `MonNov1212_174715/predictions.csv`). With ``--prediction-info``
 flag set to ``brief`` only the prediction result will be stored (default is
-``normal`` and includes confidence information). You can also set it to ``full
-data`` if you prefer the result to be presented as a row with your test
-input data followed by the corresponding prediction.
+``normal`` and includes confidence information). You can also set it to
+``full`` if you prefer the result to be presented as a row with your test
+input data followed by the corresponding prediction. To include a headers row
+in the prediction file you can set ``--prediction-header`` and,
+for the ``--prediction-info full`` option, if you want to
+include only a subset of the fields in your test file you can select them by
+setting ``--prediction-fields`` to a comma-separated list of them. Then::
 
+    bigmler --train data/iris.csv --test data/test_iris.csv \
+            --prediction-info full --prediction-header \
+            --prediction-fields 'petal length','petal width'
+
+will include in the generated predictions file a headers row::
+
+    petal length,petal width,species
+
+and only the values of ``petal length`` and ``petal width`` will be shown
+before the objective field prediction ``species``.
 
 A different ``objective field`` (the field that you want to predict) can be
 selected using::
@@ -70,6 +84,10 @@ If you don't provide a file name for your training source, BigMLer will try to
 read it from the standard input::
 
     cat data/iris.csv | bigmler --train
+
+or you can also read the test info from there
+
+    cat data/test_iris.csv | bigmler --train data/iris.csv --test
 
 BigMLer will try to use the locale of the model both to create a new source
 (if the ``--train`` flag is used) and to interpret test data. In case
@@ -824,12 +842,12 @@ Optional Arguments
 General configuration
 ---------------------
 --username      BigML's username. If left unspecified, it will default to the
-                values of the ``BIGML_USERNAME`` environment variable.
+                values of the ``BIGML_USERNAME`` environment variable
 --api-key       BigML's api_key. If left unspecified, it will default to the
-                values of the ``BIGML_API_KEY`` environment variable.
+                values of the ``BIGML_API_KEY`` environment variable
 --dev           Uses FREE development environment. Sizes must be under 1MB
-                though.
---debug         Activates debug level and shows log info for each https request.
+                though
+--debug         Activates debug level and shows log info for each https request
 
 Basic Functionality
 -------------------
@@ -837,25 +855,25 @@ Basic Functionality
 --train TRAINING_SET                Full path to a training set. It can be a
                                     remote URL to a (gzipped or compressed) csv
                                     file. The protocol schemes can be http,
-                                    https, s3, azure, odata.
+                                    https, s3, azure, odata
 --test TEST_SET                     Full path to a test set. A file containing
                                     the data that
-                                    you want to input to generate predictions.
+                                    you want to input to generate predictions
 --objective OBJECTIVE_FIELD         The column number  of the Objective Field
                                     (the field that you want to predict) or its
-                                    name.
+                                    name
 --output PREDICTIONS                Full path to a file to save predictions.
                                     If left unspecified, it will default to an
                                     auto-generated file created by BigMLer.
 --method METHOD                     Prediction method used: ``plurality``,
                                     ``"confidence weighted"`` or
-                                    ``"probability weighted"``.
+                                    ``"probability weighted"``
 --pruning PRUNING_TYPE              The pruning applied in building the model.
                                     It's allowed values are ``smart``,
-                                    ``statistical`` and ``no-pruning``.
+                                    ``statistical`` and ``no-pruning``
                                     The default value is ``smart``
 --evaluate                          Turns on evaluation mode
---resume                            Retries command execution.
+--resume                            Retries command execution
 --stack-level LEVEL                 Level of the retried command in the stack
 --cross-validation-rate RATE        Fraction of the training data held out for
                                     Monte-Carlo cross-validation
@@ -871,7 +889,7 @@ Content
 --category CATEGORY             Category code. See
                                 `full list <https://bigml.com/developers/sources#s_categories>`_.
 --description DESCRIPTION       Path to a file with a description in plain text
-                                or markdown.
+                                or markdown
 --tag TAG                       Tag to later retrieve new resources
 --no-tag                        Puts BigMLer default tag if no other tag is given
 
@@ -879,7 +897,7 @@ Data Configuration
 ------------------
 --no-train-header                   The train set file hasn't a header
 --no-test-header                    The test set file hasn't a header
---field-attribute PATH              Path to a file describing field attributes.
+--field-attribute PATH              Path to a file describing field attributes
                                     One definition per line
                                     (e.g., 0,'Last Name')
 --types PATH                        Path to a file describing field types.
@@ -896,7 +914,10 @@ Data Configuration
 --locale LOCALE                     Locale code string
 --fields-map PATH                   Path to a file containing the dataset to
                                     model fields map for evaluation
---test-separator SEPARATOR          Character used as test data field separator.
+--test-separator SEPARATOR          Character used as test data field separator
+--prediction-header                 Include a headers row in the prediction file
+--prediction-fields TEST_FIELDS     Comma-separated list of fields of the test
+                                    file to be included in the prediction file
 
 
 Remote Resources
@@ -912,37 +933,37 @@ Remote Resources
 
 Delete Remote Resources
 -----------------------
---delete            Starts delete mode.
---ids LIST_OF_IDS   Comma separated list of ids to be deleted.
+--delete            Starts delete mode
+--ids LIST_OF_IDS   Comma separated list of ids to be deleted
 --from-file FILE_OF_IDS  Path to a file containing the resources' ids to be
-                         deleted.
---all-tag TAG       Retrieves resources that were tagged with tag to be deleted.
---source-tag TAG    Retrieves sources that were tagged with tag to be deleted.
---dataset-tag TAG   Retrieves datasets that were tagged with tag to be deleted.
---model-tag TAG     Retrieves models that were tagged with tag to be deleted.
+                         deleted
+--all-tag TAG       Retrieves resources that were tagged with tag to be deleted
+--source-tag TAG    Retrieves sources that were tagged with tag to be deleted
+--dataset-tag TAG   Retrieves datasets that were tagged with tag to be deleted
+--model-tag TAG     Retrieves models that were tagged with tag to be deleted
 --prediction-tag TAG   Retrieves predictions that were tagged with tag to be
-                       deleted.
+                       deleted
 --evaluation-tag TAG   Retrieves evaluations that were tagged with tag to be
-                       deleted.
+                       deleted
 
 Ensembles
 ---------
---number-of-models NUMBER_OF_MODELS     Number of models to create.
+--number-of-models NUMBER_OF_MODELS     Number of models to create
 --sample-rate SAMPLE_RATE               Sample rate to use (a float between
-                                        0.01 and 1).
---replacement                           Use replacement when sampling.
+                                        0.01 and 1)
+--replacement                           Use replacement when sampling
 --max-parallel-models MAX_PARALLEL_MODELS    Max number of models to create in
-                                             parallel.
+                                             parallel
 --max-batch-models MAX_BATCH_MODELS     Max number of local models to be
                                         predicted from in parallel. For
                                         ensembles with a number of models over
                                         it, predictions are stored in files as
                                         they are computed and retrived and
-                                        combined eventually.
---randomize                             Use a random set of fields to split on.
+                                        combined eventually
+--randomize                             Use a random set of fields to split on
 --combine-votes LIST_OF_DIRS            Combines the votes of models generated
-                                        in a list of directories.
---tlp LEVEL                             Task-level parallelization.
+                                        in a list of directories
+--tlp LEVEL                             Task-level parallelization
 
 If you are not choosing to create an ensemble,
 make sure that you tag your models conveniently so that you can
@@ -950,12 +971,12 @@ then retrieve them later to generate predictions.
 
 Multi-labels
 ----------------
---multi-label                       Use multiple labels in the objective field.
---labels                            Comma-separated list of labels used.
+--multi-label                       Use multiple labels in the objective field
+--labels                            Comma-separated list of labels used
 --training-separator SEPARATOR      Character used as field separator in train
-                                    data field.
+                                    data field
 --label-separator SEPARATOR         Character used as label separator in the
-                                    multi-labelled objective field.
+                                    multi-labelled objective field
 
 Public Resources
 ----------------
@@ -974,18 +995,18 @@ Fancy Options
 --progress-bar              Shows an update on the bytes uploaded when creating
                             a new source. This option might run into issues
                             depending on the locale
-                            settings of your OS.
+                            settings of your OS
 --no-dataset                Does not create a model. BigMLer will only create
-                            a source.
+                            a source
 --no-model                  Does not create a model. BigMLer will only create
-                            a dataset.
+                            a dataset
 --resources-log LOG_FILE    Keeps a log of the resources generated in each
-                            command.
+                            command
 --version                   Shows the version number
 --verbosity LEVEL           Turns on (1) or off (0) the verbosity.
 --clear-logs                Clears the ``.bigmler``, ``.bigmler_dir_stack``,
                             ``.bigmler_dirs`` and user log file given in
-                            ``--resources-log`` (if any).
+                            ``--resources-log`` (if any)
 --store                     Stores every created or retrieved resource in your
                             output directory
 

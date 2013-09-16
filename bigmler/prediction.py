@@ -41,11 +41,11 @@ from bigmler.labels import MULTI_LABEL_LABEL
 MAX_MODELS = 10
 BRIEF_FORMAT = 'brief'
 NORMAL_FORMAT = 'normal'
-FULL_FORMAT = 'full data'
+FULL_FORMAT = 'full'
 AGGREGATION = -1
 
 
-def write_prediction_headers(output, test_reader,
+def write_prediction_headers(prediction_headers, output, test_reader,
                              fields, args, objective_field):
     """Add headers to the prediction file selected format
 
@@ -57,7 +57,7 @@ def write_prediction_headers(output, test_reader,
     if args.prediction_info == NORMAL_FORMAT:
         headers.append("confidence")
     if (args.prediction_info == FULL_FORMAT or
-        args.prediction_fields is not None):
+            args.prediction_fields is not None):
         # Try to retrieve headers from the test file
         if test_reader.has_headers():
             input_headers = test_reader.raw_headers
@@ -68,7 +68,7 @@ def write_prediction_headers(output, test_reader,
             # same model input_field structure removing the objective field
             input_headers = [fields[field]['name'] for field in
                              fields.fields_columns if not
-                             field == objective_id]
+                             field == objective_field]
 
         if args.prediction_fields is not None:
             prediction_fields = map(lambda x: x.strip(),
@@ -78,13 +78,15 @@ def write_prediction_headers(output, test_reader,
             for index in range(0, number_of_headers):
                 if not input_headers[index] in prediction_fields:
                     exclude.append(index)
+        exclude = sorted(list(set(exclude)))
         if exclude:
             input_headers = [input_headers[index] for index in
                              range(0, number_of_headers)
                              if not index in exclude]
         input_headers.extend(headers)
         headers = input_headers
-    output.writerow(headers)
+    if prediction_headers:
+        output.writerow(headers)
     return exclude
 
 
@@ -462,9 +464,9 @@ def predict(test_set, test_set_header, models, fields, output,
     output_path = u.check_dir(output)
     output = csv.writer(open(output, 'w', 0), lineterminator="\n")
     # columns to exclude if input_data is added to the prediction field
-    exclude = (write_prediction_headers(
-        output, test_reader, fields, args, objective_field) if
-        args.prediction_header else [])
+    exclude = write_prediction_headers(
+        args.prediction_header, output, test_reader, fields, args,
+        objective_field)
     exclude.reverse()
 
     # Remote predictions: predictions are computed in bigml.com and stored

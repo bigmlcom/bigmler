@@ -606,10 +606,10 @@ under the License.""" % version
                         action='store',
                         dest='prediction_info',
                         default=defaults.get('prediction_info', 'normal'),
-                        choices=["brief", "normal", "full data"],
+                        choices=["brief", "normal", "full", "full data"],
                         help=("Prediction log format: 'brief' will only "
                               "log predictions, 'normal' will write confidence"
-                              " too, 'full data' will write in a row the"
+                              " too, 'full' will write in a row the"
                               " input data that generates the prediction"
                               " followed by the latter."))
 

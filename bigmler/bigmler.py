@@ -68,7 +68,7 @@ from bigmler.options import create_parser
 from bigmler.defaults import get_user_defaults
 from bigmler.defaults import DEFAULTS_FILE
 from bigmler.prediction import predict, combine_votes
-from bigmler.prediction import MAX_MODELS
+from bigmler.prediction import MAX_MODELS, FULL_FORMAT
 from bigmler.train_reader import TrainReader
 
 
@@ -952,6 +952,10 @@ def main(args=sys.argv[1:]):
     if command_args.fields_map:
         fields_map_arg = u.read_fields_map(command_args.fields_map)
         output_args.update(fields_map=fields_map_arg)
+
+    # Old value for --prediction-info='full data' maps to 'full'
+    if command_args.prediction_info == 'full data':
+        command_args.prediction_info = FULL_FORMAT
 
     # Parses resources ids if provided.
     if command_args.delete:
