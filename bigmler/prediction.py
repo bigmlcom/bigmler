@@ -45,9 +45,15 @@ FULL_FORMAT = 'full'
 AGGREGATION = -1
 
 
-def write_prediction_headers(prediction_headers, output, test_reader,
+def use_prediction_headers(prediction_headers, output, test_reader,
                              fields, args, objective_field):
-    """Add headers to the prediction file selected format
+    """Uses header information from the test file in the prediction output
+
+       If --prediction-header is set, adds a headers row to the prediction
+       file.
+       If --prediction-fields is used, retrieves the fields to exclude
+       from the test input in the --prediction-info full format, that includes
+       them all by default.
 
     """
     exclude = []
@@ -71,18 +77,16 @@ def write_prediction_headers(prediction_headers, output, test_reader,
                              field == objective_field]
 
         if args.prediction_fields is not None:
-            prediction_fields = map(lambda x: x.strip(),
+            prediction_fields = map(str.strip,
                                     args.prediction_fields.split(','))
             # Filter input_headers adding only those chosen by the user
             number_of_headers = len(input_headers)
             for index in range(0, number_of_headers):
                 if not input_headers[index] in prediction_fields:
                     exclude.append(index)
-        exclude = sorted(list(set(exclude)))
-        if exclude:
-            input_headers = [input_headers[index] for index in
-                             range(0, number_of_headers)
-                             if not index in exclude]
+        exclude = sorted(list(set(exclude)), reverse=True)
+        for index in exclude:
+            del input_headers[index]
         input_headers.extend(headers)
         headers = input_headers
     if prediction_headers:
@@ -464,10 +468,9 @@ def predict(test_set, test_set_header, models, fields, output,
     output_path = u.check_dir(output)
     output = csv.writer(open(output, 'w', 0), lineterminator="\n")
     # columns to exclude if input_data is added to the prediction field
-    exclude = write_prediction_headers(
+    exclude = use_prediction_headers(
         args.prediction_header, output, test_reader, fields, args,
         objective_field)
-    exclude.reverse()
 
     # Remote predictions: predictions are computed in bigml.com and stored
     # in a file named after the model in the following syntax:

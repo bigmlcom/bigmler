@@ -156,8 +156,7 @@ class TrainReader(object):
                 objective_value = row[self.objective_column]
                 if self.multi_label:
                     new_labels = objective_value.split(self.label_separator)
-                    new_labels = [new_label.strip()
-                                  for new_label in new_labels]
+                    new_labels = map(str.strip, new_labels)
                     # TODO: clean user given missing tokens
                     for index in range(0, len(new_labels)):
                         if new_labels[index] == '':

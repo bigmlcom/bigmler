@@ -805,7 +805,7 @@ under the License.""" % version
                         default=defaults.get('multi_label', False),
                         help=("The objective field has not multiple labels."))
 
-    # Prediction-header. If set, headers are not added to the prediction file.
+    # Prediction-header.
     parser.add_argument('--no-prediction-header',
                         action='store_false',
                         dest='prediction_header',

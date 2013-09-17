@@ -425,7 +425,7 @@ def multi_label_expansion(training_set, training_set_header, objective_field,
     try:
         file_name = os.path.basename(training_set)
     except AttributeError:
-        file_name = "file.csv"
+        file_name = "training_set.csv"
     output_file = "%s%sextended_%s" % (output_path, os.sep, file_name)
     message = u.dated("Transforming to extended source.\n")
     u.log_message(message, log_file=session_file,
@@ -520,7 +520,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 pass
 
     # labels to be used in multi-label expansion
-    labels = (map(lambda x: x.strip(), args.labels.split(','))
+    labels = (map(str.strip, args.labels.split(','))
               if args.labels is not None else None)
     if labels is not None:
         labels = sorted(labels)
@@ -716,8 +716,8 @@ def main(args=sys.argv[1:]):
                      "available still.")
 
     if train_stdin and command_args.multi_label:
-        parser.error("Stream reading the training set for multi-label "
-                     "is not available still.")
+        parser.error("Reading multi-label training sets from stream "
+                     "is not yet available.")
 
     if test_stdin and command_args.resume:
         parser.error("Can't resume when using stream reading test sets.")
@@ -731,16 +731,14 @@ def main(args=sys.argv[1:]):
         args = shlex.split(command)[1:]
         try:
             position = args.index("--train")
-            if (position == (len(args) - 1) or
-                    args[position + 1].startswith("--")):
-                train_stdin = True
+            train_stdin = (position == (len(args) - 1) or
+                           args[position + 1].startswith("--"))
         except ValueError:
             pass
         try:
             position = args.index("--test")
-            if (position == (len(args) - 1) or
-                    args[position + 1].startswith("--")):
-                test_stdin = True
+            test_stdin = (position == (len(args) - 1) or
+                          args[position + 1].startswith("--"))
         except ValueError:
             pass
         output_dir = u.get_log_reversed(DIRS_LOG,
@@ -877,13 +875,13 @@ def main(args=sys.argv[1:]):
 
     # Parses dataset fields if provided.
     if command_args.dataset_fields:
-        dataset_fields_arg = map(lambda x: x.strip(),
+        dataset_fields_arg = map(str.strip,
                                  command_args.dataset_fields.split(','))
         output_args.update(dataset_fields=dataset_fields_arg)
 
     # Parses model input fields if provided.
     if command_args.model_fields:
-        model_fields_arg = map(lambda x: x.strip(),
+        model_fields_arg = map(str.strip,
                                command_args.model_fields.split(','))
         output_args.update(model_fields=model_fields_arg)
 
@@ -943,7 +941,7 @@ def main(args=sys.argv[1:]):
 
     # Reads votes files in the provided directories.
     if command_args.votes_dirs:
-        dirs = map(lambda x: x.strip(), command_args.votes_dirs.split(','))
+        dirs = map(str.strip, command_args.votes_dirs.split(','))
         votes_path = os.path.dirname(command_args.predictions)
         votes_files = u.read_votes_files(dirs, votes_path)
         output_args.update(votes_files=votes_files)
@@ -955,6 +953,7 @@ def main(args=sys.argv[1:]):
 
     # Old value for --prediction-info='full data' maps to 'full'
     if command_args.prediction_info == 'full data':
+        print "WARNING: 'full data' is a deprecated value. Use 'full' instead"
         command_args.prediction_info = FULL_FORMAT
 
     # Parses resources ids if provided.
@@ -969,7 +968,7 @@ def main(args=sys.argv[1:]):
                       console=command_args.verbosity)
         delete_list = []
         if command_args.delete_list:
-            delete_list = map(lambda x: x.strip(),
+            delete_list = map(str.strip,
                               command_args.delete_list.split(','))
         if command_args.delete_file:
             if not os.path.exists(command_args.delete_file):
