@@ -4,6 +4,7 @@ import csv
 import json
 from lettuce import step, world
 from subprocess import check_call, CalledProcessError
+from bigmler.checkpoint import file_number_of_lines
 
 @step(r'I create BigML multi-label resources tagged as "(.*)" with "(.*)" label separator and (\d*) labels uploading train "(.*)" file with "(.*)" field separator to test "(.*)" and log predictions in "(.*)"')
 def i_create_all_ml_resources(step, tag=None, label_separator=None, number_of_labels=None, data=None, training_separator=None, test=None, output=None):
@@ -18,9 +19,9 @@ def i_create_all_ml_resources(step, tag=None, label_separator=None, number_of_la
         if retcode < 0:
             assert False
         else:
-            world.test_lines = 0
-            for line in open(test, "r"):
-                world.test_lines += 1
+            world.test_lines = file_number_of_lines(test)
+            # test file has headers in it, so first line must be ignored
+            world.test_lines -= 1
             world.output = output
             assert True
     except (OSError, CalledProcessError, IOError) as exc:
@@ -40,9 +41,9 @@ def i_predict_ml_from_model_tag(step, tag=None, test=None, output=None):
         if retcode < 0:
             assert False
         else:
-            world.test_lines = 0
-            for line in open(test, "r"):
-                world.test_lines += 1
+            world.test_lines = file_number_of_lines(test)
+            # test file has headers in it, so first line must be ignored
+            world.test_lines -= 1
             world.output = output
             assert True
     except (OSError, CalledProcessError, IOError) as exc:
@@ -56,14 +57,13 @@ def i_predict_ml_from_model_tag_with_labels(step, labels=None, tag=None, test=No
     world.folders.append(world.directory)
     try:
         command = "bigmler --multi-label --model-tag " + tag + " --labels " + labels + " --test " + test + " --store --output " + output + " --max-batch-models 1"
-        print command
         retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
-            world.test_lines = 0
-            for line in open(test, "r"):
-                world.test_lines += 1
+            world.test_lines = file_number_of_lines(test)
+            # test file has headers in it, so first line must be ignored
+            world.test_lines -= 1
             world.output = output
             assert True
     except (OSError, CalledProcessError, IOError) as exc:

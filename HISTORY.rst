@@ -3,10 +3,13 @@
 History
 -------
 
-0.3.7 (2013-08-31)
+0.3.7 (2013-09-17)
 ~~~~~~~~~~~~~~~~~~
 
 - Adding support for multi-label objective fields
+- Adding --prediction-headers and --prediction-fields to improve
+  --prediction-info formatting options for the predictions file
+- Adding the ability to read --test input data from stdin
 
 0.3.6 (2013-08-21)
 ~~~~~~~~~~~~~~~~~~

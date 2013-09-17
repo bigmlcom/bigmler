@@ -6,10 +6,31 @@ from lettuce import step, world
 from subprocess import check_call, CalledProcessError
 from bigml.api import check_resource
 from bigmler.bigmler import MONTECARLO_FACTOR
+from bigmler.checkpoint import file_number_of_lines
 from ml_test_prediction_steps import i_create_all_ml_resources
 
 
-@step(r'I create BigML resources uploading train "(.*)" file to test "(.*)" and log predictions in "(.*)"')
+@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" and log predictions in "(.*?)" with "(.*?)" as test field separator$')
+def i_create_all_resources_with_separator(step, data=None, test=None, output=None, separator=None):
+    if data is None or test is None or separator is None or output is None:
+        assert False
+    world.directory = os.path.dirname(output)
+    world.folders.append(world.directory)
+    try:
+        retcode = check_call("bigmler --train " + data + " --test " + test + " --test-separator " + separator + " --store --output " + output + " --max-batch-models 1", shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.test_lines = file_number_of_lines(test)
+            # test file has headers in it, so first line must be ignored
+            world.test_lines -= 1
+            world.output = output
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+
+@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" and log predictions in "([^"]*)"$')
 def i_create_all_resources(step, data=None, test=None, output=None):
     if data is None or test is None or output is None:
         assert False
@@ -20,29 +41,31 @@ def i_create_all_resources(step, data=None, test=None, output=None):
         if retcode < 0:
             assert False
         else:
-            world.test_lines = 0
-            for line in open(test, "r"):
-                world.test_lines += 1
+            world.test_lines = file_number_of_lines(test)
+            # test file has headers in it, so first line must be ignored
+            world.test_lines -= 1
             world.output = output
             assert True
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
 
-@step(r'I create BigML resources uploading train "(.*)" file to test "(.*)" with "(.*)" separator and log predictions in "(.*)"')
-def i_create_all_resources_with_separator(step, data=None, test=None, separator=None, output=None):
-    if data is None or test is None or separator is None or output is None:
+@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" and log predictions in "(.*?)" with prediction options "(.*?)"')
+def i_create_all_resources_with_options(step, data=None, test=None, output=None, options=''):
+    if data is None or test is None or output is None:
         assert False
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
-        retcode = check_call("bigmler --train " + data + " --test " + test + " --test-separator " + separator + " --store --output " + output + " --max-batch-models 1", shell=True)
+        command = "bigmler --train " + data + " --test " + test + " --store --output " + output + " --max-batch-models 1 " + options
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
-            world.test_lines = 0
-            for line in open(test, "r"):
-                world.test_lines += 1
+            world.test_lines = file_number_of_lines(test)
+            # test file has headers in it, so first line must be ignored
+            if options.find('--prediction-header') == -1:
+                world.test_lines -= 1
             world.output = output
             assert True
     except (OSError, CalledProcessError, IOError) as exc:
@@ -61,9 +84,9 @@ def i_create_resources_from_source(step, multi_label=None, test=None, output=Non
         if retcode < 0:
             assert False
         else:
-            world.test_lines = 0
-            for line in open(test, "r"):
-                world.test_lines += 1
+            world.test_lines = file_number_of_lines(test)
+            # test file has headers in it, so first line must be ignored
+            world.test_lines -= 1
             world.output = output
             assert True
     except (OSError, CalledProcessError, IOError) as exc:
@@ -82,9 +105,9 @@ def i_create_resources_from_dataset(step, multi_label=None, test=None, output=No
         if retcode < 0:
             assert False
         else:
-            world.test_lines = 0
-            for line in open(test, "r"):
-                world.test_lines += 1
+            world.test_lines = file_number_of_lines(test)
+            # test file has headers in it, so first line must be ignored
+            world.test_lines -= 1
             world.output = output
             assert True
     except (OSError, CalledProcessError, IOError) as exc:
@@ -101,9 +124,9 @@ def i_create_resources_from_dataset_objective_model(step, objective=None, fields
         if retcode < 0:
             assert False
         else:
-            world.test_lines = 0
-            for line in open(test, "r"):
-                world.test_lines += 1
+            world.test_lines = file_number_of_lines(test)
+            # test file has headers in it, so first line must be ignored
+            world.test_lines -= 1
             world.output = output
             assert True
     except (OSError, CalledProcessError, IOError) as exc:
@@ -120,9 +143,9 @@ def i_create_resources_from_model(step, test=None, output=None):
         if retcode < 0:
             assert False
         else:
-            world.test_lines = 0
-            for line in open(test, "r"):
-                world.test_lines += 1
+            world.test_lines = file_number_of_lines(test)
+            # test file has headers in it, so first line must be ignored
+            world.test_lines -= 1
             world.output = output
             assert True
     except (OSError, CalledProcessError, IOError) as exc:
@@ -140,9 +163,9 @@ def i_create_resources_from_ensemble(step, number_of_models=None, test=None, out
         if retcode < 0:
             assert False
         else:
-            world.test_lines = 0
-            for line in open(test, "r"):
-                world.test_lines += 1
+            world.test_lines = file_number_of_lines(test)
+            # test file has headers in it, so first line must be ignored
+            world.test_lines -= 1
             world.output = output
             world.number_of_models = int(number_of_models)
             assert True
@@ -162,9 +185,9 @@ def i_create_resources_from_models_file(step, multi_label=None, models_file=None
         if retcode < 0:
             assert False
         else:
-            world.test_lines = 0
-            for line in open(test, "r"):
-                world.test_lines += 1
+            world.test_lines = file_number_of_lines(test)
+            # test file has headers in it, so first line must be ignored
+            world.test_lines -= 1
             world.output = output
             assert True
     except (OSError, CalledProcessError, IOError) as exc:
@@ -182,9 +205,9 @@ def i_create_resources_from_dataset_file(step, dataset_file=None, test=None, out
         if retcode < 0:
             assert False
         else:
-            world.test_lines = 0
-            for line in open(test, "r"):
-                world.test_lines += 1
+            world.test_lines = file_number_of_lines(test)
+            # test file has headers in it, so first line must be ignored
+            world.test_lines -= 1
             world.output = output
             assert True
     except (OSError, CalledProcessError, IOError) as exc:
@@ -221,9 +244,7 @@ def i_find_predictions_files(step, directory1=None, directory2=None, output=None
         if retcode < 0:
             assert False
         else:
-            world.test_lines = 0
-            for line in open("%s%spredictions.csv" % (directory1, os.sep), "r"):
-                world.test_lines += 1
+            world.test_lines = file_number_of_lines("%s%spredictions.csv" % (directory1, os.sep))
             world.output = output
             assert True
     except (OSError, CalledProcessError, IOError) as exc:
@@ -241,9 +262,7 @@ def i_find_predictions_files(step, directory1=None, directory2=None, output=None
         if retcode < 0:
             assert False
         else:
-            world.test_lines = 0
-            for line in open("%s%spredictions.csv" % (directory1, os.sep), "r"):
-                world.test_lines += 1
+            world.test_lines = file_number_of_lines("%s%spredictions.csv" % (directory1, os.sep))
             world.output = output
             assert True
     except (OSError, CalledProcessError, IOError) as exc:
@@ -381,21 +400,19 @@ def i_check_create_predictions(step):
 
     previous_lines = -1
     predictions_lines = 0
-    while previous_lines != predictions_lines:
-        try:
-            predictions_file = world.output
-            predictions_file = open(predictions_file, "r")
-            predictions_lines = 0
-            for line in predictions_file:
-                predictions_lines += 1
-            if predictions_lines == world.test_lines:
-                assert True
-            else:
-                previous_lines = predictions_lines
-                time.sleep(10)
-            predictions_file.close()
-        except Exception, exc:
-            assert False, str(exc)
+    try:
+        predictions_file = world.output
+        predictions_file = open(predictions_file, "r")
+        predictions_lines = 0
+        for line in predictions_file:
+            predictions_lines += 1
+        if predictions_lines == world.test_lines:
+            assert True
+        else:
+            assert False, "predictions lines: %s, test lines: %s" % (predictions_lines, world.test_lines)
+        predictions_file.close()
+    except Exception, exc:
+        assert False, str(exc)
 
 
 @step(r'the local prediction file is like "(.*)"')

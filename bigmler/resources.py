@@ -119,7 +119,8 @@ def create_source(data_set, source_args,
             raise IOError("%s: Failed to write %s/source" % (str(exc), path))
     check_resource_error(source, "Failed to create source: ")
     try:
-        source = check_resource(source, api.get_source)
+        source = check_resource(source, api.get_source,
+                                query_string=ALL_FIELDS_QS)
     except ValueError, exception:
         sys.exit("Failed to get a finished source: %s" % str(exception))
     message = dated("Source created: %s\n" % get_url(source))
@@ -161,7 +162,8 @@ def get_source(source, api=None, verbosity=True,
         log_message(message, log_file=session_file,
                     console=verbosity)
         try:
-            source = check_resource(source, api.get_source)
+            source = check_resource(source, api.get_source,
+                                    query_string=ALL_FIELDS_QS)
         except ValueError, exception:
             sys.exit("Failed to get a finished source: %s" % str(exception))
     return source
@@ -240,7 +242,8 @@ def create_dataset(source_or_dataset, dataset_args, args, api=None, path=None,
                           bigml.api.get_dataset_id(dataset))
     check_resource_error(dataset, "Failed to create dataset: ")
     try:
-        dataset = check_resource(dataset, api.get_dataset)
+        dataset = check_resource(dataset, api.get_dataset,
+                                 query_string=ALL_FIELDS_QS)
     except ValueError, exception:
         sys.exit("Failed to get a finished dataset: %s" % str(exception))
     message = dated("Dataset created: %s\n" % get_url(dataset))
@@ -261,7 +264,8 @@ def get_dataset(dataset, api=None, verbosity=True, session_file=None):
                         get_url(dataset))
         log_message(message, log_file=session_file,
                     console=verbosity)
-        dataset = check_resource(dataset, api.get_dataset)
+        dataset = check_resource(dataset, api.get_dataset,
+                                 query_string=ALL_FIELDS_QS)
         check_resource_error(dataset, "Failed to get dataset: ")
     return dataset
 

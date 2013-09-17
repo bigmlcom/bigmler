@@ -95,6 +95,7 @@ under the License.""" % version
     parser.add_argument('--test',
                         action='store',
                         dest='test_set',
+                        nargs='?',
                         default=defaults.get('test', None),
                         help="Test set path.")
 
@@ -605,10 +606,10 @@ under the License.""" % version
                         action='store',
                         dest='prediction_info',
                         default=defaults.get('prediction_info', 'normal'),
-                        choices=["brief", "normal", "full data"],
+                        choices=["brief", "normal", "full", "full data"],
                         help=("Prediction log format: 'brief' will only "
                               "log predictions, 'normal' will write confidence"
-                              " too, 'full data' will write in a row the"
+                              " too, 'full' will write in a row the"
                               " input data that generates the prediction"
                               " followed by the latter."))
 
@@ -661,6 +662,21 @@ under the License.""" % version
                         dest='training_separator',
                         default=defaults.get('training_separator', None),
                         help=("Training set field separator."))
+
+    # Prediction header. If set, headers are added to the prediction file.
+    parser.add_argument('--prediction-header',
+                        action='store_true',
+                        dest='prediction_header',
+                        default=defaults.get('prediction_header', False),
+                        help="Headers are added to the prediction file.")
+
+    # Prediction fields. A comma-separated list of the fields that should
+    # be included in the prediction file.
+    parser.add_argument('--prediction-fields',
+                        action='store',
+                        dest='prediction_fields',
+                        default=defaults.get('prediction_fields', None),
+                        help="Fields added to the prediction file.")
 
     # The following options are only useful to deactivate the corresponding
     # oposed default values
@@ -774,7 +790,7 @@ under the License.""" % version
                         default=defaults.get('clear_logs', False),
                         help="Don't clear global bigmler log files.")
 
-    # Stores the retrieved resources in the output directory
+    # Don't store the retrieved resources in the output directory
     parser.add_argument('--no-store',
                         action='store_false',
                         dest='store',
@@ -782,10 +798,17 @@ under the License.""" % version
                         help=("Don't store the retrieved resources in the"
                               " output directory."))
 
-    # Multi-label. The objective field has multiple labels.
+    # Multi-label. The objective field hasn't multiple labels.
     parser.add_argument('--no-multi-label',
                         action='store_false',
                         dest='multi_label',
                         default=defaults.get('multi_label', False),
                         help=("The objective field has not multiple labels."))
+
+    # Prediction-header.
+    parser.add_argument('--no-prediction-header',
+                        action='store_false',
+                        dest='prediction_header',
+                        default=defaults.get('prediction_header', False),
+                        help="Headers are not added to the prediction file.")
     return parser

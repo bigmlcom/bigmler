@@ -145,7 +145,7 @@ Feature: Upload source and produce test predictions
 
 
     Scenario: Successfully building test predictions from start with user-given separator:
-        Given I create BigML resources uploading train "<data>" file to test "<test>" with "<separator>" separator and log predictions in "<output>"
+        Given I create BigML resources uploading train "<data>" file to test "<test>" and log predictions in "<output>" with "<separator>" as test field separator
         And I check that the source has been created
         And I check that the dataset has been created 
         And I check that the model has been created 
@@ -155,4 +155,16 @@ Feature: Upload source and produce test predictions
         Examples:
         | data               | test                    | separator | output                        |predictions_file           |
         | ../data/iris.csv   | ../data/test_iris.tsv   | "\t"        |./scenario14/predictions.csv   | ./check_files/predictions_iris.csv   |
+
+    Scenario: Successfully building test predictions from start with different prediction file format:
+        Given I create BigML resources uploading train "<data>" file to test "<test>" and log predictions in "<output>" with prediction options "<options>"
+        And I check that the source has been created
+        And I check that the dataset has been created 
+        And I check that the model has been created 
+        And I check that the predictions are ready
+        Then the local prediction file is like "<predictions_file>"
+
+        Examples:
+        | data               | test                    | output                        |options     |predictions_file           |
+        | ../data/iris.csv   | ../data/test_iris.csv   |./scenario15/predictions.csv   |--prediction-header --prediction-fields 'petal length,petal width' --prediction-info full | ./check_files/predictions_iris_h.csv   |
 
