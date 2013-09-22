@@ -560,22 +560,7 @@ def create_ensembles(dataset, ensemble_ids, ensemble_args, args,
             ensembles.append(ensemble)
             log_created_resources("ensembles", path, ensemble_id, open_mode='a')
 
-        for index in range(0, len(ensembles)):
-            ensemble = ensembles[index]
-            if bigml.api.get_status(ensemble)['code'] != bigml.api.FINISHED:
-                try:
-                    ensemble = check_resource(ensemble, api.get_ensemble,
-                                              query_string=query_string)   
-                    ensembles[index] = ensemble
-                except ValueError, exception:
-                    sys.exit("Failed to get a finished ensemble: %s" %
-                             str(exception))
-            model_ids.extend(ensemble['object']['models'])  
-        for model_id in model_ids:
-            log_created_resources("models", path, model_id, open_mode='a')
-        models = model_ids[:]
-        models[0] = check_resource(models[0], api.get_model,
-                                   query_string=query_string)
+        models, model_ids = retrieve_ensembles_models(ensembles, api, path)
         if number_of_ensembles < 2 and args.verbosity:
             message = dated("Ensemble created: %s.\n" %
                             get_url(ensemble))
@@ -583,6 +568,32 @@ def create_ensembles(dataset, ensemble_ids, ensemble_args, args,
                         console=args.verbosity)
 
     return ensembles, ensemble_ids, models, model_ids
+
+
+def retrieve_ensembles_models(ensembles, api, path=None):
+    """Retrieves the models associated to a list of ensembles
+
+    """
+    models = []
+    model_ids = []
+    for index in range(0, len(ensembles)):
+        ensemble = ensembles[index]
+        if (isinstance(ensemble, basestring) or
+            bigml.api.get_status(ensemble)['code'] != bigml.api.FINISHED):
+            try:
+                ensemble = check_resource(ensemble, api.get_ensemble)   
+                ensembles[index] = ensemble
+            except ValueError, exception:
+                sys.exit("Failed to get a finished ensemble: %s" %
+                         str(exception))
+        model_ids.extend(ensemble['object']['models'])
+    if path is not None:
+        for model_id in model_ids:
+            log_created_resources("models", path, model_id, open_mode='a')
+    models = model_ids[:]
+    models[0] = check_resource(models[0], api.get_model,
+                               query_string=ALL_FIELDS_QS)
+    return models, model_ids
 
 
 def get_ensemble(ensemble, api=None, verbosity=True, session_file=None):

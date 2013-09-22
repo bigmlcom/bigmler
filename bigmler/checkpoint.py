@@ -140,7 +140,7 @@ def are_ensembles_created(path, number_of_ensembles):
     """Reads the ensembles ids from the ensembles file in the path directory
 
     """
-    ensembles_ids = []
+    ensemble_ids = []
     try:
         with open("%s%sensembles" % (path, os.sep)) as ensembles_file:
             for line in ensembles_file:
