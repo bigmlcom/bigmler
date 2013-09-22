@@ -685,6 +685,14 @@ under the License.""" % version
                         default=defaults.get('seed', None),
                         help="Value used as seed in dataset splits.")
 
+    # Max number of ensembles to create in parallel.
+    parser.add_argument('--max-parallel-ensembles',
+                        action='store',
+                        dest='max_parallel_ensembles',
+                        default=defaults.get('max_parallel_ensembles', 1),
+                        type=int,
+                        help="Max number of ensembles to create in parallel.")
+
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #
