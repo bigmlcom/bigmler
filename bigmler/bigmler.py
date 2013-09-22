@@ -247,7 +247,7 @@ def ensemble_processing(dataset, name, description, objective_field, fields,
     if resume:
         message = u.dated("Ensemble not found. Resuming.\n")
         resume, ensembles = c.checkpoint(
-            c.are_ensemble_created, path, number_of_ensembles,
+            c.are_ensembles_created, path, number_of_ensembles,
             debug=args.debug,
             message=message, log_file=session_file, console=args.verbosity)
     try:
@@ -321,14 +321,15 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
                     resume, ensemble_ids = c.checkpoint(
                         c.are_ensembles_created, path, number_of_ensembles,
                         debug=args.debug)
+                    ensembles = ensemble_ids
                     if not resume:
                         message = u.dated("Found %s ensembles out of %s. Resuming.\n"
-                                          % (len(ensembles_ids),
+                                          % (len(ensemble_ids),
                                              number_of_ensembles))
                         u.log_message(message, log_file=session_file,
-                                      console=args.verbosity)
-
-                    ensembles = ensemble_ids
+                                      console=args.verbosity)                  
+                        # erase models' info that will be rebuilt
+                        u.log_created_resources("models", path, None, open_mode='w')
                 number_of_ensembles = len(labels) - len(ensemble_ids)
                 ensemble_args_list = r.set_label_ensemble_args(
                     name, description, args,

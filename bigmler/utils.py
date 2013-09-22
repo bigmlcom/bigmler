@@ -395,7 +395,8 @@ def log_created_resources(file_name, path, resource_id, open_mode='w'):
         file_name = "%s%s%s" % (path, os.sep, file_name)
         try:
             with open(file_name, open_mode, 0) as resource_file:
-                resource_file.write("%s\n" % resource_id)
+                if resource_id is not None:
+                    resource_file.write("%s\n" % resource_id)
         except IOError, exc:
             print ("Failed to write %s: %s" % (file_name, str(exc)))
 
