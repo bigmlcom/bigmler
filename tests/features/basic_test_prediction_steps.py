@@ -315,7 +315,7 @@ def i_check_create_model(step):
 
 @step(r'I check that the ensemble has been created')
 def i_check_create_ensemble(step):
-    ensemble_file = "%s%sensemble" % (world.directory, os.sep)
+    ensemble_file = "%s%sensembles" % (world.directory, os.sep)
     try:
         ensemble_file = open(ensemble_file, "r")
         ensemble = check_resource(ensemble_file.readline().strip(),

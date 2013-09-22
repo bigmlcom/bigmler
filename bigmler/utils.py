@@ -375,12 +375,17 @@ def plural(text, num):
 
 
 def check_resource_error(resource, message):
-    """Checks if a given resource is faulty and exits
+    """If a given resource is faulty, or some other error has occured, exits.
+       Returns the resource id otherwise.
 
     """
-    if bigml.api.get_status(resource)['code'] == bigml.api.FAULTY:
-        sys.exit("%s: %s" % (message, resource['error']))
-
+    if ('error' in resource and resource['error'] or
+        bigml.api.get_status(resource)['code'] == bigml.api.FAULTY):
+        if ('status' in resource['error'] and
+            'message' in resource['error']['status']):
+            error_message = resource['error']['status']['message']
+        sys.exit("%s%s" % (message, error_message))
+    return bigml.api.get_resource_id(resource)
 
 def log_created_resources(file_name, path, resource_id, open_mode='w'):
     """Logs the created resources ids in the given file
@@ -392,8 +397,7 @@ def log_created_resources(file_name, path, resource_id, open_mode='w'):
             with open(file_name, open_mode, 0) as resource_file:
                 resource_file.write("%s\n" % resource_id)
         except IOError, exc:
-            raise IOError("%s: Failed to write %s" % (str(exc),
-                          file_name))
+            print ("Failed to write %s: %s" % (file_name, str(exc)))
 
 
 def check_resource(*args, **kwargs):
