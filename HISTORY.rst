@@ -10,6 +10,7 @@ History
 - Adding --prediction-headers and --prediction-fields to improve
   --prediction-info formatting options for the predictions file
 - Adding the ability to read --test input data from stdin
+- Adding --seed option to generate different splits from a dataset
 
 0.3.6 (2013-08-21)
 ~~~~~~~~~~~~~~~~~~
