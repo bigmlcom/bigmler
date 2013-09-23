@@ -221,7 +221,7 @@ def set_dataset_split_args(name, description, args, sample_rate,
         "description": description,
         "category": args.category,
         "tags": args.tag,
-        "seed": SEED,
+        "seed": SEED if args.seed is None else args.seed,
         "sample_rate": sample_rate,
         "out_of_bag": out_of_bag
     }

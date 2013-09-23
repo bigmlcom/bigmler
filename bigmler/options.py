@@ -678,6 +678,13 @@ under the License.""" % version
                         default=defaults.get('prediction_fields', None),
                         help="Fields added to the prediction file.")
 
+    # Seed. The value used in dataset's splits as seed
+    parser.add_argument('--seed',
+                        action='store',
+                        dest='seed',
+                        default=defaults.get('seed', None),
+                        help="Value used as seed in dataset splits.")
+
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #

@@ -448,7 +448,14 @@ build the test set and leave the rest for training. For instance::
 will build a source with your entire file contents, create the corresponding
 dataset and split it in two: a test dataset with 20% of instances and a
 training dataset with the remaining 80%. Then, a model will be created based on the
-training set data and evaluated using the test set.
+training set data and evaluated using the test set. By default, split is
+deterministic, so that every time you issue the same command will get the
+same split datasets. If you want to generate
+different splits from a unique dataset you can set the ``--seed`` option to a
+different string in every call.
+
+    bigmler --train data/iris.csv --test-split 0.2 --name iris \
+            --seed my_random_string_382734627364 --evaluate
 
 Fitering Sources
 ----------------
