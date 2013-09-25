@@ -45,7 +45,7 @@ long_description = '\n\n'.join(file_contents)
 
 distutils.core.setup(
     name="bigmler",
-    description="A Higher Level API to BigML.io, the public BigML API",
+    description="A command-line tool for BigML.io, the public BigML API",
     long_description=long_description,
     version=version,
     author="The BigML Team",
