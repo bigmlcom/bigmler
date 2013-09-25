@@ -1,5 +1,5 @@
-BigMLer - A Higher-Level API to BigML's API
-===========================================
+BigMLer - A command-line tool to BigML's API
+============================================
 
 BigMLer makes `BigML <https://bigml.com>`_ even easier.
 
@@ -67,6 +67,7 @@ selected using::
 
     bigmler --train data/iris.csv --test data/test_iris.csv \
             --objective 'sepal length'
+
 If you do not explicitly specify an objective field, BigML will default to the
 last
 column in your dataset. You can also use as selector the field column number
