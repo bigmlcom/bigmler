@@ -1,5 +1,5 @@
-BigMLer - A Higher-Level API to BigML's API
-===========================================
+BigMLer - A command-line tool for BigML's API
+=============================================
 
 BigMLer makes `BigML <https://bigml.com>`_ even easier.
 
@@ -26,7 +26,7 @@ Requirements
 
 Python 2.7 is currently supported by BigMLer.
 
-BigMLer requires `bigml 0.7.4 <https://github.com/bigmlcom/python>`_  or higher.
+BigMLer requires `bigml 0.8.0 <https://github.com/bigmlcom/python>`_  or higher.
 
 BigMLer Installation
 ====================

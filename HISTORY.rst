@@ -3,6 +3,11 @@
 History
 -------
 
+0.4.0 (2013-08-15)
+~~~~~~~~~~~~~~~~~~
+
+- Adding text analysis through the corresponding bindings
+
 0.3.7 (2013-09-17)
 ~~~~~~~~~~~~~~~~~~
 

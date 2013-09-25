@@ -45,7 +45,7 @@ long_description = '\n\n'.join(file_contents)
 
 distutils.core.setup(
     name="bigmler",
-    description="A Higher Level API to BigML.io, the public BigML API",
+    description="A command-line tool for BigML.io, the public BigML API",
     long_description=long_description,
     version=version,
     author="The BigML Team",
@@ -56,7 +56,7 @@ distutils.core.setup(
     setup_requires = [],
     packages = ['bigmler'],
     include_package_data = True,
-    install_requires = ['bigml>=0.7.4,<0.8.0'],
+    install_requires = ['bigml>=0.8.0,<0.9.0'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
