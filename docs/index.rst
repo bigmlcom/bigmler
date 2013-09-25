@@ -1,5 +1,5 @@
-BigMLer - A command-line tool to BigML's API
-============================================
+BigMLer - A command-line tool for BigML's API
+=============================================
 
 BigMLer makes `BigML <https://bigml.com>`_ even easier.
 

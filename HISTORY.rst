@@ -7,7 +7,6 @@ History
 ~~~~~~~~~~~~~~~~~~
 
 - Adding text analysis through the corresponding bindings
-- Bug fixing: resume crashed when checking the number of predictions
 
 0.3.7 (2013-09-17)
 ~~~~~~~~~~~~~~~~~~
