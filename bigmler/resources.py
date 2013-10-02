@@ -587,16 +587,14 @@ def set_evaluation_args(name, description, args, fields=None, fields_map=None):
         evaluation_args.update({"fields_map": map_fields(fields_map, fields)})
     # Two cases to use out_of_bag and sample_rate: standard evaluations where
     # only the training set is provided, and cross_validation
-
-    # [--dataset|--test] [--model|--models|--model-tag] --evaluate
+    # [--dataset|--test] [--model|--models|--model-tag|--ensemble] --evaluate
     if ((args.dataset or args.test_set)
             and (args.model or args.models or args.model_tag or
-                 args.ensemble)):
+                 (args.ensemble and args.number_of_models == 1))):
         return evaluation_args
     # [--train|--dataset] --test-split --evaluate
     if (args.test_split > 0 and (args.training_set or args.dataset)):
         return evaluation_args
-
     if args.sample_rate == 1:
         args.sample_rate = EVALUATE_SAMPLE_RATE
     evaluation_args.update(out_of_bag=True, seed=SEED,
