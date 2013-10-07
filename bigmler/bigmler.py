@@ -277,7 +277,7 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
     # If we have a dataset but not a model, we create the model if the no_model
     # flag hasn't been set up.
     if (dataset and not args.model and not model_ids and not args.no_model
-            and not args.ensemble):
+            and not args.ensemble and not args.ensembles):
 
         model_ids = []
         models = []
@@ -395,11 +395,26 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
         ensemble = r.get_ensemble(args.ensemble, api, args.verbosity,
                                   session_file)
         model_ids = ensemble['object']['models']
-        if log_models:
+        if log_models and args.number_of_models > 1:
             for model_id in model_ids:
                 u.log_created_resources("models", path, model_id,
                                         open_mode='a')
 
+        models = model_ids[:]
+
+    if args.ensembles or args.ensemble_tag:
+        model_ids = []
+        ensemble_ids = []
+        # Parses ensemble/ids if provided.
+        if args.ensemble_tag:
+            ensemble_ids = (ensemble_ids +
+                            u.list_ids(api.list_ensembles,
+                                       "tags__in=%s" % args.ensemble_tag))
+        else:
+            ensemble_ids = u.read_resources(args.ensembles)
+        for ensemble_id in ensemble_ids:
+            ensemble = r.get_ensemble(ensemble_id, api)
+            model_ids.extend(ensemble['object']['models'])
         models = model_ids[:]
 
     # If we are going to predict we must retrieve the models
@@ -550,7 +565,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # models
     if (not description and
             (args.black_box or args.white_box or args.public_dataset)):
-        raise Exception("You should provide a description to publish.")
+        sys.exit("You should provide a description to publish.")
 
     path = u.check_dir(output)
     session_file = "%s%s%s" % (path, os.sep, SESSIONS_LOG)
@@ -638,9 +653,13 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
     # If predicting
     if models and test_set and not args.evaluate:
+        models_per_label = 1
+        if args.multi_label:
+            models_per_label = len(models) / len(all_labels)
         predict(test_set, test_set_header, models, fields, output,
                 objective_field, args, api, log,
-                args.max_batch_models, resume, session_file, labels=labels)
+                args.max_batch_models, resume, session_file, labels=labels,
+                models_per_label=models_per_label)
 
     # When combine_votes flag is used, retrieve the predictions files saved
     # in the comma separated list of directories and combine them
@@ -937,7 +956,7 @@ def main(args=sys.argv[1:]):
     model_ids = []
     # Parses model/ids if provided.
     if command_args.models:
-        model_ids = u.read_models(command_args.models)
+        model_ids = u.read_resources(command_args.models)
         output_args.update(model_ids=model_ids)
 
     dataset_id = None
@@ -1021,7 +1040,7 @@ def main(args=sys.argv[1:]):
                               command_args.delete_list.split(','))
         if command_args.delete_file:
             if not os.path.exists(command_args.delete_file):
-                raise Exception("File %s not found" % command_args.delete_file)
+                sys.exit("File %s not found" % command_args.delete_file)
             delete_list.extend([line for line
                                 in open(command_args.delete_file, "r")])
         if command_args.all_tag:

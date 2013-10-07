@@ -317,7 +317,7 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                         session_file=None, debug=False,
                         prediction_info=NORMAL_FORMAT,
                         labels=None, label_separator=None, ordered=True,
-                        exclude=None, number_of_models=1):
+                        exclude=None, models_per_label=1):
     """Get local predictions form partial Multimodel, combine and save to file
 
     """
@@ -422,25 +422,26 @@ def local_batch_predict(models, test_reader, prediction_file, api,
         input_data = raw_input_data_list[index]
         if method == AGGREGATION:
             predictions = multivote.predictions
-            if ordered and number_of_models == 1:
+            if ordered and models_per_label == 1:
                 # as multi-labelled models are created from end to start votes
                 # must be reversed to match
                 predictions.reverse()
             else:
                 predictions = [prediction for (order, prediction)
                                in sorted(zip(models_order, predictions))]
+            
             if (labels is None or
-                len(labels) * number_of_models != len(predictions)):
+                len(labels) * models_per_label != len(predictions)):
                 sys.exit("Failed to make a multi-label prediction. No"
                          " valid label info is found.")
             prediction_list = []
             confidence_list = []
             # In the following case, we must vote each label using the models
             # in the ensemble and the chosen method
-            if number_of_models > 1:
-                label_predictions = [predictions[i: i + number_of_models] for
+            if models_per_label > 1:
+                label_predictions = [predictions[i: i + models_per_label] for
                                      i in range(0, len(predictions),
-                                                number_of_models)]
+                                                models_per_label)]
                 predictions = []
                 for label_prediction in label_predictions:
                     label_multivote = MultiVote(label_prediction)
@@ -463,7 +464,7 @@ def local_batch_predict(models, test_reader, prediction_file, api,
 def predict(test_set, test_set_header, models, fields, output,
             objective_field, args, api=None, log=None,
             max_models=MAX_MODELS, resume=False, session_file=None,
-            labels=None):
+            labels=None, models_per_label=1):
     """Computes a prediction for each entry in the `test_set`.
 
        Predictions can be computed remotely, locally using MultiModels built
@@ -527,8 +528,9 @@ def predict(test_set, test_set_header, models, fields, output,
             # retrieves the models with no order, so the correspondence with
             # each label must be restored.
             ordered = True
+            models_per_label = 1
             if args.multi_label and (args.model_tag is not None
-                                     or args.number_of_models > 1):
+                                     or models_per_label > 1):
                 ordered = False
             local_batch_predict(models, test_reader, prediction_file, api,
                                 max_models, resume, output_path,
@@ -537,4 +539,4 @@ def predict(test_set, test_set_header, models, fields, output,
                                 session_file, args.debug,
                                 args.prediction_info, labels,
                                 args.label_separator, ordered, exclude,
-                                args.number_of_models)
+                                models_per_label)

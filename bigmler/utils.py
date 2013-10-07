@@ -128,8 +128,8 @@ def read_fields_map(path):
     return map_dict
 
 
-def read_models(path):
-    """Reads model ids from a file.
+def read_resources(path):
+    """Reads resources ids from a file.
 
     For example:
 
@@ -138,10 +138,10 @@ def read_models(path):
     model/5097488b155268377a000059
 
     """
-    models = []
+    resources = []
     for line in fileinput.input([path]):
-        models.append(line.rstrip())
-    return models
+        resources.append(line.rstrip())
+    return resources
 
 
 def read_dataset(path):

@@ -40,7 +40,9 @@ def get_labels_from_fields(fields):
         label_attribute = fields[field_id].get('label', None)
         if (label_attribute is not None and
                 label_attribute.startswith(MULTI_LABEL_LABEL)):
-            labels.append(label_attribute[len(MULTI_LABEL_LABEL):])
+            label = label_attribute[len(MULTI_LABEL_LABEL):]
+            if not label in labels:
+                labels.append(label)
     return labels
 
 
@@ -59,6 +61,7 @@ def retrieve_labels(fields, labels):
         fields_list = fields
         for fields in fields_list:
             fields_labels.extend(get_labels_from_fields(fields))
+            fields_labels = list(set(fields_labels))
     else:
         fields_labels = get_labels_from_fields(fields)
     if labels is not None:
