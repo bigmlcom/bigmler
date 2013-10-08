@@ -146,7 +146,7 @@ def prediction_to_row(prediction, prediction_info=NORMAL_FORMAT):
     tree = prediction.get('prediction_path', prediction)
     row = [prediction['prediction'][prediction_class]]
     if not prediction_info == BRIEF_FORMAT:
-        row.append(tree['confidence'])
+        row.append(prediction.get('confidence', tree.get('confidence', 0)))
         distribution = None
         if ('objective_summary' in tree):
             summary = tree['objective_summary']
