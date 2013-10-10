@@ -502,7 +502,7 @@ with information about a group of people and we want to predict the ``class``
 another person will fall into. As you can see, each record has more
 than one ``class`` per person (for example, the first person is labelled as
 being both a ``Student`` and a ``Teenager``) and they are all stored in the
-``class`` field by concatenating the all the applicable labels using ``,`` as
+``class`` field by concatenating all the applicable labels using ``,`` as
 separator. Each of these labels is, 'per se', an objective to be predicted, and
 that's what we can rely on BigMLer to do.
 

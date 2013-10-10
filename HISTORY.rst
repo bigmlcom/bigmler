@@ -3,6 +3,13 @@
 History
 -------
 
+0.4.1 (2013-10-02)
+~~~~~~~~~~~~~~~~~~
+
+- Bug fixing: in evaluation mode, evaluation for --dataset and
+  --number-of-models > 1 did not select the 20% hold out instances to test the
+  generated ensemble.
+
 0.4.0 (2013-08-15)
 ~~~~~~~~~~~~~~~~~~
 
