@@ -575,6 +575,26 @@ example::
 will limit the predictions to the ``Adult`` and ``Student`` classes, leaving
 out the ``Teenager`` classification.
 
+Multi-labelled predictions can also be computed using ensembles, one for each
+label. To create an ensemble prediction, use the ``--number-of-models`` option
+that will set the number of models in each ensemble::
+
+    bigmler --multi-label --train data/multilabel.csv \
+            --number-of-models 20 --test data/test_multilabel.csv
+
+The ids of the ensembles will be stored in an ``ensembles`` file in the output
+directory, and can be used in other predictions by setting the ``--ensembles``
+option::
+
+    bigmler --multi-label --ensembles multilabel/ensembles \
+            --test data/test_multilabel.csv
+
+or you can retrieve all previously tagged ensembles with ``--ensemble-tag``::
+
+    bigmler --multi-label --ensemble-tag multilabel \
+            --test data/test_multilabel.csv
+
+
 Multi-labelled resources
 ------------------------
 

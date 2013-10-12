@@ -8,6 +8,7 @@ from bigml.api import check_resource
 from bigmler.bigmler import MONTECARLO_FACTOR
 from bigmler.checkpoint import file_number_of_lines
 from ml_test_prediction_steps import i_create_all_ml_resources
+from ml_test_prediction_steps import i_create_all_ml_resources_and_ensembles
 
 
 @step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" and log predictions in "(.*?)" with "(.*?)" as test field separator$')
@@ -329,6 +330,11 @@ def i_check_create_ensemble(step):
 
 @step(r'I check that the models have been created')
 def i_check_create_models(step):
+    i_check_create_models_in_ensembles(step, False)
+
+
+@step(r'I check that the models in the ensembles have been created')
+def i_check_create_models_in_ensembles(step, in_ensemble=True):
     model_file = "%s%smodels" % (world.directory, os.sep)
     number_of_lines = 0
     count = 0
@@ -348,10 +354,17 @@ def i_check_create_models(step):
     for model_id in model_ids:
         try:
             model = check_resource(model_id, world.api.get_model)
-            world.models.append(model_id)
+            if in_ensemble:
+                ensemble_id = "ensemble/%s" % model['object']['ensemble_id']
+                if not ensemble_id in world.ensembles:
+                    world.ensembles.append(ensemble_id) 
+            else:
+                world.models.append(model_id)
+   
             assert True
         except Exception, exc:
             assert False, str(exc)
+
 
 @step(r'I check that the evaluation has been created')
 def i_check_create_evaluation(step):
@@ -527,7 +540,8 @@ def i_have_previous_scenario_or_reproduce_it(step, scenario, kwargs):
                  'scenario5': [(i_create_resources_from_ensemble, True), (i_check_create_models, False)], 
                  'scenario_e1': [(i_create_all_resources_to_evaluate, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_model, False), (i_check_create_evaluation, False)],
                  'scenario_ml_1': [(i_create_all_ml_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models, False)],
-                 'scenario_ml_6': [(i_create_all_ml_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models, False)]}
+                 'scenario_ml_6': [(i_create_all_ml_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models, False)],
+                 'scenario_mle_1': [(i_create_all_ml_resources_and_ensembles, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models_in_ensembles, False)]}
     if os.path.exists("./%s/" % scenario):
         assert True
     else:

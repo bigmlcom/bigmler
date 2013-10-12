@@ -317,11 +317,8 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                         session_file=None, debug=False,
                         prediction_info=NORMAL_FORMAT,
                         labels=None, label_separator=None, ordered=True,
-<<<<<<< HEAD
-                        exclude=None, number_of_models=1):
-=======
                         exclude=None, models_per_label=1):
->>>>>>> ml-ensem
+
     """Get local predictions form partial Multimodel, combine and save to file
 
     """
@@ -435,7 +432,6 @@ def local_batch_predict(models, test_reader, prediction_file, api,
             else:
                 predictions = [prediction for (order, prediction)
                                in sorted(zip(models_order, predictions))]
-            
             if (labels is None or
                     len(labels) * models_per_label != len(predictions)):
                 sys.exit("Failed to make a multi-label prediction. No"
@@ -536,7 +532,7 @@ def predict(test_set, test_set_header, models, fields, output,
             # each label must be restored.
             ordered = True
 
-            models_per_label = 1
+            models_per_label = args.number_of_models
             if args.multi_label and (args.model_tag is not None
                                      or models_per_label > 1):
                 ordered = False
