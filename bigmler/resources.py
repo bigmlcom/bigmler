@@ -487,6 +487,7 @@ def set_label_ensemble_args(name, description, args, labels, all_labels,
         ensemble_args_list.append(ensemble_args)
     return ensemble_args_list
 
+
 def set_ensemble_args(name, description, args, model_fields,
                       objective_field=None, fields=None):
     """Return ensemble arguments dict
@@ -531,8 +532,6 @@ def create_ensembles(dataset, ensemble_ids, ensemble_args, args,
         api = bigml.api.BigML()
     ensembles = ensemble_ids[:]
     model_ids = []
-    models = []
-    existing_ensembles = len(ensembles)
     ensemble_args_list = []
     if isinstance(ensemble_args, list):
         ensemble_args_list = ensemble_args
@@ -554,11 +553,13 @@ def create_ensembles(dataset, ensemble_ids, ensemble_args, args,
             if ensemble_args_list:
                 ensemble_args = ensemble_args_list[i]
             ensemble = api.create_ensemble(dataset, ensemble_args)
-            ensemble_id = check_resource_error(ensemble, "Failed to create ensemble: ")
+            ensemble_id = check_resource_error(ensemble,
+                                               "Failed to create ensemble: ")
             log_message("%s\n" % ensemble_id, log_file=log)
             ensemble_ids.append(ensemble_id)
             ensembles.append(ensemble)
-            log_created_resources("ensembles", path, ensemble_id, open_mode='a')
+            log_created_resources("ensembles", path, ensemble_id,
+                                  open_mode='a')
 
         models, model_ids = retrieve_ensembles_models(ensembles, api, path)
         if number_of_ensembles < 2 and args.verbosity:
@@ -579,9 +580,9 @@ def retrieve_ensembles_models(ensembles, api, path=None):
     for index in range(0, len(ensembles)):
         ensemble = ensembles[index]
         if (isinstance(ensemble, basestring) or
-            bigml.api.get_status(ensemble)['code'] != bigml.api.FINISHED):
+                bigml.api.get_status(ensemble)['code'] != bigml.api.FINISHED):
             try:
-                ensemble = check_resource(ensemble, api.get_ensemble)   
+                ensemble = check_resource(ensemble, api.get_ensemble)
                 ensembles[index] = ensemble
             except ValueError, exception:
                 sys.exit("Failed to get a finished ensemble: %s" %

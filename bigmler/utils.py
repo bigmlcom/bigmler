@@ -380,12 +380,13 @@ def check_resource_error(resource, message):
 
     """
     if ('error' in resource and resource['error'] or
-        bigml.api.get_status(resource)['code'] == bigml.api.FAULTY):
+            bigml.api.get_status(resource)['code'] == bigml.api.FAULTY):
         if ('status' in resource['error'] and
-            'message' in resource['error']['status']):
+                'message' in resource['error']['status']):
             error_message = resource['error']['status']['message']
         sys.exit("%s%s" % (message, error_message))
     return bigml.api.get_resource_id(resource)
+
 
 def log_created_resources(file_name, path, resource_id, open_mode='w'):
     """Logs the created resources ids in the given file

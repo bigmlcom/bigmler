@@ -295,7 +295,8 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
                         c.are_models_created, path, args.number_of_models,
                         debug=args.debug)
                     if not resume:
-                        message = u.dated("Found %s models out of %s. Resuming.\n"
+                        message = u.dated("Found %s models out of %s."
+                                          " Resuming.\n"
                                           % (len(model_ids),
                                              args.number_of_models))
                         u.log_message(message, log_file=session_file,
@@ -323,13 +324,15 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
                         debug=args.debug)
                     ensembles = ensemble_ids
                     if not resume:
-                        message = u.dated("Found %s ensembles out of %s. Resuming.\n"
+                        message = u.dated("Found %s ensembles out of %s."
+                                          " Resuming.\n"
                                           % (len(ensemble_ids),
                                              number_of_ensembles))
                         u.log_message(message, log_file=session_file,
-                                      console=args.verbosity)                  
+                                      console=args.verbosity)
                         # erase models' info that will be rebuilt
-                        u.log_created_resources("models", path, None, open_mode='w')
+                        u.log_created_resources("models", path, None,
+                                                open_mode='w')
                 number_of_ensembles = len(labels) - len(ensemble_ids)
                 ensemble_args_list = r.set_label_ensemble_args(
                     name, description, args,
@@ -338,19 +341,21 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
 
                 # create ensembles changing the input_field to select
                 # only one label at a time
-                ensembles, ensemble_ids, models, model_ids = r.create_ensembles(
-                    dataset, ensemble_ids, ensemble_args_list, args,
-                    number_of_ensembles, api,
-                    path, session_file, log)
+                (ensembles, ensemble_ids,
+                 models, model_ids) = r.create_ensembles(
+                     dataset, ensemble_ids, ensemble_args_list, args,
+                     number_of_ensembles, api,
+                     path, session_file, log)
 
         elif args.number_of_models > 1:
             ensembles = []
             ensemble_ids = []
             # Ensemble of models
-            ensembles, ensemble_ids, models, model_ids, resume = ensemble_processing(
-                dataset, name, description, objective_field, fields,
-                model_fields, api, args, resume,
-                session_file=session_file, path=path, log=log)
+            (ensembles, ensemble_ids,
+             models, model_ids, resume) = ensemble_processing(
+                 dataset, name, description, objective_field, fields,
+                 model_fields, api, args, resume,
+                 session_file=session_file, path=path, log=log)
             ensemble = ensembles[0]
             args.ensemble = bigml.api.get_ensemble_id(ensemble)
             log_models = True
@@ -592,8 +597,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if args.multi_label and training_set is not None:
         (training_set, labels,
          field_attributes, objective_field) = multi_label_expansion(
-            training_set, training_set_header, objective_field, args, path,
-            field_attributes, labels, session_file=session_file)
+             training_set, training_set_header, objective_field, args, path,
+             field_attributes, labels, session_file=session_file)
         training_set_header = True
     all_labels = labels
 

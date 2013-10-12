@@ -46,7 +46,7 @@ AGGREGATION = -1
 
 
 def use_prediction_headers(prediction_headers, output, test_reader,
-                             fields, args, objective_field):
+                           fields, args, objective_field):
     """Uses header information from the test file in the prediction output
 
        If --prediction-header is set, adds a headers row to the prediction
@@ -448,8 +448,10 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                 predictions = []
                 for label_prediction in label_predictions:
                     label_multivote = MultiVote(label_prediction)
-                    prediction, confidence = label_multivote.combine(method, True)
-                    predictions.append({'prediction': prediction, 'confidence': confidence})
+                    prediction, confidence = label_multivote.combine(
+                        method, True)
+                    predictions.append({'prediction': prediction,
+                                        'confidence': confidence})
             for vote_index in range(0, len(predictions)):
                 if ast.literal_eval(predictions[vote_index]['prediction']):
                     prediction_list.append(labels[vote_index])
