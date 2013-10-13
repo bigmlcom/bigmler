@@ -685,6 +685,23 @@ under the License.""" % version
                         default=defaults.get('seed', None),
                         help="Value used as seed in dataset splits.")
 
+    # Max number of ensembles to create in parallel.
+    parser.add_argument('--max-parallel-ensembles',
+                        action='store',
+                        dest='max_parallel_ensembles',
+                        default=defaults.get('max_parallel_ensembles', 1),
+                        type=int,
+                        help="Max number of ensembles to create in parallel.")
+
+    # The path to a file containing ensemble ids.
+    parser.add_argument('--ensembles',
+                        action='store',
+                        dest='ensembles',
+                        default=defaults.get('ensembles', None),
+                        help=("Path to a file containing ensemble/ids. One "
+                              "ensemble per line (e.g., "
+                              "ensemble/50a206a8035d0706dc000376)."))
+
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #

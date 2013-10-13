@@ -116,8 +116,8 @@ def create_source(data_set, source_args,
                 source_file.write("%s\n" % source['resource'])
                 source_file.write("%s\n" % source['object']['name'])
         except IOError, exc:
-            raise IOError("%s: Failed to write %s/source" % (str(exc), path))
-    check_resource_error(source, "Failed to create source: ")
+            sys.exit("%s: Failed to write %s/source" % (str(exc), path))
+    source_id = check_resource_error(source, "Failed to create source: ")
     try:
         source = check_resource(source, api.get_source,
                                 query_string=ALL_FIELDS_QS)
@@ -125,7 +125,7 @@ def create_source(data_set, source_args,
         sys.exit("Failed to get a finished source: %s" % str(exception))
     message = dated("Source created: %s\n" % get_url(source))
     log_message(message, log_file=session_file, console=args.verbosity)
-    log_message("%s\n" % source['resource'], log_file=log)
+    log_message("%s\n" % source_id, log_file=log)
 
     return source
 
@@ -240,7 +240,7 @@ def create_dataset(source_or_dataset, dataset_args, args, api=None, path=None,
     suffix = "_" + dataset_type if dataset_type else ""
     log_created_resources("dataset%s" % suffix, path,
                           bigml.api.get_dataset_id(dataset))
-    check_resource_error(dataset, "Failed to create dataset: ")
+    dataset_id = check_resource_error(dataset, "Failed to create dataset: ")
     try:
         dataset = check_resource(dataset, api.get_dataset,
                                  query_string=ALL_FIELDS_QS)
@@ -248,7 +248,7 @@ def create_dataset(source_or_dataset, dataset_args, args, api=None, path=None,
         sys.exit("Failed to get a finished dataset: %s" % str(exception))
     message = dated("Dataset created: %s\n" % get_url(dataset))
     log_message(message, log_file=session_file, console=args.verbosity)
-    log_message("%s\n" % dataset['resource'], log_file=log)
+    log_message("%s\n" % dataset_id, log_file=log)
     return dataset
 
 
@@ -397,15 +397,13 @@ def create_models(dataset, model_ids, model_args,
             if args.cross_validation_rate > 0:
                 new_seed = get_basic_seed(i + existing_models)
                 model_args.update(seed=new_seed)
-
             model = api.create_model(dataset, model_args)
-            log_message("%s\n" % model['resource'], log_file=log)
-            model_ids.append(model['resource'])
+            model_id = check_resource_error(model, "Failed to create model: ")
+            log_message("%s\n" % model_id, log_file=log)
+            model_ids.append(model_id)
             models.append(model)
-            log_created_resources("models", path,
-                                  bigml.api.get_model_id(model), open_mode='a')
-            check_resource_error(model, "Failed to create model %s:" %
-                                 model['resource'])
+            log_created_resources("models", path, model_id, open_mode='a')
+
         if args.number_of_models < 2 and args.verbosity:
             if bigml.api.get_status(model)['code'] != bigml.api.FINISHED:
                 try:
@@ -466,6 +464,30 @@ def get_models(model_ids, args, api=None, session_file=None):
     return models, model_ids
 
 
+def set_label_ensemble_args(name, description, args, labels, all_labels,
+                            number_of_ensembles, fields, model_fields,
+                            objective_field):
+    """Set of args needed to build an ensemble per label
+
+    """
+    if model_fields is None:
+        model_fields = []
+    if objective_field is None:
+        objective_id = fields.field_id(fields.objective_field)
+        objective_field = fields.fields[objective_id]['name']
+    ensemble_args_list = []
+
+    for index in range(number_of_ensembles - 1, -1, -1):
+        label = labels[index]
+        (new_name, label_field, single_label_fields) = label_model_args(
+            name, label, all_labels, model_fields, objective_field)
+        ensemble_args = set_ensemble_args(new_name, description, args,
+                                          single_label_fields,
+                                          label_field, fields)
+        ensemble_args_list.append(ensemble_args)
+    return ensemble_args_list
+
+
 def set_ensemble_args(name, description, args, model_fields,
                       objective_field=None, fields=None):
     """Return ensemble arguments dict
@@ -500,23 +522,79 @@ def set_ensemble_args(name, description, args, model_fields,
     return ensemble_args
 
 
-def create_ensemble(dataset, ensemble_args, args, api=None, path=None,
-                    session_file=None, log=None):
-    """Create ensemble from input data
+def create_ensembles(dataset, ensemble_ids, ensemble_args, args,
+                     number_of_ensembles=1,
+                     api=None, path=None, session_file=None, log=None):
+    """Create ensembles from input data
 
     """
     if api is None:
         api = bigml.api.BigML()
-    message = dated("Creating ensemble.\n")
-    log_message(message, log_file=session_file,
-                console=args.verbosity)
-    ensemble = api.create_ensemble(dataset, ensemble_args)
-    log_created_resources("ensemble", path,
-                          bigml.api.get_ensemble_id(ensemble))
-    check_resource_error(ensemble, "Failed to create ensemble: ")
-    log_message("%s\n" % ensemble['resource'], log_file=log)
+    ensembles = ensemble_ids[:]
+    model_ids = []
+    ensemble_args_list = []
+    if isinstance(ensemble_args, list):
+        ensemble_args_list = ensemble_args
+    if number_of_ensembles > 0:
+        message = dated("Creating %s.\n" %
+                        plural("ensemble", number_of_ensembles))
+        log_message(message, log_file=session_file,
+                    console=args.verbosity)
+        query_string = ALL_FIELDS_QS
+        for i in range(0, number_of_ensembles):
+            if i % args.max_parallel_ensembles == 0 and i > 0:
+                try:
+                    ensembles[i - 1] = check_resource(
+                        ensembles[i - 1], api.get_ensemble,
+                        query_string=query_string)
+                except ValueError, exception:
+                    sys.exit("Failed to get a finished ensemble: %s" %
+                             str(exception))
+            if ensemble_args_list:
+                ensemble_args = ensemble_args_list[i]
+            ensemble = api.create_ensemble(dataset, ensemble_args)
+            ensemble_id = check_resource_error(ensemble,
+                                               "Failed to create ensemble: ")
+            log_message("%s\n" % ensemble_id, log_file=log)
+            ensemble_ids.append(ensemble_id)
+            ensembles.append(ensemble)
+            log_created_resources("ensembles", path, ensemble_id,
+                                  open_mode='a')
 
-    return ensemble
+        models, model_ids = retrieve_ensembles_models(ensembles, api, path)
+        if number_of_ensembles < 2 and args.verbosity:
+            message = dated("Ensemble created: %s.\n" %
+                            get_url(ensemble))
+            log_message(message, log_file=session_file,
+                        console=args.verbosity)
+
+    return ensembles, ensemble_ids, models, model_ids
+
+
+def retrieve_ensembles_models(ensembles, api, path=None):
+    """Retrieves the models associated to a list of ensembles
+
+    """
+    models = []
+    model_ids = []
+    for index in range(0, len(ensembles)):
+        ensemble = ensembles[index]
+        if (isinstance(ensemble, basestring) or
+                bigml.api.get_status(ensemble)['code'] != bigml.api.FINISHED):
+            try:
+                ensemble = check_resource(ensemble, api.get_ensemble)
+                ensembles[index] = ensemble
+            except ValueError, exception:
+                sys.exit("Failed to get a finished ensemble: %s" %
+                         str(exception))
+        model_ids.extend(ensemble['object']['models'])
+    if path is not None:
+        for model_id in model_ids:
+            log_created_resources("models", path, model_id, open_mode='a')
+    models = model_ids[:]
+    models[0] = check_resource(models[0], api.get_model,
+                               query_string=ALL_FIELDS_QS)
+    return models, model_ids
 
 
 def get_ensemble(ensemble, api=None, verbosity=True, session_file=None):
@@ -587,16 +665,14 @@ def set_evaluation_args(name, description, args, fields=None, fields_map=None):
         evaluation_args.update({"fields_map": map_fields(fields_map, fields)})
     # Two cases to use out_of_bag and sample_rate: standard evaluations where
     # only the training set is provided, and cross_validation
-
-    # [--dataset|--test] [--model|--models|--model-tag] --evaluate
+    # [--dataset|--test] [--model|--models|--model-tag|--ensemble] --evaluate
     if ((args.dataset or args.test_set)
             and (args.model or args.models or args.model_tag or
-                 args.ensemble)):
+                 (args.ensemble and args.number_of_models == 1))):
         return evaluation_args
     # [--train|--dataset] --test-split --evaluate
     if (args.test_split > 0 and (args.training_set or args.dataset)):
         return evaluation_args
-
     if args.sample_rate == 1:
         args.sample_rate = EVALUATE_SAMPLE_RATE
     evaluation_args.update(out_of_bag=True, seed=SEED,
@@ -630,9 +706,11 @@ def create_evaluation(model_or_ensemble, dataset, evaluation_args, args,
                 console=args.verbosity)
     evaluation = api.create_evaluation(model_or_ensemble, dataset,
                                        evaluation_args)
+    evaluation_id = check_resource_error(evaluation,
+                                         "Failed to create evaluation: ")
     log_created_resources("evaluation", path,
-                          bigml.api.get_evaluation_id(evaluation))
-    check_resource_error(evaluation, "Failed to create evaluation: ")
+                          evaluation_id)
+
     log_message("%s\n" % evaluation['resource'], log_file=log)
 
     return evaluation
@@ -674,10 +752,10 @@ def create_evaluations(model_ids, dataset, evaluation_args, args, api=None,
             new_seed = get_basic_seed(i + existing_evaluations)
             evaluation_args.update(seed=new_seed)
         evaluation = api.create_evaluation(model, dataset, evaluation_args)
-        log_created_resources("evaluations", path,
-                              bigml.api.get_evaluation_id(evaluation),
+        evaluation_id = check_resource_error(evaluation,
+                                             "Failed to create evaluation: ")
+        log_created_resources("evaluations", path, evaluation_id,
                               open_mode='a')
-        check_resource_error(evaluation, "Failed to create evaluation: ")
         evaluations.append(evaluation)
         log_message("%s\n" % evaluation['resource'], log_file=log)
 

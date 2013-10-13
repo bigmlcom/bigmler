@@ -128,8 +128,8 @@ def read_fields_map(path):
     return map_dict
 
 
-def read_models(path):
-    """Reads model ids from a file.
+def read_resources(path):
+    """Reads resources ids from a file.
 
     For example:
 
@@ -138,10 +138,10 @@ def read_models(path):
     model/5097488b155268377a000059
 
     """
-    models = []
+    resources = []
     for line in fileinput.input([path]):
-        models.append(line.rstrip())
-    return models
+        resources.append(line.rstrip())
+    return resources
 
 
 def read_dataset(path):
@@ -375,11 +375,17 @@ def plural(text, num):
 
 
 def check_resource_error(resource, message):
-    """Checks if a given resource is faulty and exits
+    """If a given resource is faulty, or some other error has occured, exits.
+       Returns the resource id otherwise.
 
     """
-    if bigml.api.get_status(resource)['code'] == bigml.api.FAULTY:
-        sys.exit("%s: %s" % (message, resource['error']))
+    if ('error' in resource and resource['error'] or
+            bigml.api.get_status(resource)['code'] == bigml.api.FAULTY):
+        if ('status' in resource['error'] and
+                'message' in resource['error']['status']):
+            error_message = resource['error']['status']['message']
+        sys.exit("%s%s" % (message, error_message))
+    return bigml.api.get_resource_id(resource)
 
 
 def log_created_resources(file_name, path, resource_id, open_mode='w'):
@@ -390,10 +396,10 @@ def log_created_resources(file_name, path, resource_id, open_mode='w'):
         file_name = "%s%s%s" % (path, os.sep, file_name)
         try:
             with open(file_name, open_mode, 0) as resource_file:
-                resource_file.write("%s\n" % resource_id)
+                if resource_id is not None:
+                    resource_file.write("%s\n" % resource_id)
         except IOError, exc:
-            raise IOError("%s: Failed to write %s" % (str(exc),
-                          file_name))
+            print ("Failed to write %s: %s" % (file_name, str(exc)))
 
 
 def check_resource(*args, **kwargs):
