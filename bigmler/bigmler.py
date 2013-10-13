@@ -265,6 +265,84 @@ def ensemble_processing(dataset, name, description, objective_field, fields,
     return ensembles, ensemble_ids, models, model_ids, resume
 
 
+def model_per_label(labels, all_labels, dataset, fields, model_fields,
+                    objective_field, name, description, api, args, resume,
+                    session_file=None, path=None, log=None):
+    """Creates a model per label for multi-label datasets
+        
+    """
+    model_ids = []
+    models = []
+    args.number_of_models = len(labels)
+    if resume:
+        resume, model_ids = c.checkpoint(
+            c.are_models_created, path, args.number_of_models,
+            debug=args.debug)
+        if not resume:
+            message = u.dated("Found %s models out of %s."
+                              " Resuming.\n"
+                              % (len(model_ids),
+                                 args.number_of_models))
+            u.log_message(message, log_file=session_file,
+                          console=args.verbosity)
+
+        models = model_ids
+    args.number_of_models = len(labels) - len(model_ids)
+    model_args_list = r.set_label_model_args(
+        name, description, args,
+        labels, all_labels, fields, model_fields, objective_field)
+
+    # create models changing the input_field to select
+    # only one label at a time
+    models, model_ids = r.create_models(
+        dataset, models, model_args_list, args, api,
+        path, session_file, log)
+    args.number_of_models = 1
+    return models, model_ids, resume
+
+def ensemble_per_label(labels, all_labels, dataset, fields, model_fields,
+                       objective_field, name, description, api, args, resume,
+                       session_file=None, path=None, log=None):
+    """Creates an ensemble per label for multi-label datasets
+        
+    """
+
+    ensemble_ids = []
+    ensembles = []
+    model_ids = []
+    models = []
+    number_of_ensembles = len(labels)
+    if resume:
+        resume, ensemble_ids = c.checkpoint(
+            c.are_ensembles_created, path, number_of_ensembles,
+            debug=args.debug)
+        ensembles = ensemble_ids
+        if not resume:
+            message = u.dated("Found %s ensembles out of %s."
+                              " Resuming.\n"
+                              % (len(ensemble_ids),
+                                 number_of_ensembles))
+            u.log_message(message, log_file=session_file,
+                          console=args.verbosity)
+            # erase models' info that will be rebuilt
+            u.log_created_resources("models", path, None,
+                                    open_mode='w')
+    number_of_ensembles = len(labels) - len(ensemble_ids)
+    ensemble_args_list = r.set_label_ensemble_args(
+        name, description, args,
+        labels, all_labels, number_of_ensembles,
+        fields, model_fields, objective_field)
+
+    # create ensembles changing the input_field to select
+    # only one label at a time
+    (ensembles, ensemble_ids,
+     models, model_ids) = r.create_ensembles(
+         dataset, ensemble_ids, ensemble_args_list, args,
+         number_of_ensembles, api,
+         path, session_file, log)
+    return ensembles, ensemble_ids, models, model_ids, resume
+
+
 def models_processing(dataset, models, model_ids, name, description, test_set,
                       objective_field, fields, model_fields, api, args, resume,
                       session_file=None, path=None, log=None, labels=None,
@@ -289,63 +367,16 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
             # label. Otherwise, create one ensemble per label with the required
             # number of models
             if args.number_of_models < 2:
-                args.number_of_models = len(labels)
-                if resume:
-                    resume, model_ids = c.checkpoint(
-                        c.are_models_created, path, args.number_of_models,
-                        debug=args.debug)
-                    if not resume:
-                        message = u.dated("Found %s models out of %s."
-                                          " Resuming.\n"
-                                          % (len(model_ids),
-                                             args.number_of_models))
-                        u.log_message(message, log_file=session_file,
-                                      console=args.verbosity)
-
-                    models = model_ids
-                args.number_of_models = len(labels) - len(model_ids)
-                model_args_list = r.set_label_model_args(
-                    name, description, args,
-                    labels, all_labels, fields, model_fields, objective_field)
-
-                # create models changing the input_field to select
-                # only one label at a time
-                models, model_ids = r.create_models(
-                    dataset, models, model_args_list, args, api,
-                    path, session_file, log)
-                args.number_of_models = 1
+                models, model_ids, resume = model_per_label(
+                    labels, all_labels, dataset, fields, model_fields,
+                    objective_field, name, description, api, args, resume,
+                    session_file, path, log)
             else:
-                ensemble_ids = []
-                ensembles = []
-                number_of_ensembles = len(labels)
-                if resume:
-                    resume, ensemble_ids = c.checkpoint(
-                        c.are_ensembles_created, path, number_of_ensembles,
-                        debug=args.debug)
-                    ensembles = ensemble_ids
-                    if not resume:
-                        message = u.dated("Found %s ensembles out of %s."
-                                          " Resuming.\n"
-                                          % (len(ensemble_ids),
-                                             number_of_ensembles))
-                        u.log_message(message, log_file=session_file,
-                                      console=args.verbosity)
-                        # erase models' info that will be rebuilt
-                        u.log_created_resources("models", path, None,
-                                                open_mode='w')
-                number_of_ensembles = len(labels) - len(ensemble_ids)
-                ensemble_args_list = r.set_label_ensemble_args(
-                    name, description, args,
-                    labels, all_labels, number_of_ensembles,
-                    fields, model_fields, objective_field)
-
-                # create ensembles changing the input_field to select
-                # only one label at a time
                 (ensembles, ensemble_ids,
-                 models, model_ids) = r.create_ensembles(
-                     dataset, ensemble_ids, ensemble_args_list, args,
-                     number_of_ensembles, api,
-                     path, session_file, log)
+                 models, model_ids, resume) = ensemble_per_label(
+                     labels, all_labels, dataset, fields, model_fields,
+                     objective_field, name, description, api, args, resume,
+                     session_file, path, log)
 
         elif args.number_of_models > 1:
             ensembles = []
@@ -419,6 +450,8 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
             ensemble_ids = u.read_resources(args.ensembles)
         for ensemble_id in ensemble_ids:
             ensemble = r.get_ensemble(ensemble_id, api)
+            if args.ensemble is None:
+                args.ensemble = ensemble_id
             model_ids.extend(ensemble['object']['models'])
         models = model_ids[:]
 

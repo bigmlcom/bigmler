@@ -482,7 +482,7 @@ where ``filter.lisp`` is a file containing a expression like this::
 For more details, see the BigML's API documentation on
 `filtering rows <https://bigml.com/developers/datasets#d_filteringrows>`_.
 
-Multi-labelled categories in training data 
+Multi-labeled categories in training data 
 ------------------------------------------
 
 Sometimes the information you want to predict is not a single category but a
@@ -500,7 +500,7 @@ Let's say you have a simple file::
 
 with information about a group of people and we want to predict the ``class``
 another person will fall into. As you can see, each record has more
-than one ``class`` per person (for example, the first person is labelled as
+than one ``class`` per person (for example, the first person is labeled as
 being both a ``Student`` and a ``Teenager``) and they are all stored in the
 ``class`` field by concatenating all the applicable labels using ``,`` as
 separator. Each of these labels is, 'per se', an objective to be predicted, and
@@ -528,11 +528,11 @@ input features and one of the label fields as objective. Thus, each
 of the classes that label the training set can be predicted independently using
 one of the models.
 
-But, naturally, when predicting a multi-labelled field you expect to obtain
+But, naturally, when predicting a multi-labeled field you expect to obtain
 all the labels that qualify the input features at once, as you provide them in
 the training data records. That's also what BigMLer does. The syntax to
 predict using
-multi-labelled training data sets is similar to the single labelled case::
+multi-labeled training data sets is similar to the single labeled case::
 
     bigmler --multi-label --train data/tiny_multilabel.csv \
             --test data/tiny_test_multilabel.csv
@@ -575,7 +575,7 @@ example::
 will limit the predictions to the ``Adult`` and ``Student`` classes, leaving
 out the ``Teenager`` classification.
 
-Multi-labelled predictions can also be computed using ensembles, one for each
+Multi-labeled predictions can also be computed using ensembles, one for each
 label. To create an ensemble prediction, use the ``--number-of-models`` option
 that will set the number of models in each ensemble::
 
@@ -595,20 +595,20 @@ or you can retrieve all previously tagged ensembles with ``--ensemble-tag``::
             --test data/test_multilabel.csv
 
 
-Multi-labelled resources
+Multi-labeled resources
 ------------------------
 
-The resources generated from a multi-labelled training data file can also be
-recovered and used to generate more multi-labelled predictions. As in the
-single-labelled case::
+The resources generated from a multi-labeled training data file can also be
+recovered and used to generate more multi-labeled predictions. As in the
+single-labeled case::
 
     bigmler --multi-label --source source/522521bf37203f412f000100 \
             --test data/test_multilabel.csv
 
 would generate a dataset and the corresponding set of models needed to create
-a ``predictions.csv`` file that contains the multi-labelled predictions.
+a ``predictions.csv`` file that contains the multi-labeled predictions.
 
-Similarly, starting from a previously created multi-labelled dataset::
+Similarly, starting from a previously created multi-labeled dataset::
 
     bigmler --multi-label --dataset source/522521bf37203f412fac0135 \
             --test data/test_multilabel.csv --output multilabel/predictions.csv
@@ -625,7 +625,7 @@ to predict to a subset of the complete list available in the original objective
 field. The ``--labels`` option can be set to a comma-separated list of the
 selected labels in order to do so.
 
-Finally, the ``--model-tag`` can be used as well to retrieve multi-labelled
+Finally, the ``--model-tag`` can be used as well to retrieve multi-labeled
 models and predict with them::
     
     bigmler --multi-label --model-tag my_multilabel \
@@ -1004,7 +1004,7 @@ Multi-labels
 --training-separator SEPARATOR      Character used as field separator in train
                                     data field
 --label-separator SEPARATOR         Character used as label separator in the
-                                    multi-labelled objective field
+                                    multi-labeled objective field
 
 Public Resources
 ----------------

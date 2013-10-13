@@ -62,7 +62,7 @@ def cleanup_resources(feature):
     for id in world.sources:
         world.api.delete_source(id)
     world.sources = []
-    
+
     for id in world.datasets:
         world.api.delete_dataset(id)
     world.datasets = []
