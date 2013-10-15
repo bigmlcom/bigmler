@@ -3,6 +3,12 @@
 History
 -------
 
+0.4.2 (2013-10-08)
+~~~~~~~~~~~~~~~~~~
+
+- Adapting to predictions issued by the high performance prediction server and
+  the 0.8.1 version of the python bindings.
+
 0.4.1 (2013-10-02)
 ~~~~~~~~~~~~~~~~~~
 
