@@ -39,7 +39,13 @@ from bigml.util import console_log
 PAGE_LENGTH = 200
 ATTRIBUTE_NAMES = ['name', 'label', 'description']
 NEW_DIRS_LOG = ".bigmler_dirs"
-RESOURCE_URL = "https://bigml.com/dashboard/"
+
+# Base Domain
+BIGML_DOMAIN = os.environ.get('BIGML_DOMAIN', 'bigml.io')
+BIGML_DASHBOARD_URL = os.environ.get('BIGML_DASHBOARD_URL')  
+RESOURCE_URL = ("https://%s/dashboard/" % (BIGML_DOMAIN[:-3] + '.com')
+                if BIGML_DASHBOARD_URL is None
+                else BIGML_DASHBOARD_URL)
 
 
 def read_description(path):
