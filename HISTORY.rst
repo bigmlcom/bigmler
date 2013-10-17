@@ -3,11 +3,13 @@
 History
 -------
 
-0.4.2 (2013-10-08)
+0.5.0 (2013-10-08)
 ~~~~~~~~~~~~~~~~~~
 
 - Adapting to predictions issued by the high performance prediction server and
-  the 0.8.1 version of the python bindings.
+  the 0.9.0 version of the python bindings.
+- Support for shared models using the same version on python bindings. 
+- Support for different server names using environment variables.
 
 0.4.1 (2013-10-02)
 ~~~~~~~~~~~~~~~~~~
