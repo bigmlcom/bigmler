@@ -680,66 +680,56 @@ def set_evaluation_args(name, description, args, fields=None, fields_map=None):
     return evaluation_args
 
 
-def create_evaluation(model_or_ensemble, dataset, evaluation_args, args,
-                      api=None,
-                      path=None, session_file=None, log=None, seed=SEED):
-    """Create evaluation
-
-       ``model_or_ensemble``: resource object or id for the model or ensemble
-                              that should be evaluated
-       ``dataset``: dataset object or id to evaluate with
-       ``evaluation_args``: arguments for the ``create_evaluation`` call
-       ``args``: input values for bigmler flags
-       ``api``: api to remote objects in BigML
-       ``path``: directory to store the BigMLer generated files in
-       ``session_file``: file to store the messages of that session
-       ``log``: user provided log file
-       ``seed``: seed for the dataset sampling (when needed)
+def set_label_evaluation_args(name, description, args, labels, all_labels,
+                              number_of_evaluations, fields, fields_map,
+                              objective_field):
+    """Set of args needed to build an evaluation per label
 
     """
-    if api is None:
-        api = bigml.api.BigML()
-    if args.cross_validation_rate > 0:
-        evaluation_args.update(seed=seed)
-    message = dated("Creating evaluation.\n")
-    log_message(message, log_file=session_file,
-                console=args.verbosity)
-    evaluation = api.create_evaluation(model_or_ensemble, dataset,
-                                       evaluation_args)
-    evaluation_id = check_resource_error(evaluation,
-                                         "Failed to create evaluation: ")
-    log_created_resources("evaluation", path,
-                          evaluation_id)
+    if objective_field is None:
+        objective_id = fields.field_id(fields.objective_field)
+        objective_field = fields.fields[objective_id]['name']
+    evaluation_args_list = []
 
-    log_message("%s\n" % evaluation['resource'], log_file=log)
-
-    return evaluation
+    for index in range(number_of_evaluations - 1, -1, -1):
+        label = labels[index]
+        (new_name, label_field, single_label_fields) = label_model_args(
+            name, label, all_labels, [], objective_field)
+        evaluation_args = set_evaluation_args(new_name, description, args,
+                                              fields, fields_map)
+        evaluation_args_list.append(evaluation_args)
+    return evaluation_args_list
 
 
-def create_evaluations(model_ids, dataset, evaluation_args, args, api=None,
+def create_evaluations(model_ids, datasets, evaluation_args, args, api=None,
                        path=None, session_file=None, log=None,
                        existing_evaluations=0):
     """Create evaluations for a list of models
 
        ``model_ids``: list of model ids to create an evaluation of
-       ``dataset``: dataset object or id to evaluate with
+       ``datasets``: dataset objects or ids to evaluate with
        ``evaluation_args``: arguments for the ``create_evaluation`` call
        ``args``: input values for bigmler flags
        ``api``: api to remote objects in BigML
        ``path``: directory to store the BigMLer generated files in
        ``session_file``: file to store the messages of that session
        ``log``: user provided log file
-       ``seed``: seed for the dataset sampling (when needed)
+       ``existing_evaluations``: evaluations found when attempting resume
     """
     evaluations = []
+    dataset = datasets[0]
+    evaluation_args_list = []
+    if isinstance(evaluation_args, list):
+        evaluation_args_list = evaluation_args
     if api is None:
         api = bigml.api.BigML()
-    number_of_evaluations = len(model_ids)
+    remaining_ids = model_ids[existing_evaluations:]
+    number_of_evaluations = len(remaining_ids)
     message = dated("Creating evaluations.\n")
     log_message(message, log_file=session_file,
                 console=args.verbosity)
     for i in range(0, number_of_evaluations):
-        model = model_ids[i]
+        model = remaining_ids[i]
 
         if i % args.max_parallel_evaluations == 0 and i > 0:
             try:
@@ -748,6 +738,8 @@ def create_evaluations(model_ids, dataset, evaluation_args, args, api=None,
             except ValueError, exception:
                 sys.exit("Failed to get a finished evaluation: %s" %
                          str(exception))
+        if evaluation_args_list != []:
+            evaluation_args = evaluation_args_list[i]
         if args.cross_validation_rate > 0:
             new_seed = get_basic_seed(i + existing_evaluations)
             evaluation_args.update(seed=new_seed)

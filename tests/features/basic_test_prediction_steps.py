@@ -368,7 +368,7 @@ def i_check_create_models_in_ensembles(step, in_ensemble=True):
 
 @step(r'I check that the evaluation has been created')
 def i_check_create_evaluation(step):
-    evaluation_file = "%s%sevaluation" % (world.directory, os.sep)
+    evaluation_file = "%s%sevaluations" % (world.directory, os.sep)
     try:
         evaluation_file = open(evaluation_file, "r")
         evaluation = check_resource(evaluation_file.readline().strip(),
