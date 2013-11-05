@@ -39,6 +39,7 @@ def evaluate(models_or_ensembles, datasets, name, description, fields,
     """Evaluates a model or an ensemble with the given dataset
 
     """
+    evaluation_files = []
     evaluations, resume = evaluations_process(
         models_or_ensembles, datasets, name, description, fields,
         fields_map, api, args, resume,
@@ -55,8 +56,11 @@ def evaluate(models_or_ensembles, datasets, name, description, fields,
         if args.multi_label:
             suffix = file_labels[index]
             file_name += "_%s" % suffix
-                
+            evaluation_files.append("%s.json" % file_name)  
         r.save_evaluation(evaluation, file_name, api)
+    if args.multi_label:
+        mean_evaluation = average_evaluations(evaluation_files)
+        r.save_evaluation(evaluation, output, api)
     return resume
 
 
@@ -71,16 +75,16 @@ def cross_validate(models, dataset, number_of_evaluations, name, description,
         fields, fields_map, api, args, resume,
         session_file=session_file, path=path, log=log)
     if not resume:
-        evaluations_files = []
+        evaluation_files = []
         for evaluation in evaluations:
             evaluation = r.get_evaluation(evaluation, api, args.verbosity,
                                           session_file)
             model_id = evaluation['object']['model']
             file_name = "%s%s%s__evaluation" % (path, os.sep,
                                                 model_id.replace("/", "_"))
-            evaluations_files.append(file_name + ".json")
+            evaluation_files.append(file_name + ".json")
             r.save_evaluation(evaluation, file_name, api)
-        cross_validation = average_evaluations(evaluations_files)
+        cross_validation = average_evaluations(evaluation_files)
         file_name = "%s%scross_validation" % (path, os.sep)
         r.save_evaluation(cross_validation, file_name, api)
 
