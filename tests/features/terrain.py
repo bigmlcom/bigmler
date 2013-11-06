@@ -52,13 +52,13 @@ def setup_resources(feature):
 def cleanup_resources(feature):
     if os.path.exists('./tmp'):
         shutil.rmtree('./tmp')
-
+    """
     for folder in world.folders:
         try:
             shutil.rmtree(folder)
         except:
             pass
-
+    """
     for id in world.sources:
         world.api.delete_source(id)
     world.sources = []
