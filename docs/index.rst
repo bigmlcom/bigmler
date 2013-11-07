@@ -649,7 +649,10 @@ the data in your training file chosen at random. After that, the remaining 20%
 of the data will be run through each of the models to obtain an evaluation of
 the model. BigMLer retrieves all evaluations and saves each one of them locally
 in json and txt format. They are named using the objective field name and the
-value of the label that they refer to. As an example, if your objective field
+value of the label that they refer to. Finally, it averages the results
+obtained in all the evaluations to generate a mean evaluation stored in the
+``evaluation.txt`` and ``evaluation.json`` files.As an example,
+if your objective field
 name is ``class`` and the labels it contains are
 ``Adult,Student``, the generated files will be::
 
@@ -663,6 +666,8 @@ Generated files:
   ├─models
   ├─evaluation_class_adult.json
   ├─dataset
+  ├─evaluation.json
+  ├─evaluation.txt
   ├─evaluation_class_student.json
   ├─bigmler_sessions
   └─evaluation_class_adult.txt
@@ -680,7 +685,7 @@ using a separate set of
 data stored in a file or a previous dataset::
 
     bigmler --multi-label --models MonNov0413_201326/models \
-            --test data/iris.csv --evaluate
+            --test data/test_multilabel.csv --evaluate
     bigmler --multi-label --ensembles MonNov0413_201328/ensembles \
             --dataset dataset/50a1f441035d0706d9000371 --evaluate
 

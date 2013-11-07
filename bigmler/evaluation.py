@@ -60,7 +60,7 @@ def evaluate(models_or_ensembles, datasets, name, description, fields,
         r.save_evaluation(evaluation, file_name, api)
     if args.multi_label:
         mean_evaluation = average_evaluations(evaluation_files)
-        r.save_evaluation(evaluation, output, api)
+        r.save_evaluation(mean_evaluation, output, api)
     return resume
 
 

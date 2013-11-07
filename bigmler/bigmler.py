@@ -934,10 +934,11 @@ def main(args=sys.argv[1:]):
     if (command_args.evaluate
         and not (command_args.training_set or command_args.source
                  or command_args.dataset)
-        and not (command_args.test_set and (command_args.model or
-                 command_args.models or command_args.model_tag or
-                 command_args.ensemble or command_args.ensembles or
-                 command_args.ensemble_tag))):
+        and not ((command_args.test_set or command_args.test_split) and
+                 (command_args.model or
+                  command_args.models or command_args.model_tag or
+                  command_args.ensemble or command_args.ensembles or
+                  command_args.ensemble_tag))):
         parser.error("Evaluation wrong syntax.\n"
                      "\nTry for instance:\n\nbigmler --train data/iris.csv"
                      " --evaluate\nbigmler --model "

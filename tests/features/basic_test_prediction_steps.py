@@ -9,7 +9,7 @@ from bigmler.bigmler import MONTECARLO_FACTOR
 from bigmler.checkpoint import file_number_of_lines
 from ml_test_prediction_steps import i_create_all_ml_resources
 from ml_test_prediction_steps import i_create_all_ml_resources_and_ensembles
-from ml_test_evaluation_steps import i_create_all_ml_evaluations
+from ml_test_evaluation_steps import i_create_all_ml_resources_for_evaluation
 
 
 @step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" and log predictions in "(.*?)" with "(.*?)" as test field separator$')
@@ -286,19 +286,22 @@ def i_check_create_source(step):
         assert False, str(exc)
 
 
-@step(r'I check that the dataset has been created')
-def i_check_create_dataset(step):
-    dataset_file = "%s%sdataset" % (world.directory, os.sep)
+@step(r'I check that the (test\s|train\s)?dataset has been created')
+def i_check_create_dataset(step, suffix=None):
+    import traceback
+    suffix = "" if suffix is None else "_%s" % suffix[:-1]
+    dataset_file = "%s%sdataset%s" % (world.directory, os.sep, suffix)
     try:
         dataset_file = open(dataset_file, "r")
-        dataset = check_resource(dataset_file.readline().strip(),
+        dataset_id = dataset_file.readline().strip()
+        dataset = check_resource(dataset_id,
                                  world.api.get_dataset)
         world.datasets.append(dataset['resource'])
         world.dataset = dataset
         dataset_file.close()
         assert True
     except Exception, exc:
-        assert False, str(exc)
+        assert False, traceback.format_exc()
 
 
 @step(r'I check that the model has been created')
@@ -545,7 +548,7 @@ def i_have_previous_scenario_or_reproduce_it(step, scenario, kwargs):
                  'scenario_ml_1': [(i_create_all_ml_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models, False)],
                  'scenario_ml_6': [(i_create_all_ml_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models, False)],
                  'scenario_mle_1': [(i_create_all_ml_resources_and_ensembles, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models_in_ensembles, False)],
-                 'scenario_ml_e1': [(i_create_all_ml_evaluations, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models, False)]}
+                 'scenario_ml_e1': [(i_create_all_ml_resources_for_evaluation, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models, False)]}
     if os.path.exists("./%s/" % scenario):
         assert True
     else:
