@@ -1,10 +1,10 @@
 Feature: Upload multi-label source and produce evaluations
-    In order produce an evaluation
-    I need to upload a train set
+    In order to create an evaluation
+    I need to upload a training set
     Then I need to create a dataset and a model and an evaluation
 
 
-    Scenario: Successfully building multi-label evaluations from start:
+    Scenario: Successfully building multi-label evaluations from scratch
         Given I create BigML multi-label resources tagged as "<tag>" with "<label_separator>" label separator and "<number_of_labels>" labels uploading train "<data>" file with "<training_separator>" field separator to evaluate and log evaluation in "<output>"
         And I check that the source has been created
         And I check that the dataset has been created 

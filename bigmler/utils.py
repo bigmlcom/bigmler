@@ -39,7 +39,7 @@ from bigml.util import console_log
 PAGE_LENGTH = 200
 ATTRIBUTE_NAMES = ['name', 'label', 'description']
 NEW_DIRS_LOG = ".bigmler_dirs"
-BRIEF_MODEL = "exclude=root,fields"
+BRIEF_MODEL_QS = "exclude=root,fields"
 
 # Base Domain
 BIGML_DOMAIN = os.environ.get('BIGML_DOMAIN', 'bigml.io')
@@ -437,7 +437,7 @@ def objective_field_names(models_or_ensembles, api):
                 if model_id is not None:
                     try:
                         model = check_resource(model_id, api.get_model,
-                                               query_string=BRIEF_MODEL)
+                                               query_string=BRIEF_MODEL_QS)
                     except ValueError, exception:
                         sys.exit("Failed to get a finished model: %s" %
                                  str(exception))
@@ -480,7 +480,7 @@ def objective_field_name(model_or_ensemble, api):
     try:
         bigml.api.get_ensemble_id(model_or_ensemble)
         model = model_or_ensemble['object']['models'][0]
-        model = api.get_model(model, query_string=BRIEF_MODEL)
+        model = api.get_model(model, query_string=BRIEF_MODEL_QS)
     except ValueError:
         model = model_or_ensemble
     return model['object']['model']['model_fields'][objective_field]['name']

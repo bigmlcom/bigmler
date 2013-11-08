@@ -36,7 +36,7 @@ def evaluate(models_or_ensembles, datasets, name, description, fields,
              fields_map, output, api, args, resume,
              session_file=None, path=None, log=None, labels=None,
              all_labels=None, objective_field=None):
-    """Evaluates a model or an ensemble with the given dataset
+    """Evaluates a list of models or ensembles with the given dataset
 
     """
     evaluation_files = []

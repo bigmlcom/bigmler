@@ -636,24 +636,23 @@ Multi-label evaluations
 
 Multi-label predictions are computed using a set of binary models
 (or ensembles), one for
-each label to predict. Each one of them can be evaluated to check its
+each label to predict. Each model can be evaluated to check its
 performance. In order to do so, you can mimic the commands explained in the
 ``evaluations`` section for the single-label models and ensembles. Starting
-from a local csv file::
+from a local CSV file::
 
 bigmler --multi-label --train data/multilabel.csv \
         --label-separator ":" --evaluate
 
-Will build the source, dataset and model objects for you using 80% of
-the data in your training file chosen at random. After that, the remaining 20%
+will build the source, dataset and model objects for you using a
+random 80% portion of data in your training file. After that, the remaining 20%
 of the data will be run through each of the models to obtain an evaluation of
-the model. BigMLer retrieves all evaluations and saves each one of them locally
-in json and txt format. They are named using the objective field name and the
-value of the label that they refer to. Finally, it averages the results
-obtained in all the evaluations to generate a mean evaluation stored in the
-``evaluation.txt`` and ``evaluation.json`` files.As an example,
-if your objective field
-name is ``class`` and the labels it contains are
+the corresponding model. BigMLer retrieves all evaluations and saves
+them locally in json and txt format. They are named using the objective field
+name and the value of the label that they refer to. Finally, it averages the
+results obtained in all the evaluations to generate a mean evaluation stored
+in the ``evaluation.txt`` and ``evaluation.json`` files. As an example,
+if your objective field name is ``class`` and the labels it contains are
 ``Adult,Student``, the generated files will be::
 
 Generated files:
@@ -939,7 +938,7 @@ Basic Functionality
 -------------------
 
 --train TRAINING_SET                Full path to a training set. It can be a
-                                    remote URL to a (gzipped or compressed) csv
+                                    remote URL to a (gzipped or compressed) CSV
                                     file. The protocol schemes can be http,
                                     https, s3, azure, odata
 --test TEST_SET                     Full path to a test set. A file containing
