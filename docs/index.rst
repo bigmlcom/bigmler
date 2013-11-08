@@ -409,9 +409,9 @@ the ``sepal length`` by saying::
             --model-fields -'sepal length'
 
 
-When evaluating, you can map the fields of the test dataset to those of
-the evaluated model by writing in a file the field column of the dataset and
-the field column of the model separated by a comma and using `--fields-map`
+When evaluating, you can map the fields of the evaluated model to those of
+the test dataset by writing in a file the field column of the model and
+the field column of the dataset separated by a comma and using `--fields-map`
 flag to specify the name of the file::
 
     bigmler --dataset dataset/50a1f441035d0706d9000371 \

@@ -43,7 +43,7 @@ BRIEF_MODEL_QS = "exclude=root,fields"
 
 # Base Domain
 BIGML_DOMAIN = os.environ.get('BIGML_DOMAIN', 'bigml.io')
-BIGML_DASHBOARD_URL = os.environ.get('BIGML_DASHBOARD_URL')  
+BIGML_DASHBOARD_URL = os.environ.get('BIGML_DASHBOARD_URL')
 RESOURCE_URL = ("https://%s/dashboard/" % (BIGML_DOMAIN[:-3] + '.com')
                 if BIGML_DASHBOARD_URL is None
                 else BIGML_DASHBOARD_URL)
@@ -110,9 +110,9 @@ def read_types(path):
 
 
 def read_fields_map(path):
-    """Fields map from test dataset to evaluated model.
+    """Fields map from evaluated model to test dataset.
 
-    The test dataset field column and the evaluated model field column
+    The the evaluated model field column and the test dataset field column
     separated by a comma per line.
 
     For example:
@@ -424,7 +424,7 @@ def objective_field_names(models_or_ensembles, api):
     """Gets the objective field names for a list of models or ensembles
 
     """
-    objective_field_names = []
+    objective_fields = []
     for model_or_ensemble in models_or_ensembles:
         name = None
         if isinstance(model_or_ensemble, dict):
@@ -456,9 +456,9 @@ def objective_field_names(models_or_ensembles, api):
                 except ValueError:
                     sys.exit("No valid model or ensemble id")
         if name is not None:
-            objective_field_names.append(name)
+            objective_fields.append(name)
 
-    return objective_field_names
+    return objective_fields
 
 
 def objective_field_name(model_or_ensemble, api):

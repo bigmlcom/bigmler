@@ -641,14 +641,14 @@ def publish_model(model, args, api=None, session_file=None):
 
 
 def map_fields(fields_map, fields):
-    """Build a dict to map dataset to model fields
+    """Build a dict to map model to dataset fields
 
     """
     update_map = {}
-    for (dataset_column, model_column) in fields_map.iteritems():
+    for (model_column, dataset_column) in fields_map.iteritems():
         update_map.update({
-            fields.field_id(dataset_column):
-            fields.field_id(model_column)})
+            fields.field_id(model_column):
+            fields.field_id(dataset_column)})
     return update_map
 
 
@@ -693,8 +693,8 @@ def set_label_evaluation_args(name, description, args, labels, all_labels,
 
     for index in range(number_of_evaluations - 1, -1, -1):
         label = labels[index]
-        (new_name, label_field, single_label_fields) = label_model_args(
-            name, label, all_labels, [], objective_field)
+        new_name = label_model_args(
+            name, label, all_labels, [], objective_field)[0]
         evaluation_args = set_evaluation_args(new_name, description, args,
                                               fields, fields_map)
         evaluation_args_list.append(evaluation_args)

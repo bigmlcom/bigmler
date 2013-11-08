@@ -56,7 +56,7 @@ def evaluate(models_or_ensembles, datasets, name, description, fields,
         if args.multi_label:
             suffix = file_labels[index]
             file_name += "_%s" % suffix
-            evaluation_files.append("%s.json" % file_name)  
+            evaluation_files.append("%s.json" % file_name)
         r.save_evaluation(evaluation, file_name, api)
     if args.multi_label:
         mean_evaluation = average_evaluations(evaluation_files)
@@ -64,8 +64,8 @@ def evaluate(models_or_ensembles, datasets, name, description, fields,
     return resume
 
 
-def cross_validate(models, dataset, number_of_evaluations, name, description,
-                   fields, fields_map, api, args, resume,
+def cross_validate(models, dataset, fields, api, args, resume,
+                   name=None, description=None, fields_map=None,
                    session_file=None, path=None, log=None):
     """Cross-validates using a MONTE-CARLO variant
 
@@ -117,7 +117,7 @@ def evaluations_process(models_or_ensembles, datasets, name, description,
                 name, description, args, labels, all_labels,
                 number_of_evaluations, fields, fields_map,
                 objective_field)
-        else:          
+        else:
             evaluation_args = r.set_evaluation_args(name, description, args,
                                                     fields, fields_map)
 

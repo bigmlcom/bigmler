@@ -6,7 +6,10 @@ History
 0.6.0 (2013-11-08)
 ~~~~~~~~~~~~~~~~~~
 
-- Adding evaluations to multi-label models
+- Changing fields_map column order: previously mapped dataset column
+  number to model column number, now maps model column number to
+  dataset column number.
+- Adding evaluations to multi-label models.
 
 0.5.0 (2013-10-08)
 ~~~~~~~~~~~~~~~~~~

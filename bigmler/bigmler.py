@@ -101,6 +101,7 @@ def non_compatible(args, option):
                 args.model_tag)
     return False
 
+
 def source_processing(training_set, test_set, training_set_header,
                       test_set_header, api, args, resume,
                       name=None, description=None,
@@ -182,7 +183,7 @@ def dataset_processing(source, training_set, test_set, fields, api,
     # If we have a source but no dataset or model has been provided, we
     # create a new dataset if the no_dataset option isn't set up. Also
     # if evaluate is set and test_set has been provided.
-    if ((source and not args.dataset and not args.no_dataset 
+    if ((source and not args.dataset and not args.no_dataset
             and not has_models(args)) or
             (args.evaluate and args.test_set and not args.dataset)):
         dataset_args = r.set_dataset_args(name, description, args, fields,
@@ -289,7 +290,7 @@ def model_per_label(labels, all_labels, dataset, fields,
                     description=None, model_fields=None,
                     session_file=None, path=None, log=None):
     """Creates a model per label for multi-label datasets
-        
+
     """
     model_ids = []
     models = []
@@ -320,12 +321,13 @@ def model_per_label(labels, all_labels, dataset, fields,
     args.number_of_models = 1
     return models, model_ids, resume
 
+
 def ensemble_per_label(labels, all_labels, dataset, fields,
                        objective_field, api, args, resume, name=None,
                        description=None, model_fields=None,
                        session_file=None, path=None, log=None):
     """Creates an ensemble per label for multi-label datasets
-        
+
     """
 
     ensemble_ids = []
@@ -520,8 +522,8 @@ def get_model_fields(model, csv_properties, args, single_model=True):
 
 
 def multi_label_expansion(training_set, training_set_header, objective_field,
-                          args, output_path, field_attributes=None, labels=None,
-                          session_file=None):
+                          args, output_path, field_attributes=None,
+                          labels=None, session_file=None):
     """Splitting the labels in a multi-label objective field to create
        a source with column per label
 
@@ -660,7 +662,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         (test_set, test_labels,
          field_attributes, objective_field) = multi_label_expansion(
              test_set, test_set_header, objective_field, args, path,
-             field_attributes=fields_attributes, labels=labels,
+             field_attributes=field_attributes, labels=labels,
              session_file=session_file)
         test_set_header = True
 
@@ -766,14 +768,10 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # issue a cross_validation measure set.
     if args.cross_validation_rate > 0:
         args.sample_rate = 1 - args.cross_validation_rate
-        if args.number_of_evaluations > 0:
-            number_of_evaluations = args.number_of_evaluations
-        else:
-            number_of_evaluations = int(MONTECARLO_FACTOR *
-                                        args.cross_validation_rate)
-        cross_validate(models, dataset, number_of_evaluations, name,
-                       description, fields, fields_map, api, args, resume,
-                       session_file=session_file, path=path, log=log)
+        cross_validate(models, dataset, fields, api, args, resume,
+                       name=name, description=description,
+                       fields_map=fields_map, session_file=session_file,
+                       path=path, log=log)
 
     # Workaround to restore windows console cp850 encoding to print the tree
     if sys.platform == "win32" and sys.stdout.isatty():
