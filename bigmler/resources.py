@@ -649,6 +649,7 @@ def map_fields(fields_map, fields):
         update_map.update({
             fields.field_id(model_column):
             fields.field_id(dataset_column)})
+
     return update_map
 
 

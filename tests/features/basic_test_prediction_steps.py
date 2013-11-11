@@ -523,7 +523,7 @@ def i_create_all_resources_to_evaluate(step, data=None, output=None):
 
 
 @step(r'I create a BigML source from file "(.*)" with locale "(.*)" storing results in "(.*)"')
-def i_create_all_resources_to_evaluate(step, data=None, locale=None, output=None):
+def i_create_all_resources_to_evaluate_with_locale(step, data=None, locale=None, output=None):
     if data is None or locale is None or output is None:
         assert False
     try:
