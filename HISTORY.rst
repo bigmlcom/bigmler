@@ -10,6 +10,8 @@ History
   number to model column number, now maps model column number to
   dataset column number.
 - Adding evaluations to multi-label models.
+- Bug fixing: unicode characters greater than ascii-127 caused crash in
+  multi-label classification
 
 0.5.0 (2013-10-08)
 ~~~~~~~~~~~~~~~~~~
