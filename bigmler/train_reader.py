@@ -119,17 +119,18 @@ class TrainReader(object):
 
         """
         row = self.training_reader.next()
+        row = [value.strip() for value in row]
         if extended:
             if self.multi_label and self.labels is None:
                 self.labels = self.get_labels()
             aggregated_value = row[self.objective_column]
             del row[self.objective_column]
             objective_values = aggregated_value.split(self.label_separator)
-            objective_values = [value.decode("utf-8") for
+            objective_values = [value.decode("utf-8").strip() for
                                 value in objective_values]
             labels_row = [label in objective_values for label in self.labels]
             row.extend(labels_row)
-            row.append(aggregated_value)
+            row.append(aggregated_value.strip())
         if reset:
             self.reset()
         return row
@@ -160,7 +161,7 @@ class TrainReader(object):
                 if self.multi_label:
                     new_labels = objective_value.split(self.label_separator)
                     new_labels = map(str.strip, new_labels)
-                    new_labels = [label.decode("utf-8")
+                    new_labels = [label.decode("utf-8").strip()
                                   for label in new_labels]
                     # TODO: clean user given missing tokens
                     for index in range(0, len(new_labels)):

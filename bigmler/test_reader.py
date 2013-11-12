@@ -122,7 +122,7 @@ class TestReader(object):
         """
         row = self.test_reader.next()
         if self.encode:
-            row = [unicode(item, self.encode) for item in row]
+            row = [unicode(item, self.encode).strip() for item in row]
         return row
 
     def dict(self, row):
