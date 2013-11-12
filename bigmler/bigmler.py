@@ -541,6 +541,7 @@ def multi_label_expansion(training_set, training_set_header, objective_field,
                        for label in training_reader.labels]
     new_headers.extend(new_field_names)
     new_headers.append(training_reader.objective_name)
+    new_headers = [header.encode("utf-8") for header in new_headers]
     try:
         file_name = os.path.basename(training_set)
     except AttributeError:
@@ -646,7 +647,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     labels = (map(str.strip, args.labels.split(','))
               if args.labels is not None else None)
     if labels is not None:
-        labels = sorted(labels)
+        labels = sorted([label.decode("utf-8") for label in labels])
 
     # multi_label file must be preprocessed to obtain a new extended file
     if args.multi_label and training_set is not None:
