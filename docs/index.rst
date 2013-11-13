@@ -453,7 +453,7 @@ training set data and evaluated using the test set. By default, split is
 deterministic, so that every time you issue the same command will get the
 same split datasets. If you want to generate
 different splits from a unique dataset you can set the ``--seed`` option to a
-different string in every call.
+different string in every call::
 
     bigmler --train data/iris.csv --test-split 0.2 --name iris \
             --seed my_random_string_382734627364 --evaluate
