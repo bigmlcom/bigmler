@@ -111,7 +111,7 @@ def cleanup_resources(feature):
     assert world.final_datasets_count == world.init_datasets_count
     assert world.final_models_count == world.init_models_count
     assert world.final_predictions_count == world.init_predictions_count
-    assert world.final_evaluations_count == world.init_evaluations_count
+    assert world.final_evaluations_count == world.init_evaluations_count, "init: %s, final: %s" % (world.init_evaluations_count, world.final_evaluations_count)
     assert world.final_ensembles_count == world.init_ensembles_count
 
 @after.each_scenario

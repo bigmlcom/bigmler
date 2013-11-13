@@ -29,45 +29,76 @@ import bigmler.utils as u
 import bigmler.resources as r
 import bigmler.checkpoint as c
 
+from bigml.util import slugify
 
-def evaluate(model, dataset, name, description, fields, fields_map, output,
-             api, args, resume,
-             session_file=None, path=None, log=None):
-    """Evaluates a model or an ensemble with the given dataset
+
+def evaluate(models_or_ensembles, datasets, name, description, fields,
+             fields_map, output, api, args, resume,
+             session_file=None, path=None, log=None, labels=None,
+             all_labels=None, objective_field=None):
+    """Evaluates a list of models or ensembles with the given dataset
 
     """
-    if resume:
-        message = u.dated("Evaluation not found. Resuming.\n")
-        resume, evaluation = c.checkpoint(
-            c.is_evaluation_created, path, debug=args.debug, message=message,
-            log_file=session_file, console=args.verbosity)
-
-    if not resume:
-        evaluation_args = r.set_evaluation_args(name, description, args,
-                                                fields, fields_map)
-        if args.ensemble:
-            model_or_ensemble = args.ensemble
-        else:
-            model_or_ensemble = model
-        evaluation = r.create_evaluation(model_or_ensemble, dataset,
-                                         evaluation_args,
-                                         args, api, path, session_file,
-                                         log)
-
-    evaluation = r.get_evaluation(evaluation, api, args.verbosity,
-                                  session_file)
-    r.save_evaluation(evaluation, output, api)
+    evaluation_files = []
+    evaluations, resume = evaluations_process(
+        models_or_ensembles, datasets, name, description, fields,
+        fields_map, api, args, resume,
+        session_file=session_file, path=path, log=log,
+        labels=labels, all_labels=all_labels, objective_field=objective_field)
+    if args.multi_label:
+        file_labels = map(slugify,
+                          u.objective_field_names(models_or_ensembles, api))
+    for index in range(0, len(evaluations)):
+        evaluation = evaluations[index]
+        evaluation = r.get_evaluation(evaluation, api, args.verbosity,
+                                      session_file)
+        file_name = output
+        if args.multi_label:
+            suffix = file_labels[index]
+            file_name += "_%s" % suffix
+            evaluation_files.append("%s.json" % file_name)
+        r.save_evaluation(evaluation, file_name, api)
+    if args.multi_label:
+        mean_evaluation = average_evaluations(evaluation_files)
+        r.save_evaluation(mean_evaluation, output, api)
     return resume
 
 
-def cross_validate(models, dataset, number_of_evaluations, name, description,
-                   fields, fields_map, api, args, resume,
+def cross_validate(models, dataset, fields, api, args, resume,
+                   name=None, description=None, fields_map=None,
                    session_file=None, path=None, log=None):
     """Cross-validates using a MONTE-CARLO variant
 
     """
+    evaluations, resume = evaluations_process(
+        models, [dataset], name, description,
+        fields, fields_map, api, args, resume,
+        session_file=session_file, path=path, log=log)
+    if not resume:
+        evaluation_files = []
+        for evaluation in evaluations:
+            evaluation = r.get_evaluation(evaluation, api, args.verbosity,
+                                          session_file)
+            model_id = evaluation['object']['model']
+            file_name = "%s%s%s__evaluation" % (path, os.sep,
+                                                model_id.replace("/", "_"))
+            evaluation_files.append(file_name + ".json")
+            r.save_evaluation(evaluation, file_name, api)
+        cross_validation = average_evaluations(evaluation_files)
+        file_name = "%s%scross_validation" % (path, os.sep)
+        r.save_evaluation(cross_validation, file_name, api)
+
+
+def evaluations_process(models_or_ensembles, datasets, name, description,
+                        fields, fields_map, api, args, resume,
+                        session_file=None, path=None, log=None, labels=None,
+                        all_labels=None, objective_field=None):
+    """Evaluates models or ensembles against datasets
+
+    """
     existing_evaluations = 0
     evaluations = []
+    number_of_evaluations = len(models_or_ensembles)
     if resume:
         resume, evaluations = c.checkpoint(c.are_evaluations_created, path,
                                            number_of_evaluations,
@@ -81,26 +112,21 @@ def cross_validate(models, dataset, number_of_evaluations, name, description,
             u.log_message(message, log_file=session_file,
                           console=args.verbosity)
     if not resume:
-        evaluation_args = r.set_evaluation_args(name, description, args,
-                                                fields, fields_map)
+        if args.multi_label:
+            evaluation_args = r.set_label_evaluation_args(
+                name, description, args, labels, all_labels,
+                number_of_evaluations, fields, fields_map,
+                objective_field)
+        else:
+            evaluation_args = r.set_evaluation_args(name, description, args,
+                                                    fields, fields_map)
 
-        evaluations.extend(r.create_evaluations(models, dataset,
-                                                evaluation_args,
-                                                args, api, path,
-                                                session_file, log,
-                                                existing_evaluations))
-        evaluations_files = []
-        for evaluation in evaluations:
-            evaluation = r.get_evaluation(evaluation, api, args.verbosity,
-                                          session_file)
-            model_id = evaluation['object']['model']
-            file_name = "%s%s%s__evaluation" % (path, os.sep,
-                                                model_id.replace("/", "_"))
-            evaluations_files.append(file_name + ".json")
-            r.save_evaluation(evaluation, file_name, api)
-        cross_validation = average_evaluations(evaluations_files)
-        file_name = "%s%scross_validation" % (path, os.sep)
-        r.save_evaluation(cross_validation, file_name, api)
+        evaluations.extend(r.create_evaluations(
+            models_or_ensembles, datasets, evaluation_args,
+            args, api, path=path, session_file=session_file,
+            log=log, existing_evaluations=existing_evaluations))
+
+    return evaluations, resume
 
 
 def standard_deviation(points, mean):

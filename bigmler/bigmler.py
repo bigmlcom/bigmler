@@ -84,8 +84,27 @@ MISSING_TOKENS = ['', 'N/A', 'n/a', 'NULL', 'null', '-', '#DIV/0', '#REF!',
 MONTECARLO_FACTOR = 200
 
 
+def has_models(args):
+    """Returns if some kind of model or ensemble is given in args.
+
+    """
+    return (args.model or args.ensemble or args.ensembles
+            or args.models or args.model_tag or args.ensemble_tag)
+
+
+def non_compatible(args, option):
+    """Return non_compatible options
+
+    """
+    if option == '--cross-validation-rate':
+        return (args.test_set or args.evaluate or args.model or args.models or
+                args.model_tag)
+    return False
+
+
 def source_processing(training_set, test_set, training_set_header,
-                      test_set_header, name, description, api, args, resume,
+                      test_set_header, api, args, resume,
+                      name=None, description=None,
                       csv_properties=None, field_attributes=None, types=None,
                       session_file=None, path=None, log=None):
     """Creating or retrieving a data source from input arguments
@@ -145,9 +164,9 @@ def source_processing(training_set, test_set, training_set_header,
     return source, resume, csv_properties, fields
 
 
-def dataset_processing(source, training_set, test_set, model_ids, name,
-                       description, fields, dataset_fields, api, args,
-                       resume, csv_properties=None,
+def dataset_processing(source, training_set, test_set, fields, api,
+                       args, resume,  name=None, description=None,
+                       dataset_fields=None, csv_properties=None,
                        session_file=None, path=None, log=None):
     """Creating or retrieving dataset from input arguments
 
@@ -164,8 +183,8 @@ def dataset_processing(source, training_set, test_set, model_ids, name,
     # If we have a source but no dataset or model has been provided, we
     # create a new dataset if the no_dataset option isn't set up. Also
     # if evaluate is set and test_set has been provided.
-    if ((source and not args.dataset and not args.model and not model_ids and
-            not args.no_dataset) or
+    if ((source and not args.dataset and not args.no_dataset
+            and not has_models(args)) or
             (args.evaluate and args.test_set and not args.dataset)):
         dataset_args = r.set_dataset_args(name, description, args, fields,
                                           dataset_fields)
@@ -189,7 +208,7 @@ def dataset_processing(source, training_set, test_set, model_ids, name,
     return dataset, resume, csv_properties, fields
 
 
-def split_processing(dataset, name, description, api, args, resume,
+def split_processing(dataset, api, args, resume, name=None, description=None,
                      session_file=None, path=None, log=None):
     """Splits a dataset into train and test datasets
     """
@@ -236,8 +255,9 @@ def split_processing(dataset, name, description, api, args, resume,
     return train_dataset, test_dataset, resume
 
 
-def ensemble_processing(dataset, name, description, objective_field, fields,
-                        model_fields, api, args, resume, session_file=None,
+def ensemble_processing(dataset, objective_field, fields, api, args, resume,
+                        name=None, description=None, model_fields=None,
+                        session_file=None,
                         path=None, log=None):
     """Creates an ensemble of models from the input data
 
@@ -265,11 +285,12 @@ def ensemble_processing(dataset, name, description, objective_field, fields,
     return ensembles, ensemble_ids, models, model_ids, resume
 
 
-def model_per_label(labels, all_labels, dataset, fields, model_fields,
-                    objective_field, name, description, api, args, resume,
+def model_per_label(labels, all_labels, dataset, fields,
+                    objective_field, api, args, resume, name=None,
+                    description=None, model_fields=None,
                     session_file=None, path=None, log=None):
     """Creates a model per label for multi-label datasets
-        
+
     """
     model_ids = []
     models = []
@@ -300,11 +321,13 @@ def model_per_label(labels, all_labels, dataset, fields, model_fields,
     args.number_of_models = 1
     return models, model_ids, resume
 
-def ensemble_per_label(labels, all_labels, dataset, fields, model_fields,
-                       objective_field, name, description, api, args, resume,
+
+def ensemble_per_label(labels, all_labels, dataset, fields,
+                       objective_field, api, args, resume, name=None,
+                       description=None, model_fields=None,
                        session_file=None, path=None, log=None):
     """Creates an ensemble per label for multi-label datasets
-        
+
     """
 
     ensemble_ids = []
@@ -343,20 +366,19 @@ def ensemble_per_label(labels, all_labels, dataset, fields, model_fields,
     return ensembles, ensemble_ids, models, model_ids, resume
 
 
-def models_processing(dataset, models, model_ids, name, description, test_set,
-                      objective_field, fields, model_fields, api, args, resume,
-                      session_file=None, path=None, log=None, labels=None,
-                      all_labels=None):
+def models_processing(dataset, models, model_ids, objective_field, fields,
+                      api, args, resume,
+                      name=None, description=None, model_fields=None,
+                      session_file=None, path=None,
+                      log=None, labels=None, all_labels=None):
     """Creates or retrieves models from the input data
 
     """
     log_models = False
-
+    ensemble_ids = []
     # If we have a dataset but not a model, we create the model if the no_model
     # flag hasn't been set up.
-    if (dataset and not args.model and not model_ids and not args.no_model
-            and not args.ensemble and not args.ensembles):
-
+    if dataset and not (has_models(args) or args.no_model):
         model_ids = []
         models = []
         if args.multi_label:
@@ -368,24 +390,23 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
             # number of models
             if args.number_of_models < 2:
                 models, model_ids, resume = model_per_label(
-                    labels, all_labels, dataset, fields, model_fields,
-                    objective_field, name, description, api, args, resume,
-                    session_file, path, log)
+                    labels, all_labels, dataset, fields,
+                    objective_field, api, args, resume, name, description,
+                    model_fields, session_file, path, log)
             else:
                 (ensembles, ensemble_ids,
                  models, model_ids, resume) = ensemble_per_label(
-                     labels, all_labels, dataset, fields, model_fields,
-                     objective_field, name, description, api, args, resume,
-                     session_file, path, log)
+                     labels, all_labels, dataset, fields,
+                     objective_field, api, args, resume, name, description,
+                     model_fields, session_file, path, log)
 
         elif args.number_of_models > 1:
             ensembles = []
-            ensemble_ids = []
             # Ensemble of models
             (ensembles, ensemble_ids,
              models, model_ids, resume) = ensemble_processing(
-                 dataset, name, description, objective_field, fields,
-                 model_fields, api, args, resume,
+                 dataset, objective_field, fields, api, args, resume,
+                 name=name, description=description, model_fields=model_fields,
                  session_file=session_file, path=path, log=log)
             ensemble = ensembles[0]
             args.ensemble = bigml.api.get_ensemble_id(ensemble)
@@ -456,10 +477,10 @@ def models_processing(dataset, models, model_ids, name, description, test_set,
         models = model_ids[:]
 
     # If we are going to predict we must retrieve the models
-    if model_ids and test_set and not args.evaluate:
+    if model_ids and args.test_set and not args.evaluate:
         models, model_ids = r.get_models(models, args, api, session_file)
 
-    return models, model_ids, resume
+    return models, model_ids, ensemble_ids, resume
 
 
 def get_model_fields(model, csv_properties, args, single_model=True):
@@ -501,8 +522,8 @@ def get_model_fields(model, csv_properties, args, single_model=True):
 
 
 def multi_label_expansion(training_set, training_set_header, objective_field,
-                          args, output_path, field_attributes, labels,
-                          session_file=None):
+                          args, output_path, field_attributes=None,
+                          labels=None, session_file=None):
     """Splitting the labels in a multi-label objective field to create
        a source with column per label
 
@@ -520,6 +541,7 @@ def multi_label_expansion(training_set, training_set_header, objective_field,
                        for label in training_reader.labels]
     new_headers.extend(new_field_names)
     new_headers.append(training_reader.objective_name)
+    new_headers = [header.encode("utf-8") for header in new_headers]
     try:
         file_name = os.path.basename(training_set)
     except AttributeError:
@@ -542,7 +564,7 @@ def multi_label_expansion(training_set, training_set_header, objective_field,
             except StopIteration:
                 break
     objective_field = training_reader.headers[training_reader.objective_column]
-    if args.field_attributes is None:
+    if field_attributes is None:
         field_attributes = {}
     for label_column, label in training_reader.labels_columns():
         field_attributes.update({label_column: {
@@ -598,6 +620,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     model = None
     models = None
     fields = None
+    ensemble_ids = []
 
     # It is compulsory to have a description to publish either datasets or
     # models
@@ -624,38 +647,50 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     labels = (map(str.strip, args.labels.split(','))
               if args.labels is not None else None)
     if labels is not None:
-        labels = sorted(labels)
+        labels = sorted([label.decode("utf-8") for label in labels])
 
     # multi_label file must be preprocessed to obtain a new extended file
     if args.multi_label and training_set is not None:
         (training_set, labels,
          field_attributes, objective_field) = multi_label_expansion(
              training_set, training_set_header, objective_field, args, path,
-             field_attributes, labels, session_file=session_file)
+             field_attributes=field_attributes, labels=labels,
+             session_file=session_file)
         training_set_header = True
     all_labels = labels
 
+    if args.multi_label and args.evaluate and args.test_set is not None:
+        (test_set, test_labels,
+         field_attributes, objective_field) = multi_label_expansion(
+             test_set, test_set_header, objective_field, args, path,
+             field_attributes=field_attributes, labels=labels,
+             session_file=session_file)
+        test_set_header = True
+
     source, resume, csv_properties, fields = source_processing(
         training_set, test_set, training_set_header, test_set_header,
-        name, description, api, args, resume, csv_properties=csv_properties,
+        api, args, resume, name=name, description=description,
+        csv_properties=csv_properties,
         field_attributes=field_attributes,
         types=types, session_file=session_file, path=path, log=log)
 
     dataset, resume, csv_properties, fields = dataset_processing(
-        source, training_set, test_set, model_ids, name, description, fields,
-        dataset_fields, api, args, resume, csv_properties=csv_properties,
+        source, training_set, test_set, fields,
+        api, args, resume, name=name, description=description,
+        dataset_fields=dataset_fields, csv_properties=csv_properties,
         session_file=session_file, path=path, log=log)
 
     # If test_split is used, split the dataset in a training and a test dataset
     # according to the given split
     if args.test_split > 0:
         dataset, test_dataset, resume = split_processing(
-            dataset, name, description, api, args, resume,
+            dataset, api, args, resume, name=name, description=description,
             session_file=session_file, path=path, log=log)
 
-    models, model_ids, resume = models_processing(
-        dataset, models, model_ids, name, description, test_set,
-        objective_field, fields, model_fields, api, args, resume,
+    models, model_ids, ensemble_ids, resume = models_processing(
+        dataset, models, model_ids,
+        objective_field, fields, api, args, resume,
+        name=name, description=description, model_fields=model_fields,
         session_file=session_file, path=path, log=log, labels=labels,
         all_labels=all_labels)
     if models:
@@ -678,7 +713,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if args.multi_label and training_set is None:
         fields_list = []
         for model in models:
-            if isinstance(model, basestring):
+            if (isinstance(model, basestring) or
+                    bigml.api.get_status(model)['code'] != bigml.api.FINISHED):
                 # if there's more than one model the first one must contain
                 # the entire field structure to be used as reference.
                 query_string = (r.FIELDS_QS if single_model
@@ -721,23 +757,22 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if args.evaluate:
         if args.test_split > 0:
             dataset = test_dataset
-        resume = evaluate(model, dataset, name, description, fields,
-                          fields_map, output, api, args, resume,
-                          session_file=session_file, path=path, log=log)
+        models_or_ensembles = ensemble_ids if ensemble_ids != [] else models
+        resume = evaluate(models_or_ensembles, [dataset], name, description,
+                          fields, fields_map, output, api, args, resume,
+                          session_file=session_file, path=path, log=log,
+                          labels=labels, all_labels=all_labels,
+                          objective_field=objective_field)
 
     # If cross_validation_rate is > 0, create remote evaluations and save
     # results in json and human-readable format. Then average the results to
     # issue a cross_validation measure set.
     if args.cross_validation_rate > 0:
         args.sample_rate = 1 - args.cross_validation_rate
-        if args.number_of_evaluations > 0:
-            number_of_evaluations = args.number_of_evaluations
-        else:
-            number_of_evaluations = int(MONTECARLO_FACTOR *
-                                        args.cross_validation_rate)
-        cross_validate(models, dataset, number_of_evaluations, name,
-                       description, fields, fields_map, api, args, resume,
-                       session_file=session_file, path=path, log=log)
+        cross_validate(models, dataset, fields, api, args, resume,
+                       name=name, description=description,
+                       fields_map=fields_map, session_file=session_file,
+                       path=path, log=log)
 
     # Workaround to restore windows console cp850 encoding to print the tree
     if sys.platform == "win32" and sys.stdout.isatty():
@@ -808,18 +843,12 @@ def main(args=sys.argv[1:]):
     command_args = parser.parse_args(args)
 
     if command_args.cross_validation_rate > 0 and (
-            command_args.test_set or command_args.evaluate or
-            command_args.model or command_args.models or
-            command_args.model_tag):
+            non_compatible(command_args, '--cross-validation-rate')):
         parser.error("Non compatible flags: --cross-validation-rate"
                      " cannot be used with --evaluate, --model,"
                      " --models or --model-tag. Usage:\n\n"
                      "bigmler --train data/iris.csv "
                      "--cross-validation-rate 0.1")
-
-    if command_args.multi_label and command_args.evaluate:
-        parser.error("Evaluation for multi-label models is not "
-                     "available still.")
 
     if train_stdin and command_args.multi_label:
         parser.error("Reading multi-label training sets from stream "
@@ -925,16 +954,19 @@ def main(args=sys.argv[1:]):
     if (command_args.evaluate
         and not (command_args.training_set or command_args.source
                  or command_args.dataset)
-        and not (command_args.test_set and (command_args.model or
-                 command_args.models or command_args.model_tag or
-                 command_args.ensemble))):
+        and not ((command_args.test_set or command_args.test_split) and
+                 (command_args.model or
+                  command_args.models or command_args.model_tag or
+                  command_args.ensemble or command_args.ensembles or
+                  command_args.ensemble_tag))):
         parser.error("Evaluation wrong syntax.\n"
                      "\nTry for instance:\n\nbigmler --train data/iris.csv"
                      " --evaluate\nbigmler --model "
                      "model/5081d067035d076151000011 --dataset "
                      "dataset/5081d067035d076151003423 --evaluate\n"
                      "bigmler --ensemble ensemble/5081d067035d076151003443"
-                     " --evaluate")
+                     " --dataset "
+                     "dataset/5081d067035d076151003423 --evaluate")
 
     if command_args.objective_field:
         objective = command_args.objective_field
