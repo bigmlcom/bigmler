@@ -76,6 +76,27 @@ def configure_input_fields(fields, user_given_fields):
     return input_fields
 
 
+def relative_input_fields(fields, user_given_fields):
+    """Changes user fields syntax from absolute given fields to relative
+
+    """
+
+    input_fields = []
+    if all([(name[0] in ADD_REMOVE_PREFIX) for name in user_given_fields]):
+        return user_given_fields
+
+    preferred_fields = fields.preferred_fields()
+    for field_id in preferred_fields.keys():
+        name = fields.fields[field_id]['name']
+        if not name in user_given_fields:
+            input_fields.append("%s%s" % (REMOVE_PREFIX, name))
+    for name in user_given_fields:
+        field_id = fields.field_id(name)
+        input_fields.append("%s%s" % (ADD_PREFIX, name))
+
+    return input_fields
+
+
 def set_source_args(data_set_header, name, description, args):
     """Returns a source arguments dict
 
@@ -342,6 +363,8 @@ def set_label_model_args(name, description, args, labels, all_labels, fields,
     """
     if model_fields is None:
         model_fields = []
+    else:
+        model_fields = relative_input_fields(fields, model_fields)
     if objective_field is None:
         objective_id = fields.field_id(fields.objective_field)
         objective_field = fields.fields[objective_id]['name']
@@ -472,6 +495,8 @@ def set_label_ensemble_args(name, description, args, labels, all_labels,
     """
     if model_fields is None:
         model_fields = []
+    else:
+        model_fields = relative_input_fields(fields, model_fields)
     if objective_field is None:
         objective_id = fields.field_id(fields.objective_field)
         objective_field = fields.fields[objective_id]['name']

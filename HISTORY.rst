@@ -3,6 +3,12 @@
 History
 -------
 
+0.6.1 (2013-11-14)
+~~~~~~~~~~~~~~~~~~
+
+- Bug fixing: --model-fields option with absolute field names was not
+  compatible with multi-label classification models.
+
 0.6.0 (2013-11-08)
 ~~~~~~~~~~~~~~~~~~
 

@@ -658,18 +658,18 @@ if your objective field name is ``class`` and the labels it contains are
 Generated files:
 
  MonNov0413_201326
-  ├─evaluations
-  ├─extended_multilabel.csv
-  ├─source
-  ├─evaluation_class_student.txt
-  ├─models
-  ├─evaluation_class_adult.json
-  ├─dataset
-  ├─evaluation.json
-  ├─evaluation.txt
-  ├─evaluation_class_student.json
-  ├─bigmler_sessions
-  └─evaluation_class_adult.txt
+  - evaluations
+  - extended_multilabel.csv
+  - source
+  - evaluation_class_student.txt
+  - models
+  - evaluation_class_adult.json
+  - dataset
+  - evaluation.json
+  - evaluation.txt
+  - evaluation_class_student.json
+  - bigmler_sessions
+  - evaluation_class_adult.txt
 
 You can use the same procedure with a previously
 existing multi-label source or dataset::
