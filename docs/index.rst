@@ -209,7 +209,7 @@ stored. For instance::
             --number-of-models 20 --sample-rate 0.75 \
             --output ./dir1/predictions.csv
     bigmler --dataset dataset/50c23e5e035d07305a000056 \
-            --test data/test_iris.csv  --number-of-models 20 \ 
+            --test data/test_iris.csv  --number-of-models 20 \
             --sample-rate 0.75 --output ./dir2/predictions.csv
     bigmler --combine-votes ./dir1,./dir2
 
@@ -482,7 +482,7 @@ where ``filter.lisp`` is a file containing a expression like this::
 For more details, see the BigML's API documentation on
 `filtering rows <https://bigml.com/developers/datasets#d_filteringrows>`_.
 
-Multi-labeled categories in training data 
+Multi-labeled categories in training data
 ------------------------------------------
 
 Sometimes the information you want to predict is not a single category but a
@@ -627,7 +627,7 @@ selected labels in order to do so.
 
 Finally, the ``--model-tag`` can be used as well to retrieve multi-labeled
 models and predict with them::
-    
+
     bigmler --multi-label --model-tag my_multilabel \
             --test data/test_multilabel.csv
 
@@ -641,8 +641,8 @@ performance. In order to do so, you can mimic the commands explained in the
 ``evaluations`` section for the single-label models and ensembles. Starting
 from a local CSV file::
 
-bigmler --multi-label --train data/multilabel.csv \
-        --label-separator ":" --evaluate
+    bigmler --multi-label --train data/multilabel.csv \
+            --label-separator ":" --evaluate
 
 will build the source, dataset and model objects for you using a
 random 80% portion of data in your training file. After that, the remaining 20%
@@ -868,7 +868,7 @@ To install BigMLer on Windows environments, you'll need `Python for Windows
 In addition to that, you'll need the ``pip`` tool to install BigMLer. To
 install pip, first you need to open your command line window (write ``cmd`` in
 the input field that appears when you click on ``Start`` and hit ``enter``),
-download this `python file <http://python-distribute.org/distribute_setup.py>`_ 
+download this `python file <http://python-distribute.org/distribute_setup.py>`_
 and execute it::
 
     c:\Python27\python.exe distribute_setup.py
@@ -964,7 +964,7 @@ Basic Functionality
                                     Monte-Carlo cross-validation
 --number-of-evaluations NUMBER_OF_EVALUATIONS    Number of runs that will be
                                                  used in cross-validation
---max-parallel-evaluations MAX_PARALLEL_EVALUATIONS   Maximum number of 
+--max-parallel-evaluations MAX_PARALLEL_EVALUATIONS   Maximum number of
                                                       evaluations
                                                       to create in parallel
 
@@ -1076,7 +1076,7 @@ Notice that datasets and models will be made public without assigning any price
 to them.
 
 Fancy Options
--------------    
+-------------
 --progress-bar              Shows an update on the bytes uploaded when creating
                             a new source. This option might run into issues
                             depending on the locale
