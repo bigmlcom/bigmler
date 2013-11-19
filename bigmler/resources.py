@@ -116,6 +116,7 @@ def set_source_args(data_set_header, name, description, args):
                         LOCALE_DEFAULT), log_file=None, console=True)
             source_locale = LOCALE_DEFAULT
         source_args["source_parser"].update({'locale': source_locale})
+
     return source_args
 
 

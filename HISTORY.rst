@@ -8,6 +8,7 @@ History
 
 - Bug fixing: --model-fields option with absolute field names was not
   compatible with multi-label classification models.
+- Changing resource type checking function.
 
 0.6.0 (2013-11-08)
 ~~~~~~~~~~~~~~~~~~
