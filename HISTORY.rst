@@ -9,7 +9,7 @@ History
 - Bug fixing: --model-fields option with absolute field names was not
   compatible with multi-label classification models.
 - Changing resource type checking function.
-- Adding pruning option to ensembles.
+- Bug fixing: evaluations did not use the given combination method
 
 0.6.0 (2013-11-08)
 ~~~~~~~~~~~~~~~~~~

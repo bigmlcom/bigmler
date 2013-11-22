@@ -542,8 +542,9 @@ def set_ensemble_args(name, description, args, model_fields,
         input_fields = configure_input_fields(fields, model_fields)
         ensemble_args.update(input_fields=input_fields)
 
-    if args.pruning and args.pruning != 'smart':
-        ensemble_args.update(stat_pruning=(args.pruning == 'statistical'))
+    # TODO: add pruning option to ensemble creation
+    # if args.pruning and args.pruning != 'smart':
+    #     ensemble_args.update(stat_pruning=(args.pruning == 'statistical'))
 
     ensemble_args.update(sample_rate=args.sample_rate,
                          replacement=args.replacement,
