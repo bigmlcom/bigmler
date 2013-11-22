@@ -12,6 +12,7 @@ History
 - Bug fixing: evaluations did not use the given combination method.
 - Bug fixing: evaluation of an ensemble had turned into evaluations of its
               models.
+- Adding pruning to the ensemble creation configuration options
 
 0.6.0 (2013-11-08)
 ~~~~~~~~~~~~~~~~~~
