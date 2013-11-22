@@ -692,6 +692,8 @@ def set_evaluation_args(name, description, args, fields=None, fields_map=None):
         "description": description,
         "tags": args.tag
     }
+    if (args.number_of_models > 1 or args.ensemble):
+        evaluation_args.update(combiner=args.method)
     if fields_map is not None and fields is not None:
         evaluation_args.update({"fields_map": map_fields(fields_map, fields)})
     # Two cases to use out_of_bag and sample_rate: standard evaluations where
