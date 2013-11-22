@@ -77,7 +77,7 @@ def configure_input_fields(fields, user_given_fields):
 
 
 def relative_input_fields(fields, user_given_fields):
-    """Changes user fields syntax from absolute given fields to relative
+    """Returns the user given input fields using relative syntax
 
     """
 
