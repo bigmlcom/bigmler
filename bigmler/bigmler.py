@@ -451,6 +451,7 @@ def models_processing(dataset, models, model_ids, objective_field, fields,
     if args.ensemble:
         ensemble = r.get_ensemble(args.ensemble, api, args.verbosity,
                                   session_file)
+        ensemble_ids = [ensemble]
         model_ids = ensemble['object']['models']
         if log_models and args.number_of_models > 1:
             for model_id in model_ids:

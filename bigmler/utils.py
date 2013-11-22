@@ -417,7 +417,7 @@ def check_resource(*args, **kwargs):
         result = bigml.api.check_resource(*args, **kwargs)
         return result
     except ValueError, exc:
-        sys.exit("\nFailed to obtain a finished resource:\n%s" % str(exc))
+        sys.exit("\nFailed to obtain a finished resource:\n%s." % str(exc))
 
 
 def objective_field_names(models_or_ensembles, api):
@@ -432,7 +432,8 @@ def objective_field_names(models_or_ensembles, api):
             if status_code == bigml.api.FINISHED:
                 name = objective_field_name(model_or_ensemble, api)
         if name is None:
-            try:
+            resource_type = bigml.api.get_resource_type(model_or_ensemble)
+            if resource_type == bigml.api.MODEL_PATH:
                 model_id = bigml.api.get_model_id(model_or_ensemble)
                 if model_id is not None:
                     try:
@@ -442,19 +443,18 @@ def objective_field_names(models_or_ensembles, api):
                         sys.exit("Failed to get a finished model: %s" %
                                  str(exception))
                     name = objective_field_name(model, api)
-            except ValueError:
-                try:
-                    ensemble_id = bigml.api.get_ensemble_id(model_or_ensemble)
-                    if ensemble_id is not None:
-                        try:
-                            ensemble = check_resource(
-                                ensemble_id, api.get_ensemble)
-                        except ValueError, exception:
-                            sys.exit("Failed to get a finished ensemble: %s" %
-                                     str(exception))
-                        name = objective_field_name(ensemble, api)
-                except ValueError:
-                    sys.exit("No valid model or ensemble id")
+            elif resource_type == bigml.api.ENSEMBLE_PATH:
+                ensemble_id = bigml.api.get_ensemble_id(model_or_ensemble)
+                if ensemble_id is not None:
+                    try:
+                        ensemble = check_resource(
+                            ensemble_id, api.get_ensemble)
+                    except ValueError, exception:
+                        sys.exit("Failed to get a finished ensemble: %s" %
+                                 str(exception))
+                    name = objective_field_name(ensemble, api)
+            else:
+                sys.exit("No valid model or ensemble id.")
         if name is not None:
             objective_fields.append(name)
 
@@ -477,10 +477,13 @@ def objective_field_name(model_or_ensemble, api):
         objective_field = resource_info['objective_fields'][0]
     if objective_field is None:
         return None
-    try:
+    resource_type = bigml.api.get_resource_type(model_or_ensemble)
+    if resource_type == bigml.api.ENSEMBLE_PATH:
         bigml.api.get_ensemble_id(model_or_ensemble)
         model = model_or_ensemble['object']['models'][0]
         model = api.get_model(model, query_string=BRIEF_MODEL_QS)
-    except ValueError:
+    elif resource_type == bigml.api.MODEL_PATH:
         model = model_or_ensemble
+    else:
+        sys.exit("No valid model or ensemble structure.")
     return model['object']['model']['model_fields'][objective_field]['name']

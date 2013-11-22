@@ -372,7 +372,7 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                                              query_string)
                 except ValueError, exception:
                     sys.exit("Failed to get model: %s. %s" % (model,
-                                                          str(exception)))
+                                                              str(exception)))
             # When user selects the labels in multi-label predictions, we must
             # filter the models that will be used to predict
             if labels:

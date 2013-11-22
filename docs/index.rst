@@ -658,18 +658,18 @@ if your objective field name is ``class`` and the labels it contains are
 Generated files:
 
  MonNov0413_201326
-  ├─evaluations
-  ├─extended_multilabel.csv
-  ├─source
-  ├─evaluation_class_student.txt
-  ├─models
-  ├─evaluation_class_adult.json
-  ├─dataset
-  ├─evaluation.json
-  ├─evaluation.txt
-  ├─evaluation_class_student.json
-  ├─bigmler_sessions
-  └─evaluation_class_adult.txt
+  - evaluations
+  - extended_multilabel.csv
+  - source
+  - evaluation_class_student.txt
+  - models
+  - evaluation_class_adult.json
+  - dataset
+  - evaluation.json
+  - evaluation.txt
+  - evaluation_class_student.json
+  - bigmler_sessions
+  - evaluation_class_adult.txt
 
 You can use the same procedure with a previously
 existing multi-label source or dataset::
@@ -815,7 +815,7 @@ Requirements
 
 Python 2.7 is currently supported by BigMLer.
 
-BigMLer requires `bigml 0.9.1 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 0.10.0 <https://github.com/bigmlcom/python>`_  or
 higher.
 
 BigMLer Installation

@@ -76,6 +76,27 @@ def configure_input_fields(fields, user_given_fields):
     return input_fields
 
 
+def relative_input_fields(fields, user_given_fields):
+    """Returns the user given input fields using relative syntax
+
+    """
+
+    input_fields = []
+    if all([(name[0] in ADD_REMOVE_PREFIX) for name in user_given_fields]):
+        return user_given_fields
+
+    preferred_fields = fields.preferred_fields()
+    for field_id in preferred_fields.keys():
+        name = fields.fields[field_id]['name']
+        if not name in user_given_fields:
+            input_fields.append("%s%s" % (REMOVE_PREFIX, name))
+    for name in user_given_fields:
+        field_id = fields.field_id(name)
+        input_fields.append("%s%s" % (ADD_PREFIX, name))
+
+    return input_fields
+
+
 def set_source_args(data_set_header, name, description, args):
     """Returns a source arguments dict
 
@@ -95,6 +116,7 @@ def set_source_args(data_set_header, name, description, args):
                         LOCALE_DEFAULT), log_file=None, console=True)
             source_locale = LOCALE_DEFAULT
         source_args["source_parser"].update({'locale': source_locale})
+
     return source_args
 
 
@@ -342,6 +364,8 @@ def set_label_model_args(name, description, args, labels, all_labels, fields,
     """
     if model_fields is None:
         model_fields = []
+    else:
+        model_fields = relative_input_fields(fields, model_fields)
     if objective_field is None:
         objective_id = fields.field_id(fields.objective_field)
         objective_field = fields.fields[objective_id]['name']
@@ -472,6 +496,8 @@ def set_label_ensemble_args(name, description, args, labels, all_labels,
     """
     if model_fields is None:
         model_fields = []
+    else:
+        model_fields = relative_input_fields(fields, model_fields)
     if objective_field is None:
         objective_id = fields.field_id(fields.objective_field)
         objective_field = fields.fields[objective_id]['name']
@@ -515,6 +541,10 @@ def set_ensemble_args(name, description, args, model_fields,
     if model_fields and fields is not None:
         input_fields = configure_input_fields(fields, model_fields)
         ensemble_args.update(input_fields=input_fields)
+
+    if args.pruning and args.pruning != 'smart':
+        ensemble_args.update(stat_pruning=(args.pruning == 'statistical'))
+
     ensemble_args.update(sample_rate=args.sample_rate,
                          replacement=args.replacement,
                          randomize=args.randomize,
@@ -662,6 +692,8 @@ def set_evaluation_args(name, description, args, fields=None, fields_map=None):
         "description": description,
         "tags": args.tag
     }
+    if (args.number_of_models > 1 or args.ensemble):
+        evaluation_args.update(combiner=args.method)
     if fields_map is not None and fields is not None:
         evaluation_args.update({"fields_map": map_fields(fields_map, fields)})
     # Two cases to use out_of_bag and sample_rate: standard evaluations where
