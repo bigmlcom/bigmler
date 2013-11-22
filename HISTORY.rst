@@ -9,7 +9,9 @@ History
 - Bug fixing: --model-fields option with absolute field names was not
   compatible with multi-label classification models.
 - Changing resource type checking function.
-- Bug fixing: evaluations did not use the given combination method
+- Bug fixing: evaluations did not use the given combination method.
+- Bug fixing: evaluation of an ensemble had turned into evaluations of its
+              models.
 
 0.6.0 (2013-11-08)
 ~~~~~~~~~~~~~~~~~~
