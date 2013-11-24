@@ -32,7 +32,7 @@ import bigmler.checkpoint as c
 from bigml.model import Model
 from bigml.multimodel import MultiModel, read_votes
 from bigml.util import (localize, console_log, get_predictions_file_name)
-from bigml.multivote import PLURALITY_CODE, MultiVote
+from bigml.multivote import PLURALITY_CODE, THRESHOLD_CODE, MultiVote
 
 from bigmler.test_reader import TestReader
 from bigmler.resources import FIELDS_QS, ALL_FIELDS_QS
@@ -293,7 +293,7 @@ def remote_predict_ensemble(ensemble_id, test_reader, prediction_file, api,
                              prediction_info, input_data, exclude)
 
 
-def local_predict(models, test_reader, output, method,
+def local_predict(models, test_reader, output, method, options=None,
                   prediction_info=NORMAL_FORMAT, exclude=None):
     """Get local predictions and combine them to get a final prediction
 
@@ -305,7 +305,8 @@ def local_predict(models, test_reader, output, method,
         prediction = local_model.predict(input_data_dict,
                                          by_name=test_set_header,
                                          method=method,
-                                         with_confidence=True)
+                                         with_confidence=True,
+                                         options=options)
         write_prediction(prediction, output,
                          prediction_info, input_data, exclude)
 
@@ -313,7 +314,7 @@ def local_predict(models, test_reader, output, method,
 def local_batch_predict(models, test_reader, prediction_file, api,
                         max_models=MAX_MODELS,
                         resume=False, output_path=None, output=None,
-                        verbosity=True, method=PLURALITY_CODE,
+                        verbosity=True, method=PLURALITY_CODE, options=None,
                         session_file=None, debug=False,
                         prediction_info=NORMAL_FORMAT,
                         labels=None, label_separator=None, ordered=True,
@@ -449,7 +450,7 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                 for label_prediction in label_predictions:
                     label_multivote = MultiVote(label_prediction)
                     prediction, confidence = label_multivote.combine(
-                        method, True)
+                        method=method, with_confidence=True, options=options)
                     predictions.append({'prediction': prediction,
                                         'confidence': confidence})
             for vote_index in range(0, len(predictions)):
@@ -460,7 +461,8 @@ def local_batch_predict(models, test_reader, prediction_file, api,
             prediction = [label_separator.join(prediction_list),
                           label_separator.join(confidence_list)]
         else:
-            prediction = multivote.combine(method, True)
+            prediction = multivote.combine(method=method, with_confidence=True,
+                                           options=options)
 
         write_prediction(prediction, output, prediction_info, input_data,
                          exclude)
@@ -495,7 +497,8 @@ def predict(test_set, test_set_header, models, fields, output,
     #     model_[id of the model]__predictions.csv
     # For instance,
     #     model_50c0de043b563519830001c2_predictions.csv
-    if args.remote and not args.multi_label:
+    if (args.remote and not args.multi_label
+        and args.method != THRESHOLD_CODE):
         if args.ensemble is not None:
             remote_predict_ensemble(args.ensemble, test_reader,
                                     prediction_file, api, resume,
@@ -513,11 +516,18 @@ def predict(test_set, test_set_header, models, fields, output,
     else:
         message = u.dated("Creating local predictions.\n")
         u.log_message(message, log_file=session_file, console=args.verbosity)
+        options = {}
+        if args.method == THRESHOLD_CODE:
+            options.update(threshold=args.threshold)
+            if args.threshold_class is None:
+                local_model = Model(models[0])
+                args.threshold_class = local_model.tree.distribution[0][0]
+            options.update(category=args.threshold_class)
         # For a small number of models, we build a MultiModel using all of
         # the given models and issue a combined prediction
         if len(models) < max_models and not args.multi_label:
-            local_predict(models, test_reader, output,
-                          args.method, args.prediction_info, exclude)
+            local_predict(models, test_reader, output, args.method, options,
+                          args.prediction_info, exclude)
         # For large numbers of models, we split the list of models in chunks
         # and build a MultiModel for each chunk, issue and store predictions
         # for each model and combine all of them eventually.
@@ -533,7 +543,6 @@ def predict(test_set, test_set_header, models, fields, output,
             # retrieves the models with no order, so the correspondence with
             # each label must be restored.
             ordered = True
-
             models_per_label = args.number_of_models
             if args.multi_label and (args.model_tag is not None
                                      or models_per_label > 1):
@@ -541,7 +550,7 @@ def predict(test_set, test_set_header, models, fields, output,
             local_batch_predict(models, test_reader, prediction_file, api,
                                 max_models, resume, output_path,
                                 output,
-                                args.verbosity, method,
+                                args.verbosity, method, options,
                                 session_file, args.debug,
                                 args.prediction_info, labels,
                                 args.label_separator, ordered, exclude,

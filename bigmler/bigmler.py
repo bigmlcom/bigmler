@@ -204,7 +204,7 @@ def dataset_processing(source, training_set, test_set, fields, api,
                 'data_locale': dataset['object']['locale']}
         fields = Fields(dataset['object']['fields'], **csv_properties)
         if args.public_dataset:
-            r.publish_dataset(dataset, api, args, session_file)
+            r.publish_dataset(dataset, args, api, session_file)
     return dataset, resume, csv_properties, fields
 
 

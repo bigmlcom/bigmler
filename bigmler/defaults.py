@@ -98,7 +98,9 @@ FLAGS = {'BigMLer': [{'flag': 'debug', 'type': 'boolean'},
                      {'flag': 'prediction_fields', 'type': 'string'},
                      {'flag': 'seed', 'type': 'string'},
                      {'flag': 'max_parallel_ensembles', 'type': 'int'},
-                     {'flag': 'ensembles', 'type': 'string'}]}
+                     {'flag': 'ensembles', 'type': 'string'},
+                     {'flag': 'threshold', 'type': 'int'},
+                     {'flag': 'threshold_class', 'type': 'string'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):

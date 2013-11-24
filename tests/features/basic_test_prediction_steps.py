@@ -154,14 +154,41 @@ def i_create_resources_from_model(step, test=None, output=None):
         assert False, str(exc)
 
 
-@step(r'I create BigML resources using ensemble of (.*) models to test "(.*)" and log predictions in "(.*)"')
-def i_create_resources_from_ensemble(step, number_of_models=None, test=None, output=None):
+@step(r'I create BigML resources using the previous ensemble with different thresholds to test "(.*)" and log predictions in "(.*)" and "(.*)"')
+def i_create_resources_from_ensemble_with_threshold(step, test=None, output2=None, output3=None):
+    if test is None or output2 is None or output3 is None:
+        assert False
+    try:
+        retcode = check_call("bigmler --ensemble " + world.ensemble['resource'] + " --test " + test 
+                             + " --tag my_ensemble --store --output " + output2 +
+                             " --method threshold --threshold " +
+                             str(world.number_of_models) , shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            assert True
+        retcode = check_call("bigmler --ensemble " + world.ensemble['resource'] + " --test " + test 
+                             + " --tag my_ensemble --store --output " + output3 +
+                             " --method threshold --threshold 1", shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+
+@step(r'I create BigML resources using ensemble of (.*) models (with replacement\s)to test "(.*)" and log predictions in "(.*)"')
+def i_create_resources_from_ensemble(step, number_of_models=None, alternative=None, test=None, output=None):
     if number_of_models is None or test is None or output is None:
         assert False
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
+    no_replacement = ""
+    if alternative is None:
+        no_replacement = " --no-replacement"
     try:
-        retcode = check_call("bigmler --dataset " + world.dataset['resource'] + " --test " + test + " --number-of-models " + str(number_of_models) + " --no-replacement --tag my_ensemble --store --output " + output, shell=True)
+        retcode = check_call("bigmler --dataset " + world.dataset['resource'] + " --test " + test + " --number-of-models " + str(number_of_models) + " --tag my_ensemble --store --output " + output + no_replacement, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -457,6 +484,19 @@ def i_check_predictions(step, check_file):
                     print row, check_row
                     assert False
         assert True
+    except Exception, exc:
+        assert False, str(exc)
+
+
+@step(r'local predictions for different thresholds in "(.*)" and "(.*)" are different')
+def i_check_predictions_with_different_thresholds(step, output2, output3):
+    try:
+        predictions_file = open(output2, "U").read()
+        predictions_file_k = open(output3, "U").read()
+        if predictions_file != predictions_file_k:
+            assert True
+        else:
+            assert False
     except Exception, exc:
         assert False, str(exc)
 

@@ -168,3 +168,14 @@ Feature: Upload source and produce test predictions
         | data               | test                    | output                        |options     |predictions_file           |
         | ../data/iris.csv   | ../data/test_iris.csv   |./scenario15/predictions.csv   |--prediction-header --prediction-fields 'petal length,petal width' --prediction-info full | ./check_files/predictions_iris_h.csv   |
 
+    Scenario: Successfully building threshold test predictions from ensemble
+        Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs> 
+        And I create BigML resources using ensemble of <number_of_models> models with replacement to test "<test>" and log predictions in "<output>"
+        And I check that the ensemble has been created
+        And I check that the predictions are ready
+        And I create BigML resources using the previous ensemble with different thresholds to test "<test>" and log predictions in "<output2>" and "<output3>"
+        Then local predictions for different thresholds in "<output2>" and "<output3>" are different
+
+        Examples:
+        |scenario    | kwargs                                                  | number_of_models | test                    | output                  | output2 | output3
+        | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | 10              | ../data/test_iris.csv   | ./scenario16/predictions.csv   | ./scenario16/predictions2.csv | ./scenario16/predictions3.csv 
