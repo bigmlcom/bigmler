@@ -182,9 +182,9 @@ contains the prediction, its confidence, the node's distribution and the node's
 total number of instances. The default value for ``max-batch-models`` is 10.
 
 When using ensembles, model's predictions are combined to issue a final
-prediction. There are several different methods
-to build the combination. You can choose ``plurality``, ``confidence weighted``
-or ``probability weighted`` using the ``--method`` flag::
+prediction. There are several different methods to build the combination.
+You can choose ``plurality``, ``confidence weighted``, ``probability weighted``
+or ``threshold`` using the ``--method`` flag::
 
     bigmler --train data/iris.csv --test data/test_iris.csv \
             --number-of-models 10 --sample-rate 0.75 \
@@ -192,10 +192,19 @@ or ``probability weighted`` using the ``--method`` flag::
 
 For classification ensembles, the combination is made by majority vote:
 ``plurality`` weights each model's prediction as one vote,
-``confidence weighted`` uses confidences as weight for the prediction and
+``confidence weighted`` uses confidences as weight for the prediction,
 ``probability weighted`` uses the probability of the class in the distribution
-of classes in the node as weight. For regression ensembles, the predicted
-values are averaged: ``plurality`` again weights each predicted value as one,
+of classes in the node as weight, and ``threshold`` uses an integer number
+as threshold and a class name to issue the prediction: if the votes for
+the chosen class reach the threshold value, then the class is predicted
+and plurality for the rest of predictions is used otherwise::
+
+    bigmler --train data/iris.csv --test data/test_iris.csv \
+            --number-of-models 10 --sample-rate 0.75 \
+            --method threshold --threshold 4 --class 'Iris-setosa'
+
+For regression ensembles, the predicted values are averaged: ``plurality``
+again weights each predicted value as one,
 ``confidence weighted`` weights each prediction according to the associated
 error and ``probability weighted`` gives the same results as ``plurality``.
 
@@ -951,8 +960,8 @@ Basic Functionality
                                     If left unspecified, it will default to an
                                     auto-generated file created by BigMLer.
 --method METHOD                     Prediction method used: ``plurality``,
-                                    ``"confidence weighted"`` or
-                                    ``"probability weighted"``
+                                    ``"confidence weighted"``,
+                                    ``"probability weighted"`` or ``threshold``.
 --pruning PRUNING_TYPE              The pruning applied in building the model.
                                     It's allowed values are ``smart``,
                                     ``statistical`` and ``no-pruning``

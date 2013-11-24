@@ -3,6 +3,12 @@
 History
 -------
 
+0.7.0 (2013-11-24)
+~~~~~~~~~~~~~~~~~~
+
+- Bug fixing: --dataset-price could not be set.
+- Adding the threshold combination method to the local ensemble.
+
 0.6.1 (2013-11-23)
 ~~~~~~~~~~~~~~~~~~
 
