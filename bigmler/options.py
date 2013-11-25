@@ -497,11 +497,11 @@ under the License.""" % version
                         dest='method',
                         default=defaults.get('method', plurality),
                         choices=["plurality", "confidence weighted",
-                                 "probability weighted"],
+                                 "probability weighted", "threshold"],
                         help="Method to combine votes from ensemble"
                              " predictions. Allowed methods: plurality"
-                             ", \"confidence weighted\" or "
-                             " \"probability weighted\".")
+                             ", \"confidence weighted\", "
+                             " \"probability weighted\", threshold.")
 
     # Resume a partial execution
     parser.add_argument('--resume',
@@ -701,6 +701,22 @@ under the License.""" % version
                         help=("Path to a file containing ensemble/ids. One "
                               "ensemble per line (e.g., "
                               "ensemble/50a206a8035d0706dc000376)."))
+
+    # Threshold. Minimum necessary number of votes to issue a prediction.
+    parser.add_argument('--threshold',
+                        action='store',
+                        dest='threshold',
+                        default=defaults.get('threshold', 1),
+                        type=int,
+                        help=("Minimum number of votes to issue a prediction"
+                             " for the threshold combiner."))
+
+    # Class. Label for the category used in threshold voting predictions.
+    parser.add_argument('--class',
+                        action='store',
+                        dest='threshold_class',
+                        default=defaults.get('threshold_class', None),
+                        help="Category used in threshold combiner method.")
 
     # The following options are only useful to deactivate the corresponding
     # oposed default values
