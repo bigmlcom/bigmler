@@ -177,16 +177,19 @@ def i_create_resources_from_ensemble_with_threshold(step, test=None, output2=Non
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
+@step(r'I create BigML resources using ensemble of (.*) models with replacement to test "(.*)" and log predictions in "(.*)"')
+def i_create_resources_from_ensemble_with_replacement(step, number_of_models=None, test=None, output=None):
+    i_create_resources_from_ensemble_generic(step, number_of_models, "", test, output)
 
-@step(r'I create BigML resources using ensemble of (.*) models (with replacement\s)to test "(.*)" and log predictions in "(.*)"')
-def i_create_resources_from_ensemble(step, number_of_models=None, alternative=None, test=None, output=None):
+@step(r'I create BigML resources using ensemble of (.*) models to test "(.*)" and log predictions in "(.*)"')
+def i_create_resources_from_ensemble(step, number_of_models=None, test=None, output=None):
+    i_create_resources_from_ensemble_generic(step, number_of_models, " --no-replacement", test, output)
+
+def i_create_resources_from_ensemble_generic(step, number_of_models=None, no_replacement="", test=None, output=None):
     if number_of_models is None or test is None or output is None:
         assert False
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
-    no_replacement = ""
-    if alternative is None:
-        no_replacement = " --no-replacement"
     try:
         retcode = check_call("bigmler --dataset " + world.dataset['resource'] + " --test " + test + " --number-of-models " + str(number_of_models) + " --tag my_ensemble --store --output " + output + no_replacement, shell=True)
         if retcode < 0:

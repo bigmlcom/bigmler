@@ -708,7 +708,8 @@ under the License.""" % version
                         dest='threshold',
                         default=defaults.get('threshold', 1),
                         type=int,
-                        help="Minimum number of votes to issue a prediction.")
+                        help=("Minimum number of votes to issue a prediction"
+                             " for the threshold combiner."))
 
     # Class. Label for the category used in threshold voting predictions.
     parser.add_argument('--class',
