@@ -63,6 +63,28 @@ def is_dataset_created(path, suffix=""):
         return False, None
 
 
+def are_datasets_created(path, number_of_datasets):
+    """Reads the dataset ids from the datasets file in the path directory
+
+    """
+    dataset_ids = []
+    try:
+        with open("%s%sdataset_parts" % (path, os.sep)) as datasets_file:
+            for line in datasets_file:
+                dataset = line.strip()
+                try:
+                    dataset_id = bigml.api.get_dataset_id(dataset)
+                    dataset_ids.append(dataset_id)
+                except ValueError:
+                    return False, dataset_ids
+        if len(dataset_ids) == number_of_datasets:
+            return True, dataset_ids
+        else:
+            return False, dataset_ids
+    except IOError:
+        return False, dataset_ids
+
+
 def are_models_created(path, number_of_models):
     """Reads the model ids from the models file in the path directory
 

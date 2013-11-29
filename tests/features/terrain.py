@@ -107,12 +107,12 @@ def cleanup_resources(feature):
     assert ensembles['code'] == HTTP_OK
     world.final_ensembles_count = ensembles['meta']['total_count']
 
-    assert world.final_sources_count == world.init_sources_count
-    assert world.final_datasets_count == world.init_datasets_count
-    assert world.final_models_count == world.init_models_count
-    assert world.final_predictions_count == world.init_predictions_count
+    assert world.final_sources_count == world.init_sources_count, "init: %s, final: %s" % (world.init_sources_count, world.final_sources_count)
+    assert world.final_datasets_count == world.init_datasets_count, "init: %s, final: %s" % (world.init_datasets_count, world.final_datasets_count)
+    assert world.final_models_count == world.init_models_count, "init: %s, final: %s" % (world.init_models_count, world.final_models_count)
+    assert world.final_predictions_count == world.init_predictions_count, "init: %s, final: %s" % (world.init_predictions_count, world.final_predictions_count)
     assert world.final_evaluations_count == world.init_evaluations_count, "init: %s, final: %s" % (world.init_evaluations_count, world.final_evaluations_count)
-    assert world.final_ensembles_count == world.init_ensembles_count
+    assert world.final_ensembles_count == world.init_ensembles_count, "init: %s, final: %s" % (world.init_ensembles_count, world.final_ensembles_count)
 
 @after.each_scenario
 def cleanup_output(scenario):

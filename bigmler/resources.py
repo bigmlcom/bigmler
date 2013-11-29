@@ -249,19 +249,19 @@ def set_dataset_split_args(name, description, args, sample_rate,
     }
 
 
-def create_dataset(source_or_dataset, dataset_args, args, api=None, path=None,
-                   session_file=None, log=None, dataset_type=None):
+def create_dataset(source_or_dataset, dataset_args, verbosity, api=None,
+                   path=None, session_file=None, log=None, dataset_type=None):
     """Creates remote dataset
 
     """
     if api is None:
         api = bigml.api.BigML()
     message = dated("Creating dataset.\n")
-    log_message(message, log_file=session_file, console=args.verbosity)
+    log_message(message, log_file=session_file, console=verbosity)
     dataset = api.create_dataset(source_or_dataset, dataset_args)
     suffix = "_" + dataset_type if dataset_type else ""
     log_created_resources("dataset%s" % suffix, path,
-                          bigml.api.get_dataset_id(dataset))
+                          bigml.api.get_dataset_id(dataset), open_mode='a')
     dataset_id = check_resource_error(dataset, "Failed to create dataset: ")
     try:
         dataset = check_resource(dataset, api.get_dataset,
@@ -269,7 +269,7 @@ def create_dataset(source_or_dataset, dataset_args, args, api=None, path=None,
     except ValueError, exception:
         sys.exit("Failed to get a finished dataset: %s" % str(exception))
     message = dated("Dataset created: %s\n" % get_url(dataset))
-    log_message(message, log_file=session_file, console=args.verbosity)
+    log_message(message, log_file=session_file, console=verbosity)
     log_message("%s\n" % dataset_id, log_file=log)
     return dataset
 
@@ -382,7 +382,7 @@ def set_label_model_args(name, description, args, labels, all_labels, fields,
     return model_args_list
 
 
-def create_models(dataset, model_ids, model_args,
+def create_models(datasets, model_ids, model_args,
                   args, api=None, path=None,
                   session_file=None, log=None):
     """Create remote models
@@ -394,6 +394,8 @@ def create_models(dataset, model_ids, model_args,
     models = model_ids[:]
     existing_models = len(models)
     model_args_list = []
+    datasets = datasets[existing_models:]
+    dataset = datasets[0]
     if isinstance(model_args, list):
         model_args_list = model_args
     if args.number_of_models > 0:
@@ -421,6 +423,8 @@ def create_models(dataset, model_ids, model_args,
             if args.cross_validation_rate > 0:
                 new_seed = get_basic_seed(i + existing_models)
                 model_args.update(seed=new_seed)
+            if len(datasets) > 1:
+                dataset = datasets[i]
             model = api.create_model(dataset, model_args)
             model_id = check_resource_error(model, "Failed to create model: ")
             log_message("%s\n" % model_id, log_file=log)

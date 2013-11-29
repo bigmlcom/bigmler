@@ -31,8 +31,9 @@ import bigmler.checkpoint as c
 
 from bigml.model import Model
 from bigml.multimodel import MultiModel, read_votes
-from bigml.util import (localize, console_log, get_predictions_file_name)
-from bigml.multivote import PLURALITY_CODE, THRESHOLD_CODE, MultiVote
+from bigml.util import localize, console_log, get_predictions_file_name
+from bigml.multivote import (PLURALITY_CODE, THRESHOLD_CODE, MultiVote,
+                             ws_confidence)
 
 from bigmler.test_reader import TestReader
 from bigmler.resources import FIELDS_QS, ALL_FIELDS_QS
@@ -43,6 +44,9 @@ BRIEF_FORMAT = 'brief'
 NORMAL_FORMAT = 'normal'
 FULL_FORMAT = 'full'
 AGGREGATION = -1
+COMBINATION = -2
+COMBINATION_LABEL = 'combined'
+OTHER = "***** other *****"
 
 
 def use_prediction_headers(prediction_headers, output, test_reader,
@@ -426,7 +430,6 @@ def local_batch_predict(models, test_reader, prediction_file, api,
             predictions = multivote.predictions
 
             if ordered and models_per_label == 1:
-
                 # as multi-labelled models are created from end to start votes
                 # must be reversed to match
                 predictions.reverse()
@@ -460,6 +463,20 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                     confidence_list.append(confidence)
             prediction = [label_separator.join(prediction_list),
                           label_separator.join(confidence_list)]
+        elif method==COMBINATION:
+            predictions = multivote.predictions
+            global_distribution = []
+            prediction_category = None
+            prediction_instances = 0
+            for prediction in predictions:
+                for category, instances in prediction['distribution']:
+                    if category != OTHER:
+                        if instances > prediction_instances:
+                            prediction_category = category
+                        global_distribution.append([category, instances])
+            prediction = [prediction_category,
+                          ws_confidence(prediction_category,
+                                        global_distribution)]
         else:
             prediction = multivote.combine(method=method, with_confidence=True,
                                            options=options)
@@ -498,7 +515,7 @@ def predict(test_set, test_set_header, models, fields, output,
     # For instance,
     #     model_50c0de043b563519830001c2_predictions.csv
     if (args.remote and not args.multi_label
-        and args.method != THRESHOLD_CODE):
+        and args.method != THRESHOLD_CODE and args.method != COMBINATION):
         if args.ensemble is not None:
             remote_predict_ensemble(args.ensemble, test_reader,
                                     prediction_file, api, resume,
@@ -525,7 +542,8 @@ def predict(test_set, test_set_header, models, fields, output,
             options.update(category=args.threshold_class)
         # For a small number of models, we build a MultiModel using all of
         # the given models and issue a combined prediction
-        if len(models) < max_models and not args.multi_label:
+        if (len(models) < max_models and not args.multi_label 
+            and args.max_categories == 0 and args.method != COMBINATION):
             local_predict(models, test_reader, output, args.method, options,
                           args.prediction_info, exclude)
         # For large numbers of models, we split the list of models in chunks
@@ -537,7 +555,12 @@ def predict(test_set, test_set_header, models, fields, output,
             # aggregation if the objective field is a multi-labelled field
             # or one of the available combination methods: plurality,
             # confidence weighted and probability weighted
-            method = AGGREGATION if args.multi_label else args.method
+            if args.multi_label:
+                method = AGGREGATION
+            elif args.max_categories > 0:
+                method = COMBINATION
+            else:
+                method = args.method
             # For multi-labelled models, the --models flag keeps the order
             # of the labels and the models but the --model-tag flag
             # retrieves the models with no order, so the correspondence with
