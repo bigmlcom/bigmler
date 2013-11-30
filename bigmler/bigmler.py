@@ -107,6 +107,8 @@ def non_compatible(args, option):
     if option == '--cross-validation-rate':
         return (args.test_set or args.evaluate or args.model or args.models or
                 args.model_tag)
+    if option == '--max-categories':
+        return (args.evaluate or args.test_split)
     return False
 
 
@@ -953,6 +955,11 @@ def main(args=sys.argv[1:]):
                      " --models or --model-tag. Usage:\n\n"
                      "bigmler --train data/iris.csv "
                      "--cross-validation-rate 0.1")
+
+    if command_args.max_categories and (
+            non_compatible(command_args, '--max-categories')):
+        parser.error("Non compatible flags: --max-categories cannot "
+                     "be used with --test-split.")
 
     if train_stdin and command_args.multi_label:
         parser.error("Reading multi-label training sets from stream "
