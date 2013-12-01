@@ -108,7 +108,7 @@ def non_compatible(args, option):
         return (args.test_set or args.evaluate or args.model or args.models or
                 args.model_tag)
     if option == '--max-categories':
-        return (args.evaluate or args.test_split)
+        return (args.evaluate or args.test_split or args.remote)
     return False
 
 
@@ -236,8 +236,6 @@ def dataset_processing(source, training_set, test_set, fields, api,
     # If we already have a dataset, we check the status and get the fields if
     # we hadn't them yet.
     if dataset:
-        if not datasets:
-            datasets = [dataset]
         dataset = r.get_dataset(dataset, api, args.verbosity, session_file)
         if not csv_properties and 'locale' in dataset['object']:
             csv_properties = {
@@ -245,6 +243,10 @@ def dataset_processing(source, training_set, test_set, fields, api,
         fields = Fields(dataset['object']['fields'], **csv_properties)
         if args.public_dataset:
             r.publish_dataset(dataset, args, api, session_file)
+        if not datasets:
+            datasets = [dataset]
+        else:
+            datasets[0] = dataset
     return datasets, resume, csv_properties, fields
 
 
@@ -959,7 +961,7 @@ def main(args=sys.argv[1:]):
     if command_args.max_categories and (
             non_compatible(command_args, '--max-categories')):
         parser.error("Non compatible flags: --max-categories cannot "
-                     "be used with --test-split.")
+                     "be used with --test-split, --remote or --evaluate.")
 
     if train_stdin and command_args.multi_label:
         parser.error("Reading multi-label training sets from stream "
