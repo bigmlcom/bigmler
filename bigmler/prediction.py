@@ -322,7 +322,7 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                         session_file=None, debug=False,
                         prediction_info=NORMAL_FORMAT,
                         labels=None, label_separator=None, ordered=True,
-                        exclude=None, models_per_label=1):
+                        exclude=None, models_per_label=1, other_label=OTHER):
 
     """Get local predictions form partial Multimodel, combine and save to file
 
@@ -463,14 +463,14 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                     confidence_list.append(confidence)
             prediction = [label_separator.join(prediction_list),
                           label_separator.join(confidence_list)]
-        elif method==COMBINATION:
+        elif method == COMBINATION:
             predictions = multivote.predictions
             global_distribution = []
             prediction_category = None
             prediction_instances = 0
             for prediction in predictions:
                 for category, instances in prediction['distribution']:
-                    if category != OTHER:
+                    if category != other_label:
                         if instances > prediction_instances:
                             prediction_category = category
                         global_distribution.append([category, instances])
@@ -488,7 +488,7 @@ def local_batch_predict(models, test_reader, prediction_file, api,
 def predict(test_set, test_set_header, models, fields, output,
             objective_field, args, api=None, log=None,
             max_models=MAX_MODELS, resume=False, session_file=None,
-            labels=None, models_per_label=1):
+            labels=None, models_per_label=1, other_label=OTHER):
     """Computes a prediction for each entry in the `test_set`.
 
        Predictions can be computed remotely, locally using MultiModels built
@@ -515,7 +515,7 @@ def predict(test_set, test_set_header, models, fields, output,
     # For instance,
     #     model_50c0de043b563519830001c2_predictions.csv
     if (args.remote and not args.multi_label
-        and args.method != THRESHOLD_CODE and args.method != COMBINATION):
+            and not args.method in [THRESHOLD_CODE, COMBINATION]):
         if args.ensemble is not None:
             remote_predict_ensemble(args.ensemble, test_reader,
                                     prediction_file, api, resume,
@@ -542,8 +542,8 @@ def predict(test_set, test_set_header, models, fields, output,
             options.update(category=args.threshold_class)
         # For a small number of models, we build a MultiModel using all of
         # the given models and issue a combined prediction
-        if (len(models) < max_models and not args.multi_label 
-            and args.max_categories == 0 and args.method != COMBINATION):
+        if (len(models) < max_models and not args.multi_label
+                and args.max_categories == 0 and args.method != COMBINATION):
             local_predict(models, test_reader, output, args.method, options,
                           args.prediction_info, exclude)
         # For large numbers of models, we split the list of models in chunks
@@ -577,4 +577,4 @@ def predict(test_set, test_set_header, models, fields, output,
                                 session_file, args.debug,
                                 args.prediction_info, labels,
                                 args.label_separator, ordered, exclude,
-                                models_per_label)
+                                models_per_label, other_label)

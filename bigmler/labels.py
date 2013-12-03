@@ -85,7 +85,7 @@ def label_model_args(name, label, all_labels, model_fields, objective_field):
 
     """
     label_field = get_label_field(objective_field, label)
-    # TODO: modify fields if user set it absolutely
+    # model_fields must be given in a relative syntax
     single_label_fields = model_fields[:]
     single_label_fields.extend(
         map(lambda x: ("-%s" % get_label_field(objective_field, x)

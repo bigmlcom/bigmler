@@ -703,7 +703,7 @@ High number of Categories
 
 In BigML there's a limit in the number of categories of a categorical
 objective field. This limit is set to ensure the quality of the resulting
-models. Sometimes, though, this becomes a restriction when dealing with
+models. This may become a restriction when dealing with
 categorical objective fields with a high number of categories. To cope with
 these cases, BigMLer offers the --max-categories option. Setting to a number
 lower than the mentioned limit, the existing categories will be organized in
@@ -721,12 +721,12 @@ For instance, to use the same ``iris.csv`` example, you could do::
 This command would generate a source and dataset object, as usual, but then,
 as the total number of categories is three and --max-categories is set to 1,
 three more datasets will be created, one per each category. After generating
-the correspondent models, the test data will be run through them and their
+the corresponding models, the test data will be run through them and their
 predictions combined to obtain the final predictions file. The same procedure
 would be applied if starting from a preexisting source or dataset using the
 ``--source`` or ``--dataset`` options.
 
-``--method`` option allows a new ``combine`` value to use such kind of
+``--method`` option accepts a new ``combine`` value to use such kind of
 combination. You can use it if you need to create a new group of predictions
 based on the same models produced in the first example. Filling the path to the
 model ids file::

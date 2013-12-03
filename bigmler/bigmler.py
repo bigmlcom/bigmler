@@ -112,24 +112,36 @@ def non_compatible(args, option):
     return False
 
 
+def create_other_label(categories, label):
+    """Creates a label that is not amongst the categories list
+
+    """
+    if not label in categories:
+        return label
+    return create_other_label(categories, "*%s*" % label)
+
+
 def get_categories_distribution(dataset, objective_id):
     """Returns the categories distribution in a categorical dataset
 
     """
-    dataset_info = dataset.get('object', [])
-    if dataset_info['objective_field']['optype'] == 'categorical':
-        if 'distribution' in dataset_info:
-            distribution = dataset_info['distribution']
-        elif ('objective_summary' in dataset_info):
-            summary = dataset_info['objective_summary']
-            if 'categories' in summary:
-                distribution = summary['categories']
+    try:
+        dataset_info = dataset.get('object', [])
+        if dataset_info['objective_field']['optype'] == 'categorical':
+            if 'distribution' in dataset_info:
+                distribution = dataset_info['distribution']
+            elif ('objective_summary' in dataset_info):
+                summary = dataset_info['objective_summary']
+                if 'categories' in summary:
+                    distribution = summary['categories']
+            else:
+                summary = dataset_info['fields'][objective_id]['summary']
+                if 'categories' in summary:
+                    distribution = summary['categories']
+            return distribution
         else:
-            summary = dataset_info['fields'][objective_id]['summary']
-            if 'categories' in summary:
-                distribution = summary['categories']
-        return distribution
-    else:
+            return []
+    except KeyError:
         return []
 
 
@@ -228,9 +240,9 @@ def dataset_processing(source, training_set, test_set, fields, api,
         dataset = bigml.api.get_dataset_id(args.dataset)
 
     # If set of datasets is provided, let's check their ids.
-    elif args._datasets:
-        for i in range(0, len(args._datasets)):
-            datasets.append(bigml.api.get_dataset_id(args._datasets[i]))
+    elif args.dataset_ids:
+        for i in range(0, len(args.dataset_ids)):
+            datasets.append(bigml.api.get_dataset_id(args.dataset_ids[i]))
         dataset = datasets[0]
 
     # If we already have a dataset, we check the status and get the fields if
@@ -651,9 +663,10 @@ def set_multi_label_objective(fields_dict, objective):
                  " fields.")
 
 
-def create_sliced_categories_datasets(dataset, distribution,
-                                      fields, args, api, resume,
-                                      session_file=None, path=None, log=None):
+def create_categories_datasets(dataset, distribution,
+                               fields, args, api, resume,
+                               session_file=None, path=None, log=None,
+                               other_label=OTHER):
     """Generates a new dataset using a subset of categories of the original one
 
     """
@@ -681,16 +694,18 @@ def create_sliced_categories_datasets(dataset, distribution,
         for element in split:
             category = element[0]
             category_selector += " (= v \"%s\")" % category
-        category_selector += ") v \"%s\")" % OTHER
-        category_filter = "(let (v (f %s)) %s)" % (fields.objective_field,
-                                                   category_selector)
+        category_selector += ") v \"%s\")" % other_label
+        category_generator = "(let (v (f %s)) %s)" % (fields.objective_field,
+                                                      category_selector)
         dataset_args = {
             "all_but": [fields.objective_field],
-            "new_fields":[
+            "new_fields": [
                 {"name": fields.field_name(fields.objective_field),
-                 "field": category_filter}]}
-        new_dataset = r.create_dataset(dataset, dataset_args, args.verbosity, api,
-                                       path, session_file, log, "parts")
+                 "field": category_generator}]}
+        new_dataset = r.create_dataset(dataset, dataset_args, args.verbosity,
+                                       api=api, path=path,
+                                       session_file=session_file,
+                                       log=log, dataset_type="parts")
         datasets.append(new_dataset)
     return datasets, resume
 
@@ -714,6 +729,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     model = None
     models = None
     fields = None
+    other_label = OTHER
     ensemble_ids = []
 
     # It is compulsory to have a description to publish either datasets or
@@ -790,9 +806,12 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         objective_id = fields.field_id(fields.objective_field)
         distribution = get_categories_distribution(dataset, objective_id)
         if distribution and len(distribution) > args.max_categories:
-            datasets, resume = create_sliced_categories_datasets(
+            categories = [element[0] for element in distribution]
+            other_label = create_other_label(categories, other_label)
+            datasets, resume = create_categories_datasets(
                 dataset, distribution, fields, args,
-                api, resume, session_file=session_file, path=path, log=log)
+                api, resume, session_file=session_file, path=path, log=log,
+                other_label=other_label)
 
     models, model_ids, ensemble_ids, resume = models_processing(
         datasets, models, model_ids,
@@ -840,7 +859,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         predict(test_set, test_set_header, models, fields, output,
                 objective_field, args, api, log,
                 args.max_batch_models, resume, session_file, labels=labels,
-                models_per_label=models_per_label)
+                models_per_label=models_per_label, other_label=other_label)
 
     # When combine_votes flag is used, retrieve the predictions files saved
     # in the comma separated list of directories and combine them
@@ -1143,13 +1162,13 @@ def main(args=sys.argv[1:]):
         output_args.update(model_ids=model_ids)
 
     dataset_ids = None
-    command_args._datasets = []
+    command_args.dataset_ids = []
     # Parses dataset/id if provided.
     if command_args.datasets:
         dataset_ids = u.read_datasets(command_args.datasets)
         if len(dataset_ids) == 1:
             command_args.dataset = dataset_ids[0]
-        command_args._datasets = dataset_ids
+        command_args.dataset_ids = dataset_ids
 
     # Retrieve model/ids if provided.
     if command_args.model_tag:
