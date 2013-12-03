@@ -68,7 +68,8 @@ from bigmler.options import create_parser
 from bigmler.defaults import get_user_defaults
 from bigmler.defaults import DEFAULTS_FILE
 from bigmler.prediction import predict, combine_votes
-from bigmler.prediction import MAX_MODELS, FULL_FORMAT
+from bigmler.prediction import (MAX_MODELS, FULL_FORMAT, OTHER, COMBINATION,
+                                COMBINATION_LABEL)
 from bigmler.train_reader import TrainReader
 
 
@@ -92,6 +93,13 @@ def has_models(args):
             or args.models or args.model_tag or args.ensemble_tag)
 
 
+def has_datasets(args):
+    """Returns if some kind of dataset id is given in args.
+
+    """
+    return args.dataset or args.datasets or args.dataset_tag
+
+
 def non_compatible(args, option):
     """Return non_compatible options
 
@@ -99,7 +107,42 @@ def non_compatible(args, option):
     if option == '--cross-validation-rate':
         return (args.test_set or args.evaluate or args.model or args.models or
                 args.model_tag)
+    if option == '--max-categories':
+        return (args.evaluate or args.test_split or args.remote)
     return False
+
+
+def create_other_label(categories, label):
+    """Creates a label that is not amongst the categories list
+
+    """
+    if not label in categories:
+        return label
+    return create_other_label(categories, "*%s*" % label)
+
+
+def get_categories_distribution(dataset, objective_id):
+    """Returns the categories distribution in a categorical dataset
+
+    """
+    try:
+        dataset_info = dataset.get('object', [])
+        if dataset_info['objective_field']['optype'] == 'categorical':
+            if 'distribution' in dataset_info:
+                distribution = dataset_info['distribution']
+            elif ('objective_summary' in dataset_info):
+                summary = dataset_info['objective_summary']
+                if 'categories' in summary:
+                    distribution = summary['categories']
+            else:
+                summary = dataset_info['fields'][objective_id]['summary']
+                if 'categories' in summary:
+                    distribution = summary['categories']
+            return distribution
+        else:
+            return []
+    except KeyError:
+        return []
 
 
 def source_processing(training_set, test_set, training_set_header,
@@ -171,6 +214,7 @@ def dataset_processing(source, training_set, test_set, fields, api,
     """Creating or retrieving dataset from input arguments
 
     """
+    datasets = []
     dataset = None
     if (training_set or args.source or (args.evaluate and test_set)):
         # if resuming, try to extract args.dataset form log files
@@ -183,17 +227,23 @@ def dataset_processing(source, training_set, test_set, fields, api,
     # If we have a source but no dataset or model has been provided, we
     # create a new dataset if the no_dataset option isn't set up. Also
     # if evaluate is set and test_set has been provided.
-    if ((source and not args.dataset and not args.no_dataset
-            and not has_models(args)) or
+    if ((source and not has_datasets(args) and not has_models(args)
+         and not args.no_dataset) or
             (args.evaluate and args.test_set and not args.dataset)):
         dataset_args = r.set_dataset_args(name, description, args, fields,
                                           dataset_fields)
-        dataset = r.create_dataset(source, dataset_args, args, api,
+        dataset = r.create_dataset(source, dataset_args, args.verbosity, api,
                                    path, session_file, log)
 
     # If a dataset is provided, let's retrieve it.
     elif args.dataset:
         dataset = bigml.api.get_dataset_id(args.dataset)
+
+    # If set of datasets is provided, let's check their ids.
+    elif args.dataset_ids:
+        for i in range(0, len(args.dataset_ids)):
+            datasets.append(bigml.api.get_dataset_id(args.dataset_ids[i]))
+        dataset = datasets[0]
 
     # If we already have a dataset, we check the status and get the fields if
     # we hadn't them yet.
@@ -205,12 +255,17 @@ def dataset_processing(source, training_set, test_set, fields, api,
         fields = Fields(dataset['object']['fields'], **csv_properties)
         if args.public_dataset:
             r.publish_dataset(dataset, args, api, session_file)
-    return dataset, resume, csv_properties, fields
+        if not datasets:
+            datasets = [dataset]
+        else:
+            datasets[0] = dataset
+    return datasets, resume, csv_properties, fields
 
 
 def split_processing(dataset, api, args, resume, name=None, description=None,
                      session_file=None, path=None, log=None):
     """Splits a dataset into train and test datasets
+
     """
     train_dataset = None
     test_dataset = None
@@ -228,8 +283,8 @@ def split_processing(dataset, api, args, resume, name=None, description=None,
             int(sample_rate * 100)), description, args,
             sample_rate, out_of_bag=False)
         train_dataset = r.create_dataset(
-            dataset, dataset_split_args, args, api, path, session_file,
-            log, "train")
+            dataset, dataset_split_args, args.verbosity, api, path,
+            session_file, log, "train")
         if train_dataset:
             train_dataset = r.get_dataset(train_dataset, api,
                                           args.verbosity, session_file)
@@ -247,8 +302,8 @@ def split_processing(dataset, api, args, resume, name=None, description=None,
             int(args.test_split * 100)), description, args,
             sample_rate, out_of_bag=True)
         test_dataset = r.create_dataset(
-            dataset, dataset_split_args, args, api, path, session_file,
-            log, "test")
+            dataset, dataset_split_args, args.verbosity, api, path,
+            session_file, log, "test")
         if test_dataset:
             test_dataset = r.get_dataset(test_dataset, api, args.verbosity,
                                          session_file)
@@ -285,7 +340,7 @@ def ensemble_processing(dataset, objective_field, fields, api, args, resume,
     return ensembles, ensemble_ids, models, model_ids, resume
 
 
-def model_per_label(labels, all_labels, dataset, fields,
+def model_per_label(labels, all_labels, datasets, fields,
                     objective_field, api, args, resume, name=None,
                     description=None, model_fields=None,
                     session_file=None, path=None, log=None):
@@ -316,7 +371,7 @@ def model_per_label(labels, all_labels, dataset, fields,
     # create models changing the input_field to select
     # only one label at a time
     models, model_ids = r.create_models(
-        dataset, models, model_args_list, args, api,
+        datasets, models, model_args_list, args, api,
         path, session_file, log)
     args.number_of_models = 1
     return models, model_ids, resume
@@ -366,7 +421,7 @@ def ensemble_per_label(labels, all_labels, dataset, fields,
     return ensembles, ensemble_ids, models, model_ids, resume
 
 
-def models_processing(dataset, models, model_ids, objective_field, fields,
+def models_processing(datasets, models, model_ids, objective_field, fields,
                       api, args, resume,
                       name=None, description=None, model_fields=None,
                       session_file=None, path=None,
@@ -376,9 +431,11 @@ def models_processing(dataset, models, model_ids, objective_field, fields,
     """
     log_models = False
     ensemble_ids = []
+
     # If we have a dataset but not a model, we create the model if the no_model
     # flag hasn't been set up.
-    if dataset and not (has_models(args) or args.no_model):
+    if datasets and not (has_models(args) or args.no_model):
+        dataset = datasets[0]
         model_ids = []
         models = []
         if args.multi_label:
@@ -390,7 +447,7 @@ def models_processing(dataset, models, model_ids, objective_field, fields,
             # number of models
             if args.number_of_models < 2:
                 models, model_ids, resume = model_per_label(
-                    labels, all_labels, dataset, fields,
+                    labels, all_labels, datasets, fields,
                     objective_field, api, args, resume, name, description,
                     model_fields, session_file, path, log)
             else:
@@ -411,7 +468,11 @@ def models_processing(dataset, models, model_ids, objective_field, fields,
             ensemble = ensembles[0]
             args.ensemble = bigml.api.get_ensemble_id(ensemble)
             log_models = True
+
         else:
+            # Set of partial datasets created setting args.max_categories
+            if len(datasets) > 1:
+                args.number_of_models = len(datasets)
             # Cross-validation case: we create 2 * n models to be validated
             # holding out an n% of data
             if args.cross_validation_rate > 0:
@@ -437,7 +498,7 @@ def models_processing(dataset, models, model_ids, objective_field, fields,
             model_args = r.set_model_args(name, description, args,
                                           objective_field, fields,
                                           model_fields)
-            models, model_ids = r.create_models(dataset, models,
+            models, model_ids = r.create_models(datasets, models,
                                                 model_args, args, api,
                                                 path, session_file, log)
     # If a model is provided, we use it.
@@ -602,6 +663,53 @@ def set_multi_label_objective(fields_dict, objective):
                  " fields.")
 
 
+def create_categories_datasets(dataset, distribution,
+                               fields, args, api, resume,
+                               session_file=None, path=None, log=None,
+                               other_label=OTHER):
+    """Generates a new dataset using a subset of categories of the original one
+
+    """
+    if args.max_categories < 1:
+        sys.exit("--max-categories can only be a positive number.")
+    datasets = []
+    categories_splits = [distribution[i: i + args.max_categories] for i
+                         in range(0, len(distribution) / args.max_categories)]
+    number_of_datasets = len(categories_splits)
+
+    if resume:
+        resume, datasets = c.checkpoint(
+            c.are_datasets_created, path, number_of_datasets,
+            debug=args.debug)
+        if not resume:
+            message = u.dated("Found %s datasets out of %s. Resuming.\n"
+                              % (len(datasets),
+                                 number_of_datasets))
+            u.log_message(message, log_file=session_file,
+                          console=args.verbosity)
+
+    for i in range(len(datasets), number_of_datasets):
+        split = categories_splits[i]
+        category_selector = "(if (or"
+        for element in split:
+            category = element[0]
+            category_selector += " (= v \"%s\")" % category
+        category_selector += ") v \"%s\")" % other_label
+        category_generator = "(let (v (f %s)) %s)" % (fields.objective_field,
+                                                      category_selector)
+        dataset_args = {
+            "all_but": [fields.objective_field],
+            "new_fields": [
+                {"name": fields.field_name(fields.objective_field),
+                 "field": category_generator}]}
+        new_dataset = r.create_dataset(dataset, dataset_args, args.verbosity,
+                                       api=api, path=path,
+                                       session_file=session_file,
+                                       log=log, dataset_type="parts")
+        datasets.append(new_dataset)
+    return datasets, resume
+
+
 def compute_output(api, args, training_set, test_set=None, output=None,
                    objective_field=None,
                    description=None,
@@ -621,6 +729,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     model = None
     models = None
     fields = None
+    other_label = OTHER
     ensemble_ids = []
 
     # It is compulsory to have a description to publish either datasets or
@@ -675,11 +784,13 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         field_attributes=field_attributes,
         types=types, session_file=session_file, path=path, log=log)
 
-    dataset, resume, csv_properties, fields = dataset_processing(
+    datasets, resume, csv_properties, fields = dataset_processing(
         source, training_set, test_set, fields,
         api, args, resume, name=name, description=description,
         dataset_fields=dataset_fields, csv_properties=csv_properties,
         session_file=session_file, path=path, log=log)
+    if datasets:
+        dataset = datasets[0]
 
     # If test_split is used, split the dataset in a training and a test dataset
     # according to the given split
@@ -687,9 +798,23 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         dataset, test_dataset, resume = split_processing(
             dataset, api, args, resume, name=name, description=description,
             session_file=session_file, path=path, log=log)
+        datasets[0] = dataset
+
+    # Check if the dataset has a categorical objective field and it
+    # has a max_categories limit for categories
+    if args.max_categories > 0 and len(datasets) == 1:
+        objective_id = fields.field_id(fields.objective_field)
+        distribution = get_categories_distribution(dataset, objective_id)
+        if distribution and len(distribution) > args.max_categories:
+            categories = [element[0] for element in distribution]
+            other_label = create_other_label(categories, other_label)
+            datasets, resume = create_categories_datasets(
+                dataset, distribution, fields, args,
+                api, resume, session_file=session_file, path=path, log=log,
+                other_label=other_label)
 
     models, model_ids, ensemble_ids, resume = models_processing(
-        dataset, models, model_ids,
+        datasets, models, model_ids,
         objective_field, fields, api, args, resume,
         name=name, description=description, model_fields=model_fields,
         session_file=session_file, path=path, log=log, labels=labels,
@@ -734,7 +859,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         predict(test_set, test_set_header, models, fields, output,
                 objective_field, args, api, log,
                 args.max_batch_models, resume, session_file, labels=labels,
-                models_per_label=models_per_label)
+                models_per_label=models_per_label, other_label=other_label)
 
     # When combine_votes flag is used, retrieve the predictions files saved
     # in the comma separated list of directories and combine them
@@ -838,7 +963,8 @@ def main(args=sys.argv[1:]):
     user_defaults = get_user_defaults()
     parser = create_parser(defaults=get_user_defaults(),
                            constants={'NOW': NOW,
-                           'MAX_MODELS': MAX_MODELS, 'PLURALITY': PLURALITY})
+                                      'MAX_MODELS': MAX_MODELS,
+                                      'PLURALITY': PLURALITY})
 
     # Parses command line arguments.
     command_args = parser.parse_args(args)
@@ -850,6 +976,11 @@ def main(args=sys.argv[1:]):
                      " --models or --model-tag. Usage:\n\n"
                      "bigmler --train data/iris.csv "
                      "--cross-validation-rate 0.1")
+
+    if command_args.max_categories and (
+            non_compatible(command_args, '--max-categories')):
+        parser.error("Non compatible flags: --max-categories cannot "
+                     "be used with --test-split, --remote or --evaluate.")
 
     if train_stdin and command_args.multi_label:
         parser.error("Reading multi-label training sets from stream "
@@ -1030,11 +1161,14 @@ def main(args=sys.argv[1:]):
         model_ids = u.read_resources(command_args.models)
         output_args.update(model_ids=model_ids)
 
-    dataset_id = None
+    dataset_ids = None
+    command_args.dataset_ids = []
     # Parses dataset/id if provided.
     if command_args.datasets:
-        dataset_id = u.read_dataset(command_args.datasets)
-        command_args.dataset = dataset_id
+        dataset_ids = u.read_datasets(command_args.datasets)
+        if len(dataset_ids) == 1:
+            command_args.dataset = dataset_ids[0]
+        command_args.dataset_ids = dataset_ids
 
     # Retrieve model/ids if provided.
     if command_args.model_tag:
@@ -1059,12 +1193,13 @@ def main(args=sys.argv[1:]):
         command_args.tag.append('BigMLer_%s' % NOW)
 
     # Checks combined votes method
-    if (command_args.method and
-            not command_args.method in COMBINATION_WEIGHTS.keys()):
+    if (command_args.method and command_args.method != COMBINATION_LABEL and
+            not (command_args.method in COMBINATION_WEIGHTS.keys())):
         command_args.method = 0
     else:
         combiner_methods = dict([[value, key]
                                 for key, value in COMBINER_MAP.items()])
+        combiner_methods[COMBINATION_LABEL] = COMBINATION
         command_args.method = combiner_methods.get(command_args.method, 0)
 
     # Adds replacement=True if creating ensemble and nothing is specified

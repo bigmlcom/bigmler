@@ -698,6 +698,52 @@ data stored in a file or a previous dataset::
             --dataset dataset/50a1f441035d0706d9000371 --evaluate
 
 
+High number of Categories
+-------------------------
+
+In BigML there's a limit in the number of categories of a categorical
+objective field. This limit is set to ensure the quality of the resulting
+models. This may become a restriction when dealing with
+categorical objective fields with a high number of categories. To cope with
+these cases, BigMLer offers the --max-categories option. Setting to a number
+lower than the mentioned limit, the existing categories will be organized in
+subsets of that size. Then the original dataset will be copied many times, one
+per subset, and its objective field will only keep the categories belonging to
+each subset plus a generic ``***** other *****`` category that will summarize
+the rest of categories. Then a model will be created from each dataset and
+the test data will be run through them to generate partial predictions. The
+final prediction will be extracted by merging the distributions obtained for
+each model's prediction ignoring the ``***** other ******`` generic category.
+For instance, to use the same ``iris.csv`` example, you could do::
+
+    bigmler --train data/iris.csv --max-categories 1 --test data/test_iris.csv
+
+This command would generate a source and dataset object, as usual, but then,
+as the total number of categories is three and --max-categories is set to 1,
+three more datasets will be created, one per each category. After generating
+the corresponding models, the test data will be run through them and their
+predictions combined to obtain the final predictions file. The same procedure
+would be applied if starting from a preexisting source or dataset using the
+``--source`` or ``--dataset`` options.
+
+``--method`` option accepts a new ``combine`` value to use such kind of
+combination. You can use it if you need to create a new group of predictions
+based on the same models produced in the first example. Filling the path to the
+model ids file::
+
+    bigmler --models my_dir/models --method combine --test data/new_test.csv
+
+the new predictions will be created. Also, you could use the set of datasets
+created in the first case as starting point. Their ids are stored in a
+``dataset_parts`` file that can be found in the output location::
+
+    bigmler --dataset my_dir/dataset_parts --method combine \
+            --test data/test.csv
+
+This command would cause a new set of models, one per dataset, to be generated
+and their predictions would be combined in a final predictions file.
+
+
 Deleting Remote Resources
 -------------------------
 
@@ -961,7 +1007,8 @@ Basic Functionality
                                     auto-generated file created by BigMLer.
 --method METHOD                     Prediction method used: ``plurality``,
                                     ``"confidence weighted"``,
-                                    ``"probability weighted"`` or ``threshold``.
+                                    ``"probability weighted"``, ``threshold``
+                                    or ``combined``.
 --pruning PRUNING_TYPE              The pruning applied in building the model.
                                     It's allowed values are ``smart``,
                                     ``statistical`` and ``no-pruning``
@@ -1012,6 +1059,11 @@ Data Configuration
 --prediction-header                 Include a headers row in the prediction file
 --prediction-fields TEST_FIELDS     Comma-separated list of fields of the test
                                     file to be included in the prediction file
+--max-categories CATEGORIES_NUMBER  Sets the maximum number of categories that
+                                    will be used in a dataset. When more
+                                    categories are found, new datasets are
+                                    generated to analize the remaining
+                                    categories.
 
 
 Remote Resources

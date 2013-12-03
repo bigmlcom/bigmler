@@ -100,7 +100,8 @@ FLAGS = {'BigMLer': [{'flag': 'debug', 'type': 'boolean'},
                      {'flag': 'max_parallel_ensembles', 'type': 'int'},
                      {'flag': 'ensembles', 'type': 'string'},
                      {'flag': 'threshold', 'type': 'int'},
-                     {'flag': 'threshold_class', 'type': 'string'}]}
+                     {'flag': 'threshold_class', 'type': 'string'},
+                     {'flag': 'max_categories', 'type': 'int'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):

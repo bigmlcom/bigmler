@@ -151,18 +151,20 @@ def read_resources(path):
     return resources
 
 
-def read_dataset(path):
-    """Reads dataset id from a file.
+def read_datasets(path):
+    """Reads dataset ids from a file.
 
     For example:
 
     dataset/50978822035d0706da000069
+    dataset/50978822035d0706da000073
+    dataset/50978822035d0706da000085
 
     """
     datasets = []
     for line in fileinput.input([path]):
         datasets.append(line.rstrip())
-    return datasets[0]
+    return datasets
 
 
 def read_json_filter(path):

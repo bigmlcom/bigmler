@@ -30,7 +30,8 @@ from bigmler.utils import log_message
 
 
 def is_source_created(path):
-    """Reads the source id from the source file in the path directory
+    """Checks existence and reads the source id from the source file in the
+       path directory
 
     """
     source_id = None
@@ -47,7 +48,8 @@ def is_source_created(path):
 
 
 def is_dataset_created(path, suffix=""):
-    """Reads the dataset id from the dataset file in the path directory
+    """Checks existence and reads the dataset id from the dataset file in
+       the path directory
 
     """
     dataset_id = None
@@ -63,8 +65,32 @@ def is_dataset_created(path, suffix=""):
         return False, None
 
 
+def are_datasets_created(path, number_of_datasets):
+    """Checks existence and reads the dataset ids from the datasets file in
+       the path directory
+
+    """
+    dataset_ids = []
+    try:
+        with open("%s%sdataset_parts" % (path, os.sep)) as datasets_file:
+            for line in datasets_file:
+                dataset = line.strip()
+                try:
+                    dataset_id = bigml.api.get_dataset_id(dataset)
+                    dataset_ids.append(dataset_id)
+                except ValueError:
+                    return False, dataset_ids
+        if len(dataset_ids) == number_of_datasets:
+            return True, dataset_ids
+        else:
+            return False, dataset_ids
+    except IOError:
+        return False, dataset_ids
+
+
 def are_models_created(path, number_of_models):
-    """Reads the model ids from the models file in the path directory
+    """Checks existence and reads the model ids from the models file in the
+       path directory
 
     """
     model_ids = []
@@ -86,7 +112,8 @@ def are_models_created(path, number_of_models):
 
 
 def are_predictions_created(predictions_file, number_of_tests):
-    """Reads the predictions from the predictions file in the path directory
+    """Checks existence and reads the predictions from the predictions file in
+       the path directory
 
     """
     predictions = file_number_of_lines(predictions_file)
@@ -97,7 +124,8 @@ def are_predictions_created(predictions_file, number_of_tests):
 
 
 def is_evaluation_created(path):
-    """Reads the evaluation id from the evaluation file in the path directory
+    """Checks existence and reads the evaluation id from the evaluation file
+       in the path directory
 
     """
     evaluation_id = None
@@ -114,8 +142,8 @@ def is_evaluation_created(path):
 
 
 def are_evaluations_created(path, number_of_evaluations):
-    """Reads the evaluation ids from the evaluations file in the path directory
-       and checks the corresponding evaluations
+    """Checks existence and reads the evaluation ids from the evaluations file
+       in the path directory and checks the corresponding evaluations
 
     """
     evaluation_ids = []
@@ -137,7 +165,8 @@ def are_evaluations_created(path, number_of_evaluations):
 
 
 def are_ensembles_created(path, number_of_ensembles):
-    """Reads the ensembles ids from the ensembles file in the path directory
+    """Checks and reads the ensembles ids from the ensembles file in the
+       path directory
 
     """
     ensemble_ids = []

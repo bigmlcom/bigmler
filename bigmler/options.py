@@ -497,11 +497,14 @@ under the License.""" % version
                         dest='method',
                         default=defaults.get('method', plurality),
                         choices=["plurality", "confidence weighted",
-                                 "probability weighted", "threshold"],
+                                 "probability weighted", "threshold",
+                                 "combined"],
                         help="Method to combine votes from ensemble"
                              " predictions. Allowed methods: plurality"
                              ", \"confidence weighted\", "
-                             " \"probability weighted\", threshold.")
+                             " \"probability weighted\", threshold. Also"
+                             " \"combined\" for datasets with subsets of"
+                             " categories")
 
     # Resume a partial execution
     parser.add_argument('--resume',
@@ -717,6 +720,15 @@ under the License.""" % version
                         dest='threshold_class',
                         default=defaults.get('threshold_class', None),
                         help="Category used in threshold combiner method.")
+
+    # Max number of categories to be included in a model
+    parser.add_argument('--max-categories',
+                        action='store',
+                        dest='max_categories',
+                        default=defaults.get('max_categories', 0),
+                        type=int,
+                        help=("Max number of categories to be included in"
+                              " a model."))
 
     # The following options are only useful to deactivate the corresponding
     # oposed default values
