@@ -207,8 +207,8 @@ def source_processing(training_set, test_set, training_set_header,
     return source, resume, csv_properties, fields
 
 
-def dataset_processing(source, training_set, test_set, fields, api,
-                       args, resume,  name=None, description=None,
+def dataset_processing(source, training_set, test_set, fields, objective_field,
+                       api, args, resume,  name=None, description=None,
                        dataset_fields=None, csv_properties=None,
                        session_file=None, path=None, log=None):
     """Creating or retrieving dataset from input arguments
@@ -255,6 +255,15 @@ def dataset_processing(source, training_set, test_set, fields, api,
         fields = Fields(dataset['object']['fields'], **csv_properties)
         if args.public_dataset:
             r.publish_dataset(dataset, args, api, session_file)
+        if args.objective_field:
+            dataset_args = r.set_dataset_args(name, description, args, fields,
+                                  dataset_fields, objective_field)
+            dataset = r.update_dataset(dataset, dataset_args, args.verbosity,
+                                       api=api, session_file=session_file)
+            dataset = r.get_dataset(dataset, api, args.verbosity, session_file)
+            csv_properties.update(objective_field=objective_field,
+                                  objective_field_present=True)
+            fields = Fields(dataset['object']['fields'], **csv_properties)
         if not datasets:
             datasets = [dataset]
         else:
@@ -670,11 +679,12 @@ def create_categories_datasets(dataset, distribution,
     """Generates a new dataset using a subset of categories of the original one
 
     """
+
     if args.max_categories < 1:
         sys.exit("--max-categories can only be a positive number.")
     datasets = []
     categories_splits = [distribution[i: i + args.max_categories] for i
-                         in range(0, len(distribution) / args.max_categories)]
+                         in range(0, len(distribution), args.max_categories)]
     number_of_datasets = len(categories_splits)
 
     if resume:
@@ -785,7 +795,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         types=types, session_file=session_file, path=path, log=log)
 
     datasets, resume, csv_properties, fields = dataset_processing(
-        source, training_set, test_set, fields,
+        source, training_set, test_set, fields, objective_field,
         api, args, resume, name=name, description=description,
         dataset_fields=dataset_fields, csv_properties=csv_properties,
         session_file=session_file, path=path, log=log)

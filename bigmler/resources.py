@@ -211,7 +211,8 @@ def update_source_fields(source, updated_values, fields, api=None,
     return source
 
 
-def set_dataset_args(name, description, args, fields, dataset_fields):
+def set_dataset_args(name, description, args, fields, dataset_fields,
+                     objective_field=None):
     """Return dataset arguments dict
 
     """
@@ -222,6 +223,9 @@ def set_dataset_args(name, description, args, fields, dataset_fields):
         "tags": args.tag
     }
 
+    if objective_field is not None and fields is not None:
+        dataset_args.update(objective_field={'id':
+                                             fields.field_id(objective_field)})
     if args.json_filter:
         dataset_args.update(json_filter=args.json_filter)
     elif args.lisp_filter:
@@ -300,16 +304,23 @@ def publish_dataset(dataset, args, api=None, session_file=None):
         api = bigml.api.BigML()
     public_dataset = {"private": False}
     if args.dataset_price:
-        message = dated("Updating dataset. %s\n" %
-                        get_url(dataset))
-        log_message(message, log_file=session_file,
-                    console=args.verbosity)
         public_dataset.update(price=args.dataset_price)
+    return update_dataset(dataset, public_dataset, args.verbosity, api=api,
+                          session_file=session_file)
+
+
+def update_dataset(dataset, dataset_args, verbosity,
+                   api=None, session_file=None):
+    """Updates dataset properties
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
     message = dated("Updating dataset. %s\n" %
                     get_url(dataset))
     log_message(message, log_file=session_file,
-                console=args.verbosity)
-    dataset = api.update_dataset(dataset, public_dataset)
+                console=verbosity)
+    dataset = api.update_dataset(dataset, dataset_args)
     check_resource_error(dataset, "Failed to update dataset: ")
     return dataset
 
