@@ -716,7 +716,8 @@ final prediction will be extracted by merging the distributions obtained for
 each model's prediction ignoring the ``***** other ******`` generic category.
 For instance, to use the same ``iris.csv`` example, you could do::
 
-    bigmler --train data/iris.csv --max-categories 1 --test data/test_iris.csv
+    bigmler --train data/iris.csv --max-categories 1 \
+            --test data/test_iris.csv --objective species
 
 This command would generate a source and dataset object, as usual, but then,
 as the total number of categories is three and --max-categories is set to 1,
@@ -724,14 +725,17 @@ three more datasets will be created, one per each category. After generating
 the corresponding models, the test data will be run through them and their
 predictions combined to obtain the final predictions file. The same procedure
 would be applied if starting from a preexisting source or dataset using the
-``--source`` or ``--dataset`` options.
+``--source`` or ``--dataset`` options. Please note that the ``--objective``
+flag is mandatory in this case to ensure that the right categorical field
+is selected as objective field.
 
 ``--method`` option accepts a new ``combine`` value to use such kind of
 combination. You can use it if you need to create a new group of predictions
 based on the same models produced in the first example. Filling the path to the
 model ids file::
 
-    bigmler --models my_dir/models --method combine --test data/new_test.csv
+    bigmler --models my_dir/models --method combine \
+            --test data/new_test.csv
 
 the new predictions will be created. Also, you could use the set of datasets
 created in the first case as starting point. Their ids are stored in a
