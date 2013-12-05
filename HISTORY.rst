@@ -3,6 +3,13 @@
 History
 -------
 
+0.8.1 (2013-12-04)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing problem with --max-categories when the categorical field is not
+  a preferred field of the dataset.
+
+
 0.8.0 (2013-11-29)
 ~~~~~~~~~~~~~~~~~~
 
