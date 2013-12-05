@@ -3,13 +3,15 @@
 History
 -------
 
-0.8.0 (2013-11-29)
+0.8.0 (2013-12-04)
 ~~~~~~~~~~~~~~~~~~
 
 - Adding the --max-categories option to handle datasets with a high number of
   categories.
 - Adding the --method combine option to produce predictions with the sets
   of datasets generated using --max-categories option.
+- Fixing problem with --max-categories when the categorical field is not
+  a preferred field of the dataset.
 
 0.7.0 (2013-11-24)
 ~~~~~~~~~~~~~~~~~~

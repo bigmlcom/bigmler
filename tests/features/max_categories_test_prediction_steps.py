@@ -7,14 +7,14 @@ from subprocess import check_call, CalledProcessError
 from bigmler.checkpoint import file_number_of_lines
 from bigml.api import check_resource
 
-@step(r'I create BigML resources from "(.*)" with (\d+) as categories limit to test "(.*)" and log predictions in "(.*)"')
-def i_create_all_mc_resources(step, data, max_categories=None, test=None, output=None):
-    if max_categories is None or test is None or output is None:
+@step(r'I create BigML resources from "(.*)" with (\d+) as categories limit and (.*) as objective field to test "(.*)" and log predictions in "(.*)"')
+def i_create_all_mc_resources(step, data, max_categories=None, objective=None, test=None, output=None):
+    if max_categories is None or test is None or output is None or objective is None:
         assert False
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
-        command = "bigmler --train " + data + " --max-categories " + max_categories +  " --test " + test + " --store --output " + output
+        command = "bigmler --train " + data + " --max-categories " + max_categories + " --objective " + objective + " --test " + test + " --store --output " + output
         retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
@@ -28,14 +28,14 @@ def i_create_all_mc_resources(step, data, max_categories=None, test=None, output
         assert False, str(exc)
 
 
-@step(r'I create BigML resources with (\d+) as categories limit using source to test "(.*)" and log predictions in "(.*)"')
-def i_create_all_mc_resources_from_source(step, max_categories=None, test=None, output=None):
+@step(r'I create BigML resources with (\d+) as categories limit and (.*) as objective field using source to test "(.*)" and log predictions in "(.*)"')
+def i_create_all_mc_resources_from_source(step, max_categories=None, objective=None, test=None, output=None):
     if max_categories is None or test is None or output is None:
         assert False
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
-        command = "bigmler --source " + world.source['resource'] + " --max-categories " + max_categories +  " --test " + test + " --store --output " + output
+        command = "bigmler --source " + world.source['resource'] + " --max-categories " + max_categories +  " --objective " + objective + " --test " + test + " --store --output " + output
         retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
@@ -49,14 +49,14 @@ def i_create_all_mc_resources_from_source(step, max_categories=None, test=None, 
         assert False, str(exc)
 
 
-@step(r'I create BigML resources with (\d+) as categories limit using dataset to test "(.*)" and log predictions in "(.*)"')
-def i_create_all_mc_resources_from_dataset(step, max_categories=None, test=None, output=None):
+@step(r'I create BigML resources with (\d+) as categories limit and (.*) as objective field using dataset to test "(.*)" and log predictions in "(.*)"')
+def i_create_all_mc_resources_from_dataset(step, max_categories=None, objective=None, test=None, output=None):
     if max_categories is None or test is None or output is None:
         assert False
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
-        command = "bigmler --dataset " + world.dataset['resource'] + " --max-categories " + max_categories +  " --test " + test + " --store --output " + output
+        command = "bigmler --dataset " + world.dataset['resource'] + " --max-categories " + max_categories + " --objective " + objective + " --test " + test + " --store --output " + output
         retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False

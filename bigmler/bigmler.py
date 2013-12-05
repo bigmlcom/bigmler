@@ -145,6 +145,13 @@ def get_categories_distribution(dataset, objective_id):
         return []
 
 
+def check_categorical(field):
+    """Checks if a field is categorical
+
+    """
+    return field['optype'] == 'categorical'
+
+
 def source_processing(training_set, test_set, training_set_header,
                       test_set_header, api, args, resume,
                       name=None, description=None,
@@ -207,8 +214,8 @@ def source_processing(training_set, test_set, training_set_header,
     return source, resume, csv_properties, fields
 
 
-def dataset_processing(source, training_set, test_set, fields, api,
-                       args, resume,  name=None, description=None,
+def dataset_processing(source, training_set, test_set, fields, objective_field,
+                       api, args, resume,  name=None, description=None,
                        dataset_fields=None, csv_properties=None,
                        session_file=None, path=None, log=None):
     """Creating or retrieving dataset from input arguments
@@ -255,6 +262,15 @@ def dataset_processing(source, training_set, test_set, fields, api,
         fields = Fields(dataset['object']['fields'], **csv_properties)
         if args.public_dataset:
             r.publish_dataset(dataset, args, api, session_file)
+        if args.objective_field:
+            dataset_args = r.set_dataset_args(name, description, args, fields,
+                                              dataset_fields, objective_field)
+            dataset = r.update_dataset(dataset, dataset_args, args.verbosity,
+                                       api=api, session_file=session_file)
+            dataset = r.get_dataset(dataset, api, args.verbosity, session_file)
+            csv_properties.update(objective_field=objective_field,
+                                  objective_field_present=True)
+            fields = Fields(dataset['object']['fields'], **csv_properties)
         if not datasets:
             datasets = [dataset]
         else:
@@ -670,11 +686,12 @@ def create_categories_datasets(dataset, distribution,
     """Generates a new dataset using a subset of categories of the original one
 
     """
+
     if args.max_categories < 1:
         sys.exit("--max-categories can only be a positive number.")
     datasets = []
     categories_splits = [distribution[i: i + args.max_categories] for i
-                         in range(0, len(distribution) / args.max_categories)]
+                         in range(0, len(distribution), args.max_categories)]
     number_of_datasets = len(categories_splits)
 
     if resume:
@@ -738,6 +755,12 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             (args.black_box or args.white_box or args.public_dataset)):
         sys.exit("You should provide a description to publish.")
 
+    # When using --max-categories, it is compulsory to specify also the
+    # objective_field
+    if args.max_categories > 0 and objective_field is None:
+        sys.exit("When --max-categories is used, you must also provide the"
+                 " --objective field name or column number")
+
     path = u.check_dir(output)
     session_file = "%s%s%s" % (path, os.sep, SESSIONS_LOG)
     csv_properties = {}
@@ -785,7 +808,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         types=types, session_file=session_file, path=path, log=log)
 
     datasets, resume, csv_properties, fields = dataset_processing(
-        source, training_set, test_set, fields,
+        source, training_set, test_set, fields, objective_field,
         api, args, resume, name=name, description=description,
         dataset_fields=dataset_fields, csv_properties=csv_properties,
         session_file=session_file, path=path, log=log)
@@ -804,14 +827,19 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # has a max_categories limit for categories
     if args.max_categories > 0 and len(datasets) == 1:
         objective_id = fields.field_id(fields.objective_field)
-        distribution = get_categories_distribution(dataset, objective_id)
-        if distribution and len(distribution) > args.max_categories:
-            categories = [element[0] for element in distribution]
-            other_label = create_other_label(categories, other_label)
-            datasets, resume = create_categories_datasets(
-                dataset, distribution, fields, args,
-                api, resume, session_file=session_file, path=path, log=log,
-                other_label=other_label)
+        if check_categorical(fields.fields[objective_id]):
+            distribution = get_categories_distribution(dataset, objective_id)
+            if distribution and len(distribution) > args.max_categories:
+                categories = [element[0] for element in distribution]
+                other_label = create_other_label(categories, other_label)
+                datasets, resume = create_categories_datasets(
+                    dataset, distribution, fields, args,
+                    api, resume, session_file=session_file, path=path, log=log,
+                    other_label=other_label)
+        else:
+            sys.exit("The provided objective field is not categorical. A"
+                     " categorical field is expected when using"
+                     "  --max-categories")
 
     models, model_ids, ensemble_ids, resume = models_processing(
         datasets, models, model_ids,
