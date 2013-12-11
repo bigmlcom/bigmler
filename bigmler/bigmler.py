@@ -278,6 +278,35 @@ def dataset_processing(source, training_set, test_set, fields, objective_field,
     return datasets, resume, csv_properties, fields
 
 
+def alternative_dataset_processing(dataset, suffix, api, args, resume,
+                                   name=None, description=None,
+                                   out_of_bag=False,
+                                   sample_rate=1, session_file=None,
+                                   path=None, log=None):
+    """Creates a dataset. Used in splits to generate train and test datasets 
+
+    """
+    alternative_dataset = None
+    # if resuming, try to extract test dataset form log files
+    if resume:
+        message = u.dated("Dataset not found. Resuming.\n")
+        resume, alternative_dataset = c.checkpoint(
+            c.is_dataset_created, path, "_%s" % suffix, debug=args.debug,
+            message=message, log_file=session_file, console=args.verbosity)
+
+    if alternative_dataset is None:
+        dataset_alternative_args = r.set_dataset_split_args(
+            name, description, args,
+            sample_rate, out_of_bag=out_of_bag)
+        alternative_dataset = r.create_dataset(
+            dataset, dataset_alternative_args, args.verbosity, api, path,
+            session_file, log, suffix)
+        if alternative_dataset:
+            alternative_dataset = r.get_dataset(
+                alternative_dataset, api, args.verbosity, session_file)
+    return alternative_dataset, resume
+
+
 def split_processing(dataset, api, args, resume, name=None, description=None,
                      session_file=None, path=None, log=None):
     """Splits a dataset into train and test datasets
@@ -286,43 +315,15 @@ def split_processing(dataset, api, args, resume, name=None, description=None,
     train_dataset = None
     test_dataset = None
     sample_rate = 1 - args.test_split
-    # if resuming, try to extract train dataset form log files
-    if resume:
-        message = u.dated("Dataset not found. Resuming.\n")
-        resume, train_dataset = c.checkpoint(
-            c.is_dataset_created, path, "_train", debug=args.debug,
-            message=message, log_file=session_file, console=args.verbosity)
+    train_dataset, resume = alternative_dataset_processing(
+        dataset, "train", api, args, resume, name="%s - train (%s %%)" % (name,
+        int(sample_rate * 100)), description=description, out_of_bag=False,
+        sample_rate=sample_rate, session_file=session_file, path=path, log=log)
+    test_dataset, resume = alternative_dataset_processing(
+        dataset, "test", api, args, resume, name="%s - test (%s %%)" % (name,
+        int(args.test_split * 100)), description=description, out_of_bag=True,
+        sample_rate=sample_rate, session_file=session_file, path=path, log=log)
 
-    if train_dataset is None:
-        dataset_split_args = r.set_dataset_split_args(
-            "%s - train (%s %%)" % (name,
-            int(sample_rate * 100)), description, args,
-            sample_rate, out_of_bag=False)
-        train_dataset = r.create_dataset(
-            dataset, dataset_split_args, args.verbosity, api, path,
-            session_file, log, "train")
-        if train_dataset:
-            train_dataset = r.get_dataset(train_dataset, api,
-                                          args.verbosity, session_file)
-
-    # if resuming, try to extract test dataset form log files
-    if resume:
-        message = u.dated("Dataset not found. Resuming.\n")
-        resume, test_dataset = c.checkpoint(
-            c.is_dataset_created, path, "_test", debug=args.debug,
-            message=message, log_file=session_file, console=args.verbosity)
-
-    if test_dataset is None:
-        dataset_split_args = r.set_dataset_split_args(
-            "%s - test (%s %%)" % (name,
-            int(args.test_split * 100)), description, args,
-            sample_rate, out_of_bag=True)
-        test_dataset = r.create_dataset(
-            dataset, dataset_split_args, args.verbosity, api, path,
-            session_file, log, "test")
-        if test_dataset:
-            test_dataset = r.get_dataset(test_dataset, api, args.verbosity,
-                                         session_file)
     return train_dataset, test_dataset, resume
 
 

@@ -513,7 +513,7 @@ def predict(test_set, test_set_header, models, fields, output,
     # in a file named after the model in the following syntax:
     #     model_[id of the model]__predictions.csv
     # For instance,
-    #     model_50c0de043b563519830001c2_predictions.csv
+    #     model_50c0de043b563519830001c2__predictions.csv
     if (args.remote and not args.multi_label
             and not args.method in [THRESHOLD_CODE, COMBINATION]):
         if args.ensemble is not None:
