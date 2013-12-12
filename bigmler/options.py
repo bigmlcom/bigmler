@@ -730,6 +730,25 @@ under the License.""" % version
                         help=("Max number of categories to be included in"
                               " a model."))
 
+    # The path to a file containing attributes if you want to alter BigML's
+    # default field attributes or the ones provided by the test file header.
+    parser.add_argument('--test-field-attributes',
+                        action='store',
+                        dest='test_field_attributes',
+                        default=defaults.get('test_field_attributes', None),
+                        help=("Path to a csv file describing field attributes."
+                              " One definition per line"
+                              " (e.g., 0,'Last Name')."))
+
+    # The path to a file containing types if you want to alter BigML's
+    # type auto-detect.
+    parser.add_argument('--test_types',
+                        action='store',
+                        dest='test_types',
+                        default=defaults.get('test_types', None),
+                        help=("Path to a file describing field types. One"
+                              " definition per line (e.g., 0, 'numeric')."))
+
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #
