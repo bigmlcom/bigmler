@@ -379,10 +379,9 @@ def local_batch_predict(models, test_reader, prediction_file, api,
 
 
 def predict(test_set, test_set_header, models, fields, output,
-            objective_field, args, api=None, log=None,
+            objective_field, args, api=None,
             max_models=MAX_MODELS, resume=False, session_file=None,
-            labels=None, models_per_label=1, other_label=OTHER,
-            test_dataset=None):
+            labels=None, models_per_label=1, other_label=OTHER):
     """Computes a prediction for each entry in the `test_set`.
 
        Predictions computed locally using MultiModels on subgroups of models.
@@ -444,13 +443,17 @@ def predict(test_set, test_set_header, models, fields, output,
                                  or models_per_label > 1):
             ordered = False
         local_batch_predict(models, test_reader, prediction_file, api,
-                            max_models, resume, output_path,
-                            output,
-                            args.verbosity, method, options,
-                            session_file, args.debug,
-                            args.prediction_info, labels,
-                            args.label_separator, ordered, exclude,
-                            models_per_label, other_label)
+                            max_models=max_models, resume=resume,
+                            output_path=output_path,
+                            output=output, verbosity=args.verbosity,
+                            method=method, options=options,
+                            session_file=session_file, debug=args.debug,
+                            prediction_info=args.prediction_info,
+                            labels=labels,
+                            label_separator=args.label_separator,
+                            ordered=ordered, exclude=exclude,
+                            models_per_label=models_per_label,
+                            other_label=other_label)
 
 
 def remote_predict(model, test_dataset, batch_prediction_args, args,

@@ -55,7 +55,10 @@ import bigml.api
 import bigmler.utils as u
 import bigmler.resources as r
 import bigmler.labels as l
-import bigmler.processing as p
+import bigmler.processing.sources as ps
+import bigmler.processing.datasets as pd
+import bigmler.processing.models as pm
+import bigmler.processing.ensembles as pe
 
 from bigml.multivote import COMBINATION_WEIGHTS, COMBINER_MAP, PLURALITY
 from bigml.model import Model
@@ -149,7 +152,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # multi_label file must be preprocessed to obtain a new extended file
     if args.multi_label and training_set is not None:
         (training_set, labels,
-         field_attributes, objective_field) = p.multi_label_expansion(
+         field_attributes, objective_field) = ps.multi_label_expansion(
              training_set, training_set_header, objective_field, args, path,
              field_attributes=field_attributes, labels=labels,
              session_file=session_file)
@@ -158,20 +161,20 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
     if args.multi_label and args.evaluate and args.test_set is not None:
         (test_set, test_labels,
-         field_attributes, objective_field) = p.multi_label_expansion(
+         field_attributes, objective_field) = ps.multi_label_expansion(
              test_set, test_set_header, objective_field, args, path,
              field_attributes=field_attributes, labels=labels,
              session_file=session_file)
         test_set_header = True
 
-    source, resume, csv_properties, fields = p.source_processing(
+    source, resume, csv_properties, fields = ps.source_processing(
         training_set, test_set, training_set_header, test_set_header,
         api, args, resume, name=name, description=description,
         csv_properties=csv_properties,
         field_attributes=field_attributes,
         types=types, session_file=session_file, path=path, log=log)
 
-    datasets, resume, csv_properties, fields = p.dataset_processing(
+    datasets, resume, csv_properties, fields = pd.dataset_processing(
         source, training_set, test_set, fields, objective_field,
         api, args, resume, name=name, description=description,
         dataset_fields=dataset_fields, csv_properties=csv_properties,
@@ -182,7 +185,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # If test_split is used, split the dataset in a training and a test dataset
     # according to the given split
     if args.test_split > 0:
-        dataset, test_dataset, resume = p.split_processing(
+        dataset, test_dataset, resume = pd.split_processing(
             dataset, api, args, resume, name=name, description=description,
             session_file=session_file, path=path, log=log)
         datasets[0] = dataset
@@ -191,12 +194,12 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # has a max_categories limit for categories
     if args.max_categories > 0 and len(datasets) == 1:
         objective_id = fields.field_id(fields.objective_field)
-        if p.check_categorical(fields.fields[objective_id]):
-            distribution = p.get_categories_distribution(dataset, objective_id)
+        if pd.check_categorical(fields.fields[objective_id]):
+            distribution = pd.get_categories_distribution(dataset, objective_id)
             if distribution and len(distribution) > args.max_categories:
                 categories = [element[0] for element in distribution]
-                other_label = p.create_other_label(categories, other_label)
-                datasets, resume = p.create_categories_datasets(
+                other_label = pd.create_other_label(categories, other_label)
+                datasets, resume = pd.create_categories_datasets(
                     dataset, distribution, fields, args,
                     api, resume, session_file=session_file, path=path, log=log,
                     other_label=other_label)
@@ -205,7 +208,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                      " categorical field is expected when using"
                      "  --max-categories")
 
-    models, model_ids, ensemble_ids, resume = p.models_processing(
+    models, model_ids, ensemble_ids, resume = pm.models_processing(
         datasets, models, model_ids,
         objective_field, fields, api, args, resume,
         name=name, description=description, model_fields=model_fields,
@@ -223,7 +226,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             model = r.publish_model(model, args, api, session_file)
             models[0] = model
         # If more than one model, use the full field structure
-        fields, objective_field = p.get_model_fields(
+        fields, objective_field = pm.get_model_fields(
             model, csv_properties, args, single_model=single_model)
 
     # If multi-label flag is set and no training_set was provided, label
@@ -257,7 +260,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             # create test source from file
             test_name = "%s - test" % name
             (test_source, resume,
-             csv_properties, fields) = p.test_source_processing(
+             csv_properties, fields) = ps.test_source_processing(
                 test_set, test_set_header,
                 api, args, resume, name=test_name, description=description,
                 csv_properties=csv_properties,
@@ -265,7 +268,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 session_file=session_file, path=path, log=log)
             # create test dataset from test source
             dataset_args = r.set_basic_dataset_args(test_name, description, args)
-            test_dataset, resume = p.alternative_dataset_processing(
+            test_dataset, resume = ps.alternative_dataset_processing(
                 test_source, "test", dataset_args, api, args,
                 resume, name=test_name, description=description,
                 session_file=session_file,
@@ -279,7 +282,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                            session_file=session_file, path=path, log=log)
         else:
             predict(test_set, test_set_header, models, fields, output,
-                    objective_field, args, api, log,
+                    objective_field, args, api,
                     args.max_batch_models, resume, session_file, labels=labels,
                     models_per_label=models_per_label, other_label=other_label)
 
