@@ -5,7 +5,7 @@ import json
 from lettuce import step, world
 from subprocess import check_call, CalledProcessError
 from bigml.api import check_resource
-from bigmler.bigmler import MONTECARLO_FACTOR
+from bigmler.processing.models import MONTECARLO_FACTOR
 from bigmler.checkpoint import file_number_of_lines
 from ml_test_prediction_steps import i_create_all_ml_resources
 from ml_test_prediction_steps import i_create_all_ml_resources_and_ensembles

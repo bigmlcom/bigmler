@@ -41,6 +41,9 @@ ALL_FIELDS_QS = "limit=-1"
 ADD_PREFIX = '+'
 REMOVE_PREFIX = '-'
 ADD_REMOVE_PREFIX = [ADD_PREFIX, REMOVE_PREFIX]
+BRIEF_FORMAT = 'brief'
+NORMAL_FORMAT = 'normal'
+FULL_FORMAT = 'full'
 
 
 def get_basic_seed(order):
@@ -120,21 +123,22 @@ def set_source_args(data_set_header, name, description, args):
     return source_args
 
 
-def create_source(data_set, source_args,
-                  args, api=None, path=None,
-                  session_file=None, log=None):
+def create_source(data_set, source_args, args, api=None, path=None,
+                  session_file=None, log=None, source_type=None):
     """Creates remote source
 
     """
     if api is None:
         api = bigml.api.BigML()
-    message = dated("Creating source.\n")
+    suffix = "" if source_type is None else "%s " % source_type
+    message = dated("Creating %ssource.\n" % suffix)
     log_message(message, log_file=session_file, console=args.verbosity)
     source = api.create_source(data_set, source_args,
                                progress_bar=args.progress_bar)
     if path is not None:
         try:
-            with open(path + '/source', 'w', 0) as source_file:
+            suffix = "_" + source_type if source_type else ""
+            with open("%s/source%s" % (path, suffix), 'w', 0) as source_file:
                 source_file.write("%s\n" % source['resource'])
                 source_file.write("%s\n" % source['object']['name'])
         except IOError, exc:
@@ -211,9 +215,8 @@ def update_source_fields(source, updated_values, fields, api=None,
     return source
 
 
-def set_dataset_args(name, description, args, fields, dataset_fields,
-                     objective_field=None):
-    """Return dataset arguments dict
+def set_basic_dataset_args(name, description, args):
+    """Return dataset basic arguments dict
 
     """
     dataset_args = {
@@ -222,6 +225,16 @@ def set_dataset_args(name, description, args, fields, dataset_fields,
         "category": args.category,
         "tags": args.tag
     }
+
+    return dataset_args
+
+
+def set_dataset_args(name, description, args, fields, dataset_fields,
+                     objective_field=None):
+    """Return dataset arguments dict
+
+    """
+    dataset_args = set_basic_dataset_args(name, description, args)
 
     if objective_field is not None and fields is not None:
         dataset_args.update(objective_field={'id':
@@ -833,3 +846,61 @@ def save_evaluation(evaluation, output, api=None):
     api.pprint(evaluation, evaluation_txt)
     evaluation_txt.flush()
     evaluation_txt.close()
+
+
+def set_batch_prediction_args(name, description, args, fields=None,
+                              fields_map=None):
+    """Return batch prediction args dict
+
+    """
+    batch_prediction_args = {
+        "name": name,
+        "description": description,
+        "tags": args.tag,
+        "header": args.prediction_header,
+        "combiner": args.method
+    }
+
+    if fields_map is not None and fields is not None:
+        batch_prediction_args.update({
+            "fields_map": map_fields(fields_map, fields)})
+
+    if args.prediction_info == NORMAL_FORMAT:
+        batch_prediction_args.update(confidence=True)
+
+    if args.prediction_info == FULL_FORMAT:
+        batch_prediction_args.update(all_fields=True)
+
+    return batch_prediction_args
+
+
+def create_batch_prediction(model_or_ensemble, test_dataset,
+                            batch_prediction_args, verbosity,
+                            api=None, session_file=None,
+                            path=None, log=None):
+    """Creates remote batch_prediction
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+    message = dated("Creating batch prediction.\n")
+    log_message(message, log_file=session_file, console=verbosity)
+    batch_prediction = api.create_batch_prediction(model_or_ensemble,
+                                                   test_dataset,
+                                                   batch_prediction_args)
+    log_created_resources("batch_prediction", path,
+                          bigml.api.get_batch_prediction_id(batch_prediction),
+                          open_mode='a')
+    batch_prediction_id = check_resource_error(
+        batch_prediction, "Failed to create batch prediction: ")
+    try:
+        batch_prediction = check_resource(batch_prediction,
+                                          api.get_batch_prediction)
+    except ValueError, exception:
+        sys.exit("Failed to get a finished batch prediction: %s"
+                 % str(exception))
+    message = dated("Batch prediction created: %s\n"
+                    % get_url(batch_prediction))
+    log_message(message, log_file=session_file, console=verbosity)
+    log_message("%s\n" % batch_prediction_id, log_file=log)
+    return batch_prediction

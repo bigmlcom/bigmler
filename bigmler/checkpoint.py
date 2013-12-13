@@ -29,14 +29,14 @@ from bigml.util import console_log
 from bigmler.utils import log_message
 
 
-def is_source_created(path):
+def is_source_created(path, suffix=""):
     """Checks existence and reads the source id from the source file in the
        path directory
 
     """
     source_id = None
     try:
-        with open("%s%ssource" % (path, os.sep)) as source_file:
+        with open("%s%ssource%s" % (path, os.sep, suffix)) as source_file:
             source_id = source_file.readline().strip()
             try:
                 source_id = bigml.api.get_source_id(source_id)
@@ -220,3 +220,22 @@ def file_number_of_lines(file_name):
         return item[0] + 1
     except IOError:
         return 0
+
+
+def is_batch_prediction_created(path):
+    """Checks existence and reads the batch prediction id from the
+       batch_prediction file in the path directory
+
+    """
+    batch_prediction_id = None
+    try:
+        with open("%s%sbatch_prediction" % (path, os.sep)) as batch_prediction_file:
+            batch_prediction_id = batch_prediction_file.readline().strip()
+            try:
+                batch_prediction_id = bigml.api.get_batch_prediction_id(
+                    batch_prediction_id)
+                return True, batch_prediction_id
+            except ValueError:
+                return False, None
+    except IOError:
+        return False, None
