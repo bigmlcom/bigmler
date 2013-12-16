@@ -270,9 +270,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             dataset_args = r.set_basic_dataset_args(test_name, description, args)
             test_dataset, resume = ps.alternative_dataset_processing(
                 test_source, "test", dataset_args, api, args,
-                resume, name=test_name, description=description,
-                session_file=session_file,
-                path=path, log=log)
+                resume, session_file=session_file, path=path, log=log)
 
             batch_prediction_args = r.set_batch_prediction_args(
                 name, description, args, fields=fields, fields_map=fields_map)

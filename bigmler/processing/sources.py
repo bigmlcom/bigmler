@@ -20,10 +20,8 @@
 """
 from __future__ import absolute_import
 
-import sys
 import os
 import csv
-import copy
 
 import bigml.api
 import bigmler.utils as u
@@ -34,8 +32,6 @@ import bigmler.labels as l
 from bigml.fields import Fields
 
 from bigmler.train_reader import TrainReader
-from bigmler.prediction import OTHER
-from bigmler.processing.datasets import alternative_dataset_processing
 
 
 MISSING_TOKENS = ['', 'N/A', 'n/a', 'NULL', 'null', '-', '#DIV/0', '#REF!',

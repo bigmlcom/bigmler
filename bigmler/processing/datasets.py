@@ -21,19 +21,14 @@
 from __future__ import absolute_import
 
 import sys
-import os
-import csv
-import copy
 
 import bigml.api
 import bigmler.utils as u
 import bigmler.resources as r
 import bigmler.checkpoint as c
-import bigmler.labels as l
 
 from bigml.fields import Fields
 
-from bigmler.train_reader import TrainReader
 from bigmler.prediction import OTHER
 from bigmler.processing.models import has_models
 
@@ -150,10 +145,7 @@ def dataset_processing(source, training_set, test_set, fields, objective_field,
 
 def alternative_dataset_processing(dataset_or_source, suffix, dataset_args,
                                    api, args, resume,
-                                   name=None, description=None,
-                                   out_of_bag=False,
-                                   sample_rate=1, session_file=None,
-                                   path=None, log=None):
+                                   session_file=None, path=None, log=None):
     """Creates a dataset. Used in splits to generate train and test datasets 
 
     """
@@ -184,21 +176,19 @@ def split_processing(dataset, api, args, resume, name=None, description=None,
     test_dataset = None
     sample_rate = 1 - args.test_split
     dataset_alternative_args = r.set_dataset_split_args(
-        name, description, args,
+        "%s - train (%s %%)" % (name,
+        int(sample_rate * 100)), description, args,
         sample_rate, out_of_bag=False)
     train_dataset, resume = alternative_dataset_processing(
         dataset, "train", dataset_alternative_args, api, args,
-        resume, name="%s - train (%s %%)" % (name,
-        int(sample_rate * 100)), description=description,
-        session_file=session_file, path=path, log=log)
+        resume, session_file=session_file, path=path, log=log)
     dataset_alternative_args = r.set_dataset_split_args(
-        name, description, args,
+        "%s - test (%s %%)" % (name,
+        int(args.test_split * 100)), description, args,
         sample_rate, out_of_bag=True)
     test_dataset, resume = alternative_dataset_processing(
         dataset, "test", dataset_alternative_args, api, args,
-        resume, name="%s - test (%s %%)" % (name,
-        int(args.test_split * 100)), description=description,
-        session_file=session_file, path=path, log=log)
+        resume, session_file=session_file, path=path, log=log)
 
     return train_dataset, test_dataset, resume
 

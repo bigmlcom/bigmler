@@ -367,6 +367,7 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                         if instances > prediction_instances:
                             prediction_category = category
                         global_distribution.append([category, instances])
+            print prediction_category, global_distribution
             prediction = [prediction_category,
                           ws_confidence(prediction_category,
                                         global_distribution)]
