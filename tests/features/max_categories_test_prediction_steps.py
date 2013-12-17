@@ -6,6 +6,7 @@ from lettuce import step, world
 from subprocess import check_call, CalledProcessError
 from bigmler.checkpoint import file_number_of_lines
 from bigml.api import check_resource
+from common_steps import check_debug
 
 @step(r'I create BigML resources from "(.*)" with (\d+) as categories limit and (.*) as objective field to test "(.*)" and log predictions in "(.*)"')
 def i_create_all_mc_resources(step, data, max_categories=None, objective=None, test=None, output=None):
@@ -14,7 +15,10 @@ def i_create_all_mc_resources(step, data, max_categories=None, objective=None, t
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
-        command = "bigmler --train " + data + " --max-categories " + max_categories + " --objective " + objective + " --test " + test + " --store --output " + output
+        command = ("bigmler --train " + data + " --max-categories " +
+                   max_categories + " --objective " + objective + " --test " +
+                   test + " --store --output " + output)
+        command = check_debug(command)
         retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
@@ -35,7 +39,11 @@ def i_create_all_mc_resources_from_source(step, max_categories=None, objective=N
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
-        command = "bigmler --source " + world.source['resource'] + " --max-categories " + max_categories +  " --objective " + objective + " --test " + test + " --store --output " + output
+        command = ("bigmler --source " + world.source['resource'] +
+                   " --max-categories " + max_categories +  " --objective " +
+                   objective + " --test " + test + " --store --output " +
+                   output)
+        command = check_debug(command)
         retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
@@ -56,7 +64,11 @@ def i_create_all_mc_resources_from_dataset(step, max_categories=None, objective=
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
-        command = "bigmler --dataset " + world.dataset['resource'] + " --max-categories " + max_categories + " --objective " + objective + " --test " + test + " --store --output " + output
+        command = ("bigmler --dataset " + world.dataset['resource'] + 
+                   " --max-categories " + max_categories + " --objective " +
+                   objective + " --test " + test + " --store --output " +
+                   output)
+        command = check_debug(command)
         retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
@@ -77,7 +89,10 @@ def i_create_all_mc_resources_from_models(step, models_file=None, test=None, out
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
-        command = "bigmler --models " + models_file + " --method combined --test " + test + " --store --output " + output
+        command = ("bigmler --models " + models_file +
+                   " --method combined --test " + test + " --store --output "
+                   + output)
+        command = check_debug(command)
         retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False

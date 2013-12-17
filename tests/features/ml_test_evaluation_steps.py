@@ -5,6 +5,7 @@ import json
 from lettuce import step, world
 from subprocess import check_call, CalledProcessError
 from bigmler.checkpoint import file_number_of_lines
+from common_steps import check_debug
 
 @step(r'I create BigML multi-label resources tagged as "(.*)" with "(.*)" label separator and "(\d*)" labels uploading train "(.*)" file with "(.*)" field separator to evaluate and log evaluation in "(.*)"')
 def i_create_all_ml_evaluations(step, tag=None, label_separator=None, number_of_labels=None, data=None, training_separator=None, output=None):
@@ -78,7 +79,11 @@ def i_create_ml_evaluations_from_dataset(step, output=None):
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
-        retcode = check_call("bigmler --multi-label --dataset " + world.dataset['resource'] + " --evaluate --store --output " + output, shell=True)
+        command = ("bigmler --multi-label --dataset " +
+                   world.dataset['resource'] + " --evaluate --store --output "
+                   + output)
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -95,7 +100,11 @@ def i_create_ml_evaluations_from_models(step, models_file=None, output=None):
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
-        retcode = check_call("bigmler --multi-label --models " + models_file + " --dataset " + world.dataset['resource'] + " --evaluate --store --output " + output, shell=True)
+        command = ("bigmler --multi-label --models " + models_file +
+                   " --dataset " + world.dataset['resource'] +
+                   " --evaluate --store --output " + output)
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -111,7 +120,11 @@ def i_create_ml_evaluations_from_tagged_models(step, tag=None, output=None):
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
-        retcode = check_call("bigmler --multi-label --model-tag " + tag + " --dataset " + world.dataset['resource'] + " --evaluate --store --output " + output, shell=True)
+        command = ("bigmler --multi-label --model-tag " + tag + " --dataset " +
+                   world.dataset['resource'] + " --evaluate --store --output "
+                   + output)
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:

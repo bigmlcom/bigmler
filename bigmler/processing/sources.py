@@ -31,6 +31,7 @@ import bigmler.labels as l
 
 from bigml.fields import Fields
 
+from bigmler.processing.datasets import alternative_dataset_processing
 from bigmler.train_reader import TrainReader
 
 
@@ -48,6 +49,8 @@ def test_source_processing(test_set, test_set_header, api, args, resume,
     """
     test_source = None
     fields = None
+    if csv_properties is None:
+        csv_properties = {}
     if (args.test_set and args.remote):
         # If resuming, try to extract args.source form log files
         if resume:

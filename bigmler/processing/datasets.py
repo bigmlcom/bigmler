@@ -121,10 +121,7 @@ def dataset_processing(source, training_set, test_set, fields, objective_field,
     # we hadn't them yet.
     if dataset:
         dataset = r.get_dataset(dataset, api, args.verbosity, session_file)
-        if not csv_properties and 'locale' in dataset['object']:
-            csv_properties = {
-                'data_locale': dataset['object']['locale']}
-        fields = Fields(dataset['object']['fields'], **csv_properties)
+        fields = get_fields_structure(dataset, csv_properties)
         if args.public_dataset:
             r.publish_dataset(dataset, args, api, session_file)
         if args.objective_field:
@@ -141,6 +138,17 @@ def dataset_processing(source, training_set, test_set, fields, objective_field,
         else:
             datasets[0] = dataset
     return datasets, resume, csv_properties, fields
+
+
+def get_fields_structure(resource, csv_properties):
+    """Builds a Fields object from the fields information in the resource
+
+    """
+    if not csv_properties and 'locale' in resource['object']:
+        csv_properties = {
+            'data_locale': resource['object']['locale']}
+    fields = Fields(resource['object']['fields'], **csv_properties)
+    return fields
 
 
 def alternative_dataset_processing(dataset_or_source, suffix, dataset_args,
