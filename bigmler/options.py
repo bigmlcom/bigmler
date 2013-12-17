@@ -763,6 +763,13 @@ under the License.""" % version
                         default=defaults.get('test_dataset', None),
                         help="BigML test dataset Id.")
 
+    # No batch predictions. Remote predictions are created individually.
+    parser.add_argument('--no-batch',
+                        action='store_true',
+                        dest='no_batch',
+                        default=defaults.get('no_batch', False),
+                        help="Create remote predictions individually.")
+
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #
@@ -896,4 +903,11 @@ under the License.""" % version
                         dest='prediction_header',
                         default=defaults.get('prediction_header', False),
                         help="Headers are not added to the prediction file.")
+
+    # Batch predictions. Remote predictions are created in batch mode.
+    parser.add_argument('--batch',
+                        action='store_false',
+                        dest='no_batch',
+                        default=defaults.get('no_batch', False),
+                        help="Create remote predictions in batch.")
     return parser

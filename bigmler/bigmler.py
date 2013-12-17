@@ -261,8 +261,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             models_per_label = len(models) / len(all_labels)
 
         # Remote predictions: predictions are computed as batch predictions
-        # in bigml.com
-        if (args.remote and not args.multi_label
+        # in bigml.com except when --no-batch flag is set on or multi-label
+        # or max-categories are used
+        if (args.remote and not args.no_batch and not args.multi_label
                 and not args.method in [THRESHOLD_CODE, COMBINATION]):
             # create test source from file
             test_name = "%s - test" % name
@@ -301,8 +302,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                            session_file=session_file, path=path, log=log)
         else:
             predict(test_set, test_set_header, models, fields, output,
-                    objective_field, args, api,
-                    args.max_batch_models, resume, session_file, labels=labels,
+                    objective_field, args, api=api, log=log,
+                    max_models=args.max_batch_models, resume=resume,
+                    session_file=session_file, labels=labels,
                     models_per_label=models_per_label, other_label=other_label)
 
     # When combine_votes flag is used, retrieve the predictions files saved
