@@ -473,7 +473,7 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                         if instances > prediction_instances:
                             prediction_category = category
                         global_distribution.append([category, instances])
-            print prediction_category, global_distribution
+
             prediction = [prediction_category,
                           ws_confidence(prediction_category,
                                         global_distribution)]
@@ -515,7 +515,7 @@ def predict(test_set, test_set_header, models, fields, output,
     #     model_50c0de043b563519830001c2_predictions.csv
     # Predictions are computed individually only if no_batch flag is set
     if (args.remote and args.no_batch and not args.multi_label
-        and args.method != THRESHOLD_CODE):
+            and args.method != THRESHOLD_CODE):
         if args.ensemble is not None:
             remote_predict_ensemble(args.ensemble, test_reader,
                                     prediction_file, api, resume,

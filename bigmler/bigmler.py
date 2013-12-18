@@ -202,7 +202,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if args.max_categories > 0 and len(datasets) == 1:
         objective_id = fields.field_id(fields.objective_field)
         if pd.check_categorical(fields.fields[objective_id]):
-            distribution = pd.get_categories_distribution(dataset, objective_id)
+            distribution = pd.get_categories_distribution(dataset,
+                                                          objective_id)
             if distribution and len(distribution) > args.max_categories:
                 categories = [element[0] for element in distribution]
                 other_label = pd.create_other_label(categories, other_label)
@@ -275,19 +276,19 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                     field_attributes=test_field_attributes, types=test_types,
                     session_file=session_file, path=path, log=log)
             else:
-                test_source = bigml.api.get_source_id(args.test_source)
-                test_source = api.check_resource(test_source,
+                test_source_id = bigml.api.get_source_id(args.test_source)
+                test_source = api.check_resource(test_source_id,
                                                  api.get_source)
             if args.test_dataset is None:
             # create test dataset from test source
                 dataset_args = r.set_basic_dataset_args(test_name,
                                                         description, args)
-                test_dataset, resume = ps.alternative_dataset_processing(
+                test_dataset, resume = pd.alternative_dataset_processing(
                     test_source, "test", dataset_args, api, args,
                     resume, session_file=session_file, path=path, log=log)
             else:
-                test_dataset = bigml.api.get_dataset_id(args.test_dataset)
-                test_dataset = api.check_resource(test_dataset,
+                test_dataset_id = bigml.api.get_dataset_id(args.test_dataset)
+                test_dataset = api.check_resource(test_dataset_id,
                                                   api.get_dataset)
 
             test_fields = pd.get_fields_structure(test_dataset,
@@ -598,7 +599,6 @@ def main(args=sys.argv[1:]):
     if command_args.test_types:
         types_arg = u.read_types(command_args.test_types)
         output_args.update(test_types=types_arg)
-
 
     # Parses dataset fields if provided.
     if command_args.dataset_fields:

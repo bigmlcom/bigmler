@@ -31,7 +31,7 @@ import bigmler.labels as l
 
 from bigml.fields import Fields
 
-from bigmler.processing.ensembles import (ensemble_processing, 
+from bigmler.processing.ensembles import (ensemble_processing,
                                           ensemble_per_label)
 
 

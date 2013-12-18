@@ -31,7 +31,6 @@ import bigmler.labels as l
 
 from bigml.fields import Fields
 
-from bigmler.processing.datasets import alternative_dataset_processing
 from bigmler.train_reader import TrainReader
 
 
@@ -39,6 +38,7 @@ MISSING_TOKENS = ['', 'N/A', 'n/a', 'NULL', 'null', '-', '#DIV/0', '#REF!',
                   '#NAME?', 'NIL', 'nil', 'NA', 'na', '#VALUE!', '#NULL!',
                   'NaN', '#N/A', '#NUM!', '?']
 MONTECARLO_FACTOR = 200
+
 
 def test_source_processing(test_set, test_set_header, api, args, resume,
                            name=None, description=None, csv_properties=None,

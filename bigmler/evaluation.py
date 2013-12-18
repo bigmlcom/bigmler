@@ -34,8 +34,9 @@ from bigml.util import slugify
 
 def evaluate(models_or_ensembles, datasets, output, api, args, resume,
              session_file=None, path=None, log=None, name=None,
-             description=None, fields=None, dataset_fields=None, fields_map=None,
-             labels=None, all_labels=None, objective_field=None):
+             description=None, fields=None, dataset_fields=None,
+             fields_map=None, labels=None, all_labels=None,
+             objective_field=None):
     """Evaluates a list of models or ensembles with the given dataset
 
     """

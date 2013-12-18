@@ -1,5 +1,5 @@
 Feature: Upload source and produce remote batch test predictions
-    In order produce test predictions
+    In order to produce test predictions
     I need to upload a train set and a test set
     Then I need to create a dataset and a model and a batch prediction to predict
 

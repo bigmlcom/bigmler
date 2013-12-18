@@ -114,13 +114,13 @@ Remote Predictions
 ------------------
 
 All the predictions we saw in the previous section are computed locally in
-your computer. BigMLer allows you to ask for remote computation by adding
+your computer. BigMLer allows you to ask for a remote computation by adding
 the ``--remote`` flag. Remote computations are treated as batch computations.
 This means that your test data will be loaded in BigML as a regular source and
 the corresponding dataset will be created and fed as input data to your
 model to generate a remote ``batch prediction`` object. BigMLer will download
-the predictions file created as a result in this ``batch prediction`` and
-save it to your local computer just as it did for local predictions::
+the predictions file created as a result of this ``batch prediction`` and
+save it to local storage just as it did for local predictions::
 
     bigmler --train data/iris.csv --test data/test_iris.csv \
             --remote --output my_dir/remote_predictions.csv
@@ -1080,10 +1080,16 @@ Data Configuration
 ------------------
 --no-train-header                   The train set file hasn't a header
 --no-test-header                    The test set file hasn't a header
---field-attribute PATH              Path to a file describing field attributes
+--field-attributes PATH             Path to a file describing field attributes
                                     One definition per line
                                     (e.g., 0,'Last Name')
 --types PATH                        Path to a file describing field types.
+                                    One definition per line
+                                    (e.g., 0, 'numeric')
+--test-field-attributes PATH        Path to a file describing test field
+                                    attributes. One definition per line
+                                    (e.g., 0,'Last Name')
+--test-types PATH                   Path to a file describing test field types.
                                     One definition per line
                                     (e.g., 0, 'numeric')
 --dataset-fields DATASET_FIELDS     Comma-separated list of field column
@@ -1126,7 +1132,7 @@ Remote Resources
                             default)
 --no-batch                  Remote predictions are computed individually
 --model-tag MODEL_TAG       Retrieve models that were tagged with tag
---ensemble-tag ENSEMBLE_TAG Retrieve models that were tagged with tag
+--ensemble-tag ENSEMBLE_TAG Retrieve ensembles that were tagged with tag
 
 Delete Remote Resources
 -----------------------

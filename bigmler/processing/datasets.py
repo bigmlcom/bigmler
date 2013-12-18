@@ -55,6 +55,7 @@ def check_categorical(field):
     """
     return field['optype'] == 'categorical'
 
+
 def get_categories_distribution(dataset, objective_id):
     """Returns the categories distribution in a categorical dataset
 
@@ -77,6 +78,17 @@ def get_categories_distribution(dataset, objective_id):
             return []
     except KeyError:
         return []
+
+
+def get_fields_structure(resource, csv_properties):
+    """Builds a Fields object from the fields information in the resource
+
+    """
+    if not csv_properties and 'locale' in resource['object']:
+        csv_properties = {
+            'data_locale': resource['object']['locale']}
+    fields = Fields(resource['object']['fields'], **csv_properties)
+    return fields
 
 
 def dataset_processing(source, training_set, test_set, fields, objective_field,
@@ -140,21 +152,10 @@ def dataset_processing(source, training_set, test_set, fields, objective_field,
     return datasets, resume, csv_properties, fields
 
 
-def get_fields_structure(resource, csv_properties):
-    """Builds a Fields object from the fields information in the resource
-
-    """
-    if not csv_properties and 'locale' in resource['object']:
-        csv_properties = {
-            'data_locale': resource['object']['locale']}
-    fields = Fields(resource['object']['fields'], **csv_properties)
-    return fields
-
-
 def alternative_dataset_processing(dataset_or_source, suffix, dataset_args,
                                    api, args, resume,
                                    session_file=None, path=None, log=None):
-    """Creates a dataset. Used in splits to generate train and test datasets 
+    """Creates a dataset. Used in splits to generate train and test datasets
 
     """
     alternative_dataset = None

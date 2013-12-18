@@ -1,8 +1,10 @@
+import os
+
 def check_debug(command):
     """Adds verbosity level and command print.
 
     """
-    debug = False
+    debug = os.environ.get('BIGMLER_DEBUG', False)
     verbosity = 0
     if debug:
         verbosity = 1
