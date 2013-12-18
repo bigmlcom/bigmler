@@ -110,6 +110,30 @@ store a copy of every created or retrieved resource in your output directory
 (e.g., TueNov1312_003451/model_50c23e5e035d07305a00004f) by setting the flag
 ``--store``.
 
+Remote Predictions
+------------------
+
+All the predictions we saw in the previous section are computed locally in
+your computer. BigMLer allows you to ask for remote computation by adding
+the ``--remote`` flag. Remote computations are treated as batch computations.
+This means that your test data will be loaded in BigML as a regular source and
+the corresponding dataset will be created and fed as input data to your
+model to generate a remote ``batch prediction`` object. BigMLer will download
+the predictions file created as a result in this ``batch prediction`` and
+save it to your local computer just as it did for local predictions::
+
+    bigmler --train data/iris.csv --test data/test_iris.csv \
+            --remote --output my_dir/remote_predictions.csv
+
+This command will create a source, dataset and model for your training data, 
+a source and dataset for your test data and a batch prediction using the model
+and the test dataset. The results will be stored in the
+``my_dir/remote_predictions.csv`` file. In case you prefer BigMLer to issue
+one-by-one remote prediction calls, you can use the ``--no-batch`` flag::
+
+    bigmler --train data/iris.csv --test data/test_iris.csv \
+            --remote --no-batch
+
 Remote Sources
 --------------
 
@@ -257,7 +281,8 @@ Please note:
     - Descriptions are provided in a text file that can also include `markdown <http://en.wikipedia.org/wiki/Markdown>`_.
     - Many tags can be added to the same resource.
     - Use ``--no_tag`` if you do not want default BigMLer tags to be added.
-    - BigMLer will add the name, category, description, and tags to all the newly created resources in each request.
+    - BigMLer will add the name, category, description, and tags to all the
+      newly created resources in each request.
 
 
 Using previous Sources, Datasets, and Models
@@ -285,10 +310,19 @@ You can also input the dataset from a file::
 
     bigmler --datasets iris_dataset
 
-Finally, a previously generated source can also be used to generate a new
+A previously generated source can also be used to generate a new
 dataset and model::
 
     bigmler --source source/50a1e520eabcb404cd0000d1
+
+And test sources and datasets can also be referenced by id in new
+BigMLer requests for remote predictions::
+
+    bigmler --model model/52af53a437203f1cfe0001f0 --remote \
+            --test-source source/52b0cbe637203f1d3e0015db
+
+    bigmler --model model/52af53a437203f1cfe0001f0 --remote \
+            --test-dataset dataset/52b0fb5637203f5c4f000018
 
 Evaluations
 -----------
@@ -857,6 +891,10 @@ The set of negative flags is:
 --no-no-dataset             as opposed to --no-dataset
 --no-no-model               as opposed to --no-model
 --no-clear-logs             as opposed to --clear-logs
+--no-store                  as opposed to --store
+--no-multi-label            as opposed to --multi-label
+--no-prediction-header      as opposed to --prediction-header
+--batch                     as opposed to --no-batch
 
 
 Support
@@ -1072,29 +1110,42 @@ Data Configuration
 
 Remote Resources
 ----------------
---source SOURCE     BigML source Id
---dataset DATASET   BigML dataset Id
---datasets PATH     Path to a file containing a dataset Id
---model MODEL       BigML model Id
---remote            Computes predictions remotely
---models PATH       Path to a file containing model/ids. One model per line
-                    (e.g., model/4f824203ce80053)
---model-tag MODEL_TAG   Retrieve models that were tagged with tag
+--source SOURCE             BigML source Id
+--dataset DATASET           BigML dataset Id
+--datasets PATH             Path to a file containing a dataset Id
+--model MODEL               BigML model Id
+--models PATH               Path to a file containing model/ids. One model per
+                            line (e.g., model/4f824203ce80053)
+--ensemble ENSEMBLE         BigML ensemble Id
+--ensembles PATH            Path to a file containing ensembles Ids
+--test-source SOURCE        BigML test source Id (only for remote predictions)
+--test-dataset DATASET      BigML test dataset Id (only for remote predictions)
+--source SOURCE             BigML source Id
+--dataset DATASET           BigML dataset Id
+--remote                    Computes predictions remotely (in batch mode by
+                            default)
+--no-batch                  Remote predictions are computed individually
+--model-tag MODEL_TAG       Retrieve models that were tagged with tag
+--ensemble-tag ENSEMBLE_TAG Retrieve models that were tagged with tag
 
 Delete Remote Resources
 -----------------------
---delete            Starts delete mode
---ids LIST_OF_IDS   Comma separated list of ids to be deleted
---from-file FILE_OF_IDS  Path to a file containing the resources' ids to be
-                         deleted
---all-tag TAG       Retrieves resources that were tagged with tag to be deleted
---source-tag TAG    Retrieves sources that were tagged with tag to be deleted
---dataset-tag TAG   Retrieves datasets that were tagged with tag to be deleted
---model-tag TAG     Retrieves models that were tagged with tag to be deleted
---prediction-tag TAG   Retrieves predictions that were tagged with tag to be
-                       deleted
---evaluation-tag TAG   Retrieves evaluations that were tagged with tag to be
-                       deleted
+--delete                    Starts delete mode
+--ids LIST_OF_IDS           Comma separated list of ids to be deleted
+--from-file FILE_OF_IDS     Path to a file containing the resources' ids to be
+                            deleted
+--all-tag TAG               Retrieves resources that were tagged with tag to be
+                            deleted
+--source-tag TAG            Retrieves sources that were tagged with tag to be
+                            deleted
+--dataset-tag TAG           Retrieves datasets that were tagged with tag to be
+                            deleted
+--model-tag TAG             Retrieves models that were tagged with tag to be
+                            deleted
+--prediction-tag TAG        Retrieves predictions that were tagged with tag to
+                            be deleted
+--evaluation-tag TAG        Retrieves evaluations that were tagged with tag to
+                            be deleted
 
 Ensembles
 ---------

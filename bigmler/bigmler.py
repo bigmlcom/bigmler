@@ -750,7 +750,7 @@ def main(args=sys.argv[1:]):
             message = "\nGenerated files:\n\n" + u.print_tree(path, " ") + "\n"
         u.log_message(message, log_file=session_file,
                       console=command_args.verbosity)
-    elif (command_args.training_set or command_args.test_set
+    elif (command_args.training_set or has_test(command_args)
           or command_args.source or command_args.dataset
           or command_args.datasets or command_args.votes_dirs):
         compute_output(**output_args)
