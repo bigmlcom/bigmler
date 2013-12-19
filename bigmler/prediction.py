@@ -543,7 +543,6 @@ def predict(test_set, test_set_header, models, fields, output,
             # retrieves the models with no order, so the correspondence with
             # each label must be restored.
             ordered = True
-            models_per_label = args.number_of_models
             if args.multi_label and (args.model_tag is not None
                                      or models_per_label > 1):
                 ordered = False
