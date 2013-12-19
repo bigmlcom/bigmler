@@ -3,6 +3,11 @@
 History
 -------
 
+0.7.2 (2013-12-20)
+~~~~~~~~~~~~~~~~~~
+
+- Adding confidence to predictions output in full format
+
 0.7.1 (2013-12-19)
 ~~~~~~~~~~~~~~~~~~
 
