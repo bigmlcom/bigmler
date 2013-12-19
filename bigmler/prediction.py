@@ -63,7 +63,7 @@ def use_prediction_headers(prediction_headers, output, test_reader,
     objective_name = fields.fields[objective_field]['name']
     headers = [objective_name]
 
-    if args.prediction_info == NORMAL_FORMAT:
+    if args.prediction_info in [NORMAL_FORMAT, FULL_FORMAT]:
         headers.append("confidence")
     if (args.prediction_info == FULL_FORMAT or
             args.prediction_fields is not None):
@@ -120,17 +120,17 @@ def write_prediction(prediction, output=sys.stdout,
     if isinstance(prediction, list):
         prediction, confidence = ((prediction[0], None) if len(prediction) == 1
                                   else prediction)
-    row = [prediction]
-    if prediction_info == NORMAL_FORMAT:
-        row.append(confidence)
-    elif prediction_info == FULL_FORMAT:
+    row = []
+    if prediction_info == FULL_FORMAT:
         if input_data is None:
             input_data = []
         row = input_data
         if exclude:
             for index in exclude:
                 del row[index]
-        row.append(prediction)
+    row.append(prediction)
+    if prediction_info in [NORMAL_FORMAT, FULL_FORMAT]:
+        row.append(confidence)
     try:
         output.writerow(row)
     except AttributeError:

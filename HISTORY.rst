@@ -13,6 +13,17 @@ History
 - Fixing problem with --max-categories when the categorical field is not
   a preferred field of the dataset.
 
+0.7.2 (2013-12-20)
+~~~~~~~~~~~~~~~~~~
+
+- Adding confidence to predictions output in full format
+
+0.7.1 (2013-12-19)
+~~~~~~~~~~~~~~~~~~
+
+- Bug fixing: multi-label predictions failed when the --ensembles option
+  is used to provide the ensemble information
+
 0.7.0 (2013-11-24)
 ~~~~~~~~~~~~~~~~~~
 
