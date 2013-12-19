@@ -92,6 +92,13 @@ def non_compatible(args, option):
     return False
 
 
+def has_test(args):
+    """Returns if some kind of test data is given in args.
+
+    """
+    return args.test_set or args.test_source or args.test_dataset
+
+
 def compute_output(api, args, training_set, test_set=None, output=None,
                    objective_field=None,
                    description=None,
@@ -195,7 +202,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if args.max_categories > 0 and len(datasets) == 1:
         objective_id = fields.field_id(fields.objective_field)
         if pd.check_categorical(fields.fields[objective_id]):
-            distribution = pd.get_categories_distribution(dataset, objective_id)
+            distribution = pd.get_categories_distribution(dataset,
+                                                          objective_id)
             if distribution and len(distribution) > args.max_categories:
                 categories = [element[0] for element in distribution]
                 other_label = pd.create_other_label(categories, other_label)
@@ -247,43 +255,57 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         all_labels, labels = l.retrieve_labels(fields_list, labels)
 
     # If predicting
-    if models and test_set and not args.evaluate:
+    if models and has_test(args) and not args.evaluate:
         models_per_label = 1
         test_dataset = None
         if args.multi_label:
             models_per_label = len(models) / len(all_labels)
 
         # Remote predictions: predictions are computed as batch predictions
-        # in bigml.com
-        if (args.remote and not args.multi_label
+        # in bigml.com except when --no-batch flag is set on or multi-label
+        # or max-categories are used
+        if (args.remote and not args.no_batch and not args.multi_label
                 and not args.method in [THRESHOLD_CODE, COMBINATION]):
             # create test source from file
             test_name = "%s - test" % name
-            (test_source, resume,
-             csv_properties, fields) = ps.test_source_processing(
-                test_set, test_set_header,
-                api, args, resume, name=test_name, description=description,
-                csv_properties=csv_properties,
-                field_attributes=test_field_attributes, types=test_types,
-                session_file=session_file, path=path, log=log)
+            if args.test_source is None:
+                (test_source, resume,
+                 csv_properties, test_fields) = ps.test_source_processing(
+                    test_set, test_set_header,
+                    api, args, resume, name=test_name, description=description,
+                    field_attributes=test_field_attributes, types=test_types,
+                    session_file=session_file, path=path, log=log)
+            else:
+                test_source_id = bigml.api.get_source_id(args.test_source)
+                test_source = api.check_resource(test_source_id,
+                                                 api.get_source)
+            if args.test_dataset is None:
             # create test dataset from test source
-            dataset_args = r.set_basic_dataset_args(test_name, description, args)
-            test_dataset, resume = ps.alternative_dataset_processing(
-                test_source, "test", dataset_args, api, args,
-                resume, name=test_name, description=description,
-                session_file=session_file,
-                path=path, log=log)
+                dataset_args = r.set_basic_dataset_args(test_name,
+                                                        description, args)
+                test_dataset, resume = pd.alternative_dataset_processing(
+                    test_source, "test", dataset_args, api, args,
+                    resume, session_file=session_file, path=path, log=log)
+            else:
+                test_dataset_id = bigml.api.get_dataset_id(args.test_dataset)
+                test_dataset = api.check_resource(test_dataset_id,
+                                                  api.get_dataset)
+
+            test_fields = pd.get_fields_structure(test_dataset,
+                                                  csv_properties)
 
             batch_prediction_args = r.set_batch_prediction_args(
-                name, description, args, fields=fields, fields_map=fields_map)
+                name, description, args, fields=fields,
+                dataset_fields=test_fields, fields_map=fields_map)
 
             remote_predict(model, test_dataset, batch_prediction_args, args,
                            api, resume, prediction_file=output,
                            session_file=session_file, path=path, log=log)
         else:
             predict(test_set, test_set_header, models, fields, output,
-                    objective_field, args, api,
-                    args.max_batch_models, resume, session_file, labels=labels,
+                    objective_field, args, api=api, log=log,
+                    max_models=args.max_batch_models, resume=resume,
+                    session_file=session_file, labels=labels,
                     models_per_label=models_per_label, other_label=other_label)
 
     # When combine_votes flag is used, retrieve the predictions files saved
@@ -308,11 +330,14 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if args.evaluate:
         if args.test_split > 0:
             dataset = test_dataset
+        dataset_fields = pd.get_fields_structure(dataset, None)
         models_or_ensembles = ensemble_ids if ensemble_ids != [] else models
-        resume = evaluate(models_or_ensembles, [dataset], name, description,
-                          fields, fields_map, output, api, args, resume,
-                          session_file=session_file, path=path, log=log,
-                          labels=labels, all_labels=all_labels,
+        resume = evaluate(models_or_ensembles, [dataset], output, api,
+                          args, resume, name=name, description=description,
+                          fields=fields, dataset_fields=dataset_fields,
+                          fields_map=fields_map,
+                          session_file=session_file, path=path,
+                          log=log, labels=labels, all_labels=all_labels,
                           objective_field=objective_field)
 
     # If cross_validation_rate is > 0, create remote evaluations and save
@@ -575,7 +600,6 @@ def main(args=sys.argv[1:]):
         types_arg = u.read_types(command_args.test_types)
         output_args.update(test_types=types_arg)
 
-
     # Parses dataset fields if provided.
     if command_args.dataset_fields:
         dataset_fields_arg = map(str.strip,
@@ -726,7 +750,7 @@ def main(args=sys.argv[1:]):
             message = "\nGenerated files:\n\n" + u.print_tree(path, " ") + "\n"
         u.log_message(message, log_file=session_file,
                       console=command_args.verbosity)
-    elif (command_args.training_set or command_args.test_set
+    elif (command_args.training_set or has_test(command_args)
           or command_args.source or command_args.dataset
           or command_args.datasets or command_args.votes_dirs):
         compute_output(**output_args)

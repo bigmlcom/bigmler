@@ -21,19 +21,14 @@
 from __future__ import absolute_import
 
 import sys
-import os
-import csv
-import copy
 
 import bigml.api
 import bigmler.utils as u
 import bigmler.resources as r
 import bigmler.checkpoint as c
-import bigmler.labels as l
 
 from bigml.fields import Fields
 
-from bigmler.train_reader import TrainReader
 from bigmler.prediction import OTHER
 from bigmler.processing.models import has_models
 
@@ -60,6 +55,7 @@ def check_categorical(field):
     """
     return field['optype'] == 'categorical'
 
+
 def get_categories_distribution(dataset, objective_id):
     """Returns the categories distribution in a categorical dataset
 
@@ -82,6 +78,17 @@ def get_categories_distribution(dataset, objective_id):
             return []
     except KeyError:
         return []
+
+
+def get_fields_structure(resource, csv_properties):
+    """Builds a Fields object from the fields information in the resource
+
+    """
+    if not csv_properties and 'locale' in resource['object']:
+        csv_properties = {
+            'data_locale': resource['object']['locale']}
+    fields = Fields(resource['object']['fields'], **csv_properties)
+    return fields
 
 
 def dataset_processing(source, training_set, test_set, fields, objective_field,
@@ -126,10 +133,7 @@ def dataset_processing(source, training_set, test_set, fields, objective_field,
     # we hadn't them yet.
     if dataset:
         dataset = r.get_dataset(dataset, api, args.verbosity, session_file)
-        if not csv_properties and 'locale' in dataset['object']:
-            csv_properties = {
-                'data_locale': dataset['object']['locale']}
-        fields = Fields(dataset['object']['fields'], **csv_properties)
+        fields = get_fields_structure(dataset, csv_properties)
         if args.public_dataset:
             r.publish_dataset(dataset, args, api, session_file)
         if args.objective_field:
@@ -150,11 +154,8 @@ def dataset_processing(source, training_set, test_set, fields, objective_field,
 
 def alternative_dataset_processing(dataset_or_source, suffix, dataset_args,
                                    api, args, resume,
-                                   name=None, description=None,
-                                   out_of_bag=False,
-                                   sample_rate=1, session_file=None,
-                                   path=None, log=None):
-    """Creates a dataset. Used in splits to generate train and test datasets 
+                                   session_file=None, path=None, log=None):
+    """Creates a dataset. Used in splits to generate train and test datasets
 
     """
     alternative_dataset = None
@@ -184,21 +185,19 @@ def split_processing(dataset, api, args, resume, name=None, description=None,
     test_dataset = None
     sample_rate = 1 - args.test_split
     dataset_alternative_args = r.set_dataset_split_args(
-        name, description, args,
+        "%s - train (%s %%)" % (name,
+        int(sample_rate * 100)), description, args,
         sample_rate, out_of_bag=False)
     train_dataset, resume = alternative_dataset_processing(
         dataset, "train", dataset_alternative_args, api, args,
-        resume, name="%s - train (%s %%)" % (name,
-        int(sample_rate * 100)), description=description,
-        session_file=session_file, path=path, log=log)
+        resume, session_file=session_file, path=path, log=log)
     dataset_alternative_args = r.set_dataset_split_args(
-        name, description, args,
+        "%s - test (%s %%)" % (name,
+        int(args.test_split * 100)), description, args,
         sample_rate, out_of_bag=True)
     test_dataset, resume = alternative_dataset_processing(
         dataset, "test", dataset_alternative_args, api, args,
-        resume, name="%s - test (%s %%)" % (name,
-        int(args.test_split * 100)), description=description,
-        session_file=session_file, path=path, log=log)
+        resume, session_file=session_file, path=path, log=log)
 
     return train_dataset, test_dataset, resume
 

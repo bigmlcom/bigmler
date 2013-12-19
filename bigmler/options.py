@@ -742,12 +742,33 @@ under the License.""" % version
 
     # The path to a file containing types if you want to alter BigML's
     # type auto-detect.
-    parser.add_argument('--test_types',
+    parser.add_argument('--test-types',
                         action='store',
                         dest='test_types',
                         default=defaults.get('test_types', None),
                         help=("Path to a file describing field types. One"
                               " definition per line (e.g., 0, 'numeric')."))
+
+    # If a BigML test source is provided, the script won't create a new one
+    parser.add_argument('--test-source',
+                        action='store',
+                        dest='test_source',
+                        default=defaults.get('test_source', None),
+                        help="BigML test source Id.")
+
+    # If a BigML test dataset is provided, the script won't create a new one
+    parser.add_argument('--test-dataset',
+                        action='store',
+                        dest='test_dataset',
+                        default=defaults.get('test_dataset', None),
+                        help="BigML test dataset Id.")
+
+    # No batch predictions. Remote predictions are created individually.
+    parser.add_argument('--no-batch',
+                        action='store_true',
+                        dest='no_batch',
+                        default=defaults.get('no_batch', False),
+                        help="Create remote predictions individually.")
 
     # The following options are only useful to deactivate the corresponding
     # oposed default values
@@ -882,4 +903,11 @@ under the License.""" % version
                         dest='prediction_header',
                         default=defaults.get('prediction_header', False),
                         help="Headers are not added to the prediction file.")
+
+    # Batch predictions. Remote predictions are created in batch mode.
+    parser.add_argument('--batch',
+                        action='store_false',
+                        dest='no_batch',
+                        default=defaults.get('no_batch', False),
+                        help="Create remote predictions in batch.")
     return parser

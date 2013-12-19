@@ -11,148 +11,134 @@ from ml_test_prediction_steps import i_create_all_ml_resources
 from ml_test_prediction_steps import i_create_all_ml_resources_and_ensembles
 from ml_test_evaluation_steps import i_create_all_ml_resources_for_evaluation
 from max_categories_test_prediction_steps import i_check_create_max_categories_datasets, i_create_all_mc_resources
+from basic_batch_test_prediction_steps import i_check_create_test_source, i_check_create_test_dataset
+from common_steps import check_debug
 
+
+def shell_execute(command, output, test=None, options=None):
+    """Excute bigmler command in shell
+
+    """
+    command = check_debug(command)
+    world.directory = os.path.dirname(output)
+    world.folders.append(world.directory)
+    try:
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            if test is not None:
+                world.test_lines = file_number_of_lines(test)
+                if options is None or options.find('--prediction-header') == -1:
+                    # test file has headers in it, so first line must be ignored
+                    world.test_lines -= 1
+            world.output = output
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
 
 @step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" and log predictions in "(.*?)" with "(.*?)" as test field separator$')
 def i_create_all_resources_with_separator(step, data=None, test=None, output=None, separator=None):
     if data is None or test is None or separator is None or output is None:
         assert False
-    world.directory = os.path.dirname(output)
-    world.folders.append(world.directory)
-    try:
-        retcode = check_call("bigmler --train " + data + " --test " + test + " --test-separator " + separator + " --store --output " + output + " --max-batch-models 1", shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.test_lines = file_number_of_lines(test)
-            # test file has headers in it, so first line must be ignored
-            world.test_lines -= 1
-            world.output = output
-            assert True
-    except (OSError, CalledProcessError, IOError) as exc:
-        assert False, str(exc)
+    command = ("bigmler --train " + data + " --test " + test +
+               " --test-separator " + separator + " --store --output " +
+               output + " --max-batch-models 1")
+    shell_execute(command, output, test=test)
+
+@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" remotely with mapping file "(.*?)" and log predictions in "([^"]*)"$')
+def i_create_all_resources_batch_map(step, data=None, test=None, fields_map=None, output=None):
+    if data is None or test is None or output is None or fields_map is None:
+        assert False
+    command = ("bigmler --train " + data + " --test " + test + " --fields-map "
+               + fields_map + " --store --output " + output + " --remote")
+    shell_execute(command, output, test=test)
+
+
+@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" remotely and log predictions in "([^"]*)"$')
+def i_create_all_resources_batch(step, data=None, test=None, output=None):
+    if data is None or test is None or output is None:
+        assert False
+    command = ("bigmler --train " + data + " --test " + test +
+               " --store --output " + output + " --remote")
+    shell_execute(command, output, test=test)
 
 
 @step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" and log predictions in "([^"]*)"$')
 def i_create_all_resources(step, data=None, test=None, output=None):
     if data is None or test is None or output is None:
         assert False
-    world.directory = os.path.dirname(output)
-    world.folders.append(world.directory)
-    try:
-        retcode = check_call("bigmler --train " + data + " --test " + test + " --store --output " + output + " --max-batch-models 1", shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.test_lines = file_number_of_lines(test)
-            # test file has headers in it, so first line must be ignored
-            world.test_lines -= 1
-            world.output = output
-            assert True
-    except (OSError, CalledProcessError, IOError) as exc:
-        assert False, str(exc)
+    command = ("bigmler --train " + data + " --test " + test +
+               " --store --output " + output + " --max-batch-models 1")
+    shell_execute(command, output, test=test)
 
 
 @step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" and log predictions in "(.*?)" with prediction options "(.*?)"')
 def i_create_all_resources_with_options(step, data=None, test=None, output=None, options=''):
     if data is None or test is None or output is None:
         assert False
-    world.directory = os.path.dirname(output)
-    world.folders.append(world.directory)
-    try:
-        command = "bigmler --train " + data + " --test " + test + " --store --output " + output + " --max-batch-models 1 " + options
-        retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.test_lines = file_number_of_lines(test)
-            # test file has headers in it, so first line must be ignored
-            if options.find('--prediction-header') == -1:
-                world.test_lines -= 1
-            world.output = output
-            assert True
-    except (OSError, CalledProcessError, IOError) as exc:
-        assert False, str(exc)
+    command = ("bigmler --train " + data + " --test " + test +
+               " --store --output " + output + " --max-batch-models 1 " +
+               options)
+    shell_execute(command, output, test=test, options=options)
 
 
 @step(r'I create BigML (multi-label\s)?resources using source to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_source(step, multi_label=None, test=None, output=None):
     if test is None or output is None:
         assert False
-    world.directory = os.path.dirname(output)
-    world.folders.append(world.directory)
-    multi_label = "" if multi_label is None else " --multi-label " 
-    try:
-        retcode = check_call("bigmler "+ multi_label +"--source " + world.source['resource'] + " --test " + test + " --store --output " + output, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.test_lines = file_number_of_lines(test)
-            # test file has headers in it, so first line must be ignored
-            world.test_lines -= 1
-            world.output = output
-            assert True
-    except (OSError, CalledProcessError, IOError) as exc:
-        assert False, str(exc)
 
+    multi_label = "" if multi_label is None else " --multi-label "
+    command = ("bigmler "+ multi_label +"--source " + world.source['resource']
+               + " --test " + test + " --store --output " + output)
+    shell_execute(command, output, test=test)
+
+
+@step(r'I create BigML resources using source to test the previous test source remotely and log predictions in "(.*)"')
+def i_create_resources_from_source_batch(step, output=None):
+    if output is None:
+        assert False
+    command = ("bigmler --source " + world.source['resource']
+               + " --test-source " + world.test_source['resource']
+               + " --store --remote --output " + output)
+    shell_execute(command, output)
 
 @step(r'I create BigML (multi-label\s)?resources using dataset to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_dataset(step, multi_label=None, test=None, output=None):
     if test is None or output is None:
         assert False
-    world.directory = os.path.dirname(output)
-    world.folders.append(world.directory)
     multi_label = "" if multi_label is None else " --multi-label " 
-    try:
-        retcode = check_call("bigmler "+ multi_label +"--dataset " + world.dataset['resource'] + " --test " + test + " --store --output " + output, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.test_lines = file_number_of_lines(test)
-            # test file has headers in it, so first line must be ignored
-            world.test_lines -= 1
-            world.output = output
-            assert True
-    except (OSError, CalledProcessError, IOError) as exc:
-        assert False, str(exc)
+    command = ("bigmler "+ multi_label +"--dataset " +
+               world.dataset['resource'] + " --test " + test +
+               " --store --output " + output)
+    shell_execute(command, output, test=test)
+
+@step(r'I create BigML resources using dataset to test the previous test dataset remotely and log predictions in "(.*)"')
+def i_create_resources_from_dataset_batch(step, output=None):
+    if output is None:
+        assert False
+    command = ("bigmler --dataset " + world.dataset['resource'] + " --test-dataset " +
+               world.test_dataset['resource'] + " --store --remote --output " + output)
+    shell_execute(command, output)
+
 
 @step(r'I create BigML resources using dataset, objective field (.*) and model fields (.*) to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_dataset_objective_model(step, objective=None, fields=None, test=None, output=None):
     if objective is None or fields is None or test is None or output is None:
         assert False
-    world.directory = os.path.dirname(output)
-    world.folders.append(world.directory)
-    try:
-        retcode = check_call("bigmler --dataset " + world.dataset['resource'] + " --objective " + objective + " --model-fields " + fields + " --test " + test + " --store --output " + output, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.test_lines = file_number_of_lines(test)
-            # test file has headers in it, so first line must be ignored
-            world.test_lines -= 1
-            world.output = output
-            assert True
-    except (OSError, CalledProcessError, IOError) as exc:
-        assert False, str(exc)
+    command = ("bigmler --dataset " + world.dataset['resource'] +
+               " --objective " + objective + " --model-fields " +
+               fields + " --test " + test + " --store --output " + output)
+    shell_execute(command, output, test=test)
+
 
 @step(r'I create BigML resources using model to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_model(step, test=None, output=None):
     if test is None or output is None:
         assert False
-    world.directory = os.path.dirname(output)
-    world.folders.append(world.directory)
-    try:
-        retcode = check_call("bigmler --model " + world.model['resource'] + " --test " + test + " --store --output " + output + " --max-batch-models 1", shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.test_lines = file_number_of_lines(test)
-            # test file has headers in it, so first line must be ignored
-            world.test_lines -= 1
-            world.output = output
-            assert True
-    except (OSError, CalledProcessError, IOError) as exc:
-        assert False, str(exc)
+    command = ("bigmler --model " + world.model['resource'] + " --test " +
+               test + " --store --output " + output + " --max-batch-models 1")
+    shell_execute(command, output, test=test)
 
 
 @step(r'I create BigML resources using the previous ensemble with different thresholds to test "(.*)" and log predictions in "(.*)" and "(.*)"')
@@ -160,17 +146,21 @@ def i_create_resources_from_ensemble_with_threshold(step, test=None, output2=Non
     if test is None or output2 is None or output3 is None:
         assert False
     try:
-        retcode = check_call("bigmler --ensemble " + world.ensemble['resource'] + " --test " + test 
-                             + " --tag my_ensemble --store --output " + output2 +
-                             " --method threshold --threshold " +
-                             str(world.number_of_models) , shell=True)
+        command = ("bigmler --ensemble " + world.ensemble['resource'] +
+                   " --test " + test + " --tag my_ensemble --store --output " +
+                   output2 + " --method threshold --threshold " +
+                   str(world.number_of_models))
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
             assert True
-        retcode = check_call("bigmler --ensemble " + world.ensemble['resource'] + " --test " + test 
-                             + " --tag my_ensemble --store --output " + output3 +
-                             " --method threshold --threshold 1", shell=True)
+        command = ("bigmler --ensemble " + world.ensemble['resource'] +
+                   " --test " + test + " --tag my_ensemble --store --output " +
+                   output3 + " --method threshold --threshold 1")
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -192,7 +182,12 @@ def i_create_resources_from_ensemble_generic(step, number_of_models=None, no_rep
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
-        retcode = check_call("bigmler --dataset " + world.dataset['resource'] + " --test " + test + " --number-of-models " + str(number_of_models) + " --tag my_ensemble --store --output " + output + no_replacement, shell=True)
+        command = ("bigmler --dataset " + world.dataset['resource'] +
+                   " --test " + test + " --number-of-models " +
+                   str(number_of_models) + " --tag my_ensemble --store" +
+                   " --output " + output + no_replacement)
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -210,41 +205,19 @@ def i_create_resources_from_ensemble_generic(step, number_of_models=None, no_rep
 def i_create_resources_from_models_file(step, multi_label=None, models_file=None, test=None, output=None):
     if models_file is None or test is None or output is None:
         assert False
-    world.directory = os.path.dirname(output)
-    world.folders.append(world.directory)
     multi_label = "" if multi_label is None else " --multi-label "
-    try:
-        retcode = check_call("bigmler "+ multi_label +"--models " + models_file + " --test " + test + " --store --output " + output, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.test_lines = file_number_of_lines(test)
-            # test file has headers in it, so first line must be ignored
-            world.test_lines -= 1
-            world.output = output
-            assert True
-    except (OSError, CalledProcessError, IOError) as exc:
-        assert False, str(exc)
+    command = ("bigmler "+ multi_label +"--models " + models_file + " --test "
+               + test + " --store --output " + output)
+    shell_execute(command, output, test=test)
 
 
 @step(r'I create BigML resources using dataset in file "(.*)" to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_dataset_file(step, dataset_file=None, test=None, output=None):
     if dataset_file is None or test is None or output is None:
         assert False
-    world.directory = os.path.dirname(output)
-    world.folders.append(world.directory)
-    try:
-        retcode = check_call("bigmler --datasets " + dataset_file + " --test " + test + " --store --output " + output, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.test_lines = file_number_of_lines(test)
-            # test file has headers in it, so first line must be ignored
-            world.test_lines -= 1
-            world.output = output
-            assert True
-    except (OSError, CalledProcessError, IOError) as exc:
-        assert False, str(exc)
+    command = ("bigmler --datasets " + dataset_file + " --test " + test +
+               " --store --output " + output)
+    shell_execute(command, output, test=test)
 
 
 @step(r'I create a BigML cross-validation with rate (0\.\d+) using a dataset and log results in "(.*)"')
@@ -256,7 +229,11 @@ def i_create_cross_validation_from_dataset(step, rate=None, output=None):
     world.number_of_models = int(MONTECARLO_FACTOR * float(rate))
     world.number_of_evaluations = world.number_of_models
     try:
-        retcode = check_call("bigmler --dataset " + world.dataset['resource'] + " --cross-validation-rate " + rate + " --store --output " + output, shell=True)
+        command = ("bigmler --dataset " + world.dataset['resource'] +
+                   " --cross-validation-rate " + rate + " --store --output "
+                   + output)
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -273,7 +250,10 @@ def i_find_predictions_files(step, directory1=None, directory2=None, output=None
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
-        retcode = check_call("bigmler --combine-votes " + directory1 + "," + directory2 + " --store --output " + output, shell=True)
+        command = ("bigmler --combine-votes " + directory1 + "," + directory2 +
+                   " --store --output " + output)
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -291,7 +271,10 @@ def i_find_predictions_files(step, directory1=None, directory2=None, output=None
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
-        retcode = check_call("bigmler --combine-votes " + directory1 + "," + directory2 + " --store --output " + output + " --method " + method, shell=True)
+        command = ("bigmler --combine-votes " + directory1 + "," + directory2 +
+                   " --store --output " + output + " --method " + method)
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -302,7 +285,7 @@ def i_find_predictions_files(step, directory1=None, directory2=None, output=None
         assert False, str(exc)
 
 
-@step(r'I check that the source has been created')
+@step(r'I check that the source has been created$')
 def i_check_create_source(step):
     source_file = "%s%ssource" % (world.directory, os.sep)
     try:
@@ -317,7 +300,7 @@ def i_check_create_source(step):
         assert False, str(exc)
 
 
-@step(r'I check that the (test\s|train\s)?dataset has been created')
+@step(r'I check that the (test\s|train\s)?dataset has been created$')
 def i_check_create_dataset(step, suffix=None):
     import traceback
     suffix = "" if suffix is None else "_%s" % suffix[:-1]
@@ -477,7 +460,8 @@ def i_check_predictions(step, check_file):
                 assert False
             for index in range(len(row)):
                 dot = row[index].find(".")
-                if dot > 0:
+                if dot > 0 or (check_row[index].find(".") > 0 
+                               and check_row[index].endswith(".0")):
                     try:
                         decimal_places = min(len(row[index]), len(check_row[index])) - dot - 1
                         row[index] = round(float(row[index]), decimal_places)
@@ -593,7 +577,8 @@ def i_have_previous_scenario_or_reproduce_it(step, scenario, kwargs):
                  'scenario_ml_6': [(i_create_all_ml_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models, False)],
                  'scenario_mle_1': [(i_create_all_ml_resources_and_ensembles, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models_in_ensembles, False)],
                  'scenario_ml_e1': [(i_create_all_ml_resources_for_evaluation, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models, False)],
-                 'scenario_mc_1': [(i_create_all_mc_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_max_categories_datasets, False), (i_check_create_models, False)]}
+                 'scenario_mc_1': [(i_create_all_mc_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_max_categories_datasets, False), (i_check_create_models, False)],
+                 'scenario_r1': [(i_create_all_resources_batch, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_max_categories_datasets, False), (i_check_create_models, False), (i_check_create_test_source, False), (i_check_create_test_dataset, False)]}
     if os.path.exists("./%s/" % scenario):
         assert True
     else:

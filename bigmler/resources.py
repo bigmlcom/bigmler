@@ -698,20 +698,21 @@ def publish_model(model, args, api=None, session_file=None):
     return model
 
 
-def map_fields(fields_map, fields):
+def map_fields(fields_map, model_fields, dataset_fields):
     """Build a dict to map model to dataset fields
 
     """
     update_map = {}
     for (model_column, dataset_column) in fields_map.iteritems():
         update_map.update({
-            fields.field_id(model_column):
-            fields.field_id(dataset_column)})
+            model_fields.field_id(model_column):
+            dataset_fields.field_id(dataset_column)})
 
     return update_map
 
 
-def set_evaluation_args(name, description, args, fields=None, fields_map=None):
+def set_evaluation_args(name, description, args, fields=None,
+                        dataset_fields=None, fields_map=None):
     """Return evaluation args dict
 
     """
@@ -720,10 +721,15 @@ def set_evaluation_args(name, description, args, fields=None, fields_map=None):
         "description": description,
         "tags": args.tag
     }
+
     if (args.number_of_models > 1 or args.ensemble):
         evaluation_args.update(combiner=args.method)
     if fields_map is not None and fields is not None:
-        evaluation_args.update({"fields_map": map_fields(fields_map, fields)})
+        if dataset_fields is None:
+            datset_fields = fields
+        evaluation_args.update({"fields_map": map_fields(fields_map,
+                                                         fields,
+                                                         dataset_fields)})
     # Two cases to use out_of_bag and sample_rate: standard evaluations where
     # only the training set is provided, and cross_validation
     # [--dataset|--test] [--model|--models|--model-tag|--ensemble] --evaluate
@@ -742,8 +748,8 @@ def set_evaluation_args(name, description, args, fields=None, fields_map=None):
 
 
 def set_label_evaluation_args(name, description, args, labels, all_labels,
-                              number_of_evaluations, fields, fields_map,
-                              objective_field):
+                              number_of_evaluations, fields, dataset_fields,
+                              fields_map, objective_field):
     """Set of args needed to build an evaluation per label
 
     """
@@ -757,7 +763,8 @@ def set_label_evaluation_args(name, description, args, labels, all_labels,
         new_name = label_model_args(
             name, label, all_labels, [], objective_field)[0]
         evaluation_args = set_evaluation_args(new_name, description, args,
-                                              fields, fields_map)
+                                              fields, dataset_fields,
+                                              fields_map)
         evaluation_args_list.append(evaluation_args)
     return evaluation_args_list
 
@@ -849,7 +856,7 @@ def save_evaluation(evaluation, output, api=None):
 
 
 def set_batch_prediction_args(name, description, args, fields=None,
-                              fields_map=None):
+                              dataset_fields=None, fields_map=None):
     """Return batch prediction args dict
 
     """
@@ -862,8 +869,10 @@ def set_batch_prediction_args(name, description, args, fields=None,
     }
 
     if fields_map is not None and fields is not None:
+        if dataset_fields is None:
+            dataset_fields = fields
         batch_prediction_args.update({
-            "fields_map": map_fields(fields_map, fields)})
+            "fields_map": map_fields(fields_map, fields, dataset_fields)})
 
     if args.prediction_info == NORMAL_FORMAT:
         batch_prediction_args.update(confidence=True)

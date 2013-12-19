@@ -40,6 +40,10 @@ def setup_resources(feature):
     assert ensembles['code'] == HTTP_OK
     world.init_ensembles_count = ensembles['meta']['total_count']
 
+    batch_predictions = world.api.list_batch_predictions()
+    assert batch_predictions['code'] == HTTP_OK
+    world.init_batch_predictions_count = batch_predictions['meta']['total_count']
+
     world.sources = []
     world.datasets = []
     world.models = []
@@ -47,6 +51,7 @@ def setup_resources(feature):
     world.folders = []
     world.evaluations = []
     world.ensembles = []
+    world.batch_predictions = []
 
 @after.each_feature
 def cleanup_resources(feature):
@@ -83,6 +88,10 @@ def cleanup_resources(feature):
         world.api.delete_ensemble(id)
     world.ensembles = []
 
+    for id in world.batch_predictions:
+        world.api.delete_batch_prediction(id)
+    world.batch_predictions = []
+
     sources = world.api.list_sources()
     assert sources['code'] == HTTP_OK
     world.final_sources_count = sources['meta']['total_count']
@@ -107,12 +116,17 @@ def cleanup_resources(feature):
     assert ensembles['code'] == HTTP_OK
     world.final_ensembles_count = ensembles['meta']['total_count']
 
+    batch_predictions = world.api.list_batch_predictions()
+    assert batch_predictions['code'] == HTTP_OK
+    world.final_batch_predictions_count = batch_predictions['meta']['total_count']
+
     assert world.final_sources_count == world.init_sources_count, "init: %s, final: %s" % (world.init_sources_count, world.final_sources_count)
     assert world.final_datasets_count == world.init_datasets_count, "init: %s, final: %s" % (world.init_datasets_count, world.final_datasets_count)
     assert world.final_models_count == world.init_models_count, "init: %s, final: %s" % (world.init_models_count, world.final_models_count)
     assert world.final_predictions_count == world.init_predictions_count, "init: %s, final: %s" % (world.init_predictions_count, world.final_predictions_count)
     assert world.final_evaluations_count == world.init_evaluations_count, "init: %s, final: %s" % (world.init_evaluations_count, world.final_evaluations_count)
     assert world.final_ensembles_count == world.init_ensembles_count, "init: %s, final: %s" % (world.init_ensembles_count, world.final_ensembles_count)
+    assert world.final_batch_predictions_count == world.init_batch_predictions_count, "init: %s, final: %s" % (world.init_batch_predictions_count, world.final_batch_predictions_count)
 
 @after.each_scenario
 def cleanup_output(scenario):

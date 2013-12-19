@@ -32,17 +32,18 @@ import bigmler.checkpoint as c
 from bigml.util import slugify
 
 
-def evaluate(models_or_ensembles, datasets, name, description, fields,
-             fields_map, output, api, args, resume,
-             session_file=None, path=None, log=None, labels=None,
-             all_labels=None, objective_field=None):
+def evaluate(models_or_ensembles, datasets, output, api, args, resume,
+             session_file=None, path=None, log=None, name=None,
+             description=None, fields=None, dataset_fields=None,
+             fields_map=None, labels=None, all_labels=None,
+             objective_field=None):
     """Evaluates a list of models or ensembles with the given dataset
 
     """
     evaluation_files = []
     evaluations, resume = evaluations_process(
         models_or_ensembles, datasets, name, description, fields,
-        fields_map, api, args, resume,
+        dataset_fields, fields_map, api, args, resume,
         session_file=session_file, path=path, log=log,
         labels=labels, all_labels=all_labels, objective_field=objective_field)
     if args.multi_label:
@@ -72,7 +73,7 @@ def cross_validate(models, dataset, fields, api, args, resume,
     """
     evaluations, resume = evaluations_process(
         models, [dataset], name, description,
-        fields, fields_map, api, args, resume,
+        fields, fields, fields_map, api, args, resume,
         session_file=session_file, path=path, log=log)
     if not resume:
         evaluation_files = []
@@ -90,7 +91,7 @@ def cross_validate(models, dataset, fields, api, args, resume,
 
 
 def evaluations_process(models_or_ensembles, datasets, name, description,
-                        fields, fields_map, api, args, resume,
+                        fields, dataset_fields, fields_map, api, args, resume,
                         session_file=None, path=None, log=None, labels=None,
                         all_labels=None, objective_field=None):
     """Evaluates models or ensembles against datasets
@@ -115,11 +116,12 @@ def evaluations_process(models_or_ensembles, datasets, name, description,
         if args.multi_label:
             evaluation_args = r.set_label_evaluation_args(
                 name, description, args, labels, all_labels,
-                number_of_evaluations, fields, fields_map,
+                number_of_evaluations, fields, dataset_fields, fields_map,
                 objective_field)
         else:
             evaluation_args = r.set_evaluation_args(name, description, args,
-                                                    fields, fields_map)
+                                                    fields, dataset_fields,
+                                                    fields_map)
 
         evaluations.extend(r.create_evaluations(
             models_or_ensembles, datasets, evaluation_args,

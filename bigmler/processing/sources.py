@@ -20,10 +20,8 @@
 """
 from __future__ import absolute_import
 
-import sys
 import os
 import csv
-import copy
 
 import bigml.api
 import bigmler.utils as u
@@ -34,14 +32,13 @@ import bigmler.labels as l
 from bigml.fields import Fields
 
 from bigmler.train_reader import TrainReader
-from bigmler.prediction import OTHER
-from bigmler.processing.datasets import alternative_dataset_processing
 
 
 MISSING_TOKENS = ['', 'N/A', 'n/a', 'NULL', 'null', '-', '#DIV/0', '#REF!',
                   '#NAME?', 'NIL', 'nil', 'NA', 'na', '#VALUE!', '#NULL!',
                   'NaN', '#N/A', '#NUM!', '?']
 MONTECARLO_FACTOR = 200
+
 
 def test_source_processing(test_set, test_set_header, api, args, resume,
                            name=None, description=None, csv_properties=None,
@@ -52,6 +49,8 @@ def test_source_processing(test_set, test_set_header, api, args, resume,
     """
     test_source = None
     fields = None
+    if csv_properties is None:
+        csv_properties = {}
     if (args.test_set and args.remote):
         # If resuming, try to extract args.source form log files
         if resume:
