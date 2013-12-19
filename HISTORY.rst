@@ -3,6 +3,12 @@
 History
 -------
 
+0.7.1 (2013-12-19)
+~~~~~~~~~~~~~~~~~~
+
+- Bug fixing: multi-label predictions failed when the --ensembles option
+  is used to provide the ensemble information
+
 0.7.0 (2013-11-24)
 ~~~~~~~~~~~~~~~~~~
 
