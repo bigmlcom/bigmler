@@ -34,10 +34,8 @@ from bigml.fields import Fields
 from bigmler.processing.ensembles import (ensemble_processing,
                                           ensemble_per_label)
 
+from bigmler.processing.ensembles import MISSING_TOKENS
 
-MISSING_TOKENS = ['', 'N/A', 'n/a', 'NULL', 'null', '-', '#DIV/0', '#REF!',
-                  '#NAME?', 'NIL', 'nil', 'NA', 'na', '#VALUE!', '#NULL!',
-                  'NaN', '#N/A', '#NUM!', '?']
 MONTECARLO_FACTOR = 200
 
 
