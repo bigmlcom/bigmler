@@ -789,14 +789,16 @@ under the License.""" % version
                               " are set."))
 
     # Path to the file containing fields generators for the new dataset.
-    # Used when generating a dataset from another by transforming its contents.
-    parser.add_argument('--generators',
+    # Used when generating a dataset from another by adding new fields
+    # combining or setting its contents.
+    parser.add_argument('--new-fields',
                         action='store',
-                        dest='generators',
-                        default=defaults.get('generators', None),
-                        help=("Path to the file containing fields generators"
-                              " used to create a new dataset from an existing"
-                              " one."))
+                        dest='new_fields',
+                        default=defaults.get('new_fields', None),
+                        help=("Path to the file containing fields generators."
+                              " Used to create a new dataset from an existing"
+                              " one by adding new fields combining or"
+                              " setting its contents."))
 
 
     # The following options are only useful to deactivate the corresponding
