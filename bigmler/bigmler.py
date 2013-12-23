@@ -471,6 +471,7 @@ def main(args=sys.argv[1:]):
             command_args.predictions = ("%s%s%s" %
                                         (output_dir, os.sep,
                                          default_output))
+        
         # Logs the issued command and the resumed command
         session_file = "%s%s%s" % (output_dir, os.sep, SESSIONS_LOG)
         u.log_message(message, log_file=session_file)
@@ -487,13 +488,15 @@ def main(args=sys.argv[1:]):
 
         resume = True
     else:
+        if command_args.output_dir is None:
+            command_args.output_dir = NOW
         if command_args.predictions is None:
             command_args.predictions = ("%s%s%s" %
-                                        (NOW, os.sep,
+                                        (command_args.output_dir, os.sep,
                                          default_output))
         if len(os.path.dirname(command_args.predictions).strip()) == 0:
             command_args.predictions = ("%s%s%s" %
-                                        (NOW, os.sep,
+                                        (command_args.output_dir, os.sep,
                                          command_args.predictions))
         directory = u.check_dir(command_args.predictions)
         session_file = "%s%s%s" % (directory, os.sep, SESSIONS_LOG)
