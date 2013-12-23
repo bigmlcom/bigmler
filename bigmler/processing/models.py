@@ -150,7 +150,7 @@ def models_processing(datasets, models, model_ids, objective_field, fields,
             # Ensemble of models
             (ensembles, ensemble_ids,
              models, model_ids, resume) = ensemble_processing(
-                 dataset, objective_field, fields, api, args, resume,
+                 datasets, objective_field, fields, api, args, resume,
                  name=name, description=description, model_fields=model_fields,
                  session_file=session_file, path=path, log=log)
             ensemble = ensembles[0]
@@ -159,7 +159,7 @@ def models_processing(datasets, models, model_ids, objective_field, fields,
 
         else:
             # Set of partial datasets created setting args.max_categories
-            if len(datasets) > 1:
+            if len(datasets) > 1 and args.max_categories:
                 args.number_of_models = len(datasets)
             # Cross-validation case: we create 2 * n models to be validated
             # holding out an n% of data

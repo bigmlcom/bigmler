@@ -770,6 +770,14 @@ under the License.""" % version
                         default=defaults.get('no_batch', False),
                         help="Create remote predictions individually.")
 
+    # The path to a file containing dataset attributes.
+    parser.add_argument('--dataset-attributes',
+                        action='store',
+                        dest='dataset_attributes',
+                        default=defaults.get('dataset_attributes', None),
+                        help=("Path to a json file describing dataset"
+                              " attributes."))
+
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #

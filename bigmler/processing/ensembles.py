@@ -32,7 +32,7 @@ MISSING_TOKENS = ['', 'N/A', 'n/a', 'NULL', 'null', '-', '#DIV/0', '#REF!',
 MONTECARLO_FACTOR = 200
 
 
-def ensemble_processing(dataset, objective_field, fields, api, args, resume,
+def ensemble_processing(datasets, objective_field, fields, api, args, resume,
                         name=None, description=None, model_fields=None,
                         session_file=None,
                         path=None, log=None):
@@ -57,7 +57,7 @@ def ensemble_processing(dataset, objective_field, fields, api, args, resume,
                                             model_fields, objective_field,
                                             fields)
         ensembles, ensemble_ids, models, model_ids = r.create_ensembles(
-            dataset, ensembles, ensemble_args, args, api=api, path=path,
+            datasets, ensembles, ensemble_args, args, api=api, path=path,
             session_file=session_file, log=log)
     return ensembles, ensemble_ids, models, model_ids, resume
 

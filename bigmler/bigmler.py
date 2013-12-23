@@ -606,6 +606,13 @@ def main(args=sys.argv[1:]):
                                  command_args.dataset_fields.split(','))
         output_args.update(dataset_fields=dataset_fields_arg)
 
+    # Parses dataset attributes in json format if provided
+    if command_args.dataset_attributes:
+        json_dataset_attributes = u.read_json(command_args.dataset_attributes)
+        command_args.dataset_json_args = json_dataset_attributes
+    else:
+        command_args.dataset_json_args = {}
+
     # Parses model input fields if provided.
     if command_args.model_fields:
         model_fields_arg = map(str.strip,

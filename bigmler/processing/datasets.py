@@ -21,6 +21,7 @@
 from __future__ import absolute_import
 
 import sys
+import re
 
 import bigml.api
 import bigmler.utils as u
@@ -31,6 +32,9 @@ from bigml.fields import Fields
 
 from bigmler.prediction import OTHER
 from bigmler.processing.models import has_models
+
+
+MAX_CATEGORIES_RE = re.compile("max_categories: (\d+)")
 
 
 def has_datasets(args):
@@ -129,11 +133,18 @@ def dataset_processing(source, training_set, test_set, fields, objective_field,
             datasets.append(bigml.api.get_dataset_id(args.dataset_ids[i]))
         dataset = datasets[0]
 
-    # If we already have a dataset, we check the status and get the fields if
+    # If we( already have a dataset, we check the status and get the fields if
     # we hadn't them yet.
     if dataset:
         dataset = r.get_dataset(dataset, api, args.verbosity, session_file)
         fields = get_fields_structure(dataset, csv_properties)
+        objective_field_info = fields.fields[
+            fields.field_id(fields.objective_field)]
+        if 'label' in objective_field_info:
+            label = objective_field_info['label']
+            if MAX_CATEGORIES_RE.match(label):
+                args.max_categories = int(re.sub(MAX_CATEGORIES_RE,  r'\1', label))
+
         if args.public_dataset:
             r.publish_dataset(dataset, args, api, session_file)
         if args.objective_field:
@@ -241,7 +252,8 @@ def create_categories_datasets(dataset, distribution,
             "all_but": [fields.objective_field],
             "new_fields": [
                 {"name": fields.field_name(fields.objective_field),
-                 "field": category_generator}]}
+                 "field": category_generator,
+                 "label": "max_categories: %s" % args.max_categories}]}
         new_dataset = r.create_dataset(dataset, dataset_args, args.verbosity,
                                        api=api, path=path,
                                        session_file=session_file,
