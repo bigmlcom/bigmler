@@ -124,7 +124,7 @@ def read_json(path):
     try:
         attributes_reader = open(path, "r")
     except IOError:
-        sys.exit("Error: cannot read resource attributes %s" % path)
+        sys.exit("Error: cannot read json file %s" % path)
     try:
         json_attributes = json.loads(attributes_reader.read())
     except ValueError:

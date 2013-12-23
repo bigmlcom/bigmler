@@ -108,7 +108,8 @@ FLAGS = {'BigMLer': [{'flag': 'debug', 'type': 'boolean'},
                      {'flag': 'test_dataset', 'type': 'string'},
                      {'flag': 'no_batch', 'type': 'boolean'},
                      {'flag': 'dataset_attributes', 'type': 'string'},
-                     {'flag': 'output', 'type': 'string'}]}
+                     {'flag': 'output', 'type': 'string'},
+                     {'flag': 'generators', 'type': 'string'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):

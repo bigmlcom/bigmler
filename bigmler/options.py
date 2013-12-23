@@ -788,6 +788,17 @@ under the License.""" % version
                               " --output file path will override it if both"
                               " are set."))
 
+    # Path to the file containing fields generators for the new dataset.
+    # Used when generating a dataset from another by transforming its contents.
+    parser.add_argument('--generators',
+                        action='store',
+                        dest='generators',
+                        default=defaults.get('generators', None),
+                        help=("Path to the file containing fields generators"
+                              " used to create a new dataset from an existing"
+                              " one."))
+
+
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #
