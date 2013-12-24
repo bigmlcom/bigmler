@@ -251,7 +251,7 @@ a similar set in ``./dir2`` and combine all of them to generate the final
 prediction.
 
 
-Making your Dastaset and Model Public
+Making your Dataset and Model Public
 -------------------------------------
 
 Creating a model and making it public in BigML's gallery is as easy as::
@@ -500,6 +500,48 @@ different string in every call::
 
     bigmler --train data/iris.csv --test-split 0.2 --name iris \
             --seed my_random_string_382734627364 --evaluate
+
+
+Advanced Dataset management
+---------------------------
+
+As you can find in the BigML's API documentation on
+`datasets <https://bigml.com/developers/datasets>`_ besided the basic name,
+label and description that we discussed in previous sections, there are many
+more configurable options in a dataset resource. In order to set or update
+dataset options, you can use the ``--dataset-attributes`` option pointing
+to a file path that contains the configuration settings in JSON format::
+
+    bigmler --dataset dataset/52b8a12037203f48bc00000a \
+            --dataset-attributes my_dir/attributes.json
+
+Let's say this dataset has a text field with id ``000001``. The
+``attributes.json`` to change its text parsing mode to full field contents
+would read::
+
+    {"fields": {"000001": {"term_analysis": {"token_mode": "full_terms_only"}}}}
+
+Similarly, you might want to add fields to your existing dataset by combining
+some of its fields or simply tagging their rows. Using BigMLer, you can set the
+``--new-fields`` option to a file path that contains a JSON structure that
+describes the fields you want to select or exclude from the original dataset,
+or the ones you want to combine and the combination function. This structure
+must follow the rules of a specific languange described in the developers
+section::
+
+    bigmler --dataset dataset/52b8a12037203f48bc00000a \
+            --new-fields my_dir/generators.json
+
+To see a simple example, should you want to include all the fields but the
+one with id ``000001`` and add a new one with a label depending on whether
+the value of the field ``sepal length`` is smaller than 1
+you would write in ``generators.json``::
+
+    {"all_but": ["000001"], "new_fields": [{"name": "new_field", "field": "(if (< (f \"sepal length\") 1) \"small\" \"big\")"}]}
+
+or to tag the outliers in the same field::
+
+    {"new_fields": [{"name": "outlier?", "field": "(if (within-percentiles? \"sepal length\" 0.5 0.95) \"normal\" \"outlier\")"}]}
 
 Fitering Sources
 ----------------
@@ -1046,7 +1088,10 @@ Basic Functionality
                                     name
 --output PREDICTIONS                Full path to a file to save predictions.
                                     If left unspecified, it will default to an
-                                    auto-generated file created by BigMLer.
+                                    auto-generated file created by BigMLer. It
+                                    overrides --output-dir
+--output-dir DIRECTORY              Directory where all the session files
+                                    will be stored. It is overriden by --output
 --method METHOD                     Prediction method used: ``plurality``,
                                     ``"confidence weighted"``,
                                     ``"probability weighted"``, ``threshold``
@@ -1096,6 +1141,9 @@ Data Configuration
                                     numbers to include in the dataset
 --model-fields MODEL_FIELDS         Comma-separated list of input fields
                                     (predictors) to create the model
+--dataset-attributes PATH           Path to a file containing a JSON expression
+                                    with attributes to be used as arguments
+                                    in the create dataset calls
 --json-filter PATH                  Path to a file containing a JSON expression
                                     to filter the source
 --lisp-filter PATH                  Path to a file containing a LISP expression
@@ -1111,8 +1159,10 @@ Data Configuration
                                     will be used in a dataset. When more
                                     categories are found, new datasets are
                                     generated to analize the remaining
-                                    categories.
-
+                                    categories
+--new-fields PATH                   Path to a file containing a JSON expression
+                                    used to generate a new dataset with new
+                                    fields by combining or setting their values
 
 Remote Resources
 ----------------

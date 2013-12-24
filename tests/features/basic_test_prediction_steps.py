@@ -318,6 +318,22 @@ def i_check_create_dataset(step, suffix=None):
         assert False, traceback.format_exc()
 
 
+@step(r'I check that the new dataset has been created$')
+def i_check_create_new_dataset(step):
+    dataset_file = "%s%sdataset_gen" % (world.directory, os.sep)
+    try:
+        dataset_file = open(dataset_file, "r")
+        dataset_id = dataset_file.readline().strip()
+        dataset = check_resource(dataset_id,
+                                 world.api.get_dataset)
+        world.datasets.append(dataset['resource'])
+        world.dataset = dataset
+        dataset_file.close()
+        assert True
+    except Exception, exc:
+        assert False, str(exc)
+
+
 @step(r'I check that the model has been created')
 def i_check_create_model(step):
     model_file = "%s%smodels" % (world.directory, os.sep)

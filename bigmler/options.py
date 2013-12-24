@@ -800,7 +800,6 @@ under the License.""" % version
                               " one by adding new fields combining or"
                               " setting its contents."))
 
-
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #

@@ -147,7 +147,8 @@ def dataset_processing(source, training_set, test_set, fields, objective_field,
 
         if args.public_dataset:
             r.publish_dataset(dataset, args, api, session_file)
-        if args.objective_field:
+            
+        if args.objective_field or args.dataset_attributes:
             dataset_args = r.set_dataset_args(name, description, args, fields,
                                               dataset_fields, objective_field)
             dataset = r.update_dataset(dataset, dataset_args, args.verbosity,
