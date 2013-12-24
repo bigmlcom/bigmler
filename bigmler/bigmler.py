@@ -485,7 +485,7 @@ def main(args=sys.argv[1:]):
             command_args.predictions = ("%s%s%s" %
                                         (output_dir, os.sep,
                                          default_output))
-        
+
         # Logs the issued command and the resumed command
         session_file = "%s%s%s" % (output_dir, os.sep, SESSIONS_LOG)
         u.log_message(message, log_file=session_file)

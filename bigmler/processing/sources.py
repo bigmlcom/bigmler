@@ -32,7 +32,6 @@ import bigmler.labels as l
 from bigml.fields import Fields
 
 from bigmler.train_reader import TrainReader
-from bigmler.processing.ensembles import MISSING_TOKENS
 
 MONTECARLO_FACTOR = 200
 

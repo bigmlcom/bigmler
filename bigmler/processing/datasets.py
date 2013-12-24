@@ -143,11 +143,12 @@ def dataset_processing(source, training_set, test_set, fields, objective_field,
         if 'label' in objective_field_info:
             label = objective_field_info['label']
             if MAX_CATEGORIES_RE.match(label):
-                args.max_categories = int(re.sub(MAX_CATEGORIES_RE,  r'\1', label))
+                args.max_categories = int(re.sub(MAX_CATEGORIES_RE,
+                                                 r'\1', label))
 
         if args.public_dataset:
             r.publish_dataset(dataset, args, api, session_file)
-            
+
         if args.objective_field or args.dataset_attributes:
             dataset_args = r.set_dataset_args(name, description, args, fields,
                                               dataset_fields, objective_field)
@@ -281,6 +282,10 @@ def create_new_dataset(dataset, api, args, resume, name=None,
             u.log_message(message, log_file=session_file,
                           console=args.verbosity)
     if not resume:
+        if name is not None:
+            args.dataset_json_generators.update(name=name)
+        if description is not None:
+            args.dataset_json_generators.update(description=description)
         new_dataset = r.create_dataset(dataset, args.dataset_json_generators,
                                        args.verbosity,
                                        api=api, path=path,
