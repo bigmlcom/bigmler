@@ -4,9 +4,12 @@ BigMLer - A command-line tool for BigML's API
 BigMLer makes `BigML <https://bigml.com>`_ even easier.
 
 BigMLer wraps `BigML's API Python bindings <http://bigml.readthedocs.org>`_  to
-offer a high-level command-line script to easily create and publish datasets and models, create ensembles,
+offer a high-level command-line script to easily create and publish datasets
+and models, create ensembles,
 make local predictions from multiple models, and simplify many other machine
-learning tasks.
+learning tasks. For additional information, see
+the
+`full documentation for BigMLer on Read the Docs <http://bigmler.readthedocs.org>`_. 
 
 BigMLer is open sourced under the `Apache License, Version
 2.0 <http://www.apache.org/licenses/LICENSE-2.0.html>`_.

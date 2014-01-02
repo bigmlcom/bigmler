@@ -251,7 +251,7 @@ a similar set in ``./dir2`` and combine all of them to generate the final
 prediction.
 
 
-Making your Dataset and Model Public
+Making your Dataset and Model public
 -------------------------------------
 
 Creating a model and making it public in BigML's gallery is as easy as::
@@ -506,7 +506,7 @@ Advanced Dataset management
 ---------------------------
 
 As you can find in the BigML's API documentation on
-`datasets <https://bigml.com/developers/datasets>`_ besided the basic name,
+`datasets <https://bigml.com/developers/datasets>`_ besides the basic name,
 label and description that we discussed in previous sections, there are many
 more configurable options in a dataset resource. In order to set or update
 dataset options, you can use the ``--dataset-attributes`` option pointing
@@ -521,25 +521,34 @@ would read::
 
     {"fields": {"000001": {"term_analysis": {"token_mode": "full_terms_only"}}}}
 
+There are other kinds of updatable options in the dataset besides controlling
+its fields features. As an example, to publish a dataset in the
+gallery and set its price you could use::
+
+    {"private": false, "price": 120.4}
+
 Similarly, you might want to add fields to your existing dataset by combining
 some of its fields or simply tagging their rows. Using BigMLer, you can set the
 ``--new-fields`` option to a file path that contains a JSON structure that
 describes the fields you want to select or exclude from the original dataset,
-or the ones you want to combine and the combination function. This structure
-must follow the rules of a specific languange described in the developers
-section::
+or the ones you want to combine and
+the `Flatline expression <https://github.com/bigmlcom/flatline>` to
+combine them. This structure
+must follow the rules of a specific languange described in the `Transformations
+item of the developers
+section <https://bigml.com/developers/transformations>`_::
 
     bigmler --dataset dataset/52b8a12037203f48bc00000a \
             --new-fields my_dir/generators.json
 
 To see a simple example, should you want to include all the fields but the
 one with id ``000001`` and add a new one with a label depending on whether
-the value of the field ``sepal length`` is smaller than 1
+the value of the field ``sepal length`` is smaller than 1,
 you would write in ``generators.json``::
 
     {"all_but": ["000001"], "new_fields": [{"name": "new_field", "field": "(if (< (f \"sepal length\") 1) \"small\" \"big\")"}]}
 
-or to tag the outliers in the same field::
+Or, as another example, to tag the outliers of the same field one coud use::
 
     {"new_fields": [{"name": "outlier?", "field": "(if (within-percentiles? \"sepal length\" 0.5 0.95) \"normal\" \"outlier\")"}]}
 
@@ -1143,7 +1152,7 @@ Data Configuration
                                     (predictors) to create the model
 --dataset-attributes PATH           Path to a file containing a JSON expression
                                     with attributes to be used as arguments
-                                    in the create dataset calls
+                                    in create dataset calls
 --json-filter PATH                  Path to a file containing a JSON expression
                                     to filter the source
 --lisp-filter PATH                  Path to a file containing a LISP expression
@@ -1162,7 +1171,8 @@ Data Configuration
                                     categories
 --new-fields PATH                   Path to a file containing a JSON expression
                                     used to generate a new dataset with new
-                                    fields by combining or setting their values
+                                    fields created via `Flatline <https://github.com/bigmlcom/flatline>`
+                                    by combining or setting their values
 
 Remote Resources
 ----------------

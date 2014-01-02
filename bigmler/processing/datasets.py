@@ -133,7 +133,7 @@ def dataset_processing(source, training_set, test_set, fields, objective_field,
             datasets.append(bigml.api.get_dataset_id(args.dataset_ids[i]))
         dataset = datasets[0]
 
-    # If we( already have a dataset, we check the status and get the fields if
+    # If we already have a dataset, we check the status and get the fields if
     # we hadn't them yet.
     if dataset:
         dataset = r.get_dataset(dataset, api, args.verbosity, session_file)
