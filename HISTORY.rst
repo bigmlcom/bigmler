@@ -3,7 +3,7 @@
 History
 -------
 
-0.8.0 (2013-12-04)
+1.0 (2014-01-02)
 ~~~~~~~~~~~~~~~~~~
 
 - Adding the --max-categories option to handle datasets with a high number of
