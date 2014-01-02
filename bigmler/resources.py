@@ -237,8 +237,9 @@ def set_dataset_args(name, description, args, fields, dataset_fields,
     dataset_args = set_basic_dataset_args(name, description, args)
 
     if objective_field is not None and fields is not None:
-        dataset_args.update(objective_field={'id':
-                                             fields.field_id(objective_field)})
+        objective_id = fields.field_id(objective_field)
+        dataset_args.update(objective_field={'id': objective_id})
+
     if args.json_filter:
         dataset_args.update(json_filter=args.json_filter)
     elif args.lisp_filter:
@@ -247,6 +248,9 @@ def set_dataset_args(name, description, args, fields, dataset_fields,
     if dataset_fields and fields is not None:
         input_fields = configure_input_fields(fields, dataset_fields)
         dataset_args.update(input_fields=input_fields)
+    if args.dataset_json_args:
+        dataset_args.update(args.dataset_json_args)
+
     return dataset_args
 
 
@@ -447,9 +451,12 @@ def create_models(datasets, model_ids, model_args,
             if args.cross_validation_rate > 0:
                 new_seed = get_basic_seed(i + existing_models)
                 model_args.update(seed=new_seed)
-            if len(datasets) > 1:
+            # one model per dataset (--max-categories or single model)
+            if args.max_categories > 0:
                 dataset = datasets[i]
-            model = api.create_model(dataset, model_args)
+                model = api.create_model(dataset, model_args)
+            else:
+                model = api.create_model(datasets, model_args)
             model_id = check_resource_error(model, "Failed to create model: ")
             log_message("%s\n" % model_id, log_file=log)
             model_ids.append(model_id)
@@ -580,7 +587,7 @@ def set_ensemble_args(name, description, args, model_fields,
     return ensemble_args
 
 
-def create_ensembles(dataset, ensemble_ids, ensemble_args, args,
+def create_ensembles(datasets, ensemble_ids, ensemble_args, args,
                      number_of_ensembles=1,
                      api=None, path=None, session_file=None, log=None):
     """Create ensembles from input data
@@ -610,7 +617,7 @@ def create_ensembles(dataset, ensemble_ids, ensemble_args, args,
                              str(exception))
             if ensemble_args_list:
                 ensemble_args = ensemble_args_list[i]
-            ensemble = api.create_ensemble(dataset, ensemble_args)
+            ensemble = api.create_ensemble(datasets, ensemble_args)
             ensemble_id = check_resource_error(ensemble,
                                                "Failed to create ensemble: ")
             log_message("%s\n" % ensemble_id, log_file=log)

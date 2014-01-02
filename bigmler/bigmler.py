@@ -135,6 +135,12 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         sys.exit("When --max-categories is used, you must also provide the"
                  " --objective field name or column number")
 
+    # When using --new-fields, it is compulsory to specify also a dataset
+    # id
+    if args.new_fields and not args.dataset:
+        sys.exit("To use --new-fields you must also provide a dataset id"
+                 " to generate the new dataset from it.")
+
     path = u.check_dir(output)
     session_file = "%s%s%s" % (path, os.sep, SESSIONS_LOG)
     csv_properties = {}
@@ -215,6 +221,14 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             sys.exit("The provided objective field is not categorical. A"
                      " categorical field is expected when using"
                      "  --max-categories")
+
+    # Check if the dataset a generators file associated with it, and
+    # generate a new dataset with the specified field structure
+    if args.new_fields:
+        dataset, resume = pd.create_new_dataset(
+            dataset, api, args, resume, name=name,
+            description=description, session_file=session_file, path=path,
+            log=log)
 
     models, model_ids, ensemble_ids, resume = pm.models_processing(
         datasets, models, model_ids,
@@ -471,6 +485,7 @@ def main(args=sys.argv[1:]):
             command_args.predictions = ("%s%s%s" %
                                         (output_dir, os.sep,
                                          default_output))
+
         # Logs the issued command and the resumed command
         session_file = "%s%s%s" % (output_dir, os.sep, SESSIONS_LOG)
         u.log_message(message, log_file=session_file)
@@ -487,13 +502,15 @@ def main(args=sys.argv[1:]):
 
         resume = True
     else:
+        if command_args.output_dir is None:
+            command_args.output_dir = NOW
         if command_args.predictions is None:
             command_args.predictions = ("%s%s%s" %
-                                        (NOW, os.sep,
+                                        (command_args.output_dir, os.sep,
                                          default_output))
         if len(os.path.dirname(command_args.predictions).strip()) == 0:
             command_args.predictions = ("%s%s%s" %
-                                        (NOW, os.sep,
+                                        (command_args.output_dir, os.sep,
                                          command_args.predictions))
         directory = u.check_dir(command_args.predictions)
         session_file = "%s%s%s" % (directory, os.sep, SESSIONS_LOG)
@@ -606,6 +623,20 @@ def main(args=sys.argv[1:]):
                                  command_args.dataset_fields.split(','))
         output_args.update(dataset_fields=dataset_fields_arg)
 
+    # Parses dataset attributes in json format if provided
+    if command_args.dataset_attributes:
+        json_dataset_attributes = u.read_json(command_args.dataset_attributes)
+        command_args.dataset_json_args = json_dataset_attributes
+    else:
+        command_args.dataset_json_args = {}
+
+    # Parses dataset generators in json format if provided
+    if command_args.new_fields:
+        json_generators = u.read_json(command_args.new_fields)
+        command_args.dataset_json_generators = json_generators
+    else:
+        command_args.dataset_json_generators = {}
+
     # Parses model input fields if provided.
     if command_args.model_fields:
         model_fields_arg = map(str.strip,
@@ -623,6 +654,15 @@ def main(args=sys.argv[1:]):
     # Parses dataset/id if provided.
     if command_args.datasets:
         dataset_ids = u.read_datasets(command_args.datasets)
+        if len(dataset_ids) == 1:
+            command_args.dataset = dataset_ids[0]
+        command_args.dataset_ids = dataset_ids
+
+    # Retrieve dataset/ids if provided.
+    if command_args.dataset_tag:
+        dataset_ids = dataset_ids.extend(
+                     u.list_ids(api.list_datasets,
+                                "tags__in=%s" % command_args.dataset_tag))
         if len(dataset_ids) == 1:
             command_args.dataset = dataset_ids[0]
         command_args.dataset_ids = dataset_ids

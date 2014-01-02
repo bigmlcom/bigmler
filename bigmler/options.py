@@ -770,6 +770,36 @@ under the License.""" % version
                         default=defaults.get('no_batch', False),
                         help="Create remote predictions individually.")
 
+    # The path to a file containing dataset attributes.
+    parser.add_argument('--dataset-attributes',
+                        action='store',
+                        dest='dataset_attributes',
+                        default=defaults.get('dataset_attributes', None),
+                        help=("Path to a json file describing dataset"
+                              " attributes."))
+
+    # Name of the directory where session files will be stored. If --output
+    # is set, this setting will be overriden by it.
+    parser.add_argument('--output-dir',
+                        action='store',
+                        dest='output_dir',
+                        default=defaults.get('output_dir', None),
+                        help=("Directory where session files will be stored."
+                              " --output file path will override it if both"
+                              " are set."))
+
+    # Path to the file containing fields generators for the new dataset.
+    # Used when generating a dataset from another by adding new fields
+    # combining or setting its contents.
+    parser.add_argument('--new-fields',
+                        action='store',
+                        dest='new_fields',
+                        default=defaults.get('new_fields', None),
+                        help=("Path to the file containing fields generators."
+                              " Used to create a new dataset from an existing"
+                              " one by adding new fields combining or"
+                              " setting its contents."))
+
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #

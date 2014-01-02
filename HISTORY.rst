@@ -12,6 +12,9 @@ History
   of datasets generated using --max-categories option.
 - Fixing problem with --max-categories when the categorical field is not
   a preferred field of the dataset.
+- Changing the --datasets option behaviour: it points to a file where
+  dataset ids are stored, one per line, and now it reads all of them to be
+  used in model and ensemble creation.
 
 0.7.2 (2013-12-20)
 ~~~~~~~~~~~~~~~~~~

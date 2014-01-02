@@ -229,7 +229,7 @@ def is_batch_prediction_created(path):
     """
     batch_prediction_id = None
     try:
-        with open("%s%sbatch_prediction" 
+        with open("%s%sbatch_prediction"
                   % (path, os.sep)) as batch_prediction_file:
             batch_prediction_id = batch_prediction_file.readline().strip()
             try:

@@ -21,6 +21,7 @@
 from __future__ import absolute_import
 
 import sys
+import re
 
 import bigml.api
 import bigmler.utils as u
@@ -31,6 +32,9 @@ from bigml.fields import Fields
 
 from bigmler.prediction import OTHER
 from bigmler.processing.models import has_models
+
+
+MAX_CATEGORIES_RE = re.compile("max_categories: (\d+)")
 
 
 def has_datasets(args):
@@ -134,9 +138,18 @@ def dataset_processing(source, training_set, test_set, fields, objective_field,
     if dataset:
         dataset = r.get_dataset(dataset, api, args.verbosity, session_file)
         fields = get_fields_structure(dataset, csv_properties)
+        objective_field_info = fields.fields[
+            fields.field_id(fields.objective_field)]
+        if 'label' in objective_field_info:
+            label = objective_field_info['label']
+            if MAX_CATEGORIES_RE.match(label):
+                args.max_categories = int(re.sub(MAX_CATEGORIES_RE,
+                                                 r'\1', label))
+
         if args.public_dataset:
             r.publish_dataset(dataset, args, api, session_file)
-        if args.objective_field:
+
+        if args.objective_field or args.dataset_attributes:
             dataset_args = r.set_dataset_args(name, description, args, fields,
                                               dataset_fields, objective_field)
             dataset = r.update_dataset(dataset, dataset_args, args.verbosity,
@@ -227,24 +240,57 @@ def create_categories_datasets(dataset, distribution,
                                  number_of_datasets))
             u.log_message(message, log_file=session_file,
                           console=args.verbosity)
+    if not resume:
+        for i in range(len(datasets), number_of_datasets):
+            split = categories_splits[i]
+            category_selector = "(if (or"
+            for element in split:
+                category = element[0]
+                category_selector += " (= v \"%s\")" % category
+            category_selector += ") v \"%s\")" % other_label
+            category_generator = "(let (v (f %s)) %s)" % (
+                fields.objective_field, category_selector)
+            dataset_args = {
+                "all_but": [fields.objective_field],
+                "new_fields": [
+                    {"name": fields.field_name(fields.objective_field),
+                     "field": category_generator,
+                     "label": "max_categories: %s" % args.max_categories}]}
+            new_dataset = r.create_dataset(
+                dataset, dataset_args, args.verbosity, api=api, path=path,
+                session_file=session_file, log=log, dataset_type="parts")
+            datasets.append(new_dataset)
+    return datasets, resume
 
-    for i in range(len(datasets), number_of_datasets):
-        split = categories_splits[i]
-        category_selector = "(if (or"
-        for element in split:
-            category = element[0]
-            category_selector += " (= v \"%s\")" % category
-        category_selector += ") v \"%s\")" % other_label
-        category_generator = "(let (v (f %s)) %s)" % (fields.objective_field,
-                                                      category_selector)
-        dataset_args = {
-            "all_but": [fields.objective_field],
-            "new_fields": [
-                {"name": fields.field_name(fields.objective_field),
-                 "field": category_generator}]}
-        new_dataset = r.create_dataset(dataset, dataset_args, args.verbosity,
+
+def create_new_dataset(dataset, api, args, resume, name=None,
+                       description=None, session_file=None, path=None,
+                       log=None):
+    """Generates a new dataset using the generators given in a generators file
+
+    """
+    datasets = []
+    number_of_datasets = 1
+    if resume:
+        resume, datasets = c.checkpoint(
+            c.are_datasets_created, path, number_of_datasets,
+            debug=args.debug, suffix="gen")
+        if not resume:
+            message = u.dated("Found %s datasets out of %s. Resuming.\n"
+                              % (len(datasets),
+                                 number_of_datasets))
+            u.log_message(message, log_file=session_file,
+                          console=args.verbosity)
+    if not resume:
+        if name is not None:
+            args.dataset_json_generators.update(name=name)
+        if description is not None:
+            args.dataset_json_generators.update(description=description)
+        new_dataset = r.create_dataset(dataset, args.dataset_json_generators,
+                                       args.verbosity,
                                        api=api, path=path,
                                        session_file=session_file,
-                                       log=log, dataset_type="parts")
-        datasets.append(new_dataset)
-    return datasets, resume
+                                       log=log, dataset_type="gen")
+    else:
+        new_dataset = datasets[0]
+    return new_dataset, resume

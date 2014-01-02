@@ -33,10 +33,6 @@ from bigml.fields import Fields
 
 from bigmler.train_reader import TrainReader
 
-
-MISSING_TOKENS = ['', 'N/A', 'n/a', 'NULL', 'null', '-', '#DIV/0', '#REF!',
-                  '#NAME?', 'NIL', 'nil', 'NA', 'na', '#VALUE!', '#NULL!',
-                  'NaN', '#N/A', '#NUM!', '?']
 MONTECARLO_FACTOR = 200
 
 

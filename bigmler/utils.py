@@ -109,6 +109,29 @@ def read_types(path):
     return types_dict
 
 
+def read_json(path):
+    """Reads attributes from a json file to update or create resources.
+       For instance, to change the text analysis mode to full text in the
+       field whose id is '000001'
+
+        {"fields": {
+            "000001": {
+                "term_analysis": {
+                    "token_mode": "full_terms_only"}}}}
+
+    """
+    json_attributes = {}
+    try:
+        attributes_reader = open(path, "r")
+    except IOError:
+        sys.exit("Error: cannot read json file %s" % path)
+    try:
+        json_attributes = json.loads(attributes_reader.read())
+    except ValueError:
+        sys.exit("Error: no valid json found in %s" % path)
+    return json_attributes
+
+
 def read_fields_map(path):
     """Fields map from evaluated model to test dataset.
 
