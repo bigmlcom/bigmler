@@ -3,6 +3,11 @@
 History
 -------
 
+1.0.1 (2014-01-06)
+~~~~~~~~~~~~~~~~~~
+
+- Fix for missing modules during installation.
+
 1.0 (2014-01-02)
 ~~~~~~~~~~~~~~~~~~
 
