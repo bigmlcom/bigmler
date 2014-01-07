@@ -117,7 +117,6 @@ def models_processing(datasets, models, model_ids, objective_field, fields,
     """Creates or retrieves models from the input data
 
     """
-    log_models = False
     ensemble_ids = []
 
     # If we have a dataset but not a model, we create the model if the no_model
@@ -155,7 +154,6 @@ def models_processing(datasets, models, model_ids, objective_field, fields,
                  session_file=session_file, path=path, log=log)
             ensemble = ensembles[0]
             args.ensemble = bigml.api.get_ensemble_id(ensemble)
-            log_models = True
 
         else:
             # Set of partial datasets created setting args.max_categories
@@ -202,11 +200,6 @@ def models_processing(datasets, models, model_ids, objective_field, fields,
                                   session_file)
         ensemble_ids = [ensemble]
         model_ids = ensemble['object']['models']
-        if log_models and args.number_of_models > 1:
-            for model_id in model_ids:
-                u.log_created_resources("models", path, model_id,
-                                        open_mode='a')
-
         models = model_ids[:]
 
     if args.ensembles or args.ensemble_tag:

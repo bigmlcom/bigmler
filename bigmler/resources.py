@@ -379,6 +379,10 @@ def set_model_args(name, description,
     if args.pruning and args.pruning != 'smart':
         model_args.update(stat_pruning=(args.pruning == 'statistical'))
 
+    if args.node_threshold > 0:
+        model_args.update(node_threshold=args.node_threshold)
+    if args.model_json_args:
+        model_args.update(args.model_json_args)
     model_args.update(sample_rate=args.sample_rate,
                       replacement=args.replacement,
                       randomize=args.randomize)
@@ -579,7 +583,10 @@ def set_ensemble_args(name, description, args, model_fields,
 
     if args.pruning and args.pruning != 'smart':
         ensemble_args.update(stat_pruning=(args.pruning == 'statistical'))
-
+    if args.node_threshold > 0:
+        ensemble_args.update(node_threshold=args.node_threshold)
+    if args.model_json_args:
+        ensemble_args.update(args.model_json_args)
     ensemble_args.update(sample_rate=args.sample_rate,
                          replacement=args.replacement,
                          randomize=args.randomize,

@@ -3,6 +3,15 @@
 History
 -------
 
+1.1.0 (2014-01-08)
+~~~~~~~~~~~~~~~~~~
+
+- Fix for ensembles' local predictions when order is used in tie break.
+- Fix for duplicated model ids in models file.
+- Adding new --node-threshold option to allow node limit in models.
+- Adding new --model-attributes option pointing to a JSON file containing
+  model attributes for model creation.
+
 1.0.1 (2014-01-06)
 ~~~~~~~~~~~~~~~~~~
 

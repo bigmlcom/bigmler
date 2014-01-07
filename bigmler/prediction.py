@@ -412,7 +412,7 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                 draw_progress_bar(models_count, models_total)
             if total_votes:
                 for index in range(0, len(votes)):
-                    predictions = total_votes[index].predictions
+                    predictions = total_votes[index]
                     predictions.extend(votes[index].predictions)
             else:
                 total_votes = votes
@@ -564,7 +564,6 @@ def predict(test_set, test_set_header, models, fields, output,
         # retrieves the models with no order, so the correspondence with
         # each label must be restored.
         ordered = True
-        models_per_label = args.number_of_models
         if args.multi_label and (args.model_tag is not None
                                  or models_per_label > 1):
             ordered = False
