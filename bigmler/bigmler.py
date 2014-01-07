@@ -86,7 +86,7 @@ def non_compatible(args, option):
     """
     if option == '--cross-validation-rate':
         return (args.test_set or args.evaluate or args.model or args.models or
-                args.model_tag)
+                args.model_tag or args.multi_label)
     if option == '--max-categories':
         return (args.evaluate or args.test_split or args.remote)
     return False
@@ -316,6 +316,11 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                            api, resume, prediction_file=output,
                            session_file=session_file, path=path, log=log)
         else:
+            models_per_label = args.number_of_models
+            if (args.multi_label and len(ensemble_ids) > 0
+                and args.number_of_models == 1):
+                # use case where ensembles are read from a file
+                models_per_label = len(models) / len(ensemble_ids)
             predict(test_set, test_set_header, models, fields, output,
                     objective_field, args, api=api, log=log,
                     max_models=args.max_batch_models, resume=resume,
@@ -437,7 +442,7 @@ def main(args=sys.argv[1:]):
             non_compatible(command_args, '--cross-validation-rate')):
         parser.error("Non compatible flags: --cross-validation-rate"
                      " cannot be used with --evaluate, --model,"
-                     " --models or --model-tag. Usage:\n\n"
+                     " --models, --model-tag or --multi-label. Usage:\n\n"
                      "bigmler --train data/iris.csv "
                      "--cross-validation-rate 0.1")
 
@@ -629,6 +634,13 @@ def main(args=sys.argv[1:]):
         command_args.dataset_json_args = json_dataset_attributes
     else:
         command_args.dataset_json_args = {}
+
+    # Parses dataset attributes in json format if provided
+    if command_args.model_attributes:
+        json_model_attributes = u.read_json(command_args.model_attributes)
+        command_args.model_json_args = json_model_attributes
+    else:
+        command_args.model_json_args = {}
 
     # Parses dataset generators in json format if provided
     if command_args.new_fields:

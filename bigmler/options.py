@@ -800,6 +800,22 @@ under the License.""" % version
                               " one by adding new fields combining or"
                               " setting its contents."))
 
+    # The path to a file containing model attributes.
+    parser.add_argument('--model-attributes',
+                        action='store',
+                        dest='model_attributes',
+                        default=defaults.get('model_attributes', None),
+                        help=("Path to a json file describing model"
+                              " attributes."))
+
+    # Node threshold. Maximum number of nodes in the tree.
+    parser.add_argument('--node-threshold',
+                        action='store',
+                        dest='node_threshold',
+                        default=defaults.get('node_threshold', 0),
+                        type=int,
+                        help="Maximum number of nodes in the model.")
+
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #

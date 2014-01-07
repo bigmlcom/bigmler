@@ -144,7 +144,7 @@ BigML recognizes a growing list of schemas (**http**, **https**, **s3**,
 
     bigmler --train https://test:test@static.bigml.com/csv/iris.csv
 
-    bigmler --train "s3://bigml-public/csv/iris.csv?access-key=AKIAIF6IUYDYUQ7BALJQ&secret-key=XgrQV/hHBVymD75AhFOzveX4qz7DYrO6q8WsM6ny"
+    bigmler --train "s3://bigml-public/csv/iris.csv?access-key=[your-access-key]&secret-key=[your-secret-key]"
 
     bigmler --train azure://csv/diabetes.csv?AccountName=bigmlpublic
 
@@ -664,7 +664,8 @@ in this case, or no objective fields will be created. Following the previous
 example::
 
     bigmler --multi-label --train data/multilabel.csv \
-            --test data/test_multilabel.csv --labels Adult,Student
+            --test data/test_multilabel.csv --label-separator ':' \
+            --labels Adult,Student
 
 will limit the predictions to the ``Adult`` and ``Student`` classes, leaving
 out the ``Teenager`` classification.
@@ -674,7 +675,8 @@ label. To create an ensemble prediction, use the ``--number-of-models`` option
 that will set the number of models in each ensemble::
 
     bigmler --multi-label --train data/multilabel.csv \
-            --number-of-models 20 --test data/test_multilabel.csv
+            --number-of-models 20 --label-separator ':' \
+            --test data/test_multilabel.csv
 
 The ids of the ensembles will be stored in an ``ensembles`` file in the output
 directory, and can be used in other predictions by setting the ``--ensembles``
@@ -1153,6 +1155,9 @@ Data Configuration
 --dataset-attributes PATH           Path to a file containing a JSON expression
                                     with attributes to be used as arguments
                                     in create dataset calls
+--model-attributes PATH             Path to a file containing a JSON expression
+                                    with attributes to be used as arguments
+                                    in create model calls
 --json-filter PATH                  Path to a file containing a JSON expression
                                     to filter the source
 --lisp-filter PATH                  Path to a file containing a LISP expression
@@ -1173,6 +1178,8 @@ Data Configuration
                                     used to generate a new dataset with new
                                     fields created via `Flatline <https://github.com/bigmlcom/flatline>`
                                     by combining or setting their values
+--node-threshold                    Maximum number or nodes to grow the tree
+                                    with
 
 Remote Resources
 ----------------
