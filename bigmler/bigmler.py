@@ -194,6 +194,15 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         session_file=session_file, path=path, log=log)
     if datasets:
         dataset = datasets[0]
+        """
+        # If multi-label flag is set and no training_set was provided, label
+        # info is extracted from the dataset fields structure
+        if args.multi_label and all_labels is None:
+            objective_id = fields.field_id(fields.objective_field)
+            objective_name = fields.fields[objective_id]['name']
+            all_labels, labels = l.retrieve_labels(fields.fields,
+                                                   labels, objective_name)
+        """
 
     # If test_split is used, split the dataset in a training and a test dataset
     # according to the given split
@@ -250,30 +259,33 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         # If more than one model, use the full field structure
         fields, objective_field = pm.get_model_fields(
             model, csv_properties, args, single_model=single_model)
-
     # If multi-label flag is set and no training_set was provided, label
     # info is extracted from the fields structure
-    if args.multi_label and training_set is None:
+    if args.multi_label and all_labels is None:
         fields_list = []
         for model in models:
             if (isinstance(model, basestring) or
                     bigml.api.get_status(model)['code'] != bigml.api.FINISHED):
-                # if there's more than one model the first one must contain
-                # the entire field structure to be used as reference.
                 query_string = (r.FIELDS_QS if single_model
                                 else r.ALL_FIELDS_QS)
                 model = bigml.api.check_resource(model, api.get_model,
                                                  query_string=query_string)
             fields_list.append(model['object']['model']['fields'])
         fields_list.reverse()
-        all_labels, labels = l.retrieve_labels(fields_list, labels)
+
+        objective_id = model['object']['objective_fields']
+        if isinstance(objective_id, list):
+            objective_id = objective_id[0]
+        objective_name = fields_list[0][objective_id]['name']
+        objective_name = objective_name[0: objective_name.index(' - ')]
+        all_labels, labels = l.retrieve_labels(fields_list,
+                                               labels, objective_name)
+
 
     # If predicting
     if models and has_test(args) and not args.evaluate:
         models_per_label = 1
         test_dataset = None
-        if args.multi_label:
-            models_per_label = len(models) / len(all_labels)
 
         # Remote predictions: predictions are computed as batch predictions
         # in bigml.com except when --no-batch flag is set on or multi-label

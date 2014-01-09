@@ -111,7 +111,8 @@ FLAGS = {'BigMLer': [{'flag': 'debug', 'type': 'boolean'},
                      {'flag': 'output', 'type': 'string'},
                      {'flag': 'new_fields', 'type': 'string'},
                      {'flag': 'model_attributes', 'type': 'string'},
-                     {'flag': 'node_threshold', 'type': 'int'}]}
+                     {'flag': 'node_threshold', 'type': 'int'},
+                     {'flag': 'multi_label_fields', 'type': 'string'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):

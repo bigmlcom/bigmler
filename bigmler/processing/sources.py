@@ -164,18 +164,23 @@ def multi_label_expansion(training_set, training_set_header, objective_field,
        a source with column per label
 
     """
-    # find out column number corresponding to the objective field
+    multi_label_fields = []
+    if args.multi_label_fields is not None:
+        multi_label_fields = args.multi_label_fields.strip().split(',')
     training_reader = TrainReader(training_set, training_set_header,
                                   objective_field, multi_label=True,
                                   labels=labels,
                                   label_separator=args.label_separator,
-                                  training_separator=args.training_separator)
+                                  training_separator=args.training_separator,
+                                  multi_label_fields=multi_label_fields)
     # read file to get all the different labels if no --labels flag is given
     # or use labels given in --labels and generate the new field names
     new_headers = training_reader.get_headers(objective_field=False)
-    new_field_names = [l.get_label_field(training_reader.objective_name, label)
-                       for label in training_reader.labels]
-    new_headers.extend(new_field_names)
+    for field_column, labels in training_reader.fields_labels.items(): 
+        new_field_names = [l.get_label_field(
+            training_reader.headers[field_column], label)
+            for label in labels]
+        new_headers.extend(new_field_names)
     new_headers.append(training_reader.objective_name)
     new_headers = [header.encode("utf-8") for header in new_headers]
     try:
@@ -202,6 +207,7 @@ def multi_label_expansion(training_set, training_set_header, objective_field,
     objective_field = training_reader.headers[training_reader.objective_column]
     if field_attributes is None:
         field_attributes = {}
+
     for label_column, label in training_reader.labels_columns():
         field_attributes.update({label_column: {
             "label": "%s%s" % (l.MULTI_LABEL_LABEL, label)}})

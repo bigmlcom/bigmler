@@ -28,7 +28,7 @@ def get_label_field(objective_name, label):
     return "%s - %s" % (objective_name, label)
 
 
-def get_labels_from_fields(fields):
+def get_labels_from_fields(fields, objective_name=None):
     """Returns the name of the labels for a multi-label field structure.
 
        'fields' is a field dict and the label fields can be selected
@@ -38,15 +38,17 @@ def get_labels_from_fields(fields):
     labels = []
     for field_id in fields:
         label_attribute = fields[field_id].get('label', None)
-        if (label_attribute is not None and
-                label_attribute.startswith(MULTI_LABEL_LABEL)):
+        field_name = fields[field_id]['name']
+        if ((objective_name is None or field_name.startswith(objective_name))
+                and label_attribute is not None
+                and label_attribute.startswith(MULTI_LABEL_LABEL)):
             label = label_attribute[len(MULTI_LABEL_LABEL):]
             if not label in labels:
                 labels.append(label)
     return labels
 
 
-def retrieve_labels(fields, labels):
+def retrieve_labels(fields, labels, objective_name=None):
     """Returns the name of lables for a multi-label field structure either
        from the labels given by the user or from a field dict
 
@@ -60,10 +62,10 @@ def retrieve_labels(fields, labels):
     if isinstance(fields, list):
         fields_list = fields
         for fields in fields_list:
-            fields_labels.extend(get_labels_from_fields(fields))
+            fields_labels.extend(get_labels_from_fields(fields, objective_name))
             fields_labels = list(set(fields_labels))
     else:
-        fields_labels = get_labels_from_fields(fields)
+        fields_labels = get_labels_from_fields(fields, objective_name)
     if labels is not None:
         missing_labels = []
         for index in range(len(labels) - 1, -1, -1):

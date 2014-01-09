@@ -63,11 +63,11 @@ def set_multi_label_objective(fields_dict, objective):
             target_field['name'] = objective_name
             target_field['label'] = 'multi-label objective'
         except IndexError:
-            sys.exit("It seems that the label of multi-labelled fields has"
+            sys.exit("It seems that the label of multi-labeled fields has"
                      " been altered. You should not change the labels of"
                      " generated fields.")
     else:
-        sys.exit("It seems that the label of multi-labelled fields has been"
+        sys.exit("It seems that the label of multi-labeled fields has been"
                  " altered. You should not change the labels of generated"
                  " fields.")
 
@@ -128,7 +128,12 @@ def models_processing(datasets, models, model_ids, objective_field, fields,
         if args.multi_label:
             # Create one model per column choosing only the label column
             if args.training_set is None:
-                all_labels, labels = l.retrieve_labels(fields.fields, labels)
+                if objective_field is None:
+                    objective_field = fields.objective_field
+                objective_id = fields.field_id(objective_field)
+                objective_name = fields.fields[objective_id]['name']
+                all_labels, labels = l.retrieve_labels(fields.fields, labels,
+                                                       objective_name)
             # If --number-of-models is not set or is 1, create one model per
             # label. Otherwise, create one ensemble per label with the required
             # number of models
@@ -200,6 +205,7 @@ def models_processing(datasets, models, model_ids, objective_field, fields,
                                   session_file)
         ensemble_ids = [ensemble]
         model_ids = ensemble['object']['models']
+
         models = model_ids[:]
 
     if args.ensembles or args.ensemble_tag:
