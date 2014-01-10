@@ -7,6 +7,36 @@ from subprocess import check_call, CalledProcessError
 from bigmler.checkpoint import file_number_of_lines
 from common_steps import check_debug
 
+@step(r'I create BigML multi-label resources tagged as "(.*)" with "(.*)" label separator and (\d*) labels uploading train "(.*)" file with "(.*)" field separator and "(.*)" as multi-label fields using model_fields "(.*)" and objective "(.*)" to test "(.*)" and log predictions in "(.*)"')
+def i_create_all_mlm_resources(step, tag=None, label_separator=None, number_of_labels=None, data=None, training_separator=None, ml_fields=None, model_fields=None, objective=None, test=None, output=None):
+    if tag is None or label_separator is None or training_separator is None or number_of_labels is None or data is None or test is None or output is None or model_fields is None or objective is None or ml_fields is None:
+        assert False
+    world.directory = os.path.dirname(output)
+    world.folders.append(world.directory)
+    world.number_of_models = int(number_of_labels)
+    try:
+        command = ("bigmler --multi-label --train " + data +
+                   " --multi-label-fields " + ml_fields +
+                   " --label-separator \"" + label_separator +
+                   "\" --training-separator \"" + training_separator +
+                   "\" --model-fields \" " + model_fields +
+                   "\" --test " + test + " --store --output " + output +
+                   " --objective " + objective +
+                   " --tag " + tag + " --max-batch-models 1")
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.test_lines = file_number_of_lines(test)
+            # test file has headers in it, so first line must be ignored
+            world.test_lines -= 1
+            world.output = output
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+
 @step(r'I create BigML multi-label resources tagged as "(.*)" with "(.*)" label separator and (\d*) labels uploading train "(.*)" file with "(.*)" field separator to test "(.*)" and log predictions in "(.*)"')
 def i_create_all_ml_resources(step, tag=None, label_separator=None, number_of_labels=None, data=None, training_separator=None, test=None, output=None):
     if tag is None or label_separator is None or training_separator is None or number_of_labels is None or data is None or test is None or output is None:
@@ -57,6 +87,31 @@ def i_predict_ml_from_model_tag(step, tag=None, test=None, output=None):
             assert True
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
+
+@step(r'I create BigML multi-label resources with labels "(.*)" and objective "(.*)" using models tagged as "(.*)" to test "(.*)" and log predictions in "(.*)"')
+def i_predict_ml_from_model_tag_with_labels(step, labels=None, objective=None, tag=None, test=None, output=None):
+    if (tag is None or labels is None or test is None or output is None
+            or objective is None):
+        assert False
+    world.directory = os.path.dirname(output)
+    world.folders.append(world.directory)
+    try:
+        command = ("bigmler --multi-label --model-tag " + tag + " --labels " +
+                   labels + " --test " + test + " --store --output " + output +
+                   " --objective " + objective + " --max-batch-models 1")
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.test_lines = file_number_of_lines(test)
+            # test file has headers in it, so first line must be ignored
+            world.test_lines -= 1
+            world.output = output
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
 
 @step(r'I create BigML multi-label resources with labels "(.*)" using models tagged as "(.*)" to test "(.*)" and log predictions in "(.*)"')
 def i_predict_ml_from_model_tag_with_labels(step, labels=None, tag=None, test=None, output=None):

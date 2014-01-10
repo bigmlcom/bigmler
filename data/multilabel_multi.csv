@@ -1,0 +1,151 @@
+color,year,price,first_name,last_name,sex,class,type
+Blue,1992,"1208,6988040134",John,Higgins,Male,Worker:Adult,W:A
+Blue,2005,"2821,8477368243",Mary,Taylor,Male,Student:Child,S:C
+Blue,2010,"1337,9887314402",Bryan,Parker,Male,Student:Child,S:C
+Orange,1997,"2367,5836757645",Joseph,Slendenton,Male,Worker:Teenager,W:T
+Green,2001,"1929,7757800557",Dylan,Oldman,Male,Worker:Teenager,W:T
+Red,2007,"2778,4454948157",Tyler,Bush,Female,Worker:Child,W:C
+Red,1997,"1339,331450861",Jacob,Lewis,Male,Student:Teenager,S:T
+Green,1990,"1025,3779427037",Sabrina,Bauer,Female,Retired:Adult,R:A
+Blue,1998,"1002,265727602",Amy,Whiteman,Female,Worker:Teenager,W:T
+Blue,2001,"618,3144850545",Peter,Symons,Male,Worker:Teenager,W:T
+Yellow,2013,"1733,6302730143",Adam,Baldwin,Male,Retired:Child,R:C
+Blue,2005,"1319,2270314209",Cristina,Yang,Female,Student:Child,S:C
+Orange,1996,"492,2495423704",Margareth,Miller,Male,Worker:Teenager,W:T
+Green,2003,"2937,036577601",Oleg,Hanson,Female,Retired:Child,R:C
+Orange,2010,"2925,2370889187",Martina,Davenport,Male,Pensioner:Child,P:C
+Yellow,2008,"1498,6236030124",Ian,Neal,Male,Student:Child,S:C
+Red,2003,"905,259514682",Matthew,Garrison,Male,Pensioner:Child,P:C
+Blue,2005,"2006,4400569424",Yosufzai,Hamidullah,Male,Student:Child,S:C
+Yellow,2001,"2624,6065976918",Cana,Lorik,Female,Pensioner:Teenager,P:T
+Green,1992,"1614,7092333883",Bougherra,Madjid,Female,Worker:Adult,W:A
+Red,2001,"685,5748016275",Amisone,Liatama,Female,Worker:Teenager,W:T
+Red,2005,"729,9721697234",Sonejee,Masand Oscar,Female,Worker:Child,W:C
+Red,2009,"2427,1085671969",Girdon,Connor,Male,Pensioner:Child,P:C
+Yellow,2013,"461,2222625762",Dublin,George,Male,Student:Child,S:C
+Green,2010,"2587,7485279813",Messi,Lionel,Female,Student:Child,S:C
+Green,2001,"2488,9446077757",Berezovski,Roman,Female,Worker:Teenager,W:T
+Yellow,2000,"2953,9757543132",Baten,Raymond,Female,Worker:Teenager,W:T
+Orange,1996,"1304,5304790028",Neill,Lucas,Female,Student:Teenager,S:T
+Orange,2010,"1135,3133977279",Fuchs,Christian,Female,Worker:Child,W:C
+Blue,2004,"943,2910452485",Sadikhov,Rashad,Female,Student:Child,S:C
+Blue,1993,"2691,0514403023",Leslie,St. Fleur,Female,Pensioner:Adult,P:A
+Blue,2012,"472,2781032212",Sujon,Md.,Male,Student:Child,S:C
+Green,1995,"1823,3408746198",Williams,Rashida,Female,Student:Teenager,S:T
+Yellow,1990,"2396,8477286287",Veremko,Siarhei,Male,Pensioner:Adult,P:A
+Yellow,1996,"1247,0663902238",Kompany,Vincent,Male,Pensioner:Teenager,P:T
+Yellow,2006,"2172,6787462719",Gaynair,Ian,Female,Pensioner:Child,P:C
+Blue,2007,"498,9985236786",Nusum,John Barry,Female,Student:Child,S:C
+Blue,2003,"1435,728331551",Tshering,Pasang,Female,Pensioner:Child,P:C
+Orange,2007,"589,5406030938",Raldes,Ronald,Male,Worker:Child,W:C
+Green,1992,"97,6044931337",Emir,Spahic,Female,Pensioner:Adult,P:A
+Green,1990,"1202,1776568033",Thuma,Mompati,Female,Student:Adult,S:A
+Green,2007,"492,6865650229",Da,Silva Thiago Emiliano,Female,Worker:Child,W:C
+Red,2007,"3011,1505417042",Darussalam,Haji Kamis Rosmin,Female,Pensioner:Child,P:C
+Green,1996,"2643,3850643113",Popov,Ivelin,Male,Pensioner:Teenager,P:T
+Blue,1996,"1309,6954594255",Dagano,Moumouni,Female,Worker:Teenager,W:T
+Orange,2003,"564,7560055256",Nahayo,Valery,Female,Worker:Child,W:C
+Blue,1991,"1105,0086687207",Sok,Ngon Keo,Female,Student:Adult,S:A
+Blue,2010,"2177,9549741075",Eto'o,Fils Samuel,Female,Student:Child,S:C
+Yellow,1995,"2534,196062468",Mckenna,Kevin,Male,Pensioner:Teenager,P:T
+Red,2002,"692,6152664125",Neves,Fernando,Male,Pensioner:Teenager,P:T
+Red,2013,"755,6642088927",Lindo,Ian,Female,Pensioner:Child,P:C
+Blue,2007,"182,7708654925",Koulara,Armel,Female,Student:Child,S:C
+Red,1994,"1385,5874375329",Zheng,Zhi,Male,Worker:Adult,W:A
+Green,2009,"145,7727760896",Yepes,Mario Alberto,Female,Worker:Child,W:C
+Green,2006,"606,9931280687",Mroivili,Mahamoud,Male,Worker:Child,W:C
+Yellow,1991,"936,3359655142",Andzouana,Kevin,Female,Pensioner:Adult,P:A
+Yellow,1997,"2597,7173838653",Mputu,Mabi Trésor,Female,Pensioner:Teenager,P:T
+Orange,1992,"523,9688823819",Ruiz,Bryan,Female,Pensioner:Adult,P:A
+Green,1997,"2203,8664459139",Srna,Darijo,Female,Student:Teenager,S:T
+Green,1993,"696,0307815932",Molina,Odelin,Female,Worker:Adult,W:A
+Yellow,2006,"1430,2599276304",Bernardus,Ashar,Male,Pensioner:Child,P:C
+Red,2000,"1857,9178862162",Constantinou,Michael,Female,Pensioner:Teenager,P:T
+Orange,1991,"1131,3088848144",Rosicky,Tomás,Female,Worker:Adult,W:A
+Orange,2012,"216,6008036472",Agger,Daniel,Male,Student:Child,S:C
+Blue,2001,"1217,7656148449",Mohamed,Kader Ahmed,Female,Worker:Teenager,W:T
+Yellow,1997,"2341,3752764352",Barmettler,Heinz,Male,Worker:Teenager,W:T
+Yellow,2005,"2352,2795499191",Ayovi,Walter,Male,Pensioner:Child,P:C
+Green,1995,"1679,7641399205",Elhadary,Essam,Female,Worker:Teenager,W:T
+Green,2011,"740,1036079861",Portillo,Dagoberto,Male,Student:Child,S:C
+Green,1998,"2904,8201544099",Gerrard,Steven,Male,Worker:Teenager,W:T
+Blue,1997,"1740,3686330542",Goitom,Daniel,Male,Worker:Teenager,W:T
+Yellow,2011,"1905,2812647894",Klavan,Ragnar,Female,Worker:Child,W:C
+Blue,1992,"360,5067194328",Debebe,Degu,Male,Pensioner:Adult,P:A
+Blue,1990,"1714,5191747584",Benjaminsen,Fróoi,Female,Worker:Adult,W:A
+Orange,1994,"1511,6663304977",Moisander,Niklas,Male,Student:Adult,S:A
+Green,1999,"1633,2021788582",Lloris,Hugo,Female,Student:Teenager,S:T
+Yellow,2004,"2242,2751802839",Pandev,Goran,Female,Pensioner:Child,P:C
+Yellow,1995,"2579,6749992184",Kankava,Jaba,Female,Student:Teenager,S:T
+Red,1995,"774,1571543626",Lahm,Philipp,Female,Worker:Teenager,W:T
+Red,2009,"1739,4712441489",Gyan,Asamoah,Female,Pensioner:Child,P:C
+Blue,2008,"235,2902656309",Salpingidis,Dimitrios,Male,Student:Child,S:C
+Green,1995,"1492,8213632554",Marshall,Marc,Male,Student:Teenager,S:T
+Orange,2002,"1885,2421096414",Cunliffe,Jason,Female,Pensioner:Teenager,P:T
+Orange,2013,"1583,8777031638",Ruiz,Gutierrez Carlos Humberto,Male,Worker:Child,W:C
+Yellow,1990,"1601,594139345",Zayatte,Kamil,Male,Pensioner:Adult,P:A
+Red,1995,"2455,2352377102",Nurse,Chris,Male,Student:Teenager,S:T
+Green,1990,"2483,2136700749",Valladares,Noel,Male,Student:Adult,S:A
+Red,1997,"1162,3115232103",Chan,Wai Ho,Female,Pensioner:Teenager,P:T
+Red,1998,"2942,2041200921",Gera,Zoltán,Female,Student:Teenager,S:T
+Yellow,1997,"1650,0801159889",Gunnarsson,Aron Einar,Female,Student:Teenager,S:T
+Green,2000,"1821,3423062004",Chhetri,Sunil,Female,Student:Teenager,S:T
+Yellow,1991,"1335,4640477225",Buffon,Gianluigi,Male,Student:Adult,S:A
+Blue,2008,"470,998002205",Thomas,Shavar,Male,Pensioner:Child,P:C
+Green,2002,"2915,6511910148",Hasebe,Makoto,Male,Pensioner:Teenager,P:T
+Yellow,2013,"1515,0648513697",Deeb,Amer,Female,Student:Child,S:C
+Green,1995,"1651,7636170499",Nurdauletov,Kairat,Female,Worker:Teenager,W:T
+Orange,2010,"2220,02646745",Ri,Myong Guk,Female,Student:Child,S:C
+Orange,2004,"830,3444026858",Ha,Daesung,Female,Pensioner:Child,P:C
+Yellow,2001,"294,5277569704",Al-khaldi,Nawaf,Female,Student:Teenager,S:T
+Red,2007,"2923,1300768331",Baimatov,Azamat,Female,Student:Child,S:C
+Red,2013,"698,1645570956",Phaphouvaninh,Vixay,Male,Student:Child,S:C
+Green,2008,"1997,8963900246",Gorkss,Kaspars,Female,Worker:Child,W:C
+Blue,2004,"1791,4113416225",Antar,Roda,Female,Pensioner:Child,P:C
+Blue,1991,"1021,6712765284",Gebro,George Duncan,Male,Student:Adult,S:A
+Orange,2009,"675,4155647829",Stocklasa,Martin,Female,Pensioner:Child,P:C
+Yellow,2009,"266,0776721202",Danilevicius,Tomas,Female,Pensioner:Child,P:C
+Red,2000,"2617,8734567836",Peters,René,Male,Worker:Teenager,W:T
+Green,1999,"2880,6907464638",Cheng,Ieong Paulo Cheang,Female,Pensioner:Teenager,P:T
+Orange,1991,"2808,7526713386",Rajoarimanana,Yvan,Female,Student:Adult,S:A
+Red,2006,"355,0306111462",Chavula,Moses,Female,Pensioner:Child,P:C
+Yellow,1995,"1583,1619906128",Ashfaq,Ali,Male,Worker:Teenager,W:T
+Yellow,2009,"3007,0429383665",Coulibaly,Adama,Female,Student:Child,S:C
+Yellow,2011,"1810,8519744016",Mifsud,Michael,Male,Student:Child,S:C
+Green,2008,"431,4041002542",Baghayoko,Moussa,Male,Student:Child,S:C
+Green,2008,"1553,9206415303",Bell,Colin,Male,Pensioner:Child,P:C
+Orange,2012,"375,4461137466",Rodriguez,Pinedo Francisco Javier,Male,Pensioner:Child,P:C
+Yellow,2013,"2849,6393379644",Epureanu,Alexandru,Male,Worker:Child,W:C
+Blue,2009,"1000,1343116053",Donorov,Lumbengarav,Female,Student:Child,S:C
+Orange,1995,"1500,7576369569",Vucinic,Mirko,Male,Worker:Teenager,W:T
+Yellow,1997,"2754,8434580565",Mendes,Junior,Male,Worker:Teenager,W:T
+Green,1992,"2613,2144275941",Lamyaghri,Nadir,Male,Worker:Adult,W:A
+Green,2006,"285,0999431573",Rafael,Joao,Female,Pensioner:Child,P:C
+Red,1998,"1053,307505779",Khin,Maung Lwin,Male,Pensioner:Teenager,P:T
+Orange,2010,"47,2124297991",Ketjijere,Ronald,Female,Worker:Child,W:C
+Blue,1995,"163,7511355691",Sneijder,Wesley,Male,Pensioner:Teenager,P:T
+Yellow,1998,"2531,3723585457",Dokunengo,Olivier,Male,Pensioner:Teenager,P:T
+Red,1992,"1661,976048246",Nelsen,Ryan,Female,Pensioner:Adult,P:A
+Yellow,1991,"2346,777603019",Solorzano,David,Female,Pensioner:Adult,P:A
+Green,2012,"324,7167612314",Ouwo,Moussa Maazou,Female,Pensioner:Child,P:C
+Orange,2004,"2167,4663536139",Djeparov,Server,Male,Pensioner:Child,P:C
+Green,1991,"1820,8444295339",Jean,Robert Yelou,Female,Student:Child,S:C
+Orange,2000,"1195,8848717511",Arango,Juan,Female,Pensioner:Adult,P:A
+Yellow,1999,"2144,9280432314",Nguyen,Minh Duc,Female,Pensioner:Child,P:C
+Green,2012,"1477,4567633756",Ashley,Williams,Male,Worker:Child,W:C
+Yellow,2007,"2008,7477736995",Awad,Salim,Female,Pensioner:Adult,P:A
+Red,1991,"2132,602162648",Christopher,Katongo,Female,Student:Teenager,S:T
+Blue,1990,"1260,8202313893",Matongorere,Nelson,Male,Student:Adult,S:A
+Blue,1997,"2315,9830341935",Kargar,Mohammad Yosuf,Male,Student:Child,S:C
+Yellow,2009,"745,2523303106",De,Biasi Giovanni,Male,Worker:Teenager,W:T
+Orange,1994,"353,961303819",Halilhodzic,Vahid,Female,Student:Teenager,S:T
+Green,2010,"2910,935055919",Lalogafuafua,Iofi,Female,Worker:Child,W:C
+Blue,1994,"1240,4063031897",Alvarez,De Eulate Jesus Luis,Male,Pensioner:Child,P:C
+Yellow,1993,"1643,0100574978",Colin,Girdon,Male,Student:Adult,S:A
+Red,1997,"1454,7683959715",Curtis,Thomas,Female,Student:Child,S:C
+Blue,2012,"2578,9604741037",Sabella,Alejandro,Male,Worker:Adult,W:A
+Yellow,2003,"882,3778326511",Minasyan,Vardan,Female,Worker:Adult,W:A
+Yellow,2008,"1932,1543322764",Beeldsnijder,Herbert,Female,Pensioner:Adult,P:A
+Green,2010,"2399,3304064386",Osieck,Holger,Female,Student:Child,S:C
+Red,1994,"1301,1423041932",Koller,Marcel,Female,Student:Adult,S:A
+Orange,2005,"923,9663202204",Vogts,Hans Hubert,Female,Worker:Adult,W:A

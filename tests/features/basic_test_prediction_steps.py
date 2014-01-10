@@ -12,6 +12,7 @@ from ml_test_prediction_steps import i_create_all_ml_resources_and_ensembles
 from ml_test_evaluation_steps import i_create_all_ml_resources_for_evaluation
 from max_categories_test_prediction_steps import i_check_create_max_categories_datasets, i_create_all_mc_resources
 from basic_batch_test_prediction_steps import i_check_create_test_source, i_check_create_test_dataset
+from ml_test_prediction_steps import i_create_all_mlm_resources
 from common_steps import check_debug
 
 
@@ -83,6 +84,18 @@ def i_create_all_resources_with_options(step, data=None, test=None, output=None,
     shell_execute(command, output, test=test, options=options)
 
 
+@step(r'I create BigML (multi-label\s)?resources using source with objective "(.*)" and model fields "(.*)" to test "(.*)" and log predictions in "(.*)"')
+def i_create_resources_from_source(step, multi_label=None, objective=None, model_fields=None, test=None, output=None):
+    if test is None or output is None:
+        assert False
+
+    multi_label = "" if multi_label is None else " --multi-label "
+    command = ("bigmler "+ multi_label +"--source " + world.source['resource']
+               + " --objective " + objective + " --model-fields ' "
+               + model_fields + "' --test " + test
+               + " --store --output " + output)
+    shell_execute(command, output, test=test)
+
 @step(r'I create BigML (multi-label\s)?resources using source to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_source(step, multi_label=None, test=None, output=None):
     if test is None or output is None:
@@ -102,6 +115,18 @@ def i_create_resources_from_source_batch(step, output=None):
                + " --test-source " + world.test_source['resource']
                + " --store --remote --output " + output)
     shell_execute(command, output)
+
+@step(r'I create BigML (multi-label\s)?resources using dataset with objective "(.*)" and model fields "(.*)" to test "(.*)" and log predictions in "(.*)"')
+def i_create_resources_from_source(step, multi_label=None, objective=None, model_fields=None, test=None, output=None):
+    if test is None or output is None:
+        assert False
+
+    multi_label = "" if multi_label is None else " --multi-label "
+    command = ("bigmler "+ multi_label +"--dataset " + world.dataset['resource']
+               + " --objective " + objective + " --model-fields ' "
+               + model_fields + "' --test " + test
+               + " --store --output " + output)
+    shell_execute(command, output, test=test)
 
 @step(r'I create BigML (multi-label\s)?resources using dataset to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_dataset(step, multi_label=None, test=None, output=None):
@@ -200,6 +225,16 @@ def i_create_resources_from_ensemble_generic(step, number_of_models=None, no_rep
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
+@step(r'I create BigML (multi-label\s)?resources using models in file "(.*)" with objective "(.*)" to test "(.*)" and log predictions in "(.*)"')
+def i_create_resources_from_models_file_with_objective(step, multi_label=None, models_file=None, objective=None, test=None, output=None):
+    if (models_file is None or test is None or output is None
+            or objective is None):
+        assert False
+    multi_label = "" if multi_label is None else " --multi-label "
+    command = ("bigmler "+ multi_label +"--models " + models_file + " --test "
+               + test + " --store --output " + output
+               + " --objective " + objective)
+    shell_execute(command, output, test=test)
 
 @step(r'I create BigML (multi-label\s)?resources using models in file "(.*)" to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_models_file(step, multi_label=None, models_file=None, test=None, output=None):
@@ -594,7 +629,8 @@ def i_have_previous_scenario_or_reproduce_it(step, scenario, kwargs):
                  'scenario_mle_1': [(i_create_all_ml_resources_and_ensembles, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models_in_ensembles, False)],
                  'scenario_ml_e1': [(i_create_all_ml_resources_for_evaluation, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models, False)],
                  'scenario_mc_1': [(i_create_all_mc_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_max_categories_datasets, False), (i_check_create_models, False)],
-                 'scenario_r1': [(i_create_all_resources_batch, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_max_categories_datasets, False), (i_check_create_models, False), (i_check_create_test_source, False), (i_check_create_test_dataset, False)]}
+                 'scenario_r1': [(i_create_all_resources_batch, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_max_categories_datasets, False), (i_check_create_models, False), (i_check_create_test_source, False), (i_check_create_test_dataset, False)],
+                 'scenario_mlm_1': [(i_create_all_mlm_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models, False)]}
     if os.path.exists("./%s/" % scenario):
         assert True
     else:

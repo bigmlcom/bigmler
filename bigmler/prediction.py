@@ -435,6 +435,7 @@ def local_batch_predict(models, test_reader, prediction_file, api,
             else:
                 predictions = [prediction for (order, prediction)
                                in sorted(zip(models_order, predictions))]
+
             if (labels is None or
                     len(labels) * models_per_label != len(predictions)):
                 sys.exit("Failed to make a multi-label prediction. No"
