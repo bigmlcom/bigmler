@@ -131,7 +131,7 @@ def models_processing(datasets, models, model_ids, objective_field, fields,
                 if objective_field is None:
                     objective_field = fields.objective_field
                 objective_id = fields.field_id(objective_field)
-                objective_name = fields.fields[objective_id]['name']
+                objective_name = fields.field_name(objective_id)
                 all_labels, labels = l.retrieve_labels(fields.fields, labels,
                                                        objective_name)
             # If --number-of-models is not set or is 1, create one model per

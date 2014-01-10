@@ -176,7 +176,7 @@ def multi_label_expansion(training_set, training_set_header, objective_field,
     # read file to get all the different labels if no --labels flag is given
     # or use labels given in --labels and generate the new field names
     new_headers = training_reader.get_headers(objective_field=False)
-    for field_column, labels in training_reader.fields_labels.items(): 
+    for field_column, labels in training_reader.fields_labels.items():
         new_field_names = [l.get_label_field(
             training_reader.headers[field_column], label)
             for label in labels]

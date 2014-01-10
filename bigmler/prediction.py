@@ -60,7 +60,7 @@ def use_prediction_headers(prediction_headers, output, test_reader,
 
     """
     exclude = []
-    objective_name = fields.fields[objective_field]['name']
+    objective_name = fields.field_name(objective_field)
     headers = [objective_name]
 
     if args.prediction_info in [NORMAL_FORMAT, FULL_FORMAT]:
@@ -372,7 +372,6 @@ def local_batch_predict(models, test_reader, prediction_file, api,
             if (isinstance(model, basestring) or
                     bigml.api.get_status(model)['code'] != bigml.api.FINISHED):
                 try:
-                    
                     model = u.check_resource(model, api.get_model,
                                              query_string)
                 except ValueError, exception:

@@ -63,27 +63,26 @@ class TrainReader(object):
                                 else get_csv_delimiter())
 
         first_row = self.next(reset=not training_set_header)
-        row_length = len(first_row)
-        self.row_length = row_length
+        self.row_length = len(first_row)
 
         if training_set_header:
             self.headers = [unicode(header, "utf-8") for header in first_row]
         else:
             self.headers = [("field_%s" % index) for index in
-                            range(0, row_length)]
+                            range(0, self.row_length)]
 
-        self.multi_label_fields = sorted(self.get_column(multi_label_fields))
-        self.objective_column = self.get_column([objective_field])[0]
+        self.multi_label_fields = sorted(self._get_columns(multi_label_fields))
+        self.objective_column = self._get_columns([objective_field])[0]
         if not self.objective_column in self.multi_label_fields:
             self.multi_label_fields.append(self.objective_column)
         self.labels = labels
-        self.fields_labels = self.get_labels()
+        self.fields_labels = self._get_labels()
         self.labels = self.fields_labels[self.objective_column]
         self.objective_name = self.headers[self.objective_column]
 
-    def get_column(self, fields_list):
-        """Receives a comma-separated list of fields given by name or column number
-           and returns column number array
+    def _get_columns(self, fields_list):
+        """Receives a comma-separated list of fields given by name or
+           column number and returns column number list
 
         """
         column_list = []
@@ -142,7 +141,7 @@ class TrainReader(object):
         row = [value.strip() for value in row]
         if extended:
             if self.multi_label and self.labels is None:
-                self.fields_labels = self.get_labels()
+                self.fields_labels = self._get_labels()
 
             for field_column in self.multi_label_fields:
                 aggregated_field_value = row[field_column]
@@ -175,7 +174,7 @@ class TrainReader(object):
         """
         return self.training_set_header
 
-    def get_labels(self):
+    def _get_labels(self):
         """Returns the list of labels in the multi-label fields
 
         """
@@ -185,14 +184,14 @@ class TrainReader(object):
             labels[field_column] = []
         for row in self:
             for field_column in self.multi_label_fields:
-                labels = self._get_labels(row, labels,
-                                          field_column,
-                                          self.label_separator)
+                labels = self._get_field_labels(row, labels,
+                                                field_column,
+                                                self.label_separator)
         if self.labels is None:
             self.labels = labels[self.objective_column]
         return labels
 
-    def _get_labels(self, row, labels, field_column, separator):
+    def _get_field_labels(self, row, labels, field_column, separator):
         """Returns the list of labels in a multi-label field
 
         """

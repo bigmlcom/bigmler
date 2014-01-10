@@ -36,9 +36,9 @@ def get_labels_from_fields(fields, objective_name=None):
        multi-label label: [label]
     """
     labels = []
-    for field_id in fields:
-        label_attribute = fields[field_id].get('label', None)
-        field_name = fields[field_id]['name']
+    for field in fields.values():
+        label_attribute = field.get('label', None)
+        field_name = field['name']
         if ((objective_name is None or field_name.startswith(objective_name))
                 and label_attribute is not None
                 and label_attribute.startswith(MULTI_LABEL_LABEL)):
@@ -62,7 +62,8 @@ def retrieve_labels(fields, labels, objective_name=None):
     if isinstance(fields, list):
         fields_list = fields
         for fields in fields_list:
-            fields_labels.extend(get_labels_from_fields(fields, objective_name))
+            fields_labels.extend(
+                get_labels_from_fields(fields, objective_name))
             fields_labels = list(set(fields_labels))
     else:
         fields_labels = get_labels_from_fields(fields, objective_name)

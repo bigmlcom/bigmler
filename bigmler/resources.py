@@ -741,7 +741,7 @@ def set_evaluation_args(name, description, args, fields=None,
         evaluation_args.update(combiner=args.method)
     if fields_map is not None and fields is not None:
         if dataset_fields is None:
-            datset_fields = fields
+            dataset_fields = fields
         evaluation_args.update({"fields_map": map_fields(fields_map,
                                                          fields,
                                                          dataset_fields)})

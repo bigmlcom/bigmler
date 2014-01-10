@@ -194,15 +194,6 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         session_file=session_file, path=path, log=log)
     if datasets:
         dataset = datasets[0]
-        """
-        # If multi-label flag is set and no training_set was provided, label
-        # info is extracted from the dataset fields structure
-        if args.multi_label and all_labels is None:
-            objective_id = fields.field_id(fields.objective_field)
-            objective_name = fields.fields[objective_id]['name']
-            all_labels, labels = l.retrieve_labels(fields.fields,
-                                                   labels, objective_name)
-        """
 
     # If test_split is used, split the dataset in a training and a test dataset
     # according to the given split
@@ -281,7 +272,6 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         all_labels, labels = l.retrieve_labels(fields_list,
                                                labels, objective_name)
 
-
     # If predicting
     if models and has_test(args) and not args.evaluate:
         models_per_label = 1
@@ -330,7 +320,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         else:
             models_per_label = args.number_of_models
             if (args.multi_label and len(ensemble_ids) > 0
-                and args.number_of_models == 1):
+                    and args.number_of_models == 1):
                 # use case where ensembles are read from a file
                 models_per_label = len(models) / len(ensemble_ids)
             predict(test_set, test_set_header, models, fields, output,
@@ -685,8 +675,8 @@ def main(args=sys.argv[1:]):
     # Retrieve dataset/ids if provided.
     if command_args.dataset_tag:
         dataset_ids = dataset_ids.extend(
-                     u.list_ids(api.list_datasets,
-                                "tags__in=%s" % command_args.dataset_tag))
+            u.list_ids(api.list_datasets,
+                       "tags__in=%s" % command_args.dataset_tag))
         if len(dataset_ids) == 1:
             command_args.dataset = dataset_ids[0]
         command_args.dataset_ids = dataset_ids
