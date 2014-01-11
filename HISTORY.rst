@@ -2,6 +2,11 @@
 
 History
 -------
+1.2.0 (2014-01-09)
+~~~~~~~~~~~~~~~~~~
+
+- Adding --multi-label-fields to provide a comma-separated list of multi-label
+  fields in a file.
 
 1.1.0 (2014-01-08)
 ~~~~~~~~~~~~~~~~~~

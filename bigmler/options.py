@@ -816,6 +816,16 @@ under the License.""" % version
                         type=int,
                         help="Maximum number of nodes in the model.")
 
+    # Multi-label fields. Comma-separated list of fields that should be treated
+    # as being multi-label fields. Either its name or column number.
+    parser.add_argument('--multi-label-fields',
+                        action='store',
+                        dest='multi_label_fields',
+                        default=defaults.get('multi_label_fields', None),
+                        help=("Comma-separated list of the fields"
+                              " to be expanded as being multi-label. Name"
+                              " or column number."))
+
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #

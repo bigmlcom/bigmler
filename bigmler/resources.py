@@ -399,8 +399,9 @@ def set_label_model_args(name, description, args, labels, all_labels, fields,
     else:
         model_fields = relative_input_fields(fields, model_fields)
     if objective_field is None:
-        objective_id = fields.field_id(fields.objective_field)
-        objective_field = fields.fields[objective_id]['name']
+        objective_field = fields.objective_field
+    objective_id = fields.field_id(objective_field)
+    objective_field = fields.fields[objective_id]['name']
     model_args_list = []
 
     for index in range(args.number_of_models - 1, -1, -1):
@@ -538,8 +539,9 @@ def set_label_ensemble_args(name, description, args, labels, all_labels,
     else:
         model_fields = relative_input_fields(fields, model_fields)
     if objective_field is None:
-        objective_id = fields.field_id(fields.objective_field)
-        objective_field = fields.fields[objective_id]['name']
+        objective_field = fields.objective_field
+    objective_id = fields.field_id(objective_field)
+    objective_field = fields.fields[objective_id]['name']
     ensemble_args_list = []
 
     for index in range(number_of_ensembles - 1, -1, -1):
@@ -632,7 +634,6 @@ def create_ensembles(datasets, ensemble_ids, ensemble_args, args,
             ensembles.append(ensemble)
             log_created_resources("ensembles", path, ensemble_id,
                                   open_mode='a')
-
         models, model_ids = retrieve_ensembles_models(ensembles, api, path)
         if number_of_ensembles < 2 and args.verbosity:
             message = dated("Ensemble created: %s.\n" %
@@ -740,7 +741,7 @@ def set_evaluation_args(name, description, args, fields=None,
         evaluation_args.update(combiner=args.method)
     if fields_map is not None and fields is not None:
         if dataset_fields is None:
-            datset_fields = fields
+            dataset_fields = fields
         evaluation_args.update({"fields_map": map_fields(fields_map,
                                                          fields,
                                                          dataset_fields)})

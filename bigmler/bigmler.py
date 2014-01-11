@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-#!/usr/bin/env python
 #
 # Copyright 2012, 2013 BigML
 #
@@ -250,30 +249,32 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         # If more than one model, use the full field structure
         fields, objective_field = pm.get_model_fields(
             model, csv_properties, args, single_model=single_model)
-
     # If multi-label flag is set and no training_set was provided, label
     # info is extracted from the fields structure
-    if args.multi_label and training_set is None:
+    if args.multi_label and all_labels is None:
         fields_list = []
         for model in models:
             if (isinstance(model, basestring) or
                     bigml.api.get_status(model)['code'] != bigml.api.FINISHED):
-                # if there's more than one model the first one must contain
-                # the entire field structure to be used as reference.
                 query_string = (r.FIELDS_QS if single_model
                                 else r.ALL_FIELDS_QS)
                 model = bigml.api.check_resource(model, api.get_model,
                                                  query_string=query_string)
             fields_list.append(model['object']['model']['fields'])
         fields_list.reverse()
-        all_labels, labels = l.retrieve_labels(fields_list, labels)
+
+        objective_id = model['object']['objective_fields']
+        if isinstance(objective_id, list):
+            objective_id = objective_id[0]
+        objective_name = fields_list[0][objective_id]['name']
+        objective_name = objective_name[0: objective_name.index(' - ')]
+        all_labels, labels = l.retrieve_labels(fields_list,
+                                               labels, objective_name)
 
     # If predicting
     if models and has_test(args) and not args.evaluate:
         models_per_label = 1
         test_dataset = None
-        if args.multi_label:
-            models_per_label = len(models) / len(all_labels)
 
         # Remote predictions: predictions are computed as batch predictions
         # in bigml.com except when --no-batch flag is set on or multi-label
@@ -318,7 +319,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         else:
             models_per_label = args.number_of_models
             if (args.multi_label and len(ensemble_ids) > 0
-                and args.number_of_models == 1):
+                    and args.number_of_models == 1):
                 # use case where ensembles are read from a file
                 models_per_label = len(models) / len(ensemble_ids)
             predict(test_set, test_set_header, models, fields, output,
@@ -673,8 +674,8 @@ def main(args=sys.argv[1:]):
     # Retrieve dataset/ids if provided.
     if command_args.dataset_tag:
         dataset_ids = dataset_ids.extend(
-                     u.list_ids(api.list_datasets,
-                                "tags__in=%s" % command_args.dataset_tag))
+            u.list_ids(api.list_datasets,
+                       "tags__in=%s" % command_args.dataset_tag))
         if len(dataset_ids) == 1:
             command_args.dataset = dataset_ids[0]
         command_args.dataset_ids = dataset_ids

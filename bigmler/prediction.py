@@ -60,7 +60,7 @@ def use_prediction_headers(prediction_headers, output, test_reader,
 
     """
     exclude = []
-    objective_name = fields.fields[objective_field]['name']
+    objective_name = fields.field_name(objective_field)
     headers = [objective_name]
 
     if args.prediction_info in [NORMAL_FORMAT, FULL_FORMAT]:
@@ -416,7 +416,6 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                     predictions.extend(votes[index].predictions)
             else:
                 total_votes = votes
-
     message = u.dated("Combining predictions.\n")
     u.log_message(message, log_file=session_file, console=verbosity)
 
@@ -435,6 +434,7 @@ def local_batch_predict(models, test_reader, prediction_file, api,
             else:
                 predictions = [prediction for (order, prediction)
                                in sorted(zip(models_order, predictions))]
+
             if (labels is None or
                     len(labels) * models_per_label != len(predictions)):
                 sys.exit("Failed to make a multi-label prediction. No"
