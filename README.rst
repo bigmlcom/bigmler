@@ -215,6 +215,20 @@ preferred. ``--stat_pruning`` and ``--no_stat_pruning`` are discontinued
 and their effects can be achived by setting the actual ``--pruning`` flag
 to ``statistical`` or ``no-pruning`` values respectively.
 
+Running the Tests
+-----------------
+
+To run the tests you will need to install
+`lettuce <http://packages.python.org/lettuce/tutorial/simple.html>`_::
+
+    $ pip install lettuce
+
+and set up your authentication via environment variables, as explained
+above. With that in place, you can run the test suite simply by::
+
+    $ cd tests
+    $ lettuce
+
 Additional Information
 ----------------------
 
