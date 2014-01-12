@@ -2,6 +2,12 @@
 
 History
 -------
+1.2.1 (2014-01-12)
+~~~~~~~~~~~~~~~~~~
+
+- Fix for datasets generated using the --new-fields option. The new dataset
+  was not used in model generation.
+
 1.2.0 (2014-01-09)
 ~~~~~~~~~~~~~~~~~~
 
