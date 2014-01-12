@@ -228,6 +228,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             dataset, api, args, resume, name=name,
             description=description, session_file=session_file, path=path,
             log=log)
+        datasets[0] = dataset
 
     models, model_ids, ensemble_ids, resume = pm.models_processing(
         datasets, models, model_ids,
