@@ -1,7 +1,7 @@
 color,year,price,first_name,last_name,sex,class,type
-Blue,1992,"1208,6988040134",John,Higgins,Male,Worker:Adult,W:A
-Blue,2005,"2821,8477368243",Mary,Taylor,Male,Student:Child,S:C
-Blue,2010,"1337,9887314402",Bryan,Parker,Male,Student:Child,S:C
+Blue,1992,"1208,6988040134",John,Higgins,Male,Worker:Adult,W:A:C:S:T:R:P
+Blue,2005,"2821,8477368243",Mary,Taylor,Male,Student:Child,S:C:W
+Blue,2010,"1337,9887314402",Bryan,Parker,Male,Student:Child,S:C:P
 Orange,1997,"2367,5836757645",Joseph,Slendenton,Male,Worker:Teenager,W:T
 Green,2001,"1929,7757800557",Dylan,Oldman,Male,Worker:Teenager,W:T
 Red,2007,"2778,4454948157",Tyler,Bush,Female,Worker:Child,W:C
