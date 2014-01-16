@@ -30,7 +30,7 @@ import bigml.api
 
 from bigmler.utils import (dated, get_url, log_message, plural, check_resource,
                            check_resource_error, log_created_resources)
-from bigmler.labels import label_model_args
+from bigmler.labels import label_model_args, get_all_labels
 from bigml.util import bigml_locale
 
 EVALUATE_SAMPLE_RATE = 0.8
@@ -100,7 +100,8 @@ def relative_input_fields(fields, user_given_fields):
     return input_fields
 
 
-def set_source_args(data_set_header, name, description, args):
+def set_source_args(data_set_header, name, description, args,
+                    multi_label_data=None):
     """Returns a source arguments dict
 
     """
@@ -123,6 +124,14 @@ def set_source_args(data_set_header, name, description, args):
     if args.training_separator is not None:
         training_separator = args.training_separator.decode("string_escape")
         source_args["source_parser"].update({'separator': training_separator})
+    # If uploading a multi-label file, add the user_metadata info needed to
+    # manage the multi-label fields
+    if args.multi_label and multi_label_data is not None:
+        source_args.update(
+            {"user_metadata":
+                {"multi_label_data": multi_label_data}})
+    if args.json_args['source']:
+        source_args.update(args.json_args['source'])
     return source_args
 
 
@@ -136,6 +145,7 @@ def create_source(data_set, source_args, args, api=None, path=None,
     suffix = "" if source_type is None else "%s " % source_type
     message = dated("Creating %ssource.\n" % suffix)
     log_message(message, log_file=session_file, console=args.verbosity)
+
     source = api.create_source(data_set, source_args,
                                progress_bar=args.progress_bar)
     if path is not None:
@@ -233,12 +243,13 @@ def set_basic_dataset_args(name, description, args):
 
 
 def set_dataset_args(name, description, args, fields, dataset_fields,
-                     objective_field=None):
+                     objective_field=None, multi_label_data=None):
     """Return dataset arguments dict
 
     """
     dataset_args = set_basic_dataset_args(name, description, args)
-
+    if multi_label_data is not None and objective_field is None:
+        objective_field = multi_label_data['objective_name']
     if objective_field is not None and fields is not None:
         objective_id = fields.field_id(objective_field)
         dataset_args.update(objective_field={'id': objective_id})
@@ -251,18 +262,21 @@ def set_dataset_args(name, description, args, fields, dataset_fields,
     if dataset_fields and fields is not None:
         input_fields = configure_input_fields(fields, dataset_fields)
         dataset_args.update(input_fields=input_fields)
-    if args.dataset_json_args:
-        dataset_args.update(args.dataset_json_args)
+    if args.multi_label and multi_label_data is not None:
+        dataset_args.update(
+            user_metadata={'multi_label_data': multi_label_data})
+    if args.json_args['dataset']:
+        dataset_args.update(args.json_args['dataset'])
 
     return dataset_args
 
 
 def set_dataset_split_args(name, description, args, sample_rate,
-                           out_of_bag=False):
+                           out_of_bag=False, multi_label_data=None):
     """Return dataset arguments dict to split a dataset
 
     """
-    return {
+    dataset_args = {
         "name": name,
         "description": description,
         "category": args.category,
@@ -271,6 +285,10 @@ def set_dataset_split_args(name, description, args, sample_rate,
         "sample_rate": sample_rate,
         "out_of_bag": out_of_bag
     }
+    if args.multi_label and multi_label_data is not None:
+        dataset_args.update(
+            user_metadata={'multi_label_data': multi_label_data})
+    return dataset_args
 
 
 def create_dataset(source_or_dataset, dataset_args, verbosity, api=None,
@@ -384,19 +402,20 @@ def set_model_args(name, description,
 
     if args.node_threshold > 0:
         model_args.update(node_threshold=args.node_threshold)
-    if args.model_json_args:
-        model_args.update(args.model_json_args)
+    if args.json_args['model']:
+        model_args.update(args.json_args['model'])
     model_args.update(sample_rate=args.sample_rate,
                       replacement=args.replacement,
                       randomize=args.randomize)
     return model_args
 
 
-def set_label_model_args(name, description, args, labels, all_labels, fields,
-                         model_fields, objective_field):
+def set_label_model_args(name, description, args, labels, multi_label_data,
+                         fields, model_fields, objective_field):
     """Set of args needed to build a model per label
 
     """
+ 
     if model_fields is None:
         model_fields = []
     else:
@@ -404,7 +423,9 @@ def set_label_model_args(name, description, args, labels, all_labels, fields,
     if objective_field is None:
         objective_field = fields.objective_field
     objective_id = fields.field_id(objective_field)
-    objective_field = fields.fields[objective_id]['name']
+    objective_field = fields.field_name(objective_id)
+    objective_column = fields.field_column_number(objective_id)
+    all_labels = get_all_labels(multi_label_data)
     model_args_list = []
 
     for index in range(args.number_of_models - 1, -1, -1):
@@ -414,6 +435,9 @@ def set_label_model_args(name, description, args, labels, all_labels, fields,
         model_args = set_model_args(new_name, description, args,
                                     label_field, fields,
                                     single_label_fields)
+        if multi_label_data is not None:
+            model_args.update(
+                user_metadata={'multi_label_data': multi_label_data})
         model_args_list.append(model_args)
     return model_args_list
 
@@ -531,7 +555,7 @@ def get_models(model_ids, args, api=None, session_file=None):
     return models, model_ids
 
 
-def set_label_ensemble_args(name, description, args, labels, all_labels,
+def set_label_ensemble_args(name, description, args, labels, multi_label_data,
                             number_of_ensembles, fields, model_fields,
                             objective_field):
     """Set of args needed to build an ensemble per label
@@ -549,11 +573,15 @@ def set_label_ensemble_args(name, description, args, labels, all_labels,
 
     for index in range(number_of_ensembles - 1, -1, -1):
         label = labels[index]
+        all_labels = get_all_labels(multi_label_data)
         (new_name, label_field, single_label_fields) = label_model_args(
             name, label, all_labels, model_fields, objective_field)
         ensemble_args = set_ensemble_args(new_name, description, args,
                                           single_label_fields,
                                           label_field, fields)
+        if multi_label_data is not None:
+            ensemble_args.update(
+                user_metadata={'multi_label_data': multi_label_data})
         ensemble_args_list.append(ensemble_args)
     return ensemble_args_list
 
@@ -590,12 +618,14 @@ def set_ensemble_args(name, description, args, model_fields,
         ensemble_args.update(stat_pruning=(args.pruning == 'statistical'))
     if args.node_threshold > 0:
         ensemble_args.update(node_threshold=args.node_threshold)
-    if args.model_json_args:
-        ensemble_args.update(args.model_json_args)
+    if args.json_args['model']:
+        ensemble_args.update(args.json_args['model'])
     ensemble_args.update(sample_rate=args.sample_rate,
                          replacement=args.replacement,
                          randomize=args.randomize,
                          tlp=args.tlp)
+    if args.json_args['ensemble']:
+        ensemble_args.update(args.json_args['ensemble'])
     return ensemble_args
 
 
@@ -762,6 +792,8 @@ def set_evaluation_args(name, description, args, fields=None,
         args.sample_rate = EVALUATE_SAMPLE_RATE
     evaluation_args.update(out_of_bag=True, seed=SEED,
                            sample_rate=args.sample_rate)
+    if args.json_args['evaluation']:
+        evaluation_args.update(args.json_args['evaluation'])
     return evaluation_args
 
 
@@ -897,6 +929,8 @@ def set_batch_prediction_args(name, description, args, fields=None,
 
     if args.prediction_info == FULL_FORMAT:
         batch_prediction_args.update(all_fields=True)
+    if args.json_args['batch_prediction']:
+        batch_prediction_args.update(args.json_args['batch_prediction'])
 
     return batch_prediction_args
 

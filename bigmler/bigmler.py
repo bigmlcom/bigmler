@@ -98,6 +98,22 @@ def has_test(args):
     return args.test_set or args.test_source or args.test_dataset
 
 
+def belongs_to_ensemble(model):
+    """Checks if a model is part of an ensemble
+
+    """
+    return ('object' in model and 'ensemble' in model['object'] and
+            model['object']['ensemble'])
+
+
+def get_ensemble_id(model):
+    """Returns the ensemble/id for a model that belongs to an ensemble
+
+    """
+    if 'object' in model and 'ensemble' in model['object']:
+        return "ensemble/%s" % model['object']['ensemble']
+
+
 def compute_output(api, args, training_set, test_set=None, output=None,
                    objective_field=None,
                    description=None,
@@ -121,6 +137,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     fields = None
     other_label = OTHER
     ensemble_ids = []
+    multi_label_data = None
 
     # It is compulsory to have a description to publish either datasets or
     # models
@@ -163,33 +180,41 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
     # multi_label file must be preprocessed to obtain a new extended file
     if args.multi_label and training_set is not None:
-        (training_set, labels,
-         field_attributes, objective_field) = ps.multi_label_expansion(
+        (training_set, multi_label_data) = ps.multi_label_expansion(
              training_set, training_set_header, objective_field, args, path,
-             field_attributes=field_attributes, labels=labels,
-             session_file=session_file)
+             labels=labels, session_file=session_file)
         training_set_header = True
-    all_labels = labels
+        objective_field = multi_label_data["objective_name"]
+        objective_column = multi_label_data["objective_column"]
+        all_labels = l.get_all_labels(multi_label_data)
+        if not labels:
+            labels = all_labels
+    else:
+        all_labels = labels
 
     if args.multi_label and args.evaluate and args.test_set is not None:
-        (test_set, test_labels,
-         field_attributes, objective_field) = ps.multi_label_expansion(
+        test_set = ps.multi_label_expansion(
              test_set, test_set_header, objective_field, args, path,
-             field_attributes=field_attributes, labels=labels,
-             session_file=session_file)
+             labels=labels, session_file=session_file)[0]
         test_set_header = True
 
     source, resume, csv_properties, fields = ps.source_processing(
         training_set, test_set, training_set_header, test_set_header,
         api, args, resume, name=name, description=description,
-        csv_properties=csv_properties,
-        field_attributes=field_attributes,
-        types=types, session_file=session_file, path=path, log=log)
+        csv_properties=csv_properties, field_attributes=field_attributes,
+        types=types, multi_label_data=multi_label_data,
+        session_file=session_file, path=path, log=log)
+    if args.multi_label and source:
+        multi_label_data = l.get_multi_label_data(source)
+        (objective_field, labels, all_labels,
+         multi_label_data) = l.multi_label_sync(
+            objective_field, labels, multi_label_data, fields)
 
     datasets, resume, csv_properties, fields = pd.dataset_processing(
         source, training_set, test_set, fields, objective_field,
         api, args, resume, name=name, description=description,
-        dataset_fields=dataset_fields, csv_properties=csv_properties,
+        dataset_fields=dataset_fields, multi_label_data=multi_label_data,
+        csv_properties=csv_properties,
         session_file=session_file, path=path, log=log)
     if datasets:
         dataset = datasets[0]
@@ -199,6 +224,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if args.test_split > 0:
         dataset, test_dataset, resume = pd.split_processing(
             dataset, api, args, resume, name=name, description=description,
+            multi_label_data=multi_label_data,
             session_file=session_file, path=path, log=log)
         datasets[0] = dataset
 
@@ -229,16 +255,36 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             description=description, session_file=session_file, path=path,
             log=log)
         datasets[0] = dataset
+    if args.multi_label and dataset and multi_label_data is None:
+        multi_label_data = l.get_multi_label_data(dataset)
+        (objective_field, labels, all_labels,
+         multi_label_data) = l.multi_label_sync(
+            objective_field, labels, multi_label_data, fields)
 
     models, model_ids, ensemble_ids, resume = pm.models_processing(
         datasets, models, model_ids,
         objective_field, fields, api, args, resume,
         name=name, description=description, model_fields=model_fields,
         session_file=session_file, path=path, log=log, labels=labels,
-        all_labels=all_labels)
+        multi_label_data=multi_label_data)
     if models:
         model = models[0]
         single_model = len(models) == 1
+
+    # If multi-label flag is set and no training_set was provided, label
+    # info is extracted from the user_metadata. If models belong to an
+    # ensemble, the ensemble must be retrieved to get the user_metadata.
+    if model and args.multi_label and multi_label_data is None:
+        if len(ensemble_ids) > 0 and isinstance(ensemble_ids[0], dict):
+            resource = ensemble_ids[0]
+        elif belongs_to_ensemble(model):
+            ensemble_id = get_ensemble_id(model)
+            resource = get_ensemble(ensemble_id, api=api,
+                                    verbosity=args.verbosity,
+                                    session_file=session_file)
+        else:
+            resource = model
+        multi_label_data = l.get_multi_label_data(resource)
 
     # We get the fields of the model if we haven't got
     # them yet and update its public state if needed
@@ -249,29 +295,13 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             models[0] = model
         # If more than one model, use the full field structure
         fields, objective_field = pm.get_model_fields(
-            model, csv_properties, args, single_model=single_model)
-    # If multi-label flag is set and no training_set was provided, label
-    # info is extracted from the fields structure
-    if args.multi_label and all_labels is None:
-        fields_list = []
-        for model in models:
-            if (isinstance(model, basestring) or
-                    bigml.api.get_status(model)['code'] != bigml.api.FINISHED):
-                query_string = (r.FIELDS_QS if single_model
-                                else r.ALL_FIELDS_QS)
-                model = bigml.api.check_resource(model, api.get_model,
-                                                 query_string=query_string)
-            fields_list.append(model['object']['model']['fields'])
-        fields_list.reverse()
-
-        objective_id = model['object']['objective_fields']
-        if isinstance(objective_id, list):
-            objective_id = objective_id[0]
-        objective_name = fields_list[0][objective_id]['name']
-        objective_name = objective_name[0: objective_name.index(' - ')]
-        all_labels, labels = l.retrieve_labels(fields_list,
-                                               labels, objective_name)
-
+            model, csv_properties, args, single_model=single_model,
+            multi_label_data=multi_label_data)
+    # Fills in all_labels from user_metadata
+    if args.multi_label and not all_labels:
+        (objective_field, labels, all_labels,
+         multi_label_data) = l.multi_label_sync(
+            objective_field, labels, multi_label_data, fields)
     # If predicting
     if models and has_test(args) and not args.evaluate:
         models_per_label = 1
@@ -327,7 +357,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                     objective_field, args, api=api, log=log,
                     max_models=args.max_batch_models, resume=resume,
                     session_file=session_file, labels=labels,
-                    models_per_label=models_per_label, other_label=other_label)
+                    models_per_label=models_per_label, other_label=other_label,
+                    multi_label_data=multi_label_data)
 
     # When combine_votes flag is used, retrieve the predictions files saved
     # in the comma separated list of directories and combine them
@@ -630,19 +661,23 @@ def main(args=sys.argv[1:]):
                                  command_args.dataset_fields.split(','))
         output_args.update(dataset_fields=dataset_fields_arg)
 
-    # Parses dataset attributes in json format if provided
-    if command_args.dataset_attributes:
-        json_dataset_attributes = u.read_json(command_args.dataset_attributes)
-        command_args.dataset_json_args = json_dataset_attributes
-    else:
-        command_args.dataset_json_args = {}
+    # Parses attributes in json format if provided
+    command_args.json_args = {}
 
-    # Parses dataset attributes in json format if provided
-    if command_args.model_attributes:
-        json_model_attributes = u.read_json(command_args.model_attributes)
-        command_args.model_json_args = json_model_attributes
-    else:
-        command_args.model_json_args = {}
+    json_attribute_options = {
+        'source': command_args.source_attributes,
+        'dataset': command_args.dataset_attributes,
+        'model': command_args.model_attributes,
+        'ensemble': command_args.ensemble_attributes,
+        'evaluation': command_args.evaluation_attributes,
+        'batch_prediction': command_args.batch_prediction_attributes}
+
+    for resource_type, attributes_file in json_attribute_options.items():
+        if attributes_file is not None:
+            command_args.json_args[resource_type] = u.read_json(
+                attributes_file)
+        else:
+            command_args.json_args[resource_type] = {}
 
     # Parses dataset generators in json format if provided
     if command_args.new_fields:

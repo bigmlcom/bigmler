@@ -62,9 +62,10 @@ def ensemble_processing(datasets, objective_field, fields, api, args, resume,
     return ensembles, ensemble_ids, models, model_ids, resume
 
 
-def ensemble_per_label(labels, all_labels, dataset, fields,
+def ensemble_per_label(labels, dataset, fields,
                        objective_field, api, args, resume, name=None,
                        description=None, model_fields=None,
+                       multi_label_data=None,
                        session_file=None, path=None, log=None):
     """Creates an ensemble per label for multi-label datasets
 
@@ -93,7 +94,7 @@ def ensemble_per_label(labels, all_labels, dataset, fields,
     number_of_ensembles = len(labels) - len(ensemble_ids)
     ensemble_args_list = r.set_label_ensemble_args(
         name, description, args,
-        labels, all_labels, number_of_ensembles,
+        labels, multi_label_data, number_of_ensembles,
         fields, model_fields, objective_field)
 
     # create ensembles changing the input_field to select
