@@ -119,7 +119,10 @@ def set_source_args(data_set_header, name, description, args):
                         LOCALE_DEFAULT), log_file=None, console=True)
             source_locale = LOCALE_DEFAULT
         source_args["source_parser"].update({'locale': source_locale})
-
+    # If user has set a training separator, use it.
+    if args.training_separator is not None:
+        training_separator = args.training_separator.decode("string_escape")
+        source_args["source_parser"].update({'separator': training_separator})
     return source_args
 
 
