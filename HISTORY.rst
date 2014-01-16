@@ -3,6 +3,11 @@
 History
 -------
 
+1.2.3 (2014-01-16)
+~~~~~~~~~~~~~~~~~~
+
+- Fix to transmit --training-separator when creating remote sources.
+
 1.2.2 (2014-01-14)
 ~~~~~~~~~~~~~~~~~~
 
