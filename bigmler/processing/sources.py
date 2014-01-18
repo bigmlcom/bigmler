@@ -27,7 +27,6 @@ import bigml.api
 import bigmler.utils as u
 import bigmler.resources as r
 import bigmler.checkpoint as c
-import bigmler.labels as l
 
 from bigml.fields import Fields
 

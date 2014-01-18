@@ -125,14 +125,10 @@ def models_processing(datasets, models, model_ids, objective_field, fields,
         dataset = datasets[0]
         model_ids = []
         models = []
+        """
         all_labels = []
+        """
         if args.multi_label:
-            # Create one model per column choosing only the label column
-            if args.training_set is None:
-                (objective_field, labels, all_labels,
-                 multi_label_data) = l.multi_label_sync(
-                    objective_field, labels, multi_label_data, fields)
-
             # If --number-of-models is not set or is 1, create one model per
             # label. Otherwise, create one ensemble per label with the required
             # number of models

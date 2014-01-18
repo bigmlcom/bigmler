@@ -262,5 +262,3 @@ class TrainReader(object):
             "generated_fields": self.new_fields_info(),
             "objective_name": self.objective_name,
             "objective_column": self.objective_column}
-        
-        

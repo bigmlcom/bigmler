@@ -204,14 +204,14 @@ def split_processing(dataset, api, args, resume, name=None, description=None,
     dataset_alternative_args = r.set_dataset_split_args(
         "%s - train (%s %%)" % (name,
         int(sample_rate * 100)), description, args,
-        sample_rate, out_of_bag=False)
+        sample_rate, out_of_bag=False, multi_label_data=multi_label_data)
     train_dataset, resume = alternative_dataset_processing(
         dataset, "train", dataset_alternative_args, api, args,
         resume, session_file=session_file, path=path, log=log)
     dataset_alternative_args = r.set_dataset_split_args(
         "%s - test (%s %%)" % (name,
         int(args.test_split * 100)), description, args,
-        sample_rate, out_of_bag=True)
+        sample_rate, out_of_bag=True, multi_label_data=multi_label_data)
     test_dataset, resume = alternative_dataset_processing(
         dataset, "test", dataset_alternative_args, api, args,
         resume, session_file=session_file, path=path, log=log)

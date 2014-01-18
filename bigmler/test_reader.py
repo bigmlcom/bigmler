@@ -24,7 +24,6 @@ from __future__ import absolute_import
 
 import csv
 import sys
-import cStringIO
 
 from bigml.util import get_csv_delimiter
 

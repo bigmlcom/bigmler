@@ -1186,12 +1186,24 @@ Data Configuration
                                     numbers to include in the dataset
 --model-fields MODEL_FIELDS         Comma-separated list of input fields
                                     (predictors) to create the model
+--source-attributes PATH            Path to a file containing a JSON expression
+                                    with attributes to be used as arguments
+                                    in create source calls
 --dataset-attributes PATH           Path to a file containing a JSON expression
                                     with attributes to be used as arguments
                                     in create dataset calls
 --model-attributes PATH             Path to a file containing a JSON expression
                                     with attributes to be used as arguments
                                     in create model calls
+--ensemble-attributes PATH          Path to a file containing a JSON expression
+                                    with attributes to be used as arguments
+                                    in create ensemble calls
+--evaluation-attributes PATH        Path to a file containing a JSON expression
+                                    with attributes to be used as arguments
+                                    in create evaluation calls
+--batch_prediction-attributes PATH  Path to a file containing a JSON expression
+                                    with attributes to be used as arguments
+                                    in create batch prediction calls
 --json-filter PATH                  Path to a file containing a JSON expression
                                     to filter the source
 --lisp-filter PATH                  Path to a file containing a LISP expression

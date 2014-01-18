@@ -39,7 +39,6 @@ from bigmler.test_reader import TestReader
 from bigmler.resources import (FIELDS_QS, ALL_FIELDS_QS, BRIEF_FORMAT,
                                NORMAL_FORMAT, FULL_FORMAT)
 from bigmler.resources import create_batch_prediction
-from bigmler.labels import MULTI_LABEL_LABEL
 
 MAX_MODELS = 10
 AGGREGATION = -1
@@ -384,8 +383,8 @@ def local_batch_predict(models, test_reader, prediction_file, api,
             # filter the models that will be used to predict
             if labels:
                 objective_column = str(multi_label_data['objective_column'])
-                labels_info = multi_label_data['generated_fields'][
-                                               objective_column]
+                labels_info = multi_label_data[
+                    'generated_fields'][objective_column]
                 labels_columns = [label_info[1] for label_info in labels_info
                                   if label_info[0] in labels]
                 model_objective_id = model['object']['objective_fields'][0]

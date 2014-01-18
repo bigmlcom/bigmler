@@ -468,6 +468,13 @@ under the License.""" % version
                         help=("Select ensemble tagged with tag to"
                               " be deleted."))
 
+    # Batch predictions selected by tag to be deleted.
+    parser.add_argument('--batch-prediction-tag',
+                        dest='batch_prediction_tag',
+                        default=defaults.get('batch_prediction_tag', None),
+                        help=("Select batch prediction tagged with tag to"
+                              " be deleted."))
+
     # Resources selected by tag to be deleted.
     parser.add_argument('--all-tag',
                         dest='all_tag',

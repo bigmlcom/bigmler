@@ -17,6 +17,8 @@
 """Multi-label labels management functions
 
 """
+import sys
+
 MULTI_LABEL_LABEL = "multi-label label: "
 
 
@@ -49,25 +51,38 @@ def label_model_args(name, label, all_labels, model_fields, objective_field):
 
 
 def get_multi_label_data(resource):
-    """Returns the multi-label info from the resource
+    """Checks and returns the multi-label info from the resource
 
     """
     if ('object' in resource and 'user_metadata' in resource['object'] and
-           'multi_label_data' in resource['object']['user_metadata']):
-        return resource['object']['user_metadata']['multi_label_data']
+            'multi_label_data' in resource['object']['user_metadata']):
+        multi_label_data = resource[
+            'object']['user_metadata']['multi_label_data']
+        multi_label_keys = ["multi_label_fields", "generated_fields",
+                            "objective_name", "objective_column"]
+        if not all(key in multi_label_data for key in multi_label_keys):
+            sys.exit("The information needed to process %s as a multi-label "
+                     "resource cannot be found. Try "
+                     "creating it anew." % resource['resource'])
+        return multi_label_data
+
 
 def get_all_labels(multi_label_data):
     """Extracts the complete set of labels from the stored multi_label_data.
 
     """
     new_fields = multi_label_data['generated_fields']
-    new_objective_fields= new_fields[str(multi_label_data['objective_column'])]
+    new_objective_fields = new_fields[
+        str(multi_label_data['objective_column'])]
     return [new_field[0] for new_field in new_objective_fields]
+
 
 def multi_label_sync(objective_field, labels, multi_label_data, fields):
     """Returns the right objective_field, labels, and all_labels info
        either from the user given values or from the structure stored
-       in user_metadata
+       in user_metadata. Also the objective field information
+       in the multi_label_data structure is updated to the one given by
+       the user.
 
     """
 
@@ -85,4 +100,4 @@ def multi_label_sync(objective_field, labels, multi_label_data, fields):
     all_labels = get_all_labels(multi_label_data)
     if not labels:
         labels = all_labels
-    return (objective_field, labels, all_labels, multi_label_data)        
+    return (objective_field, labels, all_labels)

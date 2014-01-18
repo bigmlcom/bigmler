@@ -415,7 +415,7 @@ def set_label_model_args(name, description, args, labels, multi_label_data,
     """Set of args needed to build a model per label
 
     """
- 
+
     if model_fields is None:
         model_fields = []
     else:
@@ -424,7 +424,6 @@ def set_label_model_args(name, description, args, labels, multi_label_data,
         objective_field = fields.objective_field
     objective_id = fields.field_id(objective_field)
     objective_field = fields.field_name(objective_id)
-    objective_column = fields.field_column_number(objective_id)
     all_labels = get_all_labels(multi_label_data)
     model_args_list = []
 
