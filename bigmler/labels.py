@@ -20,6 +20,8 @@
 import sys
 
 MULTI_LABEL_LABEL = "multi-label label: "
+MULTI_LABEL_KEYS = ["multi_label_fields", "generated_fields",
+                    "objective_name", "objective_column"]
 
 
 def get_label_field(objective_name, label):
@@ -58,9 +60,8 @@ def get_multi_label_data(resource):
             'multi_label_data' in resource['object']['user_metadata']):
         multi_label_data = resource[
             'object']['user_metadata']['multi_label_data']
-        multi_label_keys = ["multi_label_fields", "generated_fields",
-                            "objective_name", "objective_column"]
-        if not all(key in multi_label_data for key in multi_label_keys):
+
+        if not all(key in multi_label_data for key in MULTI_LABEL_KEYS):
             sys.exit("The information needed to process %s as a multi-label "
                      "resource cannot be found. Try "
                      "creating it anew." % resource['resource'])
