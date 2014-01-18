@@ -468,6 +468,13 @@ under the License.""" % version
                         help=("Select ensemble tagged with tag to"
                               " be deleted."))
 
+    # Batch predictions selected by tag to be deleted.
+    parser.add_argument('--batch-prediction-tag',
+                        dest='batch_prediction_tag',
+                        default=defaults.get('batch_prediction_tag', None),
+                        help=("Select batch prediction tagged with tag to"
+                              " be deleted."))
+
     # Resources selected by tag to be deleted.
     parser.add_argument('--all-tag',
                         dest='all_tag',
@@ -826,6 +833,38 @@ under the License.""" % version
                               " to be expanded as being multi-label. Name"
                               " or column number."))
 
+    # The path to a file containing ensemble attributes.
+    parser.add_argument('--ensemble-attributes',
+                        action='store',
+                        dest='ensemble_attributes',
+                        default=defaults.get('ensemble_attributes', None),
+                        help=("Path to a json file describing ensemble"
+                              " attributes."))
+
+    # The path to a file containing source attributes.
+    parser.add_argument('--source-attributes',
+                        action='store',
+                        dest='source_attributes',
+                        default=defaults.get('source_attributes', None),
+                        help=("Path to a json file describing source"
+                              " attributes."))
+
+    # The path to a file containing evaluation attributes.
+    parser.add_argument('--evaluation-attributes',
+                        action='store',
+                        dest='evaluation_attributes',
+                        default=defaults.get('evaluation_attributes', None),
+                        help=("Path to a json file describing evaluation"
+                              " attributes."))
+
+    # The path to a file containing batch prediction attributes.
+    parser.add_argument('--batch-prediction-attributes',
+                        action='store',
+                        dest='batch_prediction_attributes',
+                        default=defaults.get('batch_prediction_attributes',
+                                             None),
+                        help=("Path to a json file describing batch prediction"
+                              " attributes."))
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #

@@ -72,9 +72,9 @@ def set_multi_label_objective(fields_dict, objective):
                  " fields.")
 
 
-def model_per_label(labels, all_labels, datasets, fields,
+def model_per_label(labels, datasets, fields,
                     objective_field, api, args, resume, name=None,
-                    description=None, model_fields=None,
+                    description=None, model_fields=None, multi_label_data=None,
                     session_file=None, path=None, log=None):
     """Creates a model per label for multi-label datasets
 
@@ -98,7 +98,7 @@ def model_per_label(labels, all_labels, datasets, fields,
     args.number_of_models = len(labels) - len(model_ids)
     model_args_list = r.set_label_model_args(
         name, description, args,
-        labels, all_labels, fields, model_fields, objective_field)
+        labels, multi_label_data, fields, model_fields, objective_field)
 
     # create models changing the input_field to select
     # only one label at a time
@@ -113,7 +113,7 @@ def models_processing(datasets, models, model_ids, objective_field, fields,
                       api, args, resume,
                       name=None, description=None, model_fields=None,
                       session_file=None, path=None,
-                      log=None, labels=None, all_labels=None):
+                      log=None, labels=None, multi_label_data=None):
     """Creates or retrieves models from the input data
 
     """
@@ -125,29 +125,24 @@ def models_processing(datasets, models, model_ids, objective_field, fields,
         dataset = datasets[0]
         model_ids = []
         models = []
+        """
+        all_labels = []
+        """
         if args.multi_label:
-            # Create one model per column choosing only the label column
-            if args.training_set is None:
-                if objective_field is None:
-                    objective_field = fields.objective_field
-                objective_id = fields.field_id(objective_field)
-                objective_name = fields.field_name(objective_id)
-                all_labels, labels = l.retrieve_labels(fields.fields, labels,
-                                                       objective_name)
             # If --number-of-models is not set or is 1, create one model per
             # label. Otherwise, create one ensemble per label with the required
             # number of models
             if args.number_of_models < 2:
                 models, model_ids, resume = model_per_label(
-                    labels, all_labels, datasets, fields,
+                    labels, datasets, fields,
                     objective_field, api, args, resume, name, description,
-                    model_fields, session_file, path, log)
+                    model_fields, multi_label_data, session_file, path, log)
             else:
                 (ensembles, ensemble_ids,
                  models, model_ids, resume) = ensemble_per_label(
-                     labels, all_labels, dataset, fields,
+                     labels, dataset, fields,
                      objective_field, api, args, resume, name, description,
-                     model_fields, session_file, path, log)
+                     model_fields, multi_label_data, session_file, path, log)
 
         elif args.number_of_models > 1:
             ensembles = []
@@ -232,7 +227,8 @@ def models_processing(datasets, models, model_ids, objective_field, fields,
     return models, model_ids, ensemble_ids, resume
 
 
-def get_model_fields(model, csv_properties, args, single_model=True):
+def get_model_fields(model, csv_properties, args, single_model=True,
+                     multi_label_data=None):
     """Retrieves fields info from model resource
 
     """
@@ -256,15 +252,20 @@ def get_model_fields(model, csv_properties, args, single_model=True):
     # field is never amongst the set of fields of each individual model, so
     # we must add it.
     fields_dict = copy.deepcopy(model['object']['model']['fields'])
-    objective_field = model['object']['objective_fields']
-    if isinstance(objective_field, list):
-        objective_field = objective_field[0]
+
     if args.multi_label:
-        # Changes fields_dict objective field attributes to the real
-        # multi-label objective
-        set_multi_label_objective(fields_dict, objective_field)
+        # Adds the real objective field to fields_dict
+        objective_field = multi_label_data['objective_name']
+        objective_id = multi_label_data['objective_id']
+        objective_column = multi_label_data['objective_column']
+        fields_dict[objective_id] = {"op_type": "categorical",
+                                     "name": objective_field,
+                                     "column_number": objective_column}
+    else:
+        objective_field = model['object']['objective_fields']
+        if isinstance(objective_field, list):
+            objective_field = objective_field[0]
     csv_properties.update(objective_field=objective_field)
 
     fields = Fields(fields_dict, **csv_properties)
-
     return fields, objective_field

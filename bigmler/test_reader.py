@@ -24,7 +24,6 @@ from __future__ import absolute_import
 
 import csv
 import sys
-import cStringIO
 
 from bigml.util import get_csv_delimiter
 
@@ -55,6 +54,8 @@ class TestReader(object):
             self.test_set_handler = open(test_set, "U")
         self.test_set_header = test_set_header
         self.fields = fields
+        if not objective_field in fields.fields:
+            objective_field = fields.field_id(objective_field)
         self.objective_field = objective_field
         self.test_separator = (test_separator.decode("string_escape")
                                if test_separator is not None

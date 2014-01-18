@@ -27,7 +27,6 @@ import bigml.api
 import bigmler.utils as u
 import bigmler.resources as r
 import bigmler.checkpoint as c
-import bigmler.labels as l
 
 from bigml.fields import Fields
 
@@ -99,6 +98,7 @@ def source_processing(training_set, test_set, training_set_header,
                       test_set_header, api, args, resume,
                       name=None, description=None,
                       csv_properties=None, field_attributes=None, types=None,
+                      multi_label_data=None,
                       session_file=None, path=None, log=None):
     """Creating or retrieving a data source from input arguments
 
@@ -122,7 +122,8 @@ def source_processing(training_set, test_set, training_set_header,
                                                  test_set_header, args)
     if data_set is not None:
         source_args = r.set_source_args(data_set_header, name, description,
-                                        args)
+                                        args,
+                                        multi_label_data=multi_label_data)
         source = r.create_source(data_set, source_args, args, api,
                                  path, session_file, log)
 
@@ -158,7 +159,7 @@ def source_processing(training_set, test_set, training_set_header,
 
 
 def multi_label_expansion(training_set, training_set_header, objective_field,
-                          args, output_path, field_attributes=None,
+                          args, output_path,
                           labels=None, session_file=None):
     """Splitting the labels in a multi-label objective field to create
        a source with column per label
@@ -175,15 +176,8 @@ def multi_label_expansion(training_set, training_set_header, objective_field,
                                   multi_label_fields=multi_label_fields)
     # read file to get all the different labels if no --labels flag is given
     # or use labels given in --labels and generate the new field names
-    new_headers = training_reader.get_headers(objective_field=False)
-    for field_column in training_reader.multi_label_fields:
-        labels = training_reader.fields_labels[field_column]
-        new_field_names = [l.get_label_field(
-            training_reader.headers[field_column], label)
-            for label in labels]
-        new_headers.extend(new_field_names)
-    new_headers.append(training_reader.objective_name)
-    new_headers = [header.encode("utf-8") for header in new_headers]
+    new_headers = training_reader.get_label_headers()
+
     try:
         file_name = os.path.basename(training_set)
     except AttributeError:
@@ -206,14 +200,5 @@ def multi_label_expansion(training_set, training_set_header, objective_field,
             except StopIteration:
                 break
     objective_field = training_reader.headers[training_reader.objective_column]
-    if field_attributes is None:
-        field_attributes = {}
 
-    for label_column, label in training_reader.labels_columns():
-        field_attributes.update({label_column: {
-            "label": "%s%s" % (l.MULTI_LABEL_LABEL, label)}})
-    # Setting field label to mark objective and label fields and objective
-    # field (just in case it was not set previously and other derived fields
-    # are added in the source construction process after the real last field).
-    return (output_file, training_reader.labels, field_attributes,
-            training_reader.objective_name)
+    return (output_file, training_reader.get_multi_label_data())

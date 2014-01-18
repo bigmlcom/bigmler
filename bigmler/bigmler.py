@@ -47,19 +47,17 @@ import sys
 import os
 import re
 import shlex
-import datetime
-import StringIO
 
 import bigml.api
 import bigmler.utils as u
 import bigmler.resources as r
 import bigmler.labels as l
+import bigmler.processing.args as a
 import bigmler.processing.sources as ps
 import bigmler.processing.datasets as pd
 import bigmler.processing.models as pm
-import bigmler.processing.ensembles as pe
 
-from bigml.multivote import COMBINATION_WEIGHTS, COMBINER_MAP, PLURALITY
+from bigml.multivote import PLURALITY
 from bigml.model import Model
 
 from bigmler.evaluation import evaluate, cross_validate
@@ -67,28 +65,13 @@ from bigmler.options import create_parser
 from bigmler.defaults import get_user_defaults
 from bigmler.defaults import DEFAULTS_FILE
 from bigmler.prediction import predict, combine_votes, remote_predict
-from bigmler.prediction import (MAX_MODELS, FULL_FORMAT, OTHER, COMBINATION,
-                                COMBINATION_LABEL, THRESHOLD_CODE)
+from bigmler.prediction import (MAX_MODELS, OTHER, COMBINATION,
+                                THRESHOLD_CODE)
 
-
-# Date and time in format SunNov0412_120510 to name and tag resources
-NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
 COMMAND_LOG = ".bigmler"
 DIRS_LOG = ".bigmler_dir_stack"
 SESSIONS_LOG = "bigmler_sessions"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
-
-
-def non_compatible(args, option):
-    """Return non_compatible options
-
-    """
-    if option == '--cross-validation-rate':
-        return (args.test_set or args.evaluate or args.model or args.models or
-                args.model_tag or args.multi_label)
-    if option == '--max-categories':
-        return (args.evaluate or args.test_split or args.remote)
-    return False
 
 
 def has_test(args):
@@ -96,6 +79,77 @@ def has_test(args):
 
     """
     return args.test_set or args.test_source or args.test_dataset
+
+
+def belongs_to_ensemble(model):
+    """Checks if a model is part of an ensemble
+
+    """
+    return ('object' in model and 'ensemble' in model['object'] and
+            model['object']['ensemble'])
+
+
+def get_ensemble_id(model):
+    """Returns the ensemble/id for a model that belongs to an ensemble
+
+    """
+    if 'object' in model and 'ensemble' in model['object']:
+        return "ensemble/%s" % model['object']['ensemble']
+
+
+def delete_resources(command_args, api):
+    """Deletes the resources selected by the user given options
+
+    """
+    if command_args.predictions is None:
+        path = a.NOW
+    else:
+        path = u.check_dir(command_args.predictions)
+    session_file = "%s%s%s" % (path, os.sep, SESSIONS_LOG)
+    message = u.dated("Retrieving objects to delete.\n")
+    u.log_message(message, log_file=session_file,
+                  console=command_args.verbosity)
+    delete_list = []
+    if command_args.delete_list:
+        delete_list = map(str.strip,
+                          command_args.delete_list.split(','))
+    if command_args.delete_file:
+        if not os.path.exists(command_args.delete_file):
+            sys.exit("File %s not found" % command_args.delete_file)
+        delete_list.extend([line for line
+                            in open(command_args.delete_file, "r")])
+
+    resource_selectors = [
+        (command_args.source_tag, api.list_sources),
+        (command_args.dataset_tag, api.list_datasets),
+        (command_args.model_tag, api.list_models),
+        (command_args.prediction_tag, api.list_predictions),
+        (command_args.evaluation_tag, api.list_evaluations),
+        (command_args.ensemble_tag, api.list_ensembles),
+        (command_args.batch_prediction_tag, api.list_batch_predictions)]
+
+    for selector, api_call in resource_selectors:
+        query_string = None
+        if command_args.all_tag:
+            query_string = "tags__in=%s" % command_args.all_tag
+        elif selector:
+            query_string = "tags__in=%s" % selector
+        if query_string:
+            delete_list.extend(u.list_ids(api_call, query_string))
+
+    message = u.dated("Deleting objects.\n")
+    u.log_message(message, log_file=session_file,
+                  console=command_args.verbosity)
+    message = "\n".join(delete_list)
+    u.log_message(message, log_file=session_file)
+    u.delete(api, delete_list)
+    if sys.platform == "win32" and sys.stdout.isatty():
+        message = (u"\nGenerated files:\n\n" +
+                   unicode(u.print_tree(path, " "), "utf-8") + u"\n")
+    else:
+        message = "\nGenerated files:\n\n" + u.print_tree(path, " ") + "\n"
+    u.log_message(message, log_file=session_file,
+                  console=command_args.verbosity)
 
 
 def compute_output(api, args, training_set, test_set=None, output=None,
@@ -121,6 +175,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     fields = None
     other_label = OTHER
     ensemble_ids = []
+    multi_label_data = None
 
     # It is compulsory to have a description to publish either datasets or
     # models
@@ -163,33 +218,39 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
     # multi_label file must be preprocessed to obtain a new extended file
     if args.multi_label and training_set is not None:
-        (training_set, labels,
-         field_attributes, objective_field) = ps.multi_label_expansion(
+        (training_set, multi_label_data) = ps.multi_label_expansion(
              training_set, training_set_header, objective_field, args, path,
-             field_attributes=field_attributes, labels=labels,
-             session_file=session_file)
+             labels=labels, session_file=session_file)
         training_set_header = True
-    all_labels = labels
+        objective_field = multi_label_data["objective_name"]
+        all_labels = l.get_all_labels(multi_label_data)
+        if not labels:
+            labels = all_labels
+    else:
+        all_labels = labels
 
     if args.multi_label and args.evaluate and args.test_set is not None:
-        (test_set, test_labels,
-         field_attributes, objective_field) = ps.multi_label_expansion(
+        test_set = ps.multi_label_expansion(
              test_set, test_set_header, objective_field, args, path,
-             field_attributes=field_attributes, labels=labels,
-             session_file=session_file)
+             labels=labels, session_file=session_file)[0]
         test_set_header = True
 
     source, resume, csv_properties, fields = ps.source_processing(
         training_set, test_set, training_set_header, test_set_header,
         api, args, resume, name=name, description=description,
-        csv_properties=csv_properties,
-        field_attributes=field_attributes,
-        types=types, session_file=session_file, path=path, log=log)
+        csv_properties=csv_properties, field_attributes=field_attributes,
+        types=types, multi_label_data=multi_label_data,
+        session_file=session_file, path=path, log=log)
+    if args.multi_label and source:
+        multi_label_data = l.get_multi_label_data(source)
+        (objective_field, labels, all_labels) = l.multi_label_sync(
+            objective_field, labels, multi_label_data, fields)
 
     datasets, resume, csv_properties, fields = pd.dataset_processing(
         source, training_set, test_set, fields, objective_field,
         api, args, resume, name=name, description=description,
-        dataset_fields=dataset_fields, csv_properties=csv_properties,
+        dataset_fields=dataset_fields, multi_label_data=multi_label_data,
+        csv_properties=csv_properties,
         session_file=session_file, path=path, log=log)
     if datasets:
         dataset = datasets[0]
@@ -199,6 +260,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if args.test_split > 0:
         dataset, test_dataset, resume = pd.split_processing(
             dataset, api, args, resume, name=name, description=description,
+            multi_label_data=multi_label_data,
             session_file=session_file, path=path, log=log)
         datasets[0] = dataset
 
@@ -229,16 +291,35 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             description=description, session_file=session_file, path=path,
             log=log)
         datasets[0] = dataset
+    if args.multi_label and dataset and multi_label_data is None:
+        multi_label_data = l.get_multi_label_data(dataset)
+        (objective_field, labels, all_labels) = l.multi_label_sync(
+            objective_field, labels, multi_label_data, fields)
 
     models, model_ids, ensemble_ids, resume = pm.models_processing(
         datasets, models, model_ids,
         objective_field, fields, api, args, resume,
         name=name, description=description, model_fields=model_fields,
         session_file=session_file, path=path, log=log, labels=labels,
-        all_labels=all_labels)
+        multi_label_data=multi_label_data)
     if models:
         model = models[0]
         single_model = len(models) == 1
+
+    # If multi-label flag is set and no training_set was provided, label
+    # info is extracted from the user_metadata. If models belong to an
+    # ensemble, the ensemble must be retrieved to get the user_metadata.
+    if model and args.multi_label and multi_label_data is None:
+        if len(ensemble_ids) > 0 and isinstance(ensemble_ids[0], dict):
+            resource = ensemble_ids[0]
+        elif belongs_to_ensemble(model):
+            ensemble_id = get_ensemble_id(model)
+            resource = r.get_ensemble(ensemble_id, api=api,
+                                      verbosity=args.verbosity,
+                                      session_file=session_file)
+        else:
+            resource = model
+        multi_label_data = l.get_multi_label_data(resource)
 
     # We get the fields of the model if we haven't got
     # them yet and update its public state if needed
@@ -249,29 +330,12 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             models[0] = model
         # If more than one model, use the full field structure
         fields, objective_field = pm.get_model_fields(
-            model, csv_properties, args, single_model=single_model)
-    # If multi-label flag is set and no training_set was provided, label
-    # info is extracted from the fields structure
-    if args.multi_label and all_labels is None:
-        fields_list = []
-        for model in models:
-            if (isinstance(model, basestring) or
-                    bigml.api.get_status(model)['code'] != bigml.api.FINISHED):
-                query_string = (r.FIELDS_QS if single_model
-                                else r.ALL_FIELDS_QS)
-                model = bigml.api.check_resource(model, api.get_model,
-                                                 query_string=query_string)
-            fields_list.append(model['object']['model']['fields'])
-        fields_list.reverse()
-
-        objective_id = model['object']['objective_fields']
-        if isinstance(objective_id, list):
-            objective_id = objective_id[0]
-        objective_name = fields_list[0][objective_id]['name']
-        objective_name = objective_name[0: objective_name.index(' - ')]
-        all_labels, labels = l.retrieve_labels(fields_list,
-                                               labels, objective_name)
-
+            model, csv_properties, args, single_model=single_model,
+            multi_label_data=multi_label_data)
+    # Fills in all_labels from user_metadata
+    if args.multi_label and not all_labels:
+        (objective_field, labels, all_labels) = l.multi_label_sync(
+            objective_field, labels, multi_label_data, fields)
     # If predicting
     if models and has_test(args) and not args.evaluate:
         models_per_label = 1
@@ -327,7 +391,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                     objective_field, args, api=api, log=log,
                     max_models=args.max_batch_models, resume=resume,
                     session_file=session_file, labels=labels,
-                    models_per_label=models_per_label, other_label=other_label)
+                    models_per_label=models_per_label, other_label=other_label,
+                    multi_label_data=multi_label_data)
 
     # When combine_votes flag is used, retrieve the predictions files saved
     # in the comma separated list of directories and combine them
@@ -388,23 +453,7 @@ def main(args=sys.argv[1:]):
     """Main process
 
     """
-    train_stdin = False
-    test_stdin = False
-    flags = []
-    for i in range(0, len(args)):
-        if args[i].startswith("--"):
-            flag = args[i]
-            # syntax --flag=value
-            if "=" in flag:
-                flag = args[i][0: flag.index("=")]
-            flag = flag.replace("_", "-")
-            flags.append(flag)
-            if (flag == '--train' and
-                    (i == len(args) - 1 or args[i + 1].startswith("--"))):
-                train_stdin = True
-            elif (flag == '--test' and
-                    (i == len(args) - 1 or args[i + 1].startswith("--"))):
-                test_stdin = True
+    (flags, train_stdin, test_stdin) = a.get_flags(args)
 
     # If --clear-logs the log files are cleared
     if "--clear-logs" in args:
@@ -413,18 +462,7 @@ def main(args=sys.argv[1:]):
                 open(log_file, 'w', 0).close()
             except IOError:
                 pass
-    literal_args = args[:]
-    for i in range(0, len(args)):
-        # quoting literals with blanks: 'petal length'
-        if ' ' in args[i]:
-            prefix = ""
-            literal = args[i]
-            # literals with blanks after "+" or "-": +'petal length'
-            if args[i][0] in r.ADD_REMOVE_PREFIX:
-                prefix = args[i][0]
-                literal = args[i][1:]
-            literal_args[i] = '%s"%s"' % (prefix, literal)
-    message = "bigmler %s\n" % " ".join(literal_args)
+    message = a.get_command_message(args)
 
     # Resume calls are not logged
     if not "--resume" in args:
@@ -433,36 +471,16 @@ def main(args=sys.argv[1:]):
         resume = False
     user_defaults = get_user_defaults()
     parser = create_parser(defaults=get_user_defaults(),
-                           constants={'NOW': NOW,
+                           constants={'NOW': a.NOW,
                                       'MAX_MODELS': MAX_MODELS,
                                       'PLURALITY': PLURALITY})
-
     # Parses command line arguments.
-    command_args = parser.parse_args(args)
-
-    if command_args.cross_validation_rate > 0 and (
-            non_compatible(command_args, '--cross-validation-rate')):
-        parser.error("Non compatible flags: --cross-validation-rate"
-                     " cannot be used with --evaluate, --model,"
-                     " --models, --model-tag or --multi-label. Usage:\n\n"
-                     "bigmler --train data/iris.csv "
-                     "--cross-validation-rate 0.1")
-
-    if command_args.max_categories and (
-            non_compatible(command_args, '--max-categories')):
-        parser.error("Non compatible flags: --max-categories cannot "
-                     "be used with --test-split, --remote or --evaluate.")
-
-    if train_stdin and command_args.multi_label:
-        parser.error("Reading multi-label training sets from stream "
-                     "is not yet available.")
-
-    if test_stdin and command_args.resume:
-        parser.error("Can't resume when using stream reading test sets.")
+    command_args = a.parse_and_check(parser, args, train_stdin, test_stdin)
 
     default_output = ('evaluation' if command_args.evaluate
                       else 'predictions.csv')
     if command_args.resume:
+        # Restore the args of the call to resume from the command log file
         debug = command_args.debug
         command = u.get_log_reversed(COMMAND_LOG,
                                      command_args.stack_level)
@@ -484,10 +502,11 @@ def main(args=sys.argv[1:]):
         defaults_file = "%s%s%s" % (output_dir, os.sep, DEFAULTS_FILE)
         user_defaults = get_user_defaults(defaults_file)
         parser = create_parser(defaults=user_defaults,
-                               constants={'NOW': NOW,
+                               constants={'NOW': a.NOW,
                                           'MAX_MODELS': MAX_MODELS,
                                           'PLURALITY': PLURALITY})
-        command_args = parser.parse_args(args)
+        # Parses resumed arguments.
+        command_args = a.parse_and_check(parser, args, train_stdin, test_stdin)
         if command_args.predictions is None:
             command_args.predictions = ("%s%s%s" %
                                         (output_dir, os.sep,
@@ -510,7 +529,7 @@ def main(args=sys.argv[1:]):
         resume = True
     else:
         if command_args.output_dir is None:
-            command_args.output_dir = NOW
+            command_args.output_dir = a.NOW
         if command_args.predictions is None:
             command_args.predictions = ("%s%s%s" %
                                         (command_args.output_dir, os.sep,
@@ -535,278 +554,21 @@ def main(args=sys.argv[1:]):
         with open(DIRS_LOG, "a", 0) as directory_log:
             directory_log.write("%s\n" % os.path.abspath(directory))
 
+    # Creates the corresponding api instance
     if resume and debug:
         command_args.debug = True
+    api = a.get_api_instance(command_args, u.check_dir(session_file))
 
-    if train_stdin:
-        if test_stdin:
-            sys.exit("The standard input can't be used both for training and"
-                     " testing. Choose one of them")
-        command_args.training_set = StringIO.StringIO(sys.stdin.read())
-    elif test_stdin:
-        command_args.test_set = StringIO.StringIO(sys.stdin.read())
-
-    api_command_args = {
-        'username': command_args.username,
-        'api_key': command_args.api_key,
-        'dev_mode': command_args.dev_mode,
-        'debug': command_args.debug}
-
-    if command_args.store:
-        api_command_args.update({'storage': u.check_dir(session_file)})
-
-    api = bigml.api.BigML(**api_command_args)
-
-    if (command_args.evaluate
-        and not (command_args.training_set or command_args.source
-                 or command_args.dataset)
-        and not ((command_args.test_set or command_args.test_split) and
-                 (command_args.model or
-                  command_args.models or command_args.model_tag or
-                  command_args.ensemble or command_args.ensembles or
-                  command_args.ensemble_tag))):
-        parser.error("Evaluation wrong syntax.\n"
-                     "\nTry for instance:\n\nbigmler --train data/iris.csv"
-                     " --evaluate\nbigmler --model "
-                     "model/5081d067035d076151000011 --dataset "
-                     "dataset/5081d067035d076151003423 --evaluate\n"
-                     "bigmler --ensemble ensemble/5081d067035d076151003443"
-                     " --dataset "
-                     "dataset/5081d067035d076151003423 --evaluate")
-
-    if command_args.objective_field:
-        objective = command_args.objective_field
-        try:
-            command_args.objective_field = int(objective)
-        except ValueError:
-            if not command_args.train_header:
-                sys.exit("The %s has been set as objective field but"
-                         " the file has not been marked as containing"
-                         " headers.\nPlease set the --train-header flag if"
-                         " the file has headers or use a column number"
-                         " to set the objective field." % objective)
-
-    output_args = {
-        "api": api,
-        "training_set": command_args.training_set,
-        "test_set": command_args.test_set,
-        "output": command_args.predictions,
-        "objective_field": command_args.objective_field,
-        "name": command_args.name,
-        "training_set_header": command_args.train_header,
-        "test_set_header": command_args.test_header,
-        "args": command_args,
-        "resume": resume,
-    }
-
-    # Reads description if provided.
-    if command_args.description:
-        description_arg = u.read_description(command_args.description)
-        output_args.update(description=description_arg)
-    else:
-        output_args.update(description="Created using BigMLer")
-
-    # Parses fields if provided.
-    if command_args.field_attributes:
-        field_attributes_arg = (
-            u.read_field_attributes(command_args.field_attributes))
-        output_args.update(field_attributes=field_attributes_arg)
-    if command_args.test_field_attributes:
-        field_attributes_arg = (
-            u.read_field_attributes(command_args.test_field_attributes))
-        output_args.update(test_field_attributes=field_attributes_arg)
-
-    # Parses types if provided.
-    if command_args.types:
-        types_arg = u.read_types(command_args.types)
-        output_args.update(types=types_arg)
-    if command_args.test_types:
-        types_arg = u.read_types(command_args.test_types)
-        output_args.update(test_types=types_arg)
-
-    # Parses dataset fields if provided.
-    if command_args.dataset_fields:
-        dataset_fields_arg = map(str.strip,
-                                 command_args.dataset_fields.split(','))
-        output_args.update(dataset_fields=dataset_fields_arg)
-
-    # Parses dataset attributes in json format if provided
-    if command_args.dataset_attributes:
-        json_dataset_attributes = u.read_json(command_args.dataset_attributes)
-        command_args.dataset_json_args = json_dataset_attributes
-    else:
-        command_args.dataset_json_args = {}
-
-    # Parses dataset attributes in json format if provided
-    if command_args.model_attributes:
-        json_model_attributes = u.read_json(command_args.model_attributes)
-        command_args.model_json_args = json_model_attributes
-    else:
-        command_args.model_json_args = {}
-
-    # Parses dataset generators in json format if provided
-    if command_args.new_fields:
-        json_generators = u.read_json(command_args.new_fields)
-        command_args.dataset_json_generators = json_generators
-    else:
-        command_args.dataset_json_generators = {}
-
-    # Parses model input fields if provided.
-    if command_args.model_fields:
-        model_fields_arg = map(str.strip,
-                               command_args.model_fields.split(','))
-        output_args.update(model_fields=model_fields_arg)
-
-    model_ids = []
-    # Parses model/ids if provided.
-    if command_args.models:
-        model_ids = u.read_resources(command_args.models)
-        output_args.update(model_ids=model_ids)
-
-    dataset_ids = None
-    command_args.dataset_ids = []
-    # Parses dataset/id if provided.
-    if command_args.datasets:
-        dataset_ids = u.read_datasets(command_args.datasets)
-        if len(dataset_ids) == 1:
-            command_args.dataset = dataset_ids[0]
-        command_args.dataset_ids = dataset_ids
-
-    # Retrieve dataset/ids if provided.
-    if command_args.dataset_tag:
-        dataset_ids = dataset_ids.extend(
-            u.list_ids(api.list_datasets,
-                       "tags__in=%s" % command_args.dataset_tag))
-        if len(dataset_ids) == 1:
-            command_args.dataset = dataset_ids[0]
-        command_args.dataset_ids = dataset_ids
-
-    # Retrieve model/ids if provided.
-    if command_args.model_tag:
-        model_ids = (model_ids +
-                     u.list_ids(api.list_models,
-                                "tags__in=%s" % command_args.model_tag))
-        output_args.update(model_ids=model_ids)
-
-    # Reads a json filter if provided.
-    if command_args.json_filter:
-        json_filter = u.read_json_filter(command_args.json_filter)
-        command_args.json_filter = json_filter
-
-    # Reads a lisp filter if provided.
-    if command_args.lisp_filter:
-        lisp_filter = u.read_lisp_filter(command_args.lisp_filter)
-        command_args.lisp_filter = lisp_filter
-
-    # Adds default tags unless that it is requested not to do so.
-    if command_args.no_tag:
-        command_args.tag.append('BigMLer')
-        command_args.tag.append('BigMLer_%s' % NOW)
-
-    # Checks combined votes method
-    if (command_args.method and command_args.method != COMBINATION_LABEL and
-            not (command_args.method in COMBINATION_WEIGHTS.keys())):
-        command_args.method = 0
-    else:
-        combiner_methods = dict([[value, key]
-                                for key, value in COMBINER_MAP.items()])
-        combiner_methods[COMBINATION_LABEL] = COMBINATION
-        command_args.method = combiner_methods.get(command_args.method, 0)
-
-    # Adds replacement=True if creating ensemble and nothing is specified
-    if (command_args.number_of_models > 1 and
-            not command_args.replacement and
-            not '--no-replacement' in flags and
-            not 'replacement' in user_defaults and
-            not '--no-randomize' in flags and
-            not 'randomize' in user_defaults and
-            not '--sample-rate' in flags and
-            not 'sample_rate' in user_defaults):
-        command_args.replacement = True
-
-    # Reads votes files in the provided directories.
-    if command_args.votes_dirs:
-        dirs = map(str.strip, command_args.votes_dirs.split(','))
-        votes_path = os.path.dirname(command_args.predictions)
-        votes_files = u.read_votes_files(dirs, votes_path)
-        output_args.update(votes_files=votes_files)
-
-    # Parses fields map if provided.
-    if command_args.fields_map:
-        fields_map_arg = u.read_fields_map(command_args.fields_map)
-        output_args.update(fields_map=fields_map_arg)
-
-    # Old value for --prediction-info='full data' maps to 'full'
-    if command_args.prediction_info == 'full data':
-        print "WARNING: 'full data' is a deprecated value. Use 'full' instead"
-        command_args.prediction_info = FULL_FORMAT
-
-    # Parses resources ids if provided.
+    # Selects the action to perform: delete or create resources
     if command_args.delete:
-        if command_args.predictions is None:
-            path = NOW
-        else:
-            path = u.check_dir(command_args.predictions)
-        session_file = "%s%s%s" % (path, os.sep, SESSIONS_LOG)
-        message = u.dated("Retrieving objects to delete.\n")
-        u.log_message(message, log_file=session_file,
-                      console=command_args.verbosity)
-        delete_list = []
-        if command_args.delete_list:
-            delete_list = map(str.strip,
-                              command_args.delete_list.split(','))
-        if command_args.delete_file:
-            if not os.path.exists(command_args.delete_file):
-                sys.exit("File %s not found" % command_args.delete_file)
-            delete_list.extend([line for line
-                                in open(command_args.delete_file, "r")])
-        if command_args.all_tag:
-            query_string = "tags__in=%s" % command_args.all_tag
-            delete_list.extend(u.list_ids(api.list_sources, query_string))
-            delete_list.extend(u.list_ids(api.list_datasets, query_string))
-            delete_list.extend(u.list_ids(api.list_models, query_string))
-            delete_list.extend(u.list_ids(api.list_predictions, query_string))
-            delete_list.extend(u.list_ids(api.list_evaluations, query_string))
-        # Retrieve sources/ids if provided
-        if command_args.source_tag:
-            query_string = "tags__in=%s" % command_args.source_tag
-            delete_list.extend(u.list_ids(api.list_sources, query_string))
-        # Retrieve datasets/ids if provided
-        if command_args.dataset_tag:
-            query_string = "tags__in=%s" % command_args.dataset_tag
-            delete_list.extend(u.list_ids(api.list_datasets, query_string))
-        # Retrieve model/ids if provided
-        if command_args.model_tag:
-            query_string = "tags__in=%s" % command_args.model_tag
-            delete_list.extend(u.list_ids(api.list_models, query_string))
-        # Retrieve prediction/ids if provided
-        if command_args.prediction_tag:
-            query_string = "tags__in=%s" % command_args.prediction_tag
-            delete_list.extend(u.list_ids(api.list_predictions, query_string))
-        # Retrieve evaluation/ids if provided
-        if command_args.evaluation_tag:
-            query_string = "tags__in=%s" % command_args.evaluation_tag
-            delete_list.extend(u.list_ids(api.list_evaluations, query_string))
-        # Retrieve ensembles/ids if provided
-        if command_args.ensemble_tag:
-            query_string = "tags__in=%s" % command_args.ensemble_tag
-            delete_list.extend(u.list_ids(api.list_ensembles, query_string))
-        message = u.dated("Deleting objects.\n")
-        u.log_message(message, log_file=session_file,
-                      console=command_args.verbosity)
-        message = "\n".join(delete_list)
-        u.log_message(message, log_file=session_file)
-        u.delete(api, delete_list)
-        if sys.platform == "win32" and sys.stdout.isatty():
-            message = (u"\nGenerated files:\n\n" +
-                       unicode(u.print_tree(path, " "), "utf-8") + u"\n")
-        else:
-            message = "\nGenerated files:\n\n" + u.print_tree(path, " ") + "\n"
-        u.log_message(message, log_file=session_file,
-                      console=command_args.verbosity)
+        delete_resources(command_args, api)
     elif (command_args.training_set or has_test(command_args)
           or command_args.source or command_args.dataset
           or command_args.datasets or command_args.votes_dirs):
+        a.check_evaluate_syntax(command_args, parser)
+        output_args = a.get_output_args(api, train_stdin, test_stdin,
+                                        command_args, resume)
+        a.transform_args(command_args, flags, api, user_defaults)
         compute_output(**output_args)
     u.log_message("_" * 80 + "\n", log_file=session_file)
 

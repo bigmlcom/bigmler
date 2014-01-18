@@ -97,7 +97,8 @@ def get_fields_structure(resource, csv_properties):
 
 def dataset_processing(source, training_set, test_set, fields, objective_field,
                        api, args, resume,  name=None, description=None,
-                       dataset_fields=None, csv_properties=None,
+                       dataset_fields=None, multi_label_data=None,
+                       csv_properties=None,
                        session_file=None, path=None, log=None):
     """Creating or retrieving dataset from input arguments
 
@@ -119,7 +120,9 @@ def dataset_processing(source, training_set, test_set, fields, objective_field,
          and not args.no_dataset) or
             (args.evaluate and args.test_set and not args.dataset)):
         dataset_args = r.set_dataset_args(name, description, args, fields,
-                                          dataset_fields)
+                                          dataset_fields,
+                                          objective_field=objective_field,
+                                          multi_label_data=multi_label_data)
         dataset = r.create_dataset(source, dataset_args, args.verbosity, api,
                                    path, session_file, log)
 
@@ -190,7 +193,8 @@ def alternative_dataset_processing(dataset_or_source, suffix, dataset_args,
 
 
 def split_processing(dataset, api, args, resume, name=None, description=None,
-                     session_file=None, path=None, log=None):
+                     multi_label_data=None, session_file=None,
+                     path=None, log=None):
     """Splits a dataset into train and test datasets
 
     """
@@ -200,14 +204,14 @@ def split_processing(dataset, api, args, resume, name=None, description=None,
     dataset_alternative_args = r.set_dataset_split_args(
         "%s - train (%s %%)" % (name,
         int(sample_rate * 100)), description, args,
-        sample_rate, out_of_bag=False)
+        sample_rate, out_of_bag=False, multi_label_data=multi_label_data)
     train_dataset, resume = alternative_dataset_processing(
         dataset, "train", dataset_alternative_args, api, args,
         resume, session_file=session_file, path=path, log=log)
     dataset_alternative_args = r.set_dataset_split_args(
         "%s - test (%s %%)" % (name,
         int(args.test_split * 100)), description, args,
-        sample_rate, out_of_bag=True)
+        sample_rate, out_of_bag=True, multi_label_data=multi_label_data)
     test_dataset, resume = alternative_dataset_processing(
         dataset, "test", dataset_alternative_args, api, args,
         resume, session_file=session_file, path=path, log=log)
@@ -264,8 +268,8 @@ def create_categories_datasets(dataset, distribution,
 
 
 def create_new_dataset(dataset, api, args, resume, name=None,
-                       description=None, session_file=None, path=None,
-                       log=None):
+                       description=None, multi_label_data=None,
+                       session_file=None, path=None, log=None):
     """Generates a new dataset using the generators given in a generators file
 
     """
@@ -286,6 +290,9 @@ def create_new_dataset(dataset, api, args, resume, name=None,
             args.dataset_json_generators.update(name=name)
         if description is not None:
             args.dataset_json_generators.update(description=description)
+        if args.multi_label and multi_label_data is not None:
+            args.dataset_json_generators.update(
+                user_metadata={'multi_label_data': multi_label_data})
         new_dataset = r.create_dataset(dataset, args.dataset_json_generators,
                                        args.verbosity,
                                        api=api, path=path,

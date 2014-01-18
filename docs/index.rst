@@ -908,6 +908,7 @@ or restricting the operation to a specific type::
     bigmler --delete --prediction-tag my_tag
     bigmler --delete --evaluation-tag my_tag
     bigmler --delete --ensemble-tag my_tag
+    bigmler --delete --batch-prediction-tag my_tag
 
 Resuming Previous Commands
 --------------------------
@@ -1186,12 +1187,24 @@ Data Configuration
                                     numbers to include in the dataset
 --model-fields MODEL_FIELDS         Comma-separated list of input fields
                                     (predictors) to create the model
+--source-attributes PATH            Path to a file containing a JSON expression
+                                    with attributes to be used as arguments
+                                    in create source calls
 --dataset-attributes PATH           Path to a file containing a JSON expression
                                     with attributes to be used as arguments
                                     in create dataset calls
 --model-attributes PATH             Path to a file containing a JSON expression
                                     with attributes to be used as arguments
                                     in create model calls
+--ensemble-attributes PATH          Path to a file containing a JSON expression
+                                    with attributes to be used as arguments
+                                    in create ensemble calls
+--evaluation-attributes PATH        Path to a file containing a JSON expression
+                                    with attributes to be used as arguments
+                                    in create evaluation calls
+--batch_prediction-attributes PATH  Path to a file containing a JSON expression
+                                    with attributes to be used as arguments
+                                    in create batch prediction calls
 --json-filter PATH                  Path to a file containing a JSON expression
                                     to filter the source
 --lisp-filter PATH                  Path to a file containing a LISP expression
@@ -1253,6 +1266,10 @@ Delete Remote Resources
                             be deleted
 --evaluation-tag TAG        Retrieves evaluations that were tagged with tag to
                             be deleted
+--ensemble-tag TAG          Retrieves ensembles that were tagged with tag to
+                            be deleted
+--batch-prediction-tag TAG  Retrieves batch predictions that were tagged with
+                            tag to be deleted
 
 Ensembles
 ---------

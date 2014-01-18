@@ -28,6 +28,7 @@ import sys
 from bigml.util import get_csv_delimiter
 
 from bigmler.checkpoint import file_number_of_lines
+from bigmler.labels import get_label_field
 
 
 class TrainReader(object):
@@ -79,6 +80,20 @@ class TrainReader(object):
         self.fields_labels = self._get_labels()
         self.labels = self.fields_labels[self.objective_column]
         self.objective_name = self.headers[self.objective_column]
+
+    def get_label_headers(self):
+        """Returns a list of headers with the new extended field names for
+           each objective label
+        """
+        new_headers = self.get_headers()
+        for field_column in self.multi_label_fields:
+            labels = self.fields_labels[field_column]
+            new_field_names = [get_label_field(
+                self.headers[field_column], label)
+                for label in labels]
+            new_headers.extend(new_field_names)
+        new_headers = [header.encode("utf-8") for header in new_headers]
+        return new_headers
 
     def _get_columns(self, fields_list):
         """Receives a comma-separated list of fields given by name or
@@ -152,9 +167,6 @@ class TrainReader(object):
                 labels_row = [label in field_values for label in
                               self.fields_labels[field_column]]
                 row.extend(labels_row)
-            aggregated_value = row[self.objective_column]
-            del row[self.objective_column]
-            row.append(aggregated_value.strip())
         if reset:
             self.reset()
         return row
@@ -223,16 +235,30 @@ class TrainReader(object):
         del new_headers[self.objective_column]
         return new_headers
 
-    def labels_columns(self):
-        """List of tuples (label_column, label) describing the label extension
+    def new_fields_info(self):
+        """Dict of 2-item lists 'field_column': [label, label_column]
+           describing the per label extension
 
         """
-        columns = []
-        column = len(self.headers) - 1
+        info = {}
+        column = len(self.headers)
         for field_column in self.multi_label_fields:
+            alpha_field_column = str(field_column)
+            info[alpha_field_column] = []
             labels = self.fields_labels[field_column]
             for label in labels:
-                columns.append((column, label))
+                info[alpha_field_column].append([label, column])
                 column += 1
 
-        return columns
+        return info
+
+    def get_multi_label_data(self):
+        """Returns a dict to store the multi-label info that defines this
+           source
+
+        """
+        return {
+            "multi_label_fields": self.multi_label_fields,
+            "generated_fields": self.new_fields_info(),
+            "objective_name": self.objective_name,
+            "objective_column": self.objective_column}

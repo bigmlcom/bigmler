@@ -39,7 +39,6 @@ from bigmler.test_reader import TestReader
 from bigmler.resources import (FIELDS_QS, ALL_FIELDS_QS, BRIEF_FORMAT,
                                NORMAL_FORMAT, FULL_FORMAT)
 from bigmler.resources import create_batch_prediction
-from bigmler.labels import MULTI_LABEL_LABEL
 
 MAX_MODELS = 10
 AGGREGATION = -1
@@ -60,6 +59,8 @@ def use_prediction_headers(prediction_headers, output, test_reader,
 
     """
     exclude = []
+    if not objective_field in fields.fields:
+        objective_field = fields.field_id(objective_field)
     objective_name = fields.field_name(objective_field)
     headers = [objective_name]
 
@@ -321,7 +322,8 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                         session_file=None, debug=False,
                         prediction_info=NORMAL_FORMAT,
                         labels=None, label_separator=None, ordered=True,
-                        exclude=None, models_per_label=1, other_label=OTHER):
+                        exclude=None, models_per_label=1, other_label=OTHER,
+                        multi_label_data=None):
 
     """Get local predictions form partial Multimodel, combine and save to file
 
@@ -380,20 +382,23 @@ def local_batch_predict(models, test_reader, prediction_file, api,
             # When user selects the labels in multi-label predictions, we must
             # filter the models that will be used to predict
             if labels:
+                objective_column = str(multi_label_data['objective_column'])
+                labels_info = multi_label_data[
+                    'generated_fields'][objective_column]
+                labels_columns = [label_info[1] for label_info in labels_info
+                                  if label_info[0] in labels]
                 model_objective_id = model['object']['objective_fields'][0]
                 model_fields = model['object']['model']['fields']
-                model_label = model_fields[model_objective_id]['label']
-                if (model_label.startswith(MULTI_LABEL_LABEL) and
-                        model_label[len(MULTI_LABEL_LABEL):] in labels):
+                model_objective = model_fields[model_objective_id]
+                model_column = model_objective['column_number']
+                if (model_column in labels_columns):
                     # When the list of models comes from a --model-tag
                     # selection, the models are not retrieved in the same
                     # order they were created. We must keep track of the
                     # label they are associated with to label their
                     # predictions properly
                     if not ordered:
-                        label = model_label[len(MULTI_LABEL_LABEL):]
-                        label_index = labels.index(label)
-                        models_order.append(label_index)
+                        models_order.append(model_column)
                     complete_models.append(model)
             else:
                 complete_models.append(model)
@@ -434,7 +439,6 @@ def local_batch_predict(models, test_reader, prediction_file, api,
             else:
                 predictions = [prediction for (order, prediction)
                                in sorted(zip(models_order, predictions))]
-
             if (labels is None or
                     len(labels) * models_per_label != len(predictions)):
                 sys.exit("Failed to make a multi-label prediction. No"
@@ -487,7 +491,8 @@ def local_batch_predict(models, test_reader, prediction_file, api,
 def predict(test_set, test_set_header, models, fields, output,
             objective_field, args, api=None, log=None,
             max_models=MAX_MODELS, resume=False, session_file=None,
-            labels=None, models_per_label=1, other_label=OTHER):
+            labels=None, models_per_label=1, other_label=OTHER,
+            multi_label_data=None):
     """Computes a prediction for each entry in the `test_set`.
 
        Predictions computed locally using MultiModels on subgroups of models.
@@ -578,7 +583,8 @@ def predict(test_set, test_set_header, models, fields, output,
                             label_separator=args.label_separator,
                             ordered=ordered, exclude=exclude,
                             models_per_label=models_per_label,
-                            other_label=other_label)
+                            other_label=other_label,
+                            multi_label_data=multi_label_data)
 
 
 def remote_predict(model, test_dataset, batch_prediction_args, args,
