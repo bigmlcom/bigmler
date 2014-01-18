@@ -11,6 +11,7 @@ History
 - Refactoring --multi-label resources to include its related info in 
   the user_metadata attribute.
 - Refactoring the main routine.
+- Adding --batch-prediction-tag for delete operations.
 
 1.2.3 (2014-01-16)
 ~~~~~~~~~~~~~~~~~~

@@ -908,6 +908,7 @@ or restricting the operation to a specific type::
     bigmler --delete --prediction-tag my_tag
     bigmler --delete --evaluation-tag my_tag
     bigmler --delete --ensemble-tag my_tag
+    bigmler --delete --batch-prediction-tag my_tag
 
 Resuming Previous Commands
 --------------------------
@@ -1265,6 +1266,10 @@ Delete Remote Resources
                             be deleted
 --evaluation-tag TAG        Retrieves evaluations that were tagged with tag to
                             be deleted
+--ensemble-tag TAG          Retrieves ensembles that were tagged with tag to
+                            be deleted
+--batch-prediction-tag TAG  Retrieves batch predictions that were tagged with
+                            tag to be deleted
 
 Ensembles
 ---------
