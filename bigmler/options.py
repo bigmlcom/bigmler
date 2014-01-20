@@ -865,6 +865,15 @@ under the License.""" % version
                                              None),
                         help=("Path to a json file describing batch prediction"
                               " attributes."))
+
+    # Balance. Automatically balance all the classes evenly.
+    parser.add_argument('--balance',
+                        action='store_true',
+                        dest='balance',
+                        default=defaults.get('balance', False),
+                        help=("Automatically balance all the classes"
+                              " evenly."))
+
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #
@@ -1005,4 +1014,12 @@ under the License.""" % version
                         dest='no_batch',
                         default=defaults.get('no_batch', False),
                         help="Create remote predictions in batch.")
+
+    # Balance. Automatically balance all the classes evenly..
+    parser.add_argument('--no-balance',
+                        action='store_false',
+                        dest='balance',
+                        default=defaults.get('balance', False),
+                        help=("Automatically balance all the classes"
+                              " evenly."))
     return parser
