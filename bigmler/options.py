@@ -874,6 +874,14 @@ under the License.""" % version
                         help=("Automatically balance all the classes"
                               " evenly."))
 
+    # Weight-field. Use the contents of the given field as weights.
+    parser.add_argument('--weight-field',
+                        action='store',
+                        dest='weight_field',
+                        default=defaults.get('weight_field', None),
+                        help=("Sets the name (or column) of the field"
+                              " that contains the weights for the instances."))
+
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #
