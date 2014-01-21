@@ -3,6 +3,13 @@
 History
 -------
 
+1.4.0 (2014-01-20)
+~~~~~~~~~~~~~~~~~~
+
+- Adding new --balance option to automatically balance all the classes evenly.
+- Adding new --weight-field option to use the field contents as weights for
+  the instances.
+
 1.3.0 (2014-01-17)
 ~~~~~~~~~~~~~~~~~~
 

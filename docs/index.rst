@@ -552,6 +552,24 @@ Or, as another example, to tag the outliers of the same field one coud use::
 
     {"new_fields": [{"name": "outlier?", "field": "(if (within-percentiles? \"sepal length\" 0.5 0.95) \"normal\" \"outlier\")"}]}
 
+Model Weights
+-------------
+
+To deal with imbalanced datasets, BigMLer offers two options: ``--balance`` and
+``--weight-field``.
+
+For classification models, the ``--balance`` flag will cause all the classes
+in the dataset to
+contribute evenly. A weight will be assigned automatically to each
+instance. This weight is
+inversely proportional to the number of instances in the class it belongs to,
+in order to ensure even distribution for the classes.
+
+You can also use a field in the dataset that contains the weight you would like
+to use for each instance. Using the ``--weight-field`` option followed by
+the field name or column number will cause BigMLer to use its data as instance
+weight. This is valid for both regression and classification models.
+
 Fitering Sources
 ----------------
 
@@ -1000,7 +1018,7 @@ Requirements
 
 Python 2.7 is currently supported by BigMLer.
 
-BigMLer requires `bigml 1.0 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 1.0.3 <https://github.com/bigmlcom/python>`_  or
 higher.
 
 BigMLer Installation
@@ -1227,6 +1245,10 @@ Data Configuration
                                     by combining or setting their values
 --node-threshold                    Maximum number or nodes to grow the tree
                                     with
+--balance                           Automatically balance data to treat all
+                                    classes evenly
+--weight-field FIELD                Field name or column number that contains
+                                    the weights to be used for each instance
 
 Remote Resources
 ----------------
