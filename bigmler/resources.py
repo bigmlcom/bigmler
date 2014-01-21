@@ -402,8 +402,17 @@ def set_model_args(name, description,
 
     if args.node_threshold > 0:
         model_args.update(node_threshold=args.node_threshold)
+
+    if args.balance:
+        model_args.update(balance_objective=True)
+
+    if args.weight_field:
+        weight_field = fields.field_id(args.weight_field)
+        model_args.update(weight_field=weight_field)
+
     if args.json_args['model']:
         model_args.update(args.json_args['model'])
+
     model_args.update(sample_rate=args.sample_rate,
                       replacement=args.replacement,
                       randomize=args.randomize)
@@ -617,6 +626,11 @@ def set_ensemble_args(name, description, args, model_fields,
         ensemble_args.update(stat_pruning=(args.pruning == 'statistical'))
     if args.node_threshold > 0:
         ensemble_args.update(node_threshold=args.node_threshold)
+    if args.balance:
+        ensemble_args.update(balance_objective=True)
+    if args.weight_field:
+        weight_field = fields.field_id(args.weight_field)
+        ensemble_args.update(weight_field=weight_field)
     if args.json_args['model']:
         ensemble_args.update(args.json_args['model'])
     ensemble_args.update(sample_rate=args.sample_rate,

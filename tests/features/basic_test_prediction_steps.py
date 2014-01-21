@@ -165,7 +165,6 @@ def i_create_resources_from_model(step, test=None, output=None):
                test + " --store --output " + output + " --max-batch-models 1")
     shell_execute(command, output, test=test)
 
-
 @step(r'I create BigML resources using the previous ensemble with different thresholds to test "(.*)" and log predictions in "(.*)" and "(.*)"')
 def i_create_resources_from_ensemble_with_threshold(step, test=None, output2=None, output3=None):
     if test is None or output2 is None or output3 is None:
@@ -319,6 +318,42 @@ def i_find_predictions_files(step, directory1=None, directory2=None, output=None
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
+@step(r'I create a BigML balanced model from "(.*)" and store logs in "(.*)"')
+def i_create_balanced_model(step, data=None, output_dir=None):
+    if data is None or output_dir is None:
+        assert False
+    world.directory = output_dir
+    world.folders.append(world.directory)
+    try:
+        command = ("bigmler --train " + data + " --balance " +
+                   " --store --output-dir " + output_dir)
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+@step(r'I create a BigML field weighted model from "(.*)" using field "(.*)" as weight and store logs in "(.*)"')
+def i_create_weighted_field_model(step, data=None, field=None, output_dir=None):
+    if data is None or field is None or output_dir is None:
+        assert False
+    world.directory = output_dir
+    world.folders.append(world.directory)
+    try:
+        command = ("bigmler --train " + data + " --weight-field " + field +
+                   " --store --output-dir " + output_dir)
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
 
 @step(r'I check that the source has been created$')
 def i_check_create_source(step):
@@ -382,6 +417,21 @@ def i_check_create_model(step):
         assert True
     except Exception, exc:
         assert False, str(exc)
+
+
+@step(r'I check that the model is balanced')
+def i_check_model_is_balanced(step):
+    assert ('balance_objective' in world.model['object'] and
+            world.model['object']['balance_objective'])
+
+
+@step(r'I check that the model uses as weight "(.*)"')
+def i_check_weighted_model(step, field=None):
+    if field is None:
+        assert False
+    assert ('weight_field' in world.model['object'] and
+            world.model['object']['weight_field'] == field)
+
 
 @step(r'I check that the ensemble has been created')
 def i_check_create_ensemble(step):
