@@ -86,7 +86,6 @@ class TrainReader(object):
                 self.labels = self.fields_labels[self.objective_column]
             self.objective_name = self.headers[self.objective_column]
 
-
     def get_label_headers(self):
         """Returns a list of headers with the new extended field names for
            each objective label
@@ -278,4 +277,3 @@ class TrainReader(object):
                 "generated_fields": self.new_fields_info(),
                 "objective_name": self.objective_name,
                 "objective_column": self.objective_column}
-

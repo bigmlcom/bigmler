@@ -220,8 +220,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # multi_label file must be preprocessed to obtain a new extended file
     if args.multi_label and training_set is not None:
         (training_set, multi_label_data) = ps.multi_label_expansion(
-             training_set, training_set_header, objective_field, args, path,
-             labels=labels, session_file=session_file)
+            training_set, training_set_header, objective_field, args, path,
+            labels=labels, session_file=session_file)
         training_set_header = True
         objective_field = multi_label_data["objective_name"]
         all_labels = l.get_all_labels(multi_label_data)
@@ -239,9 +239,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if args.multi_label and source:
         multi_label_data = l.get_multi_label_data(source)
         (objective_field, labels,
-         all_labels, multi_label_fields) = l.multi_label_sync(
-            objective_field, labels, multi_label_data, fields,
-            multi_label_fields)
+            all_labels, multi_label_fields) = l.multi_label_sync(
+                objective_field, labels, multi_label_data, fields,
+                multi_label_fields)
 
     datasets, resume, csv_properties, fields = pd.dataset_processing(
         source, training_set, test_set, fields, objective_field,
@@ -291,9 +291,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if args.multi_label and dataset and multi_label_data is None:
         multi_label_data = l.get_multi_label_data(dataset)
         (objective_field, labels,
-         all_labels, multi_label_fields) = l.multi_label_sync(
-            objective_field, labels, multi_label_data,
-            fields, multi_label_fields)
+            all_labels, multi_label_fields) = l.multi_label_sync(
+                objective_field, labels, multi_label_data,
+                fields, multi_label_fields)
 
     models, model_ids, ensemble_ids, resume = pm.models_processing(
         datasets, models, model_ids,
@@ -334,9 +334,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # Fills in all_labels from user_metadata
     if args.multi_label and not all_labels:
         (objective_field, labels,
-         all_labels, multi_label_fields) = l.multi_label_sync(
-            objective_field, labels, multi_label_data,
-            fields, multi_label_fields)
+            all_labels, multi_label_fields) = l.multi_label_sync(
+                objective_field, labels, multi_label_data,
+                fields, multi_label_fields)
     # If predicting
     if models and has_test(args) and not args.evaluate:
         models_per_label = 1
@@ -351,8 +351,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                                            in multi_label_fields]
                 args.multi_label_fields = ",".join(multi_label_field_names)
             test_set = ps.multi_label_expansion(
-                 test_set, test_set_header, objective_field, args, path,
-                 labels=labels, session_file=session_file, input_flag=True)[0]
+                test_set, test_set_header, objective_field, args, path,
+                labels=labels, session_file=session_file, input_flag=True)[0]
             test_set_header = True
 
         # Remote predictions: predictions are computed as batch predictions
@@ -364,11 +364,13 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             test_name = "%s - test" % name
             if args.test_source is None:
                 (test_source, resume,
-                 csv_properties, test_fields) = ps.test_source_processing(
-                    test_set, test_set_header,
-                    api, args, resume, name=test_name, description=description,
-                    field_attributes=test_field_attributes, types=test_types,
-                    session_file=session_file, path=path, log=log)
+                    csv_properties, test_fields) = ps.test_source_processing(
+                        test_set, test_set_header,
+                        api, args, resume, name=test_name,
+                        description=description,
+                        field_attributes=test_field_attributes,
+                        types=test_types,
+                        session_file=session_file, path=path, log=log)
             else:
                 test_source_id = bigml.api.get_source_id(args.test_source)
                 test_source = api.check_resource(test_source_id,
@@ -436,8 +438,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             if args.multi_label_fields is None and multi_label_fields:
                 args.multi_label_fields = multi_label_fields
             test_set = ps.multi_label_expansion(
-                 test_set, test_set_header, objective_field, args, path,
-                 labels=labels, session_file=session_file)[0]
+                test_set, test_set_header, objective_field, args, path,
+                labels=labels, session_file=session_file)[0]
             test_set_header = True
 
         if args.test_split > 0:

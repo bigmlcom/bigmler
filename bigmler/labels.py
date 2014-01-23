@@ -90,8 +90,8 @@ def multi_label_sync(objective_field, labels, multi_label_data, fields,
     """
     if objective_field is None:
         objective_field = multi_label_data['objective_name']
-    if (not multi_label_fields 
-        and 'multi_label_fields' in multi_label_data):
+    if (not multi_label_fields
+            and 'multi_label_fields' in multi_label_data):
         multi_label_fields = multi_label_data['multi_label_fields']
     if fields is not None:
         objective_id = fields.field_id(objective_field)

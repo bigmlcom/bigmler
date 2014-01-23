@@ -31,7 +31,6 @@ import bigmler.checkpoint as c
 from bigml.fields import Fields
 
 from bigmler.train_reader import TrainReader
-from bigmler.input_reader import InputReader
 
 MONTECARLO_FACTOR = 200
 
