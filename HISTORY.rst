@@ -3,6 +3,13 @@
 History
 -------
 
+1.4.1 (2014-01-23)
+~~~~~~~~~~~~~~~~~~
+
+- Fix to allow the input data for multi-label predictions to be expanded.
+- Fix to retrieve from the models definition info the labels that were
+  given by the user in its creation in multi-label models. 
+
 1.4.0 (2014-01-20)
 ~~~~~~~~~~~~~~~~~~
 
