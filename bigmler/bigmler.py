@@ -176,6 +176,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     other_label = OTHER
     ensemble_ids = []
     multi_label_data = None
+    multi_label_fields = []
 
     # It is compulsory to have a description to publish either datasets or
     # models
@@ -229,12 +230,6 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     else:
         all_labels = labels
 
-    if args.multi_label and args.evaluate and args.test_set is not None:
-        test_set = ps.multi_label_expansion(
-             test_set, test_set_header, objective_field, args, path,
-             labels=labels, session_file=session_file)[0]
-        test_set_header = True
-
     source, resume, csv_properties, fields = ps.source_processing(
         training_set, test_set, training_set_header, test_set_header,
         api, args, resume, name=name, description=description,
@@ -243,8 +238,10 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         session_file=session_file, path=path, log=log)
     if args.multi_label and source:
         multi_label_data = l.get_multi_label_data(source)
-        (objective_field, labels, all_labels) = l.multi_label_sync(
-            objective_field, labels, multi_label_data, fields)
+        (objective_field, labels,
+         all_labels, multi_label_fields) = l.multi_label_sync(
+            objective_field, labels, multi_label_data, fields,
+            multi_label_fields)
 
     datasets, resume, csv_properties, fields = pd.dataset_processing(
         source, training_set, test_set, fields, objective_field,
@@ -293,8 +290,10 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         datasets[0] = dataset
     if args.multi_label and dataset and multi_label_data is None:
         multi_label_data = l.get_multi_label_data(dataset)
-        (objective_field, labels, all_labels) = l.multi_label_sync(
-            objective_field, labels, multi_label_data, fields)
+        (objective_field, labels,
+         all_labels, multi_label_fields) = l.multi_label_sync(
+            objective_field, labels, multi_label_data,
+            fields, multi_label_fields)
 
     models, model_ids, ensemble_ids, resume = pm.models_processing(
         datasets, models, model_ids,
@@ -334,12 +333,27 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             multi_label_data=multi_label_data)
     # Fills in all_labels from user_metadata
     if args.multi_label and not all_labels:
-        (objective_field, labels, all_labels) = l.multi_label_sync(
-            objective_field, labels, multi_label_data, fields)
+        (objective_field, labels,
+         all_labels, multi_label_fields) = l.multi_label_sync(
+            objective_field, labels, multi_label_data,
+            fields, multi_label_fields)
     # If predicting
     if models and has_test(args) and not args.evaluate:
         models_per_label = 1
         test_dataset = None
+
+        if args.multi_label:
+            # When prediction starts from existing models, the
+            # multi_label_fields can be retrieved from the user_metadata
+            # in the models
+            if args.multi_label_fields is None and multi_label_fields:
+                multi_label_field_names = [field[1] for field
+                                           in multi_label_fields]
+                args.multi_label_fields = ",".join(multi_label_field_names)
+            test_set = ps.multi_label_expansion(
+                 test_set, test_set_header, objective_field, args, path,
+                 labels=labels, session_file=session_file, input_flag=True)[0]
+            test_set_header = True
 
         # Remote predictions: predictions are computed as batch predictions
         # in bigml.com except when --no-batch flag is set on or multi-label
@@ -414,6 +428,18 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # If evaluate flag is on, create remote evaluation and save results in
     # json and human-readable format.
     if args.evaluate:
+
+        if args.multi_label and args.test_set is not None:
+            # When evaluation starts from existing models, the
+            # multi_label_fields can be retrieved from the user_metadata
+            # in the models
+            if args.multi_label_fields is None and multi_label_fields:
+                args.multi_label_fields = multi_label_fields
+            test_set = ps.multi_label_expansion(
+                 test_set, test_set_header, objective_field, args, path,
+                 labels=labels, session_file=session_file)[0]
+            test_set_header = True
+
         if args.test_split > 0:
             dataset = test_dataset
         dataset_fields = pd.get_fields_structure(dataset, None)

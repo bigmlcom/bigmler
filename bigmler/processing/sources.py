@@ -31,6 +31,7 @@ import bigmler.checkpoint as c
 from bigml.fields import Fields
 
 from bigmler.train_reader import TrainReader
+from bigmler.input_reader import InputReader
 
 MONTECARLO_FACTOR = 200
 
@@ -160,7 +161,7 @@ def source_processing(training_set, test_set, training_set_header,
 
 def multi_label_expansion(training_set, training_set_header, objective_field,
                           args, output_path,
-                          labels=None, session_file=None):
+                          labels=None, session_file=None, input_flag=False):
     """Splitting the labels in a multi-label objective field to create
        a source with column per label
 
@@ -168,20 +169,21 @@ def multi_label_expansion(training_set, training_set_header, objective_field,
     multi_label_fields = []
     if args.multi_label_fields is not None:
         multi_label_fields = args.multi_label_fields.strip().split(',')
-    training_reader = TrainReader(training_set, training_set_header,
-                                  objective_field, multi_label=True,
-                                  labels=labels,
-                                  label_separator=args.label_separator,
-                                  training_separator=args.training_separator,
-                                  multi_label_fields=multi_label_fields)
+    input_reader = TrainReader(training_set, training_set_header,
+                               objective_field, multi_label=True,
+                               labels=labels,
+                               label_separator=args.label_separator,
+                               training_separator=args.training_separator,
+                               multi_label_fields=multi_label_fields,
+                               objective=not input_flag)
     # read file to get all the different labels if no --labels flag is given
     # or use labels given in --labels and generate the new field names
-    new_headers = training_reader.get_label_headers()
+    new_headers = input_reader.get_label_headers()
 
     try:
         file_name = os.path.basename(training_set)
     except AttributeError:
-        file_name = "training_set.csv"
+        file_name = "test_set.csv" if input_flag else "training_set.csv"
     output_file = "%s%sextended_%s" % (output_path, os.sep, file_name)
     message = u.dated("Transforming to extended source.\n")
     u.log_message(message, log_file=session_file,
@@ -190,15 +192,16 @@ def multi_label_expansion(training_set, training_set_header, objective_field,
         output = csv.writer(output_handler, lineterminator="\n")
         output.writerow(new_headers)
         # read to write new source file with column per label
-        training_reader.reset()
+        input_reader.reset()
         if training_set_header:
-            training_reader.next()
+            input_reader.next()
         while True:
             try:
-                row = training_reader.next(extended=True)
+                row = input_reader.next(extended=True)
                 output.writerow(row)
             except StopIteration:
                 break
-    objective_field = training_reader.headers[training_reader.objective_column]
+    if not input_flag:
+        objective_field = input_reader.headers[input_reader.objective_column]
 
-    return (output_file, training_reader.get_multi_label_data())
+    return (output_file, input_reader.get_multi_label_data())
