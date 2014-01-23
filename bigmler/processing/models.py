@@ -228,7 +228,7 @@ def models_processing(datasets, models, model_ids, objective_field, fields,
 
 
 def get_model_fields(model, csv_properties, args, single_model=True,
-                     multi_label_data=None):
+                     multi_label_data=None, local_ensemble=None):
     """Retrieves fields info from model resource
 
     """
@@ -262,6 +262,8 @@ def get_model_fields(model, csv_properties, args, single_model=True,
                                      "name": objective_field,
                                      "column_number": objective_column}
     else:
+        if local_ensemble is not None:
+            fields_dict = copy.deepcopy(local_ensemble.fields)
         objective_field = model['object']['objective_fields']
         if isinstance(objective_field, list):
             objective_field = objective_field[0]
