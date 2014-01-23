@@ -37,7 +37,8 @@ class TrainReader(object):
     """
     def __init__(self, training_set, training_set_header, objective_field,
                  multi_label=False, labels=None, label_separator=None,
-                 training_separator=None, multi_label_fields=None):
+                 training_separator=None, multi_label_fields=None,
+                 objective=True):
         """Builds a generator from a csv file
 
            `training_set`: path to the training data file
@@ -51,6 +52,7 @@ class TrainReader(object):
         self.training_set_handler = None
         self.training_reader = None
         self.multi_label = multi_label
+        self.objective = objective
 
         self.training_separator = (training_separator.decode("string_escape")
                                    if training_separator is not None
@@ -73,13 +75,16 @@ class TrainReader(object):
                             range(0, self.row_length)]
 
         self.multi_label_fields = sorted(self._get_columns(multi_label_fields))
-        self.objective_column = self._get_columns([objective_field])[0]
-        if not self.objective_column in self.multi_label_fields:
-            self.multi_label_fields.append(self.objective_column)
-        self.labels = labels
+        if objective:
+            self.objective_column = self._get_columns([objective_field])[0]
+            if not self.objective_column in self.multi_label_fields:
+                self.multi_label_fields.append(self.objective_column)
+            self.labels = labels
         self.fields_labels = self._get_labels()
-        self.labels = self.fields_labels[self.objective_column]
-        self.objective_name = self.headers[self.objective_column]
+        if objective:
+            if labels is None:
+                self.labels = self.fields_labels[self.objective_column]
+            self.objective_name = self.headers[self.objective_column]
 
     def get_label_headers(self):
         """Returns a list of headers with the new extended field names for
@@ -115,12 +120,17 @@ class TrainReader(object):
                 try:
                     column = self.headers.index(field)
                 except ValueError:
-                    sys.exit("The %s has been set as multi-label field but"
-                             " it cannot be found in the headers row: \n %s" %
-                             (field,
-                              ", ".join([header.encode("utf-8")
-                                         for header in self.headers])))
-            column_list.append(column)
+                    if self.objective:
+                        sys.exit("The %s has been set as multi-label field but"
+                                 " it cannot be found in the headers row: \n"
+                                 " %s" %
+                                 (field,
+                                  ", ".join([header.encode("utf-8")
+                                             for header in self.headers])))
+                    else:
+                        column = None
+            if column is not None:
+                column_list.append(column)
         return column_list
 
     def reset(self):
@@ -155,7 +165,7 @@ class TrainReader(object):
         row = self.training_reader.next()
         row = [value.strip() for value in row]
         if extended:
-            if self.multi_label and self.labels is None:
+            if self.multi_label and self.fields_labels is None:
                 self.fields_labels = self._get_labels()
 
             for field_column in self.multi_label_fields:
@@ -191,7 +201,6 @@ class TrainReader(object):
 
         """
         labels = {}
-        labels[self.objective_column] = []
         for field_column in self.multi_label_fields:
             labels[field_column] = []
         for row in self:
@@ -199,8 +208,6 @@ class TrainReader(object):
                 labels = self._get_field_labels(row, labels,
                                                 field_column,
                                                 self.label_separator)
-        if self.labels is None:
-            self.labels = labels[self.objective_column]
         return labels
 
     def _get_field_labels(self, row, labels, field_column, separator):
@@ -218,6 +225,11 @@ class TrainReader(object):
                 if new_labels[label_index] == '':
                     del(new_labels[label_index])
             if new_labels != []:
+                if (self.objective and field_column == self.objective_column
+                        and self.labels is not None):
+                    # If user gave the subset of labels, use only those
+                    new_labels = [label for label in self.labels if
+                                  label in new_labels]
                 labels[field_column].extend(new_labels)
         else:
             labels[field_column].append(field_value)
@@ -232,7 +244,8 @@ class TrainReader(object):
         if objective_field:
             return self.headers[:]
         new_headers = self.headers[:]
-        del new_headers[self.objective_column]
+        if self.objective:
+            del new_headers[self.objective_column]
         return new_headers
 
     def new_fields_info(self):
@@ -257,8 +270,10 @@ class TrainReader(object):
            source
 
         """
-        return {
-            "multi_label_fields": self.multi_label_fields,
-            "generated_fields": self.new_fields_info(),
-            "objective_name": self.objective_name,
-            "objective_column": self.objective_column}
+        if self.objective:
+            return {
+                "multi_label_fields": [[column, self.headers[column]]
+                                       for column in self.multi_label_fields],
+                "generated_fields": self.new_fields_info(),
+                "objective_name": self.objective_name,
+                "objective_column": self.objective_column}

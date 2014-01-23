@@ -78,17 +78,21 @@ def get_all_labels(multi_label_data):
     return [new_field[0] for new_field in new_objective_fields]
 
 
-def multi_label_sync(objective_field, labels, multi_label_data, fields):
-    """Returns the right objective_field, labels, and all_labels info
+def multi_label_sync(objective_field, labels, multi_label_data, fields,
+                     multi_label_fields):
+    """Returns the right objective_field, labels, all_labels and
+       multi_label_fields info
        either from the user given values or from the structure stored
        in user_metadata. Also the objective field information
        in the multi_label_data structure is updated to the one given by
        the user.
 
     """
-
     if objective_field is None:
         objective_field = multi_label_data['objective_name']
+    if (not multi_label_fields
+            and 'multi_label_fields' in multi_label_data):
+        multi_label_fields = multi_label_data['multi_label_fields']
     if fields is not None:
         objective_id = fields.field_id(objective_field)
         objective_name = fields.field_name(objective_id)
@@ -101,4 +105,4 @@ def multi_label_sync(objective_field, labels, multi_label_data, fields):
     all_labels = get_all_labels(multi_label_data)
     if not labels:
         labels = all_labels
-    return (objective_field, labels, all_labels)
+    return (objective_field, labels, all_labels, multi_label_fields)
