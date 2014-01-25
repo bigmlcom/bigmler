@@ -59,6 +59,7 @@ import bigmler.processing.models as pm
 
 from bigml.multivote import PLURALITY
 from bigml.model import Model
+from bigml.ensemble import Ensemble
 
 from bigmler.evaluation import evaluate, cross_validate
 from bigmler.options import create_parser
@@ -93,8 +94,8 @@ def get_ensemble_id(model):
     """Returns the ensemble/id for a model that belongs to an ensemble
 
     """
-    if 'object' in model and 'ensemble' in model['object']:
-        return "ensemble/%s" % model['object']['ensemble']
+    if 'object' in model and 'ensemble_id' in model['object']:
+        return "ensemble/%s" % model['object']['ensemble_id']
 
 
 def delete_resources(command_args, api):
@@ -177,6 +178,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     ensemble_ids = []
     multi_label_data = None
     multi_label_fields = []
+    local_ensemble = None
 
     # It is compulsory to have a description to publish either datasets or
     # models
@@ -328,9 +330,17 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             model = r.publish_model(model, args, api, session_file)
             models[0] = model
         # If more than one model, use the full field structure
+        if (not single_model and not args.multi_label and
+                belongs_to_ensemble(model)):
+            if len(ensemble_ids) > 0:
+                ensemble_id = ensemble_ids[0]
+            else:
+                ensemble_id = get_ensemble_id(model)
+            local_ensemble = Ensemble(ensemble_id, api=api)
         fields, objective_field = pm.get_model_fields(
             model, csv_properties, args, single_model=single_model,
-            multi_label_data=multi_label_data)
+            multi_label_data=multi_label_data, local_ensemble=local_ensemble)
+
     # Fills in all_labels from user_metadata
     if args.multi_label and not all_labels:
         (objective_field, labels,

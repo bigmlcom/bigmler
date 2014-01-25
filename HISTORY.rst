@@ -3,6 +3,13 @@
 History
 -------
 
+1.4.2 (2014-01-24)
+~~~~~~~~~~~~~~~~~~
+
+- Fix in local random forests' predictions. Sometimes the fields used in all
+  the models were not correctly retrieved and some predictions could be
+  erroneus.
+
 1.4.1 (2014-01-23)
 ~~~~~~~~~~~~~~~~~~
 
