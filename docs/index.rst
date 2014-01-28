@@ -555,8 +555,8 @@ Or, as another example, to tag the outliers of the same field one coud use::
 Model Weights
 -------------
 
-To deal with imbalanced datasets, BigMLer offers two options: ``--balance`` and
-``--weight-field``.
+To deal with imbalanced datasets, BigMLer offers three options: ``--balance``,
+``--weight-field`` and ``--objective-weights``.
 
 For classification models, the ``--balance`` flag will cause all the classes
 in the dataset to
@@ -569,6 +569,22 @@ You can also use a field in the dataset that contains the weight you would like
 to use for each instance. Using the ``--weight-field`` option followed by
 the field name or column number will cause BigMLer to use its data as instance
 weight. This is valid for both regression and classification models.
+
+The ``--objective-weights`` option is used in classification models to
+transmit to BigMLer which weight is assigned to each class. The option accepts
+a path to a CSV file that should contain the ``class``,``weight`` values one
+per row::
+
+    bigmler --dataset dataset/52b8a12037203f48bc00000a \
+            --objective-weights my_weights.csv
+
+where the ``my_weights.csv`` file could read::
+
+    Iris-setosa,5
+    Iris-versicolor,3
+
+so that BigMLer would associate a weight of ``5`` to the ``Iris-setosa``
+class and ``3`` to the ``Iris-versicolor`` class.
 
 Fitering Sources
 ----------------

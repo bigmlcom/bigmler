@@ -410,6 +410,9 @@ def set_model_args(name, description,
         weight_field = fields.field_id(args.weight_field)
         model_args.update(weight_field=weight_field)
 
+    if args.objective_weights:
+        model_args.update(objective_weights=args.objective_weights_json)
+
     if args.json_args['model']:
         model_args.update(args.json_args['model'])
 
@@ -631,6 +634,8 @@ def set_ensemble_args(name, description, args, model_fields,
     if args.weight_field:
         weight_field = fields.field_id(args.weight_field)
         ensemble_args.update(weight_field=weight_field)
+    if args.objective_weights:
+        model_args.update(objective_weights=args.objective_weights_json)
     if args.json_args['model']:
         ensemble_args.update(args.json_args['model'])
     ensemble_args.update(sample_rate=args.sample_rate,

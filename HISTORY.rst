@@ -3,6 +3,12 @@
 History
 -------
 
+1.4.3 (2014-01-28)
+~~~~~~~~~~~~~~~~~~
+
+- Adding the --objective-weights option to point to a CSV file containing the
+  weights assigned to each class.
+
 1.4.2 (2014-01-24)
 ~~~~~~~~~~~~~~~~~~
 

@@ -512,3 +512,36 @@ def objective_field_name(model_or_ensemble, api):
     else:
         sys.exit("No valid model or ensemble structure.")
     return model['object']['model']['model_fields'][objective_field]['name']
+
+
+def read_objective_weights(path):
+    """Reads objective weights from a CSV file in a class, weight format.
+
+    The expected structure is:
+    class name, weight
+
+    For example:
+
+    Iris-setosa,5
+    Iris-versicolor,10
+
+    """
+    objective_weights = []
+    try:
+        weights_reader = csv.reader(open(path, "U"), quotechar="'")
+    except IOError:
+        sys.exit("Error: cannot read objective weights %s" % path)
+
+    for row in weights_reader:
+        weights = []
+        if len(row) != 2:
+            sys.exit("Error: wrong objective field file syntax\n%s" %
+                     ",".join(row))
+        weights = row[:]
+        try:
+            weights[1] = int(weights[1])
+        except ValueError:
+            sys.exit("Error: wrong objective field file syntax\n%s" %
+                     ",".join(row))
+        objective_weights.append(weights)
+    return objective_weights

@@ -355,3 +355,9 @@ def transform_args(command_args, flags, api, user_defaults):
     if command_args.prediction_info == 'full data':
         print "WARNING: 'full data' is a deprecated value. Use 'full' instead"
         command_args.prediction_info = FULL_FORMAT
+
+    # Parses class, weight pairs for objective weight
+    if command_args.objective_weights:
+        objective_weights = (
+            u.read_objective_weights(command_args.objective_weights))
+        command_args.objective_weights_json = objective_weights

@@ -882,6 +882,13 @@ under the License.""" % version
                         help=("Sets the name (or column) of the field"
                               " that contains the weights for the instances."))
 
+    # Objective-weights. Path a to a CSV file of class, weight pairs.
+    parser.add_argument('--objective-weights',
+                        action='store',
+                        dest='objective_weights',
+                        default=defaults.get('objective_weights', None),
+                        help="Path to a CSV file of class, weight pairs.")
+
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #
