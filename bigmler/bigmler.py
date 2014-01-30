@@ -603,7 +603,6 @@ def main(args=sys.argv[1:]):
     elif (command_args.training_set or has_test(command_args)
           or command_args.source or command_args.dataset
           or command_args.datasets or command_args.votes_dirs):
-        a.check_evaluate_syntax(command_args, parser)
         output_args = a.get_output_args(api, train_stdin, test_stdin,
                                         command_args, resume)
         a.transform_args(command_args, flags, api, user_defaults)

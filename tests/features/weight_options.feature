@@ -24,3 +24,14 @@ Feature: Create a model using weight options
         Examples:
         |data |field | output_dir  | field_id
         |../data/iris_w.csv | weight |./scenario_w_2 | 000005
+
+    Scenario: Successfully building a objective weighted model
+        Given I create a BigML objective weighted model from "<data>" using the objective weights in file "<path>" and store logs in "<output_dir>"
+        And I check that the source has been created
+        And I check that the dataset has been created
+        And I check that the model has been created
+        Then I check that the model uses as objective weights "<weights>"
+
+        Examples:
+        |data |path | output_dir  | weights
+        |../data/iris.csv | ../data/weights.csv |./scenario_w_3 | [["Iris-setosa",5], ["Iris-versicolor",3]]

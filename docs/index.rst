@@ -555,8 +555,8 @@ Or, as another example, to tag the outliers of the same field one coud use::
 Model Weights
 -------------
 
-To deal with imbalanced datasets, BigMLer offers two options: ``--balance`` and
-``--weight-field``.
+To deal with imbalanced datasets, BigMLer offers three options: ``--balance``,
+``--weight-field`` and ``--objective-weights``.
 
 For classification models, the ``--balance`` flag will cause all the classes
 in the dataset to
@@ -569,6 +569,27 @@ You can also use a field in the dataset that contains the weight you would like
 to use for each instance. Using the ``--weight-field`` option followed by
 the field name or column number will cause BigMLer to use its data as instance
 weight. This is valid for both regression and classification models.
+
+The ``--objective-weights`` option is used in classification models to
+transmit to BigMLer what weight is assigned to each class. The option accepts
+a path to a CSV file that should contain the ``class``,``weight`` values one
+per row::
+
+    bigmler --dataset dataset/52b8a12037203f48bc00000a \
+            --objective-weights my_weights.csv
+
+where the ``my_weights.csv`` file could read::
+
+    Iris-setosa,5
+    Iris-versicolor,3
+
+so that BigMLer would associate a weight of ``5`` to the ``Iris-setosa``
+class and ``3`` to the ``Iris-versicolor`` class. For additional classes
+in the model, like ``Iris-virginica`` in the previous example,
+weight ``1`` is used as default. All specified weights must be non-negative
+numbers (with either integer or real values) and at least one of them must
+be non-zero.
+
 
 Fitering Sources
 ----------------
@@ -778,6 +799,20 @@ and ``label2``, then excluding them from the models that predict
     bigmler --multi-label --dataset dataset/52cafddb035d07269000075b \
             --objective class 
             --model-fields=' -type,-type - label1,-type - label2'
+
+You can also generate new fields applying aggregation functions such as
+``count``, ``first`` or ``last`` on the labels of the multi label fields. The
+option ``--label-aggregates`` can be set to a comma-separated list of these
+functions and a new column per multi label field and aggregation function
+will be added to your source::
+
+    bigmler --multi-label --train data/multilabel.csv \
+            --label-separator ':' --label-aggregates count,last \
+            --objective class
+
+will generate ``class - count`` and ``class - last`` in addition to the set
+of per label fields.
+
 
 Multi-label evaluations
 -----------------------

@@ -31,6 +31,12 @@ from bigmler.checkpoint import file_number_of_lines
 from bigmler.labels import get_label_field
 
 
+AGGREGATES = {
+    'count': len,
+    'last': lambda x: x[-1],
+    'first': lambda x: x[0]
+}
+
 class TrainReader(object):
     """Retrieves csv info and manages objective fields and multi-labels
 
@@ -38,7 +44,7 @@ class TrainReader(object):
     def __init__(self, training_set, training_set_header, objective_field,
                  multi_label=False, labels=None, label_separator=None,
                  training_separator=None, multi_label_fields=None,
-                 objective=True):
+                 label_aggregates=None, objective=True):
         """Builds a generator from a csv file
 
            `training_set`: path to the training data file
@@ -53,6 +59,9 @@ class TrainReader(object):
         self.training_reader = None
         self.multi_label = multi_label
         self.objective = objective
+        if label_aggregates is None:
+            label_aggregates = []
+        self.label_aggregates = label_aggregates
 
         self.training_separator = (training_separator.decode("string_escape")
                                    if training_separator is not None
@@ -97,6 +106,9 @@ class TrainReader(object):
                 self.headers[field_column], label)
                 for label in labels]
             new_headers.extend(new_field_names)
+            for aggregate in self.label_aggregates:
+                new_headers.append(get_label_field(
+                    self.headers[field_column], aggregate))
         new_headers = [header.encode("utf-8") for header in new_headers]
         return new_headers
 
@@ -177,6 +189,8 @@ class TrainReader(object):
                 labels_row = [label in field_values for label in
                               self.fields_labels[field_column]]
                 row.extend(labels_row)
+                for aggregate in self.label_aggregates:
+                    row.append(AGGREGATES[aggregate](field_values))
         if reset:
             self.reset()
         return row
@@ -262,6 +276,8 @@ class TrainReader(object):
             for label in labels:
                 info[alpha_field_column].append([label, column])
                 column += 1
+            # skip the aggregate values columns
+            column += len(self.label_aggregates)
 
         return info
 

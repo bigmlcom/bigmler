@@ -33,6 +33,7 @@ from bigml.multivote import COMBINATION_WEIGHTS, COMBINER_MAP
 
 from bigmler.resources import ADD_REMOVE_PREFIX
 from bigmler.prediction import FULL_FORMAT, COMBINATION, COMBINATION_LABEL
+from bigmler.train_reader import AGGREGATES
 
 # Date and time in format SunNov0412_120510 to name and tag resources
 NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
@@ -125,6 +126,34 @@ def parse_and_check(parser, args, train_stdin, test_stdin):
     if test_stdin and command_args.resume:
         parser.error("Can't resume when using stream reading test sets.")
 
+    if (command_args.evaluate
+        and not (command_args.training_set or command_args.source
+                 or command_args.dataset)
+        and not ((command_args.test_set or command_args.test_split) and
+                 (command_args.model or
+                  command_args.models or command_args.model_tag or
+                  command_args.ensemble or command_args.ensembles or
+                  command_args.ensemble_tag))):
+        parser.error("Evaluation wrong syntax.\n"
+                     "\nTry for instance:\n\nbigmler --train data/iris.csv"
+                     " --evaluate\nbigmler --model "
+                     "model/5081d067035d076151000011 --dataset "
+                     "dataset/5081d067035d076151003423 --evaluate\n"
+                     "bigmler --ensemble ensemble/5081d067035d076151003443"
+                     " --dataset "
+                     "dataset/5081d067035d076151003423 --evaluate")
+
+    command_args.label_aggregates_list = []
+    if command_args.label_aggregates:
+        label_aggregates = command_args.label_aggregates.strip().lower()
+        label_aggregates = label_aggregates.split(',')
+        for aggregate in label_aggregates:
+            if not aggregate in AGGREGATES:
+                parser.error("Wrong value for the --label-aggregates "
+                             "option. The allowed values are count, first and "
+                             "last.")
+            command_args.label_aggregates_list.append(aggregate)
+
     return command_args
 
 
@@ -142,28 +171,6 @@ def get_api_instance(command_args, storage_path):
         api_command_args.update({'storage': storage_path})
 
     return bigml.api.BigML(**api_command_args)
-
-
-def check_evaluate_syntax(command_args, parser):
-    """Checks if the evaluate args are coherent and sends error if they aren't
-
-    """
-    if (command_args.evaluate
-        and not (command_args.training_set or command_args.source
-                 or command_args.dataset)
-        and not ((command_args.test_set or command_args.test_split) and
-                 (command_args.model or
-                  command_args.models or command_args.model_tag or
-                  command_args.ensemble or command_args.ensembles or
-                  command_args.ensemble_tag))):
-        parser.error("Evaluation wrong syntax.\n"
-                     "\nTry for instance:\n\nbigmler --train data/iris.csv"
-                     " --evaluate\nbigmler --model "
-                     "model/5081d067035d076151000011 --dataset "
-                     "dataset/5081d067035d076151003423 --evaluate\n"
-                     "bigmler --ensemble ensemble/5081d067035d076151003443"
-                     " --dataset "
-                     "dataset/5081d067035d076151003423 --evaluate")
 
 
 def get_output_args(api, train_stdin, test_stdin, command_args, resume):
@@ -355,3 +362,14 @@ def transform_args(command_args, flags, api, user_defaults):
     if command_args.prediction_info == 'full data':
         print "WARNING: 'full data' is a deprecated value. Use 'full' instead"
         command_args.prediction_info = FULL_FORMAT
+
+    # Parses class, weight pairs for objective weight
+    if command_args.objective_weights:
+        objective_weights = (
+            u.read_objective_weights(command_args.objective_weights))
+        command_args.objective_weights_json = objective_weights
+
+    command_args.multi_label_fields_list = []
+    if command_args.multi_label_fields is not None:
+        multi_label_fields = command_args.multi_label_fields.strip()
+        command_args.multi_label_fields_list = multi_label_fields.split(',')

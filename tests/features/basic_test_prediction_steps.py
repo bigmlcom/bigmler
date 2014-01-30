@@ -85,7 +85,7 @@ def i_create_all_resources_with_options(step, data=None, test=None, output=None,
 
 
 @step(r'I create BigML (multi-label\s)?resources using source with objective "(.*)" and model fields "(.*)" to test "(.*)" and log predictions in "(.*)"')
-def i_create_resources_from_source(step, multi_label=None, objective=None, model_fields=None, test=None, output=None):
+def i_create_resources_from_source_with_objective(step, multi_label=None, objective=None, model_fields=None, test=None, output=None):
     if test is None or output is None:
         assert False
 
@@ -117,7 +117,7 @@ def i_create_resources_from_source_batch(step, output=None):
     shell_execute(command, output)
 
 @step(r'I create BigML (multi-label\s)?resources using dataset with objective "(.*)" and model fields "(.*)" to test "(.*)" and log predictions in "(.*)"')
-def i_create_resources_from_source(step, multi_label=None, objective=None, model_fields=None, test=None, output=None):
+def i_create_resources_from_dataset_with_objective(step, multi_label=None, objective=None, model_fields=None, test=None, output=None):
     if test is None or output is None:
         assert False
 
@@ -235,7 +235,7 @@ def i_create_resources_from_models_file_with_objective(step, multi_label=None, m
                + " --objective " + objective)
     shell_execute(command, output, test=test)
 
-@step(r'I create BigML (multi-label\s)?resources using models in file "(.*)" to test "(.*)" and log predictions in "(.*)"')
+@step(r'I create BigML (multi-label\s)?resources using models in file "([^"]*)" to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_models_file(step, multi_label=None, models_file=None, test=None, output=None):
     if models_file is None or test is None or output is None:
         assert False
@@ -355,6 +355,25 @@ def i_create_weighted_field_model(step, data=None, field=None, output_dir=None):
         assert False, str(exc)
 
 
+@step(r'I create a BigML objective weighted model from "(.*)" using the objective weights in file "(.*)" and store logs in "(.*)"')
+def i_create_objective_weighted_model(step, data=None, path=None, output_dir=None):
+    if data is None or path is None or output_dir is None:
+        assert False
+    world.directory = output_dir
+    world.folders.append(world.directory)
+    try:
+        command = ("bigmler --train " + data + " --objective-weights " + path +
+                   " --store --output-dir " + output_dir)
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+
 @step(r'I check that the source has been created$')
 def i_check_create_source(step):
     source_file = "%s%ssource" % (world.directory, os.sep)
@@ -431,6 +450,14 @@ def i_check_weighted_model(step, field=None):
         assert False
     assert ('weight_field' in world.model['object'] and
             world.model['object']['weight_field'] == field)
+
+
+@step(r'I check that the model uses as objective weights "(.*)"')
+def i_check_objective_weighted_model(step, weights=None):
+    if weights is None:
+        assert False
+    assert ('objective_weights' in world.model['object'] and
+            world.model['object']['objective_weights'] == json.loads(weights))
 
 
 @step(r'I check that the ensemble has been created')
