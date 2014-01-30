@@ -59,9 +59,9 @@ class TrainReader(object):
         self.training_reader = None
         self.multi_label = multi_label
         self.objective = objective
-        self.label_aggregates = ([] if label_aggregates is None
-            else [aggregate for aggregate in label_aggregates
-            if aggregate in AGGREGATES])
+        if label_aggregates is None:
+            label_aggregates = []
+        self.label_aggregates = label_aggregates
 
         self.training_separator = (training_separator.decode("string_escape")
                                    if training_separator is not None
@@ -107,9 +107,8 @@ class TrainReader(object):
                 for label in labels]
             new_headers.extend(new_field_names)
             for aggregate in self.label_aggregates:
-                if aggregate in AGGREGATES:
-                    new_headers.append(get_label_field(
-                        self.headers[field_column], aggregate))
+                new_headers.append(get_label_field(
+                    self.headers[field_column], aggregate))
         new_headers = [header.encode("utf-8") for header in new_headers]
         return new_headers
 

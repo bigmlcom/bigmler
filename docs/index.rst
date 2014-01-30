@@ -571,7 +571,7 @@ the field name or column number will cause BigMLer to use its data as instance
 weight. This is valid for both regression and classification models.
 
 The ``--objective-weights`` option is used in classification models to
-transmit to BigMLer which weight is assigned to each class. The option accepts
+transmit to BigMLer what weight is assigned to each class. The option accepts
 a path to a CSV file that should contain the ``class``,``weight`` values one
 per row::
 
@@ -584,7 +584,12 @@ where the ``my_weights.csv`` file could read::
     Iris-versicolor,3
 
 so that BigMLer would associate a weight of ``5`` to the ``Iris-setosa``
-class and ``3`` to the ``Iris-versicolor`` class.
+class and ``3`` to the ``Iris-versicolor`` class. For additional classes
+in the model, like ``Iris-virginica`` in the previous example,
+weight ``1`` is used as default. All specified weights must be non-negative
+numbers (with either integer or real values) and at least one of them must
+be non-zero.
+
 
 Fitering Sources
 ----------------
