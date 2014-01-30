@@ -85,7 +85,7 @@ def i_create_all_resources_with_options(step, data=None, test=None, output=None,
 
 
 @step(r'I create BigML (multi-label\s)?resources using source with objective "(.*)" and model fields "(.*)" to test "(.*)" and log predictions in "(.*)"')
-def i_create_resources_from_source(step, multi_label=None, objective=None, model_fields=None, test=None, output=None):
+def i_create_resources_from_source_with_objective(step, multi_label=None, objective=None, model_fields=None, test=None, output=None):
     if test is None or output is None:
         assert False
 
@@ -117,7 +117,7 @@ def i_create_resources_from_source_batch(step, output=None):
     shell_execute(command, output)
 
 @step(r'I create BigML (multi-label\s)?resources using dataset with objective "(.*)" and model fields "(.*)" to test "(.*)" and log predictions in "(.*)"')
-def i_create_resources_from_source(step, multi_label=None, objective=None, model_fields=None, test=None, output=None):
+def i_create_resources_from_dataset_with_objective(step, multi_label=None, objective=None, model_fields=None, test=None, output=None):
     if test is None or output is None:
         assert False
 
@@ -235,7 +235,7 @@ def i_create_resources_from_models_file_with_objective(step, multi_label=None, m
                + " --objective " + objective)
     shell_execute(command, output, test=test)
 
-@step(r'I create BigML (multi-label\s)?resources using models in file "(.*)" to test "(.*)" and log predictions in "(.*)"')
+@step(r'I create BigML (multi-label\s)?resources using models in file "([^"]*)" to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_models_file(step, multi_label=None, models_file=None, test=None, output=None):
     if models_file is None or test is None or output is None:
         assert False

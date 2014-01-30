@@ -166,14 +166,18 @@ def multi_label_expansion(training_set, training_set_header, objective_field,
 
     """
     multi_label_fields = []
+    label_aggregates = []
     if args.multi_label_fields is not None:
         multi_label_fields = args.multi_label_fields.strip().split(',')
+    if args.label_aggregates is not None:
+        label_aggregates = args.label_aggregates.strip().split(',')
     input_reader = TrainReader(training_set, training_set_header,
                                objective_field, multi_label=True,
                                labels=labels,
                                label_separator=args.label_separator,
                                training_separator=args.training_separator,
                                multi_label_fields=multi_label_fields,
+                               label_aggregates=label_aggregates,
                                objective=not input_flag)
     # read file to get all the different labels if no --labels flag is given
     # or use labels given in --labels and generate the new field names

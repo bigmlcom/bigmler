@@ -89,7 +89,7 @@ def i_predict_ml_from_model_tag(step, tag=None, test=None, output=None):
         assert False, str(exc)
 
 @step(r'I create BigML multi-label resources with labels "(.*)" and objective "(.*)" using models tagged as "(.*)" to test "(.*)" and log predictions in "(.*)"')
-def i_predict_ml_from_model_tag_with_labels(step, labels=None, objective=None, tag=None, test=None, output=None):
+def i_predict_ml_from_model_tag_with_labels_with_objective(step, labels=None, objective=None, tag=None, test=None, output=None):
     if (tag is None or labels is None or test is None or output is None
             or objective is None):
         assert False
@@ -113,7 +113,7 @@ def i_predict_ml_from_model_tag_with_labels(step, labels=None, objective=None, t
         assert False, str(exc)
 
 
-@step(r'I create BigML multi-label resources with labels "(.*)" using models tagged as "(.*)" to test "(.*)" and log predictions in "(.*)"')
+@step(r'I create BigML multi-label resources with labels "([^"]*)" using models tagged as "(.*)" to test "(.*)" and log predictions in "(.*)"')
 def i_predict_ml_from_model_tag_with_labels(step, labels=None, tag=None, test=None, output=None):
     if tag is None or labels is None or test is None or output is None:
         assert False

@@ -795,6 +795,20 @@ and ``label2``, then excluding them from the models that predict
             --objective class 
             --model-fields=' -type,-type - label1,-type - label2'
 
+You can also generate new fields applying aggregation functions such as
+``count``, ``first`` or ``last`` on the labels of the multi label fields. The
+option ``--label-aggregates`` can be set to a comma-separated list of these
+functions and a new column per multi label field and aggregation function
+will be added to your source::
+
+    bigmler --multi-label --train data/multilabel.csv \
+            --label-separator ':' --label-aggregates count,last \
+            --objective class
+
+will generate ``class - count`` and ``class - last`` in addition to the set
+of per label fields.
+
+
 Multi-label evaluations
 -----------------------
 

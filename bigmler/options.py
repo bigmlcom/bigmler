@@ -889,6 +889,16 @@ under the License.""" % version
                         default=defaults.get('objective_weights', None),
                         help="Path to a CSV file of class, weight pairs.")
 
+    # Label-aggregates. Comma-separated list of aggregation functions
+    # for the multi-label fields.
+    parser.add_argument('--label-aggregates',
+                        action='store',
+                        dest='label_aggregates',
+                        default=defaults.get('label_aggregates', None),
+                        help=("Comma-separated list of aggregation functions "
+                              "for the multi-label field labels."
+                              " Allowed aggregates: count, first and last"))
+
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #

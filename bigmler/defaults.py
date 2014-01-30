@@ -121,7 +121,8 @@ FLAGS = {'BigMLer': [{'flag': 'debug', 'type': 'boolean'},
                      {'flag': 'batch_prediction_tag', 'type': 'string'},
                      {'flag': 'balance', 'type': 'boolean'},
                      {'flag': 'weight_field', 'type': 'string'},
-                     {'flag': 'objective_weights', 'type': 'string'}]}
+                     {'flag': 'objective_weights', 'type': 'string'},
+                     {'flag': 'label_aggregates', 'type': 'string'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):
