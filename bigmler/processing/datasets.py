@@ -60,7 +60,6 @@ def check_max_categories(field):
        Only categorical or full terms only text are allowed.
 
     """
-    print field['term_analysis']['token_mode']
     return field['optype'] == 'categorical' or (field['optype'] == 'text' and
         field['term_analysis']['token_mode'] == TM_FULL_TERM)
 
@@ -162,7 +161,7 @@ def dataset_processing(source, training_set, test_set, fields, objective_field,
         if args.public_dataset:
             r.publish_dataset(dataset, args, api, session_file)
 
-        if args.objective_field or args.dataset_attributes:
+        if args.objective_field is not None or args.dataset_attributes:
             dataset_args = r.set_dataset_args(name, description, args, fields,
                                               dataset_fields, objective_field)
             dataset = r.update_dataset(dataset, dataset_args, args.verbosity,

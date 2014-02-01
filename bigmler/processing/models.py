@@ -125,9 +125,6 @@ def models_processing(datasets, models, model_ids, objective_field, fields,
         dataset = datasets[0]
         model_ids = []
         models = []
-        """
-        all_labels = []
-        """
         if args.multi_label:
             # If --number-of-models is not set or is 1, create one model per
             # label. Otherwise, create one ensemble per label with the required
@@ -180,7 +177,8 @@ def models_processing(datasets, models, model_ids, objective_field, fields,
 
                 models = model_ids
                 args.number_of_models -= len(model_ids)
-
+            if args.max_categories is not None:
+                objective_field = None
             model_args = r.set_model_args(name, description, args,
                                           objective_field, fields,
                                           model_fields)
