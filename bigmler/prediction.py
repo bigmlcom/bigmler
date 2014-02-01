@@ -477,9 +477,12 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                         if instances > prediction_instances:
                             prediction_category = category
                         global_distribution.append([category, instances])
-            prediction = [prediction_category,
-                          ws_confidence(prediction_category,
-                                        global_distribution)]
+            if prediction_category is not None:
+                prediction = [prediction_category,
+                              ws_confidence(prediction_category,
+                                            global_distribution)]
+            else:
+                prediction = [None, None]
         else:
             prediction = multivote.combine(method=method, with_confidence=True,
                                            options=options)
