@@ -17,7 +17,6 @@ Feature: Upload source and produce test predictions
         | ../data/iris.csv   | ../data/test_iris.csv   | ./scenario1/predictions.csv   | ./check_files/predictions_iris.csv   |
 
 
-
     Scenario: Successfully building test predictions from source
         Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
         And I create BigML resources using source to test "<test>" and log predictions in "<output>"
@@ -125,14 +124,14 @@ Feature: Upload source and produce test predictions
 
     Scenario: Successfully building cross-validation from dataset
         Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
-        And I create a BigML cross-validation with rate <rate> using a dataset and log results in "<output>"
+        And I create a BigML cross-validation with rate <rate> using the dataset in file "<dataset_file>" and log results in "<output>"
         And I check that the models have been created
         And I check that the evaluations have been created
         Then the cross-validation json model info is like the one in "<cv_file>"
 
         Examples:
-        |scenario    | kwargs                                                  | rate | output                         |cv_file |
-        | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | 0.05 | ./scenario12/cross-validation   | ./check_files/cross_validation.json   |
+        |scenario    | kwargs                                                  | rate | dataset_file | output                         |cv_file |
+        | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | 0.05 | ./scenario1/dataset | ./scenario12/cross-validation   | ./check_files/cross_validation.json   |
 
     Scenario: Successfully building a source with a given locale and storing its result
         Given I create a BigML source from file "<data>" with locale "<locale>" storing results in "<output>"

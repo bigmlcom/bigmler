@@ -19,7 +19,7 @@ History
 - Adding the --objective-weights option to point to a CSV file containing the
   weights assigned to each class.
 - Adding the --label-aggregates option to create new aggregate fields on the
-  multi label fields like count, first or last.
+  multi label fields such as count, first or last.
 
 1.4.2 (2014-01-24)
 ~~~~~~~~~~~~~~~~~~
