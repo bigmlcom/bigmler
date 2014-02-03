@@ -3,6 +3,13 @@
 History
 -------
 
+1.4.4 (2014-02-03)
+~~~~~~~~~~~~~~~~~~
+
+- Bug fixing: when using the combined method in --max-categories models
+  the combination function now uses confidence to choose the predicted
+  category.
+
 1.4.3 (2014-01-28)
 ~~~~~~~~~~~~~~~~~~
 
