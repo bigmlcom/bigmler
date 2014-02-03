@@ -3,13 +3,23 @@
 History
 -------
 
+1.4.4 (2014-02-03)
+~~~~~~~~~~~~~~~~~~
+
+- Fix when using the combined method in --max-categories models.
+  The combination function now uses confidence to choose the predicted
+  category.
+- Allowing full content text fields to be also used as --max-categories
+  objective fields.
+- Fix solving objective issues when its column number is zero.
+
 1.4.3 (2014-01-28)
 ~~~~~~~~~~~~~~~~~~
 
 - Adding the --objective-weights option to point to a CSV file containing the
   weights assigned to each class.
 - Adding the --label-aggregates option to create new aggregate fields on the
-  multi label fields like count, first or last
+  multi label fields such as count, first or last.
 
 1.4.2 (2014-01-24)
 ~~~~~~~~~~~~~~~~~~

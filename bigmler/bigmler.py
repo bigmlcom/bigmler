@@ -267,7 +267,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # has a max_categories limit for categories
     if args.max_categories > 0 and len(datasets) == 1:
         objective_id = fields.field_id(fields.objective_field)
-        if pd.check_categorical(fields.fields[objective_id]):
+        if pd.check_max_categories(fields.fields[objective_id]):
             distribution = pd.get_categories_distribution(dataset,
                                                           objective_id)
             if distribution and len(distribution) > args.max_categories:
@@ -278,8 +278,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                     api, resume, session_file=session_file, path=path, log=log,
                     other_label=other_label)
         else:
-            sys.exit("The provided objective field is not categorical. A"
-                     " categorical field is expected when using"
+            sys.exit("The provided objective field is not categorical nor "
+                     "a full terms only text field. "
+                     "Only these fields can be used with"
                      "  --max-categories")
 
     # Check if the dataset a generators file associated with it, and

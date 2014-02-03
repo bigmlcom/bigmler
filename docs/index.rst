@@ -886,7 +886,8 @@ per subset, and its objective field will only keep the categories belonging to
 each subset plus a generic ``***** other *****`` category that will summarize
 the rest of categories. Then a model will be created from each dataset and
 the test data will be run through them to generate partial predictions. The
-final prediction will be extracted by merging the distributions obtained for
+final prediction will be extracted by choosing the class with highest
+confidence from the distributions obtained for
 each model's prediction ignoring the ``***** other ******`` generic category.
 For instance, to use the same ``iris.csv`` example, you could do::
 

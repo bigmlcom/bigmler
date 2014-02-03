@@ -29,6 +29,7 @@ import bigmler.resources as r
 import bigmler.checkpoint as c
 
 from bigml.fields import Fields
+from bigml.predicate import TM_FULL_TERM
 
 from bigmler.prediction import OTHER
 from bigmler.processing.models import has_models
@@ -53,11 +54,14 @@ def create_other_label(categories, label):
     return create_other_label(categories, "*%s*" % label)
 
 
-def check_categorical(field):
-    """Checks if a field is categorical
+def check_max_categories(field):
+    """Checks if a field can be split by --max-categories. 
+
+       Only categorical or full terms only text are allowed.
 
     """
-    return field['optype'] == 'categorical'
+    return field['optype'] == 'categorical' or (field['optype'] == 'text' and
+        field['term_analysis']['token_mode'] == TM_FULL_TERM)
 
 
 def get_categories_distribution(dataset, objective_id):
@@ -77,6 +81,11 @@ def get_categories_distribution(dataset, objective_id):
                 summary = dataset_info['fields'][objective_id]['summary']
                 if 'categories' in summary:
                     distribution = summary['categories']
+            return distribution
+        elif dataset_info['objective_field']['optype'] == 'text':
+            summary = dataset_info['fields'][objective_id]['summary']
+            if 'tag_cloud' in summary:
+                distribution = summary['tag_cloud']
             return distribution
         else:
             return []
@@ -152,7 +161,7 @@ def dataset_processing(source, training_set, test_set, fields, objective_field,
         if args.public_dataset:
             r.publish_dataset(dataset, args, api, session_file)
 
-        if args.objective_field or args.dataset_attributes:
+        if args.objective_field is not None or args.dataset_attributes:
             dataset_args = r.set_dataset_args(name, description, args, fields,
                                               dataset_fields, objective_field)
             dataset = r.update_dataset(dataset, dataset_args, args.verbosity,

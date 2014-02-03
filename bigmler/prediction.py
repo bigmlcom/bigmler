@@ -469,17 +469,24 @@ def local_batch_predict(models, test_reader, prediction_file, api,
         elif method == COMBINATION:
             predictions = multivote.predictions
             global_distribution = []
-            prediction_category = None
-            prediction_instances = 0
             for prediction in predictions:
+                prediction_category = None
+                prediction_instances = 0
                 for category, instances in prediction['distribution']:
                     if category != other_label:
                         if instances > prediction_instances:
                             prediction_category = category
-                        global_distribution.append([category, instances])
-            prediction = [prediction_category,
-                          ws_confidence(prediction_category,
-                                        global_distribution)]
+                            prediction_instances = instances
+                if prediction_category is not None:
+                    prediction_confidence = ws_confidence(
+                        prediction_category, prediction['distribution'])
+                    global_distribution.append([prediction_category,
+                                                prediction_confidence])
+            if global_distribution:
+                prediction = sorted(global_distribution, key=lambda x:x[1],
+                                    reverse=True)[0]
+            else:
+                prediction = [None, None]
         else:
             prediction = multivote.combine(method=method, with_confidence=True,
                                            options=options)

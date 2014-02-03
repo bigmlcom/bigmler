@@ -254,16 +254,18 @@ def i_create_resources_from_dataset_file(step, dataset_file=None, test=None, out
     shell_execute(command, output, test=test)
 
 
-@step(r'I create a BigML cross-validation with rate (0\.\d+) using a dataset and log results in "(.*)"')
-def i_create_cross_validation_from_dataset(step, rate=None, output=None):
-    if rate is None or output is None:
+@step(r'I create a BigML cross-validation with rate (0\.\d+) using the dataset in file "(.*)" and log results in "(.*)"')
+def i_create_cross_validation_from_dataset(step, rate=None, dataset_file=None, output=None):
+    if rate is None or output is None or dataset_file is None:
         assert False
+    with open(dataset_file, "r") as handler:
+        dataset_id = handler.readline().strip()
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     world.number_of_models = int(MONTECARLO_FACTOR * float(rate))
     world.number_of_evaluations = world.number_of_models
     try:
-        command = ("bigmler --dataset " + world.dataset['resource'] +
+        command = ("bigmler --dataset " + dataset_id +
                    " --cross-validation-rate " + rate + " --store --output "
                    + output)
         command = check_debug(command)
