@@ -20,14 +20,12 @@
 """
 from __future__ import absolute_import
 
-import sys
 import copy
 
 import bigml.api
 import bigmler.utils as u
 import bigmler.resources as r
 import bigmler.checkpoint as c
-import bigmler.labels as l
 
 from bigml.fields import Fields
 
@@ -45,31 +43,6 @@ def has_models(args):
     """
     return (args.model or args.ensemble or args.ensembles
             or args.models or args.model_tag or args.ensemble_tag)
-
-
-def set_multi_label_objective(fields_dict, objective):
-    """Changes the field information for the objective field
-       in the fields_dict dictionnary to the real objective attributes for
-       multi-label models.
-
-    """
-    target_field = fields_dict[objective]
-    if target_field['label'].startswith(l.MULTI_LABEL_LABEL):
-        label = target_field['label'][len(l.MULTI_LABEL_LABEL):]
-        objective_name = target_field['name']
-        suffix_length = len(label) + 3
-        try:
-            objective_name = objective_name[0: -suffix_length]
-            target_field['name'] = objective_name
-            target_field['label'] = 'multi-label objective'
-        except IndexError:
-            sys.exit("It seems that the label of multi-labeled fields has"
-                     " been altered. You should not change the labels of"
-                     " generated fields.")
-    else:
-        sys.exit("It seems that the label of multi-labeled fields has been"
-                 " altered. You should not change the labels of generated"
-                 " fields.")
 
 
 def model_per_label(labels, datasets, fields,
@@ -113,7 +86,8 @@ def models_processing(datasets, models, model_ids, objective_field, fields,
                       api, args, resume,
                       name=None, description=None, model_fields=None,
                       session_file=None, path=None,
-                      log=None, labels=None, multi_label_data=None):
+                      log=None, labels=None, multi_label_data=None,
+                      other_label=None):
     """Creates or retrieves models from the input data
 
     """
@@ -179,9 +153,10 @@ def models_processing(datasets, models, model_ids, objective_field, fields,
                 args.number_of_models -= len(model_ids)
             if args.max_categories is not None:
                 objective_field = None
+
             model_args = r.set_model_args(name, description, args,
                                           objective_field, fields,
-                                          model_fields)
+                                          model_fields, other_label)
             models, model_ids = r.create_models(datasets, models,
                                                 model_args, args, api,
                                                 path, session_file, log)

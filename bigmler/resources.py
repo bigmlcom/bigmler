@@ -365,7 +365,7 @@ def update_dataset(dataset, dataset_args, verbosity,
 
 def set_model_args(name, description,
                    args, objective_field=None, fields=None,
-                   model_fields=None):
+                   model_fields=None, other_label=None):
     """Return model arguments dict
 
     """
@@ -412,6 +412,11 @@ def set_model_args(name, description,
 
     if args.objective_weights:
         model_args.update(objective_weights=args.objective_weights_json)
+
+    if other_label:
+        model_args.update(
+            user_metadata={'other_label': other_label,
+                           'max_categories': args.max_categories})
 
     if args.json_args['model']:
         model_args.update(args.json_args['model'])
@@ -635,7 +640,7 @@ def set_ensemble_args(name, description, args, model_fields,
         weight_field = fields.field_id(args.weight_field)
         ensemble_args.update(weight_field=weight_field)
     if args.objective_weights:
-        model_args.update(objective_weights=args.objective_weights_json)
+        ensemble_args.update(objective_weights=args.objective_weights_json)
     if args.json_args['model']:
         ensemble_args.update(args.json_args['model'])
     ensemble_args.update(sample_rate=args.sample_rate,
