@@ -19,7 +19,6 @@
 """
 import sys
 
-MULTI_LABEL_LABEL = "multi-label label: "
 MULTI_LABEL_KEYS = ["multi_label_fields", "generated_fields",
                     "objective_name", "objective_column"]
 

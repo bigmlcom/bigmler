@@ -98,6 +98,17 @@ def get_ensemble_id(model):
         return "ensemble/%s" % model['object']['ensemble_id']
 
 
+def get_metadata(resource, key, default_value):
+    """Retrieves from the user_metadata key in the resource the
+       given key using default_value as a default
+
+    """
+    if ('object' in resource and 'user_metadata' in resource['object'] and
+            key in resource['object']['user_metadata']):
+        return resource['object']['user_metadata'][key]
+    return default_value
+
+
 def delete_resources(command_args, api):
     """Deletes the resources selected by the user given options
 
@@ -297,13 +308,19 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             all_labels, multi_label_fields) = l.multi_label_sync(
                 objective_field, labels, multi_label_data,
                 fields, multi_label_fields)
+    if dataset:
+        # retrieves max_categories data, if any
+        args.max_categories = get_metadata(dataset, 'max_categories',
+                                           args.max_categories)
+        other_label = get_metadata(dataset, 'other_label',
+                                   other_label)
 
     models, model_ids, ensemble_ids, resume = pm.models_processing(
         datasets, models, model_ids,
         objective_field, fields, api, args, resume,
         name=name, description=description, model_fields=model_fields,
         session_file=session_file, path=path, log=log, labels=labels,
-        multi_label_data=multi_label_data)
+        multi_label_data=multi_label_data, other_label=other_label)
     if models:
         model = models[0]
         single_model = len(models) == 1
@@ -348,6 +365,12 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             all_labels, multi_label_fields) = l.multi_label_sync(
                 objective_field, labels, multi_label_data,
                 fields, multi_label_fields)
+    if model:
+        # retrieves max_categories data, if any
+        args.max_categories = get_metadata(model, 'max_categories',
+                                           args.max_categories)
+        other_label = get_metadata(model, 'other_label',
+                                   other_label)
     # If predicting
     if models and has_test(args) and not args.evaluate:
         models_per_label = 1

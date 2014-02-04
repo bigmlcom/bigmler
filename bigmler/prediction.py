@@ -483,7 +483,7 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                     global_distribution.append([prediction_category,
                                                 prediction_confidence])
             if global_distribution:
-                prediction = sorted(global_distribution, key=lambda x:x[1],
+                prediction = sorted(global_distribution, key=lambda x: x[1],
                                     reverse=True)[0]
             else:
                 prediction = [None, None]

@@ -37,6 +37,7 @@ AGGREGATES = {
     'first': lambda x: x[0]
 }
 
+
 class TrainReader(object):
     """Retrieves csv info and manages objective fields and multi-labels
 

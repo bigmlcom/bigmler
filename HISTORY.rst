@@ -3,6 +3,12 @@
 History
 -------
 
+1.4.5 (2014-02-04)
+~~~~~~~~~~~~~~~~~~
+
+- Storing the --max-categories info (its number and the chosen `other` label)
+  in user_metadata.
+
 1.4.4 (2014-02-03)
 ~~~~~~~~~~~~~~~~~~
 
