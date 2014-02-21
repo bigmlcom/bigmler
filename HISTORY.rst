@@ -3,6 +3,12 @@
 History
 -------
 
+1.4.6 (2014-02-21)
+~~~~~~~~~~~~~~~~~~
+
+- Bug fixing: dataset objective field is not updated each time --objective
+  is used, but only if it differs from the existing objective.
+
 1.4.5 (2014-02-04)
 ~~~~~~~~~~~~~~~~~~
 

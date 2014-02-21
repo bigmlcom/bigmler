@@ -421,6 +421,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 test_dataset = api.check_resource(test_dataset_id,
                                                   api.get_dataset)
 
+            csv_properties.update(objective_field=None,
+                                  objective_field_present=False)
             test_fields = pd.get_fields_structure(test_dataset,
                                                   csv_properties)
 
