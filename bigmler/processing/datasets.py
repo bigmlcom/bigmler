@@ -104,15 +104,16 @@ def get_fields_structure(resource, csv_properties):
     return fields
 
 
-def objective_has_changed(fields, objective, dataset):
+def get_new_objective(fields, objective, dataset):
     """Checks if the objective given by the user in the --objective flag
        differs from the one in the dataset. Returns the new objective or None
        if they are the same.
 
     """
+    if objective is None:
+        return None
     objective_id = fields.field_id(objective)
-    if (objective is None or
-        fields.objective_field == fields.field_column_number(objective_id)):
+    if fields.objective_field == fields.field_column_number(objective_id):
         return None
     return objective
 
@@ -175,8 +176,8 @@ def dataset_processing(source, training_set, test_set, fields, objective_field,
         if args.public_dataset:
             r.publish_dataset(dataset, args, api, session_file)
 
-        new_objective = objective_has_changed(fields, args.objective_field,
-                                              dataset)
+        new_objective = get_new_objective(fields, args.objective_field,
+                                          dataset)
 
         if (new_objective is not None or args.dataset_attributes):
             dataset_args = r.set_dataset_args(name, description, args, fields,
