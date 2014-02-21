@@ -104,6 +104,20 @@ def get_fields_structure(resource, csv_properties):
     return fields
 
 
+def get_new_objective(fields, objective, dataset):
+    """Checks if the objective given by the user in the --objective flag
+       differs from the one in the dataset. Returns the new objective or None
+       if they are the same.
+
+    """
+    if objective is None:
+        return None
+    objective_id = fields.field_id(objective)
+    if fields.objective_field == fields.field_column_number(objective_id):
+        return None
+    return objective
+
+
 def dataset_processing(source, training_set, test_set, fields, objective_field,
                        api, args, resume,  name=None, description=None,
                        dataset_fields=None, multi_label_data=None,
@@ -149,12 +163,23 @@ def dataset_processing(source, training_set, test_set, fields, objective_field,
     # we hadn't them yet.
     if dataset:
         dataset = r.get_dataset(dataset, api, args.verbosity, session_file)
+
+        if ('object' in dataset and 'objective_field' in dataset['object'] and
+            'column_number' in dataset['object']['objective_field']):
+            dataset_objective = dataset[
+                'object']['objective_field']['column_number']
+            csv_properties.update(objective_field=dataset_objective,
+                  objective_field_present=True)
+
         fields = get_fields_structure(dataset, csv_properties)
 
         if args.public_dataset:
             r.publish_dataset(dataset, args, api, session_file)
 
-        if args.objective_field is not None or args.dataset_attributes:
+        new_objective = get_new_objective(fields, args.objective_field,
+                                          dataset)
+
+        if (new_objective is not None or args.dataset_attributes):
             dataset_args = r.set_dataset_args(name, description, args, fields,
                                               dataset_fields, objective_field)
             dataset = r.update_dataset(dataset, dataset_args, args.verbosity,
