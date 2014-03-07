@@ -3,6 +3,13 @@
 History
 -------
 
+1.5.0 (2014-03-21)
+~~~~~~~~~~~~~~~~~~
+
+- Adding --missing-strategy option to allow different prediction strategies
+  when a missing value is found in an split field. Only available for local
+  predictions.
+
 1.4.7 (2014-03-14)
 ~~~~~~~~~~~~~~~~~~
 

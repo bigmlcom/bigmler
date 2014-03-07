@@ -30,6 +30,7 @@ import bigmler.checkpoint as c
 
 
 from bigml.model import Model
+from bigml.tree import LAST_PREDICTION
 from bigml.multimodel import MultiModel, read_votes
 from bigml.util import localize, console_log, get_predictions_file_name
 from bigml.multivote import (PLURALITY_CODE, THRESHOLD_CODE, MultiVote,
@@ -297,8 +298,8 @@ def remote_predict_ensemble(ensemble_id, test_reader, prediction_file, api,
                              prediction_info, input_data, exclude)
 
 
-def local_predict(models, test_reader, output, method, options=None,
-                  prediction_info=NORMAL_FORMAT, exclude=None):
+def local_predict(models, test_reader, output, args, options=None,
+                  exclude=None):
     """Get local predictions and combine them to get a final prediction
 
     """
@@ -306,13 +307,12 @@ def local_predict(models, test_reader, output, method, options=None,
     test_set_header = test_reader.has_headers()
     for input_data in test_reader:
         input_data_dict = test_reader.dict(input_data)
-        prediction = local_model.predict(input_data_dict,
-                                         by_name=test_set_header,
-                                         method=method,
-                                         with_confidence=True,
-                                         options=options)
+        prediction = local_model.predict(
+            input_data_dict, by_name=test_set_header, method=args.method,
+            with_confidence=True, options=options,
+            missing_strategy=args.missing_strategy)
         write_prediction(prediction, output,
-                         prediction_info, input_data, exclude)
+                         args.prediction_info, input_data, exclude)
 
 
 def local_batch_predict(models, test_reader, prediction_file, api,
@@ -323,7 +323,8 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                         prediction_info=NORMAL_FORMAT,
                         labels=None, label_separator=None, ordered=True,
                         exclude=None, models_per_label=1, other_label=OTHER,
-                        multi_label_data=None):
+                        multi_label_data=None,
+                        missing_strategy=LAST_PREDICTION):
 
     """Get local predictions form partial Multimodel, combine and save to file
 
@@ -408,7 +409,8 @@ def local_batch_predict(models, test_reader, prediction_file, api,
             local_model.batch_predict(input_data_list,
                                       output_path,
                                       by_name=test_set_header,
-                                      reuse=True)
+                                      reuse=True,
+                                      missing_strategy=missing_strategy)
             votes = local_model.batch_votes(output_path)
             models_count += max_models
             if models_count > models_total:
@@ -554,8 +556,7 @@ def predict(test_set, test_set_header, models, fields, output,
     # the given models and issue a combined prediction
     if (len(models) < max_models and not args.multi_label
             and args.max_categories == 0 and args.method != COMBINATION):
-        local_predict(models, test_reader, output, args.method, options,
-                      args.prediction_info, exclude)
+        local_predict(models, test_reader, output, args, options, exclude)
     # For large numbers of models, we split the list of models in chunks
     # and build a MultiModel for each chunk, issue and store predictions
     # for each model and combine all of them eventually.
@@ -591,7 +592,8 @@ def predict(test_set, test_set_header, models, fields, output,
                             ordered=ordered, exclude=exclude,
                             models_per_label=models_per_label,
                             other_label=other_label,
-                            multi_label_data=multi_label_data)
+                            multi_label_data=multi_label_data,
+                            missing_strategy=args.missing_strategy)
 
 
 def remote_predict(model, test_dataset, batch_prediction_args, args,
