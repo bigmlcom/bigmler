@@ -22,6 +22,7 @@ from __future__ import absolute_import
 
 import os
 import csv
+from zipfile import ZipFile, ZIP_DEFLATED
 
 import bigml.api
 import bigmler.utils as u
@@ -198,7 +199,12 @@ def multi_label_expansion(training_set, training_set_header, objective_field,
                 output.writerow(row)
             except StopIteration:
                 break
+
+    output_file_zip = "%s%sextended_%s.zip" % (output_path, os.sep, file_name)
+    with ZipFile(output_file_zip, 'w', ZIP_DEFLATED) as output_zipped_file:
+        output_zipped_file.write(output_file, file_name)
+
     if not input_flag:
         objective_field = input_reader.headers[input_reader.objective_column]
 
-    return (output_file, input_reader.get_multi_label_data())
+    return (output_file_zip, input_reader.get_multi_label_data())
