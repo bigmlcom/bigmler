@@ -470,7 +470,8 @@ def create_models(datasets, model_ids, model_args,
     models = model_ids[:]
     existing_models = len(models)
     model_args_list = []
-    datasets = datasets[existing_models:]
+    if not args.multi_label:
+        datasets = datasets[existing_models:]
     dataset = datasets[0]
     if isinstance(model_args, list):
         model_args_list = model_args
@@ -485,15 +486,21 @@ def create_models(datasets, model_ids, model_args,
         # the entire field structure to be used as reference.
         query_string = (FIELDS_QS if single_model
                         else ALL_FIELDS_QS)
+        inprogress = []
         for i in range(0, args.number_of_models):
-            if i % args.max_parallel_models == 0 and i > 0:
-                try:
-                    models[i - 1] = check_resource(
-                        models[i - 1], api.get_model,
-                        query_string=query_string)
-                except ValueError, exception:
-                    sys.exit("Failed to get a finished model: %s" %
-                             str(exception))
+            while len(inprogress) == args.max_parallel_models:
+                for j in range(0, len(inprogress)):
+                    try:
+                        ready = check_resource(inprogress[j], api.get_model,
+                                               query_string=query_string,
+                                               retries=1)
+                        if (bigml.api.get_status(ready)['code']
+                            in [bigml.api.FINISHED, bigml.api.FAULTY]):
+                            del inprogress[j]
+                            break
+                    except ValueError, exception:
+                        sys.exit("Failed to get a finished model: %s" %
+                                 str(exception))
             if model_args_list:
                 model_args = model_args_list[i]
             if args.cross_validation_rate > 0:
@@ -508,6 +515,7 @@ def create_models(datasets, model_ids, model_args,
             model_id = check_resource_error(model, "Failed to create model: ")
             log_message("%s\n" % model_id, log_file=log)
             model_ids.append(model_id)
+            inprogress.append(model_id)
             models.append(model)
             log_created_resources("models", path, model_id, open_mode='a')
 
@@ -671,15 +679,22 @@ def create_ensembles(datasets, ensemble_ids, ensemble_args, args,
         log_message(message, log_file=session_file,
                     console=args.verbosity)
         query_string = ALL_FIELDS_QS
+        inprogress = []
         for i in range(0, number_of_ensembles):
-            if i % args.max_parallel_ensembles == 0 and i > 0:
-                try:
-                    ensembles[i - 1] = check_resource(
-                        ensembles[i - 1], api.get_ensemble,
-                        query_string=query_string)
-                except ValueError, exception:
-                    sys.exit("Failed to get a finished ensemble: %s" %
-                             str(exception))
+            while len(inprogress) == args.max_parallel_ensembles:
+                for j in range(0, len(inprogress)):
+                    try:
+                        ready = check_resource(inprogress[j], api.get_ensemble,
+                                               query_string=query_string,
+                                               retries=1)
+                        if (bigml.api.get_status(ready)['code']
+                            in [bigml.api.FINISHED, bigml.api.FAULTY]):
+                            del inprogress[j]
+                            break
+                    except ValueError, exception:
+                        sys.exit("Failed to get a finished ensemble: %s" %
+                                 str(exception))
+
             if ensemble_args_list:
                 ensemble_args = ensemble_args_list[i]
             ensemble = api.create_ensemble(datasets, ensemble_args)
@@ -687,6 +702,7 @@ def create_ensembles(datasets, ensemble_ids, ensemble_args, args,
                                                "Failed to create ensemble: ")
             log_message("%s\n" % ensemble_id, log_file=log)
             ensemble_ids.append(ensemble_id)
+            inprogress.append(ensemble_id)
             ensembles.append(ensemble)
             log_created_resources("ensembles", path, ensemble_id,
                                   open_mode='a')
@@ -869,16 +885,24 @@ def create_evaluations(model_ids, datasets, evaluation_args, args, api=None,
     message = dated("Creating evaluations.\n")
     log_message(message, log_file=session_file,
                 console=args.verbosity)
+
+    inprogress = []
     for i in range(0, number_of_evaluations):
         model = remaining_ids[i]
+        while len(inprogress) == args.max_parallel_evaluations:
+            for j in range(0, len(inprogress)):
+                try:
+                    ready = check_resource(inprogress[j],
+                                        api.get_evaluation,
+                                        retries=1)
+                    if (bigml.api.get_status(ready)['code']
+                        in [bigml.api.FINISHED, bigml.api.FAULTY]):
+                        del inprogress[j]
+                        break
+                except ValueError, exception:
+                    sys.exit("Failed to get a finished model: %s" %
+                             str(exception))
 
-        if i % args.max_parallel_evaluations == 0 and i > 0:
-            try:
-                evaluations[i - 1] = check_resource(
-                    evaluations[i - 1], api.get_evaluation)
-            except ValueError, exception:
-                sys.exit("Failed to get a finished evaluation: %s" %
-                         str(exception))
         if evaluation_args_list != []:
             evaluation_args = evaluation_args_list[i]
         if args.cross_validation_rate > 0:
@@ -887,6 +911,7 @@ def create_evaluations(model_ids, datasets, evaluation_args, args, api=None,
         evaluation = api.create_evaluation(model, dataset, evaluation_args)
         evaluation_id = check_resource_error(evaluation,
                                              "Failed to create evaluation: ")
+        inprogress.append(evaluation_id)
         log_created_resources("evaluations", path, evaluation_id,
                               open_mode='a')
         evaluations.append(evaluation)
