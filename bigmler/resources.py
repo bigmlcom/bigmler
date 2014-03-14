@@ -100,6 +100,7 @@ def relative_input_fields(fields, user_given_fields):
 
     return input_fields
 
+
 def wait_for_available_tasks(inprogress, max_parallel, get_function,
                              resource_type, query_string=None, wait_step=2):
     """According to the max_parallel number of parallel resources to be
@@ -703,7 +704,8 @@ def create_ensembles(datasets, ensemble_ids, ensemble_args, args,
         for i in range(0, number_of_ensembles):
             wait_for_available_tasks(inprogress, args.max_parallel_ensembles,
                                      api.get_ensemble, "ensemble",
-                                     query_string=query_string)
+                                     query_string=query_string,
+                                     wait_step=args.number_of_models)
 
             if ensemble_args_list:
                 ensemble_args = ensemble_args_list[i]
