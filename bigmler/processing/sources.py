@@ -200,11 +200,13 @@ def multi_label_expansion(training_set, training_set_header, objective_field,
             except StopIteration:
                 break
 
-    output_file_zip = "%s%sextended_%s.zip" % (output_path, os.sep, file_name)
-    with ZipFile(output_file_zip, 'w', ZIP_DEFLATED) as output_zipped_file:
-        output_zipped_file.write(output_file, file_name)
-
+    # training sources are zipped to minimize upload time and resources
     if not input_flag:
+        output_file_zip = "%s%sextended_%s.zip" % (output_path,
+                                                   os.sep, file_name)
+        with ZipFile(output_file_zip, 'w', ZIP_DEFLATED) as output_zipped_file:
+            output_zipped_file.write(output_file, file_name)
+        output_file = output_file_zip
         objective_field = input_reader.headers[input_reader.objective_column]
 
-    return (output_file_zip, input_reader.get_multi_label_data())
+    return (output_file, input_reader.get_multi_label_data())
