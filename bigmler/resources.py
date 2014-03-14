@@ -101,7 +101,7 @@ def relative_input_fields(fields, user_given_fields):
     return input_fields
 
 def wait_for_available_tasks(inprogress, max_parallel, get_function,
-                             resource_type, query_string=None):
+                             resource_type, query_string=None, wait_step=2):
     """According to the max_parallel number of parallel resources to be
        created, when the number of in progress resources reaches the limit,
        it checks the ones in inprogress to see if there's a 
@@ -109,7 +109,7 @@ def wait_for_available_tasks(inprogress, max_parallel, get_function,
        inprogress list and returns to allow another one to be created.
 
     """
-    time_factor = 2
+    wait_step = 2
     check_kwargs = {"retries": 0}
     if query_string:
         check_kwargs.update(query_string=query_string)
@@ -127,7 +127,7 @@ def wait_for_available_tasks(inprogress, max_parallel, get_function,
             except ValueError, exception:
                 sys.exit("Failed to get a finished %s: %s" %
                          (resource_type, str(exception)))
-        time.sleep(max_parallel * time_factor)
+        time.sleep(max_parallel * wait_step)
 
 
 def set_source_args(data_set_header, name, description, args,
