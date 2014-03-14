@@ -20,6 +20,7 @@
 from __future__ import absolute_import
 
 import sys
+import time
 
 try:
     import simplejson as json
@@ -98,6 +99,35 @@ def relative_input_fields(fields, user_given_fields):
         input_fields.append("%s%s" % (ADD_PREFIX, name))
 
     return input_fields
+
+def wait_for_available_tasks(inprogress, max_parallel, get_function,
+                             resource_type, query_string=None):
+    """According to the max_parallel number of parallel resources to be
+       created, when the number of in progress resources reaches the limit,
+       it checks the ones in inprogress to see if there's a 
+       FINISHED or FAULTY resource. If found, it is removed from the
+       inprogress list and returns to allow another one to be created.
+
+    """
+    time_factor = 2
+    check_kwargs = {"retries": 0}
+    if query_string:
+        check_kwargs.update(query_string=query_string)
+    while len(inprogress) == max_parallel:
+        for j in range(0, len(inprogress)):
+            try:
+                ready = check_resource(inprogress[j], get_function,
+                                       **check_kwargs)
+                status = bigml.api.get_status(ready)
+                if (status['code'] == bigml.api.FINISHED):
+                    del inprogress[j]
+                    return
+                elif (status['code'] == bigml.api.FAULTY):
+                    raise ValueError(status['message'])
+            except ValueError, exception:
+                sys.exit("Failed to get a finished %s: %s" %
+                         (resource_type, str(exception)))
+        time.sleep(max_parallel * time_factor)
 
 
 def set_source_args(data_set_header, name, description, args,
@@ -488,19 +518,9 @@ def create_models(datasets, model_ids, model_args,
                         else ALL_FIELDS_QS)
         inprogress = []
         for i in range(0, args.number_of_models):
-            while len(inprogress) == args.max_parallel_models:
-                for j in range(0, len(inprogress)):
-                    try:
-                        ready = check_resource(inprogress[j], api.get_model,
-                                               query_string=query_string,
-                                               retries=1)
-                        if (bigml.api.get_status(ready)['code']
-                            in [bigml.api.FINISHED, bigml.api.FAULTY]):
-                            del inprogress[j]
-                            break
-                    except ValueError, exception:
-                        sys.exit("Failed to get a finished model: %s" %
-                                 str(exception))
+            wait_for_available_tasks(inprogress, args.max_parallel_models,
+                                     api.get_model, "model",
+                                     query_string=query_string)
             if model_args_list:
                 model_args = model_args_list[i]
             if args.cross_validation_rate > 0:
@@ -681,19 +701,9 @@ def create_ensembles(datasets, ensemble_ids, ensemble_args, args,
         query_string = ALL_FIELDS_QS
         inprogress = []
         for i in range(0, number_of_ensembles):
-            while len(inprogress) == args.max_parallel_ensembles:
-                for j in range(0, len(inprogress)):
-                    try:
-                        ready = check_resource(inprogress[j], api.get_ensemble,
-                                               query_string=query_string,
-                                               retries=1)
-                        if (bigml.api.get_status(ready)['code']
-                            in [bigml.api.FINISHED, bigml.api.FAULTY]):
-                            del inprogress[j]
-                            break
-                    except ValueError, exception:
-                        sys.exit("Failed to get a finished ensemble: %s" %
-                                 str(exception))
+            wait_for_available_tasks(inprogress, args.max_parallel_ensembles,
+                                     api.get_ensemble, "ensemble",
+                                     query_string=query_string)
 
             if ensemble_args_list:
                 ensemble_args = ensemble_args_list[i]
@@ -889,19 +899,8 @@ def create_evaluations(model_ids, datasets, evaluation_args, args, api=None,
     inprogress = []
     for i in range(0, number_of_evaluations):
         model = remaining_ids[i]
-        while len(inprogress) == args.max_parallel_evaluations:
-            for j in range(0, len(inprogress)):
-                try:
-                    ready = check_resource(inprogress[j],
-                                        api.get_evaluation,
-                                        retries=1)
-                    if (bigml.api.get_status(ready)['code']
-                        in [bigml.api.FINISHED, bigml.api.FAULTY]):
-                        del inprogress[j]
-                        break
-                except ValueError, exception:
-                    sys.exit("Failed to get a finished model: %s" %
-                             str(exception))
+        wait_for_available_tasks(inprogress, args.max_parallel_evaluations,
+                                 api.get_evaluation, "evaluation")
 
         if evaluation_args_list != []:
             evaluation_args = evaluation_args_list[i]
