@@ -187,7 +187,7 @@ class TrainReader(object):
                     self.label_separator)
                 field_values = [value.decode("utf-8").strip() for
                                 value in field_values]
-                labels_row = [label in field_values for label in
+                labels_row = [int(label in field_values) for label in
                               self.fields_labels[field_column]]
                 row.extend(labels_row)
                 for aggregate in self.label_aggregates:
