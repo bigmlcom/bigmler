@@ -20,6 +20,7 @@
 from __future__ import absolute_import
 
 import sys
+import time
 
 try:
     import simplejson as json
@@ -468,9 +469,11 @@ def create_models(datasets, model_ids, model_args,
         api = bigml.api.BigML()
 
     models = model_ids[:]
+    models_in_progress = []
     existing_models = len(models)
     model_args_list = []
-    datasets = datasets[existing_models:]
+    if not args.multi_label:
+        datasets = datasets[existing_models:]
     dataset = datasets[0]
     if isinstance(model_args, list):
         model_args_list = model_args
@@ -486,14 +489,18 @@ def create_models(datasets, model_ids, model_args,
         query_string = (FIELDS_QS if single_model
                         else ALL_FIELDS_QS)
         for i in range(0, args.number_of_models):
-            if i % args.max_parallel_models == 0 and i > 0:
-                try:
-                    models[i - 1] = check_resource(
-                        models[i - 1], api.get_model,
-                        query_string=query_string)
-                except ValueError, exception:
-                    sys.exit("Failed to get a finished model: %s" %
-                             str(exception))
+
+            # TODO: prevent this polling loop when API supports a better way to inquire
+            # about the number of tasks currently in progress
+            while len(models_in_progress) == args.max_parallel_models:
+                for m in models_in_progress:
+                    status = api.status(m)
+                    if status in ["FINISHED"]:
+                        models_in_progress.remove(m)
+                    elif status in ["FAULTY", "UNKNOWN"]:
+                        sys.exit("Failed to get a finished model: %s" % status)
+                time.sleep(5) # This is a magic number, but could be configured
+
             if model_args_list:
                 model_args = model_args_list[i]
             if args.cross_validation_rate > 0:
@@ -508,6 +515,7 @@ def create_models(datasets, model_ids, model_args,
             model_id = check_resource_error(model, "Failed to create model: ")
             log_message("%s\n" % model_id, log_file=log)
             model_ids.append(model_id)
+            models_in_progress.append(model)
             models.append(model)
             log_created_resources("models", path, model_id, open_mode='a')
 
