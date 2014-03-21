@@ -110,7 +110,7 @@ def wait_for_available_tasks(inprogress, max_parallel, get_function,
        inprogress list and returns to allow another one to be created.
 
     """
-    wait_step = 2
+
     check_kwargs = {"retries": 0}
     if query_string:
         check_kwargs.update(query_string=query_string)
@@ -448,6 +448,9 @@ def set_model_args(name, description,
         model_args.update(
             user_metadata={'other_label': other_label,
                            'max_categories': args.max_categories})
+
+    if args.missing_strategy:
+        model_args.update(missing_strategy=args.missing_strategy)
 
     if args.json_args['model']:
         model_args.update(args.json_args['model'])
@@ -843,6 +846,8 @@ def set_evaluation_args(name, description, args, fields=None,
         args.sample_rate = EVALUATE_SAMPLE_RATE
     evaluation_args.update(out_of_bag=True, seed=SEED,
                            sample_rate=args.sample_rate)
+    if args.missing_strategy:
+        evaluation_args.update(missing_strategy=args.missing_strategy)
     if args.json_args['evaluation']:
         evaluation_args.update(args.json_args['evaluation'])
     return evaluation_args
@@ -978,6 +983,8 @@ def set_batch_prediction_args(name, description, args, fields=None,
 
     if args.prediction_info == FULL_FORMAT:
         batch_prediction_args.update(all_fields=True)
+    if args.missing_strategy:
+        batch_prediction_args.update(missing_strategy=args.missing_strategy)
     if args.json_args['batch_prediction']:
         batch_prediction_args.update(args.json_args['batch_prediction'])
 

@@ -63,7 +63,7 @@ under the License.""" % version
                         default=defaults.get('debug', False),
                         help="Activate debug level")
 
-    # Uses BigML dev environment. Sizes must be under 1MB though.
+    # Uses BigML dev environment. Sizes must be under 16MB though.
     parser.add_argument('--dev',
                         action='store_true',
                         dest='dev_mode',

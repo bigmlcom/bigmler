@@ -441,8 +441,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 models_per_label = len(models) / len(ensemble_ids)
             predict(test_set, test_set_header, models, fields, output,
                     objective_field, args, api=api, log=log,
-                    max_models=args.max_batch_models, resume=resume,
-                    session_file=session_file, labels=labels,
+                    resume=resume, session_file=session_file, labels=labels,
                     models_per_label=models_per_label, other_label=other_label,
                     multi_label_data=multi_label_data)
 
