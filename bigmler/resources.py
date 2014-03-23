@@ -449,9 +449,6 @@ def set_model_args(name, description,
             user_metadata={'other_label': other_label,
                            'max_categories': args.max_categories})
 
-    if args.missing_strategy:
-        model_args.update(missing_strategy=args.missing_strategy)
-
     if args.json_args['model']:
         model_args.update(args.json_args['model'])
 
@@ -832,6 +829,10 @@ def set_evaluation_args(name, description, args, fields=None,
         evaluation_args.update({"fields_map": map_fields(fields_map,
                                                          fields,
                                                          dataset_fields)})
+    if args.missing_strategy:
+        evaluation_args.update(missing_strategy=args.missing_strategy)
+    if args.json_args['evaluation']:
+        evaluation_args.update(args.json_args['evaluation'])
     # Two cases to use out_of_bag and sample_rate: standard evaluations where
     # only the training set is provided, and cross_validation
     # [--dataset|--test] [--model|--models|--model-tag|--ensemble] --evaluate
@@ -846,10 +847,6 @@ def set_evaluation_args(name, description, args, fields=None,
         args.sample_rate = EVALUATE_SAMPLE_RATE
     evaluation_args.update(out_of_bag=True, seed=SEED,
                            sample_rate=args.sample_rate)
-    if args.missing_strategy:
-        evaluation_args.update(missing_strategy=args.missing_strategy)
-    if args.json_args['evaluation']:
-        evaluation_args.update(args.json_args['evaluation'])
     return evaluation_args
 
 

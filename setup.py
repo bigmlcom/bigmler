@@ -56,7 +56,7 @@ distutils.core.setup(
     setup_requires = [],
     packages = ['bigmler', 'bigmler.processing'],
     include_package_data = True,
-    install_requires = ['bigml>=1.2.0,<1.3.0'],
+    install_requires = ['bigml>=1.2.1,<1.3.0'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',

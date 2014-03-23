@@ -399,11 +399,15 @@ def local_batch_predict(models, test_reader, prediction_file, api, args,
 
         if complete_models:
             local_model = MultiModel(complete_models)
-            local_model.batch_predict(input_data_list,
-                                      output_path,
-                                      by_name=test_set_header,
-                                      reuse=True,
-                                      missing_strategy=args.missing_strategy)
+            try:
+                local_model.batch_predict(
+                    input_data_list, output_path, by_name=test_set_header,
+                    reuse=True, missing_strategy=args.missing_strategy)
+            except ImportError:
+                sys.exit("Failed to find the numpy and scipy libraries needed"
+                         " to use proportional missing strategy for"
+                         " regressions. Please, install them manually")
+
             votes = local_model.batch_votes(output_path)
             models_count += max_models
             if models_count > models_total:
