@@ -46,9 +46,9 @@ flag set to ``brief`` only the prediction result will be stored (default is
 ``normal`` and includes confidence information). You can also set it to
 ``full`` if you prefer the result to be presented as a row with your test
 input data followed by the corresponding prediction. To include a headers row
-in the prediction file you can set ``--prediction-header`` and,
-for the ``--prediction-info full`` option, if you want to
-include only a subset of the fields in your test file you can select them by
+in the prediction file you can set ``--prediction-header``. For both the
+``--prediction-info full`` and ``--prediction-info brief`` options, if you
+want to include a subset of the fields in your test file you can select them by
 setting ``--prediction-fields`` to a comma-separated list of them. Then::
 
     bigmler --train data/iris.csv --test data/test_iris.csv \
@@ -57,7 +57,7 @@ setting ``--prediction-fields`` to a comma-separated list of them. Then::
 
 will include in the generated predictions file a headers row::
 
-    petal length,petal width,species
+    petal length,petal width,species,confidence
 
 and only the values of ``petal length`` and ``petal width`` will be shown
 before the objective field prediction ``species``.
@@ -1361,6 +1361,16 @@ Delete Remote Resources
                             be deleted
 --batch-prediction-tag TAG  Retrieves batch predictions that were tagged with
                             tag to be deleted
+--older-than DATE           Retrieves resources created before the specified
+                            date. Date can be any YYYY-MM-DD string, an
+                            integer meaning the number of days before the
+                            current datetime or a resource id, meaning the
+                            creation datetime of the resource
+--newer-than DATE           Retrieves resources created after the specified
+                            date. Date can be any YYYY-MM-DD string, an
+                            integer meaning the number of days before the
+                            current datetime or a resource id, meaning the
+                            creation datetime of the resource
 
 Ensembles
 ---------

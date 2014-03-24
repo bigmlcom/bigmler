@@ -123,7 +123,8 @@ def write_prediction(prediction, output=sys.stdout,
         prediction, confidence = ((prediction[0], None) if len(prediction) == 1
                                   else prediction)
     row = []
-    if prediction_info == FULL_FORMAT:
+    # input data is added if prediction format is BRIEF (no confidence) or FULL
+    if prediction_info != NORMAL_FORMAT:
         if input_data is None:
             input_data = []
         row = input_data
