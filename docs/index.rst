@@ -964,6 +964,39 @@ or restricting the operation to a specific type::
     bigmler --delete --ensemble-tag my_tag
     bigmler --delete --batch-prediction-tag my_tag
 
+You can also delete resource by date. The options ``--newer-than`` and
+``--older-than`` let you specify a reference date. Resources created after and
+before that date respectively, will be deleted. Both options can be combined to
+set a range of dates. The allowed values are:
+
+- dates in a YYYY-MM-DD format
+- integers, that will be interpreted as number of days before now
+- resource id, the creation datetime of the resource will be used
+
+Thus,
+
+::
+
+    bigmler --delete --newer-than 2
+
+will delete all resources created less than two days ago (now being
+2014-03-23 14:00:00.00000, its creation time will be greater
+than 2014-03-21 14:00:00.00000).
+
+::
+    bigmler --delete --older-than 2014-03-20 --newer-than 2014-03-19
+
+will delete all resources created during 2014, March the 19th (creation time
+between 2014-03-19 00:00:00 and 2014-03-20 00:00:00) and
+
+::
+
+    bigmler --delete --newer-than source/532db2b637203f3f1a000104
+
+will delete all resources created after the ``source/532db2b637203f3f1a000104``
+was created.
+
+
 Resuming Previous Commands
 --------------------------
 

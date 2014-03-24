@@ -911,6 +911,22 @@ under the License.""" % version
                              " to next nodes is missing in the input data."
                              " Allowed values: last or proportional")
 
+    # Condition to select resources for deletion: olther than 
+    parser.add_argument('--older-than',
+                        action='store',
+                        dest='older_than',
+                        default=defaults.get('older_than', None),
+                        help=("Upper limit to select the resources older than"
+                              " the number of days, date, or resource given."))
+
+    # Condition to select resources for deletion: olther than 
+    parser.add_argument('--newer-than',
+                        action='store',
+                        dest='newer_than',
+                        default=defaults.get('newer_than', None),
+                        help=("Lower limit to select the resources newer than"
+                              " the number of days, date, or resource given."))
+
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #

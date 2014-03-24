@@ -47,6 +47,7 @@ import sys
 import os
 import re
 import shlex
+import datetime
 
 import bigml.api
 import bigmler.utils as u
@@ -109,6 +110,31 @@ def get_metadata(resource, key, default_value):
     return default_value
 
 
+def get_date(reference, api):
+    """Extract the date from a given reference in days from now, date format
+       or existing resource
+
+    """
+    days = None
+    date = None
+    try:
+        days = int(reference)
+        date = datetime.datetime.now() - datetime.timedelta(days=days)
+    except ValueError:
+        try:
+            date = datetime.datetime.strptime(reference, '%Y-%m-%d')
+            date = date.strftime('%Y-%m-%dT%H:%M:%S.%f')
+        except ValueError:
+            try:
+                resource_type = bigml.api.get_resource_type(reference)
+                resource = bigml.api.check_resource(reference,
+                                                    api.getters[resource_type])
+                date = resource['object']['created']
+            except:
+                return None
+    return date
+
+
 def delete_resources(command_args, api):
     """Deletes the resources selected by the user given options
 
@@ -147,6 +173,33 @@ def delete_resources(command_args, api):
         elif selector:
             query_string = "tags__in=%s" % selector
         if query_string:
+            delete_list.extend(u.list_ids(api_call, query_string))
+
+    query_string=None
+    if command_args.older_than:
+        date_str = get_date(command_args.older_than, api)
+        if date_str:
+            query_string = "created__lt=%s" % date_str
+        else:
+            sys.exit("The --older-than and --newer-than flags only accept "
+                     "integers (number of days), dates in YYYY-MM-DD format "
+                     " and resource ids. Please, double-check your input.")
+
+    if command_args.newer_than:
+        date_str = get_date(command_args.newer_than, api)
+        if date_str:
+            if query_string is None:
+                query_string = ""
+            else:
+                query_string += ";"
+            query_string += "created__gt=%s" % date_str
+        else:
+            sys.exit("The --older-than and --newer-than flags only accept "
+                     "integers (number of days), dates in YYYY-MM-DD format "
+                     " and resource ids. Please, double-check your input.")
+
+    if query_string:
+        for selector, api_call in resource_selectors:
             delete_list.extend(u.list_ids(api_call, query_string))
 
     message = u.dated("Deleting objects.\n")
