@@ -996,6 +996,11 @@ between 2014-03-19 00:00:00 and 2014-03-20 00:00:00) and
 will delete all resources created after the ``source/532db2b637203f3f1a000104``
 was created.
 
+You can also combine both types of options, to delete sources tagged as
+``my_tag`` starting from a certain date on::
+
+    bigmler --delete --newer-than 2 --source-tag my_tag
+
 
 Resuming Previous Commands
 --------------------------

@@ -166,15 +166,6 @@ def delete_resources(command_args, api):
         (command_args.ensemble_tag, api.list_ensembles),
         (command_args.batch_prediction_tag, api.list_batch_predictions)]
 
-    for selector, api_call in resource_selectors:
-        query_string = None
-        if command_args.all_tag:
-            query_string = "tags__in=%s" % command_args.all_tag
-        elif selector:
-            query_string = "tags__in=%s" % selector
-        if query_string:
-            delete_list.extend(u.list_ids(api_call, query_string))
-
     query_string=None
     if command_args.older_than:
         date_str = get_date(command_args.older_than, api)
@@ -198,16 +189,31 @@ def delete_resources(command_args, api):
                      "integers (number of days), dates in YYYY-MM-DD format "
                      " and resource ids. Please, double-check your input.")
 
-    if query_string:
+    if (any([selector[0] is not None for selector in resource_selectors]) or
+        command_args.all_tag):
+        if query_string is None:
+            query_string = ""
+        else:
+            query_string += ";"
         for selector, api_call in resource_selectors:
-            delete_list.extend(u.list_ids(api_call, query_string))
+            combined_query = query_string
+            if command_args.all_tag:
+                combined_query += "tags__in=%s" % command_args.all_tag
+                delete_list.extend(u.list_ids(api_call, combined_query))
+            elif selector:
+                combined_query += "tags__in=%s" % selector
+                delete_list.extend(u.list_ids(api_call, combined_query))
+    else:
+        if query_string:
+            for selector, api_call in resource_selectors:
+                delete_list.extend(u.list_ids(api_call, query_string))
 
     message = u.dated("Deleting objects.\n")
     u.log_message(message, log_file=session_file,
                   console=command_args.verbosity)
     message = "\n".join(delete_list)
     u.log_message(message, log_file=session_file)
-    u.delete(api, delete_list)
+    #u.delete(api, delete_list)
     if sys.platform == "win32" and sys.stdout.isatty():
         message = (u"\nGenerated files:\n\n" +
                    unicode(u.print_tree(path, " "), "utf-8") + u"\n")
