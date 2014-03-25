@@ -917,7 +917,7 @@ under the License.""" % version
                         dest='older_than',
                         default=defaults.get('older_than', None),
                         help=("Upper limit to select the resources older than"
-                              " the number of days, date, or resource given."))
+                              " the given number of days, date, or resource."))
 
     # Condition to select resources for deletion: olther than 
     parser.add_argument('--newer-than',
@@ -925,7 +925,7 @@ under the License.""" % version
                         dest='newer_than',
                         default=defaults.get('newer_than', None),
                         help=("Lower limit to select the resources newer than"
-                              " the number of days, date, or resource given."))
+                              " the given number of days, date, or resource."))
 
     # The following options are only useful to deactivate the corresponding
     # oposed default values

@@ -7,7 +7,7 @@ History
 ~~~~~~~~~~~~~~~~~~
 
 - Adding --missing-strategy option to allow different prediction strategies
-  when a missing value is found in an split field. Available for local
+  when a missing value is found in a split field. Available for local
   predictions, batch predictions and evaluations.
 - Adding new --delete options: --newer-than and --older-than to delete lists
   of resources according to their creation date.
