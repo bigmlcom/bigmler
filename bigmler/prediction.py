@@ -30,6 +30,7 @@ import bigmler.checkpoint as c
 
 
 from bigml.model import Model
+from bigml.tree import LAST_PREDICTION
 from bigml.multimodel import MultiModel, read_votes
 from bigml.util import localize, console_log, get_predictions_file_name
 from bigml.multivote import (PLURALITY_CODE, THRESHOLD_CODE, MultiVote,
@@ -122,7 +123,8 @@ def write_prediction(prediction, output=sys.stdout,
         prediction, confidence = ((prediction[0], None) if len(prediction) == 1
                                   else prediction)
     row = []
-    if prediction_info == FULL_FORMAT:
+    # input data is added if prediction format is BRIEF (no confidence) or FULL
+    if prediction_info != NORMAL_FORMAT:
         if input_data is None:
             input_data = []
         row = input_data
@@ -191,19 +193,15 @@ def combine_votes(votes_files, to_prediction, to_file, method=0,
                          prediction_info, input_data, exclude)
 
 
-def remote_predict_models(models, test_reader, prediction_file, api,
-                          resume=False,
-                          verbosity=True, output_path=None,
-                          method=PLURALITY_CODE, tags="",
-                          session_file=None, log=None, debug=False,
-                          prediction_info=NORMAL_FORMAT, exclude=None):
+def remote_predict_models(models, test_reader, prediction_file, api, args,
+                          resume=False, output_path=None,
+                          session_file=None, log=None, exclude=None):
     """Retrieve predictions remotely, combine them and save predictions to file
 
-    """
-
+    """ 
     predictions_files = []
     prediction_args = {
-        "tags": tags
+        "tags": args.tag
     }
     test_set_header = test_reader.has_headers()
     if output_path is None:
@@ -224,11 +222,12 @@ def remote_predict_models(models, test_reader, prediction_file, api,
         predictions_files.append(predictions_file)
         if (not resume or
             not c.checkpoint(c.are_predictions_created, predictions_file,
-                             test_reader.number_of_tests(), debug=debug)[0]):
+                             test_reader.number_of_tests(),
+                             debug=args.debug)[0]):
             if not message_logged:
                 message = u.dated("Creating remote predictions.\n")
                 u.log_message(message, log_file=session_file,
-                              console=verbosity)
+                              console=args.verbosity)
             message_logged = True
             predictions_file = csv.writer(open(predictions_file, 'w', 0),
                                           lineterminator="\n")
@@ -246,27 +245,23 @@ def remote_predict_models(models, test_reader, prediction_file, api,
                 predictions_file.writerow(prediction_row)
                 if single_model:
                     write_prediction(prediction_row[0:2], prediction_file,
-                                     prediction_info, input_data, exclude)
+                                     args.prediction_info, input_data, exclude)
     if not single_model:
         combine_votes(predictions_files,
                       Model(models[0]).to_prediction,
-                      prediction_file, method,
-                      prediction_info, raw_input_data_list, exclude)
+                      prediction_file, args.method,
+                      args.prediction_info, raw_input_data_list, exclude)
 
 
 def remote_predict_ensemble(ensemble_id, test_reader, prediction_file, api,
-                            resume=False,
-                            verbosity=True, output_path=None,
-                            method=PLURALITY_CODE, tags="",
-                            session_file=None, log=None, debug=False,
-                            prediction_info=NORMAL_FORMAT, exclude=None):
+                            args, resume=False, output_path=None,
+                            session_file=None, log=None, exclude=None):
     """Retrieve predictions remotely and save predictions to file
 
     """
-
     prediction_args = {
-        "tags": tags,
-        "combiner": method
+        "tags": args.tag,
+        "combiner": args.method
     }
     test_set_header = test_reader.has_headers()
     if output_path is None:
@@ -274,10 +269,10 @@ def remote_predict_ensemble(ensemble_id, test_reader, prediction_file, api,
 
     if (not resume or
         not c.checkpoint(c.are_predictions_created, prediction_file,
-                         test_reader.number_of_tests(), debug=debug)[0]):
+                         test_reader.number_of_tests(), debug=args.debug)[0]):
         message = u.dated("Creating remote predictions.")
         u.log_message(message, log_file=session_file,
-                      console=verbosity)
+                      console=args.verbosity)
 
         predictions_file = csv.writer(open(prediction_file, 'w', 0),
                                       lineterminator="\n")
@@ -292,13 +287,14 @@ def remote_predict_ensemble(ensemble_id, test_reader, prediction_file, api,
             u.check_resource_error(prediction,
                                    "Failed to create prediction: ")
             u.log_message("%s\n" % prediction['resource'], log_file=log)
-            prediction_row = prediction_to_row(prediction, prediction_info)
+            prediction_row = prediction_to_row(prediction,
+                                               args.prediction_info)
             write_prediction(prediction_row, predictions_file,
-                             prediction_info, input_data, exclude)
+                             args.prediction_info, input_data, exclude)
 
 
-def local_predict(models, test_reader, output, method, options=None,
-                  prediction_info=NORMAL_FORMAT, exclude=None):
+def local_predict(models, test_reader, output, args, options=None,
+                  exclude=None):
     """Get local predictions and combine them to get a final prediction
 
     """
@@ -306,22 +302,18 @@ def local_predict(models, test_reader, output, method, options=None,
     test_set_header = test_reader.has_headers()
     for input_data in test_reader:
         input_data_dict = test_reader.dict(input_data)
-        prediction = local_model.predict(input_data_dict,
-                                         by_name=test_set_header,
-                                         method=method,
-                                         with_confidence=True,
-                                         options=options)
+        prediction = local_model.predict(
+            input_data_dict, by_name=test_set_header, method=args.method,
+            with_confidence=True, options=options,
+            missing_strategy=args.missing_strategy)
         write_prediction(prediction, output,
-                         prediction_info, input_data, exclude)
+                         args.prediction_info, input_data, exclude)
 
 
-def local_batch_predict(models, test_reader, prediction_file, api,
-                        max_models=MAX_MODELS,
+def local_batch_predict(models, test_reader, prediction_file, api, args,
                         resume=False, output_path=None, output=None,
-                        verbosity=True, method=PLURALITY_CODE, options=None,
-                        session_file=None, debug=False,
-                        prediction_info=NORMAL_FORMAT,
-                        labels=None, label_separator=None, ordered=True,
+                        method=PLURALITY_CODE, options=None,
+                        session_file=None, labels=None, ordered=True,
                         exclude=None, models_per_label=1, other_label=OTHER,
                         multi_label_data=None):
 
@@ -335,6 +327,9 @@ def local_batch_predict(models, test_reader, prediction_file, api,
         pct = 100 - ((total - current) * 100) / (total)
         console_log("Predicted on %s out of %s models [%s%%]" % (
             localize(current), localize(total), pct))
+
+    max_models = args.max_batch_models
+    label_separator = args.label_separator
     if labels is None:
         labels = []
     test_set_header = test_reader.has_headers()
@@ -366,7 +361,7 @@ def local_batch_predict(models, test_reader, prediction_file, api,
                                                       output_path)
                 c.checkpoint(c.are_predictions_created,
                              pred_file,
-                             test_reader.number_of_tests(), debug=debug)
+                             test_reader.number_of_tests(), debug=args.debug)
         complete_models = []
 
         for index in range(len(models_split)):
@@ -405,15 +400,20 @@ def local_batch_predict(models, test_reader, prediction_file, api,
 
         if complete_models:
             local_model = MultiModel(complete_models)
-            local_model.batch_predict(input_data_list,
-                                      output_path,
-                                      by_name=test_set_header,
-                                      reuse=True)
+            try:
+                local_model.batch_predict(
+                    input_data_list, output_path, by_name=test_set_header,
+                    reuse=True, missing_strategy=args.missing_strategy)
+            except ImportError:
+                sys.exit("Failed to find the numpy and scipy libraries needed"
+                         " to use proportional missing strategy for"
+                         " regressions. Please, install them manually")
+
             votes = local_model.batch_votes(output_path)
             models_count += max_models
             if models_count > models_total:
                 models_count = models_total
-            if verbosity:
+            if args.verbosity:
                 draw_progress_bar(models_count, models_total)
             if total_votes:
                 for index in range(0, len(votes)):
@@ -422,7 +422,7 @@ def local_batch_predict(models, test_reader, prediction_file, api,
             else:
                 total_votes = votes
     message = u.dated("Combining predictions.\n")
-    u.log_message(message, log_file=session_file, console=verbosity)
+    u.log_message(message, log_file=session_file, console=args.verbosity)
 
     if label_separator is None:
         label_separator = ","
@@ -491,13 +491,13 @@ def local_batch_predict(models, test_reader, prediction_file, api,
             prediction = multivote.combine(method=method, with_confidence=True,
                                            options=options)
 
-        write_prediction(prediction, output, prediction_info, input_data,
+        write_prediction(prediction, output, args.prediction_info, input_data,
                          exclude)
 
 
 def predict(test_set, test_set_header, models, fields, output,
             objective_field, args, api=None, log=None,
-            max_models=MAX_MODELS, resume=False, session_file=None,
+            resume=False, session_file=None,
             labels=None, models_per_label=1, other_label=OTHER,
             multi_label_data=None):
     """Computes a prediction for each entry in the `test_set`.
@@ -507,7 +507,6 @@ def predict(test_set, test_set_header, models, fields, output,
        flag will lead to the last case, where memory usage is bounded and each
        model predictions are saved for further use.
     """
-
     test_reader = TestReader(test_set, test_set_header, fields,
                              objective_field,
                              test_separator=args.test_separator)
@@ -529,15 +528,13 @@ def predict(test_set, test_set_header, models, fields, output,
             and args.method != THRESHOLD_CODE):
         if args.ensemble is not None:
             remote_predict_ensemble(args.ensemble, test_reader,
-                                    prediction_file, api, resume,
-                                    args.verbosity, output_path,
-                                    args.method, args.tag, session_file, log,
-                                    args.debug, args.prediction_info, exclude)
+                                    prediction_file, api, args, resume,
+                                    output_path, session_file, log,
+                                    exclude)
         else:
             remote_predict_models(models, test_reader, prediction_file, api,
-                                  resume, args.verbosity, output_path,
-                                  args.method, args.tag, session_file, log,
-                                  args.debug, args.prediction_info, exclude)
+                                  args, resume, output_path,
+                                  session_file, log, exclude)
         return
     # Local predictions: Predictions are computed locally using models' rules
     # with MultiModel's predict method
@@ -552,10 +549,9 @@ def predict(test_set, test_set_header, models, fields, output,
         options.update(category=args.threshold_class)
     # For a small number of models, we build a MultiModel using all of
     # the given models and issue a combined prediction
-    if (len(models) < max_models and not args.multi_label
+    if (len(models) < args.max_batch_models and not args.multi_label
             and args.max_categories == 0 and args.method != COMBINATION):
-        local_predict(models, test_reader, output, args.method, options,
-                      args.prediction_info, exclude)
+        local_predict(models, test_reader, output, args, options, exclude)
     # For large numbers of models, we split the list of models in chunks
     # and build a MultiModel for each chunk, issue and store predictions
     # for each model and combine all of them eventually.
@@ -580,14 +576,10 @@ def predict(test_set, test_set_header, models, fields, output,
                                  or models_per_label > 1):
             ordered = False
         local_batch_predict(models, test_reader, prediction_file, api,
-                            max_models=max_models, resume=resume,
+                            args, resume=resume,
                             output_path=output_path,
-                            output=output, verbosity=args.verbosity,
-                            method=method, options=options,
-                            session_file=session_file, debug=args.debug,
-                            prediction_info=args.prediction_info,
-                            labels=labels,
-                            label_separator=args.label_separator,
+                            output=output, method=method, options=options,
+                            session_file=session_file, labels=labels,
                             ordered=ordered, exclude=exclude,
                             models_per_label=models_per_label,
                             other_label=other_label,

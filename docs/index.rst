@@ -46,9 +46,9 @@ flag set to ``brief`` only the prediction result will be stored (default is
 ``normal`` and includes confidence information). You can also set it to
 ``full`` if you prefer the result to be presented as a row with your test
 input data followed by the corresponding prediction. To include a headers row
-in the prediction file you can set ``--prediction-header`` and,
-for the ``--prediction-info full`` option, if you want to
-include only a subset of the fields in your test file you can select them by
+in the prediction file you can set ``--prediction-header``. For both the
+``--prediction-info full`` and ``--prediction-info brief`` options, if you
+want to include a subset of the fields in your test file you can select them by
 setting ``--prediction-fields`` to a comma-separated list of them. Then::
 
     bigmler --train data/iris.csv --test data/test_iris.csv \
@@ -57,7 +57,7 @@ setting ``--prediction-fields`` to a comma-separated list of them. Then::
 
 will include in the generated predictions file a headers row::
 
-    petal length,petal width,species
+    petal length,petal width,species,confidence
 
 and only the values of ``petal length`` and ``petal width`` will be shown
 before the objective field prediction ``species``.
@@ -964,6 +964,39 @@ or restricting the operation to a specific type::
     bigmler --delete --ensemble-tag my_tag
     bigmler --delete --batch-prediction-tag my_tag
 
+You can also delete resources by date. The options ``--newer-than`` and
+``--older-than`` let you specify a reference date. Resources created after and
+before that date respectively, will be deleted. Both options can be combined to
+set a range of dates. The allowed values are:
+
+- dates in a YYYY-MM-DD format
+- integers, that will be interpreted as number of days before now
+- resource id, the creation datetime of the resource will be used
+
+Thus,
+
+::
+
+    bigmler --delete --newer-than 2
+
+will delete all resources created less than two days ago (now being
+2014-03-23 14:00:00.00000, its creation time will be greater
+than 2014-03-21 14:00:00.00000).
+
+::
+    bigmler --delete --older-than 2014-03-20 --newer-than 2014-03-19
+
+will delete all resources created during 2014, March the 19th (creation time
+between 2014-03-19 00:00:00 and 2014-03-20 00:00:00) and
+
+::
+
+    bigmler --delete --newer-than source/532db2b637203f3f1a000104
+
+will delete all resources created after the ``source/532db2b637203f3f1a000104``
+was created.
+
+
 Resuming Previous Commands
 --------------------------
 
@@ -1054,7 +1087,7 @@ Requirements
 
 Python 2.7 is currently supported by BigMLer.
 
-BigMLer requires `bigml 1.0.5 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 1.2.1 <https://github.com/bigmlcom/python>`_  or
 higher.
 
 BigMLer Installation
@@ -1328,6 +1361,16 @@ Delete Remote Resources
                             be deleted
 --batch-prediction-tag TAG  Retrieves batch predictions that were tagged with
                             tag to be deleted
+--older-than DATE           Retrieves resources created before the specified
+                            date. Date can be any YYYY-MM-DD string, an
+                            integer meaning the number of days before the
+                            current datetime or a resource id, meaning the
+                            creation datetime of the resource
+--newer-than DATE           Retrieves resources created after the specified
+                            date. Date can be any YYYY-MM-DD string, an
+                            integer meaning the number of days before the
+                            current datetime or a resource id, meaning the
+                            creation datetime of the resource
 
 Ensembles
 ---------

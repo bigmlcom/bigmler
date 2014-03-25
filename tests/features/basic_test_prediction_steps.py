@@ -38,6 +38,37 @@ def shell_execute(command, output, test=None, options=None):
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
+
+@step(r'I create BigML resources uploading train "(.*?)" file to create model and log in "([^"]*)"$')
+def i_create_all_resources_to_model(step, data=None, output=None):
+    if data is None or output is None:
+        assert False
+    command = ("bigmler --train " + data +
+               " --store --output " + output + " --max-batch-models 1")
+    shell_execute(command, output, test=None)
+
+
+
+@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" with proportional missing strategy and log predictions in "([^"]*)"$')
+def i_create_all_resources_proportional(step, data=None, test=None, output=None):
+    if data is None or test is None or output is None:
+        assert False
+    command = ("bigmler --train " + data + " --test " + test +
+               " --missing-strategy proportional" +
+               " --store --output " + output + " --max-batch-models 1")
+    shell_execute(command, output, test=test)
+
+
+@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" remotely with proportional missing strategy and log predictions in "([^"]*)"$')
+def i_create_all_resources_remote_proportional(step, data=None, test=None, output=None):
+    if data is None or test is None or output is None:
+        assert False
+    command = ("bigmler --train " + data + " --test " + test +
+               " --missing-strategy proportional --remote" +
+               " --store --output " + output + " --max-batch-models 1")
+    shell_execute(command, output, test=test)
+
+
 @step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" and log predictions in "(.*?)" with "(.*?)" as test field separator$')
 def i_create_all_resources_with_separator(step, data=None, test=None, output=None, separator=None):
     if data is None or test is None or separator is None or output is None:

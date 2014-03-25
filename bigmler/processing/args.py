@@ -29,7 +29,8 @@ import bigml.api
 
 import bigmler.utils as u
 
-from bigml.multivote import COMBINATION_WEIGHTS, COMBINER_MAP
+from bigml.multivote import COMBINATION_WEIGHTS, COMBINER_MAP;
+from bigml.tree import LAST_PREDICTION, PROPORTIONAL;        
 
 from bigmler.resources import ADD_REMOVE_PREFIX
 from bigmler.prediction import FULL_FORMAT, COMBINATION, COMBINATION_LABEL
@@ -37,7 +38,7 @@ from bigmler.train_reader import AGGREGATES
 
 # Date and time in format SunNov0412_120510 to name and tag resources
 NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
-
+MISSING_STRATEGIES = {'last': LAST_PREDICTION, 'proportional': PROPORTIONAL};
 
 def non_compatible(args, option):
     """Return non_compatible options
@@ -346,6 +347,14 @@ def transform_args(command_args, flags, api, user_defaults):
                                 for key, value in COMBINER_MAP.items()])
         combiner_methods[COMBINATION_LABEL] = COMBINATION
         command_args.method = combiner_methods.get(command_args.method, 0)
+
+    # Checks missing_strategy
+    if (command_args.missing_strategy and
+            not (command_args.missing_strategy in MISSING_STRATEGIES.keys())):
+        command_args.missing_strategy = 0
+    else:
+        command_args.missing_strategy = MISSING_STRATEGIES.get(
+            command_args.missing_strategy, 0)
 
     # Adds replacement=True if creating ensemble and nothing is specified
     if (command_args.number_of_models > 1 and

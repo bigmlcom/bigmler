@@ -35,6 +35,7 @@ def create_parser(defaults={}, constants={}):
 
     max_models = constants.get('MAX_MODELS')
     plurality = constants.get('PLURALITY')
+    last = constants.get('LAST_PREDICTION')
 
     version = pkg_resources.require("BigMLer")[0].version
     version_text = """\
@@ -62,7 +63,7 @@ under the License.""" % version
                         default=defaults.get('debug', False),
                         help="Activate debug level")
 
-    # Uses BigML dev environment. Sizes must be under 1MB though.
+    # Uses BigML dev environment. Sizes must be under 16MB though.
     parser.add_argument('--dev',
                         action='store_true',
                         dest='dev_mode',
@@ -898,6 +899,33 @@ under the License.""" % version
                         help=("Comma-separated list of aggregation functions "
                               "for the multi-label field labels."
                               " Allowed aggregates: count, first and last"))
+
+    # Strategy used in predictions when a missing value is found for the
+    # field used to split the node.
+    parser.add_argument('--missing-strategy',
+                        action='store',
+                        dest='missing_strategy',
+                        default=defaults.get('missing_strategy', last),
+                        choices=["last", "proportional"],
+                        help="Strategy used when the field used in the rules"
+                             " to next nodes is missing in the input data."
+                             " Allowed values: last or proportional")
+
+    # Condition to select resources for deletion: olther than 
+    parser.add_argument('--older-than',
+                        action='store',
+                        dest='older_than',
+                        default=defaults.get('older_than', None),
+                        help=("Upper limit to select the resources older than"
+                              " the given number of days, date, or resource."))
+
+    # Condition to select resources for deletion: olther than 
+    parser.add_argument('--newer-than',
+                        action='store',
+                        dest='newer_than',
+                        default=defaults.get('newer_than', None),
+                        help=("Lower limit to select the resources newer than"
+                              " the given number of days, date, or resource."))
 
     # The following options are only useful to deactivate the corresponding
     # oposed default values

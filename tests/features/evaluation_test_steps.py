@@ -119,6 +119,29 @@ def i_create_with_split_to_evaluate(step, data=None, split=None, output=None):
         assert False
 
 
+@step(r'I evaluate "(.*)" with proportional missing strategy')
+def i_create_proportional_to_evaluate(step, test=None):
+    if test is None:
+        assert False
+    try:   
+        output_dir = world.directory + "_eval/"
+        output = output_dir + os.path.basename(world.output)
+        retcode = check_call("bigmler --evaluate --model " +
+                             world.model['resource'] +
+                             " --test " + test +
+                             " --missing-strategy proportional --output " +
+                             output, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.directory = output_dir
+            world.folders.append(world.directory)
+            world.output = output
+            assert True
+    except OSError as e:
+        assert False
+
+
 @step(r'the evaluation file is like "(.*)"$')
 def then_the_evaluation_file_is_like(step, check_file_json):
     evaluation_file_json = world.output + ".json"
