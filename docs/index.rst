@@ -552,6 +552,16 @@ Or, as another example, to tag the outliers of the same field one coud use::
 
     {"new_fields": [{"name": "outlier?", "field": "(if (within-percentiles? \"sepal length\" 0.5 0.95) \"normal\" \"outlier\")"}]}
 
+A dataset can also be generated as the union of several datasets using the
+flag ``--multi-dataset``. The datasets will be read from a file specified
+in the ``--datasets`` option, and they must share the same field structure.
+The file must contain one dataset id per line.
+
+::
+
+    bigmler --datasets my_datasets --multi-dataset --no-model
+ 
+
 Model Weights
 -------------
 
@@ -1075,6 +1085,8 @@ The set of negative flags is:
 --no-multi-label            as opposed to --multi-label
 --no-prediction-header      as opposed to --prediction-header
 --batch                     as opposed to --no-batch
+--no-balanced               as opposed to --balanced
+--no-multi-dataset          as opposed to --multi-dataset
 
 
 Support

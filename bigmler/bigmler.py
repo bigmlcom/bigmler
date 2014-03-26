@@ -353,7 +353,16 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                      "Only these fields can be used with"
                      "  --max-categories")
 
-    # Check if the dataset a generators file associated with it, and
+    # If multi-dataset flag is on, generate a new dataset from the given
+    # list of datasets
+    if args.multi_dataset:
+        dataset, resume = pd.create_new_dataset(
+            datasets, api, args, resume, name=name,
+            description=description, session_file=session_file, path=path,
+            log=log)
+        datasets = [dataset]
+
+    # Check if the dataset has a generators file associated with it, and
     # generate a new dataset with the specified field structure
     if args.new_fields:
         dataset, resume = pd.create_new_dataset(

@@ -125,7 +125,8 @@ FLAGS = {'BigMLer': [{'flag': 'debug', 'type': 'boolean'},
                      {'flag': 'label_aggregates', 'type': 'string'},
                      {'flag': 'missing_strategy', 'type': 'string'},
                      {'flag': 'other_than', 'type': 'string'},
-                     {'flag': 'newer_than', 'type': 'string'}]}
+                     {'flag': 'newer_than', 'type': 'string'},
+                     {'flag': 'multi_dataset', 'type': 'boolean'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):
