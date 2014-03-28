@@ -296,38 +296,10 @@ def create_categories_datasets(dataset, distribution,
     return datasets, resume
 
 
-def create_multi_dataset(datasets, api, args, resume, name=None,
-                         description=None, session_file=None,
-                         path=None, log=None):
-    """Generates a new dataset using datasets given in the datasets list
-
-    """
-    number_of_datasets = 1
-    if resume:
-        resume, datasets = c.checkpoint(
-            c.are_datasets_created, path, number_of_datasets,
-            debug=args.debug, suffix="multi")
-        if not resume:
-            message = u.dated("Found %s datasets out of %s. Resuming.\n"
-                              % (len(datasets),
-                                 number_of_datasets))
-            u.log_message(message, log_file=session_file,
-                          console=args.verbosity)
-    if not resume:
-        dataset_args = r.set_basic_dataset_args(name, description, args)
-        new_dataset = r.create_dataset(datasets, dataset_args,
-                                       args.verbosity,
-                                       api=api, path=path,
-                                       session_file=session_file,
-                                       log=log, dataset_type="multi")
-    else:
-        new_dataset = datasets[0]
-    return new_dataset, resume
-
-
 def create_new_dataset(datasets, api, args, resume, name=None,
-                       description=None, session_file=None,
-                       path=None, log=None):
+                       description=None, fields=None,
+                       dataset_fields=None, objective_field=None,
+                       session_file=None, path=None, log=None):
     """Generates a new dataset using the generators given in a generators file
        or a multi-dataset from a list of datasets
 
@@ -351,13 +323,17 @@ def create_new_dataset(datasets, api, args, resume, name=None,
                           console=args.verbosity)
     if not resume:
         if args.multi_dataset:
-            dataset_args = r.set_basic_dataset_args(name, description, args)
+            dataset_args = r.set_dataset_args(name, description, args,
+                                              fields, dataset_fields,
+                                              objective_field=objective_field)
+            if args.multi_dataset_json:
+                dataset_args.update(args.multi_dataset_json)
         else:
-            dataset_args = args.dataset_json_generators
-            if name is not None:
-                dataset_args.update(name=name)
-            if description is not None:
-                dataset_args.update(description=description)
+            dataset_args = {}
+            dataset_args.update(args.dataset_json_generators)
+            dataset_args.update(r.set_dataset_args(
+                name, description, args, fields, dataset_fields,
+                objective_field=objective_field))
         new_dataset = r.create_dataset(origin_resource, dataset_args,
                                        args.verbosity,
                                        api=api, path=path,

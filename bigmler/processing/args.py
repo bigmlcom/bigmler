@@ -305,6 +305,13 @@ def transform_args(command_args, flags, api, user_defaults):
     else:
         command_args.dataset_json_generators = {}
 
+    # Parses multi-dataset attributes in json such as field maps
+    if command_args.multi_dataset_attributes:
+        multi_dataset_json = u.read_json(command_args.multi_dataset_attributes)
+        command_args.multi_dataset_json= multi_dataset_json
+    else:
+        command_args.multi_dataset_json = {}
+
     dataset_ids = None
     command_args.dataset_ids = []
     # Parses dataset/id if provided.

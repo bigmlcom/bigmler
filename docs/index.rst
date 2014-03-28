@@ -554,13 +554,36 @@ Or, as another example, to tag the outliers of the same field one coud use::
 
 A dataset can also be generated as the union of several datasets using the
 flag ``--multi-dataset``. The datasets will be read from a file specified
-in the ``--datasets`` option, and they must share the same field structure.
-The file must contain one dataset id per line.
+in the ``--datasets`` option and the file must contain one dataset id per line.
 
 ::
 
     bigmler --datasets my_datasets --multi-dataset --no-model
- 
+
+This syntax is used when all the datasets in the ``my_datasets`` file share
+a common field structre, so the correspondence of the fields of all the
+datasets is straight forward. In the general case, the multi-dataset will
+inherit the field structure of the first component dataset.
+If you want to build a multi-dataset with
+datasets whose fields share not the same column disposition, you can specify
+which fields are correlated to the ones of the first dataset
+by mapping the fields of the rest of datasets to them.
+The option ``--multi-dataset-attributes`` can point to a JSON
+file that contains such a map. The command line syntax would then be::
+
+    bigmler --datasets my_datasets --multi-dataset \
+            --multi-dataset-attributes my_fields_map.json \
+            --no-model
+
+and for a simple case where the second dataset had flipped the first and second
+fields with respect to the first one, the file would read
+
+{"fields_maps": {"dataset/53330bce37203f222e00004b": {"000000": "000001",
+                                                      "000001": "000000"}}
+}
+
+where ``dataset/53330bce37203f222e00004b`` would be the id of the
+second dataset in the multi-dataset.
 
 Model Weights
 -------------

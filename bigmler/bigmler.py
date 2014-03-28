@@ -213,7 +213,7 @@ def delete_resources(command_args, api):
                   console=command_args.verbosity)
     message = "\n".join(delete_list)
     u.log_message(message, log_file=session_file)
-    #u.delete(api, delete_list)
+    u.delete(api, delete_list)
     if sys.platform == "win32" and sys.stdout.isatty():
         message = (u"\nGenerated files:\n\n" +
                    unicode(u.print_tree(path, " "), "utf-8") + u"\n")
@@ -321,6 +321,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         dataset_fields=dataset_fields, multi_label_data=multi_label_data,
         csv_properties=csv_properties,
         session_file=session_file, path=path, log=log)
+
     if datasets:
         dataset = datasets[0]
 
@@ -358,8 +359,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if args.multi_dataset:
         dataset, resume = pd.create_new_dataset(
             datasets, api, args, resume, name=name,
-            description=description, session_file=session_file, path=path,
-            log=log)
+            description=description, fields=fields,
+            dataset_fields=dataset_fields, objective_field=objective_field,
+            session_file=session_file, path=path, log=log)
         datasets = [dataset]
 
     # Check if the dataset has a generators file associated with it, and
@@ -367,8 +369,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if args.new_fields:
         dataset, resume = pd.create_new_dataset(
             dataset, api, args, resume, name=name,
-            description=description, session_file=session_file, path=path,
-            log=log)
+            description=description, fields=fields,
+            dataset_fields=dataset_fields, objective_field=objective_field,
+            session_file=session_file, path=path, log=log)
         datasets[0] = dataset
     if args.multi_label and dataset and multi_label_data is None:
         multi_label_data = l.get_multi_label_data(dataset)
@@ -376,6 +379,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             all_labels, multi_label_fields) = l.multi_label_sync(
                 objective_field, labels, multi_label_data,
                 fields, multi_label_fields)
+
     if dataset:
         # retrieves max_categories data, if any
         args.max_categories = get_metadata(dataset, 'max_categories',
