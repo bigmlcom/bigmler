@@ -328,18 +328,13 @@ def create_new_dataset(datasets, api, args, resume, name=None,
             u.log_message(message, log_file=session_file,
                           console=args.verbosity)
     if not resume:
-        if args.multi_dataset:
-            dataset_args = r.set_dataset_args(name, description, args,
-                                              fields, dataset_fields,
-                                              objective_field=objective_field)
-            if args.multi_dataset_json:
+        dataset_args = r.set_dataset_args(name, description, args,
+                                          fields, dataset_fields,
+                                          objective_field=objective_field)
+        if args.multi_dataset and args.multi_dataset_json:
                 dataset_args.update(args.multi_dataset_json)
         else:
-            dataset_args = {}
             dataset_args.update(args.dataset_json_generators)
-            dataset_args.update(r.set_dataset_args(
-                name, description, args, fields, dataset_fields,
-                objective_field=objective_field))
         new_dataset = r.create_dataset(origin_resource, dataset_args,
                                        args,
                                        api=api, path=path,

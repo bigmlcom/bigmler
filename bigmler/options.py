@@ -25,8 +25,10 @@ import argparse
 import datetime
 import pkg_resources
 
+import bigmler.analyze_options as analyze
 
-def create_parser(defaults={}, constants={}):
+
+def create_parser(general_defaults={}, constants={}):
     """Sets the accepted command options, variables, defaults and help
 
     """
@@ -36,6 +38,7 @@ def create_parser(defaults={}, constants={}):
     max_models = constants.get('MAX_MODELS')
     plurality = constants.get('PLURALITY')
     last = constants.get('LAST_PREDICTION')
+    defaults = general_defaults['BigMLer']
 
     version = pkg_resources.require("BigMLer")[0].version
     version_text = """\
@@ -51,11 +54,13 @@ distributed under the License is distributed on an \"AS IS\" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations
 under the License.""" % version
-    parser = argparse.ArgumentParser(
+    main_parser = argparse.ArgumentParser(
         description="A higher level API to BigML's API.",
         epilog="Happy predictive modeling!",
         version=version_text,
         formatter_class=argparse.RawTextHelpFormatter)
+    subparsers = main_parser.add_subparsers()
+    parser = subparsers.add_parser('main')
 
     # Shows log info for each https request.
     parser.add_argument('--debug',
@@ -1140,4 +1145,8 @@ under the License.""" % version
                         default=defaults.get('upload', True),
                         help="Enables upload for reports")   
 
-    return parser
+
+    # Subcommands
+    analyze.subparser_options(subparsers,
+                              defaults=general_defaults['BigMLer analyze'])
+    return main_parser
