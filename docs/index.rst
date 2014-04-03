@@ -552,6 +552,39 @@ Or, as another example, to tag the outliers of the same field one coud use::
 
     {"new_fields": [{"name": "outlier?", "field": "(if (within-percentiles? \"sepal length\" 0.5 0.95) \"normal\" \"outlier\")"}]}
 
+A dataset can also be generated as the union of several datasets using the
+flag ``--multi-dataset``. The datasets will be read from a file specified
+in the ``--datasets`` option and the file must contain one dataset id per line.
+
+::
+
+    bigmler --datasets my_datasets --multi-dataset --no-model
+
+This syntax is used when all the datasets in the ``my_datasets`` file share
+a common field structre, so the correspondence of the fields of all the
+datasets is straight forward. In the general case, the multi-dataset will
+inherit the field structure of the first component dataset.
+If you want to build a multi-dataset with
+datasets whose fields share not the same column disposition, you can specify
+which fields are correlated to the ones of the first dataset
+by mapping the fields of the rest of datasets to them.
+The option ``--multi-dataset-attributes`` can point to a JSON
+file that contains such a map. The command line syntax would then be::
+
+    bigmler --datasets my_datasets --multi-dataset \
+            --multi-dataset-attributes my_fields_map.json \
+            --no-model
+
+and for a simple case where the second dataset had flipped the first and second
+fields with respect to the first one, the file would read
+
+{"fields_maps": {"dataset/53330bce37203f222e00004b": {"000000": "000001",
+                                                      "000001": "000000"}}
+}
+
+where ``dataset/53330bce37203f222e00004b`` would be the id of the
+second dataset in the multi-dataset.
+
 Model Weights
 -------------
 
@@ -996,6 +1029,11 @@ between 2014-03-19 00:00:00 and 2014-03-20 00:00:00) and
 will delete all resources created after the ``source/532db2b637203f3f1a000104``
 was created.
 
+You can also combine both types of options, to delete sources tagged as
+``my_tag`` starting from a certain date on::
+
+    bigmler --delete --newer-than 2 --source-tag my_tag
+
 
 Resuming Previous Commands
 --------------------------
@@ -1070,6 +1108,8 @@ The set of negative flags is:
 --no-multi-label            as opposed to --multi-label
 --no-prediction-header      as opposed to --prediction-header
 --batch                     as opposed to --no-batch
+--no-balanced               as opposed to --balanced
+--no-multi-dataset          as opposed to --multi-dataset
 
 
 Support
@@ -1087,7 +1127,7 @@ Requirements
 
 Python 2.7 is currently supported by BigMLer.
 
-BigMLer requires `bigml 1.2.1 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 1.2.2 <https://github.com/bigmlcom/python>`_  or
 higher.
 
 BigMLer Installation

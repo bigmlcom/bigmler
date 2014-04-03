@@ -11,6 +11,8 @@ History
   predictions, batch predictions and evaluations.
 - Adding new --delete options: --newer-than and --older-than to delete lists
   of resources according to their creation date.
+- Adding --multi-dataset flag to generate a new dataset from a list of
+  equally structured datasets.
 
 1.4.7 (2014-03-14)
 ~~~~~~~~~~~~~~~~~~

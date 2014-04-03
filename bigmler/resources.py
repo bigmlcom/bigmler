@@ -324,7 +324,7 @@ def set_dataset_split_args(name, description, args, sample_rate,
 
 def create_dataset(source_or_dataset, dataset_args, verbosity, api=None,
                    path=None, session_file=None, log=None, dataset_type=None):
-    """Creates remote dataset
+    """Creates remote dataset from source, dataset or datasets list
 
     """
     if api is None:

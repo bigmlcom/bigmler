@@ -166,15 +166,6 @@ def delete_resources(command_args, api):
         (command_args.ensemble_tag, api.list_ensembles),
         (command_args.batch_prediction_tag, api.list_batch_predictions)]
 
-    for selector, api_call in resource_selectors:
-        query_string = None
-        if command_args.all_tag:
-            query_string = "tags__in=%s" % command_args.all_tag
-        elif selector:
-            query_string = "tags__in=%s" % selector
-        if query_string:
-            delete_list.extend(u.list_ids(api_call, query_string))
-
     query_string=None
     if command_args.older_than:
         date_str = get_date(command_args.older_than, api)
@@ -198,9 +189,24 @@ def delete_resources(command_args, api):
                      "integers (number of days), dates in YYYY-MM-DD format "
                      " and resource ids. Please, double-check your input.")
 
-    if query_string:
+    if (any([selector[0] is not None for selector in resource_selectors]) or
+        command_args.all_tag):
+        if query_string is None:
+            query_string = ""
+        else:
+            query_string += ";"
         for selector, api_call in resource_selectors:
-            delete_list.extend(u.list_ids(api_call, query_string))
+            combined_query = query_string
+            if command_args.all_tag:
+                combined_query += "tags__in=%s" % command_args.all_tag
+                delete_list.extend(u.list_ids(api_call, combined_query))
+            elif selector:
+                combined_query += "tags__in=%s" % selector
+                delete_list.extend(u.list_ids(api_call, combined_query))
+    else:
+        if query_string:
+            for selector, api_call in resource_selectors:
+                delete_list.extend(u.list_ids(api_call, query_string))
 
     message = u.dated("Deleting objects.\n")
     u.log_message(message, log_file=session_file,
@@ -315,6 +321,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         dataset_fields=dataset_fields, multi_label_data=multi_label_data,
         csv_properties=csv_properties,
         session_file=session_file, path=path, log=log)
+
     if datasets:
         dataset = datasets[0]
 
@@ -347,13 +354,24 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                      "Only these fields can be used with"
                      "  --max-categories")
 
-    # Check if the dataset a generators file associated with it, and
+    # If multi-dataset flag is on, generate a new dataset from the given
+    # list of datasets
+    if args.multi_dataset:
+        dataset, resume = pd.create_new_dataset(
+            datasets, api, args, resume, name=name,
+            description=description, fields=fields,
+            dataset_fields=dataset_fields, objective_field=objective_field,
+            session_file=session_file, path=path, log=log)
+        datasets = [dataset]
+
+    # Check if the dataset has a generators file associated with it, and
     # generate a new dataset with the specified field structure
     if args.new_fields:
         dataset, resume = pd.create_new_dataset(
             dataset, api, args, resume, name=name,
-            description=description, session_file=session_file, path=path,
-            log=log)
+            description=description, fields=fields,
+            dataset_fields=dataset_fields, objective_field=objective_field,
+            session_file=session_file, path=path, log=log)
         datasets[0] = dataset
     if args.multi_label and dataset and multi_label_data is None:
         multi_label_data = l.get_multi_label_data(dataset)
@@ -361,6 +379,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             all_labels, multi_label_fields) = l.multi_label_sync(
                 objective_field, labels, multi_label_data,
                 fields, multi_label_fields)
+
     if dataset:
         # retrieves max_categories data, if any
         args.max_categories = get_metadata(dataset, 'max_categories',

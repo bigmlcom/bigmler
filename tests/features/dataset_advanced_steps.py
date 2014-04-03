@@ -86,3 +86,62 @@ def i_check_dataset_has_field(step, attribute=None, field_id=None, value=None, t
         assert True
         return
     assert False
+
+
+@step(r'I create a multi-dataset from the datasets file and store logs in "(.*)"')
+def i_create_multi_dataset(step, output_dir):
+    if output_dir is None:
+        assert False
+    world.folders.append(output_dir)
+    datasets_file = "%s%sdataset" % (world.directory, os.sep)
+    try:
+        command = ("bigmler --datasets " + datasets_file +
+                   " --multi-dataset --no-model --store --output-dir " +
+                   output_dir)
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.directory = output_dir
+            world.output = output_dir
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+
+@step(r'I check that the multi-dataset\'s origin are the datasets in "(.*)"')
+def i_check_multi_dataset_origin(step, output_dir=None):
+    if output_dir is None:
+        assert False
+    datasets_file = "%s%sdataset" % (output_dir, os.sep) 
+    try:
+        origin_datasets = world.dataset['object']['ranges'].keys()
+        count = 0
+        with open(datasets_file, 'r') as datasets_file_handler:
+            for dataset_id in datasets_file_handler:
+                dataset_id = dataset_id.strip()
+                if not (dataset_id in origin_datasets):
+                    assert False
+                count += 1
+        if count != len(origin_datasets):
+            assert False
+        else:
+            assert True       
+    except KeyError:
+        assert False
+
+
+@step(r'I check that the multi-dataset has been created$')
+def i_check_create_multi_dataset(step):
+    dataset_file = "%s%sdataset_multi" % (world.directory, os.sep)
+    try:
+        with open(dataset_file, "r") as dataset_file_handler:
+            dataset_id = dataset_file_handler.readline().strip()
+        dataset = check_resource(dataset_id,
+                                 world.api.get_dataset)
+        world.datasets.append(dataset['resource'])
+        world.dataset = dataset
+        assert True
+    except Exception, exc:
+        assert False, str(exc)

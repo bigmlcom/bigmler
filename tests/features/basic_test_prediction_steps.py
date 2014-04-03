@@ -429,7 +429,8 @@ def i_check_create_dataset(step, suffix=None):
     dataset_file = "%s%sdataset%s" % (world.directory, os.sep, suffix)
     try:
         dataset_file = open(dataset_file, "r")
-        dataset_id = dataset_file.readline().strip()
+        for dataset_id in dataset_file:
+            dataset_id = dataset_id.strip()
         dataset = check_resource(dataset_id,
                                  world.api.get_dataset)
         world.datasets.append(dataset['resource'])
