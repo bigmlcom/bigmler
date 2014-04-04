@@ -145,13 +145,13 @@ def models_processing(datasets, models, model_ids, objective_field, fields,
                 if not resume:
                     message = u.dated("Found %s models out of %s. Resuming.\n"
                                       % (len(model_ids),
-                                         args.number_of_models))
+                                        args.number_of_models))
                     u.log_message(message, log_file=session_file,
                                   console=args.verbosity)
 
                 models = model_ids
                 args.number_of_models -= len(model_ids)
-            if args.max_categories is not None:
+            if args.max_categories > 0:
                 objective_field = None
 
             model_args = r.set_model_args(name, description, args,
