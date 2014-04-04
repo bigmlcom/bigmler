@@ -522,6 +522,8 @@ def create_models(datasets, model_ids, model_args,
     models = model_ids[:]
     existing_models = len(models)
     model_args_list = []
+    if args.test_datasets and args.evaluate:
+        args.number_of_models = len(args.dataset_ids)
     if not args.multi_label:
         datasets = datasets[existing_models:]
     dataset = datasets[0]
@@ -549,7 +551,8 @@ def create_models(datasets, model_ids, model_args,
                 new_seed = get_basic_seed(i + existing_models)
                 model_args.update(seed=new_seed)
             # one model per dataset (--max-categories or single model)
-            if args.max_categories > 0:
+            if (args.max_categories or
+                (args.test_datasets and args.evaluate)) > 0:
                 dataset = datasets[i]
                 model = api.create_model(dataset, model_args)
             else:
@@ -934,6 +937,8 @@ def create_evaluations(model_ids, datasets, evaluation_args, args, api=None,
     if api is None:
         api = bigml.api.BigML()
     remaining_ids = model_ids[existing_evaluations:]
+    if args.test_datasets:
+        remaining_datasets = datasets[existing_evaluations:]
     number_of_evaluations = len(remaining_ids)
     message = dated("Creating evaluations.\n")
     log_message(message, log_file=session_file,
@@ -942,6 +947,8 @@ def create_evaluations(model_ids, datasets, evaluation_args, args, api=None,
     inprogress = []
     for i in range(0, number_of_evaluations):
         model = remaining_ids[i]
+        if args.test_datasets:
+            dataset = remaining_datasets[i]
         wait_for_available_tasks(inprogress, args.max_parallel_evaluations,
                                  api.get_evaluation, "evaluation")
 

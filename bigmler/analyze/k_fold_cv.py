@@ -52,7 +52,8 @@ def create_kfold_cv(args):
     if args.output_dir is None:
         args.output_dir = a.NOW
     (extended_file, selecting_file_list,
-     selecting_out_file_list) = create_kfold_json(args.output_dir)
+     selecting_out_file_list) = create_kfold_json(args.output_dir,
+                                                  k=args.k_fold_cv)
     if args.dataset:
         create_kfold_dataset(args.dataset, args.output_dir, args.k_fold_cv,
                              extended_file, selecting_file_list,
@@ -71,7 +72,7 @@ def create_kfold_json(output_dir, kfold_field=DEFAULT_KFOLD_FIELD, k=5):
             extended_dataset.write(new_file)
         selecting_file_list = []
         selecting_out_file_list = []
-        for index in range(0, k - 1):
+        for index in range(0, k):
             selecting_file = TRAIN_DATASET % index
             selecting_file =  "%s%s%s" % (output_dir, os.sep, selecting_file)
             selecting_file_list.append(selecting_file)

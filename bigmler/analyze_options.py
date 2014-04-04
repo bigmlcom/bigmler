@@ -30,6 +30,7 @@ def subparser_options(subparsers, defaults={}):
                                  action='store',
                                  dest='k_fold_cv',
                                  default=defaults.get('k_fold_cv', None),
+                                 type=int,
                                  help="K-fold cross-validation index.")
     # Name of the directory where session files will be stored. If --output
     # is set, this setting will be overriden by it.

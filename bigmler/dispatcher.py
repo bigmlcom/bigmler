@@ -415,14 +415,12 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             all_labels, multi_label_fields) = l.multi_label_sync(
                 objective_field, labels, multi_label_data, fields,
                 multi_label_fields)
-
     datasets, resume, csv_properties, fields = pd.dataset_processing(
         source, training_set, test_set, fields, objective_field,
         api, args, resume, name=name, description=description,
         dataset_fields=dataset_fields, multi_label_data=multi_label_data,
         csv_properties=csv_properties,
         session_file=session_file, path=path, log=log)
-
     if datasets:
         dataset = datasets[0]
 
@@ -487,7 +485,6 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                                            args.max_categories)
         other_label = get_metadata(dataset, 'other_label',
                                    other_label)
-
     models, model_ids, ensemble_ids, resume = pm.models_processing(
         datasets, models, model_ids,
         objective_field, fields, api, args, resume,
@@ -497,7 +494,6 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if models:
         model = models[0]
         single_model = len(models) == 1
-
     # If multi-label flag is set and no training_set was provided, label
     # info is extracted from the user_metadata. If models belong to an
     # ensemble, the ensemble must be retrieved to get the user_metadata.
@@ -657,28 +653,38 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # json and human-readable format.
     if args.evaluate:
 
-        if args.multi_label and args.test_set is not None:
-            # When evaluation starts from existing models, the
-            # multi_label_fields can be retrieved from the user_metadata
-            # in the models
-            if args.multi_label_fields is None and multi_label_fields:
-                args.multi_label_fields = multi_label_fields
-            test_set = ps.multi_label_expansion(
-                test_set, test_set_header, objective_field, args, path,
-                labels=labels, session_file=session_file)[0]
-            test_set_header = True
+        if args.test_datasets:
+            # Evaluate the models with the corresponding test datasets.
+            resume = evaluate(models, args.test_dataset_ids, output, api,
+                              args, resume, name=name, description=description,
+                              fields=fields, dataset_fields=dataset_fields,
+                              fields_map=fields_map,
+                              session_file=session_file, path=path,
+                              log=log, labels=labels, all_labels=all_labels,
+                              objective_field=objective_field)
+        else:
+            if args.multi_label and args.test_set is not None:
+                # When evaluation starts from existing models, the
+                # multi_label_fields can be retrieved from the user_metadata
+                # in the models
+                if args.multi_label_fields is None and multi_label_fields:
+                    args.multi_label_fields = multi_label_fields
+                test_set = ps.multi_label_expansion(
+                    test_set, test_set_header, objective_field, args, path,
+                    labels=labels, session_file=session_file)[0]
+                test_set_header = True
 
-        if args.test_split > 0:
-            dataset = test_dataset
-        dataset_fields = pd.get_fields_structure(dataset, None)
-        models_or_ensembles = ensemble_ids if ensemble_ids != [] else models
-        resume = evaluate(models_or_ensembles, [dataset], output, api,
-                          args, resume, name=name, description=description,
-                          fields=fields, dataset_fields=dataset_fields,
-                          fields_map=fields_map,
-                          session_file=session_file, path=path,
-                          log=log, labels=labels, all_labels=all_labels,
-                          objective_field=objective_field)
+            if args.test_split > 0:
+                dataset = test_dataset
+            dataset_fields = pd.get_fields_structure(dataset, None)
+            models_or_ensembles = ensemble_ids if ensemble_ids != [] else models
+            resume = evaluate(models_or_ensembles, [dataset], output, api,
+                              args, resume, name=name, description=description,
+                              fields=fields, dataset_fields=dataset_fields,
+                              fields_map=fields_map,
+                              session_file=session_file, path=path,
+                              log=log, labels=labels, all_labels=all_labels,
+                              objective_field=objective_field)
 
     # If cross_validation_rate is > 0, create remote evaluations and save
     # results in json and human-readable format. Then average the results to

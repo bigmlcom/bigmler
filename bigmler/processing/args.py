@@ -129,8 +129,9 @@ def parse_and_check(parser, args, train_stdin, test_stdin):
 
     if (command_args.evaluate
         and not (command_args.training_set or command_args.source
-                 or command_args.dataset)
-        and not ((command_args.test_set or command_args.test_split) and
+                 or command_args.dataset or command_args.datasets)
+        and not ((command_args.test_set or command_args.test_split or
+                  command_args.test_datasets) and
                  (command_args.model or
                   command_args.models or command_args.model_tag or
                   command_args.ensemble or command_args.ensembles or
@@ -320,6 +321,13 @@ def transform_args(command_args, flags, api, user_defaults):
         if len(dataset_ids) == 1:
             command_args.dataset = dataset_ids[0]
         command_args.dataset_ids = dataset_ids
+
+    test_dataset_ids = None
+    command_args.test_dataset_ids = []
+    # Parses dataset/id if provided.
+    if command_args.test_datasets:
+        test_dataset_ids = u.read_datasets(command_args.test_datasets)
+        command_args.test_dataset_ids = test_dataset_ids
 
     # Retrieve dataset/ids if provided.
     if command_args.dataset_tag:

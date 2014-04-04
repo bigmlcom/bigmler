@@ -258,13 +258,13 @@ under the License.""" % version
                               " per line (e.g., model/50a206a8035d0706dc000376"
                               ")."))
 
-    # The path to a file containing a dataset id.
+    # The path to a file containing dataset ids.
     parser.add_argument('--datasets',
                         action='store',
                         dest='datasets',
                         default=defaults.get('datasets', None),
-                        help=("Path to a file containing a dataset/id. Just"
-                              " one dataset"
+                        help=("Path to a file containing dataset/ids. Just"
+                              " one dataset per line"
                               " (e.g., dataset/50a20697035d0706da0004a4)."))
 
     # Sets pruning.
@@ -800,6 +800,15 @@ under the License.""" % version
                         help=("Directory where session files will be stored."
                               " --output file path will override it if both"
                               " are set."))
+
+    # The path to a file containing dataset ids.
+    parser.add_argument('--test-datasets',
+                        action='store',
+                        dest='test_datasets',
+                        default=defaults.get('test_datasets', None),
+                        help=("Path to a file containing dataset/ids. Just"
+                              " one dataset per line"
+                              " (e.g., dataset/50a20697035d0706da0004a4)."))
 
     # Path to the file containing fields generators for the new dataset.
     # Used when generating a dataset from another by adding new fields
