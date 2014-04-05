@@ -116,6 +116,8 @@ def i_check_create_max_categories_datasets(step):
             dataset_id = line.strip()
             dataset = check_resource(dataset_id,
                                      world.api.get_dataset)
+            assert ('user_metadata' in dataset['object'] and 'max_categories'
+                    in dataset['object']['user_metadata'])
             world.datasets.append(dataset['resource'])
             number_of_datasets += 1
         world.number_of_models = number_of_datasets
