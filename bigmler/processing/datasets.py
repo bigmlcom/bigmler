@@ -286,16 +286,15 @@ def create_categories_datasets(dataset, distribution,
                 "new_fields": [
                     {"name": fields.field_name(fields.objective_field),
                      "field": category_generator,
-                     "label": "max_categories: %s" % args.max_categories}]}
+                     "label": "max_categories: %s" % args.max_categories}],
+                 "user_metadata": 
+                 {"max_categories": args.max_categories,
+                 "other_label": other_label}}
             new_dataset = r.create_dataset(
                 dataset, dataset_args, args.verbosity, api=api, path=path,
                 session_file=session_file, log=log, dataset_type="parts")
             new_dataset = bigml.api.check_resource(new_dataset,
                                                    api.get_dataset)
-            user_metadata = {"user_metadata": 
-                {"max_categories": args.max_categories,
-                 "other_label": other_label}}
-            new_dataset = api.update_dataset(new_dataset, user_metadata)
             datasets.append(new_dataset)
     return datasets, resume
 
