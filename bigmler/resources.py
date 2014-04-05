@@ -444,7 +444,7 @@ def set_model_args(name, description,
     if args.objective_weights:
         model_args.update(objective_weights=args.objective_weights_json)
 
-    if other_label:
+    if args.max_categories > 0:
         model_args.update(
             user_metadata={'other_label': other_label,
                            'max_categories': args.max_categories})

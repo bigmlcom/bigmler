@@ -3,6 +3,14 @@
 History
 -------
 
+1.5.1 (2014-04-04)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug for model building, when objective field was specified and
+  no --max-category was present the user given objective was not used.
+- Fixing bug: max-category data stored even when --max-category was not
+  used.
+
 1.5.0 (2014-03-24)
 ~~~~~~~~~~~~~~~~~~
 

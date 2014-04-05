@@ -433,6 +433,9 @@ def i_check_create_dataset(step, suffix=None):
             dataset_id = dataset_id.strip()
         dataset = check_resource(dataset_id,
                                  world.api.get_dataset)
+        assert (not 'user_metadata' in dataset['object'] or
+                not 'max_categories'
+                in dataset['object']['user_metadata'])
         world.datasets.append(dataset['resource'])
         world.dataset = dataset
         dataset_file.close()
