@@ -131,7 +131,8 @@ FLAGS = {'BigMLer': [{'flag': 'debug', 'type': 'boolean'},
                      {'flag': 'shared', 'type': 'boolean'},
                      {'flag': 'reports', 'type': 'list'},
                      {'flag': 'upload', 'type': 'boolean'},
-                     {'flag': 'test_dataset', 'type': 'string'}],
+                     {'flag': 'test_dataset', 'type': 'string'},
+                     {'flag': 'dataset_off', 'type': 'boolean'}],
          'BigMLer analyze': [
                      {'flag': 'k-fold-cross-validation', 'type': 'integer'}]}
 

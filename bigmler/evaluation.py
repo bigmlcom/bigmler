@@ -63,12 +63,12 @@ def evaluate(models_or_ensembles, datasets, output, api, args, resume,
             suffix = file_labels[index]
             file_name += "_%s" % suffix
             evaluation_files.append("%s.json" % file_name)
-        if args.test_datasets:
+        if args.test_datasets or args.dataset_off:
             suffix = evaluation['resource'].replace('evaluation/', '_')
             file_name += "_%s" % suffix
             evaluation_files.append("%s.json" % file_name)
         r.save_evaluation(evaluation, file_name, api)
-    if args.multi_label or args.test_datasets:
+    if args.multi_label or args.test_datasets or args.dataset_off:
         mean_evaluation = average_evaluations(evaluation_files)
         r.save_evaluation(mean_evaluation, output, api)
     return resume

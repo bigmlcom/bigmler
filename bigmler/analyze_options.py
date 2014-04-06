@@ -19,28 +19,40 @@
 """Parser for BigMLer analyze
 
 """
+from __future__ import absolute_import
 
-def subparser_options(subparsers, defaults={}):
+
+from bigmler.common_options import common_options
+
+
+def subparser_options(subparsers, defaults={}, constants={}):
     """Adding arguments for the analyze subcommand
 
     """
 
     parser_analysis = subparsers.add_parser('analyze')
+
+    common_options(parser_analysis, defaults=defaults, constants=constants)
+
+    # K-fold cross-validation index
     parser_analysis.add_argument('--k-fold-cross-validation',
                                  action='store',
                                  dest='k_fold_cv',
                                  default=defaults.get('k_fold_cv', None),
                                  type=int,
                                  help="K-fold cross-validation index.")
+
     # Name of the directory where session files will be stored. If --output
     # is set, this setting will be overriden by it.
     parser_analysis.add_argument('--output-dir',
                                  action='store',
                                  dest='output_dir',
                                  default=defaults.get('output_dir', None),
-                                 help=("Directory where session files will be stored."
-                                       " --output file path will override it if both"
+                                 help=("Directory where session files will be"
+                                       " stored. --output file path will "
+                                       " override it if both"
                                        " are set."))
+
     # If a BigML dataset is provided, the script won't create a new one
     parser_analysis.add_argument('--dataset',
                                  action='store',

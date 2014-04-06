@@ -14,8 +14,6 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
-
 """Parser for BigMLer
 
 """
@@ -26,6 +24,8 @@ import datetime
 import pkg_resources
 
 import bigmler.analyze_options as analyze
+
+from bigmler.common_options import common_options
 
 
 def create_parser(general_defaults={}, constants={}):
@@ -62,32 +62,7 @@ under the License.""" % version
     subparsers = main_parser.add_subparsers()
     parser = subparsers.add_parser('main')
 
-    # Shows log info for each https request.
-    parser.add_argument('--debug',
-                        action='store_true',
-                        default=defaults.get('debug', False),
-                        help="Activate debug level")
-
-    # Uses BigML dev environment. Sizes must be under 16MB though.
-    parser.add_argument('--dev',
-                        action='store_true',
-                        dest='dev_mode',
-                        default=defaults.get('dev', False),
-                        help=("Compute a test output using BigML FREE"
-                             " development environment."))
-
-    # BigML's username.
-    parser.add_argument('--username',
-                        action='store',
-                        default=defaults.get('username', None),
-                        help="BigML's username.")
-
-    # BigML's API key.
-    parser.add_argument('--api-key',
-                        action='store',
-                        dest='api_key',
-                        default=defaults.get('api-key', None),
-                        help="BigML's API key.")
+    common_options(parser, defaults=defaults, constants=constants)
 
     # Path to the training set.
     parser.add_argument('--train',
@@ -213,7 +188,7 @@ under the License.""" % version
                         help="The test set file hasn't a header.")
 
     # Name to be used with the source and then with datasets, models and
-    # predicitions.
+    # predictions.
     parser.add_argument('--name',
                         action='store',
                         dest='name',
@@ -410,14 +385,6 @@ under the License.""" % version
                         default=defaults.get('no_model', False),
                         help="Do not create a model.")
 
-    # Log file to store resources ids.
-    parser.add_argument('--resources-log',
-                        action='store',
-                        dest='log_file',
-                        default=defaults.get('resources_log', None),
-                        help=("Path to a file to store new resources ids."
-                              " One resource per line"
-                              " (e.g., model/50a206a8035d0706dc000376)."))
     # Changes to delete mode.
     parser.add_argument('--delete',
                         action='store_true',
@@ -556,13 +523,6 @@ under the License.""" % version
                               "One definition per line (e.g., 00000,"
                               "00000a)."))
 
-    # Clear global bigmler log files
-    parser.add_argument('--clear-logs',
-                        action='store_true',
-                        dest='clear_logs',
-                        default=defaults.get('clear_logs', False),
-                        help="Clear global bigmler log files.")
-
     # Set the part of training data to be held out for cross-validation
     parser.add_argument('--cross-validation-rate',
                         action='store',
@@ -580,14 +540,6 @@ under the License.""" % version
                         default=defaults.get('number_of_evaluations', 0),
                         help=("Number of evaluations used for"
                               " cross-validation."))
-
-    # Stores the retrieved resources in the output directory
-    parser.add_argument('--store',
-                        action='store_true',
-                        dest='store',
-                        default=defaults.get('store', False),
-                        help=("Store the retrieved resources in the"
-                              " output directory."))
 
     # Set the part of training data to be held out for testing
     parser.add_argument('--test-split',
@@ -810,6 +762,15 @@ under the License.""" % version
                               " one dataset per line"
                               " (e.g., dataset/50a20697035d0706da0004a4)."))
 
+    # Evaluations flag: excluding one dataset from the datasets list to test
+    parser.add_argument('--dataset-off',
+                        action='store_true',
+                        dest='dataset_off',
+                        default=defaults.get('dataset_off', False),
+                        help=("Excluding one dataset at a time from the"
+                              " datasets list to test."))
+
+
     # Path to the file containing fields generators for the new dataset.
     # Used when generating a dataset from another by adding new fields
     # combining or setting its contents.
@@ -985,21 +946,6 @@ under the License.""" % version
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #
-    # Hides log info for each https request.
-    parser.add_argument('--no-debug',
-                        action='store_false',
-                        dest='debug',
-                        default=defaults.get('debug', False),
-                        help="Deactivate debug level.")
-
-    # Uses BigML standard environment.
-    parser.add_argument('--no-dev',
-                        action='store_false',
-                        dest='dev_mode',
-                        default=defaults.get('dev', False),
-                        help=("Compute a test output using BigML "
-                             "standard development environment."))
-
     # Set when the training set file does include a header on the first
     # line.
     parser.add_argument('--train-header',
@@ -1154,8 +1100,15 @@ under the License.""" % version
                         default=defaults.get('upload', True),
                         help="Enables upload for reports")   
 
+    # Dataset-off. Turning off the dataset-off flag.
+    parser.add_argument('--no-dataset-off',
+                        action='store_false',
+                        dest='dataset_off',
+                        default=defaults.get('dataset_off', False),
+                        help="Do not generate a new dataset.")
 
     # Subcommands
     analyze.subparser_options(subparsers,
-                              defaults=general_defaults['BigMLer analyze'])
+                              defaults=general_defaults['BigMLer analyze'],
+                              constants=constants)
     return main_parser

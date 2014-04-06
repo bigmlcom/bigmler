@@ -677,7 +677,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             if args.test_split > 0:
                 dataset = test_dataset
             dataset_fields = pd.get_fields_structure(dataset, None)
-            models_or_ensembles = ensemble_ids if ensemble_ids != [] else models
+            models_or_ensembles = (ensemble_ids if ensemble_ids != []
+                                   else models)
             resume = evaluate(models_or_ensembles, [dataset], output, api,
                               args, resume, name=name, description=description,
                               fields=fields, dataset_fields=dataset_fields,

@@ -286,7 +286,7 @@ def set_basic_dataset_args(name, description, args):
 
 
 def set_dataset_args(name, description, args, fields, dataset_fields,
-                     objective_field=None, multi_label_data=None):
+                     objective_field=None, multi_label_data=None, method=None):
     """Return dataset arguments dict
 
     """
@@ -522,7 +522,8 @@ def create_models(datasets, model_ids, model_args,
     models = model_ids[:]
     existing_models = len(models)
     model_args_list = []
-    if args.test_datasets and args.evaluate:
+    if ((args.test_datasets and args.evaluate) or
+        (args.datasets and args.evaluate and args.dataset_off)):
         args.number_of_models = len(args.dataset_ids)
     if not args.multi_label:
         datasets = datasets[existing_models:]
@@ -555,6 +556,10 @@ def create_models(datasets, model_ids, model_args,
                 (args.test_datasets and args.evaluate)) > 0:
                 dataset = datasets[i]
                 model = api.create_model(dataset, model_args)
+            elif args.dataset_off and args.evaluate:
+                multi_dataset = datasets[:]
+                del multi_dataset[i]
+                model = api.create_model(multi_dataset, model_args)
             else:
                 model = api.create_model(datasets, model_args)
             model_id = check_resource_error(model, "Failed to create model: ")
@@ -957,6 +962,7 @@ def create_evaluations(model_ids, datasets, evaluation_args, args, api=None,
         if args.cross_validation_rate > 0:
             new_seed = get_basic_seed(i + existing_evaluations)
             evaluation_args.update(seed=new_seed)
+
         evaluation = api.create_evaluation(model, dataset, evaluation_args)
         evaluation_id = check_resource_error(evaluation,
                                              "Failed to create evaluation: ")
