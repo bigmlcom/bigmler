@@ -87,15 +87,6 @@ under the License.""" % version
                         default=defaults.get('output', None),
                         help="Path to the file to output predictions.")
 
-    # The name of the field that represents the objective field (i.e., class or
-    # label) or its column number.
-    parser.add_argument('--objective',
-                        action='store',
-                        dest='objective_field',
-                        default=defaults.get('objective', None),
-                        help=("The column number of the Objective Field"
-                              " or its name, if headers are given."))
-
     # Category code.
     parser.add_argument('--category',
                         action='store',
@@ -273,13 +264,6 @@ under the License.""" % version
                         default=defaults.get('replacement', False),
                         help="Use replacement when sampling.")
 
-    # Max number of models to create in parallel.
-    parser.add_argument('--max-parallel-models',
-                        action='store',
-                        dest='max_parallel_models',
-                        default=defaults.get('max_parallel_models', 1),
-                        type=int,
-                        help="Max number of models to create in parallel.")
 
     # Max number of models to predict from in parallel.
     parser.add_argument('--max-batch-models',
@@ -580,15 +564,6 @@ under the License.""" % version
                               " too, 'full' will write in a row the"
                               " input data that generates the prediction"
                               " followed by the latter."))
-
-    # Max number of evaluations to create in parallel.
-    parser.add_argument('--max-parallel-evaluations',
-                        action='store',
-                        dest='max_parallel_evaluations',
-                        default=defaults.get('max_parallel_evaluations', 1),
-                        type=int,
-                        help=("Max number of evaluations to create in"
-                              " parallel."))
 
     # Test set field separator. Defaults to the locale csv
     # separator.

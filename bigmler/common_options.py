@@ -99,6 +99,21 @@ def common_options(parser, defaults={}, constants={}):
                         help=("The column number of the Objective Field"
                               " or its name, if headers are given."))
 
+    # Use it to add a tag to the new resources created.
+    defaults_tag = defaults.get('tag')
+    defaults_tag = [] if defaults_tag is None else defaults_tag.split(",")
+    parser.add_argument('--tag',
+                        action='append',
+                        default=defaults_tag,
+                        help="Tag to later retrieve new resources.")
+
+    # Avoid default tagging of resources.
+    parser.add_argument('--no-tag',
+                        action='store_false',
+                        dest='no_tag',
+                        default=defaults.get('no_tag', True),
+                        help="No tag resources with default BigMLer tags.")
+
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #
