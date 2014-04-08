@@ -131,3 +131,20 @@ def common_options(parser, defaults={}, constants={}):
                         default=defaults.get('dev', False),
                         help=("Compute a test output using BigML "
                              "standard development environment."))
+
+    # Input fields to include in the model.
+    parser.add_argument('--model-fields',
+                        action='store',
+                        dest='model_fields',
+                        default=defaults.get('model_fields', None),
+                        help=("Comma-separated list of input fields"
+                              " (predictors) to create the model."))
+
+    # Turn on/off verbosity
+    parser.add_argument('--verbosity',
+                        action='store',
+                        dest='verbosity',
+                        default=defaults.get('verbosity', 1),
+                        type=int,
+                        choices=[0, 1],
+                        help="Set verbosity: 0 to turn off, 1 to turn on.")

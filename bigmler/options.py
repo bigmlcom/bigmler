@@ -154,14 +154,6 @@ under the License.""" % version
                         default=defaults.get('lisp_filter', None),
                         help="File including a Lisp filter.")
 
-    # Input fields to include in the model.
-    parser.add_argument('--model-fields',
-                        action='store',
-                        dest='model_fields',
-                        default=defaults.get('model_fields', None),
-                        help=("Comma-separated list of input fields"
-                              " (predictors) to create the model."))
-
     # Set when the training set file doesn't include a header on the first
     # line.
     parser.add_argument('--no-train-header',
@@ -280,20 +272,6 @@ under the License.""" % version
                         dest='randomize',
                         default=defaults.get('randomize', False),
                         help="Randomize feature selection at each split.")
-
-    # Use it to add a tag to the new resources created.
-    defaults_tag = defaults.get('tag')
-    defaults_tag = [] if defaults_tag is None else defaults_tag.split(",")
-    parser.add_argument('--tag',
-                        action='append',
-                        default=defaults_tag,
-                        help="Tag to later retrieve new resources.")
-    # Avoid default tagging of resources.
-    parser.add_argument('--no-tag',
-                        action='store_false',
-                        dest='no_tag',
-                        default=defaults.get('no_tag', True),
-                        help="No tag resources with default BigMLer tags.")
 
     # Use it to retrieve models that were tagged with tag.
     parser.add_argument('--model-tag',
@@ -487,15 +465,6 @@ under the License.""" % version
     parser.add_argument('--evaluate',
                         action='store_true',
                         help="Evaluate command.")
-
-    # Turn on/off verbosity
-    parser.add_argument('--verbosity',
-                        action='store',
-                        dest='verbosity',
-                        default=defaults.get('verbosity', 1),
-                        type=int,
-                        choices=[0, 1],
-                        help="Set verbosity: 0 to turn off, 1 to turn on.")
 
     # The path to a file containing the mapping of fields' ids from
     # the test dataset fields to the model fields.

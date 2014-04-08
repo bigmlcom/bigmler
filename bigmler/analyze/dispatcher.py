@@ -35,7 +35,7 @@ from bigmler.prediction import (MAX_MODELS, OTHER, COMBINATION,
                                 THRESHOLD_CODE)
 from bigmler.defaults import get_user_defaults
 from bigmler.options import create_parser
-from bigmler.analyze.k_fold_cv import create_kfold_cv
+from bigmler.analyze.k_fold_cv import create_kfold_cv, create_features_analysis
 from bigmler.utils import check_dir
 from bigmler.dispatcher import SESSIONS_LOG
 
@@ -59,9 +59,9 @@ def analyze_dispatcher(args=sys.argv[1:]):
     log = None
     if command_args.log_file:
         u.check_dir(command_args.log_file)
-        log = args.log_file
+        log = command_args.log_file
         # If --clear_logs the log files are cleared
-        if args.clear_logs:
+        if command_args.clear_logs:
             try:
                 open(log, 'w', 0).close()
             except IOError:
@@ -74,6 +74,18 @@ def analyze_dispatcher(args=sys.argv[1:]):
         path = check_dir("%s%sbigmler_session" % (command_args.output_dir,
                                                   os.sep))
 
+    if command_args.model_fields:
+        command_args.model_fields_ = map(str.strip,
+                                         command_args.model_fields.split(','))
+    else:
+        command_args.model_fields_ = {}
+
     # k-fold cross-validation
-    if command_args.k_fold_cv is not None and command_args.dataset is not None:
+    if (command_args.cv and command_args.k_folds is not None
+        and command_args.dataset is not None):
         create_kfold_cv(command_args, api)
+
+    # features analysis
+    if command_args.features and command_args.k_folds is not None:
+        print "features"
+        create_features_analysis(command_args, api)

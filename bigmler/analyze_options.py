@@ -34,11 +34,18 @@ def subparser_options(subparsers, defaults={}, constants={}):
 
     common_options(parser_analysis, defaults=defaults, constants=constants)
 
+    # K-fold cross-validation flag
+    parser_analysis.add_argument('--cross-validation',
+                                 action='store_true',
+                                 dest='cv',
+                                 default=defaults.get('cv', False),
+                                 help="K-fold cross-validation flag.")
+
     # K-fold cross-validation index
-    parser_analysis.add_argument('--k-fold-cross-validation',
+    parser_analysis.add_argument('--k-folds',
                                  action='store',
-                                 dest='k_fold_cv',
-                                 default=defaults.get('k_fold_cv', None),
+                                 dest='k_folds',
+                                 default=defaults.get('k_folds', None),
                                  type=int,
                                  help="K-fold cross-validation index.")
 
@@ -59,3 +66,28 @@ def subparser_options(subparsers, defaults={}, constants={}):
                                  dest='dataset',
                                  default=defaults.get('dataset', None),
                                  help="BigML dataset Id.")
+
+    # Staleness to stop --features analysis
+    parser_analysis.add_argument('--staleness',
+                                 action='store',
+                                 dest='staleness',
+                                 type=float,
+                                 default=defaults.get('staleness', None),
+                                 help=("Limit staleness when using --features"
+                                       " analysis."))
+
+    # Penalty per feature in --features analysis
+    parser_analysis.add_argument('--penalty',
+                                 action='store',
+                                 dest='penalty',
+                                 type=float,
+                                 default=defaults.get('penalty', None),
+                                 help=("Penalty for each feature in --features"
+                                       " analysis."))
+
+    # Features: Set on the feature exclusion analysis
+    parser_analysis.add_argument('--features',
+                                 action='store_true',
+                                 dest='features',
+                                 default=defaults.get('features', False),
+                                 help="Features analysis")

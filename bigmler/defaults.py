@@ -134,7 +134,9 @@ FLAGS = {'BigMLer': [{'flag': 'debug', 'type': 'boolean'},
                      {'flag': 'test_dataset', 'type': 'string'},
                      {'flag': 'dataset_off', 'type': 'boolean'}],
          'BigMLer analyze': [
-                     {'flag': 'k-fold-cross-validation', 'type': 'integer'}]}
+                     {'flag': 'k-fold', 'type': 'integer'},
+                     {'flag': 'cv', 'type': 'boolean'},
+                     {'flag': 'features', 'type': 'boolean'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):

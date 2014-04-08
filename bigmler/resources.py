@@ -436,15 +436,15 @@ def set_model_args(name, description,
     # If cross_validation_rate = n/100, then we choose to run 2 * n evaluations
     # by holding out a n% of randomly sampled data.
 
-    if ((args.evaluate and args.test_split == 0) or
+    if ((args.evaluate and args.test_split == 0 and args.test_datasets) or
             args.cross_validation_rate > 0):
         model_args.update(seed=SEED)
         if args.cross_validation_rate > 0:
             args.sample_rate = 1 - args.cross_validation_rate
             args.replacement = False
-        elif args.sample_rate == 1:
+        elif args.sample_rate == 1 and args.test_datasets is None:
             args.sample_rate = EVALUATE_SAMPLE_RATE
-
+    print args.sample_rate
     if model_fields and fields is not None:
         input_fields = configure_input_fields(fields, model_fields)
         model_args.update(input_fields=input_fields)
@@ -705,7 +705,8 @@ def set_ensemble_args(name, description, args, model_fields,
     # we choose a deterministic sampling with
     # args.sample_rate (80% by default) of the data to create the model
 
-    if (args.evaluate and args.test_split == 0):
+    if (args.evaluate and args.test_split == 0 and
+        args.test_datasets is None and not args.dataset_off):
         ensemble_args.update(seed=SEED)
         if args.sample_rate == 1:
             args.sample_rate = EVALUATE_SAMPLE_RATE
@@ -889,6 +890,9 @@ def set_evaluation_args(name, description, args, fields=None,
         return evaluation_args
     # [--train|--dataset] --test-split --evaluate
     if (args.test_split > 0 and (args.training_set or args.dataset)):
+        return evaluation_args
+    # --datasets --test-datasets
+    if (args.datasets and (args.test_datasets or args.dataset_off)):
         return evaluation_args
     if args.sample_rate == 1:
         args.sample_rate = EVALUATE_SAMPLE_RATE
