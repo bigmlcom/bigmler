@@ -39,20 +39,24 @@ from bigml.fields import Fields
 from bigmler.dispatcher import main_dispatcher
 from bigmler.processing.datasets import get_fields_structure
 
-ACCURACY = "phi"
+ACCURACY = "accuracy"
+AVG_PREFIX = "average_%s"
+R_SQUARED = "r_squared"
 
 EXTENDED_DATASET = "kfold_dataset.json"
 TEST_DATASET = "kfold_dataset-%s.json"
 
-SELECTING_KFOLD = '["%s", %s, ["field", "%s"]]'
-NEW_FIELD = '{"new_fields": [{"name": "%s", "field": "(rand-int %s)"}]}'
+NEW_FIELD = ('{"row_offset": %s, "row_step": %s,'
+             ' "new_fields": [{"name": "%s", "field": "%s"}],'
+             ' "objective_field": {"id": "%s"}}')
 
-COMMAND_EXTENDED = ("main --dataset %s --new-field %s --no-model --output-dir "
-                    "%s%sextended")
-COMMAND_SELECTION = ("main --dataset %s --json-filter %s --no-model"
-                     " --output-dir %s%s%s --objective %s --dataset-fields=-%s")
+COMMAND_SELECTION = ("main --dataset %s --new-field %s --no-model --output-dir"
+                     " %s")
+COMMAND_OBJECTIVE = ("main --dataset %s --objective %s --no-model"
+                     " --name %s --output-dir %s")
 COMMAND_CREATE_CV = ("main --datasets %s --output-dir %s"
-                     " --dataset-off --evaluate")
+                     " --dataset-off --evaluate"
+                     " --name eval_%s")
 DEFAULT_KFOLD_FIELD = "__kfold__"
 
 # difference needed to become new best node
@@ -65,32 +69,42 @@ DEFAULT_PENALTY = 0.001
 DEFAULT_STALENESS = 0.001
 
 
-def create_kfold_cv(args, api):
+def create_kfold_cv(args, api, common_options):
     """Creates the kfold cross-validation
 
     """
-    datasets_file = create_kfold_datasets_file(args, api)
+    datasets_file, objective_column = create_kfold_datasets_file(
+        args, api, common_options)
     if datasets_file is not None:
-        create_kfold_evaluations(
-            datasets_file, "%s%sk_fold" % (u.check_dir(datasets_file), os.sep),
-            model_fields=args.model_fields)
+        args.output_dir = "%s%sk_fold" % (u.check_dir(datasets_file), os.sep)
+        message = ('Creating the kfold evaluations.........\n')
+        u.log_message(message, log_file=args.session_file,
+                      console=args.verbosity)
+        create_kfold_evaluations(datasets_file, args, common_options)
 
 
-def create_features_analysis(args, api):
+def create_features_analysis(args, api, common_options):
     """Analyzes the features in the dataset to find the ones that
        optimize the model performance
 
     """
-    datasets_file = create_kfold_datasets_file(args, api)
-    best_first_search(datasets_file, api, args, staleness=args.staleness,
-                      penalty=args.penalty)
+    datasets_file, objective_column = create_kfold_datasets_file(
+        args, api, common_options)
+    message = ('Creating the best features set..........\n')
+    u.log_message(message, log_file=args.session_file,
+                  console=args.verbosity)
+    best_first_search(datasets_file, api, args, common_options,
+                      staleness=args.staleness,
+                      penalty=args.penalty, objective_column=objective_column)
 
 
-def create_kfold_datasets_file(args, api):
+def create_kfold_datasets_file(args, api, common_options):
     """Create the kfold dataset resources and store their ids in a file
        one per line
 
     """
+    message = ('Creating the kfold datasets............\n')
+    u.log_message(message, log_file=args.session_file, console=args.verbosity)
     if args.output_dir is None:
         args.output_dir = a.NOW
     # retrieve dataset
@@ -101,43 +115,40 @@ def create_kfold_datasets_file(args, api):
         fields = Fields(dataset, {"objective_field": args.objective_field,
                                   "objective_field_present": True})
         fields.objective_field
+        objective_id = fields.field_id(fields.objective_field)
         kfold_field_name = avoid_duplicates(DEFAULT_KFOLD_FIELD, fields)
-        # creating auxiliar json files to generate test datasets
-        extended_file, selecting_file_list = create_kfold_json(
-            args.output_dir, kfold_field=kfold_field_name, k=args.k_folds)
-        # generate test datasets, models and evaluations
-        datasets_file = create_kfold_datasets(dataset_id, args.output_dir,
-                                              args.k_folds,
-                                              extended_file,
+        # create jsons to generate partial datasets
+        selecting_file_list = create_kfold_json(args.output_dir,
+                                                kfold_field_name, args.k_folds,
+                                                objective_id) 
+        # generate test datasets
+        datasets_file = create_kfold_datasets(dataset_id, args,
                                               selecting_file_list,
                                               fields.objective_field,
-                                              kfold_field_name)
-        return datasets_file 
+                                              kfold_field_name,
+                                              common_options)
+        return datasets_file, fields.field_column_number(objective_id)
     return None    
 
 
 def create_kfold_json(output_dir, kfold_field=DEFAULT_KFOLD_FIELD,
-                      k=5):
+                      k=5, objective_field=None):
     """Create the files to generate a new field with a random integer from
        0 to k-1, and a filter file for each of these indexes.
 
     """
 
-    new_file = NEW_FIELD % (kfold_field, k)
     try:
-        extended_file = "%s%s%s" % (output_dir, os.sep, EXTENDED_DATASET) 
-        with open(extended_file, "w") as extended_dataset:
-            extended_dataset.write(new_file)
         selecting_file_list = []
-        selecting_out_file_list = []
         for index in range(0, k):
+            new_field = NEW_FIELD % (index, k, kfold_field,
+                                     index, objective_field)
             selecting_file = TEST_DATASET % index
             selecting_file =  "%s%s%s" % (output_dir, os.sep, selecting_file)
             selecting_file_list.append(selecting_file)
             with open(selecting_file, "w") as test_dataset:
-                test_dataset.write(SELECTING_KFOLD % ("!=", index,
-                                                      kfold_field))
-        return (extended_file, selecting_file_list)
+                test_dataset.write(new_field)
+        return selecting_file_list
     except IOError:
         sys.exit("Could not create the necessary files.")
 
@@ -152,50 +163,59 @@ def avoid_duplicates(field_name, fields, affix="_"):
     return field_name
 
 
-def create_kfold_datasets(dataset, output_dir, k, extended_file,
-                          selecting_file_list, objective, kfold_field):
+def create_kfold_datasets(dataset, args,
+                          selecting_file_list, objective, kfold_field,
+                          common_options):
     """Calling the bigmler procedure to create the k-fold datasets
 
     """
-    # creating the extended dataset
-    extended_dataset_file = "%s%sextended%sdataset_gen" % (output_dir, os.sep,
-                                                           os.sep)
-    command = COMMAND_EXTENDED % (dataset, extended_file,
-                                  output_dir, os.sep)
-    main_dispatcher(args=command.split())
-    # getting the extended dataset id
-    with open(extended_dataset_file, "r") as extended_handler:
-        extended_dataset_id = extended_handler.readline().strip()
+    output_dir = "%s%s%s" % (args.output_dir, os.sep, "test")
+    k = args.k_folds
     # creating the selecting datasets
     for index in range(0, len(selecting_file_list)):
         command = COMMAND_SELECTION % (
-            extended_dataset_id, selecting_file_list[index],
-            output_dir, os.sep, "test", objective, kfold_field)
-        print command
-        main_dispatcher(args=(COMMAND_SELECTION % (
-            extended_dataset_id, selecting_file_list[index],
-            output_dir, os.sep, "test", objective, kfold_field)).split())
+            dataset, selecting_file_list[index],
+            output_dir)
+        command_args = command.split()
+        common_options_list = u.get_options_list(args, common_options,
+                                                 prioritary=command_args)
+        command_args.extend(common_options_list)
+        main_dispatcher(args=command_args)
     # creating the models from the datasets' files (multidatasets excluding
     # one test dataset at a time)
-    datasets_directory = "%s%stest%s" % (output_dir, os.sep, os.sep)
-    datasets_file = "%sdataset_gen" % datasets_directory
+    datasets_file = "%s%sdataset_gen" % (output_dir, os.sep)
+    with open(datasets_file) as datasets_handler:
+        for line in datasets_handler:
+            dataset_id = line.strip()
+            command = COMMAND_OBJECTIVE % (dataset_id, objective,
+                                           "dataset_%s" % index, output_dir)
+            command_args = command.split()
+            common_options_list = u.get_options_list(args, common_options,
+                                                     prioritary=command_args)
+            command_args.extend(common_options_list)
+            main_dispatcher(args=command_args)
+
     return datasets_file
 
 
-def create_kfold_evaluations(datasets_file, output_dir, model_fields=None):
+def create_kfold_evaluations(datasets_file, args, counter, common_options):
     """ Create k-fold cross-validation from a datasets file
 
     """
-
-    command = COMMAND_CREATE_CV % (datasets_file, output_dir)
-    command_list = command.split()
-    if model_fields is not None:
-        command_list.append("--model-fields")
-        command_list.append(model_fields)
-    print command_list
-    main_dispatcher(args=command_list)
+    output_dir = u.check_dir("%s%s/evaluation.json" % (args.output_dir,
+                                                       counter))
+    model_fields = args.model_fields
+    command = COMMAND_CREATE_CV % (datasets_file, output_dir,
+                                   args.model_fields.replace(" ", "_"))
+    command_args = command.split()
+    if model_fields:
+        command_args.append("--model-fields")
+        command_args.append(model_fields)
+    common_options_list = u.get_options_list(args, common_options,
+                                             prioritary=command_args)
+    command_args.extend(common_options_list)
+    main_dispatcher(args=command_args)
     evaluation_file = "%s%sevaluation.json" % (output_dir, os.sep)
-    print evaluation_file
     try:
         with open(evaluation_file) as evaluation_handler:
             evaluation = json.loads(evaluation_handler.read())
@@ -215,7 +235,7 @@ def find_max_state(states):
 
 
 def expand_state(parent):
-    """Get all connected nodes
+    """Get all connected states
 
     """
     children = []
@@ -226,11 +246,12 @@ def expand_state(parent):
     return children
 
 
-def best_first_search(datasets_file, api, args,
-                      staleness=None, penalty=None):
+def best_first_search(datasets_file, api, args, common_options,
+                      staleness=None, penalty=None, objective_column=None):
     """Selecting the fields to be used in the model construction
 
     """
+    counter = 0
     if staleness is None:
         staleness = DEFAULT_STALENESS
     if penalty is None:
@@ -244,7 +265,7 @@ def best_first_search(datasets_file, api, args,
     dataset = api.check_resource(dataset_id, api.get_dataset)
     # initial feature set
     fields = Fields(dataset)
-    objective_id = fields.field_id(fields.objective_field)
+    objective_id = fields.field_id(objective_column)
     field_ids = [field_id for field_id in fields.preferred_fields()
                  if field_id != objective_id]
     initial_state = [False for field_id in field_ids]
@@ -254,17 +275,18 @@ def best_first_search(datasets_file, api, args,
     best_unchanged_count = 0
     while best_unchanged_count < staleness:
         (state, score) = find_max_state(open_list)
-        state_ids = [field_ids[i] for (i, val) in enumerate(state) if val]
-        print "state_ids:", state_ids
-        print "score:", score
-        print('Max state is: %s\n Accuracy = %f' % (state_ids, score))
+        state_fields = [fields.field_name(field_ids[i])
+                        for (i, val) in enumerate(state) if val]
         closed_list.append((state, score))
         open_list.remove((state, score))
         if (score - EPSILON) > best_accuracy:
             best_state = state
             best_accuracy = score
             best_unchanged_count = 0
-            print('new best state')
+            message = 'New best state: %s\n Accuracy = %f' % (state_fields,
+                                                              score)
+            u.log_message(message, log_file=args.session_file,
+                          console=args.verbosity)
         else:
             best_unchanged_count += 1
 
@@ -274,36 +296,43 @@ def best_first_search(datasets_file, api, args,
                     and child not in [state for state, _ in closed_list]):
                 input_fields = [fields.field_name(field_id) for (i, field_id)
                                 in enumerate(field_ids) if child[i]]
-                print('Evaluating %s' % input_fields)
                 # create models and evaluation with input_fields
+                args.model_fields = ",".join(input_fields)
+                counter += 1
                 score = kfold_evaluate(datasets_file, api,
-                                       model_fields=",".join(input_fields),
+                                       args, counter, common_options,
                                        penalty=penalty)
                 open_list.append((child, score))
 
     best_features = [fields.field_name(field_ids[i]) for (i, score)
                      in enumerate(best_state) if score]
-    print('The best feature subset is: %s \n Accuracy = %0.2f%%'
-          % (best_features, best_accuracy*100))
-    print('Evaluated %d/%d feature subsets' %
-          ((len(open_list) + len(closed_list)), 2**len(field_ids)))
+    message = ('The best feature subset is: %s \n'
+               % ", ".join(best_features))
+    u.log_message(message, log_file=args.session_file, console=1)
+    message = ('Accuracy = %0.2f%%\n' % (best_accuracy * 100))
+    u.log_message(message, log_file=args.session_file, console=1)
+    message = ('Evaluated %d/%d feature subsets\n' %
+               ((len(open_list) + len(closed_list)), 2 ** len(field_ids)))
+    u.log_message(message, log_file=args.session_file, console=1)
 
 
-def kfold_evaluate(datasets_file, api, model_fields=None, 
+def kfold_evaluate(datasets_file, api, args, counter, common_options,
                    penalty=DEFAULT_PENALTY,
                    measurement=ACCURACY):
     """Scoring k-fold cross-validation using the given feature subset
 
     """
     # create evaluation with input_fields
-    evaluation = create_kfold_evaluations(
-        datasets_file, "%s%skfold" % (u.check_dir(datasets_file), os.sep),
-        model_fields=model_fields)
+    args.output_dir = "%s%skfold" % (u.check_dir(datasets_file), os.sep)
+    evaluation = create_kfold_evaluations(datasets_file, args,
+                                          counter, common_options)
 
     evaluation = evaluation.get('model', {})
-    measurement = "average_%s" % measurement
-    if measurement in evaluation:
-        return (evaluation[measurement] -
-                penalty * len(model_fields.split(",")))
-    else:
-        sys.exit("Failed to find %s in the evaluation" % measurement)
+    avg_measurement = AVG_PREFIX % measurement
+    if not avg_measurement in evaluation:
+        avg_measurement = AVG_PREFIX % R_SQUARED
+        if not avg_measurement in evaluation:
+            sys.exit("Failed to find %s or r-squared in the evaluation"
+                     % measurement)
+    return (evaluation[avg_measurement] -
+            penalty * len(args.model_fields.split(",")))

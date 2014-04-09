@@ -62,7 +62,9 @@ under the License.""" % version
     subparsers = main_parser.add_subparsers()
     parser = subparsers.add_parser('main')
 
-    common_options(parser, defaults=defaults, constants=constants)
+    # list of common options
+    common_options_set = common_options(parser, defaults=defaults,
+                                        constants=constants)
 
     # Path to the training set.
     parser.add_argument('--train',
@@ -1052,7 +1054,7 @@ under the License.""" % version
                         help="Do not generate a new dataset.")
 
     # Subcommands
-    analyze.subparser_options(subparsers,
-                              defaults=general_defaults['BigMLer analyze'],
-                              constants=constants)
-    return main_parser
+    analyze.subparser_options(
+        subparsers, defaults=general_defaults['BigMLer analyze'],
+        constants=constants)
+    return main_parser, common_options_set

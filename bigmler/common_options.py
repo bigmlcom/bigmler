@@ -22,11 +22,13 @@ def common_options(parser, defaults={}, constants={}):
     """Adds common options to the given parser
 
     """
+    options = []
     # Shows log info for each https request.
     parser.add_argument('--debug',
                         action='store_true',
                         default=defaults.get('debug', False),
                         help="Activate debug level")
+    options.append('--debug')
 
     # Uses BigML dev environment. Sizes must be under 16MB though.
     parser.add_argument('--dev',
@@ -35,12 +37,14 @@ def common_options(parser, defaults={}, constants={}):
                         default=defaults.get('dev', False),
                         help=("Compute a test output using BigML FREE"
                              " development environment."))
+    options.append('--dev')
 
     # BigML's username.
     parser.add_argument('--username',
                         action='store',
                         default=defaults.get('username', None),
                         help="BigML's username.")
+    options.append('--username')
 
     # BigML's API key.
     parser.add_argument('--api-key',
@@ -48,6 +52,7 @@ def common_options(parser, defaults={}, constants={}):
                         dest='api_key',
                         default=defaults.get('api-key', None),
                         help="BigML's API key.")
+    options.append('--api-key')
 
     # Log file to store resources ids.
     parser.add_argument('--resources-log',
@@ -57,6 +62,7 @@ def common_options(parser, defaults={}, constants={}):
                         help=("Path to a file to store new resources ids."
                               " One resource per line"
                               " (e.g., model/50a206a8035d0706dc000376)."))
+    options.append('--resources-log')
 
     # Stores the retrieved resources in the output directory
     parser.add_argument('--store',
@@ -65,6 +71,7 @@ def common_options(parser, defaults={}, constants={}):
                         default=defaults.get('store', False),
                         help=("Store the retrieved resources in the"
                               " output directory."))
+    options.append('--store')
 
     # Clear global bigmler log files
     parser.add_argument('--clear-logs',
@@ -72,6 +79,7 @@ def common_options(parser, defaults={}, constants={}):
                         dest='clear_logs',
                         default=defaults.get('clear_logs', False),
                         help="Clear global bigmler log files.")
+    options.append('--clear-logs')
 
     # Max number of models to create in parallel.
     parser.add_argument('--max-parallel-models',
@@ -80,6 +88,7 @@ def common_options(parser, defaults={}, constants={}):
                         default=defaults.get('max_parallel_models', 1),
                         type=int,
                         help="Max number of models to create in parallel.")
+    options.append('--max-parallel-models')
 
     # Max number of evaluations to create in parallel.
     parser.add_argument('--max-parallel-evaluations',
@@ -89,6 +98,7 @@ def common_options(parser, defaults={}, constants={}):
                         type=int,
                         help=("Max number of evaluations to create in"
                               " parallel."))
+    options.append('--max-parallel-evaluations')
 
     # The name of the field that represents the objective field (i.e., class or
     # label) or its column number.
@@ -98,6 +108,7 @@ def common_options(parser, defaults={}, constants={}):
                         default=defaults.get('objective', None),
                         help=("The column number of the Objective Field"
                               " or its name, if headers are given."))
+    options.append('--objective')
 
     # Use it to add a tag to the new resources created.
     defaults_tag = defaults.get('tag')
@@ -106,6 +117,7 @@ def common_options(parser, defaults={}, constants={}):
                         action='append',
                         default=defaults_tag,
                         help="Tag to later retrieve new resources.")
+    options.append('--tag')
 
     # Avoid default tagging of resources.
     parser.add_argument('--no-tag',
@@ -113,6 +125,7 @@ def common_options(parser, defaults={}, constants={}):
                         dest='no_tag',
                         default=defaults.get('no_tag', True),
                         help="No tag resources with default BigMLer tags.")
+    options.append('--no-tag')
 
     # The following options are only useful to deactivate the corresponding
     # oposed default values
@@ -123,6 +136,7 @@ def common_options(parser, defaults={}, constants={}):
                         dest='debug',
                         default=defaults.get('debug', False),
                         help="Deactivate debug level.")
+    options.append('--no-debug')
 
     # Uses BigML standard environment.
     parser.add_argument('--no-dev',
@@ -131,6 +145,7 @@ def common_options(parser, defaults={}, constants={}):
                         default=defaults.get('dev', False),
                         help=("Compute a test output using BigML "
                              "standard development environment."))
+    options.append('--no-dev')
 
     # Input fields to include in the model.
     parser.add_argument('--model-fields',
@@ -139,6 +154,7 @@ def common_options(parser, defaults={}, constants={}):
                         default=defaults.get('model_fields', None),
                         help=("Comma-separated list of input fields"
                               " (predictors) to create the model."))
+    options.append('--model-fields')
 
     # Turn on/off verbosity
     parser.add_argument('--verbosity',
@@ -148,3 +164,6 @@ def common_options(parser, defaults={}, constants={}):
                         type=int,
                         choices=[0, 1],
                         help="Set verbosity: 0 to turn off, 1 to turn on.")
+    options.append('--verbosity')
+
+    return options

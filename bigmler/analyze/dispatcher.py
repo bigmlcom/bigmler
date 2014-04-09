@@ -47,13 +47,15 @@ def analyze_dispatcher(args=sys.argv[1:]):
     # Parses command line arguments.
 
     user_defaults = get_user_defaults()
-    parser = create_parser(general_defaults=user_defaults,
-                           constants={'NOW': a.NOW,
-                                      'MAX_MODELS': MAX_MODELS,
-                                      'PLURALITY': PLURALITY})
+    parser, common_options = create_parser(
+        general_defaults=user_defaults,
+        constants={'NOW': a.NOW,
+                   'MAX_MODELS': MAX_MODELS,
+                   'PLURALITY': PLURALITY})
 
     command_args = parser.parse_args(args)
-    session_file = "%s%s%s" % (command_args.output_dir, os.sep, SESSIONS_LOG)
+    command_args.session_file = "%s%s%s" % (command_args.output_dir,
+                                            os.sep, SESSIONS_LOG)
     csv_properties = {}
     # If logging is required, open the file for logging
     log = None
@@ -68,7 +70,8 @@ def analyze_dispatcher(args=sys.argv[1:]):
                 pass
 
     # create api instance form args
-    api = a.get_api_instance(command_args, u.check_dir(session_file))
+    api = a.get_api_instance(command_args,
+                             u.check_dir(command_args.session_file))
 
     if command_args.output_dir:
         path = check_dir("%s%sbigmler_session" % (command_args.output_dir,
@@ -83,9 +86,8 @@ def analyze_dispatcher(args=sys.argv[1:]):
     # k-fold cross-validation
     if (command_args.cv and command_args.k_folds is not None
         and command_args.dataset is not None):
-        create_kfold_cv(command_args, api)
+        create_kfold_cv(command_args, api, common_options)
 
     # features analysis
     if command_args.features and command_args.k_folds is not None:
-        print "features"
-        create_features_analysis(command_args, api)
+        create_features_analysis(command_args, api, common_options)

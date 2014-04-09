@@ -133,10 +133,11 @@ def main_dispatcher(args=sys.argv[1:]):
             command_log.write(message)
         resume = False
     user_defaults = get_user_defaults()
-    parser = create_parser(general_defaults=user_defaults,
-                           constants={'NOW': a.NOW,
-                                      'MAX_MODELS': MAX_MODELS,
-                                      'PLURALITY': PLURALITY})
+    parser, common_options = create_parser(
+        general_defaults=user_defaults,
+        constants={'NOW': a.NOW,
+                   'MAX_MODELS': MAX_MODELS,
+                   'PLURALITY': PLURALITY})
     # Parses command line arguments.
     command_args = a.parse_and_check(parser, args, train_stdin, test_stdin)
 
@@ -164,10 +165,11 @@ def main_dispatcher(args=sys.argv[1:]):
                                         command_args.stack_level)
         defaults_file = "%s%s%s" % (output_dir, os.sep, DEFAULTS_FILE)
         user_defaults = get_user_defaults(defaults_file)
-        parser = create_parser(general_defaults=user_defaults,
-                               constants={'NOW': a.NOW,
-                                          'MAX_MODELS': MAX_MODELS,
-                                          'PLURALITY': PLURALITY})
+        parser, common_options = create_parser(
+            general_defaults=user_defaults,
+            constants={'NOW': a.NOW,
+                       'MAX_MODELS': MAX_MODELS,
+                       'PLURALITY': PLURALITY})
 
         # Parses resumed arguments.
         command_args = a.parse_and_check(parser, args, train_stdin, test_stdin)
@@ -653,7 +655,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # json and human-readable format.
     if args.evaluate:
 
-        if args.test_datasets:
+        if args.test_dataset_ids:
             # Evaluate the models with the corresponding test datasets.
             resume = evaluate(models, args.test_dataset_ids, output, api,
                               args, resume, name=name, description=description,
