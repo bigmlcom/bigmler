@@ -436,8 +436,8 @@ def set_model_args(name, description,
     # If cross_validation_rate = n/100, then we choose to run 2 * n evaluations
     # by holding out a n% of randomly sampled data.
 
-    if ((args.evaluate and args.test_split == 0 and args.test_datasets) or
-            args.cross_validation_rate > 0):
+    if ((args.evaluate and args.test_split == 0 and args.test_datasets is None)
+        or args.cross_validation_rate > 0):
         model_args.update(seed=SEED)
         if args.cross_validation_rate > 0:
             args.sample_rate = 1 - args.cross_validation_rate
