@@ -74,6 +74,7 @@ COMMAND_LOG = ".bigmler"
 DIRS_LOG = ".bigmler_dir_stack"
 SESSIONS_LOG = "bigmler_sessions"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
+MINIMUM_MODEL = "full=false"
 
 
 def has_test(args):
@@ -412,13 +413,30 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             resource = model
         multi_label_data = l.get_multi_label_data(resource)
 
+    # We update the model's public state if needed
+    if model:
+        if isinstance(model, basestring):
+            if not args.evaluate:
+                query_string = MINIMUM_MODEL
+            else:
+                query_string = r.FIELDS_QS
+                model = u.check_resource(model, api.get_model,
+                                         query_string=query_string)
+        if (args.black_box or args.white_box or
+                r.shared_changed(args.shared, model)):
+            model_args = {}
+            if r.shared_changed(args.shared, model):
+                model_args.update(shared=args.shared)
+            if args.black_box or args.white_box:
+                model_args.update(r.set_publish_model_args(args))
+            if model_args:
+                model = r.update_model(model, model_args, args.verbosity,
+                                       api=api, session_file=session_file)
+                models[0] = model
+
     # We get the fields of the model if we haven't got
-    # them yet and update its public state if needed
-    if model and not args.evaluate and (test_set or args.black_box
-                                        or args.white_box):
-        if args.black_box or args.white_box:
-            model = r.publish_model(model, args, api, session_file)
-            models[0] = model
+    # them yet and need them
+    if model and not args.evaluate and test_set:
         # If more than one model, use the full field structure
         if (not single_model and not args.multi_label and
                 belongs_to_ensemble(model)):

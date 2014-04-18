@@ -118,6 +118,14 @@ def get_new_objective(fields, objective, dataset):
     return objective
 
 
+def shared_changed(shared, resource):
+    """Returns True if the shared status of the resource differs from the user
+       given value
+
+    """
+    return resource['object']['shared'] != shared
+
+
 def dataset_processing(source, training_set, test_set, fields, objective_field,
                        api, args, resume,  name=None, description=None,
                        dataset_fields=None, multi_label_data=None,
@@ -179,9 +187,11 @@ def dataset_processing(source, training_set, test_set, fields, objective_field,
         new_objective = get_new_objective(fields, args.objective_field,
                                           dataset)
 
-        if (new_objective is not None or args.dataset_attributes):
+        if (new_objective is not None or args.dataset_attributes or
+            shared_changed(args.shared, dataset)):
             dataset_args = r.set_dataset_args(name, description, args, fields,
                                               dataset_fields, objective_field)
+            dataset_args.update(shared=args.shared)
             dataset = r.update_dataset(dataset, dataset_args, args.verbosity,
                                        api=api, session_file=session_file)
             dataset = r.get_dataset(dataset, api, args.verbosity, session_file)
