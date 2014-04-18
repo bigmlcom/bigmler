@@ -266,9 +266,9 @@ If you also want to make public your dataset::
 
     bigmler --train data/iris.csv --public-dataset
 
-You can also share your datasets, models and evaluations privately with whoever
-you chose by generating a private link. The ``--shared`` flag will create such
-a link::
+You can also share your datasets, models and evaluations privately with
+whomever you choose by generating a private link. The ``--shared`` flag will
+create such a link::
 
     bigmler --dataset dataset/534487ef37203f0d6b000894 --shared --no-model
 
@@ -278,11 +278,6 @@ and the link will be listed in the output of the command::
     [2014-04-18 09:29:27] Retrieving dataset. https://bigml.com/dashboard/dataset/534487ef37203f0d6b000894
     [2014-04-18 09:29:30] Updating dataset. https://bigml.com/dashboard/dataset/534487ef37203f0d6b000894
     [2014-04-18 09:29:30] Shared dataset link. https://bigml.com/shared/dataset/8VPwG7Ny39g1mXBRD1sKQLuHrqE
-                                                  
-    Generated files:
-
-     FriApr1814_092927
-      └─bigmler_sessions
 
 
 or can also be found in the information pannel for the resource through the

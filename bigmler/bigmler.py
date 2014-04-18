@@ -167,7 +167,7 @@ def delete_resources(command_args, api):
         (command_args.ensemble_tag, api.list_ensembles),
         (command_args.batch_prediction_tag, api.list_batch_predictions)]
 
-    query_string=None
+    query_string = None
     if command_args.older_than:
         date_str = get_date(command_args.older_than, api)
         if date_str:
@@ -191,7 +191,7 @@ def delete_resources(command_args, api):
                      " and resource ids. Please, double-check your input.")
 
     if (any([selector[0] is not None for selector in resource_selectors]) or
-        command_args.all_tag):
+            command_args.all_tag):
         if query_string is None:
             query_string = ""
         else:

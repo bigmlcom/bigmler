@@ -59,7 +59,14 @@ def shared_changed(shared, resource):
        given value
 
     """
-    return resource['object']['shared'] != shared
+    return is_shared(resource) != shared
+
+
+def is_shared(resource):
+    """Checks if a resource is shared
+
+    """
+    return resource['object'].get('shared', False)
 
 
 def configure_input_fields(fields, user_given_fields):
@@ -113,7 +120,7 @@ def wait_for_available_tasks(inprogress, max_parallel, get_function,
                              resource_type, query_string=None, wait_step=2):
     """According to the max_parallel number of parallel resources to be
        created, when the number of in progress resources reaches the limit,
-       it checks the ones in inprogress to see if there's a 
+       it checks the ones in inprogress to see if there's a
        FINISHED or FAULTY resource. If found, it is removed from the
        inprogress list and returns to allow another one to be created.
 
@@ -398,7 +405,7 @@ def update_dataset(dataset, dataset_args, verbosity,
     log_message(message, log_file=session_file,
                 console=verbosity)
     dataset = api.update_dataset(dataset, dataset_args)
-    if dataset['object']['shared']:
+    if is_shared(dataset):
         message = dated("Shared dataset link. %s\n" %
                         get_url(dataset, shared=True))
         log_message(message, log_file=session_file,
@@ -584,7 +591,7 @@ def update_model(model, model_args, verbosity,
     model = api.update_model(model, model_args)
     check_resource_error(model, "Failed to update model: %s"
                          % model['resource'])
-    if model['object']['shared']:
+    if is_shared(model):
         message = dated("Shared model link. %s\n" %
                         get_url(model, shared=True))
         log_message(message, log_file=session_file, console=verbosity)
@@ -807,7 +814,7 @@ def get_ensemble(ensemble, api=None, verbosity=True, session_file=None):
 
 
 def set_publish_model_args(args):
-    """Set args to publish model 
+    """Set args to publish model
 
     """
     public_model = {}
@@ -946,7 +953,7 @@ def create_evaluations(model_ids, datasets, evaluation_args, args, api=None,
         log_message("%s\n" % evaluation['resource'], log_file=log)
 
     if (args.number_of_evaluations < 2 and len(evaluations) == 1
-        and args.verbosity):
+            and args.verbosity):
         evaluation = evaluations[0]
         if bigml.api.get_status(evaluation)['code'] != bigml.api.FINISHED:
             try:
@@ -993,7 +1000,7 @@ def update_evaluation(evaluation, evaluation_args, verbosity,
     evaluation = api.update_evaluation(evaluation, evaluation_args)
     check_resource_error(evaluation, "Failed to update evaluation: %s"
                          % evaluation['resource'])
-    if evaluation['object']['shared']:
+    if is_shared(evaluation):
         message = dated("Shared evaluation link. %s\n" %
                         get_url(evaluation, shared=True))
         log_message(message, log_file=session_file, console=verbosity)
