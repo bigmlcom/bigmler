@@ -3,14 +3,10 @@
 History
 -------
 
-.. _bigmler1.6.0:
-
-1.6.0 (2014-04-17)
+1.6.0 (2014-04-18)
 ~~~~~~~~~~~~~~~~~~
 
 - Adding the --shared flag to share the created dataset, model and evaluation
-
-.. _bigmler1.5.1:
 
 1.5.1 (2014-04-04)
 ~~~~~~~~~~~~~~~~~~
@@ -19,8 +15,6 @@ History
   no --max-category was present the user given objective was not used.
 - Fixing bug: max-category data stored even when --max-category was not
   used.
-
-.. _bigmler1.5.0:
 
 1.5.0 (2014-03-24)
 ~~~~~~~~~~~~~~~~~~
@@ -33,8 +27,6 @@ History
 - Adding --multi-dataset flag to generate a new dataset from a list of
   equally structured datasets.
 
-.. _bigmler1.4.7:
-
 1.4.7 (2014-03-14)
 ~~~~~~~~~~~~~~~~~~
 
@@ -44,8 +36,6 @@ History
               more tasks than permitted to be sent in parallel.
 - Improving multi-label training data uploads by zipping the extended file and
   transforming booleans from True/False to 1/0.
-
-.. _bigmler1.4.6:
 
 1.4.6 (2014-02-21)
 ~~~~~~~~~~~~~~~~~~
