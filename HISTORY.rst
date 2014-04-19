@@ -3,11 +3,13 @@
 History
 -------
 
+.. _bigml1.6.0
 1.6.0 (2014-04-17)
 ~~~~~~~~~~~~~~~~~~
 
 - Adding the --shared flag to share the created dataset, model and evaluation
 
+.. _bigml1.5.1
 1.5.1 (2014-04-04)
 ~~~~~~~~~~~~~~~~~~
 
@@ -16,6 +18,7 @@ History
 - Fixing bug: max-category data stored even when --max-category was not
   used.
 
+.. _bigml1.5.0
 1.5.0 (2014-03-24)
 ~~~~~~~~~~~~~~~~~~
 
@@ -27,6 +30,7 @@ History
 - Adding --multi-dataset flag to generate a new dataset from a list of
   equally structured datasets.
 
+.. _bigml1.4.7
 1.4.7 (2014-03-14)
 ~~~~~~~~~~~~~~~~~~
 

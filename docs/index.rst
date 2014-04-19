@@ -1147,6 +1147,11 @@ Python 2.7 is currently supported by BigMLer.
 BigMLer requires `bigml 1.2.2 <https://github.com/bigmlcom/python>`_  or
 higher.
 
+Note that using proportional missing strategy for local predictions can also
+require `numpy <http://www.numpy.org/>`_ and
+`scipy <http://www.scipy.org/>`_ libraries. They are not installed by
+default. Check the bindings documentation for more info.
+
 BigMLer Installation
 ====================
 
