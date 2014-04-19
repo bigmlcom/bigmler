@@ -943,6 +943,15 @@ under the License.""" % version
                         help=("Path to a json file describing multi-dataset"
                               " attributes."))
 
+    # Shared. Shares all shareable resources and uses its shared links in
+    # reports
+    parser.add_argument('--shared',
+                        action='store_true',
+                        dest='shared',
+                        default=defaults.get('shared', False),
+                        help=("Share resources and use its shared urls "
+                              " in reports."))
+
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #
@@ -1098,4 +1107,13 @@ under the License.""" % version
                         dest='multi_dataset',
                         default=defaults.get('multi_dataset', False),
                         help="Do not generate a new dataset.")
+
+    # Shared. Shares all shareable resources and uses its shared links in
+    # reports
+    parser.add_argument('--unshared',
+                        action='store_false',
+                        dest='shared',
+                        default=defaults.get('shared', False),
+                        help=("Share resources and use its shared urls "
+                              " in reports."))
     return parser

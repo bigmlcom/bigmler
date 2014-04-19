@@ -251,8 +251,8 @@ a similar set in ``./dir2`` and combine all of them to generate the final
 prediction.
 
 
-Making your Dataset and Model public
--------------------------------------
+Making your Dataset and Model public or share it privately
+----------------------------------------------------------
 
 Creating a model and making it public in BigML's gallery is as easy as::
 
@@ -265,6 +265,23 @@ If you just want to share it as a black-box model just use::
 If you also want to make public your dataset::
 
     bigmler --train data/iris.csv --public-dataset
+
+You can also share your datasets, models and evaluations privately with
+whomever you choose by generating a private link. The ``--shared`` flag will
+create such a link::
+
+    bigmler --dataset dataset/534487ef37203f0d6b000894 --shared --no-model
+
+and the link will be listed in the output of the command::
+
+    bigmler --dataset dataset/534487ef37203f0d6b000894 --shared --no-model
+    [2014-04-18 09:29:27] Retrieving dataset. https://bigml.com/dashboard/dataset/534487ef37203f0d6b000894
+    [2014-04-18 09:29:30] Updating dataset. https://bigml.com/dashboard/dataset/534487ef37203f0d6b000894
+    [2014-04-18 09:29:30] Shared dataset link. https://bigml.com/shared/dataset/8VPwG7Ny39g1mXBRD1sKQLuHrqE
+
+
+or can also be found in the information pannel for the resource through the
+web interface.
 
 Content
 -------
@@ -1108,9 +1125,9 @@ The set of negative flags is:
 --no-multi-label            as opposed to --multi-label
 --no-prediction-header      as opposed to --prediction-header
 --batch                     as opposed to --no-batch
---no-balanced               as opposed to --balanced
+--no-balance                as opposed to --balance
 --no-multi-dataset          as opposed to --multi-dataset
-
+--unshared                  as opposed to --shared
 
 Support
 =======
@@ -1129,6 +1146,11 @@ Python 2.7 is currently supported by BigMLer.
 
 BigMLer requires `bigml 1.2.2 <https://github.com/bigmlcom/python>`_  or
 higher.
+
+Note that using proportional missing strategy for local predictions can also
+require `numpy <http://www.numpy.org/>`_ and
+`scipy <http://www.scipy.org/>`_ libraries. They are not installed by
+default. Check the bindings documentation for more info.
 
 BigMLer Installation
 ====================
@@ -1358,6 +1380,9 @@ Data Configuration
                                     classes evenly
 --weight-field FIELD                Field name or column number that contains
                                     the weights to be used for each instance
+--shared                            Creates a secret link for every
+                                    dataset, model or evaluation used in the
+                                    command
 
 Remote Resources
 ----------------

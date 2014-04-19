@@ -3,6 +3,11 @@
 History
 -------
 
+1.6.0 (2014-04-18)
+~~~~~~~~~~~~~~~~~~
+
+- Adding the --shared flag to share the created dataset, model and evaluation
+
 1.5.1 (2014-04-04)
 ~~~~~~~~~~~~~~~~~~
 

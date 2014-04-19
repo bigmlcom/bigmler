@@ -53,6 +53,11 @@ def evaluate(models_or_ensembles, datasets, output, api, args, resume,
         evaluation = evaluations[index]
         evaluation = r.get_evaluation(evaluation, api, args.verbosity,
                                       session_file)
+        if r.shared_changed(args.shared, evaluation):
+            evaluation_args = {"shared": args.shared}
+            evaluation = r.update_evaluation(evaluation, evaluation_args,
+                                             args.verbosity, api=None,
+                                             session_file=None)
         file_name = output
         if args.multi_label:
             suffix = file_labels[index]

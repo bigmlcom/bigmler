@@ -460,6 +460,12 @@ def i_check_create_new_dataset(step):
         assert False, str(exc)
 
 
+@step(r'I check that the dataset has been created and shared$')
+def i_check_create_dataset_shared(step):
+    i_check_create_dataset(step)
+    assert world.dataset['object']['shared']
+
+
 @step(r'I check that the model has been created')
 def i_check_create_model(step):
     model_file = "%s%smodels" % (world.directory, os.sep)
@@ -473,6 +479,12 @@ def i_check_create_model(step):
         assert True
     except Exception, exc:
         assert False, str(exc)
+
+
+@step(r'I check that the model has been created and shared$')
+def i_check_create_model_shared(step):
+    i_check_create_model(step)
+    assert world.model['object']['shared']
 
 
 @step(r'I check that the model is balanced')
@@ -562,6 +574,12 @@ def i_check_create_evaluation(step):
         assert True
     except:
         assert False
+
+
+@step(r'I check that the evaluation has been created and shared$')
+def i_check_create_evaluation_shared(step):
+    i_check_create_evaluation(step)
+    assert world.evaluation['object']['shared']
 
 
 @step(r'I check that the (\d+ )?evaluations have been created')
@@ -704,6 +722,23 @@ def i_create_all_resources_to_evaluate(step, data=None, output=None):
         assert False
     try:
         retcode = check_call("bigmler --evaluate --train " + data + " --store --output " + output, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.directory = os.path.dirname(output)
+            world.folders.append(world.directory)
+            world.output = output
+            assert True
+    except OSError as e:
+        assert False
+
+
+@step(r'I create BigML resources and share them uploading train "(.*)" file to evaluate and log evaluation in "(.*)"')
+def i_create_all_resources_to_evaluate_and_share(step, data=None, output=None):
+    if data is None or output is None:
+        assert False
+    try:
+        retcode = check_call("bigmler --evaluate --shared --train " + data + " --store --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:

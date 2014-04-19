@@ -198,7 +198,7 @@ def remote_predict_models(models, test_reader, prediction_file, api, args,
                           session_file=None, log=None, exclude=None):
     """Retrieve predictions remotely, combine them and save predictions to file
 
-    """ 
+    """
     predictions_files = []
     prediction_args = {
         "tags": args.tag

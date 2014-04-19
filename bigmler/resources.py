@@ -54,6 +54,21 @@ def get_basic_seed(order):
     return "%s - %s" % (SEED, order)
 
 
+def shared_changed(shared, resource):
+    """Returns True if the shared status of the resource differs from the user
+       given value
+
+    """
+    return is_shared(resource) != shared
+
+
+def is_shared(resource):
+    """Checks if a resource is shared
+
+    """
+    return resource['object'].get('shared', False)
+
+
 def configure_input_fields(fields, user_given_fields):
     """ Returns the input fields used in the new resource creation as given
 
@@ -105,7 +120,7 @@ def wait_for_available_tasks(inprogress, max_parallel, get_function,
                              resource_type, query_string=None, wait_step=2):
     """According to the max_parallel number of parallel resources to be
        created, when the number of in progress resources reaches the limit,
-       it checks the ones in inprogress to see if there's a 
+       it checks the ones in inprogress to see if there's a
        FINISHED or FAULTY resource. If found, it is removed from the
        inprogress list and returns to allow another one to be created.
 
@@ -390,6 +405,11 @@ def update_dataset(dataset, dataset_args, verbosity,
     log_message(message, log_file=session_file,
                 console=verbosity)
     dataset = api.update_dataset(dataset, dataset_args)
+    if is_shared(dataset):
+        message = dated("Shared dataset link. %s\n" %
+                        get_url(dataset, shared=True))
+        log_message(message, log_file=session_file,
+                    console=verbosity)
     check_resource_error(dataset, "Failed to update dataset: ")
     return dataset
 
@@ -555,6 +575,28 @@ def create_models(datasets, model_ids, model_args,
                         console=args.verbosity)
 
     return models, model_ids
+
+
+def update_model(model, model_args, verbosity,
+                 api=None, session_file=None):
+    """Updates model properties
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+    message = dated("Updating model. %s\n" %
+                    get_url(model))
+    log_message(message, log_file=session_file,
+                console=verbosity)
+    model = api.update_model(model, model_args)
+    check_resource_error(model, "Failed to update model: %s"
+                         % model['resource'])
+    if is_shared(model):
+        message = dated("Shared model link. %s\n" %
+                        get_url(model, shared=True))
+        log_message(message, log_file=session_file, console=verbosity)
+
+    return model
 
 
 def get_models(model_ids, args, api=None, session_file=None):
@@ -771,12 +813,10 @@ def get_ensemble(ensemble, api=None, verbosity=True, session_file=None):
     return ensemble
 
 
-def publish_model(model, args, api=None, session_file=None):
-    """Update model with publish info
+def set_publish_model_args(args):
+    """Set args to publish model
 
     """
-    if api is None:
-        api = bigml.api.BigML()
     public_model = {}
     if args.black_box:
         public_model = {"private": False}
@@ -786,15 +826,7 @@ def publish_model(model, args, api=None, session_file=None):
             public_model.update(price=args.model_price)
         if args.cpp:
             public_model.update(credits_per_prediction=args.cpp)
-    if public_model:
-        message = dated("Updating model. %s\n" %
-                        get_url(model))
-        log_message(message, log_file=session_file,
-                    console=args.verbosity)
-        model = api.update_model(model, public_model)
-        check_resource_error(model, "Failed to update model %s: " %
-                             model['resource'])
-    return model
+    return public_model
 
 
 def map_fields(fields_map, model_fields, dataset_fields):
@@ -920,6 +952,21 @@ def create_evaluations(model_ids, datasets, evaluation_args, args, api=None,
         evaluations.append(evaluation)
         log_message("%s\n" % evaluation['resource'], log_file=log)
 
+    if (args.number_of_evaluations < 2 and len(evaluations) == 1
+            and args.verbosity):
+        evaluation = evaluations[0]
+        if bigml.api.get_status(evaluation)['code'] != bigml.api.FINISHED:
+            try:
+                evaluation = check_resource(evaluation, api.get_evaluation)
+            except ValueError, exception:
+                sys.exit("Failed to get a finished evaluation: %s" %
+                         str(exception))
+            evaluations[0] = evaluation
+        message = dated("Evaluation created: %s.\n" %
+                        get_url(evaluation))
+        log_message(message, log_file=session_file,
+                    console=args.verbosity)
+
     return evaluations
 
 
@@ -936,6 +983,28 @@ def get_evaluation(evaluation, api=None, verbosity=True, session_file=None):
         evaluation = check_resource(evaluation, api.get_evaluation)
     except ValueError, exception:
         sys.exit("Failed to get a finished evaluation: %s" % str(exception))
+    return evaluation
+
+
+def update_evaluation(evaluation, evaluation_args, verbosity,
+                      api=None, session_file=None):
+    """Updates evaluation properties
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+    message = dated("Updating evaluation. %s\n" %
+                    get_url(evaluation))
+    log_message(message, log_file=session_file,
+                console=verbosity)
+    evaluation = api.update_evaluation(evaluation, evaluation_args)
+    check_resource_error(evaluation, "Failed to update evaluation: %s"
+                         % evaluation['resource'])
+    if is_shared(evaluation):
+        message = dated("Shared evaluation link. %s\n" %
+                        get_url(evaluation, shared=True))
+        log_message(message, log_file=session_file, console=verbosity)
+
     return evaluation
 
 

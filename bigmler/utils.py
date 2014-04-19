@@ -47,6 +47,9 @@ BIGML_DASHBOARD_URL = os.environ.get('BIGML_DASHBOARD_URL')
 RESOURCE_URL = ("https://%s/dashboard/" % (BIGML_DOMAIN[:-3] + '.com')
                 if BIGML_DASHBOARD_URL is None
                 else BIGML_DASHBOARD_URL)
+RESOURCE_SHARED_URL = ("https://%s/shared/" % (BIGML_DOMAIN[:-3] + '.com')
+                       if BIGML_DASHBOARD_URL is None
+                       else BIGML_DASHBOARD_URL)
 
 
 def read_description(path):
@@ -374,14 +377,18 @@ def dated(message):
                         message)
 
 
-def get_url(resource):
+def get_url(resource, shared=False):
     """Returns the resource's url in bigml.com
 
     """
-    resource_id = bigml.api.get_resource_id(resource)
-    if not resource_id:
-        return ""
-    return RESOURCE_URL + resource_id
+    if shared:
+        return (RESOURCE_SHARED_URL + bigml.api.get_resource_type(resource)
+                + os.sep + resource['object']['shared_hash'])
+    else:
+        resource_id = bigml.api.get_resource_id(resource)
+        if not resource_id:
+            return ""
+        return RESOURCE_URL + resource_id
 
 
 def log_message(message, log_file=None, console=False):
