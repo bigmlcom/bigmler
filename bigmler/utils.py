@@ -29,6 +29,7 @@ import sys
 import datetime
 import shutil
 import requests
+import site
 
 try:
     import simplejson as json
@@ -56,8 +57,9 @@ URL_TEMPLATE = "%%BIGML_%s%%"
 SECTION_START = "\n%%START_BIGML_%s%%"
 SECTION_END = "\n%%END_BIGML_%s%%"
 GAZIBIT = "gazibit"
-GAZIBIT_PRIVATE = "data/gazibit.json"
-GAZIBIT_SHARED = "data/gazibit_shared.json"
+BIGMLER_SCRIPT = os.path.dirname(__file__)
+GAZIBIT_PRIVATE = "%s/static/gazibit.json" % BIGMLER_SCRIPT
+GAZIBIT_SHARED = "%s/static/gazibit_shared.json" % BIGMLER_SCRIPT
 GAZIBIT_TOKEN = "GAZIBIT_TOKEN"
 GAZIBIT_CREATE_URL = "http://gazibit.com/api/v1/create"
 GAZIBIT_HEADERS = {"X-Gazibit-API-Token": os.environ.get(GAZIBIT_TOKEN),
