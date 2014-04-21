@@ -430,8 +430,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             if args.black_box or args.white_box:
                 model_args.update(r.set_publish_model_args(args))
             if model_args:
-                model = r.update_model(model, model_args, args.verbosity,
-                                       api=api, session_file=session_file)
+                model = r.update_model(model, model_args, args,
+                                       api=api, path=path,
+                                       session_file=session_file)
                 models[0] = model
 
     # We get the fields of the model if we haven't got
@@ -600,6 +601,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     else:
         message = "\nGenerated files:\n\n" + u.print_tree(path, " ") + "\n"
     u.log_message(message, log_file=session_file, console=args.verbosity)
+    if args.reports:
+        u.clear_reports(path)
+        u.upload_reports(args.reports, path)
 
 
 def main(args=sys.argv[1:]):

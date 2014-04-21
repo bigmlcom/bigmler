@@ -30,7 +30,8 @@ except ImportError:
 import bigml.api
 
 from bigmler.utils import (dated, get_url, log_message, plural, check_resource,
-                           check_resource_error, log_created_resources)
+                           check_resource_error, log_created_resources,
+                           report, is_shared)
 from bigmler.labels import label_model_args, get_all_labels
 from bigml.util import bigml_locale
 
@@ -60,13 +61,6 @@ def shared_changed(shared, resource):
 
     """
     return is_shared(resource) != shared
-
-
-def is_shared(resource):
-    """Checks if a resource is shared
-
-    """
-    return resource['object'].get('shared', False)
 
 
 def configure_input_fields(fields, user_given_fields):
@@ -211,7 +205,8 @@ def create_source(data_set, source_args, args, api=None, path=None,
     message = dated("Source created: %s\n" % get_url(source))
     log_message(message, log_file=session_file, console=args.verbosity)
     log_message("%s\n" % source_id, log_file=log)
-
+    if args.reports:
+        report(args.reports, path, source)
     return source
 
 
@@ -337,7 +332,7 @@ def set_dataset_split_args(name, description, args, sample_rate,
     return dataset_args
 
 
-def create_dataset(source_or_dataset, dataset_args, verbosity, api=None,
+def create_dataset(source_or_dataset, dataset_args, args, api=None,
                    path=None, session_file=None, log=None, dataset_type=None):
     """Creates remote dataset from source, dataset or datasets list
 
@@ -345,7 +340,7 @@ def create_dataset(source_or_dataset, dataset_args, verbosity, api=None,
     if api is None:
         api = bigml.api.BigML()
     message = dated("Creating dataset.\n")
-    log_message(message, log_file=session_file, console=verbosity)
+    log_message(message, log_file=session_file, console=args.verbosity)
     dataset = api.create_dataset(source_or_dataset, dataset_args)
     suffix = "_" + dataset_type if dataset_type else ""
     log_created_resources("dataset%s" % suffix, path,
@@ -357,8 +352,10 @@ def create_dataset(source_or_dataset, dataset_args, verbosity, api=None,
     except ValueError, exception:
         sys.exit("Failed to get a finished dataset: %s" % str(exception))
     message = dated("Dataset created: %s\n" % get_url(dataset))
-    log_message(message, log_file=session_file, console=verbosity)
+    log_message(message, log_file=session_file, console=args.verbosity)
     log_message("%s\n" % dataset_id, log_file=log)
+    if args.reports:
+        report(args.reports, path, dataset)
     return dataset
 
 
@@ -393,8 +390,8 @@ def publish_dataset(dataset, args, api=None, session_file=None):
                           session_file=session_file)
 
 
-def update_dataset(dataset, dataset_args, verbosity,
-                   api=None, session_file=None):
+def update_dataset(dataset, dataset_args, args,
+                   api=None, path=None, session_file=None):
     """Updates dataset properties
 
     """
@@ -403,13 +400,15 @@ def update_dataset(dataset, dataset_args, verbosity,
     message = dated("Updating dataset. %s\n" %
                     get_url(dataset))
     log_message(message, log_file=session_file,
-                console=verbosity)
+                console=args.verbosity)
     dataset = api.update_dataset(dataset, dataset_args)
     if is_shared(dataset):
         message = dated("Shared dataset link. %s\n" %
                         get_url(dataset, shared=True))
         log_message(message, log_file=session_file,
-                    console=verbosity)
+                    console=args.verbosity)
+        if args.reports:
+            report(args.reports, path, dataset)
     check_resource_error(dataset, "Failed to update dataset: ")
     return dataset
 
@@ -573,12 +572,14 @@ def create_models(datasets, model_ids, model_args,
                             get_url(model))
             log_message(message, log_file=session_file,
                         console=args.verbosity)
+            if args.reports:
+                report(args.reports, path, model)
 
     return models, model_ids
 
 
-def update_model(model, model_args, verbosity,
-                 api=None, session_file=None):
+def update_model(model, model_args, args,
+                 api=None, path=None, session_file=None):
     """Updates model properties
 
     """
@@ -587,14 +588,16 @@ def update_model(model, model_args, verbosity,
     message = dated("Updating model. %s\n" %
                     get_url(model))
     log_message(message, log_file=session_file,
-                console=verbosity)
+                console=args.verbosity)
     model = api.update_model(model, model_args)
     check_resource_error(model, "Failed to update model: %s"
                          % model['resource'])
     if is_shared(model):
         message = dated("Shared model link. %s\n" %
                         get_url(model, shared=True))
-        log_message(message, log_file=session_file, console=verbosity)
+        log_message(message, log_file=session_file, console=args.verbosity)
+        if args.reports:
+            report(args.reports, path, model)
 
     return model
 
@@ -766,6 +769,8 @@ def create_ensembles(datasets, ensemble_ids, ensemble_args, args,
                             get_url(ensemble))
             log_message(message, log_file=session_file,
                         console=args.verbosity)
+            if args.reports:
+                report(args.reports, path, ensemble)
 
     return ensembles, ensemble_ids, models, model_ids
 
@@ -966,6 +971,8 @@ def create_evaluations(model_ids, datasets, evaluation_args, args, api=None,
                         get_url(evaluation))
         log_message(message, log_file=session_file,
                     console=args.verbosity)
+        if args.reports:
+            report(args.reports, path, evaluation)
 
     return evaluations
 
@@ -986,8 +993,8 @@ def get_evaluation(evaluation, api=None, verbosity=True, session_file=None):
     return evaluation
 
 
-def update_evaluation(evaluation, evaluation_args, verbosity,
-                      api=None, session_file=None):
+def update_evaluation(evaluation, evaluation_args, args,
+                      api=None, path=None, session_file=None):
     """Updates evaluation properties
 
     """
@@ -996,14 +1003,16 @@ def update_evaluation(evaluation, evaluation_args, verbosity,
     message = dated("Updating evaluation. %s\n" %
                     get_url(evaluation))
     log_message(message, log_file=session_file,
-                console=verbosity)
+                console=args.verbosity)
     evaluation = api.update_evaluation(evaluation, evaluation_args)
     check_resource_error(evaluation, "Failed to update evaluation: %s"
                          % evaluation['resource'])
     if is_shared(evaluation):
         message = dated("Shared evaluation link. %s\n" %
                         get_url(evaluation, shared=True))
-        log_message(message, log_file=session_file, console=verbosity)
+        log_message(message, log_file=session_file, console=args.verbosity)
+        if args.reports:
+            report(args.reports, path, evaluation)
 
     return evaluation
 
@@ -1058,7 +1067,7 @@ def set_batch_prediction_args(name, description, args, fields=None,
 
 
 def create_batch_prediction(model_or_ensemble, test_dataset,
-                            batch_prediction_args, verbosity,
+                            batch_prediction_args, args,
                             api=None, session_file=None,
                             path=None, log=None):
     """Creates remote batch_prediction
@@ -1067,7 +1076,7 @@ def create_batch_prediction(model_or_ensemble, test_dataset,
     if api is None:
         api = bigml.api.BigML()
     message = dated("Creating batch prediction.\n")
-    log_message(message, log_file=session_file, console=verbosity)
+    log_message(message, log_file=session_file, console=args.verbosity)
     batch_prediction = api.create_batch_prediction(model_or_ensemble,
                                                    test_dataset,
                                                    batch_prediction_args)
@@ -1084,6 +1093,8 @@ def create_batch_prediction(model_or_ensemble, test_dataset,
                  % str(exception))
     message = dated("Batch prediction created: %s\n"
                     % get_url(batch_prediction))
-    log_message(message, log_file=session_file, console=verbosity)
+    log_message(message, log_file=session_file, console=args.verbosity)
     log_message("%s\n" % batch_prediction_id, log_file=log)
+    if args.reports:
+        report(args.reports, path, batch_prediction)
     return batch_prediction

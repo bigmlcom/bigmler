@@ -952,6 +952,15 @@ under the License.""" % version
                         help=("Share resources and use its shared urls "
                               " in reports."))
 
+    # Report. Additional output report formats
+    parser.add_argument('--reports',
+                        action='store',
+                        dest='reports',
+                        nargs='*',
+                        default=defaults.get('reports', []),
+                        choices=["gazibit"],
+                        help="Output report formats.")    
+
     # The following options are only useful to deactivate the corresponding
     # oposed default values
     #

@@ -607,5 +607,5 @@ def remote_predict(model, test_dataset, batch_prediction_args, args,
     if not resume:
         batch_prediction = create_batch_prediction(
             model_or_ensemble, test_dataset, batch_prediction_args,
-            args.verbosity, api, session_file=session_file, path=path, log=log)
+            args, api, session_file=session_file, path=path, log=log)
     api.download_batch_prediction(batch_prediction, prediction_file)
