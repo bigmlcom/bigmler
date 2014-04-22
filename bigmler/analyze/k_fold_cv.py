@@ -66,7 +66,7 @@ EPSILON = 0.001
 DEFAULT_PENALTY = 0.001
 
 # staleness
-DEFAULT_STALENESS = 0.001
+DEFAULT_STALENESS = 5
 
 
 def create_kfold_cv(args, api, common_options):
@@ -114,7 +114,6 @@ def create_kfold_datasets_file(args, api, common_options):
         # check that kfold_field is unique
         fields = Fields(dataset, {"objective_field": args.objective_field,
                                   "objective_field_present": True})
-        fields.objective_field
         objective_id = fields.field_id(fields.objective_field)
         kfold_field_name = avoid_duplicates(DEFAULT_KFOLD_FIELD, fields)
         # create jsons to generate partial datasets
