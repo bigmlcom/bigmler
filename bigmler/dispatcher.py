@@ -106,6 +106,71 @@ def get_date(reference, api):
     return date
 
 
+def command_handling(args, log=COMMAND_LOG):
+    """Rebuilds command string, logs it for --resume future requests and
+       parses it.
+
+    """
+    # Rebuild the command string
+    message = a.get_command_message(args)
+
+    # Resume calls are not logged
+    resume = True
+    if not "--resume" in args:
+        with open(log, "a", 0) as command_log:
+            command_log.write(message)
+        resume = False
+    user_defaults = get_user_defaults()
+    parser, common_options = create_parser(
+        general_defaults=user_defaults,
+        constants={'NOW': a.NOW,
+                   'MAX_MODELS': MAX_MODELS,
+                   'PLURALITY': PLURALITY})
+
+    return parser, common_options, message, user_defaults, resume
+
+
+def get_command_from_log(command_args,
+                         log=COMMAND_LOG, dirs_log=DIRS_LOG):
+    """Retrieve the command line from the commands file and the directories
+       file and parse the command arguments and output directory from there
+
+    """
+    command = u.get_log_reversed(log, command_args.stack_level)
+    output_dir = u.get_log_reversed(dirs_log,
+                                    command_args.stack_level)
+
+    defaults_file = os.path.join(output_dir, DEFAULTS_FILE)
+    user_defaults = get_user_defaults(defaults_file)
+    parser, common_options = create_parser(
+        general_defaults=user_defaults,
+        constants={'NOW': a.NOW,
+                   'MAX_MODELS': MAX_MODELS,
+                   'PLURALITY': PLURALITY})
+    args = shlex.split(command)[1:]
+    return (command, parser, common_options, args, output_dir,
+            user_defaults, defaults_file)
+
+
+def log_resumed_command(message, defaults_file,
+                        command, session_file=SESSIONS_LOG):
+    """Logging the resumed command in the sessions_log file
+
+    """
+    u.log_message(message, log_file=session_file)
+    message = "\nResuming command:\n%s\n\n" % command
+    u.log_message(message, log_file=session_file, console=True)
+    try:
+        defaults_handler = open(defaults_file, 'r')
+        contents = defaults_handler.read()
+        message = "\nUsing the following defaults:\n%s\n\n" % contents
+        u.log_message(message, log_file=session_file, console=True)
+        defaults_handler.close()
+    except IOError:
+        pass
+
+
+
 def has_test(args):
     """Returns if some kind of test data is given in args.
 
@@ -126,19 +191,10 @@ def main_dispatcher(args=sys.argv[1:]):
                 open(log_file, 'w', 0).close()
             except IOError:
                 pass
-    message = a.get_command_message(args)
 
-    # Resume calls are not logged
-    if not "--resume" in args:
-        with open(COMMAND_LOG, "a", 0) as command_log:
-            command_log.write(message)
-        resume = False
-    user_defaults = get_user_defaults()
-    parser, common_options = create_parser(
-        general_defaults=user_defaults,
-        constants={'NOW': a.NOW,
-                   'MAX_MODELS': MAX_MODELS,
-                   'PLURALITY': PLURALITY})
+    (parser, common_options,
+     message, user_defaults, resume) = command_handling(args, COMMAND_LOG)
+
     # Parses command line arguments.
     command_args = a.parse_and_check(parser, args, train_stdin, test_stdin)
 
@@ -147,9 +203,15 @@ def main_dispatcher(args=sys.argv[1:]):
     if command_args.resume:
         # Restore the args of the call to resume from the command log file
         debug = command_args.debug
-        command = u.get_log_reversed(COMMAND_LOG,
-                                     command_args.stack_level)
-        args = shlex.split(command)[1:]
+        (command, parser, common_options, args, output_dir,
+         user_defaults, defaults_file) = get_command_from_log(
+            command_args, log=COMMAND_LOG, dirs_log=DIRS_LOG)
+        
+        # Logs the issued command and the resumed command
+        session_file = os.path.join(output_dir,SESSIONS_LOG)
+        log_resumed_command(message, defaults_file,
+                            command, session_file=session_file)
+        # Check if stdin is used as test or train input
         try:
             position = args.index("--train")
             train_stdin = (position == (len(args) - 1) or
@@ -162,57 +224,28 @@ def main_dispatcher(args=sys.argv[1:]):
                           args[position + 1].startswith("--"))
         except ValueError:
             pass
-        output_dir = u.get_log_reversed(DIRS_LOG,
-                                        command_args.stack_level)
-        defaults_file = "%s%s%s" % (output_dir, os.sep, DEFAULTS_FILE)
-        user_defaults = get_user_defaults(defaults_file)
-        parser, common_options = create_parser(
-            general_defaults=user_defaults,
-            constants={'NOW': a.NOW,
-                       'MAX_MODELS': MAX_MODELS,
-                       'PLURALITY': PLURALITY})
 
         # Parses resumed arguments.
         command_args = a.parse_and_check(parser, args, train_stdin, test_stdin)
         if command_args.predictions is None:
-            command_args.predictions = ("%s%s%s" %
-                                        (output_dir, os.sep,
-                                         default_output))
-
-        # Logs the issued command and the resumed command
-        session_file = "%s%s%s" % (output_dir, os.sep, SESSIONS_LOG)
-        u.log_message(message, log_file=session_file)
-        message = "\nResuming command:\n%s\n\n" % command
-        u.log_message(message, log_file=session_file, console=True)
-        try:
-            defaults_handler = open(defaults_file, 'r')
-            contents = defaults_handler.read()
-            message = "\nUsing the following defaults:\n%s\n\n" % contents
-            u.log_message(message, log_file=session_file, console=True)
-            defaults_handler.close()
-        except IOError:
-            pass
-
-        resume = True
+            command_args.predictions = os.path.join(output_dir, default_output)
     else:
         if command_args.output_dir is None:
             command_args.output_dir = a.NOW
         if command_args.predictions is None:
-            command_args.predictions = ("%s%s%s" %
-                                        (command_args.output_dir, os.sep,
-                                         default_output))
+            command_args.predictions = os.path.join(command_args.output_dir,
+                                                    default_output)
         if len(os.path.dirname(command_args.predictions).strip()) == 0:
-            command_args.predictions = ("%s%s%s" %
-                                        (command_args.output_dir, os.sep,
-                                         command_args.predictions))
+            command_args.predictions = os.path.join(command_args.output_dir,
+                                                    command_args.predictions)
         directory = u.check_dir(command_args.predictions)
-        session_file = "%s%s%s" % (directory, os.sep, SESSIONS_LOG)
+        session_file = os.path.join(directory, SESSIONS_LOG)
         u.log_message(message + "\n", log_file=session_file)
         try:
             defaults_file = open(DEFAULTS_FILE, 'r')
             contents = defaults_file.read()
             defaults_file.close()
-            defaults_copy = open("%s%s%s" % (directory, os.sep, DEFAULTS_FILE),
+            defaults_copy = open(os.path.join(directory, DEFAULTS_FILE),
                                  'w', 0)
             defaults_copy.write(contents)
             defaults_copy.close()

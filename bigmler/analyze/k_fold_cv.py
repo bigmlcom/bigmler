@@ -68,6 +68,9 @@ DEFAULT_PENALTY = 0.001
 # staleness
 DEFAULT_STALENESS = 5
 
+# k-fold
+DEFAULT_KFOLD = 5
+
 
 def create_kfold_cv(args, api, common_options):
     """Creates the kfold cross-validation
@@ -117,8 +120,7 @@ def create_kfold_datasets_file(args, api, common_options):
         objective_id = fields.field_id(fields.objective_field)
         kfold_field_name = avoid_duplicates(DEFAULT_KFOLD_FIELD, fields)
         # create jsons to generate partial datasets
-        selecting_file_list = create_kfold_json(args.output_dir,
-                                                kfold_field_name, args.k_folds,
+        selecting_file_list = create_kfold_json(args, kfold_field_name,
                                                 objective_id) 
         # generate test datasets
         datasets_file = create_kfold_datasets(dataset_id, args,
@@ -130,13 +132,14 @@ def create_kfold_datasets_file(args, api, common_options):
     return None    
 
 
-def create_kfold_json(output_dir, kfold_field=DEFAULT_KFOLD_FIELD,
-                      k=5, objective_field=None):
+def create_kfold_json(args, kfold_field=DEFAULT_KFOLD_FIELD,
+                      objective_field=None):
     """Create the files to generate a new field with a random integer from
        0 to k-1, and a filter file for each of these indexes.
 
     """
-
+    output_dir = args.output_dir 
+    k = args.k_fold if args.k_fold else DEFAULT_KFOLD
     try:
         selecting_file_list = []
         for index in range(0, k):
