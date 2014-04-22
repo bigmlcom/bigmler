@@ -55,7 +55,6 @@ distutils.core.setup(
     license="http://www.apache.org/licenses/LICENSE-2.0",
     setup_requires = [],
     packages = ['bigmler', 'bigmler.processing'],
-    package_data = {'bigmler': ['static/*']},
     include_package_data = True,
     install_requires = ['bigml>=1.2.2,<1.3.0'],
     classifiers=[
