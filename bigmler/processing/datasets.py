@@ -146,7 +146,7 @@ def dataset_processing(source, training_set, test_set, fields, objective_field,
                                           dataset_fields,
                                           objective_field=objective_field,
                                           multi_label_data=multi_label_data)
-        dataset = r.create_dataset(source, dataset_args, args.verbosity, api,
+        dataset = r.create_dataset(source, dataset_args, args, api,
                                    path, session_file, log)
 
     # If a dataset is provided, let's retrieve it.
@@ -184,8 +184,9 @@ def dataset_processing(source, training_set, test_set, fields, objective_field,
             dataset_args = r.set_dataset_args(name, description, args, fields,
                                               dataset_fields, objective_field)
             dataset_args.update(shared=args.shared)
-            dataset = r.update_dataset(dataset, dataset_args, args.verbosity,
-                                       api=api, session_file=session_file)
+            dataset = r.update_dataset(dataset, dataset_args, args,
+                                       api=api, path=path,
+                                       session_file=session_file)
             dataset = r.get_dataset(dataset, api, args.verbosity, session_file)
             csv_properties.update(objective_field=objective_field,
                                   objective_field_present=True)
@@ -213,7 +214,7 @@ def alternative_dataset_processing(dataset_or_source, suffix, dataset_args,
 
     if alternative_dataset is None:
         alternative_dataset = r.create_dataset(
-            dataset_or_source, dataset_args, args.verbosity, api, path,
+            dataset_or_source, dataset_args, args, api, path,
             session_file, log, suffix)
         if alternative_dataset:
             alternative_dataset = r.get_dataset(
@@ -293,7 +294,7 @@ def create_categories_datasets(dataset, distribution,
                 {"max_categories": args.max_categories,
                 "other_label": other_label}}
             new_dataset = r.create_dataset(
-                dataset, dataset_args, args.verbosity, api=api, path=path,
+                dataset, dataset_args, args, api=api, path=path,
                 session_file=session_file, log=log, dataset_type="parts")
             new_dataset = bigml.api.check_resource(new_dataset,
                                                    api.get_dataset)
@@ -340,7 +341,7 @@ def create_new_dataset(datasets, api, args, resume, name=None,
                 name, description, args, fields, dataset_fields,
                 objective_field=objective_field))
         new_dataset = r.create_dataset(origin_resource, dataset_args,
-                                       args.verbosity,
+                                       args,
                                        api=api, path=path,
                                        session_file=session_file,
                                        log=log, dataset_type=suffix)

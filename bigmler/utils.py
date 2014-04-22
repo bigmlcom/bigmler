@@ -552,3 +552,10 @@ def read_objective_weights(path):
                      ",".join(row))
         objective_weights.append(weights)
     return objective_weights
+
+
+def is_shared(resource):
+    """Checks if a resource is shared
+
+    """
+    return resource['object'].get('shared', False)

@@ -128,7 +128,9 @@ FLAGS = {'BigMLer': [{'flag': 'debug', 'type': 'boolean'},
                      {'flag': 'newer_than', 'type': 'string'},
                      {'flag': 'multi_dataset', 'type': 'boolean'},
                      {'flag': 'multi_dataset_attributes', 'type': 'string'},
-                     {'flag': 'shared', 'type': 'boolean'}]}
+                     {'flag': 'shared', 'type': 'boolean'},
+                     {'flag': 'reports', 'type': 'list'},
+                     {'flag': 'upload', 'type': 'boolean'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):

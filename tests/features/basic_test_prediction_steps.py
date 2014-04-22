@@ -582,6 +582,24 @@ def i_check_create_evaluation_shared(step):
     assert world.evaluation['object']['shared']
 
 
+@step(r'I check that the Gazibit (shared )?report has been created$')
+def i_check_gazibit_reports(step, shared=''):
+    shared = "_%s" % shared[0: -1] if shared is not None else ''
+    gazibit_file = "%s%sreports%sgazibit%s.json" % (
+        world.directory, os.sep, os.sep, shared)
+    try:
+        gazibit_file = open(gazibit_file, "r")
+        content = gazibit_file.read()
+        if (content.find('%START_BIGML_') < 0 and
+                content.find('%END_BIGML_') < 0 and
+                content.find('%BIGML_') < 0):
+            assert True
+        else:
+            assert False
+    except:
+        assert False
+
+
 @step(r'I check that the (\d+ )?evaluations have been created')
 def i_check_create_evaluations(step, number_of_evaluations=None):
     if number_of_evaluations is not None:
@@ -722,6 +740,26 @@ def i_create_all_resources_to_evaluate(step, data=None, output=None):
         assert False
     try:
         retcode = check_call("bigmler --evaluate --train " + data + " --store --output " + output, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.directory = os.path.dirname(output)
+            world.folders.append(world.directory)
+            world.output = output
+            assert True
+    except OSError as e:
+        assert False
+
+
+@step(r'I create BigML resources and share them uploading train "(.*)" file to evaluate and log evaluation and reports in "(.*)"')
+def i_create_all_resources_to_evaluate_and_report(
+    step, data=None, output=None):
+    if data is None or output is None:
+        assert False
+    try:
+        retcode = check_call("bigmler --evaluate --shared --report gazibit" +
+                             " --train " + data +
+                             " --store --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:

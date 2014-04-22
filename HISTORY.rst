@@ -3,6 +3,11 @@
 History
 -------
 
+1.7.0 (2014-04-20)
+~~~~~~~~~~~~~~~~~~
+
+- Adding the --reports option to generate Gazibit reports
+
 1.6.0 (2014-04-18)
 ~~~~~~~~~~~~~~~~~~
 

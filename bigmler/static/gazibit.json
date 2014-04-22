@@ -1,0 +1,401 @@
+{
+  "name": "BigMLer report - private resources",
+  "description": "BigML results report",
+  "styles": "",
+  "first_element": "grid1",
+  "image_url": "/uploads/1308",
+  "elements": [
+    {
+      "type": "grid",
+      "x": 874,
+      "y": 443,
+      "name": "grid1",
+      "scale": 1.29907,
+      "rotation": 0,
+      "content": "{\"zoom_target\":true,\"grid_cover\":false,\"cell_padding\":10}",
+      "width": 1050,
+      "height": 430,
+      "style": " ",
+      "links": [
+        {
+          "target": "cell3",
+          "link_type": "",
+          "transition_type": "W",
+          "expression": "1",
+          "anchor": "E",
+          "bidirectional": true,
+          "target_anchor": "W"
+        }
+      ],
+      "children": [
+        {
+          "type": "cell",
+          "x": 395,
+          "y": 320,
+          "name": "cell1",
+          "scale": 1,
+          "rotation": 0,
+          "content": "",
+          "width": 250,
+          "height": 200,
+          "links": [
+           {
+              "target": "cell6",
+              "link_type": "structure",
+              "expression": "1",
+              "anchor": "N",
+              "bidirectional": true,
+              "target_anchor": "S"
+            },
+            {
+              "target": "cell2",
+              "link_type": "structure",
+              "expression": "1",
+              "anchor": "W",
+              "bidirectional": true,
+              "target_anchor": "E"
+            },
+            {
+              "target": "cell5",
+              "link_type": "structure",
+              "expression": "1",
+              "anchor": "E",
+              "bidirectional": true,
+              "target_anchor": "W"
+            }
+          ]
+%BIGML_START_MODEL%,
+          "children": [
+            {
+              "type": "simple-text",
+              "x": 32,
+              "y": 9,
+              "name": "simple_text4",
+              "scale": 0.336238,
+              "rotation": 0,
+              "content": "<h1>Model:</h1>",
+              "width": 165,
+              "height": 47
+            },
+            {
+              "type": "iframe",
+              "x": 109,
+              "y": 106,
+              "name": "iframe2",
+              "scale": 0.19178,
+              "rotation": 0,
+              "content": "%BIGML_MODEL%",
+              "width": 1085,
+              "height": 898
+            }
+          ]
+%BIGML_END_MODEL%
+        },
+%BIGML_START_SUMMARY%
+        {
+          "type": "cell",
+          "x": 135,
+          "y": 320,
+          "name": "cell2",
+          "scale": 1,
+          "rotation": 0,
+          "content": "",
+          "width": 250,
+          "height": 200,
+          "children": [
+            {
+              "type": "simple-text",
+              "x": 95,
+              "y": 78,
+              "name": "simple_text5",
+              "scale": 0.250126,
+              "rotation": 0,
+              "content": "%BIGML_SUMMARY%",
+              "width": 720,
+              "height": 403
+            },
+            {
+              "type": "simple-text",
+              "x": 62,
+              "y": 14,
+              "name": "simple_text6",
+              "scale": 0.367906,
+              "rotation": 0,
+              "content": "<h1>Summary Report</h1>",
+              "width": 299,
+              "height": 57
+            }
+          ]
+        },
+%BIGML_END_SUMMARY%
+        {
+          "type": "cell",
+          "x": 395,
+          "y": 110,
+          "name": "cell6",
+          "scale": 1,
+          "rotation": 0,
+          "content": "",
+          "width": 250,
+          "height": 200,
+          "links": [
+            {
+              "target": "cell4",
+              "link_type": "structure",
+              "expression": "1",
+              "anchor": "E",
+              "bidirectional": true,
+              "target_anchor": "W"
+            },
+            {
+              "target": "cell3",
+              "link_type": "structure",
+              "expression": "1",
+              "anchor": "W",
+              "bidirectional": true,
+              "target_anchor": "E"
+            }
+          ]
+%BIGML_START_DATASET%,
+          "children": [
+            {
+              "type": "simple-text",
+              "x": 14,
+              "y": 9,
+              "name": "simple_text8",
+              "scale": 0.335358,
+              "rotation": 0,
+              "content": "<h1>Dataset:</h1>",
+              "width": 74,
+              "height": 60
+            },
+            {
+              "type": "iframe",
+              "x": 118,
+              "y": 105,
+              "name": "iframe1",
+              "scale": 0.208707,
+              "rotation": 0,
+              "content": "%BIGML_DATASET%",
+              "width": 1021,
+              "height": 729
+            }
+          ]
+%BIGML_END_DATASET%
+        },
+        {
+          "type": "cell",
+          "x": 655,
+          "y": 320,
+          "name": "cell5",
+          "scale": 1,
+          "rotation": 0,
+          "content": "",
+          "width": 250,
+          "height": 200
+%BIGML_START_PREDICTION%,
+          "children": [
+            {
+              "type": "iframe",
+              "x": 120,
+              "y": 105,
+              "name": "iframe4",
+              "scale": 0.219286,
+              "rotation": 0,
+              "content": %BIGML_PREDICTION%,
+              "width": 1037,
+              "height": 769
+            },
+            {
+              "type": "simple-text",
+              "x": 45,
+              "y": 9,
+              "name": "simple_text3",
+              "scale": 0.260515,
+              "rotation": 0,
+              "content": "<h1>Prediction Form</h1>",
+              "width": 295,
+              "height": 57
+            }
+          ]
+%BIGML_END_PREDICTION%
+        },
+        {
+          "type": "cell",
+          "x": 135,
+          "y": 110,
+          "name": "cell3",
+          "scale": 1,
+          "rotation": 0,
+          "content": "",
+          "width": 250,
+          "height": 200,
+          "links": [
+            {
+              "target": "cell2",
+              "link_type": "",
+              "transition_type": "N",
+              "expression": "1",
+              "anchor": "S",
+              "bidirectional": true,
+              "target_anchor": "N"
+            }
+          ],
+          "children": [
+            {
+              "type": "image",
+              "x": 97,
+              "y": 79,
+              "name": "image1",
+              "scale": 0.151515,
+              "rotation": 0,
+              "content": "/uploads/1308",
+              "width": 1237,
+              "height": 657
+            }
+          ]
+        },
+        {
+          "type": "cell",
+          "x": 655,
+          "y": 110,
+          "name": "cell4",
+          "scale": 1,
+          "rotation": 0,
+          "content": "",
+          "width": 250,
+          "height": 200,
+          "links": [
+            {
+              "target": "cell5",
+              "link_type": "",
+              "transition_type": "N",
+              "expression": "1",
+              "anchor": "S",
+              "bidirectional": true,
+              "target_anchor": "N"
+            },
+            {
+              "target": "cell9",
+              "link_type": "structure",
+              "expression": "1",
+              "anchor": "E",
+              "bidirectional": true,
+              "target_anchor": "W"
+            }
+          ]
+%BIGML_START_EVALUATION%,
+          "children": [
+            {
+              "type": "simple-text",
+              "x": 35,
+              "y": 13,
+              "name": "simple_text10",
+              "scale": 0.353239,
+              "rotation": 0,
+              "content": "<h1>Evaluation:</h1>",
+              "width": 175,
+              "height": 60
+            },
+            {
+              "type": "iframe",
+              "x": 118,
+              "y": 105,
+              "name": "iframe6",
+              "scale": 0.208707,
+              "rotation": 0,
+              "content": "%BIGML_EVALUATION%",
+              "width": 1021,
+              "height": 729
+            }
+          ]
+%BIGML_END_EVALUATION%
+        },
+        {
+          "type": "cell",
+          "x": 915,
+          "y": 110,
+          "name": "cell9",
+          "scale": 1,
+          "rotation": 0,
+          "content": "",
+          "width": 250,
+          "height": 200,
+          "links": [
+            {
+              "target": "cell2",
+              "link_type": "",
+              "transition_type": "W",
+              "expression": "1",
+              "anchor": "E",
+              "bidirectional": true,
+              "target_anchor": "W"
+            }
+          ]
+%BIGML_START_ENSEMBLE%,
+          "children": [
+           {
+              "type": "simple-text",
+              "x": 88,
+              "y": 14,
+              "name": "simple_text1",
+              "scale": 0.425981,
+              "rotation": 0,
+              "content": "<h1>Ensembles:</h1>",
+              "width": 407,
+              "height": 60
+            },
+            {
+              "type": "grid",
+              "x": 124,
+              "y": 112,
+              "name": "grid2",
+              "scale": 0.442207,
+              "rotation": 0,
+              "content": "{\"zoom_target\":true,\"grid_cover\":true,\"cell_padding\":10}",
+              "width": 530,
+              "height": 220,
+              "children": [
+                {
+                  "type": "cell",
+                  "x": 135,
+                  "y": 110,
+                  "name": "cell7",
+                  "scale": 1,
+                  "rotation": 0,
+                  "content": "",
+                  "width": 250,
+                  "height": 200,
+                  "links": [
+                    {
+                      "target": "cell8",
+                      "link_type": "structure",
+                      "expression": "1",
+                      "anchor": "E",
+                      "bidirectional": true,
+                      "target_anchor": "W"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "type": "iframe",
+                      "x": 118,
+                      "y": 98,
+                      "name": "iframe7",
+                      "scale": 0.154761,
+                      "rotation": 0,
+                      "content": "%BIGML_ENSEMBLE%",
+                      "width": 1111,
+                      "height": 1201
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+%BIGML_END_ENSEMBLE%
+        }
+      ]
+    }
+  ]
+}

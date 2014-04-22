@@ -69,6 +69,7 @@ from bigmler.defaults import DEFAULTS_FILE
 from bigmler.prediction import predict, combine_votes, remote_predict
 from bigmler.prediction import (MAX_MODELS, OTHER, COMBINATION,
                                 THRESHOLD_CODE)
+from bigmler.reports import clear_reports, upload_reports
 
 COMMAND_LOG = ".bigmler"
 DIRS_LOG = ".bigmler_dir_stack"
@@ -430,8 +431,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             if args.black_box or args.white_box:
                 model_args.update(r.set_publish_model_args(args))
             if model_args:
-                model = r.update_model(model, model_args, args.verbosity,
-                                       api=api, session_file=session_file)
+                model = r.update_model(model, model_args, args,
+                                       api=api, path=path,
+                                       session_file=session_file)
                 models[0] = model
 
     # We get the fields of the model if we haven't got
@@ -600,6 +602,9 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     else:
         message = "\nGenerated files:\n\n" + u.print_tree(path, " ") + "\n"
     u.log_message(message, log_file=session_file, console=args.verbosity)
+    if args.reports:
+        clear_reports(path)
+        upload_reports(args.reports, path)
 
 
 def main(args=sys.argv[1:]):
