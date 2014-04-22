@@ -144,7 +144,7 @@ def upload_reports(report_types, output_dir):
         else:
             sys.exit("To upload your gazibit report you need to"
                      " set your gazibit token in the GAZIBIT_TOKEN"
-                     "environment variable. Failed to find GAZIBIT_TOKEN.")
+                     " environment variable. Failed to find GAZIBIT_TOKEN.")
 
 
 def gazibit_upload(output_file, exit=False):

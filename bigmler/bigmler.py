@@ -604,7 +604,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     u.log_message(message, log_file=session_file, console=args.verbosity)
     if args.reports:
         clear_reports(path)
-        upload_reports(args.reports, path)
+        if args.upload:
+            upload_reports(args.reports, path)
 
 
 def main(args=sys.argv[1:]):

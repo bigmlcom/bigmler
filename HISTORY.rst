@@ -3,15 +3,20 @@
 History
 -------
 
+1.7.1 (2014-04-21)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug: --no-upload flag was not really used.
+
 1.7.0 (2014-04-20)
 ~~~~~~~~~~~~~~~~~~
 
-- Adding the --reports option to generate Gazibit reports
+- Adding the --reports option to generate Gazibit reports.
 
 1.6.0 (2014-04-18)
 ~~~~~~~~~~~~~~~~~~
 
-- Adding the --shared flag to share the created dataset, model and evaluation
+- Adding the --shared flag to share the created dataset, model and evaluation.
 
 1.5.1 (2014-04-04)
 ~~~~~~~~~~~~~~~~~~
