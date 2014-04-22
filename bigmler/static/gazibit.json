@@ -64,7 +64,7 @@
               "target_anchor": "W"
             }
           ]
-%START_BIGML_MODEL%,
+%BIGML_START_MODEL%,
           "children": [
             {
               "type": "simple-text",
@@ -89,9 +89,9 @@
               "height": 898
             }
           ]
-%END_BIGML_MODEL%
+%BIGML_END_MODEL%
         },
-%START_BIGML_SUMMARY%
+%BIGML_START_SUMMARY%
         {
           "type": "cell",
           "x": 135,
@@ -127,7 +127,7 @@
             }
           ]
         },
-%END_BIGML_SUMMARY%
+%BIGML_END_SUMMARY%
         {
           "type": "cell",
           "x": 395,
@@ -156,7 +156,7 @@
               "target_anchor": "E"
             }
           ]
-%START_BIGML_DATASET%,
+%BIGML_START_DATASET%,
           "children": [
             {
               "type": "simple-text",
@@ -181,7 +181,7 @@
               "height": 729
             }
           ]
-%END_BIGML_DATASET%
+%BIGML_END_DATASET%
         },
         {
           "type": "cell",
@@ -193,7 +193,7 @@
           "content": "",
           "width": 250,
           "height": 200
-%START_BIGML_PREDICTION%,
+%BIGML_START_PREDICTION%,
           "children": [
             {
               "type": "iframe",
@@ -218,7 +218,7 @@
               "height": 57
             }
           ]
-%END_BIGML_PREDICTION%
+%BIGML_END_PREDICTION%
         },
         {
           "type": "cell",
@@ -284,7 +284,7 @@
               "target_anchor": "W"
             }
           ]
-%START_BIGML_EVALUATION%,
+%BIGML_START_EVALUATION%,
           "children": [
             {
               "type": "simple-text",
@@ -309,7 +309,7 @@
               "height": 729
             }
           ]
-%END_BIGML_EVALUATION%
+%BIGML_END_EVALUATION%
         },
         {
           "type": "cell",
@@ -332,7 +332,7 @@
               "target_anchor": "W"
             }
           ]
-%START_BIGML_ENSEMBLE%,
+%BIGML_START_ENSEMBLE%,
           "children": [
            {
               "type": "simple-text",
@@ -393,7 +393,7 @@
               ]
             }
           ]
-%END_BIGML_ENSEMBLE%
+%BIGML_END_ENSEMBLE%
         }
       ]
     }

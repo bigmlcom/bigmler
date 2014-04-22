@@ -31,9 +31,11 @@ import bigml.api
 
 from bigmler.utils import (dated, get_url, log_message, plural, check_resource,
                            check_resource_error, log_created_resources,
-                           report, is_shared)
+                           is_shared)
 from bigmler.labels import label_model_args, get_all_labels
+from bigmler.reports import report
 from bigml.util import bigml_locale
+
 
 EVALUATE_SAMPLE_RATE = 0.8
 SEED = "BigML, Machine Learning made easy"

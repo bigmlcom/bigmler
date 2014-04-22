@@ -69,6 +69,7 @@ from bigmler.defaults import DEFAULTS_FILE
 from bigmler.prediction import predict, combine_votes, remote_predict
 from bigmler.prediction import (MAX_MODELS, OTHER, COMBINATION,
                                 THRESHOLD_CODE)
+from bigmler.reports import clear_reports, upload_reports
 
 COMMAND_LOG = ".bigmler"
 DIRS_LOG = ".bigmler_dir_stack"
@@ -602,8 +603,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         message = "\nGenerated files:\n\n" + u.print_tree(path, " ") + "\n"
     u.log_message(message, log_file=session_file, console=args.verbosity)
     if args.reports:
-        u.clear_reports(path)
-        u.upload_reports(args.reports, path)
+        clear_reports(path)
+        upload_reports(args.reports, path)
 
 
 def main(args=sys.argv[1:]):

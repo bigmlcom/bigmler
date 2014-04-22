@@ -27,9 +27,6 @@ import glob
 import os
 import sys
 import datetime
-import shutil
-import requests
-import site
 
 try:
     import simplejson as json
@@ -53,23 +50,6 @@ RESOURCE_URL = ("https://%s/dashboard/" % (BIGML_DOMAIN[:-3] + '.com')
 RESOURCE_SHARED_URL = ("https://%s/shared/" % (BIGML_DOMAIN[:-3] + '.com')
                        if BIGML_DASHBOARD_URL is None
                        else BIGML_DASHBOARD_URL)
-URL_TEMPLATE = "%%BIGML_%s%%"
-SECTION_START = "\n%%START_BIGML_%s%%"
-SECTION_END = "\n%%END_BIGML_%s%%"
-GAZIBIT = "gazibit"
-BIGMLER_SCRIPT = os.path.dirname(__file__)
-GAZIBIT_PRIVATE = "%s/static/gazibit.json" % BIGMLER_SCRIPT
-GAZIBIT_SHARED = "%s/static/gazibit_shared.json" % BIGMLER_SCRIPT
-GAZIBIT_TOKEN = "GAZIBIT_TOKEN"
-GAZIBIT_CREATE_URL = "http://gazibit.com/api/v1/create"
-GAZIBIT_HEADERS = {"X-Gazibit-API-Token": os.environ.get(GAZIBIT_TOKEN),
-                   "Expect": "100-continue",
-                   'content-type': 'application/x-www-form-urlencoded',
-                   'Content-Length': 12544,
-                   'User-Agent': ('curl/7.22.0 (x86_64-pc-linux-gnu)'
-                                  ' libcurl/7.22.0 OpenSSL/1.0.1'
-                                  ' zlib/1.2.3.4 libidn/1.23 librtmp/2.3')}
-HTTP_CREATED = 201
 
 
 def read_description(path):
@@ -574,130 +554,8 @@ def read_objective_weights(path):
     return objective_weights
 
 
-def report(report_types_list, output_dir=None, resource=None):
-    """Generate the demanded reports
-
-    """
-    if isinstance(resource, dict):
-        shared = is_shared(resource)
-        for report_type in report_types_list:
-            REPORTS[report_type](resource, output_dir, shared)
-
-
-def gazibit_report(resource, output_dir=None, shared=False):
-    """ Adds the link to the resource in the corresponding section of the
-        report template
-
-    """
-    try:
-        gazibit_tmp = GAZIBIT_SHARED if shared else GAZIBIT_PRIVATE
-        path = check_dir("%s%sreports%s%s" % (output_dir, os.sep, os.sep,
-                                              os.path.basename(gazibit_tmp)))
-        output_file = "%s%s%s" % (
-            path, os.sep, os.path.basename(gazibit_tmp))
-        output_tmp = "%s%s%s.tmp" % (
-            path, os.sep, os.path.basename(gazibit_tmp))
-
-        if not os.path.isfile(output_file):
-            shutil.copyfile(gazibit_tmp, output_file)
-        with open(output_file, "r") as report_template:
-            with open(output_tmp, "w") as report_output:
-                content = report_template.read()
-                resource_type = bigml.api.get_resource_type(resource)
-                resource_type = resource_type.upper()
-                url_template = URL_TEMPLATE % resource_type
-                content = content.replace(url_template,
-                                          get_url(resource, shared=shared))
-                section_template = SECTION_START % resource_type
-                content = content.replace(section_template, "")
-                section_template = SECTION_END % resource_type
-                content = content.replace(section_template, "")
-                report_output.write(content)
-        os.remove(output_file)
-        os.rename(output_tmp, output_file)
-    except IOError, exc:
-        sys.exit("Failed to generate the gazibit output report. %s" % str(exc))
-
-
 def is_shared(resource):
     """Checks if a resource is shared
 
     """
     return resource['object'].get('shared', False)
-
-
-def clear_reports(output_dir):
-    """Clears the sections useless sections
-
-    """
-    # read report files
-    path = "%s%sreports" % (output_dir, os.sep)
-    for report_file in os.listdir(path):
-        output_file = "%s%s%s" % (path, os.sep, report_file)
-        output_tmp = "%s%s%s.tmp" % (path, os.sep, report_file)
-        try:
-            with open(output_file, "r") as report_template:
-                with open(output_tmp, "w") as report_output:
-                    content = report_template.read()
-                    while content.find("%START_BIGML_") > 0:
-                        start = content.find("%START_BIGML_")
-                        end = content.find("\n", content.find("%END_BIGML_"))
-                        content = "%s%s" % (content[0: start], content[end:])
-                    report_output.write(content)
-            os.remove(output_file)
-            os.rename(output_tmp, output_file)
-        except IOError, exc:
-            sys.exit("Failed to generate the output report. %s" % str(exc))
-
-
-def upload_reports(report_types, output_dir):
-    """Uploads the reports to their respective remote location
-
-    """
-    if GAZIBIT in report_types:
-        if os.environ.get(GAZIBIT_TOKEN) is not None:
-            output_file = "%s%sreports%s%s" % (output_dir, os.sep, os.sep,
-                                               os.path.basename(GAZIBIT_PRIVATE))
-            path = check_dir(output_file)
-            gazibit_upload(output_file, exit=True)
-            output_file = "%s%s%s" % (path, os.sep,
-                                      os.path.basename(GAZIBIT_SHARED))
-            gazibit_upload(output_file)
-        else:
-            sys.exit("To upload your gazibit report you need to"
-                     " set your gazibit token in the GAZIBIT_TOKEN"
-                     "environment variable. Failed to find GAZIBIT_TOKEN.")
-
-
-def gazibit_upload(output_file, exit=False):
-    """Uploads the reports to gazibit. For `exit` set, exits if the file is
-       not found
-
-    """
-
-    try:
-        if os.path.isfile(output_file):
-            headers = GAZIBIT_HEADERS
-            with open(output_file, "rb") as output:
-                content = output.read()
-                response = requests.post(GAZIBIT_CREATE_URL,
-                                         data=content, headers=headers)
-            code = response.status_code
-            if code != HTTP_CREATED:
-                sys.exit("Failed to upload the report. Request returned %s." %
-                         code)
-        elif exit:
-            sys.exit("Failed to find the report file")
-    except IOError, excio:
-        sys.exit("ERROR: failed to read report file: %s" % str(excio) )
-    except ValueError:
-        sys.exit("Malformed response")
-    except requests.ConnectionError, exc:
-        sys.exit("Connection error: %s" % str(exc))
-    except requests.Timeout:
-        sys.exit("Request timed out")
-    except requests.RequestException:
-        sys.exit("Ambiguous exception occurred")
-
-
-REPORTS = {'gazibit': gazibit_report}
