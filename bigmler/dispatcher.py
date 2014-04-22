@@ -45,6 +45,7 @@ from bigmler.defaults import DEFAULTS_FILE
 from bigmler.prediction import predict, combine_votes, remote_predict
 from bigmler.prediction import (MAX_MODELS, OTHER, COMBINATION,
                                 THRESHOLD_CODE)
+from bigmler.reports import clear_reports, upload_reports
 
 COMMAND_LOG = ".bigmler"
 DIRS_LOG = ".bigmler_dir_stack"
