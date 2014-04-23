@@ -393,7 +393,7 @@ def best_first_search(datasets_file, api, args, common_options,
                 args.model_fields = ",".join(input_fields)
                 counter += 1
                 (score, measurement,
-                 resume = kfold_evaluate(datasets_file, api,
+                 resume) = kfold_evaluate(datasets_file, api,
                                          args, counter, common_options,
                                          penalty=penalty, resume=resume)
                 open_list.append((child, score))
