@@ -336,11 +336,13 @@ def kfold_evaluate(datasets_file, api, args, counter, common_options,
 
     evaluation = evaluation.get('model', {})
     avg_measurement = AVG_PREFIX % measurement
+    measurement_literal = measurement
     if not avg_measurement in evaluation:
         avg_measurement = AVG_PREFIX % R_SQUARED
+        measurement_literal = R_SQUARED
         if not avg_measurement in evaluation:
             sys.exit("Failed to find %s or r-squared in the evaluation"
                      % measurement)
     return (evaluation[avg_measurement] -
             penalty * len(args.model_fields.split(",")),
-            measurement.capitalize())
+            measurement_literal.capitalize())
