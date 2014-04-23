@@ -170,6 +170,16 @@ def log_resumed_command(message, defaults_file,
         pass
 
 
+def clear_log_files(log_files):
+    """Clear all contents in log files
+
+    """
+    for log_file in LOG_FILES:
+        try:
+            open(log_file, 'w', 0).close()
+        except IOError:
+            pass
+
 
 def has_test(args):
     """Returns if some kind of test data is given in args.
@@ -186,18 +196,13 @@ def main_dispatcher(args=sys.argv[1:]):
 
     # If --clear-logs the log files are cleared
     if "--clear-logs" in args:
-        for log_file in LOG_FILES:
-            try:
-                open(log_file, 'w', 0).close()
-            except IOError:
-                pass
+        clear_log_files(LOG_FILES)
 
     (parser, common_options,
      message, user_defaults, resume) = command_handling(args, COMMAND_LOG)
 
     # Parses command line arguments.
     command_args = a.parse_and_check(parser, args, train_stdin, test_stdin)
-
     default_output = ('evaluation' if command_args.evaluate
                       else 'predictions.csv')
     if command_args.resume:
@@ -206,7 +211,6 @@ def main_dispatcher(args=sys.argv[1:]):
         (command, parser, common_options, args, output_dir,
          user_defaults, defaults_file) = get_command_from_log(
             command_args, log=COMMAND_LOG, dirs_log=DIRS_LOG)
-        
         # Logs the issued command and the resumed command
         session_file = os.path.join(output_dir,SESSIONS_LOG)
         log_resumed_command(message, defaults_file,
@@ -227,8 +231,11 @@ def main_dispatcher(args=sys.argv[1:]):
 
         # Parses resumed arguments.
         command_args = a.parse_and_check(parser, args, train_stdin, test_stdin)
+        default_output = ('evaluation' if command_args.evaluate
+                          else 'predictions.csv')
         if command_args.predictions is None:
-            command_args.predictions = os.path.join(output_dir, default_output)
+            command_args.predictions = os.path.join(output_dir,
+                                                    default_output)
     else:
         if command_args.output_dir is None:
             command_args.output_dir = a.NOW
@@ -414,12 +421,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         u.check_dir(args.log_file)
         log = args.log_file
         # If --clear_logs the log files are cleared
-        if args.clear_logs:
-            try:
-                open(log, 'w', 0).close()
-            except IOError, exc:
-                sys.stderr.write("Failed to clear all logs: %s" % str(exc))
-                pass
+        clear_log_files([log])
 
     # labels to be used in multi-label expansion
     labels = (map(str.strip, args.labels.split(','))

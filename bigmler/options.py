@@ -450,19 +450,6 @@ under the License.""" % version
                              " \"combined\" for datasets with subsets of"
                              " categories")
 
-    # Resume a partial execution
-    parser.add_argument('--resume',
-                        action='store_true',
-                        help="Resume command.")
-
-    # Resume a partial execution
-    parser.add_argument('--stack-level',
-                        action='store',
-                        dest='stack_level',
-                        default=0,
-                        type=int,
-                        help="Resume command.")
-
     # Evaluate a model
     parser.add_argument('--evaluate',
                         action='store_true',
