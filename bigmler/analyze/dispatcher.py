@@ -57,7 +57,7 @@ def analyze_dispatcher(args=sys.argv[1:]):
     command_args.session_file = "%s%s%s" % (command_args.output_dir,
                                             os.sep, SESSIONS_LOG)
     csv_properties = {}
-    # If logging is required, open the file for logging
+    # If logging is required set the file for logging
     log = None
     if command_args.log_file:
         u.check_dir(command_args.log_file)

@@ -375,7 +375,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     path = u.check_dir(output)
     session_file = "%s%s%s" % (path, os.sep, SESSIONS_LOG)
     csv_properties = {}
-    # If logging is required, open the file for logging
+    # If logging is required set the file for logging
     log = None
     if args.log_file:
         u.check_dir(args.log_file)
@@ -384,7 +384,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if args.clear_logs:
             try:
                 open(log, 'w', 0).close()
-            except IOError:
+            except IOError, exc:
+                sys.stderr.write("Failed to clear all logs: %s" % str(exc))
                 pass
 
     # labels to be used in multi-label expansion

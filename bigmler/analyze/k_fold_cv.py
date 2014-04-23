@@ -148,17 +148,18 @@ def create_kfold_json(output_dir, kfold_field=DEFAULT_KFOLD_FIELD,
             with open(selecting_file, "w") as test_dataset:
                 test_dataset.write(new_field)
         return selecting_file_list
-    except IOError:
-        sys.exit("Could not create the necessary files.")
+    except IOError, exc:
+        sys.exit("Could not create the necessary files: %s" % str(exc))
 
 
 def avoid_duplicates(field_name, fields, affix="_"):
-    """Checks if a field name exists already in a fields structure.
+    """Checks if a field name already exists in a fields structure.
 
     """
     if any([field['name'] == field_name
             for _, field in fields.fields.items()]):
-        return avoid_duplicates(field_name, fields, affix=affix)
+        return avoid_duplicates("%s%s%s" % (affix, field_name, affix),
+                                fields, affix=affix)
     return field_name
 
 
@@ -183,16 +184,19 @@ def create_kfold_datasets(dataset, args,
     # creating the models from the datasets' files (multidatasets excluding
     # one test dataset at a time)
     datasets_file = "%s%sdataset_gen" % (output_dir, os.sep)
-    with open(datasets_file) as datasets_handler:
-        for line in datasets_handler:
-            dataset_id = line.strip()
-            command = COMMAND_OBJECTIVE % (dataset_id, objective,
-                                           "dataset_%s" % index, output_dir)
-            command_args = command.split()
-            common_options_list = u.get_options_list(args, common_options,
-                                                     prioritary=command_args)
-            command_args.extend(common_options_list)
-            main_dispatcher(args=command_args)
+    try:
+        with open(datasets_file) as datasets_handler:
+            for line in datasets_handler:
+                dataset_id = line.strip()
+                command = COMMAND_OBJECTIVE % (dataset_id, objective,
+                                               "dataset_%s" % index, output_dir)
+                command_args = command.split()
+                common_options_list = u.get_options_list(args, common_options,
+                                                         prioritary=command_args)
+                command_args.extend(common_options_list)
+                main_dispatcher(args=command_args)
+    except IOError, exc:
+        sys.exit("Failed to read the datasets file: %s" % str(exc))
 
     return datasets_file
 
@@ -259,8 +263,8 @@ def best_first_search(datasets_file, api, args, common_options,
     try:
         with open(datasets_file) as datasets_handler:
             dataset_id = datasets_handler.readline().strip()
-    except IOError:
-        sys.exit("Could not read the generated datasets file.")
+    except IOError, exc:
+        sys.exit("Could not read the generated datasets file: %s" % str(exc))
     dataset = api.check_resource(dataset_id, api.get_dataset)
     # initial feature set
     fields = Fields(dataset)
@@ -272,6 +276,7 @@ def best_first_search(datasets_file, api, args, common_options,
     closed_list = []
     best_accuracy = -1
     best_unchanged_count = 0
+    measurement = ACCURACY.capitalize()
     while best_unchanged_count < staleness:
         (state, score) = find_max_state(open_list)
         state_fields = [fields.field_name(field_ids[i])
@@ -282,10 +287,13 @@ def best_first_search(datasets_file, api, args, common_options,
             best_state = state
             best_accuracy = score
             best_unchanged_count = 0
-            message = 'New best state: %s\n Accuracy = %f' % (state_fields,
-                                                              score)
-            u.log_message(message, log_file=args.session_file,
-                          console=args.verbosity)
+            if state_fields:
+                message = 'New best state: %s\n' % (state_fields)
+                u.log_message(message, log_file=args.session_file,
+                              console=args.verbosity)
+                message = '%s = %0.2f%%\n' % (measurement, score)
+                u.log_message(message, log_file=args.session_file,
+                              console=args.verbosity)
         else:
             best_unchanged_count += 1
 
@@ -298,9 +306,9 @@ def best_first_search(datasets_file, api, args, common_options,
                 # create models and evaluation with input_fields
                 args.model_fields = ",".join(input_fields)
                 counter += 1
-                score = kfold_evaluate(datasets_file, api,
-                                       args, counter, common_options,
-                                       penalty=penalty)
+                score, measurement = kfold_evaluate(
+                    datasets_file, api, args, counter, common_options,
+                    penalty=penalty)
                 open_list.append((child, score))
 
     best_features = [fields.field_name(field_ids[i]) for (i, score)
@@ -308,7 +316,7 @@ def best_first_search(datasets_file, api, args, common_options,
     message = ('The best feature subset is: %s \n'
                % ", ".join(best_features))
     u.log_message(message, log_file=args.session_file, console=1)
-    message = ('Accuracy = %0.2f%%\n' % (best_accuracy * 100))
+    message = ('%s = %0.2f%%\n' % (measurement, (best_accuracy * 100)))
     u.log_message(message, log_file=args.session_file, console=1)
     message = ('Evaluated %d/%d feature subsets\n' %
                ((len(open_list) + len(closed_list)), 2 ** len(field_ids)))
@@ -334,4 +342,5 @@ def kfold_evaluate(datasets_file, api, args, counter, common_options,
             sys.exit("Failed to find %s or r-squared in the evaluation"
                      % measurement)
     return (evaluation[avg_measurement] -
-            penalty * len(args.model_fields.split(",")))
+            penalty * len(args.model_fields.split(",")),
+            measurement.capitalize())
