@@ -130,7 +130,13 @@ FLAGS = {'BigMLer': [{'flag': 'debug', 'type': 'boolean'},
                      {'flag': 'multi_dataset_attributes', 'type': 'string'},
                      {'flag': 'shared', 'type': 'boolean'},
                      {'flag': 'reports', 'type': 'list'},
-                     {'flag': 'upload', 'type': 'boolean'}]}
+                     {'flag': 'upload', 'type': 'boolean'},
+                     {'flag': 'test_dataset', 'type': 'string'},
+                     {'flag': 'dataset_off', 'type': 'boolean'}],
+         'BigMLer analyze': [
+                     {'flag': 'k-fold', 'type': 'integer'},
+                     {'flag': 'cv', 'type': 'boolean'},
+                     {'flag': 'features', 'type': 'boolean'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):
@@ -144,7 +150,8 @@ def get_user_defaults(defaults_file=DEFAULTS_FILE):
         defaults = parse_user_defaults(config)
     except IOError:
         defaults = {}
-
+        for section in FLAGS:
+            defaults[section] = {}
     return defaults
 
 
@@ -158,11 +165,12 @@ def parse_user_defaults(config):
                   'string': config.get}
     defaults = {}
     for section in FLAGS:
+        defaults[section] = {}
         for argument in FLAGS[section]:
             try:
                 value = config_get[argument['type']](section,
                                                      argument['flag'])
-                defaults.update({argument['flag']: value})
+                defaults[section].update({argument['flag']: value})
             except ConfigParser.Error:
                 pass
     return defaults

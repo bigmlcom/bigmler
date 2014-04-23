@@ -559,3 +559,41 @@ def is_shared(resource):
 
     """
     return resource['object'].get('shared', False)
+
+
+def get_options_list(args, options, prioritary=None):
+    """Creates the list of values that generates the options in `options`
+       from the args object.
+
+    """
+    options_list = []
+    if prioritary  is None:
+        exclude = []
+    filtered_options = options[:]
+    # removes the options that are already set as prioritary
+    for element in prioritary:
+        try:
+            filtered_options.remove(element)
+        except ValueError:
+            pass
+    # adds the options that have not been assigned a value in prioritary
+    for option in filtered_options:
+        try:
+            value = getattr(args, option[2:])
+            if value is not None:
+                if isinstance(value, bool):
+                    if value:
+                        options_list.append(option)
+                        print option
+                elif isinstance(value, list):
+                    if value:
+                        options_list.append(option)
+                        options_list.append(",".value)
+                else:
+                    if not isinstance(value, basestring):
+                        value = str(value)
+                    options_list.append(option)
+                    options_list.append(value)
+        except AttributeError:
+            pass
+    return options_list

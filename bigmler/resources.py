@@ -286,7 +286,7 @@ def set_basic_dataset_args(name, description, args):
 
 
 def set_dataset_args(name, description, args, fields, dataset_fields,
-                     objective_field=None, multi_label_data=None):
+                     objective_field=None, multi_label_data=None, method=None):
     """Return dataset arguments dict
 
     """
@@ -436,15 +436,14 @@ def set_model_args(name, description,
     # If cross_validation_rate = n/100, then we choose to run 2 * n evaluations
     # by holding out a n% of randomly sampled data.
 
-    if ((args.evaluate and args.test_split == 0) or
-            args.cross_validation_rate > 0):
+    if ((args.evaluate and args.test_split == 0 and args.test_datasets is None)
+        or args.cross_validation_rate > 0):
         model_args.update(seed=SEED)
         if args.cross_validation_rate > 0:
             args.sample_rate = 1 - args.cross_validation_rate
             args.replacement = False
-        elif args.sample_rate == 1:
+        elif args.sample_rate == 1 and args.test_datasets is None:
             args.sample_rate = EVALUATE_SAMPLE_RATE
-
     if model_fields and fields is not None:
         input_fields = configure_input_fields(fields, model_fields)
         model_args.update(input_fields=input_fields)
@@ -522,6 +521,9 @@ def create_models(datasets, model_ids, model_args,
     models = model_ids[:]
     existing_models = len(models)
     model_args_list = []
+    if ((args.test_datasets and args.evaluate) or
+        (args.datasets and args.evaluate and args.dataset_off)):
+        args.number_of_models = len(args.dataset_ids)
     if not args.multi_label:
         datasets = datasets[existing_models:]
     dataset = datasets[0]
@@ -549,9 +551,15 @@ def create_models(datasets, model_ids, model_args,
                 new_seed = get_basic_seed(i + existing_models)
                 model_args.update(seed=new_seed)
             # one model per dataset (--max-categories or single model)
-            if args.max_categories > 0:
+            if (args.max_categories or
+                (args.test_datasets and args.evaluate)) > 0:
                 dataset = datasets[i]
                 model = api.create_model(dataset, model_args)
+            elif args.dataset_off and args.evaluate:
+                multi_dataset = datasets[:]
+                args.test_dataset_ids.append(multi_dataset[i])
+                del multi_dataset[i]
+                model = api.create_model(multi_dataset, model_args)
             else:
                 model = api.create_model(datasets, model_args)
             model_id = check_resource_error(model, "Failed to create model: ")
@@ -697,7 +705,8 @@ def set_ensemble_args(name, description, args, model_fields,
     # we choose a deterministic sampling with
     # args.sample_rate (80% by default) of the data to create the model
 
-    if (args.evaluate and args.test_split == 0):
+    if (args.evaluate and args.test_split == 0 and
+        args.test_datasets is None and not args.dataset_off):
         ensemble_args.update(seed=SEED)
         if args.sample_rate == 1:
             args.sample_rate = EVALUATE_SAMPLE_RATE
@@ -882,6 +891,9 @@ def set_evaluation_args(name, description, args, fields=None,
     # [--train|--dataset] --test-split --evaluate
     if (args.test_split > 0 and (args.training_set or args.dataset)):
         return evaluation_args
+    # --datasets --test-datasets
+    if (args.datasets and (args.test_datasets or args.dataset_off)):
+        return evaluation_args
     if args.sample_rate == 1:
         args.sample_rate = EVALUATE_SAMPLE_RATE
     evaluation_args.update(out_of_bag=True, seed=SEED,
@@ -934,6 +946,8 @@ def create_evaluations(model_ids, datasets, evaluation_args, args, api=None,
     if api is None:
         api = bigml.api.BigML()
     remaining_ids = model_ids[existing_evaluations:]
+    if args.test_dataset_ids:
+        remaining_datasets = datasets[existing_evaluations:]
     number_of_evaluations = len(remaining_ids)
     message = dated("Creating evaluations.\n")
     log_message(message, log_file=session_file,
@@ -942,6 +956,8 @@ def create_evaluations(model_ids, datasets, evaluation_args, args, api=None,
     inprogress = []
     for i in range(0, number_of_evaluations):
         model = remaining_ids[i]
+        if args.test_dataset_ids:
+            dataset = remaining_datasets[i]
         wait_for_available_tasks(inprogress, args.max_parallel_evaluations,
                                  api.get_evaluation, "evaluation")
 
@@ -950,6 +966,7 @@ def create_evaluations(model_ids, datasets, evaluation_args, args, api=None,
         if args.cross_validation_rate > 0:
             new_seed = get_basic_seed(i + existing_evaluations)
             evaluation_args.update(seed=new_seed)
+
         evaluation = api.create_evaluation(model, dataset, evaluation_args)
         evaluation_id = check_resource_error(evaluation,
                                              "Failed to create evaluation: ")

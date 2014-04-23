@@ -151,6 +151,7 @@ def models_processing(datasets, models, model_ids, objective_field, fields,
 
                 models = model_ids
                 args.number_of_models -= len(model_ids)
+
             if args.max_categories > 0:
                 objective_field = None
 
