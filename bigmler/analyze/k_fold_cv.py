@@ -376,10 +376,10 @@ def best_first_search(datasets_file, api, args, common_options,
             best_unchanged_count = 0
             if state_fields:
                 message = 'New best state: %s\n' % (state_fields)
-                u.log_message(message, log_file=args.session_file,
+                u.log_message(message, log_file=session_file,
                               console=args.verbosity)
                 message = '%s = %0.2f%%\n' % (measurement, score * 100)
-                u.log_message(message, log_file=args.session_file,
+                u.log_message(message, log_file=session_file,
                               console=args.verbosity)
         else:
             best_unchanged_count += 1
@@ -403,9 +403,9 @@ def best_first_search(datasets_file, api, args, common_options,
                      in enumerate(best_state) if score]
     message = ('The best feature subset is: %s \n'
                % ", ".join(best_features))
-    u.log_message(message, log_file=args.session_file, console=1)
+    u.log_message(message, log_file=session_file, console=1)
     message = ('%s = %0.2f%%\n' % (measurement, (best_accuracy * 100)))
-    u.log_message(message, log_file=args.session_file, console=1)
+    u.log_message(message, log_file=session_file, console=1)
     message = ('Evaluated %d/%d feature subsets\n' %
                ((len(open_list) + len(closed_list)), 2 ** len(field_ids)))
     u.log_message(message, log_file=session_file, console=1)
