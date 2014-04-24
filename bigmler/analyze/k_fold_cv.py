@@ -270,8 +270,8 @@ def create_kfold_datasets(dataset, args,
     return datasets_file, resume
 
 
-def create_kfold_evaluations(datasets_file, args, counter, common_options,
-                             resume=False):
+def create_kfold_evaluations(datasets_file, args, common_options,
+                             resume=False, counter=0):
     """ Create k-fold cross-validation from a datasets file
 
     """
@@ -279,8 +279,9 @@ def create_kfold_evaluations(datasets_file, args, counter, common_options,
     output_dir = u.check_dir(os.path.join("%s%s" % (args.output_dir, counter),
                                           "evaluation.json"))
     model_fields = args.model_fields
-    command = COMMAND_CREATE_CV % (datasets_file, output_dir,
-                                   args.model_fields.replace(" ", "_"))
+    name = ("all" if not args.model_fields else
+            args.model_fields.replace(" ", "_"))
+    command = COMMAND_CREATE_CV % (datasets_file, output_dir, name)
     command_args = command.split()
     if model_fields:
         command_args.append("--model-fields")
@@ -314,7 +315,7 @@ def create_kfold_evaluations(datasets_file, args, counter, common_options,
 
 def find_max_state(states):
     maxval = -1
-    maxstate = ''
+    maxstate = None
     for (v,f) in states:
         if f > maxval:
             maxstate = v
@@ -363,7 +364,7 @@ def best_first_search(datasets_file, api, args, common_options,
     best_accuracy = -1
     best_unchanged_count = 0
     measurement = ACCURACY.capitalize()
-    while best_unchanged_count < staleness:
+    while best_unchanged_count < staleness and open_list:
         (state, score) = find_max_state(open_list)
         state_fields = [fields.field_name(field_ids[i])
                         for (i, val) in enumerate(state) if val]
@@ -377,7 +378,7 @@ def best_first_search(datasets_file, api, args, common_options,
                 message = 'New best state: %s\n' % (state_fields)
                 u.log_message(message, log_file=args.session_file,
                               console=args.verbosity)
-                message = '%s = %0.2f%%\n' % (measurement, score)
+                message = '%s = %0.2f%%\n' % (measurement, score * 100)
                 u.log_message(message, log_file=args.session_file,
                               console=args.verbosity)
         else:
@@ -419,8 +420,9 @@ def kfold_evaluate(datasets_file, api, args, counter, common_options,
     # create evaluation with input_fields
     args.output_dir = "%s%skfold" % (u.check_dir(datasets_file), os.sep)
     evaluation, resume = create_kfold_evaluations(datasets_file, args,
-                                                  counter, common_options,
-                                                  resume=resume)
+                                                  common_options,
+                                                  resume=resume,
+                                                  counter=counter)
 
     evaluation = evaluation.get('model', {})
     avg_measurement = AVG_PREFIX % measurement
