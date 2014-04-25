@@ -521,6 +521,8 @@ def create_models(datasets, model_ids, model_args,
     models = model_ids[:]
     existing_models = len(models)
     model_args_list = []
+    if args.dataset_off and args.evaluate:
+        args.test_dataset_ids = datasets[:]
     if not args.multi_label:
         datasets = datasets[existing_models:]
     # if resuming and all models were created, there will be no datasets left
@@ -555,9 +557,9 @@ def create_models(datasets, model_ids, model_args,
                     dataset = datasets[i]
                     model = api.create_model(dataset, model_args)
                 elif args.dataset_off and args.evaluate:
-                    multi_dataset = datasets[:]
-                    args.test_dataset_ids.append(multi_dataset[i])
-                    del multi_dataset[i]
+                    multi_dataset = args.test_dataset_ids[:]
+                    del multi_dataset[i + existing_models]
+                    print "***", i + existing_models
                     model = api.create_model(multi_dataset, model_args)
                 else:
                     model = api.create_model(datasets, model_args)
@@ -945,8 +947,14 @@ def create_evaluations(model_ids, datasets, evaluation_args, args, api=None,
     if api is None:
         api = bigml.api.BigML()
     remaining_ids = model_ids[existing_evaluations:]
-    if args.test_dataset_ids:
+    print "*** rem ids:", remaining_ids
+    print "*** datasets:", len(datasets)
+    print "*** existing:", existing_evaluations
+    if args.test_dataset_ids or args.dataset_off:
         remaining_datasets = datasets[existing_evaluations:]
+    print "*** rem datasets:", remaining_datasets
+    print "*** datasets:", len(datasets)
+    print "*** existing:", existing_evaluations
     number_of_evaluations = len(remaining_ids)
     message = dated("Creating evaluations.\n")
     log_message(message, log_file=session_file,
@@ -955,7 +963,7 @@ def create_evaluations(model_ids, datasets, evaluation_args, args, api=None,
     inprogress = []
     for i in range(0, number_of_evaluations):
         model = remaining_ids[i]
-        if args.test_dataset_ids:
+        if args.test_dataset_ids or args.dataset_off:
             dataset = remaining_datasets[i]
         wait_for_available_tasks(inprogress, args.max_parallel_evaluations,
                                  api.get_evaluation, "evaluation")

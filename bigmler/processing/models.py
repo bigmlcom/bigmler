@@ -132,6 +132,7 @@ def models_processing(datasets, models, model_ids, objective_field, fields,
                 args.number_of_models = len(datasets)
             if ((args.test_datasets and args.evaluate) or
             (args.datasets and args.evaluate and args.dataset_off)):
+                print args.dataset_ids
                 args.number_of_models = len(args.dataset_ids)
             # Cross-validation case: we create 2 * n models to be validated
             # holding out an n% of data
