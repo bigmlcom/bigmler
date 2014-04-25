@@ -39,13 +39,13 @@ from bigml.model import Model
 from bigml.ensemble import Ensemble
 
 from bigmler.evaluation import evaluate, cross_validate
-from bigmler.options import create_parser
 from bigmler.defaults import get_user_defaults
 from bigmler.defaults import DEFAULTS_FILE
 from bigmler.prediction import predict, combine_votes, remote_predict
 from bigmler.prediction import (MAX_MODELS, OTHER, COMBINATION,
                                 THRESHOLD_CODE)
 from bigmler.reports import clear_reports, upload_reports
+from bigmler.command import Command, StoredCommand
 
 COMMAND_LOG = ".bigmler"
 DIRS_LOG = ".bigmler_dir_stack"
@@ -111,63 +111,17 @@ def command_handling(args, log=COMMAND_LOG):
        parses it.
 
     """
-    # Rebuild the command string
-    message = a.get_command_message(args)
+    # Create the Command object
+    command = Command(args, None)
 
     # Resume calls are not logged
     resume = True
-    if not "--resume" in args:
+    if not command.resume:
         with open(log, "a", 0) as command_log:
-            command_log.write(message)
+            command_log.write(command.command)
         resume = False
-    user_defaults = get_user_defaults()
-    parser, common_options = create_parser(
-        general_defaults=user_defaults,
-        constants={'NOW': a.NOW,
-                   'MAX_MODELS': MAX_MODELS,
-                   'PLURALITY': PLURALITY})
 
-    return parser, common_options, message, user_defaults, resume
-
-
-def get_command_from_log(command_args,
-                         log=COMMAND_LOG, dirs_log=DIRS_LOG):
-    """Retrieve the command line from the commands file and the directories
-       file and parse the command arguments and output directory from there
-
-    """
-    command = u.get_log_reversed(log, command_args.stack_level)
-    output_dir = u.get_log_reversed(dirs_log,
-                                    command_args.stack_level)
-
-    defaults_file = os.path.join(output_dir, DEFAULTS_FILE)
-    user_defaults = get_user_defaults(defaults_file)
-    parser, common_options = create_parser(
-        general_defaults=user_defaults,
-        constants={'NOW': a.NOW,
-                   'MAX_MODELS': MAX_MODELS,
-                   'PLURALITY': PLURALITY})
-    args = shlex.split(command)[1:]
-    return (command, parser, common_options, args, output_dir,
-            user_defaults, defaults_file)
-
-
-def log_resumed_command(message, defaults_file,
-                        command, session_file=SESSIONS_LOG):
-    """Logging the resumed command in the sessions_log file
-
-    """
-    u.log_message(message, log_file=session_file)
-    message = "\nResuming command:\n%s\n\n" % command
-    u.log_message(message, log_file=session_file, console=True)
-    try:
-        defaults_handler = open(defaults_file, 'r')
-        contents = defaults_handler.read()
-        message = "\nUsing the following defaults:\n%s\n\n" % contents
-        u.log_message(message, log_file=session_file, console=True)
-        defaults_handler.close()
-    except IOError:
-        pass
+    return command
 
 
 def clear_log_files(log_files):
@@ -192,49 +146,33 @@ def main_dispatcher(args=sys.argv[1:]):
     """Parses command line and calls the different processing functions
 
     """
-    (flags, train_stdin, test_stdin) = a.get_flags(args)
 
     # If --clear-logs the log files are cleared
     if "--clear-logs" in args:
         clear_log_files(LOG_FILES)
 
-    (parser, common_options,
-     message, user_defaults, resume) = command_handling(args, COMMAND_LOG)
+    command = command_handling(args, COMMAND_LOG)
 
     # Parses command line arguments.
-    command_args = a.parse_and_check(parser, args, train_stdin, test_stdin)
+    command_args = a.parse_and_check(command)
+    resume = command_args.resume
     default_output = ('evaluation' if command_args.evaluate
                       else 'predictions.csv')
     if command_args.resume:
-        # Restore the args of the call to resume from the command log file
+        # Keep the debug option if set
         debug = command_args.debug
-        (command, parser, common_options, args, output_dir,
-         user_defaults, defaults_file) = get_command_from_log(
-            command_args, log=COMMAND_LOG, dirs_log=DIRS_LOG)
+        # Restore the args of the call to resume from the command log file
+        stored_command = StoredCommand(args, COMMAND_LOG, DIRS_LOG)
+        command = Command(None, stored_command=stored_command)
         # Logs the issued command and the resumed command
-        session_file = os.path.join(output_dir,SESSIONS_LOG)
-        log_resumed_command(message, defaults_file,
-                            command, session_file=session_file)
-        # Check if stdin is used as test or train input
-        try:
-            position = args.index("--train")
-            train_stdin = (position == (len(args) - 1) or
-                           args[position + 1].startswith("--"))
-        except ValueError:
-            pass
-        try:
-            position = args.index("--test")
-            test_stdin = (position == (len(args) - 1) or
-                          args[position + 1].startswith("--"))
-        except ValueError:
-            pass
-
+        session_file = os.path.join(stored_command.output_dir, SESSIONS_LOG)
+        stored_command.log_command(session_file=session_file)
         # Parses resumed arguments.
-        command_args = a.parse_and_check(parser, args, train_stdin, test_stdin)
+        command_args = a.parse_and_check(command)
         default_output = ('evaluation' if command_args.evaluate
                           else 'predictions.csv')
         if command_args.predictions is None:
-            command_args.predictions = os.path.join(output_dir,
+            command_args.predictions = os.path.join(stored_command.output_dir,
                                                     default_output)
     else:
         if command_args.output_dir is None:
@@ -247,7 +185,7 @@ def main_dispatcher(args=sys.argv[1:]):
                                                     command_args.predictions)
         directory = u.check_dir(command_args.predictions)
         session_file = os.path.join(directory, SESSIONS_LOG)
-        u.log_message(message + "\n", log_file=session_file)
+        u.log_message(command.command + "\n", log_file=session_file)
         try:
             defaults_file = open(DEFAULTS_FILE, 'r')
             contents = defaults_file.read()
@@ -261,6 +199,7 @@ def main_dispatcher(args=sys.argv[1:]):
         with open(DIRS_LOG, "a", 0) as directory_log:
             directory_log.write("%s\n" % os.path.abspath(directory))
 
+
     # Creates the corresponding api instance
     if resume and debug:
         command_args.debug = True
@@ -272,9 +211,11 @@ def main_dispatcher(args=sys.argv[1:]):
     elif (command_args.training_set or has_test(command_args)
           or command_args.source or command_args.dataset
           or command_args.datasets or command_args.votes_dirs):
-        output_args = a.get_output_args(api, train_stdin, test_stdin,
+        output_args = a.get_output_args(api, command.train_stdin,
+                                        command.test_stdin,
                                         command_args, resume)
-        a.transform_args(command_args, flags, api, user_defaults)
+        a.transform_args(command_args, command.flags, api,
+                         command.user_defaults)
         compute_output(**output_args)
     u.log_message("_" * 80 + "\n", log_file=session_file)
 

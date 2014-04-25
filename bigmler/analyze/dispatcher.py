@@ -34,11 +34,10 @@ from bigmler.defaults import DEFAULTS_FILE
 from bigmler.prediction import (MAX_MODELS, OTHER, COMBINATION,
                                 THRESHOLD_CODE)
 from bigmler.defaults import get_user_defaults
-from bigmler.options import create_parser
 from bigmler.analyze.k_fold_cv import create_kfold_cv, create_features_analysis
 from bigmler.utils import check_dir
-from bigmler.dispatcher import (SESSIONS_LOG, command_handling,
-                                get_command_from_log, log_resumed_command)
+from bigmler.dispatcher import (SESSIONS_LOG, command_handling)
+from bigmler.command import Command, StoredCommand
 
 
 COMMAND_LOG = ".bigmler_analyze"
@@ -56,30 +55,23 @@ def analyze_dispatcher(args=sys.argv[1:]):
     if "--clear-logs" in args:
         clear_log_files(LOG_FILES)
 
-    (parser, common_options,
-     message, user_defaults, resume) = command_handling(args, COMMAND_LOG)
+    command = command_handling(args, COMMAND_LOG)
 
-    command_args = parser.parse_args(args)
-    if command_args.resume:
-        # Restore the args of the call to resume from the command log file
+    # Parses command line arguments.
+    command_args = command.parser.parse_args(command.args)
+    resume = command_args.resume
+    if resume:
+        # Keep the debug option if set
         debug = command_args.debug
-        (command, parser, common_options, args, output_dir,
-         user_defaults, defaults_file) = get_command_from_log(
-            command_args, log=COMMAND_LOG, dirs_log=DIRS_LOG)
-        command_args = parser.parse_args(args)        
+        # Restore the args of the call to resume from the command log file
+        stored_command = StoredCommand(args, COMMAND_LOG, DIRS_LOG)
+        command = Command(None, stored_command=stored_command)
         # Logs the issued command and the resumed command
-        session_file = os.path.join(output_dir, SESSIONS_LOG)
-        log_resumed_command(message, defaults_file,
-                            command, session_file=session_file)
+        session_file = os.path.join(stored_command.output_dir, SESSIONS_LOG)
+        stored_command.log_command(session_file=session_file)
+        # Parses resumed arguments.
+        command_args = command.parser.parse_args(command.args)
     else:
-        user_defaults = get_user_defaults()
-        parser, common_options = create_parser(
-            general_defaults=user_defaults,
-            constants={'NOW': a.NOW,
-                       'MAX_MODELS': MAX_MODELS,
-                       'PLURALITY': PLURALITY})
-
-        command_args = parser.parse_args(args)
         command_args.session_file = os.path.join(command_args.output_dir,
                                                  SESSIONS_LOG)
         csv_properties = {}
@@ -108,9 +100,10 @@ def analyze_dispatcher(args=sys.argv[1:]):
     # k-fold cross-validation
     if (command_args.cv and command_args.k_folds is not None
         and command_args.dataset is not None):
-        create_kfold_cv(command_args, api, common_options, resume=resume)
+        create_kfold_cv(command_args, api, command.common_options,
+                        resume=resume)
 
     # features analysis
     if command_args.features and command_args.k_folds is not None:
-        create_features_analysis(command_args, api, common_options,
+        create_features_analysis(command_args, api, command.common_options,
                                  resume=resume)

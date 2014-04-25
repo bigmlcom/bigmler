@@ -143,6 +143,8 @@ def get_user_defaults(defaults_file=DEFAULTS_FILE):
     """Looks for a defaults file and returns its contents
 
     """
+    if defaults_file is None:
+        defaults_file = DEFAULTS_FILE
     try:
         open(defaults_file).close()
         config = ConfigParser.ConfigParser()
