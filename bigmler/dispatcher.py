@@ -465,7 +465,6 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                                            args.max_categories)
         other_label = get_metadata(dataset, 'other_label',
                                    other_label)
-    print "pre model***", len(datasets)
     models, model_ids, ensemble_ids, resume = pm.models_processing(
         datasets, models, model_ids,
         objective_field, fields, api, args, resume,

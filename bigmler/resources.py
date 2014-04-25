@@ -559,7 +559,6 @@ def create_models(datasets, model_ids, model_args,
                 elif args.dataset_off and args.evaluate:
                     multi_dataset = args.test_dataset_ids[:]
                     del multi_dataset[i + existing_models]
-                    print "***", i + existing_models
                     model = api.create_model(multi_dataset, model_args)
                 else:
                     model = api.create_model(datasets, model_args)
@@ -947,14 +946,8 @@ def create_evaluations(model_ids, datasets, evaluation_args, args, api=None,
     if api is None:
         api = bigml.api.BigML()
     remaining_ids = model_ids[existing_evaluations:]
-    print "*** rem ids:", remaining_ids
-    print "*** datasets:", len(datasets)
-    print "*** existing:", existing_evaluations
     if args.test_dataset_ids or args.dataset_off:
         remaining_datasets = datasets[existing_evaluations:]
-    print "*** rem datasets:", remaining_datasets
-    print "*** datasets:", len(datasets)
-    print "*** existing:", existing_evaluations
     number_of_evaluations = len(remaining_ids)
     message = dated("Creating evaluations.\n")
     log_message(message, log_file=session_file,
