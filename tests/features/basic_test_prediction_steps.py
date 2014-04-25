@@ -481,6 +481,29 @@ def i_check_create_model(step):
         assert False, str(exc)
 
 
+@step(r'I check that the (\d*)-models have been created')
+def i_check_create_kfold_models(step, kfolds):
+    directory = os.path.dirname(os.path.dirname(world.output))
+    
+    directories = [os.path.join(directory, folder) 
+                   for folder in os.listdir(directory) if
+                   os.path.isdir(os.path.join(directory, folder))]
+    for directory in directories:
+        model_file = os.path.join(directory, "models")
+        try:
+            with open(model_file, "r") as models_file:
+                models_list = map(str.strip, models_file.readlines())
+
+            world.models.extend(models_list)
+            world.model = models_list[-1]
+            if int(kfolds) == len(models_list):
+                assert True
+            else:
+                assert False
+        except Exception, exc:
+            assert False, str(exc)
+
+
 @step(r'I check that the model has been created and shared$')
 def i_check_create_model_shared(step):
     i_check_create_model(step)
@@ -572,6 +595,70 @@ def i_check_create_evaluation(step):
         world.evaluation = evaluation
         evaluation_file.close()
         assert True
+    except:
+        assert False
+
+
+def check_create_kfold_cross_validation(step, kfolds, directory):
+    evaluations_file = os.path.join(directory, "evaluations")
+    try:
+        with open(evaluations_file, "r") as evaluations_file:
+            evaluations_list = map(str.strip, evaluations_file.readlines())
+        world.evaluations.extend(evaluations_list)
+        world.evaluation = evaluations_list[-1]
+        if int(kfolds) == len(evaluations_list):
+            assert True
+        else:
+            assert False
+    except:
+        assert False
+
+
+@step(r'I check that all the (\d*)-fold cross-validations have been created')
+def i_check_create_all_kfold_cross_validations(step, kfolds):
+    directory = os.path.dirname(os.path.dirname(world.output))
+    directories = [os.path.join(directory, folder) 
+                   for folder in os.listdir(directory) if
+                   os.path.isdir(os.path.join(directory, folder))]
+    for directory in directories:
+        check_create_kfold_cross_validation(step, kfolds, directory)
+
+
+@step(r'I check that the (\d*)-fold cross-validation has been created')
+def i_check_create_kfold_cross_validation(step, kfolds):
+    check_create_kfold_cross_validation(step, kfolds,
+                                        os.path.dirname(world.output))
+
+
+@step(r'I check that the (\d*)-datasets have been created')
+def i_check_create_kfold_datasets(step, kfolds):
+    datasets_file = os.path.join(
+        os.path.dirname(os.path.dirname(world.output)),
+        "dataset_gen")
+    try:
+        with open(datasets_file, "r") as datasets_file:
+            datasets_list = map(str.strip, datasets_file.readlines())
+        world.datasets.extend(datasets_list)
+        world.dataset = datasets_list[-1]
+        if int(kfolds) == len(datasets_list):
+            assert True
+        else:
+            assert False
+    except:
+        assert False
+
+
+@step(r'the best feature selection is "(.*)"')
+def i_check_feature_selection(step, selection):
+    sessions_file = os.path.join(world.directory, "bigmler_sessions")
+    try:
+        with open(sessions_file, "r") as sessions_file:
+            content = sessions_file.read().decode("utf-8")
+        text = "The best feature subset is: %s" % selection
+        if content.find(text) > -1:
+            assert True
+        else:
+            assert False
     except:
         assert False
 
@@ -800,6 +887,63 @@ def i_create_all_resources_to_evaluate_with_locale(step, data=None, locale=None,
             world.directory = os.path.dirname(output)
             world.folders.append(world.directory)
             world.output = output
+            assert True
+    except OSError as e:
+        assert False
+
+
+@step(r'I create BigML dataset uploading train "(.*)" file in "(.*)"')
+def i_create_dataset(step, data=None, output=None):
+    if data is None or output is None:
+        assert False
+    try:
+        retcode = check_call("bigmler --train " + data + " --no-model --store --output " + output, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.directory = os.path.dirname(output)
+            world.folders.append(world.directory)
+            world.output = output
+            assert True
+    except OSError as e:
+        assert False
+
+
+@step(r'I create BigML (\d*)-fold cross-validation')
+def i_create_kfold_cross_validation(step, k_folds=None):
+    if k_folds is None:
+        assert False
+    try:
+        retcode = check_call("bigmler analyze --dataset " +
+                             world.dataset['resource'] +
+                             " --cross-validation --k-folds " + k_folds +
+                             " --output " + world.directory,
+                             shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.output = os.path.join(world.directory, "test", "k_fold0",
+                                        "evaluation")
+            assert True
+    except OSError as e:
+        assert False
+
+
+@step(r'I create BigML feature selection (\d*)-fold cross-validations')
+def i_create_kfold_cross_validation(step, k_folds=None):
+    if k_folds is None:
+        assert False
+    try:
+        retcode = check_call("bigmler analyze --dataset " +
+                             world.dataset['resource'] +
+                             " --features --k-folds " + k_folds +
+                             " --output " + world.directory,
+                             shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.output = os.path.join(world.directory, "test", "kfold1",
+                                        "evaluation")
             assert True
     except OSError as e:
         assert False

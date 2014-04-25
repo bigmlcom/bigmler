@@ -100,10 +100,14 @@ def get_command_message(args):
     return "bigmler %s\n" % " ".join(literal_args)
 
 
-def parse_and_check(parser, args, train_stdin, test_stdin):
+def parse_and_check(command):
     """Parses and checks the given args
 
     """
+    parser = command.parser
+    args = command.args
+    train_stdin = command.train_stdin
+    test_stdin = command.test_stdin
     command_args = parser.parse_args(args)
 
     # Checks options' compatibility

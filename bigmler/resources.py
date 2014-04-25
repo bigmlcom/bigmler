@@ -521,69 +521,69 @@ def create_models(datasets, model_ids, model_args,
     models = model_ids[:]
     existing_models = len(models)
     model_args_list = []
-    if ((args.test_datasets and args.evaluate) or
-        (args.datasets and args.evaluate and args.dataset_off)):
-        args.number_of_models = len(args.dataset_ids)
+    if args.dataset_off and args.evaluate:
+        args.test_dataset_ids = datasets[:]
     if not args.multi_label:
         datasets = datasets[existing_models:]
-    dataset = datasets[0]
-    if isinstance(model_args, list):
-        model_args_list = model_args
-    if args.number_of_models > 0:
-        message = dated("Creating %s.\n" %
-                        plural("model", args.number_of_models))
-        log_message(message, log_file=session_file,
-                    console=args.verbosity)
-
-        single_model = args.number_of_models == 1 and existing_models == 0
-        # if there's more than one model the first one must contain
-        # the entire field structure to be used as reference.
-        query_string = (FIELDS_QS if single_model
-                        else ALL_FIELDS_QS)
-        inprogress = []
-        for i in range(0, args.number_of_models):
-            wait_for_available_tasks(inprogress, args.max_parallel_models,
-                                     api.get_model, "model",
-                                     query_string=query_string)
-            if model_args_list:
-                model_args = model_args_list[i]
-            if args.cross_validation_rate > 0:
-                new_seed = get_basic_seed(i + existing_models)
-                model_args.update(seed=new_seed)
-            # one model per dataset (--max-categories or single model)
-            if (args.max_categories or
-                (args.test_datasets and args.evaluate)) > 0:
-                dataset = datasets[i]
-                model = api.create_model(dataset, model_args)
-            elif args.dataset_off and args.evaluate:
-                multi_dataset = datasets[:]
-                args.test_dataset_ids.append(multi_dataset[i])
-                del multi_dataset[i]
-                model = api.create_model(multi_dataset, model_args)
-            else:
-                model = api.create_model(datasets, model_args)
-            model_id = check_resource_error(model, "Failed to create model: ")
-            log_message("%s\n" % model_id, log_file=log)
-            model_ids.append(model_id)
-            inprogress.append(model_id)
-            models.append(model)
-            log_created_resources("models", path, model_id, open_mode='a')
-
-        if args.number_of_models < 2 and args.verbosity:
-            if bigml.api.get_status(model)['code'] != bigml.api.FINISHED:
-                try:
-                    model = check_resource(model, api.get_model,
-                                           query_string=query_string)
-                except ValueError, exception:
-                    sys.exit("Failed to get a finished model: %s" %
-                             str(exception))
-                models[0] = model
-            message = dated("Model created: %s.\n" %
-                            get_url(model))
+    # if resuming and all models were created, there will be no datasets left
+    if datasets:
+        dataset = datasets[0]
+        if isinstance(model_args, list):
+            model_args_list = model_args
+        if args.number_of_models > 0:
+            message = dated("Creating %s.\n" %
+                            plural("model", args.number_of_models))
             log_message(message, log_file=session_file,
                         console=args.verbosity)
-            if args.reports:
-                report(args.reports, path, model)
+
+            single_model = args.number_of_models == 1 and existing_models == 0
+            # if there's more than one model the first one must contain
+            # the entire field structure to be used as reference.
+            query_string = (FIELDS_QS if single_model
+                            else ALL_FIELDS_QS)
+            inprogress = []
+            for i in range(0, args.number_of_models):
+                wait_for_available_tasks(inprogress, args.max_parallel_models,
+                                         api.get_model, "model",
+                                         query_string=query_string)
+                if model_args_list:
+                    model_args = model_args_list[i]
+                if args.cross_validation_rate > 0:
+                    new_seed = get_basic_seed(i + existing_models)
+                    model_args.update(seed=new_seed)
+                # one model per dataset (--max-categories or single model)
+                if (args.max_categories or
+                    (args.test_datasets and args.evaluate)) > 0:
+                    dataset = datasets[i]
+                    model = api.create_model(dataset, model_args)
+                elif args.dataset_off and args.evaluate:
+                    multi_dataset = args.test_dataset_ids[:]
+                    del multi_dataset[i + existing_models]
+                    model = api.create_model(multi_dataset, model_args)
+                else:
+                    model = api.create_model(datasets, model_args)
+                model_id = check_resource_error(model, "Failed to create model: ")
+                log_message("%s\n" % model_id, log_file=log)
+                model_ids.append(model_id)
+                inprogress.append(model_id)
+                models.append(model)
+                log_created_resources("models", path, model_id, open_mode='a')
+
+            if args.number_of_models < 2 and args.verbosity:
+                if bigml.api.get_status(model)['code'] != bigml.api.FINISHED:
+                    try:
+                        model = check_resource(model, api.get_model,
+                                               query_string=query_string)
+                    except ValueError, exception:
+                        sys.exit("Failed to get a finished model: %s" %
+                                 str(exception))
+                    models[0] = model
+                message = dated("Model created: %s.\n" %
+                                get_url(model))
+                log_message(message, log_file=session_file,
+                            console=args.verbosity)
+                if args.reports:
+                    report(args.reports, path, model)
 
     return models, model_ids
 
@@ -946,7 +946,7 @@ def create_evaluations(model_ids, datasets, evaluation_args, args, api=None,
     if api is None:
         api = bigml.api.BigML()
     remaining_ids = model_ids[existing_evaluations:]
-    if args.test_dataset_ids:
+    if args.test_dataset_ids or args.dataset_off:
         remaining_datasets = datasets[existing_evaluations:]
     number_of_evaluations = len(remaining_ids)
     message = dated("Creating evaluations.\n")
@@ -956,7 +956,7 @@ def create_evaluations(model_ids, datasets, evaluation_args, args, api=None,
     inprogress = []
     for i in range(0, number_of_evaluations):
         model = remaining_ids[i]
-        if args.test_dataset_ids:
+        if args.test_dataset_ids or args.dataset_off:
             dataset = remaining_datasets[i]
         wait_for_available_tasks(inprogress, args.max_parallel_evaluations,
                                  api.get_evaluation, "evaluation")

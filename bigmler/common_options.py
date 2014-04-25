@@ -166,4 +166,19 @@ def common_options(parser, defaults={}, constants={}):
                         help="Set verbosity: 0 to turn off, 1 to turn on.")
     options.append('--verbosity')
 
+    # Resume a partial execution
+    parser.add_argument('--resume',
+                        action='store_true',
+                        help="Resume command.")
+    options.append('--resume')
+
+    # Resume a partial execution
+    parser.add_argument('--stack-level',
+                        action='store',
+                        dest='stack_level',
+                        default=0,
+                        type=int,
+                        help="Resume command.")
+    options.append('--stack_level')
+
     return options

@@ -301,44 +301,6 @@ def check_dir(path):
     return directory
 
 
-def tail(file_handler, window=1):
-    """Returns the last n lines of a file.
-
-    """
-    bufsiz = 1024
-    file_handler.seek(0, 2)
-    file_bytes = file_handler.tell()
-    size = window + 1
-    block = -1
-    data = []
-    while size > 0 and file_bytes > 0:
-        if (file_bytes - bufsiz > 0):
-            # Seek back one whole bufsiz
-            file_handler.seek(block * bufsiz, 2)
-            # read BUFFER
-            new_data = [file_handler.read(bufsiz)]
-            new_data.extend(data)
-            data = new_data
-        else:
-            # file too small, start from begining
-            file_handler.seek(0, 0)
-            # only read what was not read
-            data.append(file_handler.read(file_bytes))
-        lines_found = data[0].count('\n')
-        size -= lines_found
-        file_bytes -= bufsiz
-        block -= 1
-    return ''.join(data).splitlines()[-window:]
-
-
-def get_log_reversed(file_name, stack_level):
-    """Reads the line of a log file that has the chosen stack_level
-
-    """
-    lines_list = tail(open(file_name, "r"), window=(stack_level + 1))
-    return lines_list[0]
-
-
 def print_tree(directory, padding):
     """Returns a graphical directory tree structure as a string
 

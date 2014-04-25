@@ -34,60 +34,76 @@ from bigmler.defaults import DEFAULTS_FILE
 from bigmler.prediction import (MAX_MODELS, OTHER, COMBINATION,
                                 THRESHOLD_CODE)
 from bigmler.defaults import get_user_defaults
-from bigmler.options import create_parser
 from bigmler.analyze.k_fold_cv import create_kfold_cv, create_features_analysis
 from bigmler.utils import check_dir
-from bigmler.dispatcher import SESSIONS_LOG
+from bigmler.dispatcher import (SESSIONS_LOG, command_handling)
+from bigmler.command import Command, StoredCommand
+
+
+COMMAND_LOG = ".bigmler_analyze"
+DIRS_LOG = ".bigmler_analyze_dir_stack"
+SESSIONS_LOG = "bigmler_sessions"
+LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 
 
 def analyze_dispatcher(args=sys.argv[1:]):
     """Main processing of the parsed options for BigMLer analyze
 
     """
+
+    # If --clear-logs the log files are cleared
+    if "--clear-logs" in args:
+        clear_log_files(LOG_FILES)
+
+    command = command_handling(args, COMMAND_LOG)
+
     # Parses command line arguments.
+    command_args = command.parser.parse_args(command.args)
+    resume = command_args.resume
+    if resume:
+        # Keep the debug option if set
+        debug = command_args.debug
+        # Restore the args of the call to resume from the command log file
+        stored_command = StoredCommand(args, COMMAND_LOG, DIRS_LOG)
+        command = Command(None, stored_command=stored_command)
+        # Logs the issued command and the resumed command
+        session_file = os.path.join(stored_command.output_dir, SESSIONS_LOG)
+        stored_command.log_command(session_file=session_file)
+        # Parses resumed arguments.
+        command_args = command.parser.parse_args(command.args)
+    else:
+        command_args.session_file = os.path.join(command_args.output_dir,
+                                                 SESSIONS_LOG)
+        csv_properties = {}
+        # If logging is required, open the file for logging
+        log = None
+        if command_args.log_file:
+            u.check_dir(command_args.log_file)
+            log = command_args.log_file
+            # If --clear_logs the log files are cleared
+            if command_args.clear_logs:
+                clear_log_files([log])
 
-    user_defaults = get_user_defaults()
-    parser, common_options = create_parser(
-        general_defaults=user_defaults,
-        constants={'NOW': a.NOW,
-                   'MAX_MODELS': MAX_MODELS,
-                   'PLURALITY': PLURALITY})
-
-    command_args = parser.parse_args(args)
-    command_args.session_file = "%s%s%s" % (command_args.output_dir,
-                                            os.sep, SESSIONS_LOG)
-    csv_properties = {}
-    # If logging is required set the file for logging
-    log = None
-    if command_args.log_file:
-        u.check_dir(command_args.log_file)
-        log = command_args.log_file
-        # If --clear_logs the log files are cleared
-        if command_args.clear_logs:
-            try:
-                open(log, 'w', 0).close()
-            except IOError:
-                pass
-
+        if command_args.model_fields:
+            model_fields = command_args.model_fields.split(',')
+            command_args.model_fields_ = map(str.strip, model_fields)
+        else:
+            command_args.model_fields_ = {}
+        with open(DIRS_LOG, "a", 0) as directory_log:
+            directory_log.write("%s\n" %
+                                os.path.abspath(command_args.output_dir))
+        session_file = os.path.join(command_args.output_dir, SESSIONS_LOG)
     # create api instance form args
     api = a.get_api_instance(command_args,
-                             u.check_dir(command_args.session_file))
-
-    if command_args.output_dir:
-        path = check_dir("%s%sbigmler_session" % (command_args.output_dir,
-                                                  os.sep))
-
-    if command_args.model_fields:
-        command_args.model_fields_ = map(str.strip,
-                                         command_args.model_fields.split(','))
-    else:
-        command_args.model_fields_ = {}
+                             u.check_dir(session_file))
 
     # k-fold cross-validation
     if (command_args.cv and command_args.k_folds is not None
         and command_args.dataset is not None):
-        create_kfold_cv(command_args, api, common_options)
+        create_kfold_cv(command_args, api, command.common_options,
+                        resume=resume)
 
     # features analysis
     if command_args.features and command_args.k_folds is not None:
-        create_features_analysis(command_args, api, common_options)
+        create_features_analysis(command_args, api, command.common_options,
+                                 resume=resume)

@@ -132,7 +132,6 @@ def evaluations_process(models_or_ensembles, datasets, name, description,
             evaluation_args = r.set_evaluation_args(name, description, args,
                                                     fields, dataset_fields,
                                                     fields_map)
-
         evaluations.extend(r.create_evaluations(
             models_or_ensembles, datasets, evaluation_args,
             args, api, path=path, session_file=session_file,
