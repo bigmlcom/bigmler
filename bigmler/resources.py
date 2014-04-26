@@ -286,7 +286,7 @@ def set_basic_dataset_args(name, description, args):
 
 
 def set_dataset_args(name, description, args, fields, dataset_fields,
-                     objective_field=None, multi_label_data=None, method=None):
+                     objective_field=None, multi_label_data=None):
     """Return dataset arguments dict
 
     """
@@ -437,7 +437,7 @@ def set_model_args(name, description,
     # by holding out a n% of randomly sampled data.
 
     if ((args.evaluate and args.test_split == 0 and args.test_datasets is None)
-        or args.cross_validation_rate > 0):
+            or args.cross_validation_rate > 0):
         model_args.update(seed=SEED)
         if args.cross_validation_rate > 0:
             args.sample_rate = 1 - args.cross_validation_rate
@@ -553,7 +553,7 @@ def create_models(datasets, model_ids, model_args,
                     model_args.update(seed=new_seed)
                 # one model per dataset (--max-categories or single model)
                 if (args.max_categories or
-                    (args.test_datasets and args.evaluate)) > 0:
+                        (args.test_datasets and args.evaluate)) > 0:
                     dataset = datasets[i]
                     model = api.create_model(dataset, model_args)
                 elif args.dataset_off and args.evaluate:
@@ -562,7 +562,8 @@ def create_models(datasets, model_ids, model_args,
                     model = api.create_model(multi_dataset, model_args)
                 else:
                     model = api.create_model(datasets, model_args)
-                model_id = check_resource_error(model, "Failed to create model: ")
+                model_id = check_resource_error(model,
+                                                "Failed to create model: ")
                 log_message("%s\n" % model_id, log_file=log)
                 model_ids.append(model_id)
                 inprogress.append(model_id)
@@ -706,7 +707,7 @@ def set_ensemble_args(name, description, args, model_fields,
     # args.sample_rate (80% by default) of the data to create the model
 
     if (args.evaluate and args.test_split == 0 and
-        args.test_datasets is None and not args.dataset_off):
+            args.test_datasets is None and not args.dataset_off):
         ensemble_args.update(seed=SEED)
         if args.sample_rate == 1:
             args.sample_rate = EVALUATE_SAMPLE_RATE

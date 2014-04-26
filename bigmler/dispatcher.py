@@ -22,7 +22,6 @@ from __future__ import absolute_import
 import sys
 import os
 import re
-import shlex
 import datetime
 
 import bigml.api
@@ -34,15 +33,13 @@ import bigmler.processing.sources as ps
 import bigmler.processing.datasets as pd
 import bigmler.processing.models as pm
 
-from bigml.multivote import PLURALITY
 from bigml.model import Model
 from bigml.ensemble import Ensemble
 
 from bigmler.evaluation import evaluate, cross_validate
-from bigmler.defaults import get_user_defaults
 from bigmler.defaults import DEFAULTS_FILE
 from bigmler.prediction import predict, combine_votes, remote_predict
-from bigmler.prediction import (MAX_MODELS, OTHER, COMBINATION,
+from bigmler.prediction import (OTHER, COMBINATION,
                                 THRESHOLD_CODE)
 from bigmler.reports import clear_reports, upload_reports
 from bigmler.command import Command, StoredCommand
@@ -115,11 +112,9 @@ def command_handling(args, log=COMMAND_LOG):
     command = Command(args, None)
 
     # Resume calls are not logged
-    resume = True
     if not command.resume:
         with open(log, "a", 0) as command_log:
             command_log.write(command.command)
-        resume = False
 
     return command
 
@@ -128,7 +123,7 @@ def clear_log_files(log_files):
     """Clear all contents in log files
 
     """
-    for log_file in LOG_FILES:
+    for log_file in log_files:
         try:
             open(log_file, 'w', 0).close()
         except IOError:
@@ -155,9 +150,9 @@ def main_dispatcher(args=sys.argv[1:]):
 
     # Parses command line arguments.
     command_args = a.parse_and_check(command)
-    resume = command_args.resume
     default_output = ('evaluation' if command_args.evaluate
                       else 'predictions.csv')
+    resume = command_args.resume
     if command_args.resume:
         # Keep the debug option if set
         debug = command_args.debug
@@ -198,7 +193,6 @@ def main_dispatcher(args=sys.argv[1:]):
             pass
         with open(DIRS_LOG, "a", 0) as directory_log:
             directory_log.write("%s\n" % os.path.abspath(directory))
-
 
     # Creates the corresponding api instance
     if resume and debug:
@@ -251,7 +245,7 @@ def delete_resources(command_args, api):
         (command_args.ensemble_tag, api.list_ensembles),
         (command_args.batch_prediction_tag, api.list_batch_predictions)]
 
-    query_string=None
+    query_string = None
     if command_args.older_than:
         date_str = get_date(command_args.older_than, api)
         if date_str:
@@ -275,7 +269,7 @@ def delete_resources(command_args, api):
                      " and resource ids. Please, double-check your input.")
 
     if (any([selector[0] is not None for selector in resource_selectors]) or
-        command_args.all_tag):
+            command_args.all_tag):
         if query_string is None:
             query_string = ""
         else:

@@ -18,7 +18,8 @@
 
 """
 
-def common_options(parser, defaults={}, constants={}):
+
+def common_options(parser, defaults={}):
     """Adds common options to the given parser
 
     """

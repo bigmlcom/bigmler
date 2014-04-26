@@ -115,7 +115,6 @@ class StoredCommand(object):
         self.defaults_file = os.path.join(self.output_dir, DEFAULTS_FILE)
         self.args = shlex.split(self.command)[1:]
 
-
     def log_command(self, session_file=None):
         """Logging the resumed command in the sessions_log file
 

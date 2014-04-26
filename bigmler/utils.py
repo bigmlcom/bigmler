@@ -529,8 +529,6 @@ def get_options_list(args, options, prioritary=None):
 
     """
     options_list = []
-    if prioritary  is None:
-        exclude = []
     filtered_options = options[:]
     # removes the options that are already set as prioritary
     for element in prioritary:
@@ -550,7 +548,7 @@ def get_options_list(args, options, prioritary=None):
                 elif isinstance(value, list):
                     if value:
                         options_list.append(option)
-                        options_list.append(",".value)
+                        options_list.append(",".join(value))
                 else:
                     if not isinstance(value, basestring):
                         value = str(value)

@@ -26,7 +26,6 @@ import sys
 import tempfile
 import shutil
 import requests
-import site
 
 import bigml.api
 
@@ -136,8 +135,7 @@ def upload_reports(report_types, output_dir):
         if os.environ.get(GAZIBIT_TOKEN) is not None:
             output_file = os.path.join(output_dir, REPORTS_DIR,
                                        os.path.basename(GAZIBIT_PRIVATE))
-            path = check_dir(output_file)
-            gazibit_upload(output_file, exit=True)
+            gazibit_upload(output_file, exit_flag=True)
             output_file = os.path.join(output_dir, REPORTS_DIR,
                                        os.path.basename(GAZIBIT_SHARED))
             gazibit_upload(output_file)
@@ -147,7 +145,7 @@ def upload_reports(report_types, output_dir):
                      " environment variable. Failed to find GAZIBIT_TOKEN.")
 
 
-def gazibit_upload(output_file, exit=False):
+def gazibit_upload(output_file, exit_flag=False):
     """Uploads the reports to gazibit. For `exit` set, exits if the file is
        not found
 
@@ -162,7 +160,7 @@ def gazibit_upload(output_file, exit=False):
             if code != HTTP_CREATED:
                 sys.exit("Failed to upload the report. Request returned %s." %
                          code)
-        elif exit:
+        elif exit_flag:
             sys.exit("Failed to find the report file")
     except IOError, excio:
         sys.exit("ERROR: failed to read report file: %s" % str(excio))

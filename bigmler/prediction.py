@@ -30,7 +30,6 @@ import bigmler.checkpoint as c
 
 
 from bigml.model import Model
-from bigml.tree import LAST_PREDICTION
 from bigml.multimodel import MultiModel, read_votes
 from bigml.util import localize, console_log, get_predictions_file_name
 from bigml.multivote import (PLURALITY_CODE, THRESHOLD_CODE, MultiVote,
@@ -437,7 +436,7 @@ def local_batch_predict(models, test_reader, prediction_file, api, args,
                 # must be reversed to match
                 predictions.reverse()
             else:
-                predictions = [prediction for (order, prediction)
+                predictions = [prediction for (_, prediction)
                                in sorted(zip(models_order, predictions))]
             if (labels is None or
                     len(labels) * models_per_label != len(predictions)):

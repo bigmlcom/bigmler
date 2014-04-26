@@ -63,8 +63,7 @@ under the License.""" % version
     parser = subparsers.add_parser('main')
 
     # list of common options
-    common_options_set = common_options(parser, defaults=defaults,
-                                        constants=constants)
+    common_options_set = common_options(parser, defaults=defaults)
 
     # Path to the training set.
     parser.add_argument('--train',
@@ -257,7 +256,6 @@ under the License.""" % version
                         action='store_true',
                         default=defaults.get('replacement', False),
                         help="Use replacement when sampling.")
-
 
     # Max number of models to predict from in parallel.
     parser.add_argument('--max-batch-models',
@@ -703,7 +701,6 @@ under the License.""" % version
                         help=("Excluding one dataset at a time from the"
                               " datasets list to test."))
 
-
     # Path to the file containing fields generators for the new dataset.
     # Used when generating a dataset from another by adding new fields
     # combining or setting its contents.
@@ -874,7 +871,7 @@ under the License.""" % version
                         action='store_false',
                         dest='upload',
                         default=defaults.get('upload', True),
-                        help="Disables upload for reports")   
+                        help="Disables upload for reports")
 
     # The following options are only useful to deactivate the corresponding
     # oposed default values
@@ -1031,7 +1028,7 @@ under the License.""" % version
                         action='store_true',
                         dest='upload',
                         default=defaults.get('upload', True),
-                        help="Enables upload for reports")   
+                        help="Enables upload for reports")
 
     # Dataset-off. Turning off the dataset-off flag.
     parser.add_argument('--no-dataset-off',
