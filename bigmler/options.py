@@ -687,6 +687,11 @@ under the License.""" % version
                         help=("Excluding one dataset at a time from the"
                               " datasets list to test."))
 
+    # Evaluations flag: excluding one dataset from the datasets list to test
+    parser.add_argument('--version',
+                        action='version',
+                        version=version_text)
+
     # Path to the file containing fields generators for the new dataset.
     # Used when generating a dataset from another by adding new fields
     # combining or setting its contents.
@@ -1021,7 +1026,7 @@ under the License.""" % version
                         action='store_false',
                         dest='dataset_off',
                         default=defaults.get('dataset_off', False),
-                        help="Do not generate a new dataset.")
+                        help="Turning off the dataset-off flag.")
 
     # Subcommands
     analyze.subparser_options(
