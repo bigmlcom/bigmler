@@ -45,12 +45,12 @@ from __future__ import absolute_import
 
 import sys
 
+
 from bigmler.dispatcher import main_dispatcher
 from bigmler.analyze.dispatcher import analyze_dispatcher
 
 
 SUBCOMMANDS = ["main", "analyze"]
-
 
 def main(args=sys.argv[1:]):
     """Main process

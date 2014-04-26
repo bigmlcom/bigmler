@@ -1104,6 +1104,17 @@ to whatever suits your needs using the ``--k-folds`` option.
 Would select the best subset of features using 10-fold cross-validation
 and a ``0.2%`` penalty per feature, stopping after 3 non-improving iterations.
 
+You should be aware that the smart feature selection command still generates
+a high number of BigML resources. Using ``k`` as the ``k-folds`` number and
+``n`` as the number of explored feature sets, it will be generating ``k``
+datasets (``1/k``th of the instances each), and ``k * n`` models and
+evaluations. Setting the ``--max-parallel-models`` and
+``--max-parallel-evaluations`` to higher values (up to ``k``) can help you
+speed up partially the creation process because resources will be created
+in parallel. You must keep in mind, though, that this parallelization is
+limited by the task limit associated to your subscription or account type.
+
+
 Resuming Previous Commands
 --------------------------
 
