@@ -72,8 +72,10 @@ def analyze_dispatcher(args=sys.argv[1:]):
         # Parses resumed arguments.
         command_args = command.parser.parse_args(command.args)
     else:
-        command_args.session_file = os.path.join(command_args.output_dir,
-                                                 SESSIONS_LOG)
+        if command_args.output_dir is None:
+            command_args.output_dir = a.NOW
+        session_file = os.path.join(command_args.output_dir,
+                                    SESSIONS_LOG)
         csv_properties = {}
         # If logging is required, open the file for logging
         log = None
@@ -98,12 +100,11 @@ def analyze_dispatcher(args=sys.argv[1:]):
                              u.check_dir(session_file))
 
     # k-fold cross-validation
-    if (command_args.cv and command_args.k_folds is not None
-        and command_args.dataset is not None):
+    if (command_args.cv and command_args.dataset is not None):
         create_kfold_cv(command_args, api, command.common_options,
                         resume=resume)
 
     # features analysis
-    if command_args.features and command_args.k_folds is not None:
+    if command_args.features:
         create_features_analysis(command_args, api, command.common_options,
                                  resume=resume)

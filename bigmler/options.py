@@ -65,13 +65,6 @@ under the License.""" % version
     # list of common options
     common_options_set = common_options(parser, defaults=defaults)
 
-    # Path to the training set.
-    parser.add_argument('--train',
-                        action='store',
-                        dest='training_set',
-                        nargs='?',
-                        default=defaults.get('train', None),
-                        help="Training set path.")
 
     # Path to the test set.
     parser.add_argument('--test',
@@ -178,13 +171,6 @@ under the License.""" % version
                         dest='name',
                         default=defaults.get('name', 'BigMLer_%s' % now),
                         help="Name for the resources in BigML.")
-
-    # If a BigML source is provided, the script won't create a new one
-    parser.add_argument('--source',
-                        action='store',
-                        dest='source',
-                        default=defaults.get('source', None),
-                        help="BigML source Id.")
 
     # If a BigML dataset is provided, the script won't create a new one
     parser.add_argument('--dataset',

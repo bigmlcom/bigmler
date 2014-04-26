@@ -1051,6 +1051,58 @@ You can also combine both types of options, to delete sources tagged as
 
     bigmler --delete --newer-than 2 --source-tag my_tag
 
+Advanced subcommands in BigMLer: analyze
+----------------------------------------
+
+In addition to the main BigMLer capabilities explained so far, there's a
+subcommand ``bigmler analyze`` with more options to evaluate the performance
+of your models. For instance::
+
+    bigmler analyze --dataset dataset/5357eb2637203f1668000004 \
+                    --cross-validation --k-folds 5
+
+will create a k-fold cross-validation by dividing the data in your dataset in
+the number of parts given in ``--k-folds``. Then evaluations are created by
+selecting one of the parts to be the test set and using the rest of data
+to build the model for testing. The generated
+evaluations are placed in your output directory and its average is stored in
+``evaluation.txt`` and ``evaluation.json``.
+
+More insights can be drawn from the ``bigmler analyze --features`` command. In
+this case, the aim of the command is to analyze the complete set of features
+in your dataset to single out the ones that produce models with better
+evaluation scores. In this case, we focus on ``accuracy`` for categorical
+objective fields and ``r-square`` for regressions.
+
+::
+
+    bigmler analyze --dataset dataset/5357eb2637203f1668000004 \
+                    --features
+
+This command uses an algorithm for smart feature selection as described in 
+`blog post <http://blog.bigml.com/2014/02/26/smart-feature-selection-with-scikit-learn-and-bigmls-api/>`_
+that evaluates models built by using subsets of features. It starts by
+building one model per feature, chooses the subset of features used in the
+model that scores best and, from there on, repeats the procedure
+by adding another of the available features in the dataset to the chosen
+subset. The iteration stops when no improvement in score is found for a number
+of repetitions that can be controlled using the ``--staleness`` option
+(default is ``5``). There's
+also a ``--penalty`` option (default is ``0.1%``) that sets the amount that
+is substracted from the score per feature added to the
+subset. This penalty is intended
+to mitigate overfitting, but it also favors models which are quicker to build
+and evaluate. The evaluations for the scores are k-fold cross-validations.
+The ``--k-folds`` value is set to ``5`` by default, but you can change it
+to whatever suits your needs using the ``--k-folds`` option.
+
+::
+
+    bigmler analyze --dataset dataset/5357eb2637203f1668000004 \
+                    --features --k-folds 10 --staleness 3 --penalty 0.002
+
+Would select the best subset of features using 10-fold cross-validation
+and a ``0.2%`` penalty per feature, stopping after 3 non-improving iterations.
 
 Resuming Previous Commands
 --------------------------
