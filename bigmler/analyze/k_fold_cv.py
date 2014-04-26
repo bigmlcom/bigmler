@@ -50,7 +50,7 @@ NEW_FIELD = ('{"row_offset": %s, "row_step": %s,'
              ' "new_fields": [{"name": "%s", "field": "%s"}],'
              ' "objective_field": {"id": "%s"}}')
 
-COMMAND_SELECTION = ("main --dataset %s --new-field %s --no-model --output-dir"
+COMMAND_SELECTION = ("main --dataset %s --new-fields %s --no-model --output-dir"
                      " %s")
 COMMAND_OBJECTIVE = ("main --dataset %s --objective %s --no-model"
                      " --name %s --output-dir %s")

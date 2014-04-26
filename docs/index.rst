@@ -1072,7 +1072,7 @@ More insights can be drawn from the ``bigmler analyze --features`` command. In
 this case, the aim of the command is to analyze the complete set of features
 in your dataset to single out the ones that produce models with better
 evaluation scores. In this case, we focus on ``accuracy`` for categorical
-objective fields and ``r-square`` for regressions.
+objective fields and ``r-squared`` for regressions.
 
 ::
 
