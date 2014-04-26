@@ -45,26 +45,30 @@ from __future__ import absolute_import
 
 import sys
 
+
 from bigmler.dispatcher import main_dispatcher
 from bigmler.analyze.dispatcher import analyze_dispatcher
 
 
 SUBCOMMANDS = ["main", "analyze"]
 
-
 def main(args=sys.argv[1:]):
     """Main process
 
     """
-    if not args[0].lower() in SUBCOMMANDS:
-        new_args = ["main"]
-        new_args.extend(args)
+    if args:
+        if not args[0].lower() in SUBCOMMANDS:
+            new_args = ["main"]
+            new_args.extend(args)
+        else:
+            new_args = args
+        if new_args[0] == "main":
+            main_dispatcher(args=new_args)
+        elif new_args[0] == "analyze":
+            analyze_dispatcher(args=new_args)
     else:
-        new_args = args
-    if new_args[0] == "main":
-        main_dispatcher(args=new_args)
-    elif new_args[0] == "analyze":
-        analyze_dispatcher(args=new_args)
+        sys.exit("BigMLer used with no arguments. Check:\nbigmler --help\n\nor"
+                 "\n\nbigmler analyze --help\n\n for a list of options")
 
 if __name__ == '__main__':
     main(sys.argv[1:])

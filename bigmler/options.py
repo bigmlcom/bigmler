@@ -63,16 +63,8 @@ under the License.""" % version
     parser = subparsers.add_parser('main')
 
     # list of common options
-    common_options_set = common_options(parser, defaults=defaults,
-                                        constants=constants)
+    common_options_set = common_options(parser, defaults=defaults)
 
-    # Path to the training set.
-    parser.add_argument('--train',
-                        action='store',
-                        dest='training_set',
-                        nargs='?',
-                        default=defaults.get('train', None),
-                        help="Training set path.")
 
     # Path to the test set.
     parser.add_argument('--test',
@@ -180,13 +172,6 @@ under the License.""" % version
                         default=defaults.get('name', 'BigMLer_%s' % now),
                         help="Name for the resources in BigML.")
 
-    # If a BigML source is provided, the script won't create a new one
-    parser.add_argument('--source',
-                        action='store',
-                        dest='source',
-                        default=defaults.get('source', None),
-                        help="BigML source Id.")
-
     # If a BigML dataset is provided, the script won't create a new one
     parser.add_argument('--dataset',
                         action='store',
@@ -257,7 +242,6 @@ under the License.""" % version
                         action='store_true',
                         default=defaults.get('replacement', False),
                         help="Use replacement when sampling.")
-
 
     # Max number of models to predict from in parallel.
     parser.add_argument('--max-batch-models',
@@ -703,6 +687,10 @@ under the License.""" % version
                         help=("Excluding one dataset at a time from the"
                               " datasets list to test."))
 
+    # Evaluations flag: excluding one dataset from the datasets list to test
+    parser.add_argument('--version',
+                        action='version',
+                        version=version_text)
 
     # Path to the file containing fields generators for the new dataset.
     # Used when generating a dataset from another by adding new fields
@@ -874,7 +862,7 @@ under the License.""" % version
                         action='store_false',
                         dest='upload',
                         default=defaults.get('upload', True),
-                        help="Disables upload for reports")   
+                        help="Disables upload for reports")
 
     # The following options are only useful to deactivate the corresponding
     # oposed default values
@@ -1031,14 +1019,14 @@ under the License.""" % version
                         action='store_true',
                         dest='upload',
                         default=defaults.get('upload', True),
-                        help="Enables upload for reports")   
+                        help="Enables upload for reports")
 
     # Dataset-off. Turning off the dataset-off flag.
     parser.add_argument('--no-dataset-off',
                         action='store_false',
                         dest='dataset_off',
                         default=defaults.get('dataset_off', False),
-                        help="Do not generate a new dataset.")
+                        help="Turning off the dataset-off flag.")
 
     # Subcommands
     analyze.subparser_options(

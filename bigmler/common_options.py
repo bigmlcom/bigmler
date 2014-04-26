@@ -18,7 +18,8 @@
 
 """
 
-def common_options(parser, defaults={}, constants={}):
+
+def common_options(parser, defaults={}):
     """Adds common options to the given parser
 
     """
@@ -180,5 +181,22 @@ def common_options(parser, defaults={}, constants={}):
                         type=int,
                         help="Resume command.")
     options.append('--stack_level')
+
+    # If a BigML source is provided, the script won't create a new one
+    parser.add_argument('--source',
+                        action='store',
+                        dest='source',
+                        default=defaults.get('source', None),
+                        help="BigML source Id.")
+    options.append('--source')
+
+    # Path to the training set.
+    parser.add_argument('--train',
+                        action='store',
+                        dest='training_set',
+                        nargs='?',
+                        default=defaults.get('train', None),
+                        help="Training set path.")
+    options.append('--train')
 
     return options

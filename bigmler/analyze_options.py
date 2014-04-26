@@ -32,7 +32,7 @@ def subparser_options(subparsers, defaults={}, constants={}):
 
     parser_analysis = subparsers.add_parser('analyze')
 
-    common_options(parser_analysis, defaults=defaults, constants=constants)
+    common_options(parser_analysis, defaults=defaults)
 
     # K-fold cross-validation flag
     parser_analysis.add_argument('--cross-validation',
