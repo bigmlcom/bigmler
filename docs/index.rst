@@ -1079,7 +1079,7 @@ objective fields and ``r-square`` for regressions.
     bigmler analyze --dataset dataset/5357eb2637203f1668000004 \
                     --features
 
-This command uses an algorithm for smart feature selection as described in 
+This command uses an algorithm for smart feature selection as described in this
 `blog post <http://blog.bigml.com/2014/02/26/smart-feature-selection-with-scikit-learn-and-bigmls-api/>`_
 that evaluates models built by using subsets of features. It starts by
 building one model per feature, chooses the subset of features used in the
