@@ -1104,6 +1104,16 @@ to whatever suits your needs using the ``--k-folds`` option.
 Would select the best subset of features using 10-fold cross-validation
 and a ``0.2%`` penalty per feature, stopping after 3 non-improving iterations.
 
+Depending on the machine learning problem you intend to tackle, you might
+want to maximize other evaluation metric, such as ``precision`` or
+``recall``. The ``--maximize`` option will allow you to set the evaluation
+metric you'd like to maximize.
+
+::
+
+    bigmler analyze --dataset dataset/5357eb2637203f1668000004 \
+                    --features --maximize recall
+
 You should be aware that the smart feature selection command still generates
 a high number of BigML resources. Using ``k`` as the ``k-folds`` number and
 ``n`` as the number of explored feature sets, it will be generating ``k``

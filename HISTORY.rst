@@ -9,7 +9,7 @@ History
 - Adding the ``analyze`` subcommand. The subcommand presents new features,
   such as: --cross-validation, that performs k-fold cross-validation and
   --features, that selects the best features to increase accuracy (or
-  r-squared) using a smart search algorithm.
+  any other evaluation metric) using a smart search algorithm.
 
 1.7.1 (2014-04-21)
 ~~~~~~~~~~~~~~~~~~

@@ -38,8 +38,8 @@ from bigml.fields import Fields
 
 from bigmler.dispatcher import main_dispatcher
 from bigmler.processing.datasets import get_fields_structure
+from bigmler.analyze_options import ACCURACY
 
-ACCURACY = "accuracy"
 AVG_PREFIX = "average_%s"
 R_SQUARED = "r_squared"
 
@@ -50,7 +50,7 @@ NEW_FIELD = ('{"row_offset": %s, "row_step": %s,'
              ' "new_fields": [{"name": "%s", "field": "%s"}],'
              ' "objective_field": {"id": "%s"}}')
 
-COMMAND_SELECTION = ("main --dataset %s --new-fields %s --no-model --output-dir"
+COMMAND_SELECTION = ("main --dataset %s --new-field %s --no-model --output-dir"
                      " %s")
 COMMAND_OBJECTIVE = ("main --dataset %s --objective %s --no-model"
                      " --name %s --output-dir %s")
@@ -59,6 +59,7 @@ COMMAND_CREATE_CV = ("main --datasets %s --output-dir %s"
                      " --name eval_%s")
 DEFAULT_KFOLD_FIELD = "__kfold__"
 KFOLD_SUBDIR = "k_fold"
+PERCENT_EVAL_METRICS = [ACCURACY, "precision", "recall"]
 
 # difference needed to become new best node
 EPSILON = 0.001
@@ -361,24 +362,29 @@ def best_first_search(datasets_file, api, args, common_options,
     initial_state = [False for field_id in field_ids]
     open_list = [(initial_state,0)]
     closed_list = []
-    best_accuracy = -1
+    best_score = -1
     best_unchanged_count = 0
-    measurement = ACCURACY.capitalize()
+    metric = args.maximize
     while best_unchanged_count < staleness and open_list:
         (state, score) = find_max_state(open_list)
         state_fields = [fields.field_name(field_ids[i])
                         for (i, val) in enumerate(state) if val]
         closed_list.append((state, score))
         open_list.remove((state, score))
-        if (score - EPSILON) > best_accuracy:
+        if (score - EPSILON) > best_score:
             best_state = state
-            best_accuracy = score
+            best_score = score
             best_unchanged_count = 0
             if state_fields:
                 message = 'New best state: %s\n' % (state_fields)
                 u.log_message(message, log_file=session_file,
                               console=args.verbosity)
-                message = '%s = %0.2f%%\n' % (measurement, score * 100)
+                if metric in PERCENT_EVAL_METRICS:
+                    message = '%s = %0.2f%%\n' % (metric.capitalize(),
+                                                  score * 100)
+                else:
+                    message = '%s = %f\n' % (metric.capitalize(),
+                                                  score)
                 u.log_message(message, log_file=session_file,
                               console=args.verbosity)
         else:
@@ -393,10 +399,11 @@ def best_first_search(datasets_file, api, args, common_options,
                 # create models and evaluation with input_fields
                 args.model_fields = ",".join(input_fields)
                 counter += 1
-                (score, measurement,
+                (score, metric,
                  resume) = kfold_evaluate(datasets_file, api,
                                           args, counter, common_options,
-                                          penalty=penalty, resume=resume)
+                                          penalty=penalty, resume=resume,
+                                          metric=metric)
                 open_list.append((child, score))
 
     best_features = [fields.field_name(field_ids[i]) for (i, score)
@@ -404,7 +411,10 @@ def best_first_search(datasets_file, api, args, common_options,
     message = ('The best feature subset is: %s \n'
                % ", ".join(best_features))
     u.log_message(message, log_file=session_file, console=1)
-    message = ('%s = %0.2f%%\n' % (measurement, (best_accuracy * 100)))
+    if metric in PERCENT_EVAL_METRICS:
+        message = ('%s = %0.2f%%\n' % (metric, (best_score * 100)))
+    else:
+        message = ('%s = %f\n' % (metric, best_score))
     u.log_message(message, log_file=session_file, console=1)
     message = ('Evaluated %d/%d feature subsets\n' %
                ((len(open_list) + len(closed_list)), 2 ** len(field_ids)))
@@ -413,7 +423,7 @@ def best_first_search(datasets_file, api, args, common_options,
 
 def kfold_evaluate(datasets_file, api, args, counter, common_options,
                    penalty=DEFAULT_PENALTY,
-                   measurement=ACCURACY, resume=False):
+                   metric=ACCURACY, resume=False):
     """Scoring k-fold cross-validation using the given feature subset
 
     """
@@ -425,14 +435,14 @@ def kfold_evaluate(datasets_file, api, args, counter, common_options,
                                                   counter=counter)
 
     evaluation = evaluation.get('model', {})
-    avg_measurement = AVG_PREFIX % measurement
-    measurement_literal = measurement
-    if not avg_measurement in evaluation:
-        avg_measurement = AVG_PREFIX % R_SQUARED
-        measurement_literal = R_SQUARED
-        if not avg_measurement in evaluation:
+    avg_metric = AVG_PREFIX % metric
+    metric_literal = metric
+    if not avg_metric in evaluation:
+        avg_metric = AVG_PREFIX % R_SQUARED
+        metric_literal = R_SQUARED
+        if not avg_metric in evaluation:
             sys.exit("Failed to find %s or r-squared in the evaluation"
-                     % measurement)
-    return (evaluation[avg_measurement] -
+                     % metric)
+    return (evaluation[avg_metric] -
             penalty * len(args.model_fields.split(",")),
-            measurement_literal.capitalize(), resume)
+            metric_literal, resume)
