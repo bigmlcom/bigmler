@@ -305,12 +305,12 @@ def print_tree(directory, padding):
     """Returns a graphical directory tree structure as a string
 
     """
-    if padding != ' ':
+    if padding != u' ':
         output = padding[:-1] + u'├─'
     else:
         output = padding
-    output += os.path.basename(os.path.abspath(directory)) + '\n'
-    padding = padding + ' '
+    output += os.path.basename(os.path.abspath(directory)) + u'\n'
+    padding = padding + u' '
     files = []
     files = os.listdir(directory)
     count = 0
@@ -320,14 +320,14 @@ def print_tree(directory, padding):
         path = directory + os.sep + file_name
         if os.path.isdir(path):
             if count == len(files):
-                output += print_tree(path, padding + ' ')
+                output += print_tree(path, padding + u' ')
             else:
                 output += print_tree(path, padding + u'|')
         else:
             if i < (len(files) - 1):
-                output += padding + u'├─' + file_name + '\n'
+                output += padding + u'├─' + file_name + u'\n'
             else:
-                output += padding + u'└─' + file_name + '\n'
+                output += padding + u'└─' + file_name + u'\n'
     return output
 
 
@@ -359,11 +359,11 @@ def log_message(message, log_file=None, console=False):
        If log_file is set, logs the message in the file.
        If console is True, sends the message to console.
     """
+    if isinstance(message, unicode):
+        message = message.encode("utf-8")
     if console:
         console_log(message)
     if log_file is not None:
-        if isinstance(message, unicode):
-            message = message.encode("utf-8")
         with open(log_file, 'a', 0) as log_file:
             log_file.write(message)
 

@@ -681,9 +681,10 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if not data_locale[0] is None:
             locale.setlocale(locale.LC_ALL, (data_locale[0], "850"))
         message = (u"\nGenerated files:\n\n" +
-                   unicode(u.print_tree(path, " "), "utf-8") + u"\n")
+                   unicode(u.print_tree(path, u" "), "utf-8") + u"\n")
     else:
-        message = "\nGenerated files:\n\n" + u.print_tree(path, " ") + "\n"
+        message = (u"\nGenerated files:\n\n" + 
+                   u.print_tree(path, u" ") + u"\n")
     u.log_message(message, log_file=session_file, console=args.verbosity)
     if args.reports:
         clear_reports(path)
