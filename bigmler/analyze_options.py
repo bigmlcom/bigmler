@@ -24,6 +24,9 @@ from __future__ import absolute_import
 
 from bigmler.common_options import common_options
 
+ACCURACY = "accuracy"
+MAXIMIZE_OPTIONS = [ACCURACY, "precision", "recall", "phi", "f_measure",
+                    "mean_squared_error", "mean_absolute_error", "r_squared"]
 
 def subparser_options(subparsers, defaults={}, constants={}):
     """Adding arguments for the analyze subcommand
@@ -90,4 +93,12 @@ def subparser_options(subparsers, defaults={}, constants={}):
                                  action='store_true',
                                  dest='features',
                                  default=defaults.get('features', False),
-                                 help="Features analysis")
+                                 help="Features analysis.")
+
+    # Mazimize: evaluation measure to be maximized
+    parser_analysis.add_argument('--maximize',
+                                 action='store',
+                                 dest='maximize',
+                                 choices=MAXIMIZE_OPTIONS,
+                                 default=defaults.get('maximize', ACCURACY),
+                                 help="Evaluation measure to be maximized.")

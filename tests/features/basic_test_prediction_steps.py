@@ -648,13 +648,16 @@ def i_check_create_kfold_datasets(step, kfolds):
         assert False
 
 
-@step(r'the best feature selection is "(.*)"')
-def i_check_feature_selection(step, selection):
+@step(r'the best feature selection is "(.*)", with "(.*)" of (.*)')
+def i_check_feature_selection(step, selection, metric, metric_value):
+    if selection is None or metric is None or metric_value is None:
+        assert False
     sessions_file = os.path.join(world.directory, "bigmler_sessions")
     try:
         with open(sessions_file, "r") as sessions_file:
             content = sessions_file.read().decode("utf-8")
-        text = "The best feature subset is: %s" % selection
+        text = "The best feature subset is: %s \n%s = %s" % (
+            selection, metric.capitalize(), metric_value)
         if content.find(text) > -1:
             assert True
         else:
@@ -929,15 +932,16 @@ def i_create_kfold_cross_validation(step, k_folds=None):
         assert False
 
 
-@step(r'I create BigML feature selection (\d*)-fold cross-validations')
-def i_create_kfold_cross_validation(step, k_folds=None):
-    if k_folds is None:
+@step(r'I create BigML feature selection (\d*)-fold cross-validations improving "(.*)"')
+def i_create_kfold_cross_validation(step, k_folds=None, metric=None):
+    if k_folds is None or metric is None:
         assert False
     try:
         retcode = check_call("bigmler analyze --dataset " +
                              world.dataset['resource'] +
                              " --features --k-folds " + k_folds +
-                             " --output " + world.directory,
+                             " --output " + world.directory +
+                             " --maximize " + metric,
                              shell=True)
         if retcode < 0:
             assert False
