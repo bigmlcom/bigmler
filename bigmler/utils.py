@@ -306,7 +306,7 @@ def print_tree(directory, padding):
 
     """
     if padding != ' ':
-        output = padding[:-1] + '├─'
+        output = padding[:-1] + u'├─'
     else:
         output = padding
     output += os.path.basename(os.path.abspath(directory)) + '\n'
@@ -322,12 +322,12 @@ def print_tree(directory, padding):
             if count == len(files):
                 output += print_tree(path, padding + ' ')
             else:
-                output += print_tree(path, padding + '|')
+                output += print_tree(path, padding + u'|')
         else:
             if i < (len(files) - 1):
-                output += padding + '├─' + file_name + '\n'
+                output += padding + u'├─' + file_name + '\n'
             else:
-                output += padding + '└─' + file_name + '\n'
+                output += padding + u'└─' + file_name + '\n'
     return output
 
 
