@@ -249,7 +249,7 @@ def get_output_args(api, train_stdin, test_stdin, command_args, resume):
 
     # Parses model input fields if provided.
     if command_args.model_fields:
-        model_fields_arg = map(str.strip,
+        model_fields_arg = map(lambda x: x.strip(),
                                command_args.model_fields.split(','))
         output_args.update(model_fields=model_fields_arg)
 
