@@ -412,9 +412,9 @@ def best_first_search(datasets_file, api, args, common_options,
                % ", ".join(best_features))
     u.log_message(message, log_file=session_file, console=1)
     if metric in PERCENT_EVAL_METRICS:
-        message = ('%s = %0.2f%%\n' % (metric, (best_score * 100)))
+        message = ('%s = %0.2f%%\n' % (metric.capitalize(), (best_score * 100)))
     else:
-        message = ('%s = %f\n' % (metric, best_score))
+        message = ('%s = %f\n' % (metric.capitalize(), best_score))
     u.log_message(message, log_file=session_file, console=1)
     message = ('Evaluated %d/%d feature subsets\n' %
                ((len(open_list) + len(closed_list)), 2 ** len(field_ids)))

@@ -21,12 +21,13 @@ Feature: Produce k-fold cross-validation form a dataset
         Given I create BigML dataset uploading train "<data>" file in "<output>"
         And I check that the source has been created
         And I check that the dataset has been created
-        And I create BigML feature selection <kfold>-fold cross-validations
+        And I create BigML feature selection <kfold>-fold cross-validations improving "<metric>"
         And I check that the <kfold>-datasets have been created
         And I check that the <kfold>-models have been created
         And I check that all the <kfold>-fold cross-validations have been created
-        Then the best feature selection is "<selection>"
+        Then the best feature selection is "<selection>", with "<metric>" of <metric_value>
 
         Examples:
-        | data                  | output                    | kfold | selection               |
-        | ../data/iris_2f.csv | ./scenario_a_2/evaluation | 2     | petal width |
+        | data                | output                    | kfold | metric   | selection   | metric_value |
+        | ../data/iris_2f.csv | ./scenario_a_2/evaluation | 2     | accuracy | petal width | 99.90%       |
+        | ../data/iris_2f.csv | ./scenario_a_3/evaluation | 2     | phi      | petal width | 0.999000     |
