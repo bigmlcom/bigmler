@@ -50,15 +50,22 @@ NEW_FIELD = ('{"row_offset": %s, "row_step": %s,'
              ' "new_fields": [{"name": "%s", "field": "%s"}],'
              ' "objective_field": {"id": "%s"}}')
 
-COMMAND_SELECTION = ("main --dataset %s --new-field %s --no-model --output-dir"
-                     " %s")
-COMMAND_OBJECTIVE = ("main --dataset %s --objective %s --no-model"
-                     " --name %s --output-dir %s")
-COMMAND_CREATE_CV = ("main --datasets %s --output-dir %s"
-                     " --dataset-off --evaluate"
-                     " --name eval_%s")
+COMMANDS = {"selection":
+                "main --dataset %s --new-field %s --no-model --output-dir %s",
+            "objective":
+                ("main --dataset %s --objective %s --no-model --name %s "
+             "--output-dir %s"),
+            "create_cv":
+                ("main --datasets %s --output-dir %s --dataset-off --evaluate"
+             " --name eval_%s"),
+            "node_threshold":
+                ("main --datasets %s --node-threshold %s --output-dir %s"
+                 " --dataset-off --evaluate")}
+
 DEFAULT_KFOLD_FIELD = "__kfold__"
 KFOLD_SUBDIR = "k_fold"
+DEFAULT_MIN_NODES = 3
+DEFAULT_NODE_STEP = 100
 PERCENT_EVAL_METRICS = [ACCURACY, "precision", "recall"]
 
 # difference needed to become new best node
@@ -66,6 +73,9 @@ EPSILON = 0.001
 
 # per feature score penalty
 DEFAULT_PENALTY = 0.001
+
+# per node score penalty
+DEFAULT_NODES_PENALTY = 0
 
 # staleness
 DEFAULT_STALENESS = 5
@@ -136,6 +146,24 @@ def create_features_analysis(args, api, common_options, resume=False):
                       staleness=args.staleness,
                       penalty=args.penalty,
                       objective_column=objective_column, resume=resume)
+
+
+def create_nodes_analysis(args, api, common_options, resume=False):
+    """Analyzes the model performace as a function of node threshold.
+
+    """
+    set_subcommand_file(args.output_dir)
+    if resume:
+        retrieve_subcommands()
+    datasets_file, objective_column, resume = create_kfold_datasets_file(
+        args, api, common_options, resume=resume)
+    message = ('Creating the node threshold set..........\n')
+    u.log_message(message, log_file=session_file,
+                  console=args.verbosity)
+    best_node_threshold(datasets_file, api, args, common_options,
+                        staleness=args.staleness,
+                        penalty=args.penalty,
+                        objective_column=objective_column, resume=resume)
 
 
 def create_kfold_datasets_file(args, api, common_options, resume=False):
@@ -214,12 +242,13 @@ def create_kfold_datasets(dataset, args,
     """Calling the bigmler procedure to create the k-fold datasets
 
     """
-    output_dir = os.path.join(args.output_dir, "test")
+    args.output_dir = os.path.join(args.output_dir, "test")
+    output_dir = args.output_dir
     k = args.k_folds
     global subcommand_list
     # creating the selecting datasets
     for index in range(0, len(selecting_file_list)):
-        command = COMMAND_SELECTION % (
+        command = COMMANDS["selection"] % (
             dataset, selecting_file_list[index],
             output_dir)
         command_args = command.split()
@@ -246,8 +275,8 @@ def create_kfold_datasets(dataset, args,
     with open(datasets_file) as datasets_handler:
         for line in datasets_handler:
             dataset_id = line.strip()
-            command = COMMAND_OBJECTIVE % (dataset_id, objective,
-                                           "dataset_%s" % index, output_dir)
+            command = COMMANDS["objective"] % (dataset_id, objective,
+                                              "dataset_%s" % index, output_dir)
             command_args = command.split()
             common_options_list = u.get_options_list(args, common_options,
                                                      prioritary=command_args)
@@ -282,7 +311,7 @@ def create_kfold_evaluations(datasets_file, args, common_options,
     model_fields = args.model_fields
     name = ("all" if not args.model_fields else
             args.model_fields.replace(" ", "_"))
-    command = COMMAND_CREATE_CV % (datasets_file, output_dir, name)
+    command = COMMANDS["create_cv"] % (datasets_file, output_dir, name)
     command_args = command.split()
     if model_fields:
         command_args.append("--model-fields")
@@ -428,7 +457,7 @@ def kfold_evaluate(datasets_file, api, args, counter, common_options,
 
     """
     # create evaluation with input_fields
-    args.output_dir = "%s%skfold" % (u.check_dir(datasets_file), os.sep)
+    args.output_dir = os.path.join(u.check_dir(datasets_file), "kfold")
     evaluation, resume = create_kfold_evaluations(datasets_file, args,
                                                   common_options,
                                                   resume=resume,
@@ -446,3 +475,125 @@ def kfold_evaluate(datasets_file, api, args, counter, common_options,
     return (evaluation[avg_metric] -
             penalty * len(args.model_fields.split(",")),
             metric_literal, resume)
+
+
+def best_node_threshold(datasets_file, api, args, common_options,
+                        staleness=None, penalty=None, objective_column=None,
+                        resume=False):
+    """Selecting the node_limit to be used in the model construction
+
+    """
+    args.output_dir = os.path.join(args.output_dir, "node_th")
+    max_nodes = args.max_nodes + 1
+    if args.min_nodes is None:
+        args.min_nodes = DEFAULT_MIN_NODES
+    if args.nodes_step is None:
+        args.nodes_step = DEFAULT_NODES_STEP
+    node_threshold = args.min_nodes
+    if staleness is None:
+        staleness = DEFAULT_STALENESS
+    if penalty is None:
+        penalty = DEFAULT_NODES_PENALTY
+    best_score = -1
+    best_unchanged_count = 0
+    metric = args.maximize
+    score = best_score
+    while best_unchanged_count < staleness and node_threshold < max_nodes:
+        (score, metric,
+         resume) = node_threshold_evaluate(
+            datasets_file, api, args, node_threshold, common_options,
+            penalty=penalty, resume=resume, metric=metric)
+        if (score - EPSILON) > best_score:
+            best_threshold = node_threshold
+            best_score = score
+            best_unchanged_count = 0
+            message = 'New best node threshold: %s\n' % (best_threshold)
+            u.log_message(message, log_file=session_file,
+                          console=args.verbosity)
+            if metric in PERCENT_EVAL_METRICS:
+                message = '%s = %0.2f%%\n' % (metric.capitalize(),
+                                              score * 100)
+            else:
+                message = '%s = %f\n' % (metric.capitalize(),
+                                              score)
+            u.log_message(message, log_file=session_file,
+                          console=args.verbosity)
+        else:
+            best_unchanged_count += 1
+        node_threshold += args.nodes_step
+       
+
+
+    message = ('The best node threshold is: %s \n'
+               % best_threshold)
+    u.log_message(message, log_file=session_file, console=1)
+    if metric in PERCENT_EVAL_METRICS:
+        message = ('%s = %0.2f%%\n' % (metric.capitalize(),
+                                       (best_score * 100)))
+    else:
+        message = ('%s = %f\n' % (metric.capitalize(), best_score))
+    u.log_message(message, log_file=session_file, console=1)
+
+
+def node_threshold_evaluate(datasets_file, api, args, node_threshold,
+                            common_options, penalty=DEFAULT_NODES_PENALTY,
+                            metric=ACCURACY, resume=False):
+    """Scoring node_threshold created models
+
+    """
+    # create evaluation with input_fields
+    evaluation, resume = create_node_th_evaluations(
+        datasets_file, args, common_options, resume=resume,
+        node_threshold=node_threshold)
+
+    evaluation = evaluation.get('model', {})
+    avg_metric = AVG_PREFIX % metric
+    metric_literal = metric
+    if not avg_metric in evaluation:
+        avg_metric = AVG_PREFIX % R_SQUARED
+        metric_literal = R_SQUARED
+        if not avg_metric in evaluation:
+            sys.exit("Failed to find %s or r-squared in the evaluation"
+                     % metric)
+    return (evaluation[avg_metric] - penalty * node_threshold,
+            metric_literal, resume)
+
+
+def create_node_th_evaluations(datasets_file, args, common_options,
+                               resume=False,
+                               node_threshold=DEFAULT_MIN_NODES):
+    """ Create node_threshold evaluations
+
+    """
+    global subcommand_list
+    output_dir = u.check_dir(
+        os.path.join("%s%s" % (args.output_dir, node_threshold),
+                     "evaluation.json"))
+    command = COMMANDS["node_threshold"] % (
+        datasets_file, node_threshold, output_dir)
+    command_args = command.split()
+    common_options_list = u.get_options_list(args, common_options,
+                                             prioritary=command_args)
+    command_args.extend(common_options_list)
+    command = " ".join(command_args)
+    if resume:
+        next_command = subcommand_list.pop().strip()
+        if next_command != command:
+            resume = False
+            u.log_message("%s\n" % command, log_file=subcommand_file,
+                          console=False)
+            main_dispatcher(args=command_args)
+        elif not subcommand_list:
+            main_dispatcher(args=['main', '--resume'])
+            resume = False
+    else:
+        u.log_message("%s\n" % command, log_file=subcommand_file,
+                      console=False)
+        main_dispatcher(args=command_args)   
+    evaluation_file = os.path.join(output_dir, "evaluation.json")
+    try:
+        with open(evaluation_file) as evaluation_handler:
+            evaluation = json.loads(evaluation_handler.read())
+        return evaluation, resume
+    except (ValueError, IOError):
+        sys.exit("Failed to retrieve evaluation.")

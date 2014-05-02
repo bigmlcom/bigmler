@@ -666,6 +666,24 @@ def i_check_feature_selection(step, selection, metric, metric_value):
         assert False
 
 
+@step(r'the best node threshold is "(.*)", with "(.*)" of (.*)')
+def i_check_node_threshold(step, node_threshold, metric, metric_value):
+    if node_threshold is None or metric is None or metric_value is None:
+        assert False
+    sessions_file = os.path.join(world.directory, "bigmler_sessions")
+    try:
+        with open(sessions_file, "r") as sessions_file:
+            content = sessions_file.read().decode("utf-8")
+        text = "The best node threshold is: %s \n%s = %s" % (
+            node_threshold, metric.capitalize(), metric_value)
+        if content.find(text) > -1:
+            assert True
+        else:
+            assert False
+    except:
+        assert False
+
+
 @step(r'I check that the evaluation has been created and shared$')
 def i_check_create_evaluation_shared(step):
     i_check_create_evaluation(step)
@@ -926,6 +944,30 @@ def i_create_kfold_cross_validation(step, k_folds=None):
             assert False
         else:
             world.output = os.path.join(world.directory, "test", "k_fold0",
+                                        "evaluation")
+            assert True
+    except OSError as e:
+        assert False
+
+
+@step(r'I create BigML nodes analysis from (\d*) to (\d*) by (\d*) with (\d*)-cross-validation improving "(.*)"')
+def i_create_nodes_analysis(step, min_nodes=None, max_nodes=None, nodes_step=None, k_fold=None, metric=None):
+    if min_nodes is None or max_nodes is None or nodes_step is None or k_fold is None or metric is None:
+        assert False
+    try:
+        retcode = check_call("bigmler analyze --dataset " +
+                             world.dataset['resource'] +
+                             " --nodes --min-nodes " + min_nodes +
+                             " --max-nodes " + max_nodes +
+                             " --nodes-step " + nodes_step +
+                             " --k-folds " + k_fold +
+                             " --output " + world.directory +
+                             " --maximize " + metric,
+                             shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.output = os.path.join(world.directory, "test", "kfold1",
                                         "evaluation")
             assert True
     except OSError as e:

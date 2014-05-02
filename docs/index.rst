@@ -1124,6 +1124,17 @@ speed up partially the creation process because resources will be created
 in parallel. You must keep in mind, though, that this parallelization is
 limited by the task limit associated to your subscription or account type.
 
+As another optimization method, the ``bigmler analyze --nodes`` subcommand
+will find for you the best performing model by changing the number of nodes
+in its tree. You provide the ``--min-nodes`` and ``--max-nodes`` that define
+the range and ``--nodes-step`` controls the increment in each step. The command
+runs a k-fold evaluation (see ``--k-folds`` option) on a model built with each
+node threshold in you range and tries to maximize the evaluation metric you
+chose (again, default is ``accuracy``). If improvement stops (see
+the --staleness option) or the node threshold reaches the ``--max-nodes``
+limit, the process ends and shows the node threshold that
+lead to the best score.
+
 
 Resuming Previous Commands
 --------------------------
@@ -1492,6 +1503,11 @@ Data Configuration
                                     command
 --reports                           Report formats: "gazibit"
 --no-upload                         Disables reports upload
+--dataset-off                       Sets the evaluation mode that uses
+                                    the list of test datasets and extracts
+                                    one each time to test the model built
+                                    with the rest of them (k-fold
+                                    cross-validation) 
 
 Remote Resources
 ----------------
@@ -1505,6 +1521,8 @@ Remote Resources
 --ensembles PATH            Path to a file containing ensembles Ids
 --test-source SOURCE        BigML test source Id (only for remote predictions)
 --test-dataset DATASET      BigML test dataset Id (only for remote predictions)
+--test-datasets PATH        Path to the file that contains datasets ids used
+                            in evaluations, one id per line.
 --source SOURCE             BigML source Id
 --dataset DATASET           BigML dataset Id
 --remote                    Computes predictions remotely (in batch mode by
@@ -1512,6 +1530,7 @@ Remote Resources
 --no-batch                  Remote predictions are computed individually
 --model-tag MODEL_TAG       Retrieve models that were tagged with tag
 --ensemble-tag ENSEMBLE_TAG Retrieve ensembles that were tagged with tag
+
 
 Delete Remote Resources
 -----------------------
@@ -1609,6 +1628,32 @@ Fancy Options
                             ``--resources-log`` (if any)
 --store                     Stores every created or retrieved resource in your
                             output directory
+
+Analyze subcommands
+-------------------
+
+--cross-validation          Sets the k-fold cross-validation mode
+--k-folds                   Number of folds used in k-fold cross-validation
+                            (default is 5)
+--features                  Sets the smart selection features mode
+--staleness INTEGER         Number of iterations with no improvement that
+                            is considered the limit for the analysis to stop
+                            (default is 5)
+--penalty FLOAT             Coefficient used to penalyze models with many
+                            features in the smart selection features mode
+                            (default is 0.001). Also used in node threshold
+                            selection (default is 0)
+--maximize METRIC           Metric that is being maximized in the smart
+                            selection features mode or the node threshold
+                            search mode (default is accuracy)
+--nodes                     Sets the node threshold search mode
+--min-nodes INTEGER         Minimum number of nodes to start the node
+                            threshold search mode (default 3)
+--max-nodes INTEGER         Maximum number of nodes to end the node threshold
+                            search mode (default 2000)
+--nodes-step INTEGER        Step in the node threshold search iteration
+                            (default 50)
+
 
 Prior Versions Compatibility Issues
 -----------------------------------

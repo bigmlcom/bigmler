@@ -34,7 +34,9 @@ from bigmler.defaults import DEFAULTS_FILE
 from bigmler.prediction import (MAX_MODELS, OTHER, COMBINATION,
                                 THRESHOLD_CODE)
 from bigmler.defaults import get_user_defaults
-from bigmler.analyze.k_fold_cv import create_kfold_cv, create_features_analysis
+from bigmler.analyze.k_fold_cv import (create_kfold_cv,
+                                       create_features_analysis,
+                                       create_nodes_analysis)
 from bigmler.utils import check_dir
 from bigmler.dispatcher import (SESSIONS_LOG, command_handling)
 from bigmler.command import Command, StoredCommand
@@ -108,3 +110,8 @@ def analyze_dispatcher(args=sys.argv[1:]):
     if command_args.features:
         create_features_analysis(command_args, api, command.common_options,
                                  resume=resume)
+
+    # node threshold analysis
+    if command_args.nodes:
+        create_nodes_analysis(command_args, api, command.common_options,
+                              resume=resume)
