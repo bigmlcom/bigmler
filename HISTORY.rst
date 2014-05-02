@@ -3,13 +3,17 @@
 History
 -------
 
-1.8.0 (2014-04-26)
+1.8.0 (2014-04-29)
 ~~~~~~~~~~~~~~~~~~
 
 - Adding the ``analyze`` subcommand. The subcommand presents new features,
-  such as: --cross-validation, that performs k-fold cross-validation and
-  --features, that selects the best features to increase accuracy (or
-  any other evaluation metric) using a smart search algorithm.
+  such as: 
+
+    --cross-validation, that performs k-fold cross-validation and
+    --features, that selects the best features to increase accuracy (or
+                any other evaluation metric) using a smart search algorithm.
+    --nodes, that selects the node threshold that ensures best accuracy (or
+             any other evaluation metric) in user defined range of nodes.
 
 1.7.1 (2014-04-21)
 ~~~~~~~~~~~~~~~~~~

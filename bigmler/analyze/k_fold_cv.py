@@ -242,7 +242,8 @@ def create_kfold_datasets(dataset, args,
     """Calling the bigmler procedure to create the k-fold datasets
 
     """
-    output_dir = os.path.join(args.output_dir, "test")
+    args.output_dir = os.path.join(args.output_dir, "test")
+    output_dir = args.output_dir
     k = args.k_folds
     global subcommand_list
     # creating the selecting datasets
@@ -456,7 +457,7 @@ def kfold_evaluate(datasets_file, api, args, counter, common_options,
 
     """
     # create evaluation with input_fields
-    args.output_dir = "%s%skfold" % (u.check_dir(datasets_file), os.sep)
+    args.output_dir = os.path.join(u.check_dir(datasets_file), "kfold")
     evaluation, resume = create_kfold_evaluations(datasets_file, args,
                                                   common_options,
                                                   resume=resume,
@@ -482,6 +483,7 @@ def best_node_threshold(datasets_file, api, args, common_options,
     """Selecting the node_limit to be used in the model construction
 
     """
+    args.output_dir = os.path.join(args.output_dir, "node_th")
     max_nodes = args.max_nodes + 1
     if args.min_nodes is None:
         args.min_nodes = DEFAULT_MIN_NODES
@@ -526,9 +528,10 @@ def best_node_threshold(datasets_file, api, args, common_options,
                % best_threshold)
     u.log_message(message, log_file=session_file, console=1)
     if metric in PERCENT_EVAL_METRICS:
-        message = ('%s = %0.2f%%\n' % (metric, (best_score * 100)))
+        message = ('%s = %0.2f%%\n' % (metric.capitalize(),
+                                       (best_score * 100)))
     else:
-        message = ('%s = %f\n' % (metric, best_score))
+        message = ('%s = %f\n' % (metric.capitalize(), best_score))
     u.log_message(message, log_file=session_file, console=1)
 
 
@@ -539,7 +542,6 @@ def node_threshold_evaluate(datasets_file, api, args, node_threshold,
 
     """
     # create evaluation with input_fields
-    args.output_dir = os.path.join(u.check_dir(args.output_dir), "node_th")
     evaluation, resume = create_node_th_evaluations(
         datasets_file, args, common_options, resume=resume,
         node_threshold=node_threshold)
