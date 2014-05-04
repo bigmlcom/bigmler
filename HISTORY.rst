@@ -8,6 +8,7 @@ History
 
 - Changing the Gazibit report for shared resources to include the model
   shared url in embedded format.
+- Fixing bug: train and tests data could not be read from stdin
 
 1.8.0 (2014-04-29)
 ~~~~~~~~~~~~~~~~~~
