@@ -5,7 +5,7 @@ import shutil
 from lettuce import before, after, world
 
 from bigml.api import BigML
-from bigml.api import HTTP_OK
+from bigml.api import HTTP_OK, HTTP_UNAUTHORIZED
 
 @before.each_feature
 def setup_resources(feature):
@@ -15,8 +15,11 @@ def setup_resources(feature):
     assert world.API_KEY is not None
     world.api = BigML(world.USERNAME, world.API_KEY)
     world.api_dev_mode = BigML(world.USERNAME, world.API_KEY, dev_mode=True)
+    world.test_lines = 0
 
     sources = world.api.list_sources()
+    if sources['code'] == HTTP_UNAUTHORIZED:
+        print "Check your credentials and the BigML domain they belong to"
     assert sources['code'] == HTTP_OK
     world.init_sources_count = sources['meta']['total_count']
 

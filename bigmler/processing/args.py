@@ -131,6 +131,9 @@ def parse_and_check(command):
     if test_stdin and command_args.resume:
         parser.error("Can't resume when using stream reading test sets.")
 
+    command_args.train_stdin = train_stdin
+    command_args.test_stdin = test_stdin
+
     if (command_args.evaluate
         and not (command_args.training_set or command_args.source
                  or command_args.dataset or command_args.datasets)

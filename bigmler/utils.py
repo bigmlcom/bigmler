@@ -50,6 +50,10 @@ RESOURCE_URL = ("https://%s/dashboard/" % (BIGML_DOMAIN[:-3] + '.com')
 RESOURCE_SHARED_URL = ("https://%s/shared/" % (BIGML_DOMAIN[:-3] + '.com')
                        if BIGML_DASHBOARD_URL is None
                        else BIGML_DASHBOARD_URL)
+RESOURCE_EMBEDDED_URL = ("https://%s/embedded/%%s/tree" % (BIGML_DOMAIN[:-3] +
+                                                           '.com')
+                         if BIGML_DASHBOARD_URL is None
+                         else BIGML_DASHBOARD_URL)
 
 
 def read_description(path):
@@ -339,13 +343,16 @@ def dated(message):
                         message)
 
 
-def get_url(resource, shared=False):
+def get_url(resource, shared=False, embedded=False):
     """Returns the resource's url in bigml.com
 
     """
     if shared:
         return (RESOURCE_SHARED_URL + bigml.api.get_resource_type(resource)
                 + os.sep + resource['object']['shared_hash'])
+    elif embedded:
+        return (RESOURCE_EMBEDDED_URL % (bigml.api.get_resource_type(resource)
+                + os.sep + resource['object']['shared_hash']))
     else:
         resource_id = bigml.api.get_resource_id(resource)
         if not resource_id:
