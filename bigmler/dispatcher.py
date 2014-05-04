@@ -134,7 +134,16 @@ def has_test(args):
     """Returns if some kind of test data is given in args.
 
     """
-    return args.test_set or args.test_source or args.test_dataset
+    return (args.test_set or args.test_source or args.test_dataset or
+            args.test_stdin or args.test_datasets)
+
+
+def has_train(args):
+    """Returns if some kind of train data is given in args.
+
+    """
+    return (args.training_set or args.source or args.dataset or
+            args.datasets or args.train_stdin)
 
 
 def main_dispatcher(args=sys.argv[1:]):
@@ -202,9 +211,8 @@ def main_dispatcher(args=sys.argv[1:]):
     # Selects the action to perform: delete or create resources
     if command_args.delete:
         delete_resources(command_args, api)
-    elif (command_args.training_set or has_test(command_args)
-          or command_args.source or command_args.dataset
-          or command_args.datasets or command_args.votes_dirs):
+    elif (has_train(command_args) or has_test(command_args)
+          or command_args.votes_dirs):
         output_args = a.get_output_args(api, command.train_stdin,
                                         command.test_stdin,
                                         command_args, resume)
