@@ -38,6 +38,7 @@ SECTION_START_PREFIX = SECTION_START[2: 15]
 SECTION_END = "\n%%BIGML_END_%s%%"
 SECTION_END_PREFIX = SECTION_END[2: 13]
 REPORTS_DIR = "reports"
+EMBEDDED_RESOURCES = ["MODEL"]
 GAZIBIT = "gazibit"
 BIGMLER_SCRIPT = os.path.dirname(__file__)
 GAZIBIT_PRIVATE = "%s/static/gazibit.json" % BIGMLER_SCRIPT
@@ -85,8 +86,12 @@ def add_gazibit_links(resource, output_dir=None, shared=False):
                 resource_type = bigml.api.get_resource_type(resource)
                 resource_type = resource_type.upper()
                 url_template = URL_TEMPLATE % resource_type
-                content = content.replace(url_template,
-                                          get_url(resource, shared=shared))
+                # For shared reports, use the embedded model tree
+                if shared and (resource_type in EMBEDDED_RESOURCES):
+                    url = get_url(resource, embedded=True)
+                else:
+                    url = get_url(resource, shared=shared)
+                content = content.replace(url_template, url)
                 section_template = SECTION_START % resource_type
                 content = content.replace(section_template, "")
                 section_template = SECTION_END % resource_type
