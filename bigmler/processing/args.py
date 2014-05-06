@@ -404,3 +404,9 @@ def transform_args(command_args, flags, api, user_defaults):
     if command_args.multi_label_fields is not None:
         multi_label_fields = command_args.multi_label_fields.strip()
         command_args.multi_label_fields_list = multi_label_fields.split(',')
+
+    # Sets shared_flag if --shared or --unshared has been used
+    if '--shared' in flags or '--unshared' in flags:
+        command_args.shared_flag = True
+    else:
+        command_args.shared_flag = False

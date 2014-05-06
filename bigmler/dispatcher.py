@@ -498,12 +498,12 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 query_string = MINIMUM_MODEL
             else:
                 query_string = r.FIELDS_QS
-                model = u.check_resource(model, api.get_model,
-                                         query_string=query_string)
+            model = u.check_resource(model, api.get_model,
+                                     query_string=query_string)
         if (args.black_box or args.white_box or
-                r.shared_changed(args.shared, model)):
+                (args.shared_flag and r.shared_changed(args.shared, model))):
             model_args = {}
-            if r.shared_changed(args.shared, model):
+            if args.shared_flag and r.shared_changed(args.shared, model):
                 model_args.update(shared=args.shared)
             if args.black_box or args.white_box:
                 model_args.update(r.set_publish_model_args(args))

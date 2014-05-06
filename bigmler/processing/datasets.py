@@ -180,10 +180,11 @@ def dataset_processing(source, training_set, test_set, fields, objective_field,
                                           dataset)
 
         if (new_objective is not None or args.dataset_attributes or
-            r.shared_changed(args.shared, dataset)):
+            (args.shared_flag and r.shared_changed(args.shared, dataset))):
             dataset_args = r.set_dataset_args(name, description, args, fields,
                                               dataset_fields, objective_field)
-            dataset_args.update(shared=args.shared)
+            if args.shared_flag and r.shared_changed(args.shared, dataset):
+                dataset_args.update(shared=args.shared)
             dataset = r.update_dataset(dataset, dataset_args, args,
                                        api=api, path=path,
                                        session_file=session_file)

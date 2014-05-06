@@ -3,12 +3,25 @@
 History
 -------
 
+1.8.3 (2014-05-06)
+~~~~~~~~~~~~~~~~~~
+
+- Setting dependency of new python bindings version 1.3.1.
+
+1.8.2 (2014-05-06)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug: --shared and --unshared should be considered only when set
+  in the command line by the user. They were always updated, even when absent.
+- Fixing bug: --remote predictions were not working when --model was used as
+  training start point.
+
 1.8.1 (2014-05-04)
 ~~~~~~~~~~~~~~~~~~
 
 - Changing the Gazibit report for shared resources to include the model
   shared url in embedded format.
-- Fixing bug: train and tests data could not be read from stdin
+- Fixing bug: train and tests data could not be read from stdin.
 
 1.8.0 (2014-04-29)
 ~~~~~~~~~~~~~~~~~~
@@ -16,11 +29,11 @@ History
 - Adding the ``analyze`` subcommand. The subcommand presents new features,
   such as: 
 
-    --cross-validation, that performs k-fold cross-validation and
-    --features, that selects the best features to increase accuracy (or
-                any other evaluation metric) using a smart search algorithm.
-    --nodes, that selects the node threshold that ensures best accuracy (or
-             any other evaluation metric) in user defined range of nodes.
+    ``--cross-validation`` that performs k-fold cross-validation,
+    ``--features`` that selects the best features to increase accuracy
+    (or any other evaluation metric) using a smart search algorithm and
+    ``--nodes`` that selects the node threshold that ensures best accuracy
+    (or any other evaluation metric) in user defined range of nodes.
 
 1.7.1 (2014-04-21)
 ~~~~~~~~~~~~~~~~~~
