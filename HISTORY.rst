@@ -3,6 +3,11 @@
 History
 -------
 
+1.8.3 (2014-05-06)
+~~~~~~~~~~~~~~~~~~
+
+- Setting dependency of new python bindings version 1.3.1.
+
 1.8.2 (2014-05-06)
 ~~~~~~~~~~~~~~~~~~
 
