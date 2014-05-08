@@ -3,6 +3,11 @@
 History
 -------
 
+1.8.4 (2014-05-07)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug in analyze --nodes. The default node steps could not be found.
+
 1.8.3 (2014-05-06)
 ~~~~~~~~~~~~~~~~~~
 

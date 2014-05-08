@@ -65,7 +65,7 @@ COMMANDS = {"selection":
 DEFAULT_KFOLD_FIELD = "__kfold__"
 KFOLD_SUBDIR = "k_fold"
 DEFAULT_MIN_NODES = 3
-DEFAULT_NODE_STEP = 100
+DEFAULT_NODES_STEP = 100
 PERCENT_EVAL_METRICS = [ACCURACY, "precision", "recall"]
 
 # difference needed to become new best node
