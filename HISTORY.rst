@@ -3,6 +3,11 @@
 History
 -------
 
+1.8.5 (2014-05-19)
+~~~~~~~~~~~~~~~~~~
+
+- Docs update and test change to adapt to backend node threshold changes.
+
 1.8.4 (2014-05-07)
 ~~~~~~~~~~~~~~~~~~
 
