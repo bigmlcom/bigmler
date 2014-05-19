@@ -45,4 +45,4 @@ Feature: Produce model analysis from a dataset
 
         Examples:
         | data                | output                  | min_nodes | max_nodes | nodes_step | kfold | metric   | node_threshold   | metric_value |
-        | ../data/iris.csv | ./scenario_a_4/evaluation | 3         | 10        | 2         |2     | precision  | 7                | 95.40%         |
+        | ../data/iris.csv | ./scenario_a_4/evaluation | 3         | 14        | 2         |2     | precision  | 9                | 95.40%         |
