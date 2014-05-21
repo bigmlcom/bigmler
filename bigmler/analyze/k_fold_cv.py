@@ -179,9 +179,13 @@ def create_kfold_datasets_file(args, api, common_options, resume=False):
     dataset_id = bigml.api.get_dataset_id(args.dataset)
     if dataset_id:
         dataset = api.check_resource(dataset_id, api.get_dataset)
+        try:
+            args.objective_field = int(args.objective_field)
+        except ValueError:
+            pass
         # check that kfold_field is unique
-        fields = Fields(dataset, {"objective_field": args.objective_field,
-                                  "objective_field_present": True})
+        fields = Fields(dataset, objective_field= args.objective_field,
+                                 objective_field_present=True)
         objective_id = fields.field_id(fields.objective_field)
         kfold_field_name = avoid_duplicates(DEFAULT_KFOLD_FIELD, fields)
         # create jsons to generate partial datasets

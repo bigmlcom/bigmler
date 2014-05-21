@@ -3,6 +3,11 @@
 History
 -------
 
+1.8.6 (2014-05-22)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug for analyze. User-given objective field was not used.
+
 1.8.5 (2014-05-19)
 ~~~~~~~~~~~~~~~~~~
 
