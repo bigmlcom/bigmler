@@ -181,10 +181,18 @@ def create_kfold_datasets_file(args, api, common_options, resume=False):
         dataset = api.check_resource(dataset_id, api.get_dataset)
         try:
             args.objective_field = int(args.objective_field)
-        except ValueError:
+        except (TypeError, ValueError):
             pass
+        # if the user provided no objective field, try to use the one in the
+        # dataset
+        if args.objective_field is None:
+            try:
+                args.objective_field = dataset['object'][
+                    'objective_field']['column_number']
+            except KeyError:
+                pass
         # check that kfold_field is unique
-        fields = Fields(dataset, objective_field= args.objective_field,
+        fields = Fields(dataset, objective_field=args.objective_field,
                                  objective_field_present=True)
         objective_id = fields.field_id(fields.objective_field)
         kfold_field_name = avoid_duplicates(DEFAULT_KFOLD_FIELD, fields)
