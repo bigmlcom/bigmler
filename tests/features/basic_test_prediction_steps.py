@@ -48,6 +48,27 @@ def i_create_all_resources_to_model(step, data=None, output=None):
     shell_execute(command, output, test=None)
 
 
+@step(r'I create BigML feature selection (\d*)-fold cross-validations for "(.*)" improving "(.*)"')
+def i_create_kfold_cross_validation_objective(step, k_folds=None, objective=None, metric=None):
+    if k_folds is None or metric is None or objective is None:
+        assert False
+    try:
+        retcode = check_call("bigmler analyze --dataset " +
+                             world.dataset['resource'] +
+                             " --features --k-folds " + k_folds +
+                             " --output " + world.directory +
+                             " --maximize " + metric +
+                             " --objective " + objective,
+                             shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.output = os.path.join(world.directory, "test", "kfold1",
+                                        "evaluation")
+            assert True
+    except OSError as e:
+        assert False
+
 
 @step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" with proportional missing strategy and log predictions in "([^"]*)"$')
 def i_create_all_resources_proportional(step, data=None, test=None, output=None):
