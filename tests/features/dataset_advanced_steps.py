@@ -131,6 +131,23 @@ def i_check_multi_dataset_origin(step, output_dir=None):
     except KeyError:
         assert False
 
+@step(r'I filter out field "(.*)" from dataset and log to "(.*)"')
+def i_filter_field_from_dataset(step, field=None, output_dir=None):
+    if field is None or output_dir is None:
+        assert False
+    try:
+        command = ("bigmler --dataset " + world.dataset['resource'] +
+                   " --no-model --store --output-dir " + output_dir +
+                   " --dataset-fields=\"-" + field + "\""+
+                   " --new-fields ../data/empty.json")
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
 
 @step(r'I check that the multi-dataset has been created$')
 def i_check_create_multi_dataset(step):

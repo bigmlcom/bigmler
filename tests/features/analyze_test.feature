@@ -48,6 +48,24 @@ Feature: Produce model analysis from a dataset
         | ../data/iris_2f.csv | 0             |./scenario_a_5/evaluation | 2     | r_squared| petal width | 0.362550     |
 
 
+
+    Scenario: Successfully building feature selection from filtered dataset setting objective:
+        Given I create BigML dataset uploading train "<data>" file in "<output>"
+        And I check that the source has been created
+        And I check that the dataset has been created
+        And I filter out field "<field>" from dataset and log to "<output_dir>"
+        And I check that the new dataset has been created
+        And I create BigML feature selection <kfold>-fold cross-validations for "<objective>" improving "<metric>"
+        And I check that the <kfold>-datasets have been created
+        And I check that the <kfold>-models have been created
+        And I check that all the <kfold>-fold cross-validations have been created
+        Then the best feature selection is "<selection>", with "<metric>" of <metric_value>
+
+        Examples:
+        | data                 | field               | objective     |output                    | output_dir | kfold | metric   | selection   | metric_value |
+        | ../data/iris_2fd.csv | sepal length        | species         |./scenario_a_6/evaluation |./scenario_a_6 | 2     | recall   | petal width | 99.90%     |
+
+
     Scenario: Successfully building nodes threshold analysis from dataset:
         Given I create BigML dataset uploading train "<data>" file in "<output>"
         And I check that the source has been created
