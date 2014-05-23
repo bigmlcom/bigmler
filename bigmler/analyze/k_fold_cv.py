@@ -53,7 +53,7 @@ NEW_FIELD = ('{"row_offset": %s, "row_step": %s,'
 COMMANDS = {"selection":
                 "main --dataset %s --new-field %s --no-model --output-dir %s",
             "objective":
-                ("main --dataset %s --objective %s --no-model --name %s "
+                ("main --dataset %s --no-model --name %s "
              "--output-dir %s"),
             "create_cv":
                 ("main --datasets %s --output-dir %s --dataset-off --evaluate"
@@ -117,7 +117,7 @@ def create_kfold_cv(args, api, common_options, resume=False):
     set_subcommand_file(args.output_dir)
     if resume:
         retrieve_subcommands()
-    datasets_file, objective_column, resume = create_kfold_datasets_file(
+    datasets_file, objective_name, resume = create_kfold_datasets_file(
         args, api, common_options, resume=resume)
     if datasets_file is not None:
         args.output_dir = os.path.join(u.check_dir(datasets_file),
@@ -137,7 +137,7 @@ def create_features_analysis(args, api, common_options, resume=False):
     set_subcommand_file(args.output_dir)
     if resume:
         retrieve_subcommands()
-    datasets_file, objective_column, resume = create_kfold_datasets_file(
+    datasets_file, objective_name, resume = create_kfold_datasets_file(
         args, api, common_options, resume=resume)
     message = ('Creating the best features set..........\n')
     u.log_message(message, log_file=session_file,
@@ -145,7 +145,7 @@ def create_features_analysis(args, api, common_options, resume=False):
     best_first_search(datasets_file, api, args, common_options,
                       staleness=args.staleness,
                       penalty=args.penalty,
-                      objective_column=objective_column, resume=resume)
+                      objective_name=objective_name, resume=resume)
 
 
 def create_nodes_analysis(args, api, common_options, resume=False):
@@ -155,7 +155,7 @@ def create_nodes_analysis(args, api, common_options, resume=False):
     set_subcommand_file(args.output_dir)
     if resume:
         retrieve_subcommands()
-    datasets_file, objective_column, resume = create_kfold_datasets_file(
+    datasets_file, objective_name, resume = create_kfold_datasets_file(
         args, api, common_options, resume=resume)
     message = ('Creating the node threshold set..........\n')
     u.log_message(message, log_file=session_file,
@@ -163,7 +163,7 @@ def create_nodes_analysis(args, api, common_options, resume=False):
     best_node_threshold(datasets_file, api, args, common_options,
                         staleness=args.staleness,
                         penalty=args.penalty,
-                        objective_column=objective_column, resume=resume)
+                        objective_name=objective_name, resume=resume)
 
 
 def create_kfold_datasets_file(args, api, common_options, resume=False):
@@ -195,6 +195,7 @@ def create_kfold_datasets_file(args, api, common_options, resume=False):
         fields = Fields(dataset, objective_field=args.objective_field,
                                  objective_field_present=True)
         objective_id = fields.field_id(fields.objective_field)
+        objective_name = fields.field_name(objective_id)
         kfold_field_name = avoid_duplicates(DEFAULT_KFOLD_FIELD, fields)
         # create jsons to generate partial datasets
         selecting_file_list, resume = create_kfold_json(args, kfold_field_name,
@@ -203,11 +204,11 @@ def create_kfold_datasets_file(args, api, common_options, resume=False):
         # generate test datasets
         datasets_file, resume = create_kfold_datasets(dataset_id, args,
                                                       selecting_file_list,
-                                                      fields.objective_field,
+                                                      objective_name,
                                                       kfold_field_name,
                                                       common_options,
                                                       resume=resume)
-        return datasets_file, fields.field_column_number(objective_id), resume
+        return datasets_file, objective_name, resume
     return None, None, None    
 
 
@@ -287,9 +288,11 @@ def create_kfold_datasets(dataset, args,
     with open(datasets_file) as datasets_handler:
         for line in datasets_handler:
             dataset_id = line.strip()
-            command = COMMANDS["objective"] % (dataset_id, objective,
+            command = COMMANDS["objective"] % (dataset_id,
                                               "dataset_%s" % index, output_dir)
             command_args = command.split()
+            command_args.append("--objective")
+            command_args.append(objective)
             common_options_list = u.get_options_list(args, common_options,
                                                      prioritary=command_args)
             command_args.extend(common_options_list)
@@ -378,7 +381,7 @@ def expand_state(parent):
 
 
 def best_first_search(datasets_file, api, args, common_options,
-                      staleness=None, penalty=None, objective_column=None,
+                      staleness=None, penalty=None, objective_name=None,
                       resume=False):
     """Selecting the fields to be used in the model construction
 
@@ -397,7 +400,7 @@ def best_first_search(datasets_file, api, args, common_options,
     dataset = api.check_resource(dataset_id, api.get_dataset)
     # initial feature set
     fields = Fields(dataset)
-    objective_id = fields.field_id(objective_column)
+    objective_id = fields.field_id(objective_name)
     field_ids = [field_id for field_id in fields.preferred_fields()
                  if field_id != objective_id]
     initial_state = [False for field_id in field_ids]
@@ -490,7 +493,7 @@ def kfold_evaluate(datasets_file, api, args, counter, common_options,
 
 
 def best_node_threshold(datasets_file, api, args, common_options,
-                        staleness=None, penalty=None, objective_column=None,
+                        staleness=None, penalty=None, objective_name=None,
                         resume=False):
     """Selecting the node_limit to be used in the model construction
 

@@ -3,6 +3,12 @@
 History
 -------
 
+1.8.7 (2014-05-23)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug for analyze. User-given objective field was changed when using
+  filtered datasets.
+
 1.8.6 (2014-05-22)
 ~~~~~~~~~~~~~~~~~~
 
