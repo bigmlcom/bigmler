@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2012 BigML, Inc
+# Copyright 2012-2014 BigML, Inc
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -56,7 +56,7 @@ distutils.core.setup(
     setup_requires = [],
     packages = ['bigmler', 'bigmler.processing', 'bigmler.analyze'],
     include_package_data = True,
-    install_requires = ['bigml>=1.4.1, <1.5.0'],
+    install_requires = ['bigml>=1.4.4, <1.5.0'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
