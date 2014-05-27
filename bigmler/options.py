@@ -763,14 +763,6 @@ under the License.""" % version
                         help=("Path to a json file describing batch prediction"
                               " attributes."))
 
-    # Balance. Automatically balance all the classes evenly.
-    parser.add_argument('--balance',
-                        action='store_true',
-                        dest='balance',
-                        default=defaults.get('balance', False),
-                        help=("Automatically balance all the classes"
-                              " evenly."))
-
     # Weight-field. Use the contents of the given field as weights.
     parser.add_argument('--weight-field',
                         action='store',

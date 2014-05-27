@@ -157,6 +157,15 @@ def common_options(parser, defaults={}):
                               " (predictors) to create the model."))
     options.append('--model-fields')
 
+    # Balance. Automatically balance all the classes evenly.
+    parser.add_argument('--balance',
+                        action='store_true',
+                        dest='balance',
+                        default=defaults.get('balance', False),
+                        help=("Automatically balance all the classes"
+                              " evenly."))
+    options.append('--balance')
+
     # Turn on/off verbosity
     parser.add_argument('--verbosity',
                         action='store',
