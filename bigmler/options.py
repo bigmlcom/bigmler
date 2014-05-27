@@ -982,14 +982,6 @@ under the License.""" % version
                         default=defaults.get('no_batch', False),
                         help="Create remote predictions in batch.")
 
-    # Balance. Automatically balance all the classes evenly.
-    parser.add_argument('--no-balance',
-                        action='store_false',
-                        dest='balance',
-                        default=defaults.get('balance', False),
-                        help=("Automatically balance all the classes"
-                              " evenly."))
-
     # Multi-dataset. Generating a new dataset from a list of existing datasets.
     parser.add_argument('--no-multi-dataset',
                         action='store_false',

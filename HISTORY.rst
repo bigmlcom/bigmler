@@ -7,7 +7,7 @@ History
 ~~~~~~~~~~~~~~~~~~
 
 - Adding the --balance flag to the analyze subcommand.
-- Fixing bug for analyze. Some common flags allowed where not used.
+- Fixing bug for analyze. Some common flags allowed were not used.
 
 1.8.7 (2014-05-23)
 ~~~~~~~~~~~~~~~~~~

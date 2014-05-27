@@ -162,7 +162,7 @@ def common_options(parser, defaults={}):
                         action='store_true',
                         dest='balance',
                         default=defaults.get('balance', False),
-                        help=("Automatically balance all the classes"
+                        help=("Automatically balance all objective classes"
                               " evenly."))
     options.append('--balance')
 
@@ -207,5 +207,14 @@ def common_options(parser, defaults={}):
                         default=defaults.get('train', None),
                         help="Training set path.")
     options.append('--train')
+
+    # Balance. Automatically balance all the classes evenly.
+    parser.add_argument('--no-balance',
+                        action='store_false',
+                        dest='balance',
+                        default=defaults.get('balance', False),
+                        help=("Do not automatically balance all objective"
+                              " classes evenly."))
+    options.append('--no-balance')
 
     return options
