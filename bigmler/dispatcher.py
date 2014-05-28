@@ -114,6 +114,8 @@ def command_handling(args, log=COMMAND_LOG):
     # Resume calls are not logged
     if not command.resume:
         with open(log, "a", 0) as command_log:
+            if isinstance(command.command, unicode):
+                command.command = command.command.encode("utf-8")
             command_log.write(command.command)
 
     return command

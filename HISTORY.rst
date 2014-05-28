@@ -3,6 +3,11 @@
 History
 -------
 
+1.8.9 (2014-05-28)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug when utf8 characters were used in command lines.
+
 1.8.8 (2014-05-27)
 ~~~~~~~~~~~~~~~~~~
 
