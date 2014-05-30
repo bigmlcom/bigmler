@@ -995,6 +995,29 @@ def i_create_nodes_analysis(step, min_nodes=None, max_nodes=None, nodes_step=Non
         assert False
 
 
+@step(r'I create BigML feature selection (\d*)-fold cross-validations excluding "(.*)" with separator "(.*)" improving "(.*)"')
+def i_create_kfold_cross_validation(step, k_folds=None, features=None, args_separator=None, metric=None):
+    if k_folds is None or metric is None or features is None or args_separator is None:
+        assert False
+    try:
+        retcode = check_call("bigmler analyze --dataset " +
+                             world.dataset['resource'] +
+                             " --features --k-folds " + k_folds +
+                             " --output " + world.directory +
+                             " --exclude-features \"" + features + "\"" +
+                             " --args-separator " + args_separator +
+                             " --maximize " + metric,
+                             shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.output = os.path.join(world.directory, "test", "kfold1",
+                                        "evaluation")
+            assert True
+    except OSError as e:
+        assert False
+
+
 @step(r'I create BigML feature selection (\d*)-fold cross-validations improving "(.*)"')
 def i_create_kfold_cross_validation(step, k_folds=None, metric=None):
     if k_folds is None or metric is None:

@@ -365,7 +365,7 @@ def find_max_state(states):
         if f > maxval:
             maxstate = v
             maxval = f
-    return maxstate,maxval
+    return maxstate, maxval
 
 
 def expand_state(parent):
@@ -410,7 +410,7 @@ def best_first_search(datasets_file, api, args, common_options,
                  if field_id != objective_id and
                  not field_id in excluded_ids]
     initial_state = [False for field_id in field_ids]
-    open_list = [(initial_state,0)]
+    open_list = [(initial_state, 0)]
     closed_list = []
     best_score = -1
     best_unchanged_count = 0

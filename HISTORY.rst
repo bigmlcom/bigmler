@@ -7,6 +7,7 @@ History
 ~~~~~~~~~~~~~~~~~~~
 
 - Fixing bug when field names contain commas and --model-fields tag is used.
+- Fixing bug when deleting all resources by tag when ensembles were found.
 - Adding --exclude-features flag to analyze.
 
 1.8.9 (2014-05-28)

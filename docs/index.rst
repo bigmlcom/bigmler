@@ -1507,7 +1507,9 @@ Data Configuration
                                     the list of test datasets and extracts
                                     one each time to test the model built
                                     with the rest of them (k-fold
-                                    cross-validation) 
+                                    cross-validation)
+--args-separator                    Character used as separator in multi-valued
+                                    arguments (default is comma)
 
 Remote Resources
 ----------------
@@ -1653,6 +1655,8 @@ Analyze subcommands
                             search mode (default 2000)
 --nodes-step INTEGER        Step in the node threshold search iteration
                             (default 50)
+--exclude-features          Comma-separated list of features in the dataset
+                            to be excluded from the features analysis
 
 
 Prior Versions Compatibility Issues
