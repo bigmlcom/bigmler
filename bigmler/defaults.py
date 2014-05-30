@@ -141,7 +141,8 @@ FLAGS = {'BigMLer': [{'flag': 'debug', 'type': 'boolean'},
                      {'flag': 'nodes', 'type': 'boolean'},
                      {'flag': 'max_nodes', 'type': 'integer'},
                      {'flag': 'min_nodes', 'type': 'integer'},
-                     {'flag': 'nodes_step', 'type': 'integer'}]}
+                     {'flag': 'nodes_step', 'type': 'integer'},
+                     {'flag': 'exclude_features', 'type': 'string'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):

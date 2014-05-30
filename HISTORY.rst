@@ -3,6 +3,12 @@
 History
 -------
 
+1.8.10 (2014-05-29)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing bug when field names contain commas and --model-fields tag is used.
+- Adding --exclude-features flag to analyze.
+
 1.8.9 (2014-05-28)
 ~~~~~~~~~~~~~~~~~~
 

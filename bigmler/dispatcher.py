@@ -247,13 +247,14 @@ def delete_resources(command_args, api):
                             in open(command_args.delete_file, "r")])
 
     resource_selectors = [
-        (command_args.source_tag, api.list_sources),
-        (command_args.dataset_tag, api.list_datasets),
-        (command_args.model_tag, api.list_models),
-        (command_args.prediction_tag, api.list_predictions),
-        (command_args.evaluation_tag, api.list_evaluations),
-        (command_args.ensemble_tag, api.list_ensembles),
-        (command_args.batch_prediction_tag, api.list_batch_predictions)]
+        ("source", command_args.source_tag, api.list_sources),
+        ("dataset", command_args.dataset_tag, api.list_datasets),
+        ("model", command_args.model_tag, api.list_models),
+        ("prediction", command_args.prediction_tag, api.list_predictions),
+        ("ensemble", command_args.ensemble_tag, api.list_ensembles),
+        ("evaluation", command_args.evaluation_tag, api.list_evaluations),
+        ("batchprediction", command_args.batch_prediction_tag,
+         api.list_batch_predictions)]
 
     query_string = None
     if command_args.older_than:
@@ -284,13 +285,16 @@ def delete_resources(command_args, api):
             query_string = ""
         else:
             query_string += ";"
-        for selector, api_call in resource_selectors:
+        query_value = command_args.all_tag
+        for label, selector, api_call in resource_selectors:
             combined_query = query_string
-            if command_args.all_tag:
-                combined_query += "tags__in=%s" % command_args.all_tag
-                delete_list.extend(u.list_ids(api_call, combined_query))
-            elif selector:
-                combined_query += "tags__in=%s" % selector
+            if not query_value and selector:
+                query_value = selector
+            if command_args.all_tag or selector:
+                combined_query += "tags__in=%s" % query_value
+                if label == "model":
+                    # avoid ensemble's models
+                    combined_query += ";ensemble=false"
                 delete_list.extend(u.list_ids(api_call, combined_query))
     else:
         if query_string:

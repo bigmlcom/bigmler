@@ -155,7 +155,7 @@ def parse_and_check(command):
     command_args.label_aggregates_list = []
     if command_args.label_aggregates:
         label_aggregates = command_args.label_aggregates.strip().lower()
-        label_aggregates = label_aggregates.split(',')
+        label_aggregates = label_aggregates.split(command_args.args_separator)
         for aggregate in label_aggregates:
             if not aggregate in AGGREGATES:
                 parser.error("Wrong value for the --label-aggregates "
@@ -247,13 +247,15 @@ def get_output_args(api, train_stdin, test_stdin, command_args, resume):
     # Parses dataset fields if provided.
     if command_args.dataset_fields:
         dataset_fields_arg = map(str.strip,
-                                 command_args.dataset_fields.split(','))
+                                 command_args.dataset_fields.split(
+                                     command_args.args_separator))
         output_args.update(dataset_fields=dataset_fields_arg)
 
     # Parses model input fields if provided.
     if command_args.model_fields:
         model_fields_arg = map(lambda x: x.strip(),
-                               command_args.model_fields.split(','))
+                               command_args.model_fields.split(
+                                   command_args.args_separator))
         output_args.update(model_fields=model_fields_arg)
 
     model_ids = []
@@ -271,7 +273,8 @@ def get_output_args(api, train_stdin, test_stdin, command_args, resume):
 
     # Reads votes files in the provided directories.
     if command_args.votes_dirs:
-        dirs = map(str.strip, command_args.votes_dirs.split(','))
+        dirs = map(str.strip, command_args.votes_dirs.split(
+            command_args.args_separator))
         votes_path = os.path.dirname(command_args.predictions)
         votes_files = u.read_votes_files(dirs, votes_path)
         output_args.update(votes_files=votes_files)
@@ -403,7 +406,8 @@ def transform_args(command_args, flags, api, user_defaults):
     command_args.multi_label_fields_list = []
     if command_args.multi_label_fields is not None:
         multi_label_fields = command_args.multi_label_fields.strip()
-        command_args.multi_label_fields_list = multi_label_fields.split(',')
+        command_args.multi_label_fields_list = multi_label_fields.split(
+            command_args.args_separator)
 
     # Sets shared_flag if --shared or --unshared has been used
     if '--shared' in flags or '--unshared' in flags:

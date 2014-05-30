@@ -217,4 +217,13 @@ def common_options(parser, defaults={}):
                               " classes evenly."))
     options.append('--no-balance')
 
+    # Separator for multiple arguments
+    parser.add_argument('--args-separator',
+                        action='store',
+                        dest='args_separator',
+                        default=defaults.get('args_separator', ","),
+                        help=("Separator used in arguments with "
+                              " multiple values."))
+    options.append('--args-separator')
+
     return options

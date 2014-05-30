@@ -143,3 +143,13 @@ def subparser_options(subparsers, defaults={}, constants={}):
                                        " threshold number in nodes "
                                        " threshold analysis. If not set,"
                                        " an increase of 100 is used"))
+
+    # Exclude some features from the features analyze
+    parser_analysis.add_argument('--exclude-features',
+                                 action='store',
+                                 dest='exclude_features',
+                                 default=defaults.get('exclude_features',
+                                                      None),
+                                 help=("List of comma-separated field names to"
+                                       " be excluded from the features"
+                                       " analysis."))

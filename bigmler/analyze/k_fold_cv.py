@@ -400,9 +400,15 @@ def best_first_search(datasets_file, api, args, common_options,
     dataset = api.check_resource(dataset_id, api.get_dataset)
     # initial feature set
     fields = Fields(dataset)
+    excluded_features = ([] if args.exclude_features is None else
+                         args.exclude_features.decode("utf8").split(
+                             args.args_separator))
+    excluded_ids = [fields.field_id(feature) for
+                    feature in excluded_features]
     objective_id = fields.field_id(objective_name)
     field_ids = [field_id for field_id in fields.preferred_fields()
-                 if field_id != objective_id]
+                 if field_id != objective_id and
+                 not field_id in excluded_ids]
     initial_state = [False for field_id in field_ids]
     open_list = [(initial_state,0)]
     closed_list = []
@@ -441,7 +447,7 @@ def best_first_search(datasets_file, api, args, common_options,
                 input_fields = [fields.field_name(field_id) for (i, field_id)
                                 in enumerate(field_ids) if child[i]]
                 # create models and evaluation with input_fields
-                args.model_fields = ",".join(input_fields)
+                args.model_fields = args.args_separator.join(input_fields)
                 counter += 1
                 (score, metric,
                  resume) = kfold_evaluate(datasets_file, api,
@@ -488,7 +494,7 @@ def kfold_evaluate(datasets_file, api, args, counter, common_options,
             sys.exit("Failed to find %s or r-squared in the evaluation"
                      % metric)
     return (evaluation[avg_metric] -
-            penalty * len(args.model_fields.split(",")),
+            penalty * len(args.model_fields.split(args.args_separator)),
             metric_literal, resume)
 
 
