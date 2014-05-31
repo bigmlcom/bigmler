@@ -279,7 +279,7 @@ def delete_resources(command_args, api):
                      "integers (number of days), dates in YYYY-MM-DD format "
                      " and resource ids. Please, double-check your input.")
 
-    if (any([selector[0] is not None for selector in resource_selectors]) or
+    if (any([selector[1] is not None for selector in resource_selectors]) or
             command_args.all_tag):
         if query_string is None:
             query_string = ""
@@ -298,8 +298,12 @@ def delete_resources(command_args, api):
                 delete_list.extend(u.list_ids(api_call, combined_query))
     else:
         if query_string:
-            for selector, api_call in resource_selectors:
-                delete_list.extend(u.list_ids(api_call, query_string))
+            for label, selector, api_call in resource_selectors:
+                combined_query = query_string
+                if label == "model":
+                    # avoid ensemble's models
+                    combined_query += ";ensemble=false"
+                delete_list.extend(u.list_ids(api_call, combined_query))
 
     message = u.dated("Deleting objects.\n")
     u.log_message(message, log_file=session_file,
