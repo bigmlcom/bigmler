@@ -114,6 +114,13 @@ class StoredCommand(object):
         self.output_dir = get_log_reversed(dirs_log, stack_level)
         self.defaults_file = os.path.join(self.output_dir, DEFAULTS_FILE)
         self.args = shlex.split(self.command)[1:]
+        if not ("--output" in self.args or "--output-dir" in self.args):
+            current_directory = "%s%s" % (os.getcwd(), os.sep)
+            if self.output_dir.startswith(current_directory):
+                self.output_dir = self.output_dir.replace(current_directory,
+                                                          "", 1)
+            self.args.append("--output-dir")
+            self.args.append(self.output_dir)
 
     def log_command(self, session_file=None):
         """Logging the resumed command in the sessions_log file

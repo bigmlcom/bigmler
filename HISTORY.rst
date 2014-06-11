@@ -3,6 +3,12 @@
 History
 -------
 
+1.8.12 (2014-06-10)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing bug for the analyze subcommand. The --resume flag crashed when no
+  --ouput-dir was used.
+
 1.8.11 (2014-05-30)
 ~~~~~~~~~~~~~~~~~~~
 

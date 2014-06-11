@@ -51,7 +51,7 @@ Feature: Upload multi-label source and produce evaluations
 
         Examples:
         |scenario    | kwargs                                                  | models_file | number_of_labels                    | output                        |key          | value
-        | scenario_ml_e1| {"tag": "my_multilabel_e_1", "data": "../data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "./scenario_ml_e1/evaluation"}   | ./scenario_ml_e1/models | 7 | ./scenario_ml_e4/evaluation   | average_phi   | 0.8524
+        | scenario_ml_e1| {"tag": "my_multilabel_e_1", "data": "../data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "./scenario_ml_e1/evaluation"}   | ./scenario_ml_e1/models | 7 | ./scenario_ml_e4/evaluation   | average_phi   | 0.8200
 
     Scenario: Successfully building multi-label evaluations from models retrieved by tag
         Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
@@ -62,4 +62,4 @@ Feature: Upload multi-label source and produce evaluations
 
         Examples:
         |scenario    | kwargs                                                  | tag | number_of_labels                    | output                        |key          | value
-        | scenario_ml_e1| {"tag": "my_multilabel_e_1", "data": "../data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "./scenario_ml_e1/evaluation"}   | my_multilabel_e_1 | 7 | ./scenario_ml_e5/evaluation   | average_phi   | 0.8524
+        | scenario_ml_e1| {"tag": "my_multilabel_e_1", "data": "../data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "./scenario_ml_e1/evaluation"}   | my_multilabel_e_1 | 7 | ./scenario_ml_e5/evaluation   | average_phi   | 0.8200

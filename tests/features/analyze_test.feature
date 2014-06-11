@@ -45,7 +45,7 @@ Feature: Produce model analysis from a dataset
 
         Examples:
         | data                | objective     |output                    | kfold | metric   | selection   | metric_value |
-        | ../data/iris_2f.csv | 0             |./scenario_a_5/evaluation | 2     | r_squared| petal width | 0.362550     |
+        | ../data/iris_2f.csv | 0             |./scenario_a_5/evaluation | 2     | r_squared| species     | 0.457090     |
 
 
 
@@ -78,7 +78,7 @@ Feature: Produce model analysis from a dataset
 
         Examples:
         | data                | output                  | min_nodes | max_nodes | nodes_step | kfold | metric   | node_threshold   | metric_value |
-        | ../data/iris.csv | ./scenario_a_4/evaluation | 3         | 14        | 2         |2     | precision  | 9                | 95.40%         |
+        | ../data/iris.csv | ./scenario_a_4/evaluation | 3         | 14        | 2         |2     | precision  | 9                | 95.64%         |
 
     Scenario: Successfully building feature selection from dataset excluding features:
         Given I create BigML dataset uploading train "<data>" file in "<output>"
@@ -92,4 +92,4 @@ Feature: Produce model analysis from a dataset
 
         Examples:
         | data                | output                    | kfold | features              | args_separator | metric   | selection   | metric_value |
-        | ../data/iris.csv | ./scenario_a_7/evaluation | 2     | petal length!sepal width | !              | accuracy | petal width | 95.90%      |
+        | ../data/iris.csv | ./scenario_a_7/evaluation | 2     | petal length!sepal width | !              | accuracy | petal width | 95.23%      |

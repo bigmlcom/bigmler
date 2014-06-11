@@ -1,7 +1,7 @@
 petal length,petal width,species,confidence
-,,Iris-virginica,0.26289
+,,Iris-setosa,0.26289
 1.3,0.2,Iris-setosa,0.92865
-,0.2,Iris-setosa,0.92865
+,0.2,Iris-setosa,0.26289
 1.3,0.2,Iris-setosa,0.92865
 1.6,0.6,Iris-setosa,0.92865
 1.9,0.4,Iris-setosa,0.92865
