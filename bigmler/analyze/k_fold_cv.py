@@ -87,6 +87,9 @@ DEFAULT_KFOLDS = 5
 SUBCOMMAND_LOG = ".bigmler_subcmd"
 SESSIONS_LOG = "bigmler_sessions"
 
+#name max length
+NAME_MAX_LENGTH = 127
+
 subcommand_list = []
 subcommand_file = None
 session_file = None
@@ -324,7 +327,9 @@ def create_kfold_evaluations(datasets_file, args, common_options,
     output_dir = u.check_dir(os.path.join("%s%s" % (args.output_dir, counter),
                                           "evaluation.json"))
     model_fields = args.model_fields
-    name = "%s_subset_%s" % (args.name, counter)
+    name_suffix = "_subset_%s" % counter
+    name_max_length = NAME_MAX_LENGTH - len(name_suffix)
+    name = "%s%s" % (args.name[0: name_max_length] , name_suffix)
     command = COMMANDS["create_cv"] % (datasets_file, output_dir, name)
     command_args = command.split()
     if model_fields:
