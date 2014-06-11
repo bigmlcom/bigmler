@@ -57,7 +57,7 @@ COMMANDS = {"selection":
              "--output-dir %s"),
             "create_cv":
                 ("main --datasets %s --output-dir %s --dataset-off --evaluate"
-             " --name eval_%s"),
+             " --name %s"),
             "node_threshold":
                 ("main --datasets %s --node-threshold %s --output-dir %s"
                  " --dataset-off --evaluate")}
@@ -324,8 +324,7 @@ def create_kfold_evaluations(datasets_file, args, common_options,
     output_dir = u.check_dir(os.path.join("%s%s" % (args.output_dir, counter),
                                           "evaluation.json"))
     model_fields = args.model_fields
-    name = ("all" if not args.model_fields else
-            args.model_fields.replace(" ", "_"))
+    name = "%s_subset_%s" % (args.name, counter)
     command = COMMANDS["create_cv"] % (datasets_file, output_dir, name)
     command_args = command.split()
     if model_fields:

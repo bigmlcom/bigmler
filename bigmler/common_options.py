@@ -17,13 +17,17 @@
 """Common options for the BigMLer parser
 
 """
+from __future__ import absolute_import
 
+import datetime
 
-def common_options(parser, defaults={}):
+def common_options(parser, defaults={}, constants={}):
     """Adds common options to the given parser
 
     """
     options = []
+    now = constants.get('NOW',
+                        datetime.datetime.now().strftime("%a%b%d%y_%H%M%S"))
     # Shows log info for each https request.
     parser.add_argument('--debug',
                         action='store_true',
@@ -225,5 +229,14 @@ def common_options(parser, defaults={}):
                         help=("Separator used in arguments with "
                               " multiple values."))
     options.append('--args-separator')
+
+    # Name to be used with the source and then with datasets, models and
+    # predictions.
+    parser.add_argument('--name',
+                        action='store',
+                        dest='name',
+                        default=defaults.get('name', 'BigMLer_%s' % now),
+                        help="Name for the resources in BigML.")
+    options.append('--name')
 
     return options

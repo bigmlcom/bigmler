@@ -63,7 +63,8 @@ under the License.""" % version
     parser = subparsers.add_parser('main')
 
     # list of common options
-    common_options_set = common_options(parser, defaults=defaults)
+    common_options_set = common_options(parser, defaults=defaults,
+                                        constants=constants)
 
 
     # Path to the test set.
@@ -163,14 +164,6 @@ under the License.""" % version
                         dest='test_header',
                         default=defaults.get('test_header', True),
                         help="The test set file hasn't a header.")
-
-    # Name to be used with the source and then with datasets, models and
-    # predictions.
-    parser.add_argument('--name',
-                        action='store',
-                        dest='name',
-                        default=defaults.get('name', 'BigMLer_%s' % now),
-                        help="Name for the resources in BigML.")
 
     # If a BigML dataset is provided, the script won't create a new one
     parser.add_argument('--dataset',

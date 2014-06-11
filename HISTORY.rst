@@ -8,6 +8,8 @@ History
 
 - Fixing bug for the analyze subcommand. The --resume flag crashed when no
   --ouput-dir was used.
+- Fixing bug for the analyze subcommand. The --features flag crashed when
+  many long feature names were used.
 
 1.8.11 (2014-05-30)
 ~~~~~~~~~~~~~~~~~~~
