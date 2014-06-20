@@ -48,9 +48,9 @@ import sys
 
 from bigmler.dispatcher import main_dispatcher
 from bigmler.analyze.dispatcher import analyze_dispatcher
+from bigmler.cluster.dispatcher import cluster_dispatcher
+from bigmler.parser import SUBCOMMANDS
 
-
-SUBCOMMANDS = ["main", "analyze"]
 
 def main(args=sys.argv[1:]):
     """Main process
@@ -66,6 +66,8 @@ def main(args=sys.argv[1:]):
             main_dispatcher(args=new_args)
         elif new_args[0] == "analyze":
             analyze_dispatcher(args=new_args)
+        elif new_args[0] == "cluster":
+            cluster_dispatcher(args=new_args)
     else:
         sys.exit("BigMLer used with no arguments. Check:\nbigmler --help\n\nor"
                  "\n\nbigmler analyze --help\n\n for a list of options")

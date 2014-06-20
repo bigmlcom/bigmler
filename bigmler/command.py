@@ -34,7 +34,7 @@ from bigml.multivote import PLURALITY
 from bigmler.defaults import DEFAULTS_FILE
 from bigmler.defaults import get_user_defaults
 from bigmler.prediction import MAX_MODELS
-from bigmler.options import create_parser
+from bigmler.parser import create_parser
 
 
 def tail(file_handler, window=1):
