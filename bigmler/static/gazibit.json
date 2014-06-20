@@ -1,6 +1,6 @@
 {
-  "name": "BigMLer report - private resources",
-  "description": "BigML results report",
+  "name": "%REPORT_TITLE%",
+  "description": "%REPORT_DESC%",
   "styles": "",
   "first_element": "grid1",
   "image_url": "/uploads/1308",
@@ -382,11 +382,11 @@
                       "x": 118,
                       "y": 98,
                       "name": "iframe7",
-                      "scale": 0.154761,
+                      "scale": 0.25,
                       "rotation": 0,
                       "content": "%BIGML_ENSEMBLE%",
-                      "width": 1111,
-                      "height": 1201
+                      "width": 1024,
+                      "height": 768
                     }
                   ]
                 }

@@ -1,0 +1,132 @@
+<!doctype html>
+
+<html>
+<head>
+<meta charset="utf-8">
+<title>%REPORT_TITLE%</title>
+<meta name="description" content="%REPORT_DESC%" />
+<meta name="author" content="BigMLer" />
+<style>
+body {
+    font-family: 'PT Sans', sans-serif;
+    min-height: 740px;
+
+    background: rgb(215, 215, 215);
+    background: -webkit-gradient(radial, 50% 50%, 0, 50% 50%, 500, from(rgb(240, 240, 240)), to(rgb(190, 190, 190)));
+    background: -webkit-radial-gradient(rgb(240, 240, 240), rgb(190, 190, 190));
+    background:    -moz-radial-gradient(rgb(240, 240, 240), rgb(190, 190, 190));
+    background:     -ms-radial-gradient(rgb(240, 240, 240), rgb(190, 190, 190));
+    background:      -o-radial-gradient(rgb(240, 240, 240), rgb(190, 190, 190));
+    background:         radial-gradient(rgb(240, 240, 240), rgb(190, 190, 190));
+}
+
+.step {
+    position: relative;
+    width: 900px;
+    padding: 40px;
+    margin: 20px auto;
+
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing:    border-box;
+    -ms-box-sizing:     border-box;
+    -o-box-sizing:      border-box;
+    box-sizing:         border-box;
+
+    font-family: 'PT Serif', georgia, serif;
+    font-size: 48px;
+    line-height: 1.5;
+}
+
+.impress-enabled .step {
+    margin: 0;
+    opacity: 0.3;
+
+    -webkit-transition: opacity 1s;
+    -moz-transition:    opacity 1s;
+    -ms-transition:     opacity 1s;
+    -o-transition:      opacity 1s;
+    transition:         opacity 1s;
+}
+
+.impress-enabled .step.active { opacity: 1 }
+
+#impress iframe{
+  width: 1280px;
+  height: 960px;
+  z-index: 1;
+  -webkit-transform: scale(0.6);
+  -webkit-transform-origin: 0 0;
+  -moz-transform: scale(0.6);
+  -moz-transform-origin: 0 0;
+  margin-left:auto;
+  margin-right:auto;
+}
+
+#impress h2{
+  z-index:10;
+  text-align:center;
+}
+
+#impress .frame-wrapper{
+  width: 768px;
+  height: 576px;
+  margin-left:auto;
+  margin-right:auto;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="impress">
+%BIGML_START_MODEL%
+    <div id="model" class="step" data-x="%XPOS%" data-y="0">
+        <h2>Model:</h2>
+        <div class="frame-wrapper"><iframe src="%BIGML_MODEL%"></iframe></div>
+    </div>
+%BIGML_END_MODEL%
+
+%BIGML_START_SUMMARY%
+    <div id="summary" class="step" data-x="%XPOS%" data-y="0">
+        <h2>Summary Report:</h2>
+        %BIGML_SUMMARY%
+    </div>
+%BIGML_END_SUMMARY%
+
+%BIGML_START_DATASET%
+    <div id="dataset" class="step" data-x="%XPOS%" data-y="0">
+        <h2>Dataset:</h2>
+        <div class="frame-wrapper"><iframe src="%BIGML_DATASET%"></iframe></div>
+    </div>
+%BIGML_END_DATASET%
+
+%BIGML_START_PREDICTION%
+    <div id="prediction" class="step" data-x="%XPOS%" data-y="0">
+        <h2>Prediction Form:</h2>
+        <div class="frame-wrapper"><iframe src="%BIGML_PREDICTION%"></iframe></div>
+    </div>
+%BIGML_END_PREDICTION%
+
+%BIGML_START_EVALUATION%
+    <div id="evaluation" class="step" data-x="%XPOS%" data-y="0">
+        <h2>Evaluation:</h2>
+        <div class="frame-wrapper"><iframe src="%BIGML_EVALUATION%"></iframe></div>
+    </div>
+%BIGML_END_EVALUATION%
+
+%BIGML_START_ENSEMBLE%
+    <div id="ensemble" class="step" data-x="%XPOS%" data-y="0">
+        <h2>Ensembles:</h2>
+        <div class="frame-wrapper"><iframe src="%BIGML_ENSEMBLE%"></iframe></div>
+    </div>
+%BIGML_END_ENSEMBLE%
+</div>
+
+<script src="http://cdn.jsdelivr.net/impressjs/0.5.3/impress.js"></script>
+<script>impress().init();</script>
+
+</body>
+
+</html>

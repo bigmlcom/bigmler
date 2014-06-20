@@ -37,11 +37,13 @@ SECTION_START = "\n%%BIGML_START_%s%%"
 SECTION_START_PREFIX = SECTION_START[2: 15]
 SECTION_END = "\n%%BIGML_END_%s%%"
 SECTION_END_PREFIX = SECTION_END[2: 13]
+TITLE_TAG = "%REPORT_TITLE%"
+DESC_TAG = "%REPORT_DESC%"
 REPORTS_DIR = "reports"
 EMBEDDED_RESOURCES = ["MODEL"]
 GAZIBIT = "gazibit"
 BIGMLER_SCRIPT = os.path.dirname(__file__)
-GAZIBIT_PRIVATE = "%s/static/gazibit.json" % BIGMLER_SCRIPT
+GAZIBIT_PRIVATE = "%s/static/gazibit_private.json" % BIGMLER_SCRIPT
 GAZIBIT_SHARED = "%s/static/gazibit_shared.json" % BIGMLER_SCRIPT
 GAZIBIT_TOKEN = "GAZIBIT_TOKEN"
 GAZIBIT_CREATE_URL = "http://gazibit.com/api/v1/create"
@@ -52,8 +54,24 @@ GAZIBIT_HEADERS = {"X-Gazibit-API-Token": os.environ.get(GAZIBIT_TOKEN),
                    'User-Agent': ('curl/7.22.0 (x86_64-pc-linux-gnu)'
                                   ' libcurl/7.22.0 OpenSSL/1.0.1'
                                   ' zlib/1.2.3.4 libidn/1.23 librtmp/2.3')}
+
+XPOS_TEMPLATE = "%XPOS%"
+
+GAZIBIT_TEMPLATE = "%s/static/gazibit.json" % BIGMLER_SCRIPT
+IMPRESS_TEMPLATE = "%s/static/impress.html" % BIGMLER_SCRIPT
+REVEAL_TEMPLATE = "%s/static/reveal.html" % BIGMLER_SCRIPT
+
+
+TEMPLATES = {'gazibit':GAZIBIT_TEMPLATE,'impress':IMPRESS_TEMPLATE,'reveal':REVEAL_TEMPLATE}
 HTTP_CREATED = 201
 
+def private_name(path):
+    head,ext = os.path.splitext(path)
+    return head + '_private' + ext
+
+def shared_name(path):
+    head,ext = os.path.splitext(path)
+    return head + '_shared' + ext
 
 def report(report_types_list, output_dir=None, resource=None):
     """Generate the requested reports
@@ -61,25 +79,43 @@ def report(report_types_list, output_dir=None, resource=None):
     """
     shared = is_shared(resource)
     for report_type in report_types_list:
-        REPORTS[report_type](resource, output_dir, shared)
+        REPORTS[report_type](resource,output_dir, shared)
+
+def get_or_create_template(template,path,shared=False):
+    tmppath = os.path.join(path,os.path.basename(template))
+    head,ext = os.path.splitext(tmppath)
+    if shared:
+        realpath = head + '_shared' + ext
+    else:
+        realpath = head + '_private' + ext
+    if not os.path.isfile(realpath):
+        with open(template) as fid:
+            with open(realpath,'w') as output_file:
+                content = fid.read()
+                if shared:
+                    content = content.replace(TITLE_TAG,"BigMLer Report - Shared Resources")
+                    content = content.replace(DESC_TAG,"BigMLer results report: shared resources")
+                else:
+                    content = content.replace(TITLE_TAG,"BigMLer Report - Private Resources")
+                    content = content.replace(DESC_TAG,"BigMLer results report: private resources")
+                output_file.write(content)
+    return realpath
 
 
-def add_gazibit_links(resource, output_dir=None, shared=False):
+def add_report_links(resource,report_type,output_dir=None,shared=False,replace_extras=None):
     """ Adds the link to the resource in the corresponding section of the
-        report template
+    report template
 
     """
     try:
-        gazibit_tmp = GAZIBIT_SHARED if shared else GAZIBIT_PRIVATE
+        tmp = TEMPLATES[report_type]
         path = check_dir(os.path.join(output_dir,
                                       REPORTS_DIR,
-                                      os.path.basename(gazibit_tmp)))
-        input_file = os.path.join(path, os.path.basename(gazibit_tmp))
+                                      os.path.basename(tmp)))
+        input_file = get_or_create_template(tmp,path,shared)
         output_file = tempfile.NamedTemporaryFile(
             mode="w", dir=output_dir, delete=False)
 
-        if not os.path.isfile(input_file):
-            shutil.copyfile(gazibit_tmp, input_file)
         with open(input_file, "r") as report_template:
             with output_file as report_output:
                 content = report_template.read()
@@ -97,11 +133,24 @@ def add_gazibit_links(resource, output_dir=None, shared=False):
                 section_template = SECTION_END % resource_type
                 content = content.replace(section_template, "")
                 report_output.write(content)
-        os.remove(input_file)
-        os.rename(output_file.name, input_file)
+                os.remove(input_file)
+                os.rename(output_file.name, input_file)
     except IOError, exc:
         os.remove(output_file.name)
-        sys.exit("Failed to generate the gazibit output report. %s" % str(exc))
+        sys.exit("Failed to generate the %s output report. %s"
+                % (report_type,str(exc)))
+
+def add_gazibit_links(resource, output_dir=None, shared=False):
+    add_report_links(resource,'gazibit',
+                     output_dir=output_dir,shared=shared)
+
+def add_impress_links(resource, output_dir=None, shared=False):
+    add_report_links(resource,'impress',
+                     output_dir=output_dir,shared=shared)
+
+def add_reveal_links(resource, output_dir=None, shared=False):
+    add_report_links(resource,'reveal',
+                     output_dir=output_dir,shared=shared)
 
 
 def clear_reports(output_dir):
@@ -124,6 +173,11 @@ def clear_reports(output_dir):
                         end = content.find("\n",
                                            content.find(SECTION_END_PREFIX))
                         content = "%s%s" % (content[0: start], content[end:])
+                    if 'impress' in input_file:
+                        x = 0
+                        while content.find(XPOS_TEMPLATE) > 0:
+                            content = content.replace(XPOS_TEMPLATE,str(x),1)
+                            x += 1200
                     report_output.write(content)
             os.remove(input_file)
             os.rename(output_file.name, input_file)
@@ -179,4 +233,4 @@ def gazibit_upload(output_file, exit_flag=False):
         sys.exit("Ambiguous exception occurred")
 
 
-REPORTS = {'gazibit': add_gazibit_links}
+REPORTS = {'gazibit': add_gazibit_links,'impress':add_impress_links,'reveal':add_reveal_links}

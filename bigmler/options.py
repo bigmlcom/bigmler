@@ -846,7 +846,7 @@ under the License.""" % version
                         dest='reports',
                         nargs='*',
                         default=defaults.get('reports', []),
-                        choices=["gazibit"],
+                        choices=["gazibit","reveal","impress"],
                         help="Output report formats.")
 
     # Disables reports upload.

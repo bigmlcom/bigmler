@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>%REPORT_TITLE%</title>
+<meta name="description" content="%REPORT_DESC%" />
+<meta name="author" content="BigMLer" />
+<link rel="stylesheet" href="http://cdn.jsdelivr.net/reveal.js/2.6.2/css/reveal.min.css">
+
+<link rel="stylesheet" href="http://cdn.jsdelivr.net/reveal.js/2.6.2/css/theme/simple.css" id="theme">
+<!-- other themes
+<link rel="stylesheet" href="http://cdn.jsdelivr.net/reveal.js/2.6.2/css/theme/default.css" id="theme">
+<link rel="stylesheet" href="http://cdn.jsdelivr.net/reveal.js/2.6.2/css/theme/beige.css" id="theme">
+<link rel="stylesheet" href="http://cdn.jsdelivr.net/reveal.js/2.6.2/css/theme/sky.css" id="theme">
+<link rel="stylesheet" href="http://cdn.jsdelivr.net/reveal.js/2.6.2/css/theme/night.css" id="theme">
+<link rel="stylesheet" href="http://cdn.jsdelivr.net/reveal.js/2.6.2/css/theme/serif.css" id="theme">
+<link rel="stylesheet" href="http://cdn.jsdelivr.net/reveal.js/2.6.2/css/theme/solarized.css" id="theme">
+-->
+<script src="http://cdn.jsdelivr.net/reveal.js/2.6.2/js/reveal.min.js"></script>
+
+<style>
+    iframe{width:1200px; height:800px;}
+</style>
+
+</head>
+
+<body>
+<div class="reveal">
+    <div class="slides">
+
+%BIGML_START_MODEL%
+        <section>
+            <h1>Model:</h1>
+            <iframe src="%BIGML_MODEL%" class="stretch"></iframe>
+        </section>
+%BIGML_END_MODEL%
+
+%BIGML_START_SUMMARY%
+        <section>
+            <h1>Summary Report:</h1>
+            %BIGML_SUMMARY%
+        </section>
+%BIGML_END_SUMMARY%
+
+%BIGML_START_DATASET%
+        <section>
+            <h1>Dataset:</h1>
+            <iframe src="%BIGML_DATASET%" class="stretch"></iframe>
+        </section>
+%BIGML_END_DATASET%
+
+%BIGML_START_PREDICTION%
+        <section>
+            <h1>Prediction:</h1>
+            <iframe src="%BIGML_PREDICTION%" class="stretch"></iframe>
+        </section>
+%BIGML_END_PREDICTION%
+
+%BIGML_START_EVALUATION%
+        <section>
+            <h1>Evaluation:</h1>
+            <iframe src="%BIGML_EVALUATION%" class="stretch"></iframe>
+        </section>
+%BIGML_END_EVALUATION%
+
+%BIGML_START_ENSEMBLE%
+        <section>
+            <h1>Ensemble:</h1>
+            <iframe src="%BIGML_ENSEMBLE%" class="stretch"></iframe>
+        </section>
+%BIGML_END_ENSEMBLE%
+
+    </div>
+</div>
+<script>Reveal.initialize()</script>
+</body>
+
+</html>
