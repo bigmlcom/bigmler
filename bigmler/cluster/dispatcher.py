@@ -52,6 +52,7 @@ COMMAND_LOG = ".bigmler_cluster"
 DIRS_LOG = ".bigmler_cluster_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 MINIMUM_MODEL = "full=false"
+DEFAULT_OUTPUT = "centroids.csv"
 
 
 def cluster_dispatcher(args=sys.argv[1:]):
@@ -67,7 +68,6 @@ def cluster_dispatcher(args=sys.argv[1:]):
 
     # Parses command line arguments.
     command_args = a.parse_and_check(command)
-    default_output = 'centroids.csv'
     resume = command_args.resume
     if command_args.resume:
         # Keep the debug option if set
@@ -80,16 +80,15 @@ def cluster_dispatcher(args=sys.argv[1:]):
         stored_command.log_command(session_file=session_file)
         # Parses resumed arguments.
         command_args = a.parse_and_check(command)
-        default_output = 'centroids.csv'
         if command_args.predictions is None:
             command_args.predictions = os.path.join(stored_command.output_dir,
-                                                    default_output)
+                                                    DEFAULT_OUTPUT)
     else:
         if command_args.output_dir is None:
             command_args.output_dir = a.NOW
         if command_args.predictions is None:
             command_args.predictions = os.path.join(command_args.output_dir,
-                                                    default_output)
+                                                    DEFAULT_OUTPUT)
         if len(os.path.dirname(command_args.predictions).strip()) == 0:
             command_args.predictions = os.path.join(command_args.output_dir,
                                                     command_args.predictions)

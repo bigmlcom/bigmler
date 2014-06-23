@@ -38,7 +38,7 @@ from bigml.fields import Fields
 
 from bigmler.dispatcher import main_dispatcher
 from bigmler.processing.datasets import get_fields_structure
-from bigmler.analyze_options import ACCURACY
+from bigmler.options.analyze import ACCURACY
 
 AVG_PREFIX = "average_%s"
 R_SQUARED = "r_squared"

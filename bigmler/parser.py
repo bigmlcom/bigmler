@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-#!/usr/bin/env python
 #
-# Copyright 2012-2014 BigML
+# Copyright 2014 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -23,7 +22,6 @@ import argparse
 import datetime
 import pkg_resources
 
-import bigmler.analyze_options as analyze
 
 from bigmler.options.common import get_common_options
 from bigmler.options.delete import get_delete_options
