@@ -19,7 +19,6 @@
 from __future__ import absolute_import
 
 import argparse
-import datetime
 import pkg_resources
 
 
@@ -49,8 +48,6 @@ def create_parser(general_defaults={}, constants={}, subcommand=MAIN):
     """Sets the accepted command options, variables, defaults and help
 
     """
-    now = constants.get('NOW',
-                        datetime.datetime.now().strftime("%a%b%d%y_%H%M%S"))
 
     defaults = general_defaults['BigMLer']
 

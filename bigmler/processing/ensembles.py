@@ -31,8 +31,8 @@ MISSING_TOKENS = ['', 'N/A', 'n/a', 'NULL', 'null', '-', '#DIV/0', '#REF!',
 MONTECARLO_FACTOR = 200
 
 
-def ensemble_processing(datasets, objective_field, fields, api, args, resume,
-                        name=None, description=None, model_fields=None,
+def ensemble_processing(datasets, api, args, resume,
+                        fields=None,
                         session_file=None,
                         path=None, log=None):
     """Creates an ensemble of models from the input data
@@ -40,6 +40,7 @@ def ensemble_processing(datasets, objective_field, fields, api, args, resume,
     """
     ensembles = []
     number_of_ensembles = 1
+
     if resume:
         message = u.dated("Ensemble not found. Resuming.\n")
         resume, ensembles = c.checkpoint(
@@ -52,18 +53,14 @@ def ensemble_processing(datasets, objective_field, fields, api, args, resume,
         ensemble = None
 
     if ensemble is None:
-        ensemble_args = r.set_ensemble_args(name, description, args,
-                                            model_fields, objective_field,
-                                            fields)
+        ensemble_args = r.set_ensemble_args(args, fields)
         ensembles, ensemble_ids, models, model_ids = r.create_ensembles(
             datasets, ensembles, ensemble_args, args, api=api, path=path,
             session_file=session_file, log=log)
     return ensembles, ensemble_ids, models, model_ids, resume
 
 
-def ensemble_per_label(labels, dataset, fields,
-                       objective_field, api, args, resume, name=None,
-                       description=None, model_fields=None,
+def ensemble_per_label(labels, dataset, api, args, resume, fields=None,
                        multi_label_data=None,
                        session_file=None, path=None, log=None):
     """Creates an ensemble per label for multi-label datasets
@@ -92,9 +89,9 @@ def ensemble_per_label(labels, dataset, fields,
                                     open_mode='w')
     number_of_ensembles = len(labels) - len(ensemble_ids)
     ensemble_args_list = r.set_label_ensemble_args(
-        name, description, args,
+        args,
         labels, multi_label_data, number_of_ensembles,
-        fields, model_fields, objective_field)
+        fields)
 
     # create ensembles changing the input_field to select
     # only one label at a time

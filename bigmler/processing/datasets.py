@@ -117,17 +117,18 @@ def get_new_objective(fields, objective, dataset):
     return objective
 
 
-def dataset_processing(source, training_set, test_set, fields, objective_field,
-                       api, args, resume,  name=None, description=None,
-                       dataset_fields=None, multi_label_data=None,
+def dataset_processing(source, api, args, resume,
+                       fields=None,
                        csv_properties=None,
+                       multi_label_data=None,
                        session_file=None, path=None, log=None):
     """Creating or retrieving dataset from input arguments
 
     """
     datasets = []
     dataset = None
-    if (training_set or args.source or (args.evaluate and test_set)):
+    if (args.training_set or args.source or
+        (hasattr(args, "evaluate") and args.evaluate and args.test_set)):
         # if resuming, try to extract args.dataset form log files
         if resume:
             message = u.dated("Dataset not found. Resuming.\n")
@@ -140,10 +141,9 @@ def dataset_processing(source, training_set, test_set, fields, objective_field,
     # if evaluate is set and test_set has been provided.
     if ((source and not has_datasets(args) and not has_models(args)
          and not args.no_dataset) or
-            (args.evaluate and args.test_set and not args.dataset)):
-        dataset_args = r.set_dataset_args(name, description, args, fields,
-                                          dataset_fields,
-                                          objective_field=objective_field,
+            (hasattr(args, "evaluate") and args.evaluate and
+             args.test_set and not args.dataset)):
+        dataset_args = r.set_dataset_args(args, fields,
                                           multi_label_data=multi_label_data)
         dataset = r.create_dataset(source, dataset_args, args, api,
                                    path, session_file, log)
@@ -180,15 +180,14 @@ def dataset_processing(source, training_set, test_set, fields, objective_field,
 
         if (new_objective is not None or args.dataset_attributes or
             (args.shared_flag and r.shared_changed(args.shared, dataset))):
-            dataset_args = r.set_dataset_args(name, description, args, fields,
-                                              dataset_fields, objective_field)
+            dataset_args = r.set_dataset_args(args, fields)
             if args.shared_flag and r.shared_changed(args.shared, dataset):
                 dataset_args.update(shared=args.shared)
             dataset = r.update_dataset(dataset, dataset_args, args,
                                        api=api, path=path,
                                        session_file=session_file)
             dataset = r.get_dataset(dataset, api, args.verbosity, session_file)
-            csv_properties.update(objective_field=objective_field,
+            csv_properties.update(objective_field=args.objective_field,
                                   objective_field_present=True)
             fields = Fields(dataset['object']['fields'], **csv_properties)
         if not datasets:
@@ -222,7 +221,7 @@ def alternative_dataset_processing(dataset_or_source, suffix, dataset_args,
     return alternative_dataset, resume
 
 
-def split_processing(dataset, api, args, resume, name=None, description=None,
+def split_processing(dataset, api, args, resume,
                      multi_label_data=None, session_file=None,
                      path=None, log=None):
     """Splits a dataset into train and test datasets
@@ -232,15 +231,15 @@ def split_processing(dataset, api, args, resume, name=None, description=None,
     test_dataset = None
     sample_rate = 1 - args.test_split
     dataset_alternative_args = r.set_dataset_split_args(
-        "%s - train (%s %%)" % (name,
-        int(sample_rate * 100)), description, args,
+        "%s - train (%s %%)" % (args.name,
+        int(sample_rate * 100)), args.description_, args,
         sample_rate, out_of_bag=False, multi_label_data=multi_label_data)
     train_dataset, resume = alternative_dataset_processing(
         dataset, "train", dataset_alternative_args, api, args,
         resume, session_file=session_file, path=path, log=log)
     dataset_alternative_args = r.set_dataset_split_args(
-        "%s - test (%s %%)" % (name,
-        int(args.test_split * 100)), description, args,
+        "%s - test (%s %%)" % (args.name,
+        int(args.test_split * 100)), args.description_, args,
         sample_rate, out_of_bag=True, multi_label_data=multi_label_data)
     test_dataset, resume = alternative_dataset_processing(
         dataset, "test", dataset_alternative_args, api, args,
@@ -302,9 +301,7 @@ def create_categories_datasets(dataset, distribution,
     return datasets, resume
 
 
-def create_new_dataset(datasets, api, args, resume, name=None,
-                       description=None, fields=None,
-                       dataset_fields=None, objective_field=None,
+def create_new_dataset(datasets, api, args, resume, fields=None,
                        session_file=None, path=None, log=None):
     """Generates a new dataset using the generators given in a generators file
        or a multi-dataset from a list of datasets
@@ -328,9 +325,7 @@ def create_new_dataset(datasets, api, args, resume, name=None,
             u.log_message(message, log_file=session_file,
                           console=args.verbosity)
     if not resume:
-        dataset_args = r.set_dataset_args(name, description, args,
-                                          fields, dataset_fields,
-                                          objective_field=objective_field)
+        dataset_args = r.set_dataset_args(args, fields)
         if args.multi_dataset and args.multi_dataset_json:
                 dataset_args.update(args.multi_dataset_json)
         else:

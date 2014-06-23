@@ -31,18 +31,19 @@ import bigmler.checkpoint as c
 from bigml.util import slugify
 
 
-def evaluate(models_or_ensembles, datasets, output, api, args, resume,
-             session_file=None, path=None, log=None, name=None,
-             description=None, fields=None, dataset_fields=None,
-             fields_map=None, labels=None, all_labels=None,
+def evaluate(models_or_ensembles, datasets, api, args, resume,
+             session_file=None, path=None, log=None,
+             fields=None, dataset_fields=None,
+             labels=None, all_labels=None,
              objective_field=None):
     """Evaluates a list of models or ensembles with the given dataset
 
     """
+    output = args.predictions
     evaluation_files = []
     evaluations, resume = evaluations_process(
-        models_or_ensembles, datasets, name, description, fields,
-        dataset_fields, fields_map, api, args, resume,
+        models_or_ensembles, datasets, fields,
+        dataset_fields, api, args, resume,
         session_file=session_file, path=path, log=log,
         labels=labels, all_labels=all_labels, objective_field=objective_field)
     if args.multi_label:
@@ -74,14 +75,13 @@ def evaluate(models_or_ensembles, datasets, output, api, args, resume,
 
 
 def cross_validate(models, dataset, fields, api, args, resume,
-                   name=None, description=None, fields_map=None,
                    session_file=None, path=None, log=None):
     """Cross-validates using a MONTE-CARLO variant
 
     """
     evaluations, resume = evaluations_process(
-        models, [dataset], name, description,
-        fields, fields, fields_map, api, args, resume,
+        models, [dataset],
+        fields, fields, api, args, resume,
         session_file=session_file, path=path, log=log)
     if not resume:
         evaluation_files = []
@@ -98,8 +98,8 @@ def cross_validate(models, dataset, fields, api, args, resume,
         r.save_evaluation(cross_validation, file_name, api)
 
 
-def evaluations_process(models_or_ensembles, datasets, name, description,
-                        fields, dataset_fields, fields_map, api, args, resume,
+def evaluations_process(models_or_ensembles, datasets,
+                        fields, dataset_fields, api, args, resume,
                         session_file=None, path=None, log=None, labels=None,
                         all_labels=None, objective_field=None):
     """Evaluates models or ensembles against datasets
@@ -124,13 +124,12 @@ def evaluations_process(models_or_ensembles, datasets, name, description,
     if not resume:
         if args.multi_label:
             evaluation_args = r.set_label_evaluation_args(
-                name, description, args, labels, all_labels,
-                number_of_evaluations, fields, dataset_fields, fields_map,
+                args, labels, all_labels,
+                number_of_evaluations, fields, dataset_fields,
                 objective_field)
         else:
-            evaluation_args = r.set_evaluation_args(name, description, args,
-                                                    fields, dataset_fields,
-                                                    fields_map)
+            evaluation_args = r.set_evaluation_args(args, fields,
+                                                    dataset_fields)
         evaluations.extend(r.create_evaluations(
             models_or_ensembles, datasets, evaluation_args,
             args, api, path=path, session_file=session_file,

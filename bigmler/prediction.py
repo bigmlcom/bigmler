@@ -493,8 +493,7 @@ def local_batch_predict(models, test_reader, prediction_file, api, args,
                          exclude)
 
 
-def predict(test_set, test_set_header, models, fields, output,
-            objective_field, args, api=None, log=None,
+def predict(models, fields, args, api=None, log=None,
             resume=False, session_file=None,
             labels=None, models_per_label=1, other_label=OTHER,
             multi_label_data=None):
@@ -505,6 +504,10 @@ def predict(test_set, test_set_header, models, fields, output,
        flag will lead to the last case, where memory usage is bounded and each
        model predictions are saved for further use.
     """
+    test_set = args.test_set
+    test_set_header = args.test_header
+    objective_field = args.objective_field
+    output = args.predictions
     test_reader = TestReader(test_set, test_set_header, fields,
                              objective_field,
                              test_separator=args.test_separator)

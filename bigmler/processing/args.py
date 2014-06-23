@@ -37,7 +37,8 @@ from bigmler.train_reader import AGGREGATES
 
 # Date and time in format SunNov0412_120510 to name and tag resources
 NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
-MISSING_STRATEGIES = {'last': LAST_PREDICTION, 'proportional': PROPORTIONAL};
+MISSING_STRATEGIES = {'last': LAST_PREDICTION, 'proportional': PROPORTIONAL}
+DEFAULT_DESCRIPTION = "Created using BigMLer"
 
 def non_compatible(args, option):
     """Return non_compatible options
@@ -105,62 +106,79 @@ def parse_and_check(command):
     """
     parser = command.parser
     args = command.args
-    train_stdin = command.train_stdin
-    test_stdin = command.test_stdin
+
     command_args = parser.parse_args(args)
+    command_args.train_stdin = command.train_stdin
+    command_args.test_stdin = command.test_stdin
 
     # Checks options' compatibility
-    if command_args.cross_validation_rate > 0 and (
-            non_compatible(command_args, '--cross-validation-rate')):
-        parser.error("Non compatible flags: --cross-validation-rate"
-                     " cannot be used with --evaluate, --model,"
-                     " --models, --model-tag or --multi-label. Usage:\n\n"
-                     "bigmler --train data/iris.csv "
-                     "--cross-validation-rate 0.1")
+    try:
+        if command_args.cross_validation_rate > 0 and (
+                non_compatible(command_args, '--cross-validation-rate')):
+            parser.error("Non compatible flags: --cross-validation-rate"
+                         " cannot be used with --evaluate, --model,"
+                         " --models, --model-tag or --multi-label. Usage:\n\n"
+                         "bigmler --train data/iris.csv "
+                         "--cross-validation-rate 0.1")
+    except AttributeError:
+        pass
 
-    if command_args.max_categories and (
-            non_compatible(command_args, '--max-categories')):
-        parser.error("Non compatible flags: --max-categories cannot "
-                     "be used with --test-split, --remote or --evaluate.")
+    try:
+        if command_args.max_categories and (
+                non_compatible(command_args, '--max-categories')):
+            parser.error("Non compatible flags: --max-categories cannot "
+                         "be used with --test-split, --remote or --evaluate.")
+    except AttributeError:
+        pass
 
-    if train_stdin and command_args.multi_label:
-        parser.error("Reading multi-label training sets from stream "
-                     "is not yet available.")
+    try:
+        if command_args.train_stdin and command_args.multi_label:
+            parser.error("Reading multi-label training sets from stream "
+                         "is not yet available.")
+    except AttributeError:
+        pass
 
-    if test_stdin and command_args.resume:
-        parser.error("Can't resume when using stream reading test sets.")
+    try:
+        if command_args.test_stdin and command_args.resume:
+            parser.error("Can't resume when using stream reading test sets.")
+    except AttributeError:
+        pass
 
-    command_args.train_stdin = train_stdin
-    command_args.test_stdin = test_stdin
+    try:
+        if (command_args.evaluate
+            and not (command_args.training_set or command_args.source
+                     or command_args.dataset or command_args.datasets)
+            and not ((command_args.test_set or command_args.test_split or
+                      command_args.test_datasets) and
+                     (command_args.model or
+                      command_args.models or command_args.model_tag or
+                      command_args.ensemble or command_args.ensembles or
+                      command_args.ensemble_tag))):
+            parser.error("Evaluation wrong syntax.\n"
+                         "\nTry for instance:\n\nbigmler --train data/iris.csv"
+                         " --evaluate\nbigmler --model "
+                         "model/5081d067035d076151000011 --dataset "
+                         "dataset/5081d067035d076151003423 --evaluate\n"
+                         "bigmler --ensemble ensemble/5081d067035d076151003443"
+                         " --dataset "
+                         "dataset/5081d067035d076151003423 --evaluate")
+    except AttributeError:
+        pass
 
-    if (command_args.evaluate
-        and not (command_args.training_set or command_args.source
-                 or command_args.dataset or command_args.datasets)
-        and not ((command_args.test_set or command_args.test_split or
-                  command_args.test_datasets) and
-                 (command_args.model or
-                  command_args.models or command_args.model_tag or
-                  command_args.ensemble or command_args.ensembles or
-                  command_args.ensemble_tag))):
-        parser.error("Evaluation wrong syntax.\n"
-                     "\nTry for instance:\n\nbigmler --train data/iris.csv"
-                     " --evaluate\nbigmler --model "
-                     "model/5081d067035d076151000011 --dataset "
-                     "dataset/5081d067035d076151003423 --evaluate\n"
-                     "bigmler --ensemble ensemble/5081d067035d076151003443"
-                     " --dataset "
-                     "dataset/5081d067035d076151003423 --evaluate")
-
-    command_args.label_aggregates_list = []
-    if command_args.label_aggregates:
-        label_aggregates = command_args.label_aggregates.strip().lower()
-        label_aggregates = label_aggregates.split(command_args.args_separator)
-        for aggregate in label_aggregates:
-            if not aggregate in AGGREGATES:
-                parser.error("Wrong value for the --label-aggregates "
-                             "option. The allowed values are count, first and "
-                             "last.")
-            command_args.label_aggregates_list.append(aggregate)
+    try:
+        command_args.label_aggregates_list = []
+        if command_args.label_aggregates:
+            label_aggregates = command_args.label_aggregates.strip().lower()
+            label_aggregates = label_aggregates.split(
+                command_args.args_separator)
+            for aggregate in label_aggregates:
+                if not aggregate in AGGREGATES:
+                    parser.error("Wrong value for the --label-aggregates "
+                                 "option. The allowed values are count, first "
+                                 "and last.")
+                command_args.label_aggregates_list.append(aggregate)
+    except AttributeError:
+        pass
 
     return command_args
 
@@ -181,109 +199,163 @@ def get_api_instance(command_args, storage_path):
     return bigml.api.BigML(**api_command_args)
 
 
-def get_output_args(api, train_stdin, test_stdin, command_args, resume):
+def get_output_args(api, command_args, resume):
     """Returns the output args needed for the main bigmler computation process
 
     """
-    if train_stdin:
-        if test_stdin:
-            sys.exit("The standard input can't be used both for training and"
-                     " testing. Choose one of them")
-        command_args.training_set = StringIO.StringIO(sys.stdin.read())
-    elif test_stdin:
-        command_args.test_set = StringIO.StringIO(sys.stdin.read())
+    try:
+        if command_args.train_stdin:
+            if command_args.test_stdin:
+                sys.exit("The standard input can't be used both for training "
+                         "and testing. Choose one of them")
+            command_args.training_set = StringIO.StringIO(sys.stdin.read())
+        elif command_args.test_stdin:
+            command_args.test_set = StringIO.StringIO(sys.stdin.read())
+    except AttributeError:
+        pass
 
-    if command_args.objective_field:
-        objective = command_args.objective_field
-        try:
-            command_args.objective_field = int(objective)
-        except ValueError:
-            if not command_args.train_header:
-                sys.exit("The %s has been set as objective field but"
-                         " the file has not been marked as containing"
-                         " headers.\nPlease set the --train-header flag if"
-                         " the file has headers or use a column number"
-                         " to set the objective field." % objective)
+    try:
+        if command_args.objective_field:
+            objective = command_args.objective_field
+            try:
+                command_args.objective_field = int(objective)
+            except ValueError:
+                if not command_args.train_header:
+                    sys.exit("The %s has been set as objective field but"
+                             " the file has not been marked as containing"
+                             " headers.\nPlease set the --train-header flag if"
+                             " the file has headers or use a column number"
+                             " to set the objective field." % objective)
+    except AttributeError:
+        pass
 
-    output_args = {
-        "api": api,
-        "training_set": command_args.training_set,
-        "test_set": command_args.test_set,
-        "output": command_args.predictions,
-        "objective_field": command_args.objective_field,
-        "name": command_args.name,
-        "training_set_header": command_args.train_header,
-        "test_set_header": command_args.test_header,
-        "args": command_args,
-        "resume": resume,
-    }
+    command_args.resume_ = resume
 
     # Reads description if provided.
-    if command_args.description:
-        description_arg = u.read_description(command_args.description)
-        output_args.update(description=description_arg)
-    else:
-        output_args.update(description="Created using BigMLer")
+    try:
+        if command_args.description:
+            description_arg = u.read_description(command_args.description)
+            command_args.description_ = description_arg
+        else:
+            command_args.description_ = DEFAULT_DESCRIPTION
+    except AttributeError:
+        pass
 
     # Parses fields if provided.
-    if command_args.field_attributes:
-        field_attributes_arg = (
-            u.read_field_attributes(command_args.field_attributes))
-        output_args.update(field_attributes=field_attributes_arg)
-    if command_args.test_field_attributes:
-        field_attributes_arg = (
-            u.read_field_attributes(command_args.test_field_attributes))
-        output_args.update(test_field_attributes=field_attributes_arg)
+    try:
+        if command_args.field_attributes:
+            field_attributes_arg = (
+                u.read_field_attributes(command_args.field_attributes))
+            command_args.field_attributes_ = field_attributes_arg
+        else:
+            command_args.field_attributes_ = []
+    except AttributeError:
+        pass
+    try:
+        if command_args.test_field_attributes:
+            field_attributes_arg = (
+                u.read_field_attributes(command_args.test_field_attributes))
+            command_args.test_field_attributes_ = field_attributes_arg
+        else:
+            command_args.test_field_attributes_ = []
+    except AttributeError:
+        pass
 
     # Parses types if provided.
-    if command_args.types:
-        types_arg = u.read_types(command_args.types)
-        output_args.update(types=types_arg)
-    if command_args.test_types:
-        types_arg = u.read_types(command_args.test_types)
-        output_args.update(test_types=types_arg)
+    try:
+        if command_args.types:
+            types_arg = u.read_types(command_args.types)
+            command_args.types_ = types_arg
+        else:
+            command_args.types_ = None
+        if command_args.test_types:
+            types_arg = u.read_types(command_args.test_types)
+            command_args.test_types_ = types_arg
+        else:
+            command_args.test_types_ = None
+    except AttributeError:
+        pass
+
 
     # Parses dataset fields if provided.
-    if command_args.dataset_fields:
-        dataset_fields_arg = map(str.strip,
-                                 command_args.dataset_fields.split(
-                                     command_args.args_separator))
-        output_args.update(dataset_fields=dataset_fields_arg)
+    try:
+        if command_args.dataset_fields:
+            dataset_fields_arg = map(str.strip,
+                                     command_args.dataset_fields.split(
+                                         command_args.args_separator))
+            command_args.dataset_fields_ = dataset_fields_arg
+        else:
+            command_args.dataset_fields_ = []
+    except AttributeError:
+        pass
 
     # Parses model input fields if provided.
-    if command_args.model_fields:
-        model_fields_arg = map(lambda x: x.strip(),
-                               command_args.model_fields.split(
-                                   command_args.args_separator))
-        output_args.update(model_fields=model_fields_arg)
+    try:
+        if command_args.model_fields:
+            model_fields_arg = map(lambda x: x.strip(),
+                                   command_args.model_fields.split(
+                                       command_args.args_separator))
+            command_args.model_fields_ = model_fields_arg
+        else:
+            command_args.model_fields_ = []
+    except AttributeError:
+        pass
+
+    # Parses model input fields if provided.
+    try:
+        if command_args.cluster_fields:
+            cluster_fields_arg = map(lambda x: x.strip(),
+                                     command_args.cluster_fields.split(
+                                        command_args.args_separator))
+            command_args.cluster_fields = cluster_fields_arg
+        else:
+            command_args.cluster_fields_ = []
+    except AttributeError:
+        pass
 
     model_ids = []
-    # Parses model/ids if provided.
-    if command_args.models:
-        model_ids = u.read_resources(command_args.models)
-        output_args.update(model_ids=model_ids)
+    try:
+        # Parses model/ids if provided.
+        if command_args.models:
+            model_ids = u.read_resources(command_args.models)
+        command_args.model_ids_ = model_ids
+    except AttributeError:
+        pass
 
     # Retrieve model/ids if provided.
-    if command_args.model_tag:
-        model_ids = (model_ids +
-                     u.list_ids(api.list_models,
-                                "tags__in=%s" % command_args.model_tag))
-        output_args.update(model_ids=model_ids)
+    try:
+        if command_args.model_tag:
+            model_ids = (model_ids +
+                         u.list_ids(api.list_models,
+                                    "tags__in=%s" % command_args.model_tag))
+        command_args.model_ids_ = model_ids
+    except AttributeError:
+        pass
 
     # Reads votes files in the provided directories.
-    if command_args.votes_dirs:
-        dirs = map(str.strip, command_args.votes_dirs.split(
-            command_args.args_separator))
-        votes_path = os.path.dirname(command_args.predictions)
-        votes_files = u.read_votes_files(dirs, votes_path)
-        output_args.update(votes_files=votes_files)
+    try:
+        if command_args.votes_dirs:
+            dirs = map(str.strip, command_args.votes_dirs.split(
+                command_args.args_separator))
+            votes_path = os.path.dirname(command_args.predictions)
+            votes_files = u.read_votes_files(dirs, votes_path)
+            command_args.votes_files_ = votes_files
+        else:
+            command_args.votes_files_ = []
+    except AttributeError:
+        pass
 
     # Parses fields map if provided.
-    if command_args.fields_map:
-        fields_map_arg = u.read_fields_map(command_args.fields_map)
-        output_args.update(fields_map=fields_map_arg)
+    try:
+        if command_args.fields_map:
+            fields_map_arg = u.read_fields_map(command_args.fields_map)
+            command_args.fields_map_ = fields_map_arg
+        else:
+            command_args.fields_map_ = None
+    except AttributeError:
+        pass
 
-    return output_args
+    return {"api": api, "args": command_args}
 
 
 def transform_args(command_args, flags, api, user_defaults):

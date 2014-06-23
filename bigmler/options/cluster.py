@@ -30,6 +30,14 @@ def get_cluster_options(defaults={}, constants={}):
             'action': 'store_true',
             'dest': 'public_dataset',
             'default': defaults.get('public_dataset', False),
-            'help': "Make generated dataset public."}}
+            'help': "Make generated dataset public."},
+
+        # Input fields to include in the cluster.
+        '--cluster-fields': {
+                "action": 'store',
+                "dest": 'cluster_fields',
+                "default": defaults.get('cluster_fields', None),
+                "help": ("Comma-separated list of input fields"
+                         " (predictors) to create the cluster.")}}
 
     return options

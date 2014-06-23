@@ -35,9 +35,8 @@ from bigmler.train_reader import TrainReader
 MONTECARLO_FACTOR = 200
 
 
-def test_source_processing(test_set, test_set_header, api, args, resume,
-                           name=None, description=None, csv_properties=None,
-                           field_attributes=None, types=None,
+def test_source_processing(api, args, resume,
+                           csv_properties=None,
                            session_file=None, path=None, log=None):
     """Creating or retrieving a test data source from input arguments
 
@@ -55,10 +54,9 @@ def test_source_processing(test_set, test_set_header, api, args, resume,
                 message=message, log_file=session_file, console=args.verbosity)
 
         if not resume:
-            source_args = r.set_source_args(test_set_header, name, description,
-                                            args)
-            test_source = r.create_source(test_set, source_args, args, api,
-                                          path, session_file, log,
+            source_args = r.set_source_args(args.test_header, args)
+            test_source = r.create_source(args.test_set, source_args, args,
+                                          api, path, session_file, log,
                                           source_type="test")
 
     # If a source is provided either through the command line or in resume
@@ -80,24 +78,23 @@ def test_source_processing(test_set, test_set_header, api, args, resume,
                 csv_properties['data_locale'] = source_parser['locale']
 
         fields = Fields(test_source['object']['fields'], **csv_properties)
-        if field_attributes:
-            test_source = r.update_source_fields(test_source, field_attributes,
+        if args.field_attributes:
+            test_source = r.update_source_fields(test_source,
+                                                 args.field_attributes_,
                                                  fields, api, args.verbosity,
                                                  session_file)
-        if types:
-            test_source = r.update_source_fields(test_source, types, fields,
-                                                 api, args.verbosity,
+        if args.types:
+            test_source = r.update_source_fields(test_source, args.types_,
+                                                 fields, api, args.verbosity,
                                                  session_file)
-        if field_attributes or types:
+        if args.field_attributes or args.types:
             fields = Fields(test_source['object']['fields'], **csv_properties)
 
     return test_source, resume, csv_properties, fields
 
 
-def source_processing(training_set, test_set, training_set_header,
-                      test_set_header, api, args, resume,
-                      name=None, description=None,
-                      csv_properties=None, field_attributes=None, types=None,
+def source_processing(api, args, resume,
+                      csv_properties=None,
                       multi_label_data=None,
                       session_file=None, path=None, log=None):
     """Creating or retrieving a data source from input arguments
@@ -105,7 +102,8 @@ def source_processing(training_set, test_set, training_set_header,
     """
     source = None
     fields = None
-    if (training_set or (args.evaluate and test_set)):
+    if (args.training_set or
+        (hasattr(args, "evaluate") and args.evaluate and args.test_set)):
         # If resuming, try to extract args.source form log files
 
         if resume:
@@ -117,12 +115,9 @@ def source_processing(training_set, test_set, training_set_header,
     # If neither a previous source, dataset or model are provided.
     # we create a new one. Also if --evaluate and test data are provided
     # we create a new dataset to test with.
-    data_set, data_set_header = r.data_to_source(training_set, test_set,
-                                                 training_set_header,
-                                                 test_set_header, args)
+    data_set, data_set_header = r.data_to_source(args)
     if data_set is not None:
-        source_args = r.set_source_args(data_set_header, name, description,
-                                        args,
+        source_args = r.set_source_args(data_set_header, args,
                                         multi_label_data=multi_label_data)
         source = r.create_source(data_set, source_args, args, api,
                                  path, session_file, log)
@@ -145,26 +140,27 @@ def source_processing(training_set, test_set, training_set_header,
                 csv_properties['data_locale'] = source_parser['locale']
 
         fields = Fields(source['object']['fields'], **csv_properties)
-        if field_attributes:
-            source = r.update_source_fields(source, field_attributes, fields,
-                                            api, args.verbosity,
+        if args.field_attributes_:
+            source = r.update_source_fields(source, args.field_attributes_,
+                                            fields, api, args.verbosity,
                                             session_file)
-        if types:
-            source = r.update_source_fields(source, types, fields, api,
+        if args.types_:
+            source = r.update_source_fields(source, args.types_, fields, api,
                                             args.verbosity, session_file)
-        if field_attributes or types:
+        if args.field_attributes_ or args.types_:
             fields = Fields(source['object']['fields'], **csv_properties)
 
     return source, resume, csv_properties, fields
 
 
-def multi_label_expansion(training_set, training_set_header, objective_field,
+def multi_label_expansion(training_set, training_set_header,
                           args, output_path,
                           labels=None, session_file=None, input_flag=False):
     """Splitting the labels in a multi-label objective field to create
        a source with column per label
 
     """
+    objective_field = args.objective_field
     input_reader = TrainReader(training_set, training_set_header,
                                objective_field, multi_label=True,
                                labels=labels,

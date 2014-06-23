@@ -44,9 +44,8 @@ def has_models(args):
             or args.models or args.model_tag or args.ensemble_tag)
 
 
-def model_per_label(labels, datasets, fields,
-                    objective_field, api, args, resume, name=None,
-                    description=None, model_fields=None, multi_label_data=None,
+def model_per_label(labels, datasets, api, args, resume, fields=None,
+                    multi_label_data=None,
                     session_file=None, path=None, log=None):
     """Creates a model per label for multi-label datasets
 
@@ -68,9 +67,8 @@ def model_per_label(labels, datasets, fields,
 
         models = model_ids
     args.number_of_models = len(labels) - len(model_ids)
-    model_args_list = r.set_label_model_args(
-        name, description, args,
-        labels, multi_label_data, fields, model_fields, objective_field)
+    model_args_list = r.set_label_model_args(args, fields, labels,
+                                             multi_label_data)
 
     # create models changing the input_field to select
     # only one label at a time
@@ -81,9 +79,8 @@ def model_per_label(labels, datasets, fields,
     return models, model_ids, resume
 
 
-def models_processing(datasets, models, model_ids, objective_field, fields,
-                      api, args, resume,
-                      name=None, description=None, model_fields=None,
+def models_processing(datasets, models, model_ids,
+                      api, args, resume, fields=None,
                       session_file=None, path=None,
                       log=None, labels=None, multi_label_data=None,
                       other_label=None):
@@ -91,6 +88,7 @@ def models_processing(datasets, models, model_ids, objective_field, fields,
 
     """
     ensemble_ids = []
+    objective_field = args.objective_field
 
     # If we have a dataset but not a model, we create the model if the no_model
     # flag hasn't been set up.
@@ -104,23 +102,23 @@ def models_processing(datasets, models, model_ids, objective_field, fields,
             # number of models
             if args.number_of_models < 2:
                 models, model_ids, resume = model_per_label(
-                    labels, datasets, fields,
-                    objective_field, api, args, resume, name, description,
-                    model_fields, multi_label_data, session_file, path, log)
+                    labels, datasets, api, args, resume,
+                    fields=fields, multi_label_data=multi_label_data,
+                    session_file=session_file, path=path, log=log)
             else:
                 (ensembles, ensemble_ids,
                  models, model_ids, resume) = ensemble_per_label(
-                     labels, dataset, fields,
-                     objective_field, api, args, resume, name, description,
-                     model_fields, multi_label_data, session_file, path, log)
+                     labels, dataset, api, args, resume, fields=fields,
+                     multi_label_data=multi_label_data,
+                     session_file=session_file, path=path, log=log)
 
         elif args.number_of_models > 1:
             ensembles = []
             # Ensemble of models
             (ensembles, ensemble_ids,
              models, model_ids, resume) = ensemble_processing(
-                 datasets, objective_field, fields, api, args, resume,
-                 name=name, description=description, model_fields=model_fields,
+                 datasets, api, args, resume,
+                 fields=fields,
                  session_file=session_file, path=path, log=log)
             ensemble = ensembles[0]
             args.ensemble = bigml.api.get_ensemble_id(ensemble)
@@ -157,9 +155,10 @@ def models_processing(datasets, models, model_ids, objective_field, fields,
             if args.max_categories > 0:
                 objective_field = None
 
-            model_args = r.set_model_args(name, description, args,
-                                          objective_field, fields,
-                                          model_fields, other_label)
+            model_args = r.set_model_args(args, 
+                                          fields=fields,
+                                          model_fields=args.model_fields_,
+                                          other_label=other_label)
             models, model_ids = r.create_models(datasets, models,
                                                 model_args, args, api,
                                                 path, session_file, log)
@@ -244,6 +243,5 @@ def get_model_fields(model, csv_properties, args, single_model=True,
         if isinstance(objective_field, list):
             objective_field = objective_field[0]
     csv_properties.update(objective_field=objective_field)
-
-    fields = Fields(fields_dict, **csv_properties)
-    return fields, objective_field
+    args.objective_field = objective_field
+    return Fields(fields_dict, **csv_properties)

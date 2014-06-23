@@ -141,14 +141,14 @@ def wait_for_available_tasks(inprogress, max_parallel, get_function,
         time.sleep(max_parallel * wait_step)
 
 
-def set_source_args(data_set_header, name, description, args,
+def set_source_args(data_set_header, args,
                     multi_label_data=None):
     """Returns a source arguments dict
 
     """
     source_args = {
-        "name": name,
-        "description": description,
+        "name": args.name,
+        "description": args.description_,
         "category": args.category,
         "tags": args.tag,
         "source_parser": {"header": data_set_header}}
@@ -211,20 +211,20 @@ def create_source(data_set, source_args, args, api=None, path=None,
     return source
 
 
-def data_to_source(training_set, test_set,
-                   training_set_header, test_set_header, args):
+def data_to_source(args):
     """Extracts the flags info to create a source object
 
     """
     data_set = None
     data_set_header = None
-    if (training_set and not args.source and not args.dataset and
+    if (args.training_set and not args.source and not args.dataset and
             not args.model and not args.models):
-        data_set = training_set
-        data_set_header = training_set_header
-    elif (args.evaluate and test_set and not args.source):
-        data_set = test_set
-        data_set_header = test_set_header
+        data_set = args.training_set
+        data_set_header = args.train_header
+    elif (hasattr(args, 'evaluate') and args.evaluate and args.test_set
+          and not args.source):
+        data_set = args.test_set
+        data_set_header = args.test_header
 
     return data_set, data_set_header
 
@@ -270,13 +270,15 @@ def update_source_fields(source, updated_values, fields, api=None,
     return source
 
 
-def set_basic_dataset_args(name, description, args):
+def set_basic_dataset_args(args, name=None):
     """Return dataset basic arguments dict
 
     """
+    if name is None:
+        name = args.name
     dataset_args = {
         "name": name,
-        "description": description,
+        "description": args.description_,
         "category": args.category,
         "tags": args.tag
     }
@@ -284,12 +286,12 @@ def set_basic_dataset_args(name, description, args):
     return dataset_args
 
 
-def set_dataset_args(name, description, args, fields, dataset_fields,
-                     objective_field=None, multi_label_data=None):
+def set_dataset_args(args, fields, multi_label_data=None):
     """Return dataset arguments dict
 
     """
-    dataset_args = set_basic_dataset_args(name, description, args)
+    dataset_args = set_basic_dataset_args(args)
+    objective_field = args.objective_field
     if multi_label_data is not None and objective_field is None:
         objective_field = multi_label_data['objective_name']
     if objective_field is not None and fields is not None:
@@ -301,8 +303,8 @@ def set_dataset_args(name, description, args, fields, dataset_fields,
     elif args.lisp_filter:
         dataset_args.update(lisp_filter=args.lisp_filter)
 
-    if dataset_fields and fields is not None:
-        input_fields = configure_input_fields(fields, dataset_fields)
+    if args.dataset_fields and fields is not None:
+        input_fields = configure_input_fields(fields, args.dataset_fields)
         dataset_args.update(input_fields=input_fields)
     if args.multi_label and multi_label_data is not None:
         dataset_args.update(
@@ -414,15 +416,21 @@ def update_dataset(dataset, dataset_args, args,
     return dataset
 
 
-def set_model_args(name, description,
-                   args, objective_field=None, fields=None,
+def set_model_args(args, name=None, objective_field=None, fields=None,
                    model_fields=None, other_label=None):
     """Return model arguments dict
 
     """
+    if name is None:
+        name = args.name
+    if objective_field is None:
+        objective_field = args.objective_field
+    if model_fields is None:
+        model_fields = args.model_fields_
+
     model_args = {
         "name": name,
-        "description": description,
+        "description": args.description_,
         "category": args.category,
         "tags": args.tag
     }
@@ -477,16 +485,16 @@ def set_model_args(name, description,
     return model_args
 
 
-def set_label_model_args(name, description, args, labels, multi_label_data,
-                         fields, model_fields, objective_field):
+def set_label_model_args(args, fields, labels, multi_label_data):
     """Set of args needed to build a model per label
 
     """
 
-    if model_fields is None:
+    objective_field = args.objective_field
+    if not args.model_fields_:
         model_fields = []
     else:
-        model_fields = relative_input_fields(fields, model_fields)
+        model_fields = relative_input_fields(fields, args.model_fields_)
     if objective_field is None:
         objective_field = fields.objective_field
     objective_id = fields.field_id(objective_field)
@@ -497,10 +505,11 @@ def set_label_model_args(name, description, args, labels, multi_label_data,
     for index in range(args.number_of_models - 1, -1, -1):
         label = labels[index]
         (new_name, label_field, single_label_fields) = label_model_args(
-            name, label, all_labels, model_fields, objective_field)
-        model_args = set_model_args(new_name, description, args,
-                                    label_field, fields,
-                                    single_label_fields)
+            args.name, label, all_labels, model_fields,
+            objective_field)
+        model_args = set_model_args(args, name=new_name,
+                                    objective_field=label_field, fields=fields,
+                                    model_fields=single_label_fields)
         if multi_label_data is not None:
             model_args.update(
                 user_metadata={'multi_label_data': multi_label_data})
@@ -655,19 +664,17 @@ def get_models(model_ids, args, api=None, session_file=None):
     return models, model_ids
 
 
-def set_label_ensemble_args(name, description, args, labels, multi_label_data,
-                            number_of_ensembles, fields, model_fields,
-                            objective_field):
+def set_label_ensemble_args(args, labels, multi_label_data,
+                            number_of_ensembles, fields):
     """Set of args needed to build an ensemble per label
 
     """
-    if model_fields is None:
-        model_fields = []
-    else:
-        model_fields = relative_input_fields(fields, model_fields)
-    if objective_field is None:
-        objective_field = fields.objective_field
-    objective_id = fields.field_id(objective_field)
+
+    if not args.model_fields_:
+        args.model_fields_ = relative_input_fields(fields, args.model_fields_)
+    if args.objective_field is None:
+        args.objective_field = fields.objective_field
+    objective_id = fields.field_id(args.objective_field)
     objective_field = fields.fields[objective_id]['name']
     ensemble_args_list = []
 
@@ -675,10 +682,12 @@ def set_label_ensemble_args(name, description, args, labels, multi_label_data,
         label = labels[index]
         all_labels = get_all_labels(multi_label_data)
         (new_name, label_field, single_label_fields) = label_model_args(
-            name, label, all_labels, model_fields, objective_field)
-        ensemble_args = set_ensemble_args(new_name, description, args,
-                                          single_label_fields,
-                                          label_field, fields)
+            args.name, label, all_labels, args.model_fields_,
+            args.objective_field)
+        ensemble_args = set_ensemble_args(args, name=new_name,
+                                          objective_field=label_field,
+                                          model_fields=single_label_fields,
+                                          fields=fields)
         if multi_label_data is not None:
             ensemble_args.update(
                 user_metadata={'multi_label_data': multi_label_data})
@@ -686,14 +695,21 @@ def set_label_ensemble_args(name, description, args, labels, multi_label_data,
     return ensemble_args_list
 
 
-def set_ensemble_args(name, description, args, model_fields,
-                      objective_field=None, fields=None):
+def set_ensemble_args(args, name=None,
+                      objective_field=None, model_fields=None, fields=None):
     """Return ensemble arguments dict
 
     """
+    if name is None:
+        name = args.name
+    if objective_field is None:
+        objective_field = args.objective_field
+    if model_fields is None:
+        model_fields = args.model_fields_
+
     ensemble_args = {
         "name": name,
-        "description": description,
+        "description": args.description_,
         "number_of_models": args.number_of_models,
         "category": args.category,
         "tags": args.tag
@@ -858,23 +874,25 @@ def map_fields(fields_map, model_fields, dataset_fields):
     return update_map
 
 
-def set_evaluation_args(name, description, args, fields=None,
-                        dataset_fields=None, fields_map=None):
+def set_evaluation_args(args, fields=None,
+                        dataset_fields=None, name=None):
     """Return evaluation args dict
 
     """
+    if name is None:
+        name = args.name
     evaluation_args = {
         "name": name,
-        "description": description,
+        "description": args.description_,
         "tags": args.tag
     }
 
     if (args.number_of_models > 1 or args.ensemble):
         evaluation_args.update(combiner=args.method)
-    if fields_map is not None and fields is not None:
+    if args.fields_map_ and fields is not None:
         if dataset_fields is None:
             dataset_fields = fields
-        evaluation_args.update({"fields_map": map_fields(fields_map,
+        evaluation_args.update({"fields_map": map_fields(args.fields_map_,
                                                          fields,
                                                          dataset_fields)})
     if args.missing_strategy:
@@ -901,9 +919,9 @@ def set_evaluation_args(name, description, args, fields=None,
     return evaluation_args
 
 
-def set_label_evaluation_args(name, description, args, labels, all_labels,
+def set_label_evaluation_args(args, labels, all_labels,
                               number_of_evaluations, fields, dataset_fields,
-                              fields_map, objective_field):
+                              objective_field):
     """Set of args needed to build an evaluation per label
 
     """
@@ -915,10 +933,11 @@ def set_label_evaluation_args(name, description, args, labels, all_labels,
     for index in range(number_of_evaluations - 1, -1, -1):
         label = labels[index]
         new_name = label_model_args(
-            name, label, all_labels, [], objective_field)[0]
-        evaluation_args = set_evaluation_args(new_name, description, args,
-                                              fields, dataset_fields,
-                                              fields_map)
+            args.name, label, all_labels, [], objective_field)[0]
+        evaluation_args = set_evaluation_args(args,
+                                              fields=fields,
+                                              dataset_fields=dataset_fields,
+                                              name=new_name)
         evaluation_args_list.append(evaluation_args)
     return evaluation_args_list
 
@@ -1053,24 +1072,24 @@ def save_evaluation(evaluation, output, api=None):
     evaluation_txt.close()
 
 
-def set_batch_prediction_args(name, description, args, fields=None,
-                              dataset_fields=None, fields_map=None):
+def set_batch_prediction_args(args, fields=None,
+                              dataset_fields=None):
     """Return batch prediction args dict
 
     """
     batch_prediction_args = {
-        "name": name,
-        "description": description,
+        "name": args.name,
+        "description": args.description_,
         "tags": args.tag,
         "header": args.prediction_header,
         "combiner": args.method
     }
 
-    if fields_map is not None and fields is not None:
+    if args.fields_map_ and fields is not None:
         if dataset_fields is None:
             dataset_fields = fields
         batch_prediction_args.update({
-            "fields_map": map_fields(fields_map, fields, dataset_fields)})
+            "fields_map": map_fields(args.fields_map_, fields, dataset_fields)})
 
     if args.prediction_info == NORMAL_FORMAT:
         batch_prediction_args.update(confidence=True)

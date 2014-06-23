@@ -215,9 +215,7 @@ def main_dispatcher(args=sys.argv[1:]):
         delete_resources(command_args, api)
     elif (has_train(command_args) or has_test(command_args)
           or command_args.votes_dirs):
-        output_args = a.get_output_args(api, command.train_stdin,
-                                        command.test_stdin,
-                                        command_args, resume)
+        output_args = a.get_output_args(api, command_args, resume)
         a.transform_args(command_args, command.flags, api,
                          command.user_defaults)
         compute_output(**output_args)
@@ -320,18 +318,7 @@ def delete_resources(command_args, api):
                   console=command_args.verbosity)
 
 
-def compute_output(api, args, training_set, test_set=None, output=None,
-                   objective_field=None,
-                   description=None,
-                   field_attributes=None,
-                   types=None,
-                   dataset_fields=None,
-                   model_fields=None,
-                   name=None, training_set_header=True,
-                   test_set_header=True, model_ids=None,
-                   votes_files=None, resume=False, fields_map=None,
-                   test_field_attributes=None,
-                   test_types=None):
+def compute_output(api, args):
     """ Creates one or more models using the `training_set` or uses the ids
     of previously created BigML models to make predictions for the `test_set`.
 
@@ -347,15 +334,21 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     multi_label_fields = []
     local_ensemble = None
 
+    # variables from command-line options
+    resume = args.resume_
+    model_ids = args.model_ids_
+    output = args.predictions
+    dataset_fields = args.dataset_fields_
+
     # It is compulsory to have a description to publish either datasets or
     # models
-    if (not description and
+    if (not args.description_ and
             (args.black_box or args.white_box or args.public_dataset)):
         sys.exit("You should provide a description to publish.")
 
     # When using --max-categories, it is compulsory to specify also the
     # objective_field
-    if args.max_categories > 0 and objective_field is None:
+    if args.max_categories > 0 and args.objective_field is None:
         sys.exit("When --max-categories is used, you must also provide the"
                  " --objective field name or column number")
 
@@ -382,13 +375,14 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if labels is not None:
         labels = sorted([label.decode("utf-8") for label in labels])
 
+    ##### TODO args.
     # multi_label file must be preprocessed to obtain a new extended file
-    if args.multi_label and training_set is not None:
-        (training_set, multi_label_data) = ps.multi_label_expansion(
-            training_set, training_set_header, objective_field, args, path,
+    if args.multi_label and args.training_set is not None:
+        (args.training_set, multi_label_data) = ps.multi_label_expansion(
+            args.training_set, args.train_header, args, path,
             labels=labels, session_file=session_file)
-        training_set_header = True
-        objective_field = multi_label_data["objective_name"]
+        args.train_header = True
+        args.objective_field = multi_label_data["objective_name"]
         all_labels = l.get_all_labels(multi_label_data)
         if not labels:
             labels = all_labels
@@ -396,22 +390,20 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         all_labels = labels
 
     source, resume, csv_properties, fields = ps.source_processing(
-        training_set, test_set, training_set_header, test_set_header,
-        api, args, resume, name=name, description=description,
-        csv_properties=csv_properties, field_attributes=field_attributes,
-        types=types, multi_label_data=multi_label_data,
+        api, args, resume,
+        csv_properties=csv_properties, multi_label_data=multi_label_data,
         session_file=session_file, path=path, log=log)
     if args.multi_label and source:
         multi_label_data = l.get_multi_label_data(source)
-        (objective_field, labels,
+        (args.objective_field, labels,
             all_labels, multi_label_fields) = l.multi_label_sync(
-                objective_field, labels, multi_label_data, fields,
+                args.objective_field, labels, multi_label_data, fields,
                 multi_label_fields)
     datasets, resume, csv_properties, fields = pd.dataset_processing(
-        source, training_set, test_set, fields, objective_field,
-        api, args, resume, name=name, description=description,
-        dataset_fields=dataset_fields, multi_label_data=multi_label_data,
+        source, api, args, resume,
+        fields=fields,
         csv_properties=csv_properties,
+        multi_label_data=multi_label_data,
         session_file=session_file, path=path, log=log)
     if datasets:
         dataset = datasets[0]
@@ -420,7 +412,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # according to the given split
     if args.test_split > 0:
         dataset, test_dataset, resume = pd.split_processing(
-            dataset, api, args, resume, name=name, description=description,
+            dataset, api, args, resume,
             multi_label_data=multi_label_data,
             session_file=session_file, path=path, log=log)
         datasets[0] = dataset
@@ -449,9 +441,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # list of datasets
     if args.multi_dataset:
         dataset, resume = pd.create_new_dataset(
-            datasets, api, args, resume, name=name,
-            description=description, fields=fields,
-            dataset_fields=dataset_fields, objective_field=objective_field,
+            datasets, api, args, resume, fields=fields,
             session_file=session_file, path=path, log=log)
         datasets = [dataset]
 
@@ -459,16 +449,14 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     # generate a new dataset with the specified field structure
     if args.new_fields:
         dataset, resume = pd.create_new_dataset(
-            dataset, api, args, resume, name=name,
-            description=description, fields=fields,
-            dataset_fields=dataset_fields, objective_field=objective_field,
+            dataset, api, args, resume, fields=fields,
             session_file=session_file, path=path, log=log)
         datasets[0] = dataset
     if args.multi_label and dataset and multi_label_data is None:
         multi_label_data = l.get_multi_label_data(dataset)
-        (objective_field, labels,
+        (args.objective_field, labels,
             all_labels, multi_label_fields) = l.multi_label_sync(
-                objective_field, labels, multi_label_data,
+                args.objective_field, labels, multi_label_data,
                 fields, multi_label_fields)
 
     if dataset:
@@ -479,8 +467,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                                    other_label)
     models, model_ids, ensemble_ids, resume = pm.models_processing(
         datasets, models, model_ids,
-        objective_field, fields, api, args, resume,
-        name=name, description=description, model_fields=model_fields,
+        api, args, resume, fields=fields,
         session_file=session_file, path=path, log=log, labels=labels,
         multi_label_data=multi_label_data, other_label=other_label)
     if models:
@@ -525,7 +512,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
 
     # We get the fields of the model if we haven't got
     # them yet and need them
-    if model and not args.evaluate and test_set:
+    if model and not args.evaluate and args.test_set:
         # If more than one model, use the full field structure
         if (not single_model and not args.multi_label and
                 belongs_to_ensemble(model)):
@@ -534,15 +521,15 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             else:
                 ensemble_id = get_ensemble_id(model)
             local_ensemble = Ensemble(ensemble_id, api=api)
-        fields, objective_field = pm.get_model_fields(
+        fields = pm.get_model_fields(
             model, csv_properties, args, single_model=single_model,
             multi_label_data=multi_label_data, local_ensemble=local_ensemble)
 
     # Fills in all_labels from user_metadata
     if args.multi_label and not all_labels:
-        (objective_field, labels,
+        (args.objective_field, labels,
             all_labels, multi_label_fields) = l.multi_label_sync(
-                objective_field, labels, multi_label_data,
+                args.objective_field, labels, multi_label_data,
                 fields, multi_label_fields)
     if model:
         # retrieves max_categories data, if any
@@ -564,7 +551,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                                            in multi_label_fields]
                 args.multi_label_fields = ",".join(multi_label_field_names)
             test_set = ps.multi_label_expansion(
-                test_set, test_set_header, objective_field, args, path,
+                args.test_set, args.test_header, args, path,
                 labels=labels, session_file=session_file, input_flag=True)[0]
             test_set_header = True
 
@@ -574,15 +561,11 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         if (args.remote and not args.no_batch and not args.multi_label
                 and not args.method in [THRESHOLD_CODE, COMBINATION]):
             # create test source from file
-            test_name = "%s - test" % name
+            test_name = "%s - test" % args.name
             if args.test_source is None:
                 (test_source, resume,
                     csv_properties, test_fields) = ps.test_source_processing(
-                        test_set, test_set_header,
-                        api, args, resume, name=test_name,
-                        description=description,
-                        field_attributes=test_field_attributes,
-                        types=test_types,
+                        api, args, resume,
                         session_file=session_file, path=path, log=log)
             else:
                 test_source_id = bigml.api.get_source_id(args.test_source)
@@ -590,8 +573,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                                                  api.get_source)
             if args.test_dataset is None:
             # create test dataset from test source
-                dataset_args = r.set_basic_dataset_args(test_name,
-                                                        description, args)
+                dataset_args = r.set_basic_dataset_args(args, name=test_name)
                 test_dataset, resume = pd.alternative_dataset_processing(
                     test_source, "test", dataset_args, api, args,
                     resume, session_file=session_file, path=path, log=log)
@@ -606,8 +588,8 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                                                   csv_properties)
 
             batch_prediction_args = r.set_batch_prediction_args(
-                name, description, args, fields=fields,
-                dataset_fields=test_fields, fields_map=fields_map)
+                args, fields=fields,
+                dataset_fields=test_fields)
 
             remote_predict(model, test_dataset, batch_prediction_args, args,
                            api, resume, prediction_file=output,
@@ -618,17 +600,16 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                     and args.number_of_models == 1):
                 # use case where ensembles are read from a file
                 models_per_label = len(models) / len(ensemble_ids)
-            predict(test_set, test_set_header, models, fields, output,
-                    objective_field, args, api=api, log=log,
+            predict(models, fields, args, api=api, log=log,
                     resume=resume, session_file=session_file, labels=labels,
                     models_per_label=models_per_label, other_label=other_label,
                     multi_label_data=multi_label_data)
 
     # When combine_votes flag is used, retrieve the predictions files saved
     # in the comma separated list of directories and combine them
-    if votes_files:
+    if args.votes_files_:
         model_id = re.sub(r'.*(model_[a-f0-9]{24})__predictions\.csv$',
-                          r'\1', votes_files[0]).replace("_", "/")
+                          r'\1', args.votes_files_[0]).replace("_", "/")
         try:
             model = u.check_resource(model_id, api.get_model)
         except ValueError, exception:
@@ -638,7 +619,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
         message = u.dated("Combining votes.\n")
         u.log_message(message, log_file=session_file,
                       console=args.verbosity)
-        combine_votes(votes_files, local_model.to_prediction,
+        combine_votes(args.votes_files_, local_model.to_prediction,
                       output, args.method)
 
     # If evaluate flag is on, create remote evaluation and save results in
@@ -650,13 +631,12 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             args.test_dataset_ids = datasets
         if args.test_dataset_ids:
             # Evaluate the models with the corresponding test datasets.
-            resume = evaluate(models, args.test_dataset_ids, output, api,
-                              args, resume, name=name, description=description,
+            resume = evaluate(models, args.test_dataset_ids, api,
+                              args, resume,
                               fields=fields, dataset_fields=dataset_fields,
-                              fields_map=fields_map,
                               session_file=session_file, path=path,
                               log=log, labels=labels, all_labels=all_labels,
-                              objective_field=objective_field)
+                              objective_field=args.objective_field)
         else:
             if args.multi_label and args.test_set is not None:
                 # When evaluation starts from existing models, the
@@ -665,7 +645,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
                 if args.multi_label_fields is None and multi_label_fields:
                     args.multi_label_fields = multi_label_fields
                 test_set = ps.multi_label_expansion(
-                    test_set, test_set_header, objective_field, args, path,
+                    test_set, test_set_header, args, path,
                     labels=labels, session_file=session_file)[0]
                 test_set_header = True
 
@@ -674,13 +654,12 @@ def compute_output(api, args, training_set, test_set=None, output=None,
             dataset_fields = pd.get_fields_structure(dataset, None)
             models_or_ensembles = (ensemble_ids if ensemble_ids != []
                                    else models)
-            resume = evaluate(models_or_ensembles, [dataset], output, api,
-                              args, resume, name=name, description=description,
+            resume = evaluate(models_or_ensembles, [dataset], api,
+                              args, resume,
                               fields=fields, dataset_fields=dataset_fields,
-                              fields_map=fields_map,
                               session_file=session_file, path=path,
                               log=log, labels=labels, all_labels=all_labels,
-                              objective_field=objective_field)
+                              objective_field=args.objective_field)
 
     # If cross_validation_rate is > 0, create remote evaluations and save
     # results in json and human-readable format. Then average the results to
@@ -688,8 +667,7 @@ def compute_output(api, args, training_set, test_set=None, output=None,
     if args.cross_validation_rate > 0:
         args.sample_rate = 1 - args.cross_validation_rate
         cross_validate(models, dataset, fields, api, args, resume,
-                       name=name, description=description,
-                       fields_map=fields_map, session_file=session_file,
+                       session_file=session_file,
                        path=path, log=log)
 
     # Workaround to restore windows console cp850 encoding to print the tree
