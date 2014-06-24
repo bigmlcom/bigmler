@@ -303,8 +303,8 @@ def set_dataset_args(args, fields, multi_label_data=None):
     elif args.lisp_filter:
         dataset_args.update(lisp_filter=args.lisp_filter)
 
-    if args.dataset_fields and fields is not None:
-        input_fields = configure_input_fields(fields, args.dataset_fields)
+    if args.dataset_fields_ and fields is not None:
+        input_fields = configure_input_fields(fields, args.dataset_fields_)
         dataset_args.update(input_fields=input_fields)
     if args.multi_label and multi_label_data is not None:
         dataset_args.update(
@@ -423,7 +423,7 @@ def set_model_args(args, name=None, objective_field=None, fields=None,
     """
     if name is None:
         name = args.name
-    if objective_field is None:
+    if objective_field is None and args.max_categories is None:
         objective_field = args.objective_field
     if model_fields is None:
         model_fields = args.model_fields_

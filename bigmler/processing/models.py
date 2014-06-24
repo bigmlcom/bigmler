@@ -152,9 +152,6 @@ def models_processing(datasets, models, model_ids,
                 models = model_ids
                 args.number_of_models -= len(model_ids)
 
-            if args.max_categories > 0:
-                objective_field = None
-
             model_args = r.set_model_args(args, 
                                           fields=fields,
                                           model_fields=args.model_fields_,

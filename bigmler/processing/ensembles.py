@@ -53,7 +53,7 @@ def ensemble_processing(datasets, api, args, resume,
         ensemble = None
 
     if ensemble is None:
-        ensemble_args = r.set_ensemble_args(args, fields)
+        ensemble_args = r.set_ensemble_args(args, fields=fields)
         ensembles, ensemble_ids, models, model_ids = r.create_ensembles(
             datasets, ensembles, ensemble_args, args, api=api, path=path,
             session_file=session_file, log=log)
