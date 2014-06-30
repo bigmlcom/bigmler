@@ -19,11 +19,13 @@
 
 """
 
-def get_multi_label_options(defaults={}, constants={}):
+def get_multi_label_options(defaults=None):
     """Multi-label-related options
 
     """
 
+    if defaults is None:
+        defaults = {}
     options = {
         # Multi-label labels. If set, only the given labels are expanded
         '--labels': {
@@ -40,18 +42,11 @@ def get_multi_label_options(defaults={}, constants={}):
             'dest': 'label_separator',
             'default': defaults.get('label_separator', None),
             'help': ("Separator used when splitting labels in the"
-                  " objective field.")},
+                     " objective field.")},
 
-        # Training set field separator. Defaults to the locale csv
-        # separator.
-        '--training-separator': {
-            'action': 'store',
-            'dest': 'training_separator',
-            'default': defaults.get('training_separator', None),
-            'help': ("Training set field separator.")},
-
-        # Multi-label fields. Comma-separated list of fields that should be treated
-        # as being multi-label fields. Either its name or column number.
+        # Multi-label fields. Comma-separated list of fields that should be
+        # treated as being multi-label fields.
+        # Either its name or column number.
         '--multi-label-fields': {
             'action': 'store',
             'dest': 'multi_label_fields',

@@ -19,10 +19,13 @@
 
 """
 
-def get_dataset_options(defaults={}, constants={}):
+def get_dataset_options(defaults=None):
     """Dataset-related options
 
     """
+
+    if defaults is None:
+        defaults = {}
 
     options = {
         # If a BigML dataset is provided, the script won't create a new one
@@ -32,7 +35,7 @@ def get_dataset_options(defaults={}, constants={}):
             'default': defaults.get('dataset', None),
             'help': "BigML dataset Id."},
 
-       # The path to a file containing dataset ids.
+        # The path to a file containing dataset ids.
         '--datasets': {
             'action': 'store',
             'dest': 'datasets',

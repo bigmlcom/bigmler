@@ -31,17 +31,9 @@ from bigml.fields import Fields
 from bigml.predicate import TM_FULL_TERM
 
 from bigmler.prediction import OTHER
-from bigmler.processing.models import has_models
 
 
-MAX_CATEGORIES_RE = re.compile("max_categories: (\d+)")
-
-
-def has_datasets(args):
-    """Returns if some kind of dataset id is given in args.
-
-    """
-    return args.dataset or args.datasets or args.dataset_tag
+MAX_CATEGORIES_RE = re.compile(r'max_categories: (\d+)')
 
 
 def create_other_label(categories, label):
@@ -54,7 +46,7 @@ def create_other_label(categories, label):
 
 
 def check_max_categories(field):
-    """Checks if a field can be split by --max-categories. 
+    """Checks if a field can be split by --max-categories.
 
        Only categorical or full terms only text are allowed.
 
@@ -72,7 +64,7 @@ def get_categories_distribution(dataset, objective_id):
         if dataset_info['objective_field']['optype'] == 'categorical':
             if 'distribution' in dataset_info:
                 distribution = dataset_info['distribution']
-            elif ('objective_summary' in dataset_info):
+            elif 'objective_summary' in dataset_info:
                 summary = dataset_info['objective_summary']
                 if 'categories' in summary:
                     distribution = summary['categories']
@@ -103,7 +95,7 @@ def get_fields_structure(resource, csv_properties):
     return fields
 
 
-def get_new_objective(fields, objective, dataset):
+def get_new_objective(fields, objective):
     """Checks if the objective given by the user in the --objective flag
        differs from the one in the dataset. Returns the new objective or None
        if they are the same.
@@ -139,7 +131,7 @@ def dataset_processing(source, api, args, resume,
     # If we have a source but no dataset or model has been provided, we
     # create a new dataset if the no_dataset option isn't set up. Also
     # if evaluate is set and test_set has been provided.
-    if ((source and not has_datasets(args) and not has_models(args)
+    if ((source and not args.has_datasets_ and not args.has_models_
          and not args.no_dataset) or
             (hasattr(args, "evaluate") and args.evaluate and
              args.test_set and not args.dataset)):
@@ -168,15 +160,17 @@ def dataset_processing(source, api, args, resume,
             dataset_objective = dataset[
                 'object']['objective_field']['column_number']
             csv_properties.update(objective_field=dataset_objective,
-                  objective_field_present=True)
+                                  objective_field_present=True)
 
         fields = get_fields_structure(dataset, csv_properties)
 
         if args.public_dataset:
             r.publish_dataset(dataset, args, api, session_file)
 
-        new_objective = get_new_objective(fields, args.objective_field,
-                                          dataset)
+        if hasattr(args, 'objective_field'):
+            new_objective = get_new_objective(fields, args.objective_field)
+        else:
+            new_objective = None
 
         if (new_objective is not None or args.dataset_attributes or
             (args.shared_flag and r.shared_changed(args.shared, dataset))):
@@ -231,9 +225,10 @@ def split_processing(dataset, api, args, resume,
     test_dataset = None
     sample_rate = 1 - args.test_split
     dataset_alternative_args = r.set_dataset_split_args(
-        "%s - train (%s %%)" % (args.name,
-        int(sample_rate * 100)), args.description_, args,
-        sample_rate, out_of_bag=False, multi_label_data=multi_label_data)
+        "%s - train (%s %%)" % (args.name, int(sample_rate * 100)),
+                                args.description_, args, sample_rate,
+                                out_of_bag=False,
+                                multi_label_data=multi_label_data)
     train_dataset, resume = alternative_dataset_processing(
         dataset, "train", dataset_alternative_args, api, args,
         resume, session_file=session_file, path=path, log=log)
@@ -289,9 +284,9 @@ def create_categories_datasets(dataset, distribution,
                     {"name": fields.field_name(fields.objective_field),
                      "field": category_generator,
                      "label": "max_categories: %s" % args.max_categories}],
-                "user_metadata": 
+                "user_metadata":
                 {"max_categories": args.max_categories,
-                "other_label": other_label}}
+                 "other_label": other_label}}
             new_dataset = r.create_dataset(
                 dataset, dataset_args, args, api=api, path=path,
                 session_file=session_file, log=log, dataset_type="parts")
@@ -327,7 +322,7 @@ def create_new_dataset(datasets, api, args, resume, fields=None,
     if not resume:
         dataset_args = r.set_dataset_args(args, fields)
         if args.multi_dataset and args.multi_dataset_json:
-                dataset_args.update(args.multi_dataset_json)
+            dataset_args.update(args.multi_dataset_json)
         else:
             dataset_args.update(args.dataset_json_generators)
         new_dataset = r.create_dataset(origin_resource, dataset_args,

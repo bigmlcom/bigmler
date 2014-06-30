@@ -241,7 +241,7 @@ def read_votes_files(dirs_list, path):
         os.chdir(directory)
         for predictions_file in glob.glob("model_*_predictions.csv"):
             predictions_files.append("%s%s%s" % (os.getcwd(),
-                                     os.sep, predictions_file))
+                                                 os.sep, predictions_file))
             group_predictions.write("%s\n" % predictions_file)
         os.chdir(current_directory)
     group_predictions.close()
@@ -253,15 +253,15 @@ def list_ids(api_function, query_string):
 
     """
     q_s = 'status.code=%s;limit=%s;%s' % (
-          bigml.api.FINISHED, PAGE_LENGTH, query_string)
+        bigml.api.FINISHED, PAGE_LENGTH, query_string)
     resources = api_function(q_s)
     ids = [obj['resource'] for obj in (resources['objects'] or [])]
     while (resources['objects'] and
-          (resources['meta']['total_count'] > (resources['meta']['offset'] +
-           resources['meta']['limit']))):
+           (resources['meta']['total_count'] > (resources['meta']['offset'] +
+                                                resources['meta']['limit']))):
         offset = resources['meta']['offset'] + PAGE_LENGTH
         q_s = 'status.code=%s;offset=%s;limit=%s;%s' % (
-              bigml.api.FINISHED, offset, PAGE_LENGTH, query_string)
+            bigml.api.FINISHED, offset, PAGE_LENGTH, query_string)
         resources = api_function(q_s)
         if resources['objects']:
             ids.extend([obj['resource'] for obj in resources['objects']])
@@ -351,7 +351,8 @@ def get_url(resource, shared=False, embedded=False):
                 + os.sep + resource['object']['shared_hash'])
     elif embedded:
         return (RESOURCE_EMBEDDED_URL % (bigml.api.get_resource_type(resource)
-                + os.sep + resource['object']['shared_hash']))
+                                         + os.sep +
+                                         resource['object']['shared_hash']))
     else:
         resource_id = bigml.api.get_resource_id(resource)
         if not resource_id:
@@ -406,7 +407,7 @@ def log_created_resources(file_name, path, resource_id, open_mode='w'):
                 if resource_id is not None:
                     resource_file.write("%s\n" % resource_id)
         except IOError, exc:
-            print ("Failed to write %s: %s" % (file_name, str(exc)))
+            print "Failed to write %s: %s" % (file_name, str(exc))
 
 
 def check_resource(*args, **kwargs):

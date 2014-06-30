@@ -28,17 +28,11 @@ import os
 import bigmler.processing.args as a
 import bigmler.utils as u
 
-from bigml.multivote import PLURALITY
-
-from bigmler.defaults import DEFAULTS_FILE
-from bigmler.prediction import (MAX_MODELS, OTHER, COMBINATION,
-                                THRESHOLD_CODE)
-from bigmler.defaults import get_user_defaults
 from bigmler.analyze.k_fold_cv import (create_kfold_cv,
                                        create_features_analysis,
                                        create_nodes_analysis)
-from bigmler.utils import check_dir
-from bigmler.dispatcher import (SESSIONS_LOG, command_handling)
+from bigmler.dispatcher import (SESSIONS_LOG, command_handling,
+                                clear_log_files)
 from bigmler.command import Command, StoredCommand
 
 
@@ -73,12 +67,12 @@ def analyze_dispatcher(args=sys.argv[1:]):
         stored_command.log_command(session_file=session_file)
         # Parses resumed arguments.
         command_args = command.parser.parse_args(command.args)
+        command_args.debug = debug
     else:
         if command_args.output_dir is None:
             command_args.output_dir = a.NOW
         session_file = os.path.join(command_args.output_dir,
                                     SESSIONS_LOG)
-        csv_properties = {}
         # If logging is required, open the file for logging
         log = None
         if command_args.log_file:
@@ -102,7 +96,7 @@ def analyze_dispatcher(args=sys.argv[1:]):
                              u.check_dir(session_file))
 
     # k-fold cross-validation
-    if (command_args.cv and command_args.dataset is not None):
+    if command_args.cv and command_args.dataset is not None:
         create_kfold_cv(command_args, api, command.common_options,
                         resume=resume)
 

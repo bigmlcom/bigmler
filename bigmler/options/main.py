@@ -19,10 +19,15 @@
 
 """
 
-def get_main_options(defaults={}, constants={}):
+def get_main_options(defaults=None, constants=None):
     """Main subcommand-related options
 
     """
+
+    if defaults is None:
+        defaults = {}
+    if constants is None:
+        constants = {}
     max_models = constants.get('MAX_MODELS')
     plurality = constants.get('PLURALITY')
     last = constants.get('LAST_PREDICTION')
@@ -147,12 +152,12 @@ def get_main_options(defaults={}, constants={}):
             'choices': ["plurality", "confidence weighted",
                         "probability weighted", "threshold",
                         "combined"],
-            'help': "Method to combine votes from ensemble"
-                 " predictions. Allowed methods: plurality"
-                 ", \"confidence weighted\", "
-                 " \"probability weighted\", threshold. Also"
-                 " \"combined\" for datasets with subsets of"
-                 " categories"},
+            'help': ("Method to combine votes from ensemble"
+                     " predictions. Allowed methods: plurality"
+                     ", \"confidence weighted\", "
+                     " \"probability weighted\", threshold. Also"
+                     " \"combined\" for datasets with subsets of"
+                     " categories")},
 
         # Evaluate a model
         '--evaluate': {
@@ -176,8 +181,8 @@ def get_main_options(defaults={}, constants={}):
             "help": ("Max number of evaluations to create in"
                      " parallel.")},
 
-        # The name of the field that represents the objective field (i.e., class or
-        # label) or its column number.
+        # The name of the field that represents the objective field (i.e.,
+        # class or label) or its column number.
         '--objective': {
             "action": 'store',
             "dest": 'objective_field',
@@ -335,11 +340,11 @@ def get_main_options(defaults={}, constants={}):
 
         # Input fields to include in the model.
         '--model-fields': {
-                "action": 'store',
-                "dest": 'model_fields',
-                "default": defaults.get('model_fields', None),
-                "help": ("Comma-separated list of input fields"
-                         " (predictors) to create the model.")},
+            "action": 'store',
+            "dest": 'model_fields',
+            "default": defaults.get('model_fields', None),
+            "help": ("Comma-separated list of input fields"
+                     " (predictors) to create the model.")},
 
         # Balance. Automatically balance all the classes evenly.
         '--balance': {
@@ -350,7 +355,7 @@ def get_main_options(defaults={}, constants={}):
                      " evenly.")},
 
         # Balance. Do not automatically balance all the classes evenly.
-        # (opposed to balance) 
+        # (opposed to balance)
         '--no-balance': {
             "action": 'store_false',
             "dest": 'balance',
@@ -418,12 +423,12 @@ def get_main_options(defaults={}, constants={}):
 
         # Report. Additional output report formats
         '--reports': {
-                'action': 'store',
-                'dest': 'reports',
-                'nargs': '*',
-                'default': defaults.get('reports', []),
-                'choices': ["gazibit"],
-                'help': "Output report formats."},
+            'action': 'store',
+            'dest': 'reports',
+            'nargs': '*',
+            'default': defaults.get('reports', []),
+            'choices': ["gazibit"],
+            'help': "Output report formats."},
 
         # Disables reports upload.
         '--no-upload': {

@@ -130,10 +130,10 @@ def wait_for_available_tasks(inprogress, max_parallel, get_function,
                 ready = check_resource(inprogress[j], get_function,
                                        **check_kwargs)
                 status = bigml.api.get_status(ready)
-                if (status['code'] == bigml.api.FINISHED):
+                if status['code'] == bigml.api.FINISHED:
                     del inprogress[j]
                     return
-                elif (status['code'] == bigml.api.FAULTY):
+                elif status['code'] == bigml.api.FAULTY:
                     raise ValueError(status['message'])
             except ValueError, exception:
                 sys.exit("Failed to get a finished %s: %s" %
@@ -141,13 +141,15 @@ def wait_for_available_tasks(inprogress, max_parallel, get_function,
         time.sleep(max_parallel * wait_step)
 
 
-def set_source_args(data_set_header, args,
+def set_source_args(data_set_header, args, name=None,
                     multi_label_data=None):
     """Returns a source arguments dict
 
     """
+    if name is None:
+        name = args.name
     source_args = {
-        "name": args.name,
+        "name": name,
         "description": args.description_,
         "category": args.category,
         "tags": args.tag,
@@ -158,7 +160,8 @@ def set_source_args(data_set_header, args,
         if source_locale is None:
             log_message("WARNING: %s locale equivalence not found."
                         " Using %s instead.\n" % (args.user_locale,
-                        LOCALE_DEFAULT), log_file=None, console=True)
+                                                  LOCALE_DEFAULT),
+                        log_file=None, console=True)
             source_locale = LOCALE_DEFAULT
         source_args["source_parser"].update({'locale': source_locale})
     # If user has set a training separator, use it.
@@ -167,11 +170,12 @@ def set_source_args(data_set_header, args,
         source_args["source_parser"].update({'separator': training_separator})
     # If uploading a multi-label file, add the user_metadata info needed to
     # manage the multi-label fields
-    if args.multi_label and multi_label_data is not None:
-        source_args.update(
-            {"user_metadata":
-                {"multi_label_data": multi_label_data}})
-    if args.json_args['source']:
+    if (hasattr(args, 'multi_label') and args.multi_label
+            and multi_label_data is not None):
+        source_args.update({
+            "user_metadata": {
+                "multi_label_data": multi_label_data}})
+    if 'source' in args.json_args and args.json_args['source']:
         source_args.update(args.json_args['source'])
     return source_args
 
@@ -218,7 +222,7 @@ def data_to_source(args):
     data_set = None
     data_set_header = None
     if (args.training_set and not args.source and not args.dataset and
-            not args.model and not args.models):
+            not args.has_models_):
         data_set = args.training_set
         data_set_header = args.train_header
     elif (hasattr(args, 'evaluate') and args.evaluate and args.test_set
@@ -291,7 +295,8 @@ def set_dataset_args(args, fields, multi_label_data=None):
 
     """
     dataset_args = set_basic_dataset_args(args)
-    objective_field = args.objective_field
+    objective_field = (None if not hasattr(args, 'objective_field')
+                       else args.objective_field)
     if multi_label_data is not None and objective_field is None:
         objective_field = multi_label_data['objective_name']
     if objective_field is not None and fields is not None:
@@ -306,10 +311,11 @@ def set_dataset_args(args, fields, multi_label_data=None):
     if args.dataset_fields_ and fields is not None:
         input_fields = configure_input_fields(fields, args.dataset_fields_)
         dataset_args.update(input_fields=input_fields)
-    if args.multi_label and multi_label_data is not None:
+    if (hasattr(args, 'multi_label') and args.multi_label
+        and multi_label_data is not None):
         dataset_args.update(
             user_metadata={'multi_label_data': multi_label_data})
-    if args.json_args['dataset']:
+    if 'dataset' in args.json_args and args.json_args['dataset']:
         dataset_args.update(args.json_args['dataset'])
 
     return dataset_args
@@ -476,7 +482,7 @@ def set_model_args(args, name=None, objective_field=None, fields=None,
             user_metadata={'other_label': other_label,
                            'max_categories': args.max_categories})
 
-    if args.json_args['model']:
+    if 'model' in args.json_args and args.json_args['model']:
         model_args.update(args.json_args['model'])
 
     model_args.update(sample_rate=args.sample_rate,
@@ -683,7 +689,7 @@ def set_label_ensemble_args(args, labels, multi_label_data,
         all_labels = get_all_labels(multi_label_data)
         (new_name, label_field, single_label_fields) = label_model_args(
             args.name, label, all_labels, args.model_fields_,
-            args.objective_field)
+            objective_field)
         ensemble_args = set_ensemble_args(args, name=new_name,
                                           objective_field=label_field,
                                           model_fields=single_label_fields,
@@ -742,13 +748,13 @@ def set_ensemble_args(args, name=None,
         ensemble_args.update(weight_field=weight_field)
     if args.objective_weights:
         ensemble_args.update(objective_weights=args.objective_weights_json)
-    if args.json_args['model']:
+    if 'model' in args.json_args and args.json_args['model']:
         ensemble_args.update(args.json_args['model'])
     ensemble_args.update(sample_rate=args.sample_rate,
                          replacement=args.replacement,
                          randomize=args.randomize,
                          tlp=args.tlp)
-    if args.json_args['ensemble']:
+    if 'ensemble' in args.json_args and args.json_args['ensemble']:
         ensemble_args.update(args.json_args['ensemble'])
     return ensemble_args
 
@@ -887,7 +893,7 @@ def set_evaluation_args(args, fields=None,
         "tags": args.tag
     }
 
-    if (args.number_of_models > 1 or args.ensemble):
+    if args.number_of_models > 1 or args.ensemble:
         evaluation_args.update(combiner=args.method)
     if args.fields_map_ and fields is not None:
         if dataset_fields is None:
@@ -897,7 +903,7 @@ def set_evaluation_args(args, fields=None,
                                                          dataset_fields)})
     if args.missing_strategy:
         evaluation_args.update(missing_strategy=args.missing_strategy)
-    if args.json_args['evaluation']:
+    if 'evaluation' in args.json_args and args.json_args['evaluation']:
         evaluation_args.update(args.json_args['evaluation'])
     # Two cases to use out_of_bag and sample_rate: standard evaluations where
     # only the training set is provided, and cross_validation
@@ -907,10 +913,10 @@ def set_evaluation_args(args, fields=None,
                  (args.ensemble and args.number_of_models == 1))):
         return evaluation_args
     # [--train|--dataset] --test-split --evaluate
-    if (args.test_split > 0 and (args.training_set or args.dataset)):
+    if args.test_split > 0 and (args.training_set or args.dataset):
         return evaluation_args
     # --datasets --test-datasets
-    if (args.datasets and (args.test_datasets or args.dataset_off)):
+    if args.datasets and (args.test_datasets or args.dataset_off):
         return evaluation_args
     if args.sample_rate == 1:
         args.sample_rate = EVALUATE_SAMPLE_RATE
@@ -1098,7 +1104,8 @@ def set_batch_prediction_args(args, fields=None,
         batch_prediction_args.update(all_fields=True)
     if args.missing_strategy:
         batch_prediction_args.update(missing_strategy=args.missing_strategy)
-    if args.json_args['batch_prediction']:
+    if ('batch_prediction' in args.json_args and
+            args.json_args['batch_prediction']):
         batch_prediction_args.update(args.json_args['batch_prediction'])
 
     return batch_prediction_args
@@ -1136,3 +1143,218 @@ def create_batch_prediction(model_or_ensemble, test_dataset,
     if args.reports:
         report(args.reports, path, batch_prediction)
     return batch_prediction
+
+
+def set_cluster_args(args, name=None, fields=None,
+                     cluster_fields=None):
+    """Return cluster arguments dict
+
+    """
+    if name is None:
+        name = args.name
+    if cluster_fields is None:
+        cluster_fields = args.cluster_fields_
+
+    cluster_args = {
+        "name": name,
+        "description": args.description_,
+        "category": args.category,
+        "tags": args.tag
+    }
+
+    if cluster_fields and fields is not None:
+        input_fields = configure_input_fields(fields, cluster_fields)
+        cluster_args.update(input_fields=input_fields)
+
+    if 'cluster' in args.json_args and args.json_args['cluster']:
+        cluster_args.update(args.json_args['cluster'])
+
+    return cluster_args
+
+
+def create_clusters(datasets, cluster_ids, cluster_args,
+                    args, api=None, path=None,
+                    session_file=None, log=None):
+    """Create remote clusters
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+
+    clusters = cluster_ids[:]
+    existing_clusters = len(clusters)
+    cluster_args_list = []
+    datasets = datasets[existing_clusters:]
+    # if resuming and all clusters were created, there will be no datasets left
+    if datasets:
+        if isinstance(cluster_args, list):
+            cluster_args_list = cluster_args
+
+        # Only one cluster per command, at present
+        number_of_clusters = 1
+        message = dated("Creating %s.\n" %
+                        plural("cluster", number_of_clusters))
+        log_message(message, log_file=session_file,
+                    console=args.verbosity)
+
+        query_string = FIELDS_QS
+        inprogress = []
+        for i in range(0, number_of_clusters):
+            wait_for_available_tasks(inprogress, args.max_parallel_clusters,
+                                     api.get_cluster, "cluster",
+                                     query_string=query_string)
+            if cluster_args_list:
+                cluster_args = cluster_args_list[i]
+
+
+            cluster = api.create_cluster(datasets, cluster_args)
+            cluster_id = check_resource_error(cluster,
+                                              "Failed to create cluster: ")
+            log_message("%s\n" % cluster_id, log_file=log)
+            cluster_ids.append(cluster_id)
+            inprogress.append(cluster_id)
+            clusters.append(cluster)
+            log_created_resources("clusters", path, cluster_id, open_mode='a')
+
+        if args.verbosity:
+            if bigml.api.get_status(cluster)['code'] != bigml.api.FINISHED:
+                try:
+                    cluster = check_resource(cluster, api.get_cluster,
+                                             query_string=query_string)
+                except ValueError, exception:
+                    sys.exit("Failed to get a finished cluster: %s" %
+                             str(exception))
+                clusters[0] = cluster
+            message = dated("Cluster created: %s.\n" %
+                            get_url(cluster))
+            log_message(message, log_file=session_file,
+                        console=args.verbosity)
+            if args.reports:
+                report(args.reports, path, cluster)
+
+    return clusters, cluster_ids
+
+
+def get_clusters(cluster_ids, args, api=None, session_file=None):
+    """Retrieves remote clusters in its actual status
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+    cluster_id = ""
+    clusters = cluster_ids
+    cluster_id = cluster_ids[0]
+    message = dated("Retrieving %s. %s\n" %
+                    (plural("cluster", len(cluster_ids)),
+                     get_url(cluster_id)))
+    log_message(message, log_file=session_file, console=args.verbosity)
+    # only one cluster to predict at present
+    try:
+        query_string = FIELDS_QS
+        cluster = check_resource(cluster_ids[0], api.get_cluster,
+                                 query_string=query_string)
+    except ValueError, exception:
+        sys.exit("Failed to get a finished cluster: %s" % str(exception))
+    clusters[0] = cluster
+
+    return clusters, cluster_ids
+
+
+def set_batch_centroid_args(args, fields=None,
+                            dataset_fields=None):
+    """Return batch centroid args dict
+
+    """
+    batch_centroid_args = {
+        "name": args.name,
+        "description": args.description_,
+        "tags": args.tag,
+        "header": args.prediction_header,
+    }
+
+    if args.fields_map_ and fields is not None:
+        if dataset_fields is None:
+            dataset_fields = fields
+        batch_centroid_args.update({
+            "fields_map": map_fields(args.fields_map_,
+                                     fields, dataset_fields)})
+
+    if args.prediction_info == FULL_FORMAT:
+        batch_centroid_args.update(all_fields=True)
+
+    if 'batch_centroid' in args.json_args and args.json_args['batch_centroid']:
+        batch_centroid_args.update(args.json_args['batch_centroid'])
+
+    return batch_centroid_args
+
+
+def create_batch_centroid(cluster, test_dataset,
+                          batch_centroid_args, args,
+                          api=None, session_file=None,
+                          path=None, log=None):
+    """Creates remote batch_centroid
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+    message = dated("Creating batch centroid.\n")
+    log_message(message, log_file=session_file, console=args.verbosity)
+    batch_centroid = api.create_batch_centroid(cluster,
+                                               test_dataset,
+                                               batch_centroid_args)
+    log_created_resources("batch_centroid", path,
+                          bigml.api.get_batch_centroid_id(batch_centroid),
+                          open_mode='a')
+    batch_centroid_id = check_resource_error(
+        batch_centroid, "Failed to create batch prediction: ")
+    try:
+        batch_centroid = check_resource(batch_centroid,
+                                        api.get_batch_centroid)
+    except ValueError, exception:
+        sys.exit("Failed to get a finished batch centroid: %s"
+                 % str(exception))
+    message = dated("Batch centroid created: %s\n"
+                    % get_url(batch_centroid))
+    log_message(message, log_file=session_file, console=args.verbosity)
+    log_message("%s\n" % batch_centroid_id, log_file=log)
+    if args.reports:
+        report(args.reports, path, batch_centroid)
+    return batch_centroid
+
+
+def set_publish_cluster_args(args):
+    """Set args to publish cluster
+
+    """
+    public_cluster = {}
+    if args.public_cluster:
+        public_cluster = {"private": False}
+        if args.model_price:
+            public_cluster.update(price=args.model_price)
+        if args.cpp:
+            public_cluster.update(credits_per_prediction=args.cpp)
+    return public_cluster
+
+
+def update_cluster(cluster, cluster_args, args,
+                   api=None, path=None, session_file=None):
+    """Updates cluster properties
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+    message = dated("Updating cluster. %s\n" %
+                    get_url(cluster))
+    log_message(message, log_file=session_file,
+                console=args.verbosity)
+    cluster = api.update_cluster(cluster, cluster_args)
+    check_resource_error(cluster, "Failed to update cluster: %s"
+                         % cluster['resource'])
+    if is_shared(cluster):
+        message = dated("Shared cluster link. %s\n" %
+                        get_url(cluster, shared=True))
+        log_message(message, log_file=session_file, console=args.verbosity)
+        if args.reports:
+            report(args.reports, path, cluster)
+
+    return cluster

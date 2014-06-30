@@ -37,7 +37,6 @@ from copy import copy
 from bigml.fields import Fields
 
 from bigmler.dispatcher import main_dispatcher
-from bigmler.processing.datasets import get_fields_structure
 from bigmler.options.analyze import ACCURACY
 
 AVG_PREFIX = "average_%s"
@@ -54,10 +53,10 @@ COMMANDS = {"selection":
                 "main --dataset %s --new-field %s --no-model --output-dir %s",
             "objective":
                 ("main --dataset %s --no-model --name %s "
-             "--output-dir %s"),
+                 "--output-dir %s"),
             "create_cv":
                 ("main --datasets %s --output-dir %s --dataset-off --evaluate"
-             " --name %s"),
+                 " --name %s"),
             "node_threshold":
                 ("main --datasets %s --node-threshold %s --output-dir %s"
                  " --dataset-off --evaluate")}
@@ -120,7 +119,7 @@ def create_kfold_cv(args, api, common_options, resume=False):
     set_subcommand_file(args.output_dir)
     if resume:
         retrieve_subcommands()
-    datasets_file, objective_name, resume = create_kfold_datasets_file(
+    datasets_file, _, resume = create_kfold_datasets_file(
         args, api, common_options, resume=resume)
     if datasets_file is not None:
         args.output_dir = os.path.join(u.check_dir(datasets_file),
@@ -163,10 +162,10 @@ def create_nodes_analysis(args, api, common_options, resume=False):
     message = ('Creating the node threshold set..........\n')
     u.log_message(message, log_file=session_file,
                   console=args.verbosity)
-    best_node_threshold(datasets_file, api, args, common_options,
+    best_node_threshold(datasets_file, args, common_options,
                         staleness=args.staleness,
                         penalty=args.penalty,
-                        objective_name=objective_name, resume=resume)
+                        resume=resume)
 
 
 def create_kfold_datasets_file(args, api, common_options, resume=False):
@@ -196,23 +195,22 @@ def create_kfold_datasets_file(args, api, common_options, resume=False):
                 pass
         # check that kfold_field is unique
         fields = Fields(dataset, objective_field=args.objective_field,
-                                 objective_field_present=True)
+                        objective_field_present=True)
         objective_id = fields.field_id(fields.objective_field)
         objective_name = fields.field_name(objective_id)
         kfold_field_name = avoid_duplicates(DEFAULT_KFOLD_FIELD, fields)
         # create jsons to generate partial datasets
         selecting_file_list, resume = create_kfold_json(args, kfold_field_name,
                                                         objective_id,
-                                                        resume=resume) 
+                                                        resume=resume)
         # generate test datasets
         datasets_file, resume = create_kfold_datasets(dataset_id, args,
                                                       selecting_file_list,
                                                       objective_name,
-                                                      kfold_field_name,
                                                       common_options,
                                                       resume=resume)
         return datasets_file, objective_name, resume
-    return None, None, None    
+    return None, None, None
 
 
 def create_kfold_json(args, kfold_field=DEFAULT_KFOLD_FIELD,
@@ -221,7 +219,7 @@ def create_kfold_json(args, kfold_field=DEFAULT_KFOLD_FIELD,
        0 to k-1, and a filter file for each of these indexes.
 
     """
-    output_dir = args.output_dir 
+    output_dir = args.output_dir
     k = args.k_folds if args.k_folds else DEFAULT_KFOLDS
     try:
         selecting_file_list = []
@@ -253,14 +251,13 @@ def avoid_duplicates(field_name, fields, affix="_"):
 
 
 def create_kfold_datasets(dataset, args,
-                          selecting_file_list, objective, kfold_field,
+                          selecting_file_list, objective,
                           common_options, resume=False):
     """Calling the bigmler procedure to create the k-fold datasets
 
     """
     args.output_dir = os.path.join(args.output_dir, "test")
     output_dir = args.output_dir
-    k = args.k_folds
     global subcommand_list
     # creating the selecting datasets
     for index in range(0, len(selecting_file_list)):
@@ -289,10 +286,12 @@ def create_kfold_datasets(dataset, args,
     # updating the datasets to set the objective field
     datasets_file = os.path.join(output_dir, "dataset_gen")
     with open(datasets_file) as datasets_handler:
+        index = 0
         for line in datasets_handler:
             dataset_id = line.strip()
             command = COMMANDS["objective"] % (dataset_id,
-                                              "dataset_%s" % index, output_dir)
+                                               "dataset_%s" % index,
+                                               output_dir)
             command_args = command.split()
             command_args.append("--objective")
             command_args.append(objective)
@@ -314,6 +313,7 @@ def create_kfold_datasets(dataset, args,
                 u.log_message("%s\n" % command, log_file=subcommand_file,
                               console=False)
                 main_dispatcher(args=command_args)
+            index += 1
 
     return datasets_file, resume
 
@@ -329,7 +329,7 @@ def create_kfold_evaluations(datasets_file, args, common_options,
     model_fields = args.model_fields
     name_suffix = "_subset_%s" % counter
     name_max_length = NAME_MAX_LENGTH - len(name_suffix)
-    name = "%s%s" % (args.name[0: name_max_length] , name_suffix)
+    name = "%s%s" % (args.name[0: name_max_length], name_suffix)
     command = COMMANDS["create_cv"] % (datasets_file, output_dir, name)
     command_args = command.split()
     if model_fields:
@@ -352,7 +352,7 @@ def create_kfold_evaluations(datasets_file, args, common_options,
     else:
         u.log_message("%s\n" % command, log_file=subcommand_file,
                       console=False)
-        main_dispatcher(args=command_args)   
+        main_dispatcher(args=command_args)
     evaluation_file = os.path.join(output_dir, "evaluation.json")
     try:
         with open(evaluation_file) as evaluation_handler:
@@ -365,10 +365,10 @@ def create_kfold_evaluations(datasets_file, args, common_options,
 def find_max_state(states):
     maxval = -1
     maxstate = None
-    for (v,f) in states:
-        if f > maxval:
-            maxstate = v
-            maxval = f
+    for (state, value) in states:
+        if value > maxval:
+            maxstate = state
+            maxval = value
     return maxstate, maxval
 
 
@@ -438,7 +438,7 @@ def best_first_search(datasets_file, api, args, common_options,
                                                   score * 100)
                 else:
                     message = '%s = %f\n' % (metric.capitalize(),
-                                                  score)
+                                             score)
                 u.log_message(message, log_file=session_file,
                               console=args.verbosity)
         else:
@@ -454,7 +454,7 @@ def best_first_search(datasets_file, api, args, common_options,
                 args.model_fields = args.args_separator.join(input_fields)
                 counter += 1
                 (score, metric,
-                 resume) = kfold_evaluate(datasets_file, api,
+                 resume) = kfold_evaluate(datasets_file,
                                           args, counter, common_options,
                                           penalty=penalty, resume=resume,
                                           metric=metric)
@@ -475,7 +475,7 @@ def best_first_search(datasets_file, api, args, common_options,
     u.log_message(message, log_file=session_file, console=1)
 
 
-def kfold_evaluate(datasets_file, api, args, counter, common_options,
+def kfold_evaluate(datasets_file, args, counter, common_options,
                    penalty=DEFAULT_PENALTY,
                    metric=ACCURACY, resume=False):
     """Scoring k-fold cross-validation using the given feature subset
@@ -502,8 +502,8 @@ def kfold_evaluate(datasets_file, api, args, counter, common_options,
             metric_literal, resume)
 
 
-def best_node_threshold(datasets_file, api, args, common_options,
-                        staleness=None, penalty=None, objective_name=None,
+def best_node_threshold(datasets_file, args, common_options,
+                        staleness=None, penalty=None,
                         resume=False):
     """Selecting the node_limit to be used in the model construction
 
@@ -524,10 +524,12 @@ def best_node_threshold(datasets_file, api, args, common_options,
     metric = args.maximize
     score = best_score
     while best_unchanged_count < staleness and node_threshold < max_nodes:
-        (score, metric,
-         resume) = node_threshold_evaluate(
-            datasets_file, api, args, node_threshold, common_options,
-            penalty=penalty, resume=resume, metric=metric)
+        (score,
+         metric,
+         resume) = node_threshold_evaluate(datasets_file, args,
+                                           node_threshold, common_options,
+                                           penalty=penalty, resume=resume,
+                                           metric=metric)
         if (score - EPSILON) > best_score:
             best_threshold = node_threshold
             best_score = score
@@ -540,14 +542,12 @@ def best_node_threshold(datasets_file, api, args, common_options,
                                               score * 100)
             else:
                 message = '%s = %f\n' % (metric.capitalize(),
-                                              score)
+                                         score)
             u.log_message(message, log_file=session_file,
                           console=args.verbosity)
         else:
             best_unchanged_count += 1
         node_threshold += args.nodes_step
-       
-
 
     message = ('The best node threshold is: %s \n'
                % best_threshold)
@@ -560,7 +560,7 @@ def best_node_threshold(datasets_file, api, args, common_options,
     u.log_message(message, log_file=session_file, console=1)
 
 
-def node_threshold_evaluate(datasets_file, api, args, node_threshold,
+def node_threshold_evaluate(datasets_file, args, node_threshold,
                             common_options, penalty=DEFAULT_NODES_PENALTY,
                             metric=ACCURACY, resume=False):
     """Scoring node_threshold created models
@@ -614,7 +614,7 @@ def create_node_th_evaluations(datasets_file, args, common_options,
     else:
         u.log_message("%s\n" % command, log_file=subcommand_file,
                       console=False)
-        main_dispatcher(args=command_args)   
+        main_dispatcher(args=command_args)
     evaluation_file = os.path.join(output_dir, "evaluation.json")
     try:
         with open(evaluation_file) as evaluation_handler:

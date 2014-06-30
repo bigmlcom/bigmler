@@ -53,7 +53,8 @@ class TestReader(object):
             self.test_set_handler = open(test_set, "U")
         self.test_set_header = test_set_header
         self.fields = fields
-        if not objective_field in fields.fields:
+        if (objective_field is not None and
+                not objective_field in fields.fields):
             objective_field = fields.field_id(objective_field)
         self.objective_field = objective_field
         self.test_separator = (test_separator.decode("string_escape")
@@ -76,11 +77,12 @@ class TestReader(object):
             self.raw_headers = self.headers
             # validate headers against model fields excluding objective_field,
             # that may be present or not
-            objective_field = fields.field_column_number(objective_field)
+            if objective_field is not None:
+                objective_field = fields.field_column_number(objective_field)
             fields_names = [fields.fields[fields.field_id(i)]
                             ['name'] for i in
                             sorted(fields.fields_by_column_number.keys())
-                            if i != objective_field]
+                            if objective_field is None or i != objective_field]
             self.headers = [unicode(header, "utf-8")
                             for header in self.headers]
             self.exclude = [i for i in range(len(self.headers))

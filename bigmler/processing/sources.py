@@ -36,7 +36,7 @@ MONTECARLO_FACTOR = 200
 
 
 def test_source_processing(api, args, resume,
-                           csv_properties=None,
+                           name=None, csv_properties=None,
                            session_file=None, path=None, log=None):
     """Creating or retrieving a test data source from input arguments
 
@@ -45,7 +45,7 @@ def test_source_processing(api, args, resume,
     fields = None
     if csv_properties is None:
         csv_properties = {}
-    if (args.test_set and args.remote):
+    if args.test_set and args.remote:
         # If resuming, try to extract args.source form log files
         if resume:
             message = u.dated("Test source not found. Resuming.\n")
@@ -54,7 +54,7 @@ def test_source_processing(api, args, resume,
                 message=message, log_file=session_file, console=args.verbosity)
 
         if not resume:
-            source_args = r.set_source_args(args.test_header, args)
+            source_args = r.set_source_args(args.test_header, args, name=name)
             test_source = r.create_source(args.test_set, source_args, args,
                                           api, path, session_file, log,
                                           source_type="test")

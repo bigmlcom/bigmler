@@ -26,22 +26,12 @@ import bigmler.utils as u
 import bigmler.resources as r
 import bigmler.checkpoint as c
 
-from bigml.fields import Fields
+from bigml.fields import Fields, DEFAULT_MISSING_TOKENS
 
 from bigmler.processing.ensembles import (ensemble_processing,
                                           ensemble_per_label)
 
-from bigmler.processing.ensembles import MISSING_TOKENS
-
 MONTECARLO_FACTOR = 200
-
-
-def has_models(args):
-    """Returns if some kind of model or ensemble is given in args.
-
-    """
-    return (args.model or args.ensemble or args.ensembles
-            or args.models or args.model_tag or args.ensemble_tag)
 
 
 def model_per_label(labels, datasets, api, args, resume, fields=None,
@@ -88,11 +78,10 @@ def models_processing(datasets, models, model_ids,
 
     """
     ensemble_ids = []
-    objective_field = args.objective_field
 
     # If we have a dataset but not a model, we create the model if the no_model
     # flag hasn't been set up.
-    if datasets and not (has_models(args) or args.no_model):
+    if datasets and not (args.has_models_ or args.no_model):
         dataset = datasets[0]
         model_ids = []
         models = []
@@ -128,7 +117,7 @@ def models_processing(datasets, models, model_ids,
             if len(datasets) > 1 and args.max_categories:
                 args.number_of_models = len(datasets)
             if ((args.test_datasets and args.evaluate) or
-            (args.datasets and args.evaluate and args.dataset_off)):
+                    (args.datasets and args.evaluate and args.dataset_off)):
                 args.number_of_models = len(args.dataset_ids)
             # Cross-validation case: we create 2 * n models to be validated
             # holding out an n% of data
@@ -145,14 +134,14 @@ def models_processing(datasets, models, model_ids,
                 if not resume:
                     message = u.dated("Found %s models out of %s. Resuming.\n"
                                       % (len(model_ids),
-                                        args.number_of_models))
+                                         args.number_of_models))
                     u.log_message(message, log_file=session_file,
                                   console=args.verbosity)
 
                 models = model_ids
                 args.number_of_models -= len(model_ids)
 
-            model_args = r.set_model_args(args, 
+            model_args = r.set_model_args(args,
                                           fields=fields,
                                           model_fields=args.model_fields_,
                                           other_label=other_label)
@@ -218,7 +207,7 @@ def get_model_fields(model, csv_properties, args, single_model=True,
     if 'missing_tokens' in model['object']['model']:
         missing_tokens = model['object']['model']['missing_tokens']
     else:
-        missing_tokens = MISSING_TOKENS
+        missing_tokens = DEFAULT_MISSING_TOKENS
     csv_properties.update(missing_tokens=missing_tokens)
     # if the model belongs to a multi-label set of models, the real objective
     # field is never amongst the set of fields of each individual model, so

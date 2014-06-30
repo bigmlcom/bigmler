@@ -19,11 +19,13 @@
 
 """
 
-def get_test_options(defaults={}, constants={}):
+def get_test_options(defaults=None):
     """Test files-related options
 
     """
 
+    if defaults is None:
+        defaults = {}
     options = {
         # Path to the test set.
         "--test": {
@@ -56,7 +58,8 @@ def get_test_options(defaults={}, constants={}):
             'help': "Test set field separator."},
 
         # The path to a file containing attributes if you want to alter BigML's
-        # default field attributes or the ones provided by the test file header.
+        # default field attributes or the ones provided by the test file
+        # header.
         '--test-field-attributes': {
             'action': 'store',
             'dest': 'test_field_attributes',
@@ -81,7 +84,8 @@ def get_test_options(defaults={}, constants={}):
             'default': defaults.get('test_source', None),
             'help': "BigML test source Id."},
 
-        # If a BigML test dataset is provided, the script won't create a new one
+        # If a BigML test dataset is provided, the script won't create a new
+        # one
         '--test-dataset': {
             'action': 'store',
             'dest': 'test_dataset',
@@ -94,8 +98,8 @@ def get_test_options(defaults={}, constants={}):
             'dest': 'test_datasets',
             'default': defaults.get('test_datasets', None),
             'help': ("Path to a file containing dataset/ids. Just"
-                  " one dataset per line"
-                  " (e.g., dataset/50a20697035d0706da0004a4).")},
+                     " one dataset per line"
+                     " (e.g., dataset/50a20697035d0706da0004a4).")},
 
         # Set when the test set file does include a header on the first
         # line. (opposed to --no-test-header)
@@ -103,7 +107,6 @@ def get_test_options(defaults={}, constants={}):
             'action': 'store_true',
             'dest': 'test_header',
             'default': defaults.get('test_header', True),
-            'help': "The test set file has a header."}
-}
+            'help': "The test set file has a header."}}
 
     return options

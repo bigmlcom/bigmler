@@ -239,3 +239,46 @@ def is_batch_prediction_created(path):
                 return False, None
     except IOError:
         return False, None
+
+
+def is_batch_centroid_created(path):
+    """Checks existence and reads the batch centroid id from the
+       batch_centroid file in the path directory
+
+    """
+    batch_centroid_id = None
+    try:
+        with open("%s%sbatch_centroid"
+                  % (path, os.sep)) as batch_prediction_file:
+            batch_centroid_id = batch_prediction_file.readline().strip()
+            try:
+                batch_centroid_id = bigml.api.get_batch_centroid_id(
+                    batch_centroid_id)
+                return True, batch_centroid_id
+            except ValueError:
+                return False, None
+    except IOError:
+        return False, None
+
+
+def are_clusters_created(path, number_of_clusters):
+    """Checks existence and reads the cluster ids from the clusters file in the
+       path directory
+
+    """
+    cluster_ids = []
+    try:
+        with open("%s%sclusters" % (path, os.sep)) as clusters_file:
+            for line in clusters_file:
+                cluster = line.strip()
+                try:
+                    cluster_id = bigml.api.get_cluster_id(cluster)
+                    cluster_ids.append(cluster_id)
+                except ValueError:
+                    return False, cluster_ids
+        if len(cluster_ids) == number_of_clusters:
+            return True, cluster_ids
+        else:
+            return False, cluster_ids
+    except IOError:
+        return False, cluster_ids

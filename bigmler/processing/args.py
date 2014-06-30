@@ -28,8 +28,8 @@ import bigml.api
 
 import bigmler.utils as u
 
-from bigml.multivote import COMBINATION_WEIGHTS, COMBINER_MAP;
-from bigml.tree import LAST_PREDICTION, PROPORTIONAL;        
+from bigml.multivote import COMBINATION_WEIGHTS, COMBINER_MAP
+from bigml.tree import LAST_PREDICTION, PROPORTIONAL
 
 from bigmler.resources import ADD_REMOVE_PREFIX
 from bigmler.prediction import FULL_FORMAT, COMBINATION, COMBINATION_LABEL
@@ -39,6 +39,9 @@ from bigmler.train_reader import AGGREGATES
 NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
 MISSING_STRATEGIES = {'last': LAST_PREDICTION, 'proportional': PROPORTIONAL}
 DEFAULT_DESCRIPTION = "Created using BigMLer"
+RESOURCE_TYPES = ["source", "dataset", "model", "ensemble", "batch_prediction",
+                  "cluster", "centroid", "batch_centroid"]
+
 
 def non_compatible(args, option):
     """Return non_compatible options
@@ -48,7 +51,7 @@ def non_compatible(args, option):
         return (args.test_set or args.evaluate or args.model or args.models or
                 args.model_tag or args.multi_label)
     if option == '--max-categories':
-        return (args.evaluate or args.test_split or args.remote)
+        return args.evaluate or args.test_split or args.remote
     return False
 
 
@@ -74,12 +77,20 @@ def get_flags(args):
                 args[i] = "%s%s" % (flag, value)
             flags.append(flag)
             if (flag == '--train' and
-                    (i == len(args) - 1 or args[i + 1].startswith("--"))):
+                (i == len(args) - 1 or args[i + 1].startswith("--"))):
                 train_stdin = True
             elif (flag == '--test' and
-                    (i == len(args) - 1 or args[i + 1].startswith("--"))):
+                  (i == len(args) - 1 or args[i + 1].startswith("--"))):
                 test_stdin = True
     return flags, train_stdin, test_stdin
+
+
+def get_attribute(args, attribute):
+    """Returns the associated attribute, if present, in the args object
+
+    """
+
+    return None if not hasattr(args, attribute) else args.attribute
 
 
 def get_command_message(args):
@@ -306,7 +317,7 @@ def get_output_args(api, command_args, resume):
         if command_args.cluster_fields:
             cluster_fields_arg = map(lambda x: x.strip(),
                                      command_args.cluster_fields.split(
-                                        command_args.args_separator))
+                                     command_args.args_separator))
             command_args.cluster_fields = cluster_fields_arg
         else:
             command_args.cluster_fields_ = []
@@ -355,6 +366,27 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
+    cluster_ids = []
+    try:
+        # Parses cluster/ids if provided.
+        if command_args.clusters:
+            cluster_ids = u.read_resources(command_args.clusters)
+        command_args.cluster_ids_ = cluster_ids
+    except AttributeError:
+        pass
+
+    # Retrieve cluster/ids if provided.
+    try:
+        if command_args.cluster_tag:
+            cluster_ids = (cluster_ids +
+                           u.list_ids(api.list_clusters,
+                                      "tags__in=%s" %
+                                      command_args.cluster_tag))
+        command_args.cluster_ids_ = cluster_ids
+    except AttributeError:
+        pass
+
+
     return {"api": api, "args": command_args}
 
 
@@ -365,15 +397,9 @@ def transform_args(command_args, flags, api, user_defaults):
     # Parses attributes in json format if provided
     command_args.json_args = {}
 
-    json_attribute_options = {
-        'source': command_args.source_attributes,
-        'dataset': command_args.dataset_attributes,
-        'model': command_args.model_attributes,
-        'ensemble': command_args.ensemble_attributes,
-        'evaluation': command_args.evaluation_attributes,
-        'batch_prediction': command_args.batch_prediction_attributes}
-
-    for resource_type, attributes_file in json_attribute_options.items():
+    for resource_type in RESOURCE_TYPES:
+        attributes_file = get_attribute(command_args,
+                                        "%s_attribute" % resource_type)
         if attributes_file is not None:
             command_args.json_args[resource_type] = u.read_json(
                 attributes_file)
@@ -390,7 +416,7 @@ def transform_args(command_args, flags, api, user_defaults):
     # Parses multi-dataset attributes in json such as field maps
     if command_args.multi_dataset_attributes:
         multi_dataset_json = u.read_json(command_args.multi_dataset_attributes)
-        command_args.multi_dataset_json= multi_dataset_json
+        command_args.multi_dataset_json = multi_dataset_json
     else:
         command_args.multi_dataset_json = {}
 
@@ -435,33 +461,43 @@ def transform_args(command_args, flags, api, user_defaults):
         command_args.tag.append('BigMLer_%s' % NOW)
 
     # Checks combined votes method
-    if (command_args.method and command_args.method != COMBINATION_LABEL and
-            not (command_args.method in COMBINATION_WEIGHTS.keys())):
-        command_args.method = 0
-    else:
-        combiner_methods = dict([[value, key]
-                                for key, value in COMBINER_MAP.items()])
-        combiner_methods[COMBINATION_LABEL] = COMBINATION
-        command_args.method = combiner_methods.get(command_args.method, 0)
+    try:
+        if (command_args.method and command_args.method != COMBINATION_LABEL
+            and not (command_args.method in COMBINATION_WEIGHTS.keys())):
+            command_args.method = 0
+        else:
+            combiner_methods = dict([[value, key]
+                                    for key, value in COMBINER_MAP.items()])
+            combiner_methods[COMBINATION_LABEL] = COMBINATION
+            command_args.method = combiner_methods.get(command_args.method, 0)
+    except AttributeError:
+        pass
 
     # Checks missing_strategy
-    if (command_args.missing_strategy and
-            not (command_args.missing_strategy in MISSING_STRATEGIES.keys())):
-        command_args.missing_strategy = 0
-    else:
-        command_args.missing_strategy = MISSING_STRATEGIES.get(
-            command_args.missing_strategy, 0)
+    try:
+        if (command_args.missing_strategy and
+                not (command_args.missing_strategy in
+                     MISSING_STRATEGIES.keys())):
+            command_args.missing_strategy = 0
+        else:
+            command_args.missing_strategy = MISSING_STRATEGIES.get(
+                command_args.missing_strategy, 0)
+    except AttributeError:
+        pass
 
     # Adds replacement=True if creating ensemble and nothing is specified
-    if (command_args.number_of_models > 1 and
-            not command_args.replacement and
-            not '--no-replacement' in flags and
-            not 'replacement' in user_defaults and
-            not '--no-randomize' in flags and
-            not 'randomize' in user_defaults and
-            not '--sample-rate' in flags and
-            not 'sample_rate' in user_defaults):
-        command_args.replacement = True
+    try:
+        if (command_args.number_of_models > 1 and
+                not command_args.replacement and
+                not '--no-replacement' in flags and
+                not 'replacement' in user_defaults and
+                not '--no-randomize' in flags and
+                not 'randomize' in user_defaults and
+                not '--sample-rate' in flags and
+                not 'sample_rate' in user_defaults):
+            command_args.replacement = True
+    except AttributeError:
+        pass
 
     # Old value for --prediction-info='full data' maps to 'full'
     if command_args.prediction_info == 'full data':
@@ -469,19 +505,42 @@ def transform_args(command_args, flags, api, user_defaults):
         command_args.prediction_info = FULL_FORMAT
 
     # Parses class, weight pairs for objective weight
-    if command_args.objective_weights:
-        objective_weights = (
-            u.read_objective_weights(command_args.objective_weights))
-        command_args.objective_weights_json = objective_weights
+    try:
+        if command_args.objective_weights:
+            objective_weights = (
+                u.read_objective_weights(command_args.objective_weights))
+            command_args.objective_weights_json = objective_weights
+    except AttributeError:
+        pass
 
-    command_args.multi_label_fields_list = []
-    if command_args.multi_label_fields is not None:
-        multi_label_fields = command_args.multi_label_fields.strip()
-        command_args.multi_label_fields_list = multi_label_fields.split(
-            command_args.args_separator)
+    try:
+        command_args.multi_label_fields_list = []
+        if command_args.multi_label_fields is not None:
+            multi_label_fields = command_args.multi_label_fields.strip()
+            command_args.multi_label_fields_list = multi_label_fields.split(
+                command_args.args_separator)
+    except AttributeError:
+        pass
 
     # Sets shared_flag if --shared or --unshared has been used
     if '--shared' in flags or '--unshared' in flags:
         command_args.shared_flag = True
     else:
         command_args.shared_flag = False
+
+    command_args.has_models_ = (
+        (hasattr(command_args, 'model') and command_args.model) or
+        (hasattr(command_args, 'models') and command_args.models) or
+        (hasattr(command_args, 'ensemble') and command_args.ensemble) or
+        (hasattr(command_args, 'ensembles') and command_args.ensembles) or
+        (hasattr(command_args, 'cluster') and command_args.cluster) or
+        (hasattr(command_args, 'clusters') and command_args.clusters) or
+        (hasattr(command_args, 'model_tag') and command_args.model_tag) or
+        (hasattr(command_args, 'ensemble_tag')
+         and command_args.ensemble_tag) or
+        (hasattr(command_args, 'cluster_tag') and command_args.cluster_tag))
+
+    command_args.has_datasets_ = (
+        (hasattr(command_args, 'dataset') and command_args.dataset) or
+        (hasattr(command_args, 'datasets') and command_args.datasets) or
+        (hasattr(command_args, 'dataset_tag') and command_args.dataset_tag))

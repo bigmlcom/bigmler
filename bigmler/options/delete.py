@@ -19,11 +19,13 @@
 
 """
 
-def get_delete_options(defaults={}, constants={}):
+def get_delete_options(defaults=None):
     """Delete-related options
 
     """
 
+    if defaults is None:
+        defaults = {}
     options = {
         # Changes to delete mode.
         '--delete': {
@@ -77,7 +79,7 @@ def get_delete_options(defaults={}, constants={}):
             'dest': 'evaluation_tag',
             'default': defaults.get('evaluation_tag', None),
             'help': ("Select evaluation tagged with tag to"
-                  " be deleted.")},
+                     " be deleted.")},
 
         # Ensembles selected by tag to be deleted.
         '--ensemble-tag': {
@@ -113,6 +115,24 @@ def get_delete_options(defaults={}, constants={}):
             'dest': 'newer_than',
             'default': defaults.get('newer_than', None),
             'help': ("Lower limit to select the resources newer than"
-                     " the given number of days, date, or resource.")}}
+                     " the given number of days, date, or resource.")},
+
+        # Use it to retrieve clusters that were tagged with tag.
+        '--cluster-tag': {
+            'dest': 'cluster_tag',
+            'default': defaults.get('cluster_tag', None),
+            'help': "Retrieve clusters that were tagged with tag."},
+
+        # Use it to retrieve centroids that were tagged with tag.
+        '--centroid-tag': {
+            'dest': 'centroid_tag',
+            'default': defaults.get('centroid_tag', None),
+            'help': "Retrieve centroids that were tagged with tag."},
+
+        # Use it to retrieve batch centroids that were tagged with tag.
+        '--batch-centroid-tag': {
+            'dest': 'batch_centroid_tag',
+            'default': defaults.get('batch_centroid_tag', None),
+            'help': "Retrieve batch centroids that were tagged with tag."}}
 
     return options

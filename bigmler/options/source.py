@@ -19,10 +19,13 @@
 
 """
 
-def get_source_options(defaults={}, constants={}):
+def get_source_options(defaults=None):
     """source-related options
 
     """
+
+    if defaults is None:
+        defaults = {}
 
     options = {
         # Path to the training set.
@@ -38,6 +41,7 @@ def get_source_options(defaults={}, constants={}):
             "dest": 'source',
             "default": defaults.get('source', None),
             "help": "BigML source Id."},
+
         # The path to a file containing names if you want to alter BigML's
         # default field names or the ones provided by the train file header.
         # Kept for backwards compatibility
@@ -47,6 +51,7 @@ def get_source_options(defaults={}, constants={}):
             'default': defaults.get('field_names', None),
             'help': ("Path to a csv file describing field names. One"
                      " definition per line (e.g., 0,'Last Name').")},
+
         # The path to a file containing attributes if you want to alter BigML's
         # default field attributes or the ones provided by the train file
         # header.
@@ -102,11 +107,21 @@ def get_source_options(defaults={}, constants={}):
             'default': defaults.get('source_attributes', None),
             'help': ("Path to a json file describing source"
                      " attributes.")},
-        # Hides progress information when uploading a file. (opposed to --progress-bar)
+
+        # Hides progress information when uploading a file. (opposed to
+        # --progress-bar)
         '--no-progress-bar': {
             'action': 'store_false',
             'dest': 'progress_bar',
             'default': defaults.get('progress_bar', False),
-            'help': "Show progress details when creating a source."}}
+            'help': "Show progress details when creating a source."},
+
+        # Training set field separator. Defaults to the locale csv
+        # separator.
+        '--training-separator': {
+            'action': 'store',
+            'dest': 'training_separator',
+            'default': defaults.get('training_separator', None),
+            'help': ("Training set field separator.")}}
 
     return options

@@ -98,7 +98,7 @@ def get_date(reference, api):
                 resource = bigml.api.check_resource(reference,
                                                     api.getters[resource_type])
                 date = resource['object']['created']
-            except:
+            except (TypeError, KeyError):
                 return None
     return date
 
@@ -375,7 +375,6 @@ def compute_output(api, args):
     if labels is not None:
         labels = sorted([label.decode("utf-8") for label in labels])
 
-    ##### TODO args.
     # multi_label file must be preprocessed to obtain a new extended file
     if args.multi_label and args.training_set is not None:
         (args.training_set, multi_label_data) = ps.multi_label_expansion(
@@ -395,10 +394,14 @@ def compute_output(api, args):
         session_file=session_file, path=path, log=log)
     if args.multi_label and source:
         multi_label_data = l.get_multi_label_data(source)
-        (args.objective_field, labels,
-            all_labels, multi_label_fields) = l.multi_label_sync(
-                args.objective_field, labels, multi_label_data, fields,
-                multi_label_fields)
+        (args.objective_field,
+         labels,
+         all_labels,
+         multi_label_fields) = l.multi_label_sync(args.objective_field,
+                                                  labels,
+                                                  multi_label_data,
+                                                  fields,
+                                                  multi_label_fields)
     datasets, resume, csv_properties, fields = pd.dataset_processing(
         source, api, args, resume,
         fields=fields,
@@ -454,10 +457,13 @@ def compute_output(api, args):
         datasets[0] = dataset
     if args.multi_label and dataset and multi_label_data is None:
         multi_label_data = l.get_multi_label_data(dataset)
-        (args.objective_field, labels,
-            all_labels, multi_label_fields) = l.multi_label_sync(
-                args.objective_field, labels, multi_label_data,
-                fields, multi_label_fields)
+        (args.objective_field,
+         labels,
+         all_labels,
+         multi_label_fields) = l.multi_label_sync(args.objective_field,
+                                                  labels,
+                                                  multi_label_data,
+                                                  fields, multi_label_fields)
 
     if dataset:
         # retrieves max_categories data, if any
@@ -527,10 +533,12 @@ def compute_output(api, args):
 
     # Fills in all_labels from user_metadata
     if args.multi_label and not all_labels:
-        (args.objective_field, labels,
-            all_labels, multi_label_fields) = l.multi_label_sync(
-                args.objective_field, labels, multi_label_data,
-                fields, multi_label_fields)
+        (args.objective_field,
+         labels,
+         all_labels,
+         multi_label_fields) = l.multi_label_sync(args.objective_field, labels,
+                                                  multi_label_data, fields,
+                                                  multi_label_fields)
     if model:
         # retrieves max_categories data, if any
         args.max_categories = get_metadata(model, 'max_categories',
@@ -563,10 +571,12 @@ def compute_output(api, args):
             # create test source from file
             test_name = "%s - test" % args.name
             if args.test_source is None:
-                (test_source, resume,
-                    csv_properties, test_fields) = ps.test_source_processing(
-                        api, args, resume,
-                        session_file=session_file, path=path, log=log)
+                (test_source,
+                 resume,
+                 csv_properties,
+                 test_fields) = ps.test_source_processing(
+                    api, args, resume, session_file=session_file,
+                    path=path, log=log)
             else:
                 test_source_id = bigml.api.get_source_id(args.test_source)
                 test_source = api.check_resource(test_source_id,
@@ -679,7 +689,7 @@ def compute_output(api, args):
         message = (u"\nGenerated files:\n\n" +
                    unicode(u.print_tree(path, u" "), "utf-8") + u"\n")
     else:
-        message = (u"\nGenerated files:\n\n" + 
+        message = (u"\nGenerated files:\n\n" +
                    u.print_tree(path, u" ") + u"\n")
     u.log_message(message, log_file=session_file, console=args.verbosity)
     if args.reports:

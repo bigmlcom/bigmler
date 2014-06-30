@@ -102,9 +102,9 @@ class TrainReader(object):
         new_headers = self.get_headers()
         for field_column in self.multi_label_fields:
             labels = self.fields_labels[field_column]
-            new_field_names = [get_label_field(
-                self.headers[field_column], label)
-                for label in labels]
+            new_field_names = [get_label_field(self.headers[field_column],
+                                               label)
+                               for label in labels]
             new_headers.extend(new_field_names)
             for aggregate in self.label_aggregates:
                 new_headers.append(get_label_field(
@@ -237,7 +237,7 @@ class TrainReader(object):
             # TODO: clean user given missing tokens
             for label_index in range(0, len(new_labels)):
                 if new_labels[label_index] == '':
-                    del(new_labels[label_index])
+                    del new_labels[label_index]
             if new_labels != []:
                 if (self.objective and field_column == self.objective_column
                         and self.labels is not None):

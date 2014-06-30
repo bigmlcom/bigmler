@@ -25,9 +25,6 @@ import bigmler.resources as r
 import bigmler.checkpoint as c
 
 
-MISSING_TOKENS = ['', 'N/A', 'n/a', 'NULL', 'null', '-', '#DIV/0', '#REF!',
-                  '#NAME?', 'NIL', 'nil', 'NA', 'na', '#VALUE!', '#NULL!',
-                  'NaN', '#N/A', '#NUM!', '?']
 MONTECARLO_FACTOR = 200
 
 

@@ -20,10 +20,15 @@ from __future__ import absolute_import
 
 import datetime
 
-def get_common_options(defaults={}, constants={}):
+def get_common_options(defaults=None, constants=None):
     """Common options used in all subcommands
 
     """
+
+    if defaults is None:
+        defaults = {}
+    if constants is None:
+        constants = {}
     now = constants.get('NOW',
                         datetime.datetime.now().strftime("%a%b%d%y_%H%M%S"))
     version_text = constants['version_text']
@@ -59,13 +64,13 @@ def get_common_options(defaults={}, constants={}):
 
         # Log file to store resources ids.
         '--resources-log': {
-                            "action": 'store',
-                            "dest": 'log_file',
-                            "default": defaults.get('resources_log', None),
-                            "help": ("Path to a file to store new resources"
-                                     " ids. One resource per line"
-                                     " (e.g., model/50a206a8035d0706dc000376"
-                                     ").")},
+            "action": 'store',
+            "dest": 'log_file',
+            "default": defaults.get('resources_log', None),
+            "help": ("Path to a file to store new resources"
+                     " ids. One resource per line"
+                     " (e.g., model/50a206a8035d0706dc000376"
+                     ").")},
 
         # Stores the retrieved resources in the output directory
         '--store': {
@@ -108,7 +113,7 @@ def get_common_options(defaults={}, constants={}):
             "dest": 'dev_mode',
             "default": defaults.get('dev', False),
             "help": ("Compute a test output using BigML "
-                 "standard development environment.")},
+                     "standard development environment.")},
 
         # Turn on/off verbosity
         '--verbosity': {

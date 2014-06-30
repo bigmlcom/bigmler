@@ -48,7 +48,7 @@ def tail(file_handler, window=1):
     block = -1
     data = []
     while size > 0 and file_bytes > 0:
-        if (file_bytes - bufsiz > 0):
+        if (file_bytes - bufsiz) > 0:
             # Seek back one whole bufsiz
             file_handler.seek(block * bufsiz, 2)
             # read BUFFER

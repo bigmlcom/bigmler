@@ -75,13 +75,11 @@ under the License.""" % version
 
     # list of options
     common_options = get_common_options(defaults=defaults, constants=constants)
-    delete_options = get_delete_options(defaults=defaults, constants=constants)
-    source_options = get_source_options(defaults=defaults, constants=constants)
-    dataset_options = get_dataset_options(defaults=defaults,
-                                          constants=constants)
-    test_options = get_test_options(defaults=defaults, constants=constants)
-    multi_label_options = get_multi_label_options(defaults=defaults,
-                                                  constants=constants)
+    delete_options = get_delete_options(defaults=defaults)
+    source_options = get_source_options(defaults=defaults)
+    dataset_options = get_dataset_options(defaults=defaults)
+    test_options = get_test_options(defaults=defaults)
+    multi_label_options = get_multi_label_options(defaults=defaults)
 
     # subcommand options
     subcommand_options = {}
@@ -98,8 +96,7 @@ under the License.""" % version
     main_options = subcommand_options["main"]
 
     defaults = general_defaults["BigMLer analyze"]
-    subcommand_options["analyze"] = get_analyze_options(defaults=defaults,
-                                                        constants=constants)
+    subcommand_options["analyze"] = get_analyze_options(defaults=defaults)
     subcommand_options["analyze"].update(common_options)
     # we add the options that should be transmitted to bigmler main subcommands
     # in analyze
@@ -113,13 +110,26 @@ under the License.""" % version
         '--no-balance': main_options['--no-balance']})
 
     defaults = general_defaults["BigMLer cluster"]
-    subcommand_options["cluster"] = get_cluster_options(defaults=defaults,
-                                                        constants=constants)
+    subcommand_options["cluster"] = get_cluster_options(defaults=defaults)
     # general options
     subcommand_options["cluster"].update(common_options)
     subcommand_options["cluster"].update(source_options)
     subcommand_options["cluster"].update(dataset_options)
     subcommand_options["cluster"].update(test_options)
+    subcommand_options["cluster"].update({
+        '--cpp': main_options['--cpp'],
+        '--fields-map': main_options['--fields-map'],
+        '--source-tag': delete_options['--source-tag'],
+        '--dataset-tag': delete_options['--dataset-tag'],
+        '--cluster-tag': delete_options['--cluster-tag'],
+        '--centroid-tag': delete_options['--centroid-tag'],
+        '--batch-centroid-tag': delete_options['--batch-centroid-tag'],
+        '--prediction-info': main_options['--prediction-info'],
+        '--prediction-header': main_options['--prediction-header'],
+        '--prediction-fields': main_options['--prediction-fields'],
+        '--reports': main_options['--reports'],
+        '--remote': main_options['--remote'],
+        '--no-batch': main_options['--no-batch']})
 
 
     for subcommand in SUBCOMMANDS:

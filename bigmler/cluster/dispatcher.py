@@ -21,31 +21,21 @@ from __future__ import absolute_import
 
 import sys
 import os
-import re
-import datetime
 
 import bigml.api
 import bigmler.utils as u
 import bigmler.resources as r
-import bigmler.labels as l
 import bigmler.processing.args as a
 import bigmler.processing.sources as ps
 import bigmler.processing.datasets as pd
-import bigmler.processing.models as pm
 import bigmler.processing.clusters as pc
 
-from bigml.model import Model
-from bigml.ensemble import Ensemble
-
-from bigmler.evaluation import evaluate, cross_validate
 from bigmler.defaults import DEFAULTS_FILE
-from bigmler.prediction import predict, combine_votes, remote_predict
-from bigmler.prediction import (OTHER, COMBINATION,
-                                THRESHOLD_CODE)
+from bigmler.centroid import centroid, remote_centroid
 from bigmler.reports import clear_reports, upload_reports
 from bigmler.command import Command, StoredCommand
-
-from bigmler.dispatcher import (COMMAND_LOG, command_handling, clear_log_files,
+from bigmler.dispatcher import (SESSIONS_LOG, command_handling,
+                                clear_log_files,
                                 has_test, has_train)
 
 COMMAND_LOG = ".bigmler_cluster"
@@ -133,17 +123,17 @@ def compute_output(api, args):
     cluster = None
     clusters = None
     fields = None
-    other_label = OTHER
     # no multi-label support at present
 
     # variables from command-line options
-    resume = command_args.resume_
-    output = command_args.predictions
+    resume = args.resume_
+    cluster_ids = args.cluster_ids_
+    output = args.predictions
 
     # It is compulsory to have a description to publish either datasets or
     # clusters
-    if (not args.description_ and
-        (args.public_cluster or args.public_dataset)):
+    if (not args.description_ and (args.public_cluster or
+                                   args.public_dataset)):
         sys.exit("You should provide a description to publish.")
 
     # When using --new-fields, it is compulsory to specify also a dataset
@@ -199,10 +189,9 @@ def compute_output(api, args):
             dataset, api, args, resume, fields=fields,
             session_file=session_file, path=path, log=log)
         datasets[0] = dataset
-    """"
+
     clusters, cluster_ids, resume = pc.clusters_processing(
-        datasets, clusters, cluster_ids, fields, api, args, resume,
-        name=name, description=description, cluster_fields=cluster_fields,
+        datasets, clusters, cluster_ids, api, args, resume, fields=fields,
         session_file=session_file, path=path, log=log)
     if clusters:
         cluster = clusters[0]
@@ -228,35 +217,32 @@ def compute_output(api, args):
 
     # We get the fields of the cluster if we haven't got
     # them yet and need them
-    if cluster and test_set:
+    if cluster and args.test_set:
         fields = pc.get_cluster_fields(cluster, csv_properties, args)
 
     # If predicting
     if clusters and has_test(args):
         test_dataset = None
 
-        # Remote predictions: predictions are computed as batch predictions
+        # Remote centroids: centroids are computed as batch centroids
         # in bigml.com except when --no-batch flag is set on
-        if (args.remote and not args.no_batch):
+        if args.remote and not args.no_batch:
             # create test source from file
-            test_name = "%s - test" % name
+            test_name = "%s - test" % args.name
             if args.test_source is None:
-                (test_source, resume,
-                    csv_properties, test_fields) = ps.test_source_processing(
-                        test_set, test_set_header,
-                        api, args, resume, name=test_name,
-                        description=description,
-                        field_attributes=test_field_attributes,
-                        types=test_types,
-                        session_file=session_file, path=path, log=log)
+                (test_source,
+                 resume,
+                 csv_properties,
+                 test_fields) = ps.test_source_processing(
+                    api, args, resume, name=test_name,
+                    session_file=session_file, path=path, log=log)
             else:
                 test_source_id = bigml.api.get_source_id(args.test_source)
                 test_source = api.check_resource(test_source_id,
                                                  api.get_source)
             if args.test_dataset is None:
-            # create test dataset from test source
-                dataset_args = r.set_basic_dataset_args(test_name,
-                                                        description, args)
+                # create test dataset from test source
+                dataset_args = r.set_basic_dataset_args(args, name=test_name)
                 test_dataset, resume = pd.alternative_dataset_processing(
                     test_source, "test", dataset_args, api, args,
                     resume, session_file=session_file, path=path, log=log)
@@ -264,24 +250,19 @@ def compute_output(api, args):
                 test_dataset_id = bigml.api.get_dataset_id(args.test_dataset)
                 test_dataset = api.check_resource(test_dataset_id,
                                                   api.get_dataset)
-
-            csv_properties.update(objective_field=None,
-                                  objective_field_present=False)
             test_fields = pd.get_fields_structure(test_dataset,
                                                   csv_properties)
-
             batch_centroid_args = r.set_batch_centroid_args(
-                name, description, args, fields=fields,
-                dataset_fields=test_fields, fields_map=fields_map)
+                args, fields=fields,
+                dataset_fields=test_fields)
 
             remote_centroid(cluster, test_dataset, batch_centroid_args, args,
                             api, resume, prediction_file=output,
                             session_file=session_file, path=path, log=log)
+
         else:
-            centroid(test_set, test_set_header, clusters, fields, output,
-                     args, api=api, log=log,
-                     resume=resume, session_file=session_file)
-    """
+            centroid(clusters, fields, args, session_file=session_file)
+
     # Workaround to restore windows console cp850 encoding to print the tree
     if sys.platform == "win32" and sys.stdout.isatty():
         import locale
@@ -291,7 +272,7 @@ def compute_output(api, args):
         message = (u"\nGenerated files:\n\n" +
                    unicode(u.print_tree(path, u" "), "utf-8") + u"\n")
     else:
-        message = (u"\nGenerated files:\n\n" + 
+        message = (u"\nGenerated files:\n\n" +
                    u.print_tree(path, u" ") + u"\n")
     u.log_message(message, log_file=session_file, console=args.verbosity)
     if args.reports:

@@ -152,7 +152,7 @@ def prediction_to_row(prediction, prediction_info=NORMAL_FORMAT):
     if not prediction_info == BRIEF_FORMAT:
         row.append(prediction.get('confidence', tree.get('confidence', 0)))
         distribution = None
-        if ('objective_summary' in tree):
+        if 'objective_summary' in tree:
             summary = tree['objective_summary']
             if 'bins' in summary:
                 distribution = summary['bins']
@@ -219,9 +219,9 @@ def remote_predict_models(models, test_reader, prediction_file, api, args,
                                                      output_path)
         predictions_files.append(predictions_file)
         if (not resume or
-            not c.checkpoint(c.are_predictions_created, predictions_file,
-                             test_reader.number_of_tests(),
-                             debug=args.debug)[0]):
+                not c.checkpoint(c.are_predictions_created, predictions_file,
+                                 test_reader.number_of_tests(),
+                                 debug=args.debug)[0]):
             if not message_logged:
                 message = u.dated("Creating remote predictions.\n")
                 u.log_message(message, log_file=session_file,
@@ -384,7 +384,7 @@ def local_batch_predict(models, test_reader, prediction_file, api, args,
                 model_fields = model['object']['model']['fields']
                 model_objective = model_fields[model_objective_id]
                 model_column = model_objective['column_number']
-                if (model_column in labels_columns):
+                if model_column in labels_columns:
                     # When the list of models comes from a --model-tag
                     # selection, the models are not retrieved in the same
                     # order they were created. We must keep track of the
