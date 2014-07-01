@@ -129,6 +129,10 @@ def compute_output(api, args):
     resume = args.resume_
     cluster_ids = args.cluster_ids_
     output = args.predictions
+    # there's only one cluster to be generated at present
+    args.max_parallel_clusters = 1
+    # clusters cannot be published yet.
+    args.public_cluster = False
 
     # It is compulsory to have a description to publish either datasets or
     # clusters
