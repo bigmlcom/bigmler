@@ -312,13 +312,13 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
-    # Parses model input fields if provided.
+    # Parses cluster input fields if provided.
     try:
         if command_args.cluster_fields:
             cluster_fields_arg = map(lambda x: x.strip(),
                                      command_args.cluster_fields.split(
                                      command_args.args_separator))
-            command_args.cluster_fields = cluster_fields_arg
+            command_args.cluster_fields_ = cluster_fields_arg
         else:
             command_args.cluster_fields_ = []
     except AttributeError:

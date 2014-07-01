@@ -50,3 +50,18 @@ def i_check_create_test_dataset(step):
         assert True
     except Exception, exc:
         assert False, str(exc)
+
+
+@step(r'I check that the batch centroid prediction has been created')
+def i_check_create_batch_centroid(step):
+    batch_prediction_file = "%s%sbatch_centroid" % (world.directory, os.sep)
+    try:
+        batch_prediction_file = open(batch_prediction_file, "r")
+        batch_centroid = check_resource(batch_prediction_file.readline().strip(),
+                                          world.api.get_batch_centroid)
+        world.batch_centroids.append(batch_centroid['resource'])
+        world.batch_centroid = batch_centroid
+        batch_prediction_file.close()
+        assert True
+    except Exception, exc:
+        assert False, str(exc)

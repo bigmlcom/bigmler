@@ -6,11 +6,21 @@ BigMLer makes `BigML <https://bigml.com>`_ even easier.
 BigMLer wraps `BigML's API Python bindings <http://bigml.readthedocs.org>`_  to
 offer a high-level command-line script to easily create and publish datasets
 and models, create ensembles,
-make local predictions from multiple models, and simplify many other machine
-learning tasks.
+make local predictions from multiple models, clusters and simplify many other
+machine learning tasks.
 
 BigMLer is open sourced under the `Apache License, Version
 2.0 <http://www.apache.org/licenses/LICENSE-2.0.html>`_.
+
+BigMLer subcommands
+===================
+
+In addition to the ``BigMLer`` simple command, that covers the main
+functionallity, there are two additional subcommands:
+- bigmler analyze     Used for feature analysis, node threshold analysis and
+                      k-fold cross-validation. See :ref:`bigmler-analyze`.
+- bigmler cluster     Used to generate clusters and centroids' predictions.
+                      See :ref:`bigmler-cluster`.
 
 Quick Start
 ===========
@@ -1051,8 +1061,13 @@ You can also combine both types of options, to delete sources tagged as
 
     bigmler --delete --newer-than 2 --source-tag my_tag
 
-Advanced subcommands in BigMLer: analyze
-----------------------------------------
+Advanced subcommands in BigMLer
+===============================
+
+.. _bigmler-analyze:
+
+Analyze subcommand
+------------------
 
 In addition to the main BigMLer capabilities explained so far, there's a
 subcommand ``bigmler analyze`` with more options to evaluate the performance
@@ -1135,6 +1150,72 @@ the --staleness option) or the node threshold reaches the ``--max-nodes``
 limit, the process ends and shows the node threshold that
 lead to the best score.
 
+
+.. _bigmler-cluster:
+
+Cluster subcommand
+------------------
+
+Just as the simple ``bigmler`` command can generate all the
+resources leading to find models and predictions for a supervised learning
+problem, the ``bigmler cluster`` subcommand will follow the steps to generate
+clusters and predict the centroids associated to your test data. To mimic what
+we saw in the ``bigmler`` command section, the simplest call is::
+
+    bigmler cluster --train data/iris.csv
+
+This command will upload the data in the ``data/iris.csv`` file and generate
+the corresponding ``source``, ``dataset`` and ``cluster`` objects in BigML. You
+can use any of the generated objects to produce new clusters. For instance, you
+could set a subgroup of the fields of the generated dataset to produce a
+diferent cluster by using::
+
+    bigmler cluster --dataset dataset/53b1f71437203f5ac30004ed \
+                    --cluster-fields="-sepal length"
+
+that would exclude the field ``sepal length`` from the cluster creation input
+fields.
+
+Similarly to the models and datasets, the generated clusters can be shareable
+using the ``--shared`` option::
+
+    bigmler cluster --source source/53b1f71437203f5ac30004e0 \
+                    --shared
+
+will generate a secret link for both the created dataset and cluster that
+can be used to share the resource selectively.
+
+As models were used to generate predictions (class names in classification
+problems and an estimated number for regressions), clusters can be used to
+predict the subgroup of data that our input data is more similar to.
+Each subgroup is represented by its centroid, and the centroid is labelled
+by a centroid name. Thus, a cluster would classify our
+test data by assigning to each input an associated centroid name. The command::
+
+    bigmler cluster --cluster cluster/53b1f71437203f5ac30004f0 \
+                    --test data/my_test.csv
+
+would produce a file ``centroids.csv`` with the centroid name associated to
+each input. When the command is executed, the cluster information is downloaded
+to your local computer and the centroid predictions are computed locally, with
+no more latencies involved. Just in case you preferred to use BigML to compute
+the centroid predictions remotely, you can do so too::
+
+    bigmler cluster --cluster cluster/53b1f71437203f5ac30004f0 \
+                    --test data/my_test.csv --remote
+
+would create a remote source and dataset from the test file data,
+generate a ``batch centroid`` also remotely and finally download the result
+to your computer.
+
+The k-means algorithm used in clustering can only use training data that has
+no missing values in their numeric fields. Any data that does not comply with
+that is discarded in cluster construction, so you should ensure that enough
+number of rows in your training data file has non-missing values in their
+numeric fields for the cluster to be built and relevant. Similarly, the cluster
+cannot issue a centroid prediction for input data that has missing values in
+its numeric fields, so centroid predictions will give a "-" string as output
+in this case.
 
 Resuming Previous Commands
 --------------------------
@@ -1556,6 +1637,12 @@ Delete Remote Resources
                             be deleted
 --batch-prediction-tag TAG  Retrieves batch predictions that were tagged with
                             tag to be deleted
+--cluster-tag TAG           Retrieves clusters that were tagged with
+                            tag to be deleted
+--centroid-tag TAG          Retrieves centroids that were tagged with
+                            tag to be deleted
+--batch-centroid-tag TAG    Retrieves batch centroids that were tagged with
+                            tag to be deleted
 --older-than DATE           Retrieves resources created before the specified
                             date. Date can be any YYYY-MM-DD string, an
                             integer meaning the number of days before the
@@ -1631,8 +1718,8 @@ Fancy Options
 --store                     Stores every created or retrieved resource in your
                             output directory
 
-Analyze subcommands
--------------------
+Analyze subcommand Options
+--------------------------
 
 --cross-validation          Sets the k-fold cross-validation mode
 --k-folds                   Number of folds used in k-fold cross-validation
@@ -1658,6 +1745,21 @@ Analyze subcommands
 --exclude-features          Comma-separated list of features in the dataset
                             to be excluded from the features analysis
 
+Custer Specific Subcommand Options
+----------------------------------
+
+--model MODEL               BigML model Id
+--models PATH               Path to a file containing model/ids. One model per
+                            line (e.g., model/4f824203ce80053)
+
+--cluster CLUSTER           BigML cluster Id
+--clusters PATH             Path to a file containing cluster/ids. One cluster
+                            per line (e.g., cluster/4f824203ce80051)
+--no-cluster                No cluster will be generated
+--cluster-fields            Comma-separated list of fields that will be
+                            used in the cluster construction
+--cluster-attributes PATH   Path to a JSON file containing attributes to be
+                            used in the cluster creation call
 
 Prior Versions Compatibility Issues
 -----------------------------------

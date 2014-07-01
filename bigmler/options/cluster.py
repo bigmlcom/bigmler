@@ -28,13 +28,6 @@ def get_cluster_options(defaults=None):
         defaults = {}
 
     options = {
-        # Make cluster public.
-        '--public-cluster': {
-            'action': 'store_true',
-            'dest': 'public_dataset',
-            'default': defaults.get('public_dataset', False),
-            'help': "Make generated dataset public."},
-
         # Input fields to include in the cluster.
         '--cluster-fields': {
             "action": 'store',
@@ -60,29 +53,12 @@ def get_cluster_options(defaults=None):
                      " per line (e.g., cluster/50a206a8035d0706dc000376"
                      ").")},
 
-        # Set a price tag to your public cluster.
-        '--cluster-price': {
-            'action': 'store',
-            'dest': 'cluster_price',
-            'type': float,
-            'default': defaults.get('cluster_price', 0.0),
-            'help': ("The price other users must pay to clone your"
-                     " cluster.")},
-
         # Does not create a cluster just a dataset.
         '--no-cluster': {
             'action': 'store_true',
             'dest': 'no_cluster',
             'default': defaults.get('no_cluster', False),
             'help': "Do not create a cluster."},
-
-        # Max number of clusters to create in parallel.
-        '--max-parallel-clusters': {
-            "action": 'store',
-            "dest": 'max_parallel_clusters',
-            "default": defaults.get('max_parallel_clusters', 1),
-            "type": int,
-            "help": "Max number of clusters to create in parallel."},
 
         # The path to a file containing cluster attributes.
         '--cluster-attributes': {
@@ -91,13 +67,6 @@ def get_cluster_options(defaults=None):
             'default': defaults.get('cluster_attributes', None),
             'help': ("Path to a json file describing cluster"
                      " attributes.")},
-
-        # Doesn't make model a public cluster.
-        '--no-public-cluster': {
-            'action': 'store_false',
-            'dest': 'public_cluster',
-            'default': defaults.get('public_cluster', False),
-            'help': "Doesn't make generated cluster public."},
 
         # Create a cluster, not just a dataset.
         '--no-no-cluster': {

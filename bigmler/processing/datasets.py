@@ -181,8 +181,9 @@ def dataset_processing(source, api, args, resume,
                                        api=api, path=path,
                                        session_file=session_file)
             dataset = r.get_dataset(dataset, api, args.verbosity, session_file)
-            csv_properties.update(objective_field=args.objective_field,
-                                  objective_field_present=True)
+            if new_objective is not None:
+                csv_properties.update(objective_field=args.objective_field,
+                                      objective_field_present=True)
             fields = Fields(dataset['object']['fields'], **csv_properties)
         if not datasets:
             datasets = [dataset]

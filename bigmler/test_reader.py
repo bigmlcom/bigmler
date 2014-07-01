@@ -127,11 +127,13 @@ class TestReader(object):
             row = [unicode(item, self.encode).strip() for item in row]
         return row
 
-    def dict(self, row):
+    def dict(self, row, filtering=True):
         """Returns the row in a dict format according to the given headers
 
         """
         new_row = row[:]
+        if not filtering:
+            return dict(zip(self.headers, new_row))
         for index in self.exclude:
             del new_row[index]
         return self.fields.pair(new_row, self.headers, self.objective_field)

@@ -3,6 +3,11 @@
 History
 -------
 
+1.9.0 (2014-07-02)
+~~~~~~~~~~~~~~~~~~
+
+- Adding cluster subcommand to generate clusters and centroid predictions
+
 1.8.12 (2014-06-10)
 ~~~~~~~~~~~~~~~~~~~
 

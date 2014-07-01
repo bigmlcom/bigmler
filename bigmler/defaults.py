@@ -133,7 +133,10 @@ FLAGS = {
         {'flag': 'upload', 'type': 'boolean'},
         {'flag': 'test_dataset', 'type': 'string'},
         {'flag': 'dataset_off', 'type': 'boolean'},
-        {'flag': 'args_separator', 'type': 'string'}],
+        {'flag': 'args_separator', 'type': 'string'},
+        {'flag': 'cluster_tag', 'type': 'string'},
+        {'flag': 'centroid_tag', 'type': 'string'},
+        {'flag': 'batch_centroid_tag', 'type': 'string'}],
     'BigMLer analyze': [
         {'flag': 'k-fold', 'type': 'integer'},
         {'flag': 'cv', 'type': 'boolean'},
@@ -145,17 +148,11 @@ FLAGS = {
         {'flag': 'nodes_step', 'type': 'integer'},
         {'flag': 'exclude_features', 'type': 'string'}],
     'BigMLer cluster': [
-        {'flag': 'public_cluster', 'type': 'integer'},
         {'flag': 'cluster_fields', 'type': 'string'},
         {'flag': 'cluster', 'type': 'string'},
         {'flag': 'clusters', 'type': 'string'},
-        {'flag': 'cluster_prices', 'type': 'float'},
         {'flag': 'no_cluster', 'type': 'boolean'},
-        {'flag': 'max_parallel_clusters', 'type': 'integer'},
-        {'flag': 'cluster_attributes', 'type': 'string'},
-        {'flag': 'cluster_tag', 'type': 'string'},
-        {'flag': 'centroid_tag', 'type': 'string'},
-        {'flag': 'batch_centroid_tag', 'type': 'string'}]}
+        {'flag': 'cluster_attributes', 'type': 'string'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):

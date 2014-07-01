@@ -33,6 +33,9 @@ from bigmler.test_reader import TestReader
 from bigmler.resources import NORMAL_FORMAT, FULL_FORMAT
 from bigmler.resources import create_batch_centroid
 
+# symbol used in failing centroid predictions
+NO_CENTROID = "-"
+
 
 def use_prediction_headers(prediction_headers, output, test_reader,
                            fields, args):
@@ -124,9 +127,12 @@ def local_centroid(clusters, test_reader, output, args,
     local_cluster = Cluster(clusters[0])
     test_set_header = test_reader.has_headers()
     for input_data in test_reader:
-        input_data_dict = test_reader.dict(input_data)
-        centroid_info = local_cluster.centroid(
-            input_data_dict, by_name=test_set_header)
+        input_data_dict = test_reader.dict(input_data, filtering=False)
+        try:
+            centroid_info = local_cluster.centroid(
+                input_data_dict, by_name=test_set_header)
+        except Exception, exc:
+            centroid_info = {'centroid_name': NO_CENTROID}
         write_centroid(centroid_info['centroid_name'], output,
                        args.prediction_info, input_data, exclude)
 
