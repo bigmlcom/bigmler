@@ -16,7 +16,7 @@ BigMLer subcommands
 ===================
 
 In addition to the ``BigMLer`` simple command, that covers the main
-functionallity, there are two additional subcommands:
+functionality, there are two additional subcommands:
 - bigmler analyze     Used for feature analysis, node threshold analysis and
                       k-fold cross-validation. See :ref:`bigmler-analyze`.
 - bigmler cluster     Used to generate clusters and centroids' predictions.
@@ -1157,7 +1157,7 @@ Cluster subcommand
 ------------------
 
 Just as the simple ``bigmler`` command can generate all the
-resources leading to find models and predictions for a supervised learning
+resources leading to finding models and predictions for a supervised learning
 problem, the ``bigmler cluster`` subcommand will follow the steps to generate
 clusters and predict the centroids associated to your test data. To mimic what
 we saw in the ``bigmler`` command section, the simplest call is::
@@ -1168,7 +1168,7 @@ This command will upload the data in the ``data/iris.csv`` file and generate
 the corresponding ``source``, ``dataset`` and ``cluster`` objects in BigML. You
 can use any of the generated objects to produce new clusters. For instance, you
 could set a subgroup of the fields of the generated dataset to produce a
-diferent cluster by using::
+different cluster by using::
 
     bigmler cluster --dataset dataset/53b1f71437203f5ac30004ed \
                     --cluster-fields="-sepal length"
@@ -1176,8 +1176,8 @@ diferent cluster by using::
 that would exclude the field ``sepal length`` from the cluster creation input
 fields.
 
-Similarly to the models and datasets, the generated clusters can be shareable
-using the ``--shared`` option::
+Similarly to the models and datasets, the generated clusters can be shared
+using the ``--shared`` option, e.g.::
 
     bigmler cluster --source source/53b1f71437203f5ac30004e0 \
                     --shared
@@ -1198,7 +1198,7 @@ test data by assigning to each input an associated centroid name. The command::
 would produce a file ``centroids.csv`` with the centroid name associated to
 each input. When the command is executed, the cluster information is downloaded
 to your local computer and the centroid predictions are computed locally, with
-no more latencies involved. Just in case you preferred to use BigML to compute
+no more latencies involved. Just in case you prefer to use BigML to compute
 the centroid predictions remotely, you can do so too::
 
     bigmler cluster --cluster cluster/53b1f71437203f5ac30004f0 \
@@ -1621,28 +1621,28 @@ Delete Remote Resources
 --ids LIST_OF_IDS           Comma separated list of ids to be deleted
 --from-file FILE_OF_IDS     Path to a file containing the resources' ids to be
                             deleted
---all-tag TAG               Retrieves resources that were tagged with tag to be
-                            deleted
---source-tag TAG            Retrieves sources that were tagged with tag to be
-                            deleted
---dataset-tag TAG           Retrieves datasets that were tagged with tag to be
-                            deleted
---model-tag TAG             Retrieves models that were tagged with tag to be
-                            deleted
+--all-tag TAG               Retrieves resources that were tagged with tag to
+                            delete them
+--source-tag TAG            Retrieves sources that were tagged with tag to
+                            delete them
+--dataset-tag TAG           Retrieves datasets that were tagged with tag to
+                            delete them
+--model-tag TAG             Retrieves models that were tagged with tag to
+                            delete them
 --prediction-tag TAG        Retrieves predictions that were tagged with tag to
-                            be deleted
+                            delete them
 --evaluation-tag TAG        Retrieves evaluations that were tagged with tag to
-                            be deleted
+                            delete them
 --ensemble-tag TAG          Retrieves ensembles that were tagged with tag to
-                            be deleted
+                            delete them
 --batch-prediction-tag TAG  Retrieves batch predictions that were tagged with
-                            tag to be deleted
+                            tag to delete them
 --cluster-tag TAG           Retrieves clusters that were tagged with
-                            tag to be deleted
+                            tag to delete them
 --centroid-tag TAG          Retrieves centroids that were tagged with
-                            tag to be deleted
+                            tag to delete them
 --batch-centroid-tag TAG    Retrieves batch centroids that were tagged with
-                            tag to be deleted
+                            tag to delete them
 --older-than DATE           Retrieves resources created before the specified
                             date. Date can be any YYYY-MM-DD string, an
                             integer meaning the number of days before the

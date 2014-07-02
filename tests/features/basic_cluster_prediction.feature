@@ -14,7 +14,7 @@ Feature: Upload source and produce centroids for test data
         Examples:
         | data               | test               | output                           |predictions_file           |
         | ../data/grades.csv | ../data/grades.csv | ./scenario_c_1_r/centroids.csv | ./check_files/centroids_grades.csv |
-        | ../data/iris.csv   | ../data/iris.csv   | ./scenario_c_1/centroids.csv   | ./check_files/centroids_iris.csv   |
+        | ../data/diabetes.csv   | ../data/diabetes.csv   | ./scenario_c_1/centroids.csv   | ./check_files/centroids_diabetes.csv   |
 
 
 
@@ -28,7 +28,7 @@ Feature: Upload source and produce centroids for test data
 
         Examples:
         |scenario    | kwargs                                                  | test                    | output                        |predictions_file           |
-        | scenario_c_1| {"data": "../data/iris.csv", "output": "./scenario_c_1/predictions.csv", "test": "../data/iris.csv"}   | ../data/iris.csv   | ./scenario_c_2/centroids.csv   | ./check_files/centroids_iris.csv   |
+        | scenario_c_1| {"data": "../data/diabetes.csv", "output": "./scenario_c_1/centroids.csv", "test": "../data/diabetes.csv"}   | ../data/diabetes.csv   | ./scenario_c_2/centroids.csv   | ./check_files/centroids_diabetes.csv   |
 
     Scenario: Successfully building test predictions from dataset
         Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
@@ -39,7 +39,7 @@ Feature: Upload source and produce centroids for test data
 
         Examples:
         |scenario    | kwargs                                                  | test                    | output                        |predictions_file           |
-        | scenario_c_1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/iris.csv"}   | ../data/iris.csv   | ./scenario_c_3/centroids.csv   | ./check_files/centroids_iris.csv   |
+        | scenario_c_1| {"data": "../data/diabetes.csv", "output": "./scenario1/centroids.csv", "test": "../data/diabetes.csv"}   | ../data/diabetes.csv   | ./scenario_c_3/centroids.csv   | ./check_files/centroids_diabetes.csv   |
 
     Scenario: Successfully building test predictions from cluster
         Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>        
@@ -49,7 +49,7 @@ Feature: Upload source and produce centroids for test data
 
         Examples:
         |scenario    | kwargs                                                  | test                    | output                        |predictions_file           |
-        | scenario_c_1| {"data": "../data/iris.csv", "output": "./scenario1/centroids.csv", "test": "../data/iris.csv"}   | ../data/iris.csv   | ./scenario_c_4/centroids.csv   | ./check_files/centroids_iris.csv   |
+        | scenario_c_1| {"data": "../data/diabetes.csv", "output": "./scenario1/centroids.csv", "test": "../data/diabetes.csv"}   | ../data/diabetes.csv   | ./scenario_c_4/centroids.csv   | ./check_files/centroids_diabetes.csv   |
 
     Scenario: Successfully building test predictions from clusters file
         Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
@@ -59,4 +59,4 @@ Feature: Upload source and produce centroids for test data
 
         Examples:
         |scenario    | kwargs                                                  | clusters_file        | test                  | output                      |predictions_file                    |
-        | scenario_c_1| {"data": "../data/iris.csv", "output": "./scenario_c_1/predictions.csv", "test": "../data/iris.csv"}   | ./scenario_c_1/clusters | ../data/iris.csv | ./scenario_c_5/centroids.csv | ./check_files/centroids_iris.csv |
+        | scenario_c_1| {"data": "../data/diabetes.csv", "output": "./scenario_c_1/centroids.csv", "test": "../data/diabetes.csv"}   | ./scenario_c_1/clusters | ../data/diabetes.csv | ./scenario_c_5/centroids.csv | ./check_files/centroids_diabetes.csv |
