@@ -1162,18 +1162,18 @@ problem, the ``bigmler cluster`` subcommand will follow the steps to generate
 clusters and predict the centroids associated to your test data. To mimic what
 we saw in the ``bigmler`` command section, the simplest call is::
 
-    bigmler cluster --train data/iris.csv
+    bigmler cluster --train data/diabetes.csv
 
-This command will upload the data in the ``data/iris.csv`` file and generate
+This command will upload the data in the ``data/diabetes.csv`` file and generate
 the corresponding ``source``, ``dataset`` and ``cluster`` objects in BigML. You
 can use any of the generated objects to produce new clusters. For instance, you
 could set a subgroup of the fields of the generated dataset to produce a
 different cluster by using::
 
     bigmler cluster --dataset dataset/53b1f71437203f5ac30004ed \
-                    --cluster-fields="-sepal length"
+                    --cluster-fields="-blood pressure"
 
-that would exclude the field ``sepal length`` from the cluster creation input
+that would exclude the field ``blood pressure`` from the cluster creation input
 fields.
 
 Similarly to the models and datasets, the generated clusters can be shared
