@@ -17,8 +17,10 @@ BigMLer subcommands
 
 In addition to the ``BigMLer`` simple command, that covers the main
 functionality, there are two additional subcommands:
+
 - bigmler analyze     Used for feature analysis, node threshold analysis and
                       k-fold cross-validation. See :ref:`bigmler-analyze`.
+
 - bigmler cluster     Used to generate clusters and centroids' predictions.
                       See :ref:`bigmler-cluster`.
 
