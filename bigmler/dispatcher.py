@@ -59,20 +59,6 @@ def belongs_to_ensemble(model):
             model['object']['ensemble'])
 
 
-def exclude_linked_resources(resource_type):
-    """Returns the filter to avoid retrieving resources that are linked to 
-       others and cannot be deleted independently
-
-    """
-    if resource_type == "model":
-        # avoid ensemble's models
-        return ";ensemble=false"
-    if resource_type == "dataset":
-        # avoid cluster's datasets
-        return ";cluster=false"
-    return ""
-
-
 def get_ensemble_id(model):
     """Returns the ensemble/id for a model that belongs to an ensemble
 
@@ -259,18 +245,21 @@ def delete_resources(command_args, api):
                             in open(command_args.delete_file, "r")])
 
     resource_selectors = [
-        ("source", command_args.source_tag, api.list_sources),
-        ("dataset", command_args.dataset_tag, api.list_datasets),
-        ("model", command_args.model_tag, api.list_models),
-        ("prediction", command_args.prediction_tag, api.list_predictions),
-        ("ensemble", command_args.ensemble_tag, api.list_ensembles),
-        ("evaluation", command_args.evaluation_tag, api.list_evaluations),
+        ("source", command_args.source_tag, api.list_sources, None),
+        ("dataset", command_args.dataset_tag, api.list_datasets,
+         ";cluster_status=false"),
+        ("model", command_args.model_tag, api.list_models, ";ensemble=false"),
+        ("prediction", command_args.prediction_tag, api.list_predictions,
+         None),
+        ("ensemble", command_args.ensemble_tag, api.list_ensembles, None),
+        ("evaluation", command_args.evaluation_tag, api.list_evaluations,
+         None),
         ("batchprediction", command_args.batch_prediction_tag,
-         api.list_batch_predictions),
-        ("cluster", command_args.cluster_tag, api.list_clusters),
-        ("centroid", command_args.centroid_tag, api.list_centroids),
+         api.list_batch_predictions, None),
+        ("cluster", command_args.cluster_tag, api.list_clusters, None),
+        ("centroid", command_args.centroid_tag, api.list_centroids, None),
         ("batchcentroid", command_args.batch_centroid_tag,
-         api.list_batch_centroids)]
+         api.list_batch_centroids, None)]
 
     query_string = None
     if command_args.older_than:
@@ -302,23 +291,22 @@ def delete_resources(command_args, api):
         else:
             query_string += ";"
         query_value = command_args.all_tag
-        for label, selector, api_call in resource_selectors:
+        for label, selector, api_call, filter_linked in resource_selectors:
             combined_query = query_string
             if not query_value and selector:
                 query_value = selector
             if command_args.all_tag or selector:
                 combined_query += "tags__in=%s" % query_value
-                combined_query += exclude_linked_resources(label)
-                print "***", combined_query
+                if filter_linked:
+                    combined_query += filter_linked
                 delete_list.extend(u.list_ids(api_call, combined_query))
     else:
         if query_string:
-            for label, selector, api_call in resource_selectors:
+            for label, selector, api_call, filter_linked in resource_selectors:
                 combined_query = query_string
-                combined_query += exclude_linked_resources(label)
-                print "***", combined_query
+                if filter_linked:
+                    combined_query += filter_linked
                 delete_list.extend(u.list_ids(api_call, combined_query))
-    print "***", delete_list
     message = u.dated("Deleting objects.\n")
     u.log_message(message, log_file=session_file,
                   console=command_args.verbosity)
