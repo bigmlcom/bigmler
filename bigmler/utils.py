@@ -277,7 +277,12 @@ def delete(api, delete_list):
                         bigml.api.MODEL_RE: api.delete_model,
                         bigml.api.PREDICTION_RE: api.delete_prediction,
                         bigml.api.EVALUATION_RE: api.delete_evaluation,
-                        bigml.api.ENSEMBLE_RE: api.delete_ensemble}
+                        bigml.api.ENSEMBLE_RE: api.delete_ensemble,
+                        bigml.api.BATCH_PREDICTION_RE:
+                            api.delete_batch_prediction,
+                        bigml.api.CLUSTER_RE: api.delete_cluster,
+                        bigml.api.CENTROID_RE: api.delete_centroid,
+                        bigml.api.BATCH_CENTROID_RE: api.delete_centroid}
     for resource_id in delete_list:
         resource_type = None
         try:

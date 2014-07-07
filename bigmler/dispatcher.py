@@ -59,6 +59,20 @@ def belongs_to_ensemble(model):
             model['object']['ensemble'])
 
 
+def exclude_linked_resources(resource_type):
+    """Returns the filter to avoid retrieving resources that are linked to 
+       others and cannot be deleted independently
+
+    """
+    if resource_type == "model":
+        # avoid ensemble's models
+        return ";ensemble=false"
+    if resource_type == "dataset":
+        # avoid cluster's datasets
+        return ";cluster=false"
+    return ""
+
+
 def get_ensemble_id(model):
     """Returns the ensemble/id for a model that belongs to an ensemble
 
@@ -252,7 +266,11 @@ def delete_resources(command_args, api):
         ("ensemble", command_args.ensemble_tag, api.list_ensembles),
         ("evaluation", command_args.evaluation_tag, api.list_evaluations),
         ("batchprediction", command_args.batch_prediction_tag,
-         api.list_batch_predictions)]
+         api.list_batch_predictions),
+        ("cluster", command_args.cluster_tag, api.list_clusters),
+        ("centroid", command_args.centroid_tag, api.list_centroids),
+        ("batchcentroid", command_args.batch_centroid_tag,
+         api.list_batch_centroids)]
 
     query_string = None
     if command_args.older_than:
@@ -290,19 +308,17 @@ def delete_resources(command_args, api):
                 query_value = selector
             if command_args.all_tag or selector:
                 combined_query += "tags__in=%s" % query_value
-                if label == "model":
-                    # avoid ensemble's models
-                    combined_query += ";ensemble=false"
+                combined_query += exclude_linked_resources(label)
+                print "***", combined_query
                 delete_list.extend(u.list_ids(api_call, combined_query))
     else:
         if query_string:
             for label, selector, api_call in resource_selectors:
                 combined_query = query_string
-                if label == "model":
-                    # avoid ensemble's models
-                    combined_query += ";ensemble=false"
+                combined_query += exclude_linked_resources(label)
+                print "***", combined_query
                 delete_list.extend(u.list_ids(api_call, combined_query))
-
+    print "***", delete_list
     message = u.dated("Deleting objects.\n")
     u.log_message(message, log_file=session_file,
                   console=command_args.verbosity)

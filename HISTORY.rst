@@ -3,15 +3,21 @@
 History
 -------
 
+1.9.2 (2014-07-07)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug for the --delete flag. Cluster, centroids and batch centroids
+  could not be deleted.
+
 1.9.1 (2014-07-02)
 ~~~~~~~~~~~~~~~~~~
 
-- Documentation update
+- Documentation update.
 
 1.9.0 (2014-07-02)
 ~~~~~~~~~~~~~~~~~~
 
-- Adding cluster subcommand to generate clusters and centroid predictions
+- Adding cluster subcommand to generate clusters and centroid predictions.
 
 1.8.12 (2014-06-10)
 ~~~~~~~~~~~~~~~~~~~
