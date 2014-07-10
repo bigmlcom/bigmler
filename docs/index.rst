@@ -1219,6 +1219,15 @@ cannot issue a centroid prediction for input data that has missing values in
 its numeric fields, so centroid predictions will give a "-" string as output
 in this case.
 
+You can also generate the datasets associated to each centroid of a cluster.
+Using the ``--cluster-datasets`` option
+
+    bigmler cluster --cluster cluster/53b1f71437203f5ac30004f0 \
+                    --cluster-datasets "Cluster 1,Cluster 2"
+
+you can generate the datasets associated to a comma-separated list of
+centroid names. If no centroid name is provided, all datasets are generated.
+
 Resuming Previous Commands
 --------------------------
 
@@ -1340,7 +1349,7 @@ Requirements
 
 Python 2.7 is currently supported by BigMLer.
 
-BigMLer requires `bigml 1.6.0 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 1.6.1 <https://github.com/bigmlcom/python>`_  or
 higher. Using proportional missing strategy will additionally request
 the use of the `numpy <http://www.numpy.org/>`_ and
 `scipy <http://www.scipy.org/>`_ libraries. They are not
@@ -1750,18 +1759,24 @@ Analyze subcommand Options
 Custer Specific Subcommand Options
 ----------------------------------
 
---model MODEL               BigML model Id
---models PATH               Path to a file containing model/ids. One model per
-                            line (e.g., model/4f824203ce80053)
+--model MODEL                     BigML model Id
+--models PATH                     Path to a file containing model/ids. One
+                                  model per
+                                  line (e.g., model/4f824203ce80053)
 
---cluster CLUSTER           BigML cluster Id
---clusters PATH             Path to a file containing cluster/ids. One cluster
-                            per line (e.g., cluster/4f824203ce80051)
---no-cluster                No cluster will be generated
---cluster-fields            Comma-separated list of fields that will be
-                            used in the cluster construction
---cluster-attributes PATH   Path to a JSON file containing attributes to be
-                            used in the cluster creation call
+--cluster CLUSTER                 BigML cluster Id
+--clusters PATH                   Path to a file containing cluster/ids. One
+                                  cluster
+                                  per line (e.g., cluster/4f824203ce80051)
+--no-cluster                      No cluster will be generated
+--cluster-fields                  Comma-separated list of fields that will be
+                                  used in the cluster construction
+--cluster-attributes PATH         Path to a JSON file containing attributes to
+                                  be used in the cluster creation call
+--cluster-datasets CENTROID_NAMES Comma-separated list of centroid names to
+                                  generate the related datasets from a cluster.
+                                  If no CENTROID_NAMES argument is provided
+                                  all datasets are generated
 
 Prior Versions Compatibility Issues
 -----------------------------------

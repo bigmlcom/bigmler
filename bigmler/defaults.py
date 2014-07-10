@@ -152,7 +152,8 @@ FLAGS = {
         {'flag': 'cluster', 'type': 'string'},
         {'flag': 'clusters', 'type': 'string'},
         {'flag': 'no_cluster', 'type': 'boolean'},
-        {'flag': 'cluster_attributes', 'type': 'string'}]}
+        {'flag': 'cluster_attributes', 'type': 'string'},
+        {'flag': 'cluster_datasets', 'type': 'string'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):

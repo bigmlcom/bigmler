@@ -105,7 +105,7 @@ def cluster_dispatcher(args=sys.argv[1:]):
 
     # Selects the action to perform
     if (has_train(command_args) or has_test(command_args)
-            or command_args.votes_dirs):
+            or command_args.cluster_datasets is not None):
         output_args = a.get_output_args(api, command_args, resume)
         a.transform_args(command_args, command.flags, api,
                          command.user_defaults)
@@ -203,9 +203,13 @@ def compute_output(api, args):
     # We update the cluster's public state if needed
     if cluster:
         if isinstance(cluster, basestring):
-            query_string = MINIMUM_MODEL
+            if args.cluster_datasets is None and not has_test(args):
+                query_string = MINIMUM_MODEL
+            else:
+                query_string = ''
             cluster = u.check_resource(cluster, api.get_cluster,
                                        query_string=query_string)
+        clusters[0] = cluster
         if (args.public_cluster or
                 (args.shared_flag and r.shared_changed(args.shared, cluster))):
             cluster_args = {}
@@ -266,6 +270,24 @@ def compute_output(api, args):
 
         else:
             centroid(clusters, fields, args, session_file=session_file)
+
+    if cluster and args.cluster_datasets is not None:
+        centroids_info = cluster['object']['clusters']['clusters']
+        centroids = {centroid['name']: centroid['id']
+                          for centroid in centroids_info}
+        datasets = cluster['object']['cluster_datasets']
+        if args.cluster_datasets == '':
+            centroid_ids = centroids.values()
+        else:
+            centroid_ids = [centroids[cluster_name] for cluster_name in
+                            args.cluster_datasets_
+                            if datasets[centroids[cluster_name]] == '']
+        
+        for centroid_id in centroid_ids:
+            dataset_args = {'centroid': centroid_id}
+            r.create_dataset(cluster, dataset_args, args, api=api, path=path,
+                             session_file=session_file, log=log,
+                             dataset_type='cluster')
 
     # Workaround to restore windows console cp850 encoding to print the tree
     if sys.platform == "win32" and sys.stdout.isatty():

@@ -386,6 +386,19 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
+    # Parses cluster names to generate datasets if provided
+    try:
+        if command_args.cluster_datasets:
+            cluster_datasets_arg = map(lambda x: x.strip(),
+                                       command_args.cluster_datasets.split(
+                                        command_args.args_separator))
+            command_args.cluster_datasets_ = cluster_datasets_arg
+        else:
+            command_args.cluster_datasets_ = []
+    except AttributeError:
+        pass
+
+
 
     return {"api": api, "args": command_args}
 

@@ -82,6 +82,10 @@ def cleanup_resources(feature):
         except:
             pass
 
+    for id in world.clusters:
+        world.api.delete_cluster(id)
+    world.clusters = []
+
     for id in world.sources:
         world.api.delete_source(id)
     world.sources = []
@@ -109,10 +113,6 @@ def cleanup_resources(feature):
     for id in world.batch_predictions:
         world.api.delete_batch_prediction(id)
     world.batch_predictions = []
-
-    for id in world.clusters:
-        world.api.delete_cluster(id)
-    world.clusters = []
 
     for id in world.centroids:
         world.api.delete_centroid(id)

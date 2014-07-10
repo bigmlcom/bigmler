@@ -60,3 +60,12 @@ Feature: Upload source and produce centroids for test data
         Examples:
         |scenario    | kwargs                                                  | clusters_file        | test                  | output                      |predictions_file                    |
         | scenario_c_1| {"data": "../data/diabetes.csv", "output": "./scenario_c_1/centroids.csv", "test": "../data/diabetes.csv"}   | ./scenario_c_1/clusters | ../data/diabetes.csv | ./scenario_c_5/centroids.csv | ./check_files/centroids_diabetes.csv |
+
+    Scenario: Successfully generating datasets from cluster centroids
+        Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
+        And I generate datasets for "<centroid_names>" centroids and log predictions in "<output>"
+        Then I check that the <datasets_number> cluster datasets are ready
+
+        Examples:
+        |scenario    | kwargs                                                  | centroid_names        | output                      | datasets_number |
+        | scenario_c_1| {"data": "../data/diabetes.csv", "output": "./scenario_c_1/centroids.csv", "test": "../data/diabetes.csv"}   || Cluster 1,Cluster 2 | ./scenario_c_6/centroids.csv | 2 |

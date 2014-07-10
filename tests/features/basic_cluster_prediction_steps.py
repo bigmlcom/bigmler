@@ -73,7 +73,6 @@ def i_check_create_centroids(step):
             assert False, "predictions lines: %s, test lines: %s" % (predictions_lines, world.test_lines)
         predictions_file.close()
     except Exception, exc:
-        print str(exc)
         assert False, str(exc)
 
 
@@ -145,3 +144,29 @@ def i_create_all_cluster_resources_with_mapping(step, data=None, test=None, fiel
                " --store --output " + output)
     shell_execute(command, output, test=test)
 
+
+@step(r'I generate datasets for "(.*?)" centroids and log predictions in "(.*?)"$')
+def i_create_datasets_form_cluster(step, centroids=None, output=None):
+    if centroids is None or output is None:
+        assert False
+    command = ("bigmler cluster --cluster " + world.cluster['resource'] +
+               " --cluster-datasets \"" + centroids +
+               "\" --store --output " + output)
+    shell_execute(command, output, test=None)
+
+
+@step(r'I check that the (\d+) cluster datasets are ready$')
+def i_check_cluster_datasets(step, datasets_number=None):
+
+    try:
+        datasets_file = os.path.join(world.directory, "dataset_cluster")
+        datasets_file = open(datasets_file, "r")
+        dataset_ids = datasets_file.readlines()
+        world.datasets.extend(dataset_ids)
+        if int(datasets_number) == len(dataset_ids):
+            assert True
+        else:
+            assert False, "generated datasets %s, expected %s" % (
+                len(dataset_ids), datasets_number)
+    except Exception, exc:
+        assert False, str(exc)

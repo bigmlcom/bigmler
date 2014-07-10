@@ -3,6 +3,12 @@
 History
 -------
 
+1.10.0 (2014-07-11)
+~~~~~~~~~~~~~~~~~~~
+
+- Adding the --cluster-datasets option to generate the datasets related to
+  the centroids in a cluster.
+
 1.9.2 (2014-07-07)
 ~~~~~~~~~~~~~~~~~~
 

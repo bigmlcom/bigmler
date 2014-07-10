@@ -73,6 +73,17 @@ def get_cluster_options(defaults=None):
             'action': 'store_false',
             'dest': 'no_cluster',
             'default': defaults.get('no_cluster', False),
-            'help': "Create a cluster."}}
+            'help': "Create a cluster."},
+
+        # Comma separated list of datasets to be generated from the cluster.
+        '--cluster-datasets': {
+            'action': 'store',
+            'dest': 'cluster_datasets',
+            'nargs': '?',
+            'const': '',
+            'default': defaults.get('cluster_datasets', None),
+            'help': ("Comma-separated list of centroid names. The"
+                     " related datasets will be generated. All datasets "
+                     "will be generated if empty.")}}
 
     return options
