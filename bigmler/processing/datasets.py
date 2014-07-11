@@ -21,6 +21,7 @@ from __future__ import absolute_import
 
 import sys
 import re
+import os
 
 import bigml.api
 import bigmler.utils as u
@@ -107,6 +108,18 @@ def get_new_objective(fields, objective):
     if fields.objective_field == fields.field_column_number(objective_id):
         return None
     return objective
+
+
+def csv_name(user_filename, path, dataset):
+    """Building CSV exported dataset filename from the user-given value
+
+    """
+    if user_filename == '':
+        dataset_id = bigml.api.get_dataset_id(dataset)
+        if dataset_id:
+            return os.path.join(path,
+                                "%s.csv" % dataset_id.replace("/", "_"))
+    return os.path.join(path, user_filename)
 
 
 def dataset_processing(source, api, args, resume,
@@ -334,3 +347,28 @@ def create_new_dataset(datasets, api, args, resume, fields=None,
     else:
         new_dataset = datasets[0]
     return new_dataset, resume
+
+
+def export_dataset(dataset, api, args, resume,
+                   session_file=None, path=None):
+    """Exports the dataset to a CSV file given by the user or a filename
+       based on the dataset id by default.
+
+    """
+    filename = csv_name(args.to_csv, path, dataset)
+    if resume:
+        resume = c.checkpoint(
+            c.is_dataset_exported, filename,
+            debug=args.debug)
+        if not resume:
+            message = u.dated("No dataset exported. Resuming.\n")
+            u.log_message(message, log_file=session_file,
+                          console=args.verbosity)
+    else:
+        message = u.dated("Exporting dataset to CSV file: %s\n" % filename)
+        u.log_message(message, log_file=session_file,
+                      console=args.verbosity)
+        
+    if not resume:
+        api.download_dataset(dataset, filename=filename)
+    return resume

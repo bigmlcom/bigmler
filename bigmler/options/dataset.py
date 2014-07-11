@@ -159,6 +159,15 @@ def get_dataset_options(defaults=None):
             'help': ("Path to the file containing fields generators."
                      " Used to create a new dataset from an existing"
                      " one by adding new fields combining or"
-                     " setting its contents.")}}
+                     " setting its contents.")},
+
+        # Exports the dataset to a CSV file
+        '--to-csv': {
+            'action': 'store',
+            'dest': 'to_csv',
+            'nargs': '?',
+            'const': '',
+            'default': defaults.get('to_csv', None),
+            'help': "Path to the exported dataset file."}}
 
     return options

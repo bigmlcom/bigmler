@@ -169,6 +169,9 @@ def compute_output(api, args):
         session_file=session_file, path=path, log=log)
     if datasets:
         dataset = datasets[0]
+        if args.to_csv is not None:
+            resume = pd.export_dataset(dataset, api, args, resume,
+                                       session_file=session_file, path=path)
 
     # If test_split is used, split the dataset in a training and a test dataset
     # according to the given split

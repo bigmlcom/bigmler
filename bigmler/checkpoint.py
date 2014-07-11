@@ -282,3 +282,13 @@ def are_clusters_created(path, number_of_clusters):
             return False, cluster_ids
     except IOError:
         return False, cluster_ids
+
+def is_dataset_exported(filename):
+    """Checks the existence of the CSV exported dataset file
+
+    """
+    try:
+        with open(filename) as exported_file:
+            return True
+    except IOError:
+        return False

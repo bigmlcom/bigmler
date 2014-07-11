@@ -3,6 +3,11 @@
 History
 -------
 
+1.11.0 (2014-07-11)
+~~~~~~~~~~~~~~~~~~~
+
+- Adding the --to-csv option to export datasets to a CSV file.
+
 1.10.0 (2014-07-11)
 ~~~~~~~~~~~~~~~~~~~
 

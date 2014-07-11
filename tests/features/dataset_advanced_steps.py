@@ -162,3 +162,27 @@ def i_check_create_multi_dataset(step):
         assert True
     except Exception, exc:
         assert False, str(exc)
+
+@step(r'file "(.*)" is like file "(.*)"$')
+def i_files_equal(step, local_file, data):
+    contents_local_file = open(os.path.join(world.directory,
+                                            local_file)).read()
+    contents_data = open(data).read()
+    assert contents_local_file == contents_data
+
+@step(r'I export the dataset to the CSV file "(.*)"$')
+def i_export_the_dataset(step, filename):
+    if filename is None:
+        assert False
+    try:
+        command = ("bigmler --dataset " + world.dataset['resource'] +
+                   " --to-csv " + filename +
+                   " --output-dir " + world.directory + " --no-model")
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)

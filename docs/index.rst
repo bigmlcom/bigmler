@@ -581,6 +581,16 @@ Or, as another example, to tag the outliers of the same field one coud use::
 
     {"new_fields": [{"name": "outlier?", "field": "(if (within-percentiles? \"sepal length\" 0.5 0.95) \"normal\" \"outlier\")"}]}
 
+You can also export the contents of a generated dataset by using the
+``--to-csv`` option. Thus,
+
+    bigmler --dataset dataset/52b8a12037203f48bc00000a \
+            --to-csv my_dataset.csv --no-model
+
+will create a CSV file named ``my_dataset.csv`` in the default directory
+created by BigMLer to place the command output files. If no file name is given,
+the file will be named after the dataset id.
+
 A dataset can also be generated as the union of several datasets using the
 flag ``--multi-dataset``. The datasets will be read from a file specified
 in the ``--datasets`` option and the file must contain one dataset id per line.

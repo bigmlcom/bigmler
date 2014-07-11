@@ -26,6 +26,17 @@ Feature: Create a new dataset from an old one by combining its fields or from a 
         |data |output_dir  |new_fields | property | field_id | value | type
         |../data/iris.csv | ./scenario_d_2 |../data/attributes.json| preferred | 000001 | false | boolean
 
+    Scenario: Successfully exporting a dataset to a CSV file
+        Given I create a BigML dataset from "<data>" and store logs in "<output_dir>"
+        And I check that the source has been created
+        And I check that the dataset has been created
+        And I export the dataset to the CSV file "<csv_file>"
+        Then file "<csv_file>" is like file "<data>"
+
+        Examples:
+        |data |output_dir  |csv_file |
+        |../data/iris.csv | ./scenario_d_4 |dataset.csv
+
     Scenario: Successfully building a multi-dataset
         Given I create a BigML dataset from "<data>" and store logs in "<output_dir>"
         And I check that the source has been created
