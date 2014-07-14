@@ -210,116 +210,13 @@ def main_dispatcher(args=sys.argv[1:]):
         command_args.debug = True
     api = a.get_api_instance(command_args, u.check_dir(session_file))
 
-    # Selects the action to perform: delete or create resources
-    if command_args.delete:
-        delete_resources(command_args, api)
-    elif (has_train(command_args) or has_test(command_args)
+    if (has_train(command_args) or has_test(command_args)
           or command_args.votes_dirs):
         output_args = a.get_output_args(api, command_args, resume)
         a.transform_args(command_args, command.flags, api,
                          command.user_defaults)
         compute_output(**output_args)
     u.log_message("_" * 80 + "\n", log_file=session_file)
-
-
-def delete_resources(command_args, api):
-    """Deletes the resources selected by the user given options
-
-    """
-    if command_args.predictions is None:
-        path = a.NOW
-    else:
-        path = u.check_dir(command_args.predictions)
-    session_file = "%s%s%s" % (path, os.sep, SESSIONS_LOG)
-    message = u.dated("Retrieving objects to delete.\n")
-    u.log_message(message, log_file=session_file,
-                  console=command_args.verbosity)
-    delete_list = []
-    if command_args.delete_list:
-        delete_list = map(str.strip,
-                          command_args.delete_list.split(','))
-    if command_args.delete_file:
-        if not os.path.exists(command_args.delete_file):
-            sys.exit("File %s not found" % command_args.delete_file)
-        delete_list.extend([line for line
-                            in open(command_args.delete_file, "r")])
-
-    resource_selectors = [
-        ("source", command_args.source_tag, api.list_sources, None),
-        ("dataset", command_args.dataset_tag, api.list_datasets,
-         ";cluster_status=false"),
-        ("model", command_args.model_tag, api.list_models, ";ensemble=false"),
-        ("prediction", command_args.prediction_tag, api.list_predictions,
-         None),
-        ("ensemble", command_args.ensemble_tag, api.list_ensembles, None),
-        ("evaluation", command_args.evaluation_tag, api.list_evaluations,
-         None),
-        ("batchprediction", command_args.batch_prediction_tag,
-         api.list_batch_predictions, None),
-        ("cluster", command_args.cluster_tag, api.list_clusters, None),
-        ("centroid", command_args.centroid_tag, api.list_centroids, None),
-        ("batchcentroid", command_args.batch_centroid_tag,
-         api.list_batch_centroids, None)]
-
-    query_string = None
-    if command_args.older_than:
-        date_str = get_date(command_args.older_than, api)
-        if date_str:
-            query_string = "created__lt=%s" % date_str
-        else:
-            sys.exit("The --older-than and --newer-than flags only accept "
-                     "integers (number of days), dates in YYYY-MM-DD format "
-                     " and resource ids. Please, double-check your input.")
-
-    if command_args.newer_than:
-        date_str = get_date(command_args.newer_than, api)
-        if date_str:
-            if query_string is None:
-                query_string = ""
-            else:
-                query_string += ";"
-            query_string += "created__gt=%s" % date_str
-        else:
-            sys.exit("The --older-than and --newer-than flags only accept "
-                     "integers (number of days), dates in YYYY-MM-DD format "
-                     " and resource ids. Please, double-check your input.")
-
-    if (any([selector[1] is not None for selector in resource_selectors]) or
-            command_args.all_tag):
-        if query_string is None:
-            query_string = ""
-        else:
-            query_string += ";"
-        query_value = command_args.all_tag
-        for label, selector, api_call, filter_linked in resource_selectors:
-            combined_query = query_string
-            if not query_value and selector:
-                query_value = selector
-            if command_args.all_tag or selector:
-                combined_query += "tags__in=%s" % query_value
-                if filter_linked:
-                    combined_query += filter_linked
-                delete_list.extend(u.list_ids(api_call, combined_query))
-    else:
-        if query_string:
-            for label, selector, api_call, filter_linked in resource_selectors:
-                combined_query = query_string
-                if filter_linked:
-                    combined_query += filter_linked
-                delete_list.extend(u.list_ids(api_call, combined_query))
-    message = u.dated("Deleting objects.\n")
-    u.log_message(message, log_file=session_file,
-                  console=command_args.verbosity)
-    message = "\n".join(delete_list)
-    u.log_message(message, log_file=session_file)
-    u.delete(api, delete_list)
-    if sys.platform == "win32" and sys.stdout.isatty():
-        message = (u"\nGenerated files:\n\n" +
-                   unicode(u.print_tree(path, " "), "utf-8") + u"\n")
-    else:
-        message = "\nGenerated files:\n\n" + u.print_tree(path, " ") + "\n"
-    u.log_message(message, log_file=session_file,
-                  console=command_args.verbosity)
 
 
 def compute_output(api, args):

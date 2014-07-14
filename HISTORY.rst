@@ -3,6 +3,12 @@
 History
 -------
 
+1.12.0 (2014-07-15)
+~~~~~~~~~~~~~~~~~~~
+
+- Improving delete process. Leveraging delete to a subcommand and filtering
+  the type of resource to be deleted.
+
 1.11.0 (2014-07-11)
 ~~~~~~~~~~~~~~~~~~~
 

@@ -32,7 +32,7 @@ from bigmler.options.main import get_main_options
 from bigmler.options.analyze import get_analyze_options
 from bigmler.options.cluster import get_cluster_options
 
-SUBCOMMANDS = ["main", "analyze", "cluster"]
+SUBCOMMANDS = ["main", "analyze", "cluster", "delete"]
 MAIN = SUBCOMMANDS[0]
 
 
@@ -88,11 +88,18 @@ under the License.""" % version
                                                   constants=constants)
     # general options
     subcommand_options["main"].update(common_options)
-    subcommand_options["main"].update(delete_options)
     subcommand_options["main"].update(source_options)
     subcommand_options["main"].update(dataset_options)
     subcommand_options["main"].update(multi_label_options)
     subcommand_options["main"].update(test_options)
+    subcommand_options["main"].update({
+        '--source-tag': delete_options['--source-tag'],
+        '--dataset-tag': delete_options['--dataset-tag'],
+        '--model-tag': delete_options['--model-tag'],
+        '--ensemble-tag': delete_options['--ensemble-tag'],
+        '--prediction-tag': delete_options['--prediction-tag'],
+        '--batch-prediction-tag': delete_options['--batch-prediction-tag']})
+
     main_options = subcommand_options["main"]
 
     defaults = general_defaults["BigMLer analyze"]
@@ -130,7 +137,8 @@ under the License.""" % version
         '--reports': main_options['--reports'],
         '--remote': main_options['--remote'],
         '--no-batch': main_options['--no-batch']})
-
+    subcommand_options["delete"] = delete_options
+    subcommand_options["delete"].update(common_options)
 
     for subcommand in SUBCOMMANDS:
         subparser = subparsers.add_parser(subcommand)

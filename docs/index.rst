@@ -24,6 +24,9 @@ functionality, there are two additional subcommands:
 - bigmler cluster     Used to generate clusters and centroids' predictions.
                       See :ref:`bigmler-cluster`.
 
+- bigmler delete      Used to delete the remotely created resources. See
+                      :ref:`bigmler-delete`.
+
 Quick Start
 ===========
 
@@ -995,84 +998,6 @@ This command would cause a new set of models, one per dataset, to be generated
 and their predictions would be combined in a final predictions file.
 
 
-Deleting Remote Resources
--------------------------
-
-You have seen that BigMLer is an agile tool that empowers you to create a
-great number of resources easily. This is a tremedous help, but it also can
-lead to a garbage-prone environment. To keep a control of the each new created
-remote resource use the flag `--resources-log` followed by the name of the log
-file you choose.::
-
-    bigmler --train data/iris.csv --resources-log my_log.log
-
-Each new resource created by that command will cause its id to be appended as
-a new line of the log file.
-
-BigMLer can help you as well in deleting these resources. Using the `--delete`
-tag there are many options available. For instance, deleting a comma separated
-list of ids::
-
-    bigmler --delete \
-            --ids source/50a2bb64035d0706db0006cc,dataset/50a1f441035d0706d9000371
-
-deleting resources listed in a file::
-
-    bigmler --delete --from-file to_delete.log
-
-where `to_delete.log` contains a resource id per line. You can also delete
-resources based on the
-tags they are associated to::
-
-    bigmler --delete --all-tag my_tag
-
-or restricting the operation to a specific type::
-
-    bigmler --delete --source-tag my_tag
-    bigmler --delete --dataset-tag my_tag
-    bigmler --delete --model-tag my_tag
-    bigmler --delete --prediction-tag my_tag
-    bigmler --delete --evaluation-tag my_tag
-    bigmler --delete --ensemble-tag my_tag
-    bigmler --delete --batch-prediction-tag my_tag
-
-You can also delete resources by date. The options ``--newer-than`` and
-``--older-than`` let you specify a reference date. Resources created after and
-before that date respectively, will be deleted. Both options can be combined to
-set a range of dates. The allowed values are:
-
-- dates in a YYYY-MM-DD format
-- integers, that will be interpreted as number of days before now
-- resource id, the creation datetime of the resource will be used
-
-Thus,
-
-::
-
-    bigmler --delete --newer-than 2
-
-will delete all resources created less than two days ago (now being
-2014-03-23 14:00:00.00000, its creation time will be greater
-than 2014-03-21 14:00:00.00000).
-
-::
-    bigmler --delete --older-than 2014-03-20 --newer-than 2014-03-19
-
-will delete all resources created during 2014, March the 19th (creation time
-between 2014-03-19 00:00:00 and 2014-03-20 00:00:00) and
-
-::
-
-    bigmler --delete --newer-than source/532db2b637203f3f1a000104
-
-will delete all resources created after the ``source/532db2b637203f3f1a000104``
-was created.
-
-You can also combine both types of options, to delete sources tagged as
-``my_tag`` starting from a certain date on::
-
-    bigmler --delete --newer-than 2 --source-tag my_tag
-
 Advanced subcommands in BigMLer
 ===============================
 
@@ -1237,6 +1162,99 @@ Using the ``--cluster-datasets`` option
 
 you can generate the datasets associated to a comma-separated list of
 centroid names. If no centroid name is provided, all datasets are generated.
+
+.. _bigmler-delete:
+
+Delete subcommand
+-----------------
+
+You have seen that BigMLer is an agile tool that empowers you to create a
+great number of resources easily. This is a tremedous help, but it also can
+lead to a garbage-prone environment. To keep a control of the each new created
+remote resource use the flag `--resources-log` followed by the name of the log
+file you choose.::
+
+    bigmler --train data/iris.csv --resources-log my_log.log
+
+Each new resource created by that command will cause its id to be appended as
+a new line of the log file.
+
+BigMLer can help you as well in deleting these resources. Using the `delete`
+subcommand there are many options available. For instance, deleting a
+comma-separated list of ids::
+
+    bigmler delete \
+            --ids source/50a2bb64035d0706db0006cc,dataset/50a1f441035d0706d9000371
+
+deleting resources listed in a file::
+
+    bigmler delete --from-file to_delete.log
+
+where `to_delete.log` contains a resource id per line. You can also delete
+resources based on the
+tags they are associated to::
+
+    bigmler delete --all-tag my_tag
+
+or restricting the operation to a specific type::
+
+    bigmler delete --source-tag my_tag
+    bigmler delete --dataset-tag my_tag
+    bigmler delete --model-tag my_tag
+    bigmler delete --prediction-tag my_tag
+    bigmler delete --evaluation-tag my_tag
+    bigmler delete --ensemble-tag my_tag
+    bigmler delete --batch-prediction-tag my_tag
+    bigmler delete --cluster-tag my_tag
+    bigmler delete --centroid-tag my_tag
+    bigmler delete --batch-centroid-tag my_tag
+
+
+You can also delete resources by date. The options ``--newer-than`` and
+``--older-than`` let you specify a reference date. Resources created after and
+before that date respectively, will be deleted. Both options can be combined to
+set a range of dates. The allowed values are:
+
+- dates in a YYYY-MM-DD format
+- integers, that will be interpreted as number of days before now
+- resource id, the creation datetime of the resource will be used
+
+Thus,
+
+::
+
+    bigmler delete --newer-than 2
+
+will delete all resources created less than two days ago (now being
+2014-03-23 14:00:00.00000, its creation time will be greater
+than 2014-03-21 14:00:00.00000).
+
+::
+    bigmler delete --older-than 2014-03-20 --newer-than 2014-03-19
+
+will delete all resources created during 2014, March the 19th (creation time
+between 2014-03-19 00:00:00 and 2014-03-20 00:00:00) and
+
+::
+
+    bigmler delete --newer-than source/532db2b637203f3f1a000104
+
+will delete all resources created after the ``source/532db2b637203f3f1a000104``
+was created.
+
+You can also combine both types of options, to delete sources tagged as
+``my_tag`` starting from a certain date on::
+
+    bigmler delete --newer-than 2 --source-tag my_tag
+
+And finally, you can filter the type of resource to be deleted using the
+``--resource-types`` option to specify a comma-separated list of resource
+types to be deleted.
+
+    bigmler delete --older-than 2 --resource-types source,model
+
+will delete the sources and models created more than two days ago.
+
 
 Resuming Previous Commands
 --------------------------
@@ -1636,45 +1654,6 @@ Remote Resources
 --ensemble-tag ENSEMBLE_TAG Retrieve ensembles that were tagged with tag
 
 
-Delete Remote Resources
------------------------
---delete                    Starts delete mode
---ids LIST_OF_IDS           Comma separated list of ids to be deleted
---from-file FILE_OF_IDS     Path to a file containing the resources' ids to be
-                            deleted
---all-tag TAG               Retrieves resources that were tagged with tag to
-                            delete them
---source-tag TAG            Retrieves sources that were tagged with tag to
-                            delete them
---dataset-tag TAG           Retrieves datasets that were tagged with tag to
-                            delete them
---model-tag TAG             Retrieves models that were tagged with tag to
-                            delete them
---prediction-tag TAG        Retrieves predictions that were tagged with tag to
-                            delete them
---evaluation-tag TAG        Retrieves evaluations that were tagged with tag to
-                            delete them
---ensemble-tag TAG          Retrieves ensembles that were tagged with tag to
-                            delete them
---batch-prediction-tag TAG  Retrieves batch predictions that were tagged with
-                            tag to delete them
---cluster-tag TAG           Retrieves clusters that were tagged with
-                            tag to delete them
---centroid-tag TAG          Retrieves centroids that were tagged with
-                            tag to delete them
---batch-centroid-tag TAG    Retrieves batch centroids that were tagged with
-                            tag to delete them
---older-than DATE           Retrieves resources created before the specified
-                            date. Date can be any YYYY-MM-DD string, an
-                            integer meaning the number of days before the
-                            current datetime or a resource id, meaning the
-                            creation datetime of the resource
---newer-than DATE           Retrieves resources created after the specified
-                            date. Date can be any YYYY-MM-DD string, an
-                            integer meaning the number of days before the
-                            current datetime or a resource id, meaning the
-                            creation datetime of the resource
-
 Ensembles
 ---------
 --number-of-models NUMBER_OF_MODELS     Number of models to create
@@ -1787,6 +1766,49 @@ Custer Specific Subcommand Options
                                   generate the related datasets from a cluster.
                                   If no CENTROID_NAMES argument is provided
                                   all datasets are generated
+
+Delete Subcommand Options
+-------------------------
+
+--ids LIST_OF_IDS           Comma separated list of ids to be deleted
+--from-file FILE_OF_IDS     Path to a file containing the resources' ids to be
+                            deleted
+--all-tag TAG               Retrieves resources that were tagged with tag to
+                            delete them
+--source-tag TAG            Retrieves sources that were tagged with tag to
+                            delete them
+--dataset-tag TAG           Retrieves datasets that were tagged with tag to
+                            delete them
+--model-tag TAG             Retrieves models that were tagged with tag to
+                            delete them
+--prediction-tag TAG        Retrieves predictions that were tagged with tag to
+                            delete them
+--evaluation-tag TAG        Retrieves evaluations that were tagged with tag to
+                            delete them
+--ensemble-tag TAG          Retrieves ensembles that were tagged with tag to
+                            delete them
+--batch-prediction-tag TAG  Retrieves batch predictions that were tagged with
+                            tag to delete them
+--cluster-tag TAG           Retrieves clusters that were tagged with
+                            tag to delete them
+--centroid-tag TAG          Retrieves centroids that were tagged with
+                            tag to delete them
+--batch-centroid-tag TAG    Retrieves batch centroids that were tagged with
+                            tag to delete them
+--older-than DATE           Retrieves resources created before the specified
+                            date. Date can be any YYYY-MM-DD string, an
+                            integer meaning the number of days before the
+                            current datetime or a resource id, meaning the
+                            creation datetime of the resource
+--newer-than DATE           Retrieves resources created after the specified
+                            date. Date can be any YYYY-MM-DD string, an
+                            integer meaning the number of days before the
+                            current datetime or a resource id, meaning the
+                            creation datetime of the resource
+--resource-types            Comma-separated list of types of resources to be
+                            deleted. Allowed values are source, dataset, model,
+                            ensemble, prediction, batch_prediction, cluster,
+                            centroid, batch_centroid
 
 Prior Versions Compatibility Issues
 -----------------------------------

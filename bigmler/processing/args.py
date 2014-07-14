@@ -398,8 +398,6 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
-
-
     return {"api": api, "args": command_args}
 
 

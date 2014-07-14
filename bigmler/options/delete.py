@@ -133,6 +133,12 @@ def get_delete_options(defaults=None):
         '--batch-centroid-tag': {
             'dest': 'batch_centroid_tag',
             'default': defaults.get('batch_centroid_tag', None),
-            'help': "Retrieve batch centroids that were tagged with tag."}}
+            'help': "Retrieve batch centroids that were tagged with tag."},
+
+        # Use it limit the resources to be deleted.
+        '--resource-types': {
+            'dest': 'resource_types',
+            'default': defaults.get('resource_types', None),
+            'help': "Limits the type of resources to be deleted."}}
 
     return options

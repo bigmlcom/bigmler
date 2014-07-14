@@ -137,7 +137,8 @@ FLAGS = {
         {'flag': 'cluster_tag', 'type': 'string'},
         {'flag': 'centroid_tag', 'type': 'string'},
         {'flag': 'batch_centroid_tag', 'type': 'string'},
-        {'flag': 'to_csv', 'type': 'string'}],
+        {'flag': 'to_csv', 'type': 'string'},
+        {'flag': 'resource_types', 'type': 'string'}],
     'BigMLer analyze': [
         {'flag': 'k-fold', 'type': 'integer'},
         {'flag': 'cv', 'type': 'boolean'},
