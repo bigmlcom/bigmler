@@ -80,7 +80,6 @@ def main(args=sys.argv[1:]):
         # checks if the old --delete syntax is used
         new_args = check_delete_option(new_args)        
         if new_args[0] == "main":
-            new_args = check_delete_option(new_args)
             main_dispatcher(args=new_args)
         elif new_args[0] == "analyze":
             analyze_dispatcher(args=new_args)
