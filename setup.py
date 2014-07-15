@@ -55,7 +55,7 @@ distutils.core.setup(
     license="http://www.apache.org/licenses/LICENSE-2.0",
     setup_requires = [],
     packages = ['bigmler', 'bigmler.processing', 'bigmler.analyze',
-                'bigmler.cluster', 'bigmler.options'],
+                'bigmler.cluster', 'bigmler.options', 'bigmler.delete'],
     include_package_data = True,
     install_requires = ['bigml>=1.6.1, <1.7.0'],
     classifiers=[
