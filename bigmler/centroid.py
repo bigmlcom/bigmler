@@ -131,7 +131,7 @@ def local_centroid(clusters, test_reader, output, args,
         try:
             centroid_info = local_cluster.centroid(
                 input_data_dict, by_name=test_set_header)
-        except Exception, exc:
+        except Exception:
             centroid_info = {'centroid_name': NO_CENTROID}
         write_centroid(centroid_info['centroid_name'], output,
                        args.prediction_info, input_data, exclude)

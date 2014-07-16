@@ -38,12 +38,9 @@ def label_model_args(name, label, all_labels, model_fields, objective_field):
     # model_fields must be given in a relative syntax
     single_label_fields = model_fields[:]
     single_label_fields.extend(
-        map(lambda x: ("-%s" % get_label_field(objective_field, x)
-                       if x != label_field
-                       else
-                       "+%s" % get_label_field(objective_field,
-                                               x)),
-            all_labels))
+        ["%s%s" % ("-" if label != label_field else "+",
+                   get_label_field(objective_field, label))
+         for label in all_labels])
     single_label_fields.append("-%s" % objective_field)
     new_name = "%s for %s" % (name, label_field)
 

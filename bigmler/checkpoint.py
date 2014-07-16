@@ -288,7 +288,7 @@ def is_dataset_exported(filename):
 
     """
     try:
-        with open(filename) as exported_file:
+        with open(filename):
             return True
     except IOError:
         return False

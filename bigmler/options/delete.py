@@ -139,6 +139,20 @@ def get_delete_options(defaults=None):
         '--resource-types': {
             'dest': 'resource_types',
             'default': defaults.get('resource_types', None),
-            'help': "Limits the type of resources to be deleted."}}
+            'help': "Limits the type of resources to be deleted."},
+
+        # Simulate the delete, storing the ids to be deleted.
+        '--dry-run': {
+            'action': 'store_true',
+            'dest': 'dry_run',
+            'default': defaults.get('dry_run', False),
+            'help': "Lists the ids to be deleted, but does not delete."},
+
+        # Don't simulate the delete.
+        '--no-dry-run': {
+            'action': 'store_false',
+            'dest': 'dry_run',
+            'default': defaults.get('dry_run', False),
+            'help': "Deletes the ids retrieved to be deleted."}}
 
     return options

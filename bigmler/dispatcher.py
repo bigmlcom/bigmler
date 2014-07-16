@@ -78,31 +78,6 @@ def get_metadata(resource, key, default_value):
     return default_value
 
 
-def get_date(reference, api):
-    """Extract the date from a given reference in days from now, date format
-       or existing resource
-
-    """
-    days = None
-    date = None
-    try:
-        days = int(reference)
-        date = datetime.datetime.now() - datetime.timedelta(days=days)
-    except ValueError:
-        try:
-            date = datetime.datetime.strptime(reference, '%Y-%m-%d')
-            date = date.strftime('%Y-%m-%dT%H:%M:%S.%f')
-        except ValueError:
-            try:
-                resource_type = bigml.api.get_resource_type(reference)
-                resource = bigml.api.check_resource(reference,
-                                                    api.getters[resource_type])
-                date = resource['object']['created']
-            except (TypeError, KeyError):
-                return None
-    return date
-
-
 def command_handling(args, log=COMMAND_LOG):
     """Rebuilds command string, logs it for --resume future requests and
        parses it.

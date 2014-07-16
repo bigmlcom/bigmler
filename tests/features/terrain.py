@@ -1,6 +1,7 @@
 # terrain.py
 import os
 import shutil
+import time
 
 from lettuce import before, after, world
 
@@ -90,6 +91,9 @@ def setup_resources(feature):
     world.clusters = []
     world.centroids = []
     world.batch_centroids = []
+    world.source_lower = None
+    world.source_upper = None
+    world.source_reference = None
 
 @after.each_feature
 def cleanup_resources(feature):
