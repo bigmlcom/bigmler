@@ -6,8 +6,9 @@ History
 1.12.0 (2014-07-15)
 ~~~~~~~~~~~~~~~~~~~
 
-- Improving delete process. Leveraging delete to a subcommand and filtering
+- Improving delete process. Promoting delete to a subcommand and filtering
   the type of resource to be deleted.
+- Adding --dry-run option to delete.
 
 1.11.0 (2014-07-11)
 ~~~~~~~~~~~~~~~~~~~

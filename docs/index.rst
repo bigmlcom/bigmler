@@ -1249,11 +1249,24 @@ You can also combine both types of options, to delete sources tagged as
 
 And finally, you can filter the type of resource to be deleted using the
 ``--resource-types`` option to specify a comma-separated list of resource
-types to be deleted.
+types to be deleted::
 
     bigmler delete --older-than 2 --resource-types source,model
 
 will delete the sources and models created more than two days ago.
+
+You can simulate the a delete subcommand using the ``--dry-run``
+flag::
+
+    bigmler delete --newer-than source/532db2b637203f3f1a000104 \
+                   --source-tag my_source --dry-run
+
+The output for the command will be a list of resources that would be deleted
+if the ``--dry-run`` flag was removed. In this case, they will be sources
+that contain the tag ``my_source`` and were created after the one given as
+``--newer-than`` value. The first 15 resources will be logged
+to console, and the complete list can be found in the ``bigmler_sessions``
+file.
 
 
 Resuming Previous Commands
@@ -1809,6 +1822,7 @@ Delete Subcommand Options
                             deleted. Allowed values are source, dataset, model,
                             ensemble, prediction, batch_prediction, cluster,
                             centroid, batch_centroid
+--dry-run                   Delete simulation. No removal.
 
 Prior Versions Compatibility Issues
 -----------------------------------
