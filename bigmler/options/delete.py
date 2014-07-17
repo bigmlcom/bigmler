@@ -135,7 +135,7 @@ def get_delete_options(defaults=None):
             'default': defaults.get('batch_centroid_tag', None),
             'help': "Retrieve batch centroids that were tagged with tag."},
 
-        # Use it limit the resources to be deleted.
+        # Use it to limit the resources to be deleted.
         '--resource-types': {
             'dest': 'resource_types',
             'default': defaults.get('resource_types', None),
@@ -153,6 +153,15 @@ def get_delete_options(defaults=None):
             'action': 'store_false',
             'dest': 'dry_run',
             'default': defaults.get('dry_run', False),
-            'help': "Deletes the ids retrieved to be deleted."}}
+            'help': "Deletes the ids retrieved to be deleted."},
+
+        # Retrieves the ids of the resources that have been logged in the 
+        # directory to add them to the delete list.
+        '--from-dir': {
+            'dest': 'from_dir',
+            'default': defaults.get('from_dir', None),
+            'help': ("Retrieves the ids of the resources logged in the "
+                     "directory to add them to the delete list.")},
+        }
 
     return options

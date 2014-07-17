@@ -37,7 +37,28 @@ DIRS_LOG = ".bigmler_delete_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 ROWS_LIMIT = 15
 INDENT_IDS = 26
+RESOURCES_LOG_FILES = set(['source', 'dataset', 'dataset_train',
+                           'dataset_test', 'dataset_gen',  'dataset_cluster',
+                           'dataset_parts', 'dataset_multi', 'models',
+                           'ensembles', 'evaluations',
+                           'clusters', 'batch_prediction', 'batch_centroid'])
 
+def retrieve_resources(directory):
+    """Searches recusively the user-given directory for resource log files
+       and returns its ids.
+
+    """
+    log_ids = []
+    if os.path.isdir(directory):
+        for root, dirs, files in os.walk(directory):
+            for resources_file in files:
+                if resources_file in RESOURCES_LOG_FILES:
+                    for line in open(os.path.join(root, resources_file)):
+                        resource_id = bigml.api.get_resource_id(line.strip())
+                        if resource_id is not None:
+                            log_ids.append(resource_id)
+    return list(set(log_ids))
+ 
 
 def time_interval_qs(args, api):
     """Building the query string from the time interval user parameters.
@@ -76,9 +97,10 @@ def get_delete_list(args, api, query_list):
                 if selector:
                     query_value = selector
                 type_query_list.append("tags__in=%s" % query_value)
-            if filter_linked:
+            if type_query_list and filter_linked:
                 type_query_list.append(filter_linked)
             if type_query_list:
+                print type_query_list
                 delete_list.extend(u.list_ids(api_call,
                                               ";".join(type_query_list)))
     return delete_list
@@ -259,10 +281,13 @@ def delete_resources(command_args, api):
                 delete_file.readline().strip())
             if resource_id:
                 delete_list.append(resource_id)
+    # from directory
+    if command_args.from_dir:
+        delete_list.extend(retrieve_resources(command_args.from_dir))
 
     # filter resource_types if any
     delete_list = filter_resource_types(delete_list,
-                                        command_args.resource_types_) 
+                                        command_args.resource_types_)
 
     # by time interval and tag (plus filtered resource_types)
     time_qs_list = time_interval_qs(command_args, api)
