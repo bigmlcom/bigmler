@@ -100,7 +100,6 @@ def get_delete_list(args, api, query_list):
             if type_query_list and filter_linked:
                 type_query_list.append(filter_linked)
             if type_query_list:
-                print type_query_list
                 delete_list.extend(u.list_ids(api_call,
                                               ";".join(type_query_list)))
     return delete_list

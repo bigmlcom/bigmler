@@ -9,6 +9,7 @@ History
 - Improving delete process. Promoting delete to a subcommand and filtering
   the type of resource to be deleted.
 - Adding --dry-run option to delete.
+- Adding --from-dir option to delete.
 
 1.11.0 (2014-07-11)
 ~~~~~~~~~~~~~~~~~~~
