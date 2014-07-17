@@ -124,4 +124,3 @@ Feature: Delete resources filtered by user criteria
         Examples:
         | data               | output_dir       | tag1    
         | ../data/iris.csv   | ./scenario_del_9 | my_tag1
-

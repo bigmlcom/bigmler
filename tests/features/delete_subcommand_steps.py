@@ -6,7 +6,8 @@ from lettuce import step, world
 from subprocess import check_call, CalledProcessError
 from bigml.api import check_resource, HTTP_NOT_FOUND
 from bigmler.checkpoint import file_number_of_lines
-from common_steps import check_debug
+from common_steps import (check_debug, store_init_resources,
+                          store_final_resources, check_init_equals_final)
 from basic_test_prediction_steps import shell_execute
 
 
@@ -219,3 +220,33 @@ def i_delete_resources_newer_and_tag(step, tag=None, output_dir=None):
                " --all-tag " + tag +
                " --output-dir " + output_dir)
     shell_execute(command, os.path.join(output_dir, "p.csv"), test=None)
+
+
+@step(r'I create BigML resources uploading train "(.*)" storing results in "(.*)"$')
+def i_create_all_resources_in_output_dir(step, data=None, output_dir=None):
+    if output_dir is None or data is None:
+        assert False
+    command = ("bigmler --train " + data +
+               " --output-dir " + output_dir)
+    shell_execute(command, os.path.join(output_dir, "p.csv"), test=None)
+
+
+@step(r'I check that the number of resources has changed$')
+def i_check_changed_number_of_resources(step):
+    store_final_resources()
+    assert (world.final_sources_count != world.init_sources_count or
+            world.final_dataset_count != world.init_dataset_count or
+            world.final_model_count != world.init_model_count)
+
+
+@step(r'I delete the resources from the output directory$')
+def i_delete_resources_from_dir(step):
+    command = ("bigmler delete --from-dir " + world.directory +
+               " --output-dir " + world.directory)
+    shell_execute(command, os.path.join(world.directory, "p.csv"), test=None)
+
+
+@step(r'the number of resources has not changed$')
+def i_check_equal_number_of_resources(step):
+    store_final_resources()
+    check_init_equals_final()
