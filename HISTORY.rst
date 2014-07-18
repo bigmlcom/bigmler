@@ -10,6 +10,7 @@ History
   the type of resource to be deleted.
 - Adding --dry-run option to delete.
 - Adding --from-dir option to delete.
+- Fixing bug when Gazibit report is used with personalized URL dashboards.
 
 1.11.0 (2014-07-11)
 ~~~~~~~~~~~~~~~~~~~

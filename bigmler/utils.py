@@ -46,13 +46,9 @@ BIGML_DASHBOARD_URL = os.environ.get('BIGML_DASHBOARD_URL')
 RESOURCE_URL = ("https://%s/dashboard/" % (BIGML_DOMAIN[:-3] + '.com')
                 if BIGML_DASHBOARD_URL is None
                 else BIGML_DASHBOARD_URL)
-RESOURCE_SHARED_URL = ("https://%s/shared/" % (BIGML_DOMAIN[:-3] + '.com')
-                       if BIGML_DASHBOARD_URL is None
-                       else BIGML_DASHBOARD_URL)
-RESOURCE_EMBEDDED_URL = ("https://%s/embedded/%%s/tree" % (BIGML_DOMAIN[:-3] +
-                                                           '.com')
-                         if BIGML_DASHBOARD_URL is None
-                         else BIGML_DASHBOARD_URL)
+RESOURCE_SHARED_URL = "%s/shared/" % "/".join(RESOURCE_URL.split('/')[:-2])
+RESOURCE_EMBEDDED_URL = ("%s/embedded/%%s/tree" %
+                         "/".join(RESOURCE_URL.split('/')[:-2]))
 
 
 def read_description(path):
