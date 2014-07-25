@@ -350,7 +350,7 @@ def create_dataset(source_or_dataset, dataset_args, args, api=None,
         api = bigml.api.BigML()
     message = dated("Creating dataset.\n")
     log_message(message, log_file=session_file, console=args.verbosity)
-    dataset = api.create_dataset(source_or_dataset, dataset_args)
+    dataset = api.create_dataset(source_or_dataset, dataset_args, retries=None)
     suffix = "_" + dataset_type if dataset_type else ""
     log_created_resources("dataset%s" % suffix, path,
                           bigml.api.get_dataset_id(dataset), open_mode='a')
@@ -569,13 +569,15 @@ def create_models(datasets, model_ids, model_args,
                 if (args.max_categories or
                         (args.test_datasets and args.evaluate)) > 0:
                     dataset = datasets[i]
-                    model = api.create_model(dataset, model_args)
+                    model = api.create_model(dataset, model_args, retries=None)
                 elif args.dataset_off and args.evaluate:
                     multi_dataset = args.test_dataset_ids[:]
                     del multi_dataset[i + existing_models]
-                    model = api.create_model(multi_dataset, model_args)
+                    model = api.create_model(multi_dataset, model_args,
+                                             retries=None)
                 else:
-                    model = api.create_model(datasets, model_args)
+                    model = api.create_model(datasets, model_args,
+                                             retries=None)
                 model_id = check_resource_error(model,
                                                 "Failed to create model: ")
                 log_message("%s\n" % model_id, log_file=log)
@@ -787,7 +789,8 @@ def create_ensembles(datasets, ensemble_ids, ensemble_args, args,
 
             if ensemble_args_list:
                 ensemble_args = ensemble_args_list[i]
-            ensemble = api.create_ensemble(datasets, ensemble_args)
+            ensemble = api.create_ensemble(datasets, ensemble_args,
+                                           retries=None)
             ensemble_id = check_resource_error(ensemble,
                                                "Failed to create ensemble: ")
             log_message("%s\n" % ensemble_id, log_file=log)
@@ -992,7 +995,8 @@ def create_evaluations(model_ids, datasets, evaluation_args, args, api=None,
             new_seed = get_basic_seed(i + existing_evaluations)
             evaluation_args.update(seed=new_seed)
 
-        evaluation = api.create_evaluation(model, dataset, evaluation_args)
+        evaluation = api.create_evaluation(model, dataset, evaluation_args,
+                                           retries=None)
         evaluation_id = check_resource_error(evaluation,
                                              "Failed to create evaluation: ")
         inprogress.append(evaluation_id)
@@ -1124,7 +1128,8 @@ def create_batch_prediction(model_or_ensemble, test_dataset,
     log_message(message, log_file=session_file, console=args.verbosity)
     batch_prediction = api.create_batch_prediction(model_or_ensemble,
                                                    test_dataset,
-                                                   batch_prediction_args)
+                                                   batch_prediction_args,
+                                                   retries=None)
     log_created_resources("batch_prediction", path,
                           bigml.api.get_batch_prediction_id(batch_prediction),
                           open_mode='a')
@@ -1207,7 +1212,7 @@ def create_clusters(datasets, cluster_ids, cluster_args,
                 cluster_args = cluster_args_list[i]
 
 
-            cluster = api.create_cluster(datasets, cluster_args)
+            cluster = api.create_cluster(datasets, cluster_args, retries=None)
             cluster_id = check_resource_error(cluster,
                                               "Failed to create cluster: ")
             log_message("%s\n" % cluster_id, log_file=log)
@@ -1301,7 +1306,8 @@ def create_batch_centroid(cluster, test_dataset,
     log_message(message, log_file=session_file, console=args.verbosity)
     batch_centroid = api.create_batch_centroid(cluster,
                                                test_dataset,
-                                               batch_centroid_args)
+                                               batch_centroid_args,
+                                               retries=None)
     log_created_resources("batch_centroid", path,
                           bigml.api.get_batch_centroid_id(batch_centroid),
                           open_mode='a')

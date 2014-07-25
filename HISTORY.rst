@@ -3,6 +3,12 @@
 History
 -------
 
+1.12.1 (2014-07-25)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing bug when many models are evaluated in k-fold cross-validations. The
+  create evaluation could fail when called with a non-finished model.
+
 1.12.0 (2014-07-15)
 ~~~~~~~~~~~~~~~~~~~
 

@@ -22,6 +22,8 @@ def delete(object_list, delete_method):
         counter = 0
         result = delete_method(obj_id)
         while result['code'] != HTTP_NO_CONTENT and counter < MAX_RETRIES:
+            print "Failed to delete %s with code %s. Retrying." % (obj_id,
+                                                                   result['code'])
             time.sleep(3)
             counter += 1
             result = delete_method(obj_id)
