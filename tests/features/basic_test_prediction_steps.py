@@ -49,7 +49,7 @@ def i_create_all_resources_to_model(step, data=None, output=None):
     shell_execute(command, output, test=None)
 
 
-@step(r'I create BigML feature selection (\d*)-fold cross-validations for "(.*)" improving "(.*)"')
+@step(r'I create BigML feature selection (\d*)-fold cross-validations for "(.*)" improving "(.*)"$')
 def i_create_kfold_cross_validation_objective(step, k_folds=None, objective=None, metric=None):
     if k_folds is None or metric is None or objective is None:
         assert False
@@ -1019,7 +1019,29 @@ def i_create_kfold_cross_validation(step, k_folds=None, features=None, args_sepa
         assert False
 
 
-@step(r'I create BigML feature selection (\d*)-fold cross-validations improving "(.*)"')
+@step(r'I create BigML feature selection (\d*)-fold cross-validations improving "(.*)" in dev mode$')
+def i_create_kfold_cross_validation_in_dev(step, k_folds=None, metric=None):
+    if k_folds is None or metric is None:
+        assert False
+    try:
+        retcode = check_call("bigmler analyze --dataset " +
+                             world.dataset['resource'] +
+                             " --features --dev --k-folds " + k_folds +
+                             " --output " + world.directory +
+                             " --maximize " + metric,
+                             shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.output = os.path.join(world.directory, "test", "kfold1",
+                                        "evaluation")
+            assert True
+    except OSError as e:
+        assert False
+
+
+
+@step(r'I create BigML feature selection (\d*)-fold cross-validations improving "(.*)"$')
 def i_create_kfold_cross_validation(step, k_folds=None, metric=None):
     if k_folds is None or metric is None:
         assert False
@@ -1066,3 +1088,20 @@ def i_have_previous_scenario_or_reproduce_it(step, scenario, kwargs):
                 function(step, **kwargs)
             else:
                 function(step)
+
+
+@step(r'I create BigML dataset in dev mode uploading train "(.*)" file in "(.*)"')
+def i_create_dev_dataset(step, data=None, output=None):
+    if data is None or output is None:
+        assert False
+    try:
+        retcode = check_call("bigmler --train " + data + " --no-model --store --dev --output " + output, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.directory = os.path.dirname(output)
+            world.folders.append(world.directory)
+            world.output = output
+            assert True
+    except OSError as e:
+        assert False

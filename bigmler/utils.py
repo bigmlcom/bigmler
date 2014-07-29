@@ -538,6 +538,7 @@ def get_options_list(args, options, prioritary=None):
     """
     options_list = []
     filtered_options = options[:]
+    non_equivalent_options = {'dev': 'dev_mode'}
     # removes the options that are already set as prioritary
     for element in prioritary:
         try:
@@ -547,7 +548,10 @@ def get_options_list(args, options, prioritary=None):
     # adds the options that have not been assigned a value in prioritary
     for option in filtered_options:
         try:
-            value = getattr(args, option[2:].replace("-", "_"))
+            flag = option[2:].replace("-", "_")
+            if flag in non_equivalent_options.keys():
+                flag = non_equivalent_options[flag]
+            value = getattr(args, flag)
             if value is not None:
                 if isinstance(value, bool):
                     if value:

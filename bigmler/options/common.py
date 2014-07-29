@@ -59,7 +59,7 @@ def get_common_options(defaults=None, constants=None):
         '--api-key': {
             "action": 'store',
             "dest": 'api_key',
-            "default": defaults.get('api-key', None),
+            "default": defaults.get('api_key', None),
             "help": "BigML's API key."},
 
         # Log file to store resources ids.

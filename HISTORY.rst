@@ -3,6 +3,12 @@
 History
 -------
 
+1.12.2 (2014-07-29)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing but for bigmler analyze: the subcommand failed when used in
+  development created resources.
+
 1.12.1 (2014-07-25)
 ~~~~~~~~~~~~~~~~~~~
 
