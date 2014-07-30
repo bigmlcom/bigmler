@@ -367,10 +367,11 @@ def log_message(message, log_file=None, console=False):
        If log_file is set, logs the message in the file.
        If console is True, sends the message to console.
     """
-    if isinstance(message, unicode):
-        message = message.encode("utf-8")
+
     if console:
-        console_log(message)
+        console_log(message.encode(sys.stdout.encoding))
+    if isinstance(message, unicode):
+        message = message.encode('utf8')
     if log_file is not None:
         with open(log_file, 'a', 0) as log_file:
             log_file.write(message)
