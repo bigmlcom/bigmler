@@ -322,10 +322,5 @@ def delete_resources(command_args, api):
     u.log_message(message, log_file=session_file)
     if not command_args.dry_run:
         u.delete(api, delete_list)
-    if sys.platform == "win32" and sys.stdout.isatty():
-        message = (u"\nGenerated files:\n\n" +
-                   unicode(u.print_tree(path, " "), "utf-8") + u"\n")
-    else:
-        message = "\nGenerated files:\n\n" + u.print_tree(path, " ") + "\n"
-    u.log_message(message, log_file=session_file,
-                  console=command_args.verbosity)
+    u.print_generated_files(path, log_file=session_file,
+                            verbosity=command_args.verbosity)

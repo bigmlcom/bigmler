@@ -292,18 +292,8 @@ def compute_output(api, args):
                              session_file=session_file, log=log,
                              dataset_type='cluster')
 
-    # Workaround to restore windows console cp850 encoding to print the tree
-    if sys.platform == "win32" and sys.stdout.isatty():
-        import locale
-        data_locale = locale.getlocale()
-        if not data_locale[0] is None:
-            locale.setlocale(locale.LC_ALL, (data_locale[0], "850"))
-        message = (u"\nGenerated files:\n\n" +
-                   unicode(u.print_tree(path, u" "), "utf-8") + u"\n")
-    else:
-        message = (u"\nGenerated files:\n\n" +
-                   u.print_tree(path, u" ") + u"\n")
-    u.log_message(message, log_file=session_file, console=args.verbosity)
+    u.print_generated_files(path, log_file=session_file,
+                            verbosity=args.verbosity)
     if args.reports:
         clear_reports(path)
         if args.upload:

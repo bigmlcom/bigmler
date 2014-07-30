@@ -3,6 +3,11 @@
 History
 -------
 
+1.12.3 (2014-07-30)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing bug: handling stdout writes of unicodes on Windows.
+
 1.12.2 (2014-07-29)
 ~~~~~~~~~~~~~~~~~~~
 

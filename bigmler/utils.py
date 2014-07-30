@@ -367,10 +367,11 @@ def log_message(message, log_file=None, console=False):
        If log_file is set, logs the message in the file.
        If console is True, sends the message to console.
     """
-    if isinstance(message, unicode):
-        message = message.encode("utf-8")
+
     if console:
-        console_log(message)
+        console_log(message.encode(sys.stdout.encoding))
+    if isinstance(message, unicode):
+        message = message.encode('utf8')
     if log_file is not None:
         with open(log_file, 'a', 0) as log_file:
             log_file.write(message)
@@ -567,3 +568,17 @@ def get_options_list(args, options, prioritary=None):
         except AttributeError:
             pass
     return options_list
+
+def print_generated_files(path, log_file=None, verbosity=1):
+    """Prints the file structure generated while running bigmler
+
+    """
+    # Workaround to restore windows console cp850 encoding to print the tree
+    if sys.platform == "win32" and sys.stdout.isatty():
+        import locale
+        data_locale = locale.getlocale()
+        if not data_locale[0] is None:
+            locale.setlocale(locale.LC_ALL, (data_locale[0], "850"))
+    message = (u"\nGenerated files:\n\n" +
+               print_tree(path, u" ") + u"\n")
+    log_message(message, log_file=log_file, console=verbosity)
