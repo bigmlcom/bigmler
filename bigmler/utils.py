@@ -567,3 +567,17 @@ def get_options_list(args, options, prioritary=None):
         except AttributeError:
             pass
     return options_list
+
+def print_generated_files(path, log_file=None, verbosity=1):
+    """Prints the file structure generated while running bigmler
+
+    """
+    # Workaround to restore windows console cp850 encoding to print the tree
+    if sys.platform == "win32" and sys.stdout.isatty():
+        import locale
+        data_locale = locale.getlocale()
+        if not data_locale[0] is None:
+            locale.setlocale(locale.LC_ALL, (data_locale[0], "850"))
+    message = (u"\nGenerated files:\n\n" +
+               print_tree(path, u" ") + u"\n")
+    log_message(message, log_file=log_file, console=verbosity)
