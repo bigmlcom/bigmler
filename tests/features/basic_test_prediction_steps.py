@@ -133,7 +133,7 @@ def i_create_all_resources_with_options(step, data=None, test=None, output=None,
         assert False
     command = ("bigmler --train " + data + " --test " + test +
                " --store --output " + output + " --max-batch-models 1 " +
-               options)
+               options.replace("'", "\""))
     shell_execute(command, output, test=test, options=options)
 
 
