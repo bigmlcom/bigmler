@@ -144,8 +144,8 @@ def i_create_resources_from_source_with_objective(step, multi_label=None, object
 
     multi_label = "" if multi_label is None else " --multi-label "
     command = ("bigmler "+ multi_label +"--source " + world.source['resource']
-               + " --objective " + objective + " --model-fields ' "
-               + model_fields + "' --test " + test
+               + " --objective " + objective + " --model-fields \" "
+               + model_fields + "\" --test " + test
                + " --store --output " + output)
     shell_execute(command, output, test=test)
 
@@ -176,8 +176,8 @@ def i_create_resources_from_dataset_with_objective(step, multi_label=None, objec
 
     multi_label = "" if multi_label is None else " --multi-label "
     command = ("bigmler "+ multi_label +"--dataset " + world.dataset['resource']
-               + " --objective " + objective + " --model-fields ' "
-               + model_fields + "' --test " + test
+               + " --objective " + objective + " --model-fields \" "
+               + model_fields + "\" --test " + test
                + " --store --output " + output)
     shell_execute(command, output, test=test)
 
@@ -889,7 +889,7 @@ def i_create_all_resources_to_evaluate_and_report(
     try:
         retcode = check_call("bigmler --evaluate --shared --report gazibit" +
                              " --train " + data +
-                             " --store --output " + output, shell=True)
+                             " --store --no-upload --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:
