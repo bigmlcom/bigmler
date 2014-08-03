@@ -243,10 +243,11 @@ def compute_output(api, args):
         clear_log_files([log])
 
     # labels to be used in multi-label expansion
-    labels = (map(str.strip, args.labels.split(','))
-              if args.labels is not None else None)
+    labels = (None if args.labels is None else
+	          [label.strip() for label in
+               args.labels.split(args.args_separator)])
     if labels is not None:
-        labels = sorted([label.decode("utf-8") for label in labels])
+        labels = sorted([label for label in labels])
 
     # multi_label file must be preprocessed to obtain a new extended file
     if args.multi_label and args.training_set is not None:

@@ -291,9 +291,9 @@ def get_output_args(api, command_args, resume):
     # Parses dataset fields if provided.
     try:
         if command_args.dataset_fields:
-            dataset_fields_arg = map(str.strip,
-                                     command_args.dataset_fields.split(
-                                         command_args.args_separator))
+            dataset_fields_arg = [arg.strip() for arg in
+                                  command_args.dataset_fields.split(
+                                  command_args.args_separator)]
             command_args.dataset_fields_ = dataset_fields_arg
         else:
             command_args.dataset_fields_ = []
@@ -346,8 +346,8 @@ def get_output_args(api, command_args, resume):
     # Reads votes files in the provided directories.
     try:
         if command_args.votes_dirs:
-            dirs = map(str.strip, command_args.votes_dirs.split(
-                command_args.args_separator))
+            dirs = [dir.strip() for dir in command_args.votes_dirs.split(
+                command_args.args_separator)]
             votes_path = os.path.dirname(command_args.predictions)
             votes_files = u.read_votes_files(dirs, votes_path)
             command_args.votes_files_ = votes_files
