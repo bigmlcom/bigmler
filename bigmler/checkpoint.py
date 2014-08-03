@@ -71,7 +71,6 @@ def are_datasets_created(path, number_of_datasets, suffix='parts'):
     """
     dataset_ids = []
     try:
-        print "* *  ** *%s%sdataset_%s" % (path, os.sep, suffix)
         with open("%s%sdataset_%s" % (path, os.sep, suffix)) as datasets_file:
             for line in datasets_file:
                 dataset = line.strip()

@@ -386,7 +386,6 @@ def sys_log_message(message, log_file=None):
 
        If log_file is set, logs the message in the file.
     """
-    print "****", repr(message)
     if isinstance(message, unicode):
         message = message.encode(SYSTEM_ENCODING)
     if log_file is not None:

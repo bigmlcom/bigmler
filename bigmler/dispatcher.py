@@ -244,7 +244,7 @@ def compute_output(api, args):
 
     # labels to be used in multi-label expansion
     labels = (None if args.labels is None else
-	          [label.strip() for label in
+              [label.strip() for label in
                args.labels.split(args.args_separator)])
     if labels is not None:
         labels = sorted([label for label in labels])

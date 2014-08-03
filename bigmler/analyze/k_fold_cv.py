@@ -291,8 +291,6 @@ def create_kfold_datasets(dataset, args,
         if resume:
             next_command = subcommand_list.pop()
             if different_command(next_command, command):
-                print "***!!!!! different"
-                print "***", repr(next_command), "\n+++", repr(command)
                 resume = False
                 u.sys_log_message(command, log_file=subcommand_file)
                 main_dispatcher(args=command_args)
@@ -321,8 +319,6 @@ def create_kfold_datasets(dataset, args,
             if resume:
                 next_command = subcommand_list.pop()
                 if different_command(next_command, command):
-                    print "***!!!!! different"
-                    print "***", repr(next_command), "\n+++", repr(command)
                     resume = False
                     u.sys_log_message(command, log_file=subcommand_file)
                     main_dispatcher(args=command_args)
@@ -362,8 +358,6 @@ def create_kfold_evaluations(datasets_file, args, common_options,
     if resume:
         next_command = subcommand_list.pop()
         if different_command(next_command, command):
-            print "***!!!!! different"
-            print "***", repr(next_command), "\n+++", repr(command)
             resume = False
             u.sys_log_message(command, log_file=subcommand_file)
             main_dispatcher(args=command_args)
@@ -624,7 +618,6 @@ def create_node_th_evaluations(datasets_file, args, common_options,
     if resume:
         next_command = subcommand_list.pop()
         if different_command(next_command, command):
-            print "***!!!!! different"
             resume = False
             u.sys_log_message(command, log_file=subcommand_file)
             main_dispatcher(args=command_args)
