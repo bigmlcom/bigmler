@@ -44,9 +44,9 @@ from bigmler.prediction import (OTHER, COMBINATION,
 from bigmler.reports import clear_reports, upload_reports
 from bigmler.command import Command, StoredCommand
 
-COMMAND_LOG = ".bigmler"
-DIRS_LOG = ".bigmler_dir_stack"
-SESSIONS_LOG = "bigmler_sessions"
+COMMAND_LOG = u".bigmler"
+DIRS_LOG = u".bigmler_dir_stack"
+SESSIONS_LOG = u"bigmler_sessions"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 MINIMUM_MODEL = "full=false"
 
@@ -88,10 +88,7 @@ def command_handling(args, log=COMMAND_LOG):
 
     # Resume calls are not logged
     if not command.resume:
-        with open(log, "a", 0) as command_log:
-            if isinstance(command.command, unicode):
-                command.command = command.command.encode("utf-8")
-            command_log.write(command.command)
+        u.sys_log_message(command.command.replace('\\', '\\\\'), log_file=log)
 
     return command
 
@@ -177,8 +174,8 @@ def main_dispatcher(args=sys.argv[1:]):
             defaults_copy.close()
         except IOError:
             pass
-        with open(DIRS_LOG, "a", 0) as directory_log:
-            directory_log.write("%s\n" % os.path.abspath(directory))
+        u.sys_log_message(u"%s\n" % os.path.abspath(directory),
+                          log_file=DIRS_LOG)
 
     # Creates the corresponding api instance
     if resume and debug:

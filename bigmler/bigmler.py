@@ -51,6 +51,7 @@ from bigmler.analyze.dispatcher import analyze_dispatcher
 from bigmler.cluster.dispatcher import cluster_dispatcher
 from bigmler.delete.dispatcher import delete_dispatcher
 from bigmler.parser import SUBCOMMANDS
+from bigmler.utils import SYSTEM_ENCODING
 
 
 def check_delete_option(args):
@@ -79,6 +80,7 @@ def main(args=sys.argv[1:]):
             new_args = args
         # checks if the old --delete syntax is used
         new_args = check_delete_option(new_args)
+        new_args = [arg.decode(SYSTEM_ENCODING) for arg in new_args]
         if new_args[0] == "main":
             main_dispatcher(args=new_args)
         elif new_args[0] == "analyze":

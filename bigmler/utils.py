@@ -37,7 +37,7 @@ from bigml.util import console_log
 
 PAGE_LENGTH = 200
 ATTRIBUTE_NAMES = ['name', 'label', 'description']
-NEW_DIRS_LOG = ".bigmler_dirs"
+NEW_DIRS_LOG = u".bigmler_dirs"
 BRIEF_MODEL_QS = "exclude=root,fields"
 
 # Base Domain
@@ -49,6 +49,10 @@ RESOURCE_URL = ("https://%s/dashboard/" % (BIGML_DOMAIN[:-3] + '.com')
 RESOURCE_SHARED_URL = "%s/shared/" % "/".join(RESOURCE_URL.split('/')[:-2])
 RESOURCE_EMBEDDED_URL = ("%s/embedded/%%s/tree" %
                          "/".join(RESOURCE_URL.split('/')[:-2]))
+
+
+SYSTEM_ENCODING = 'cp1252' if sys.platform == 'win32' else 'utf-8'
+FILE_ENCODING = 'utf-8'
 
 
 def read_description(path):
@@ -299,9 +303,9 @@ def check_dir(path):
     """
     directory = os.path.dirname(path)
     if len(directory) > 0 and not os.path.exists(directory):
-        os.makedirs(directory)
-        with open(NEW_DIRS_LOG, "a", 0) as directory_log:
-            directory_log.write("%s\n" % os.path.abspath(directory))
+        os.makedirs(directory)            
+        sys_log_message(u"%s\n" % os.path.abspath(directory),
+                        log_file=NEW_DIRS_LOG)
     return directory
 
 
@@ -369,9 +373,22 @@ def log_message(message, log_file=None, console=False):
     """
 
     if isinstance(message, unicode):
-        message = message.encode('utf8')
+        message = message.encode(FILE_ENCODING)
     if console:
         console_log(message)
+    if log_file is not None:
+        with open(log_file, 'a', 0) as log_file:
+            log_file.write(message)
+            
+            
+def sys_log_message(message, log_file=None):
+    """Logs a message in a file using the system encoding
+
+       If log_file is set, logs the message in the file.
+    """
+    print "****", repr(message)
+    if isinstance(message, unicode):
+        message = message.encode(SYSTEM_ENCODING)
     if log_file is not None:
         with open(log_file, 'a', 0) as log_file:
             log_file.write(message)

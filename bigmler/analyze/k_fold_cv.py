@@ -26,6 +26,7 @@ from __future__ import absolute_import
 import os
 import sys
 import json
+import re
 
 import bigml
 
@@ -83,8 +84,8 @@ DEFAULT_STALENESS = 5
 DEFAULT_KFOLDS = 5
 
 #subcommands
-SUBCOMMAND_LOG = ".bigmler_subcmd"
-SESSIONS_LOG = "bigmler_sessions"
+SUBCOMMAND_LOG = u".bigmler_subcmd"
+SESSIONS_LOG = u"bigmler_sessions"
 
 #name max length
 NAME_MAX_LENGTH = 127
@@ -100,8 +101,8 @@ def set_subcommand_file(output_dir):
     """
     global subcommand_file
     global session_file
-    subcommand_file = os.path.join(output_dir, SUBCOMMAND_LOG)
-    session_file = os.path.join(output_dir, SESSIONS_LOG)
+    subcommand_file = os.path.normpath(os.path.join(output_dir, SUBCOMMAND_LOG))
+    session_file = os.path.normpath(os.path.join(output_dir, SESSIONS_LOG))
 
 
 def retrieve_subcommands():
@@ -110,7 +111,25 @@ def retrieve_subcommands():
     """
     global subcommand_list
     subcommand_list = open(subcommand_file).readlines()
+    subcommand_list = [subcommand.decode(u.SYSTEM_ENCODING)
+                       for subcommand in subcommand_list]
     subcommand_list.reverse()
+    
+def rebuild_command(args):
+    """Rebuilds a unicode command string prepared to be stored in a file
+
+    """
+    return "%s\n" % (u" ".join(args)).replace("\\", "\\\\")
+    
+def different_command(next_command, command):
+    if next_command == command:
+        return False
+    else:
+        if 'name=BigMLer_' in command:
+            # the difference may be due to the timestamp of default name parameter
+            pattern = re.compile(r'name=Bigmler_[^\s]+')
+            return re.sub(pattern, "", next_command) == re.sub(pattern, "", command)
+        return False
 
 def create_kfold_cv(args, api, common_options, resume=False):
     """Creates the kfold cross-validation
@@ -122,8 +141,8 @@ def create_kfold_cv(args, api, common_options, resume=False):
     datasets_file, _, resume = create_kfold_datasets_file(
         args, api, common_options, resume=resume)
     if datasets_file is not None:
-        args.output_dir = os.path.join(u.check_dir(datasets_file),
-                                       KFOLD_SUBDIR)
+        args.output_dir = os.path.normpath(os.path.join(u.check_dir(datasets_file),
+                                           KFOLD_SUBDIR))
         message = ('Creating the kfold evaluations.........\n')
         u.log_message(message, log_file=session_file,
                       console=args.verbosity)
@@ -151,7 +170,7 @@ def create_features_analysis(args, api, common_options, resume=False):
 
 
 def create_nodes_analysis(args, api, common_options, resume=False):
-    """Analyzes the model performace as a function of node threshold.
+    """Analyzes the model performance as a function of node threshold.
 
     """
     set_subcommand_file(args.output_dir)
@@ -227,7 +246,7 @@ def create_kfold_json(args, kfold_field=DEFAULT_KFOLD_FIELD,
             new_field = NEW_FIELD % (index, k, kfold_field,
                                      index, objective_field)
             selecting_file = TEST_DATASET % index
-            selecting_file = os.path.join(output_dir, selecting_file)
+            selecting_file = os.path.normpath(os.path.join(output_dir, selecting_file))
             selecting_file_list.append(selecting_file)
             # When resuming, check if the file already exists
             if not resume or not os.path.isfile(selecting_file):
@@ -256,7 +275,7 @@ def create_kfold_datasets(dataset, args,
     """Calling the bigmler procedure to create the k-fold datasets
 
     """
-    args.output_dir = os.path.join(args.output_dir, "test")
+    args.output_dir = os.path.normpath(os.path.join(args.output_dir, "test"))
     output_dir = args.output_dir
     global subcommand_list
     # creating the selecting datasets
@@ -268,23 +287,23 @@ def create_kfold_datasets(dataset, args,
         common_options_list = u.get_options_list(args, common_options,
                                                  prioritary=command_args)
         command_args.extend(common_options_list)
-        command = " ".join(command_args)
+        command = rebuild_command(command_args)
         if resume:
-            next_command = subcommand_list.pop().strip()
-            if next_command != command:
+            next_command = subcommand_list.pop()
+            if different_command(next_command, command):
+                print "***!!!!! different"
+                print "***", repr(next_command), "\n+++", repr(command)
                 resume = False
-                u.log_message("%s\n" % command, log_file=subcommand_file,
-                              console=False)
+                u.sys_log_message(command, log_file=subcommand_file)
                 main_dispatcher(args=command_args)
             elif not subcommand_list:
                 main_dispatcher(args=['main', '--resume'])
                 resume = False
         else:
-            u.log_message("%s\n" % command, log_file=subcommand_file,
-                          console=False)
+            u.sys_log_message(command, log_file=subcommand_file)
             main_dispatcher(args=command_args)
     # updating the datasets to set the objective field
-    datasets_file = os.path.join(output_dir, "dataset_gen")
+    datasets_file = os.path.normpath(os.path.join(output_dir, "dataset_gen"))
     with open(datasets_file) as datasets_handler:
         index = 0
         for line in datasets_handler:
@@ -298,20 +317,20 @@ def create_kfold_datasets(dataset, args,
             common_options_list = u.get_options_list(args, common_options,
                                                      prioritary=command_args)
             command_args.extend(common_options_list)
-            command = " ".join(command_args)
+            command = rebuild_command(command_args)
             if resume:
-                next_command = subcommand_list.pop().strip()
-                if next_command != command:
+                next_command = subcommand_list.pop()
+                if different_command(next_command, command):
+                    print "***!!!!! different"
+                    print "***", repr(next_command), "\n+++", repr(command)
                     resume = False
-                    u.log_message("%s\n" % command, log_file=subcommand_file,
-                                  console=False)
+                    u.sys_log_message(command, log_file=subcommand_file)
                     main_dispatcher(args=command_args)
                 elif not subcommand_list:
                     main_dispatcher(args=['main', '--resume'])
                     resume = False
             else:
-                u.log_message("%s\n" % command, log_file=subcommand_file,
-                              console=False)
+                u.sys_log_message(command, log_file=subcommand_file)
                 main_dispatcher(args=command_args)
             index += 1
 
@@ -324,8 +343,9 @@ def create_kfold_evaluations(datasets_file, args, common_options,
 
     """
     global subcommand_list
-    output_dir = u.check_dir(os.path.join("%s%s" % (args.output_dir, counter),
-                                          "evaluation.json"))
+    output_dir = os.path.normpath(
+        u.check_dir(os.path.join(u"%s%s" % (args.output_dir, counter),
+                                 u"evaluation.json")))
     model_fields = args.model_fields
     name_suffix = "_subset_%s" % counter
     name_max_length = NAME_MAX_LENGTH - len(name_suffix)
@@ -338,22 +358,22 @@ def create_kfold_evaluations(datasets_file, args, common_options,
     common_options_list = u.get_options_list(args, common_options,
                                              prioritary=command_args)
     command_args.extend(common_options_list)
-    command = " ".join(command_args)
+    command = rebuild_command(command_args)
     if resume:
-        next_command = subcommand_list.pop().strip()
-        if next_command != command:
+        next_command = subcommand_list.pop()
+        if different_command(next_command, command):
+            print "***!!!!! different"
+            print "***", repr(next_command), "\n+++", repr(command)
             resume = False
-            u.log_message("%s\n" % command, log_file=subcommand_file,
-                          console=False)
+            u.sys_log_message(command, log_file=subcommand_file)
             main_dispatcher(args=command_args)
         elif not subcommand_list:
             main_dispatcher(args=['main', '--resume'])
             resume = False
     else:
-        u.log_message("%s\n" % command, log_file=subcommand_file,
-                      console=False)
+        u.sys_log_message(command, log_file=subcommand_file)
         main_dispatcher(args=command_args)
-    evaluation_file = os.path.join(output_dir, "evaluation.json")
+    evaluation_file = os.path.normpath(os.path.join(output_dir, "evaluation.json"))
     try:
         with open(evaluation_file) as evaluation_handler:
             evaluation = json.loads(evaluation_handler.read())
@@ -405,7 +425,7 @@ def best_first_search(datasets_file, api, args, common_options,
     # initial feature set
     fields = Fields(dataset)
     excluded_features = ([] if args.exclude_features is None else
-                         args.exclude_features.decode("utf8").split(
+                         args.exclude_features.split(
                              args.args_separator))
     excluded_ids = [fields.field_id(feature) for
                     feature in excluded_features]
@@ -462,15 +482,15 @@ def best_first_search(datasets_file, api, args, common_options,
 
     best_features = [fields.field_name(field_ids[i]) for (i, score)
                      in enumerate(best_state) if score]
-    message = ('The best feature subset is: %s \n'
-               % ", ".join(best_features))
+    message = (u'The best feature subset is: %s \n'
+               % u", ".join(best_features))
     u.log_message(message, log_file=session_file, console=1)
     if metric in PERCENT_EVAL_METRICS:
-        message = ('%s = %0.2f%%\n' % (metric.capitalize(), (best_score * 100)))
+        message = (u'%s = %0.2f%%\n' % (metric.capitalize(), (best_score * 100)))
     else:
-        message = ('%s = %f\n' % (metric.capitalize(), best_score))
+        message = (u'%s = %f\n' % (metric.capitalize(), best_score))
     u.log_message(message, log_file=session_file, console=1)
-    message = ('Evaluated %d/%d feature subsets\n' %
+    message = (u'Evaluated %d/%d feature subsets\n' %
                ((len(open_list) + len(closed_list)), 2 ** len(field_ids)))
     u.log_message(message, log_file=session_file, console=1)
 
@@ -482,7 +502,7 @@ def kfold_evaluate(datasets_file, args, counter, common_options,
 
     """
     # create evaluation with input_fields
-    args.output_dir = os.path.join(u.check_dir(datasets_file), "kfold")
+    args.output_dir = os.path.normpath(os.path.join(u.check_dir(datasets_file), "kfold"))
     evaluation, resume = create_kfold_evaluations(datasets_file, args,
                                                   common_options,
                                                   resume=resume,
@@ -508,7 +528,7 @@ def best_node_threshold(datasets_file, args, common_options,
     """Selecting the node_limit to be used in the model construction
 
     """
-    args.output_dir = os.path.join(args.output_dir, "node_th")
+    args.output_dir = os.path.normpath(os.path.join(args.output_dir, "node_th"))
     max_nodes = args.max_nodes + 1
     if args.min_nodes is None:
         args.min_nodes = DEFAULT_MIN_NODES
@@ -591,31 +611,30 @@ def create_node_th_evaluations(datasets_file, args, common_options,
 
     """
     global subcommand_list
-    output_dir = u.check_dir(
-        os.path.join("%s%s" % (args.output_dir, node_threshold),
-                     "evaluation.json"))
+    output_dir = os.path.normpath(u.check_dir(
+        os.path.join(u"%s%s" % (args.output_dir, node_threshold),
+                     "evaluation.json")))
     command = COMMANDS["node_threshold"] % (
         datasets_file, node_threshold, output_dir)
     command_args = command.split()
     common_options_list = u.get_options_list(args, common_options,
                                              prioritary=command_args)
     command_args.extend(common_options_list)
-    command = " ".join(command_args)
+    command = rebuild_command(command_args)
     if resume:
-        next_command = subcommand_list.pop().strip()
-        if next_command != command:
+        next_command = subcommand_list.pop()
+        if different_command(next_command, command):
+            print "***!!!!! different"
             resume = False
-            u.log_message("%s\n" % command, log_file=subcommand_file,
-                          console=False)
+            u.sys_log_message(command, log_file=subcommand_file)
             main_dispatcher(args=command_args)
         elif not subcommand_list:
             main_dispatcher(args=['main', '--resume'])
             resume = False
     else:
-        u.log_message("%s\n" % command, log_file=subcommand_file,
-                      console=False)
+        u.sys_log_message(command, log_file=subcommand_file)
         main_dispatcher(args=command_args)
-    evaluation_file = os.path.join(output_dir, "evaluation.json")
+    evaluation_file = os.path.normpath(os.path.join(output_dir, "evaluation.json"))
     try:
         with open(evaluation_file) as evaluation_handler:
             evaluation = json.loads(evaluation_handler.read())

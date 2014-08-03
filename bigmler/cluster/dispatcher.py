@@ -38,11 +38,11 @@ from bigmler.dispatcher import (SESSIONS_LOG, command_handling,
                                 clear_log_files,
                                 has_test, has_train)
 
-COMMAND_LOG = ".bigmler_cluster"
-DIRS_LOG = ".bigmler_cluster_dir_stack"
+COMMAND_LOG = u".bigmler_cluster"
+DIRS_LOG = u".bigmler_cluster_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 MINIMUM_MODEL = "full=false"
-DEFAULT_OUTPUT = "centroids.csv"
+DEFAULT_OUTPUT = u"centroids.csv"
 
 
 def cluster_dispatcher(args=sys.argv[1:]):
@@ -95,8 +95,8 @@ def cluster_dispatcher(args=sys.argv[1:]):
             defaults_copy.close()
         except IOError:
             pass
-        with open(DIRS_LOG, "a", 0) as directory_log:
-            directory_log.write("%s\n" % os.path.abspath(directory))
+        u.sys_log_message(u"%s\n" % os.path.abspath(directory),
+                          log_file=DIRS_LOG)
 
     # Creates the corresponding api instance
     if resume and debug:
@@ -147,7 +147,7 @@ def compute_output(api, args):
                  " to generate the new dataset from it.")
 
     path = u.check_dir(output)
-    session_file = "%s%s%s" % (path, os.sep, SESSIONS_LOG)
+    session_file = u"%s%s%s" % (path, os.sep, SESSIONS_LOG)
     csv_properties = {}
     # If logging is required set the file for logging
     log = None

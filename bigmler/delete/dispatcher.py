@@ -32,8 +32,8 @@ from bigmler.command import Command, StoredCommand
 from bigmler.dispatcher import (SESSIONS_LOG, command_handling,
                                 clear_log_files)
 
-COMMAND_LOG = ".bigmler_delete"
-DIRS_LOG = ".bigmler_delete_dir_stack"
+COMMAND_LOG = u".bigmler_delete"
+DIRS_LOG = u".bigmler_delete_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 ROWS_LIMIT = 15
 INDENT_IDS = 26
@@ -230,8 +230,8 @@ def delete_dispatcher(args=sys.argv[1:]):
             defaults_copy.close()
         except IOError:
             pass
-        with open(DIRS_LOG, "a", 0) as directory_log:
-            directory_log.write("%s\n" % os.path.abspath(directory))
+        u.sys_log_message(u"%s\n" % os.path.abspath(directory),
+                          log_file=DIRS_LOG)
 
     # If --clear-logs the log files are cleared
     if "--clear-logs" in args:

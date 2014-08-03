@@ -36,9 +36,8 @@ from bigmler.dispatcher import (SESSIONS_LOG, command_handling,
 from bigmler.command import Command, StoredCommand
 
 
-COMMAND_LOG = ".bigmler_analyze"
-DIRS_LOG = ".bigmler_analyze_dir_stack"
-SESSIONS_LOG = "bigmler_sessions"
+COMMAND_LOG = u".bigmler_analyze"
+DIRS_LOG = u".bigmler_analyze_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 
 
@@ -87,9 +86,8 @@ def analyze_dispatcher(args=sys.argv[1:]):
             command_args.model_fields_ = map(str.strip, model_fields)
         else:
             command_args.model_fields_ = {}
-        with open(DIRS_LOG, "a", 0) as directory_log:
-            directory_log.write("%s\n" %
-                                os.path.abspath(command_args.output_dir))
+        u.sys_log_message(u"%s\n" % os.path.abspath(command_args.output_dir),
+                          log_file=DIRS_LOG)
         session_file = os.path.join(command_args.output_dir, SESSIONS_LOG)
     # create api instance form args
     api = a.get_api_instance(command_args,

@@ -72,7 +72,7 @@ def get_log_reversed(file_name, stack_level):
 
     """
     lines_list = tail(open(file_name, "r"), window=(stack_level + 1))
-    return lines_list[0]
+    return lines_list[0].decode(u.SYSTEM_ENCODING)
 
 
 class Command(object):
@@ -113,9 +113,10 @@ class StoredCommand(object):
         self.command = get_log_reversed(command_log, stack_level)
         self.output_dir = get_log_reversed(dirs_log, stack_level)
         self.defaults_file = os.path.join(self.output_dir, DEFAULTS_FILE)
-        self.args = shlex.split(self.command)[1:]
+        self.args = [arg.decode(u.SYSTEM_ENCODING) for arg in
+                     shlex.split(self.command.encode(u.SYSTEM_ENCODING))[1:]]
         if not ("--output" in self.args or "--output-dir" in self.args):
-            current_directory = "%s%s" % (os.getcwd(), os.sep)
+            current_directory = u"%s%s" % (os.getcwd(), os.sep)
             if self.output_dir.startswith(current_directory):
                 self.output_dir = self.output_dir.replace(current_directory,
                                                           "", 1)
@@ -127,12 +128,12 @@ class StoredCommand(object):
 
         """
         u.log_message(self.resume_command, log_file=session_file)
-        message = "\nResuming command:\n%s\n\n" % self.command
+        message = u"\nResuming command:\n%s\n\n" % self.command
         u.log_message(message, log_file=session_file, console=True)
         try:
             with open(self.defaults_file, 'r') as defaults_handler:
                 contents = defaults_handler.read()
-            message = "\nUsing the following defaults:\n%s\n\n" % contents
+            message = u"\nUsing the following defaults:\n%s\n\n" % contents
             u.log_message(message, log_file=session_file, console=True)
         except IOError:
             pass

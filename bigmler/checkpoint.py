@@ -64,14 +64,15 @@ def is_dataset_created(path, suffix=""):
         return False, None
 
 
-def are_datasets_created(path, number_of_datasets):
+def are_datasets_created(path, number_of_datasets, suffix='parts'):
     """Checks existence and reads the dataset ids from the datasets file in
        the path directory
 
     """
     dataset_ids = []
     try:
-        with open("%s%sdataset_parts" % (path, os.sep)) as datasets_file:
+        print "* *  ** *%s%sdataset_%s" % (path, os.sep, suffix)
+        with open("%s%sdataset_%s" % (path, os.sep, suffix)) as datasets_file:
             for line in datasets_file:
                 dataset = line.strip()
                 try:
@@ -190,13 +191,16 @@ def checkpoint(function, *args, **kwargs):
     """Redirects to each checkpoint function
 
     """
-
+    common_parms = ['debug', 'message', 'log_file', 'console']
     debug = kwargs.get('debug', False)
     message = kwargs.get('message', None)
     log_file = kwargs.get('log_file', None)
     console = kwargs.get('console', False)
+    
+    f_kwargs = {key: value for key, value in kwargs.items()
+                if not key in common_parms}
 
-    result = function(*args)
+    result = function(*args, **f_kwargs)
     if debug:
         console_log("Checkpoint: checking %s with args:\n%s\n\nResult:\n%s\n" %
                     (function.__name__, "\n".join([repr(arg) for arg in args]),

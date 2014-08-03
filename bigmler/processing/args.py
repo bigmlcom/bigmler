@@ -107,8 +107,8 @@ def get_command_message(args):
             if args[i][0] in ADD_REMOVE_PREFIX:
                 prefix = args[i][0]
                 literal = args[i][1:]
-            literal_args[i] = '%s"%s"' % (prefix, literal)
-    return "bigmler %s\n" % " ".join(literal_args)
+            literal_args[i] = '"%s%s"' % (prefix, literal)
+    return u"bigmler %s\n" % u" ".join(literal_args)
 
 
 def parse_and_check(command):
