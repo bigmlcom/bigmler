@@ -3,6 +3,11 @@
 History
 -------
 
+1.12.4 (2014-08-03)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing bug: handling unicode command parameters on Windows.
+
 1.12.3 (2014-07-30)
 ~~~~~~~~~~~~~~~~~~~
 
