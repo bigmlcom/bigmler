@@ -101,7 +101,8 @@ def set_subcommand_file(output_dir):
     """
     global subcommand_file
     global session_file
-    subcommand_file = os.path.normpath(os.path.join(output_dir, SUBCOMMAND_LOG))
+    subcommand_file = os.path.normpath(os.path.join(output_dir,
+                                                    SUBCOMMAND_LOG))
     session_file = os.path.normpath(os.path.join(output_dir, SESSIONS_LOG))
 
 
@@ -114,22 +115,27 @@ def retrieve_subcommands():
     subcommand_list = [subcommand.decode(u.SYSTEM_ENCODING)
                        for subcommand in subcommand_list]
     subcommand_list.reverse()
-    
+
+
 def rebuild_command(args):
     """Rebuilds a unicode command string prepared to be stored in a file
 
     """
     return "%s\n" % (u" ".join(args)).replace("\\", "\\\\")
-    
+
+
 def different_command(next_command, command):
     if next_command == command:
         return False
     else:
         if 'name=BigMLer_' in command:
-            # the difference may be due to the timestamp of default name parameter
+            # the difference may be due to the timestamp of default name
+            # parameter
             pattern = re.compile(r'name=Bigmler_[^\s]+')
-            return re.sub(pattern, "", next_command) == re.sub(pattern, "", command)
+            return re.sub(pattern, "", next_command) == re.sub(pattern,
+                                                               "", command)
         return False
+
 
 def create_kfold_cv(args, api, common_options, resume=False):
     """Creates the kfold cross-validation
@@ -141,8 +147,9 @@ def create_kfold_cv(args, api, common_options, resume=False):
     datasets_file, _, resume = create_kfold_datasets_file(
         args, api, common_options, resume=resume)
     if datasets_file is not None:
-        args.output_dir = os.path.normpath(os.path.join(u.check_dir(datasets_file),
-                                           KFOLD_SUBDIR))
+        args.output_dir = os.path.normpath(
+            os.path.join(u.check_dir(datasets_file),
+                         KFOLD_SUBDIR))
         message = ('Creating the kfold evaluations.........\n')
         u.log_message(message, log_file=session_file,
                       console=args.verbosity)
@@ -176,7 +183,7 @@ def create_nodes_analysis(args, api, common_options, resume=False):
     set_subcommand_file(args.output_dir)
     if resume:
         retrieve_subcommands()
-    datasets_file, objective_name, resume = create_kfold_datasets_file(
+    datasets_file, _, resume = create_kfold_datasets_file(
         args, api, common_options, resume=resume)
     message = ('Creating the node threshold set..........\n')
     u.log_message(message, log_file=session_file,
@@ -246,7 +253,8 @@ def create_kfold_json(args, kfold_field=DEFAULT_KFOLD_FIELD,
             new_field = NEW_FIELD % (index, k, kfold_field,
                                      index, objective_field)
             selecting_file = TEST_DATASET % index
-            selecting_file = os.path.normpath(os.path.join(output_dir, selecting_file))
+            selecting_file = os.path.normpath(os.path.join(output_dir,
+                                                           selecting_file))
             selecting_file_list.append(selecting_file)
             # When resuming, check if the file already exists
             if not resume or not os.path.isfile(selecting_file):
@@ -367,7 +375,8 @@ def create_kfold_evaluations(datasets_file, args, common_options,
     else:
         u.sys_log_message(command, log_file=subcommand_file)
         main_dispatcher(args=command_args)
-    evaluation_file = os.path.normpath(os.path.join(output_dir, "evaluation.json"))
+    evaluation_file = os.path.normpath(os.path.join(output_dir,
+                                                    "evaluation.json"))
     try:
         with open(evaluation_file) as evaluation_handler:
             evaluation = json.loads(evaluation_handler.read())
@@ -480,7 +489,8 @@ def best_first_search(datasets_file, api, args, common_options,
                % u", ".join(best_features))
     u.log_message(message, log_file=session_file, console=1)
     if metric in PERCENT_EVAL_METRICS:
-        message = (u'%s = %0.2f%%\n' % (metric.capitalize(), (best_score * 100)))
+        message = (u'%s = %0.2f%%\n' % (metric.capitalize(),
+                                        (best_score * 100)))
     else:
         message = (u'%s = %f\n' % (metric.capitalize(), best_score))
     u.log_message(message, log_file=session_file, console=1)
@@ -496,7 +506,8 @@ def kfold_evaluate(datasets_file, args, counter, common_options,
 
     """
     # create evaluation with input_fields
-    args.output_dir = os.path.normpath(os.path.join(u.check_dir(datasets_file), "kfold"))
+    args.output_dir = os.path.normpath(os.path.join(u.check_dir(datasets_file),
+                                                    "kfold"))
     evaluation, resume = create_kfold_evaluations(datasets_file, args,
                                                   common_options,
                                                   resume=resume,
@@ -522,7 +533,8 @@ def best_node_threshold(datasets_file, args, common_options,
     """Selecting the node_limit to be used in the model construction
 
     """
-    args.output_dir = os.path.normpath(os.path.join(args.output_dir, "node_th"))
+    args.output_dir = os.path.normpath(os.path.join(args.output_dir,
+                                                    "node_th"))
     max_nodes = args.max_nodes + 1
     if args.min_nodes is None:
         args.min_nodes = DEFAULT_MIN_NODES
@@ -627,7 +639,8 @@ def create_node_th_evaluations(datasets_file, args, common_options,
     else:
         u.sys_log_message(command, log_file=subcommand_file)
         main_dispatcher(args=command_args)
-    evaluation_file = os.path.normpath(os.path.join(output_dir, "evaluation.json"))
+    evaluation_file = os.path.normpath(os.path.join(output_dir,
+                                                    "evaluation.json"))
     try:
         with open(evaluation_file) as evaluation_handler:
             evaluation = json.loads(evaluation_handler.read())

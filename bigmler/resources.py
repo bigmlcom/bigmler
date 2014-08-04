@@ -312,7 +312,7 @@ def set_dataset_args(args, fields, multi_label_data=None):
         input_fields = configure_input_fields(fields, args.dataset_fields_)
         dataset_args.update(input_fields=input_fields)
     if (hasattr(args, 'multi_label') and args.multi_label
-        and multi_label_data is not None):
+            and multi_label_data is not None):
         dataset_args.update(
             user_metadata={'multi_label_data': multi_label_data})
     if 'dataset' in args.json_args and args.json_args['dataset']:
@@ -1099,7 +1099,8 @@ def set_batch_prediction_args(args, fields=None,
         if dataset_fields is None:
             dataset_fields = fields
         batch_prediction_args.update({
-            "fields_map": map_fields(args.fields_map_, fields, dataset_fields)})
+            "fields_map": map_fields(args.fields_map_,
+                                     fields, dataset_fields)})
 
     if args.prediction_info == NORMAL_FORMAT:
         batch_prediction_args.update(confidence=True)
@@ -1210,7 +1211,6 @@ def create_clusters(datasets, cluster_ids, cluster_args,
                                      query_string=query_string)
             if cluster_args_list:
                 cluster_args = cluster_args_list[i]
-
 
             cluster = api.create_cluster(datasets, cluster_args, retries=None)
             cluster_id = check_resource_error(cluster,

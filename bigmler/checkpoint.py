@@ -195,7 +195,7 @@ def checkpoint(function, *args, **kwargs):
     message = kwargs.get('message', None)
     log_file = kwargs.get('log_file', None)
     console = kwargs.get('console', False)
-    
+
     f_kwargs = {key: value for key, value in kwargs.items()
                 if not key in common_parms}
 
@@ -285,6 +285,7 @@ def are_clusters_created(path, number_of_clusters):
             return False, cluster_ids
     except IOError:
         return False, cluster_ids
+
 
 def is_dataset_exported(filename):
     """Checks the existence of the CSV exported dataset file

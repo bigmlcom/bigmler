@@ -303,7 +303,7 @@ def check_dir(path):
     """
     directory = os.path.dirname(path)
     if len(directory) > 0 and not os.path.exists(directory):
-        os.makedirs(directory)            
+        os.makedirs(directory)
         sys_log_message(u"%s\n" % os.path.abspath(directory),
                         log_file=NEW_DIRS_LOG)
     return directory
@@ -379,8 +379,8 @@ def log_message(message, log_file=None, console=False):
     if log_file is not None:
         with open(log_file, 'a', 0) as log_file:
             log_file.write(message)
-            
-            
+
+
 def sys_log_message(message, log_file=None):
     """Logs a message in a file using the system encoding
 

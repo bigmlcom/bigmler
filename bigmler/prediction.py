@@ -80,7 +80,7 @@ def use_prediction_headers(prediction_headers, output, test_reader,
                              field == objective_field]
 
         if args.prediction_fields is not None:
-            prediction_fields = [field.strip() for field in 
+            prediction_fields = [field.strip() for field in
                                  args.prediction_fields.split(',')]
             # Filter input_headers adding only those chosen by the user
             number_of_headers = len(input_headers)
