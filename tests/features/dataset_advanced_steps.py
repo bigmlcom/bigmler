@@ -5,8 +5,10 @@ import json
 from lettuce import step, world
 from subprocess import check_call, CalledProcessError
 from bigmler.checkpoint import file_number_of_lines
+from bigmler.utils import SYSTEM_ENCODING
 from bigml.api import check_resource
 from common_steps import check_debug
+
 
 @step(r'I create a BigML dataset from "(.*)" and store logs in "(.*)"')
 def i_create_dataset(step, data=None, output_dir=None):
@@ -18,7 +20,7 @@ def i_create_dataset(step, data=None, output_dir=None):
         command = (u"bigmler --train " + data +
                    u" --no-model --store --output-dir " + output_dir)
         command = check_debug(command)
-        retcode = check_call(command, shell=True)
+        retcode = check_call(command.encode(SYSTEM_ENCODING), shell=True)
         if retcode < 0:
             assert False
         else:

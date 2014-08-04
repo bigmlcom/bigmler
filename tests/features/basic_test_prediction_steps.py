@@ -7,6 +7,7 @@ from subprocess import check_call, CalledProcessError
 from bigml.api import check_resource
 from bigmler.processing.models import MONTECARLO_FACTOR
 from bigmler.checkpoint import file_number_of_lines
+from bigmler.utils import SYSTEM_ENCODING
 from ml_test_prediction_steps import i_create_all_ml_resources
 from ml_test_prediction_steps import i_create_all_ml_resources_and_ensembles
 from ml_test_evaluation_steps import i_create_all_ml_resources_for_evaluation
@@ -207,7 +208,7 @@ def i_create_resources_from_dataset_objective_model(step, objective=None, fields
     command = (u"bigmler --dataset " + world.dataset['resource'] +
                u" --objective " + objective + u" --model-fields " +
                fields + u" --test " + test + u" --store --output " + output)
-    shell_execute(command, output, test=test)
+    shell_execute(command.encode(SYSTEM_ENCODING), output, test=test)
 
 
 @step(r'I create BigML resources using model to test "(.*)" and log predictions in "(.*)"')
