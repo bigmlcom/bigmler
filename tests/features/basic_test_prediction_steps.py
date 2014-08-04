@@ -204,9 +204,9 @@ def i_create_resources_from_dataset_batch(step, output=None):
 def i_create_resources_from_dataset_objective_model(step, objective=None, fields=None, test=None, output=None):
     if objective is None or fields is None or test is None or output is None:
         assert False
-    command = ("bigmler --dataset " + world.dataset['resource'] +
-               " --objective " + objective + " --model-fields " +
-               fields + " --test " + test + " --store --output " + output)
+    command = (u"bigmler --dataset " + world.dataset['resource'] +
+               u" --objective " + objective + u" --model-fields " +
+               fields + u" --test " + test + u" --store --output " + output)
     shell_execute(command, output, test=test)
 
 

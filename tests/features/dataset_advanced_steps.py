@@ -15,8 +15,8 @@ def i_create_dataset(step, data=None, output_dir=None):
     world.directory = output_dir
     world.folders.append(world.directory)
     try:
-        command = ("bigmler --train " + data +
-                   " --no-model --store --output-dir " + output_dir)
+        command = (u"bigmler --train " + data +
+                   u" --no-model --store --output-dir " + output_dir)
         command = check_debug(command)
         retcode = check_call(command, shell=True)
         if retcode < 0:
