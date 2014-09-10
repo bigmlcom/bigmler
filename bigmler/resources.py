@@ -438,7 +438,8 @@ def set_model_args(args, name=None, objective_field=None, fields=None,
         "name": name,
         "description": args.description_,
         "category": args.category,
-        "tags": args.tag
+        "tags": args.tag,
+        "missing_splits": args.missing_splits
     }
     if objective_field is not None and fields is not None:
         model_args.update({"objective_field":
@@ -720,7 +721,8 @@ def set_ensemble_args(args, name=None,
         "description": args.description_,
         "number_of_models": args.number_of_models,
         "category": args.category,
-        "tags": args.tag
+        "tags": args.tag,
+        "missing_splits": args.missing_splits
     }
     if objective_field is not None and fields is not None:
         ensemble_args.update({"objective_field":

@@ -3,6 +3,12 @@
 History
 -------
 
+1.13.0 (2014-09-10)
+~~~~~~~~~~~~~~~~~~~
+
+- Adding the new --missing-splits flag to control if missing values are
+  included in tree branches.
+
 1.12.4 (2014-08-03)
 ~~~~~~~~~~~~~~~~~~~
 
