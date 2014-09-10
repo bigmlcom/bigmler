@@ -665,6 +665,43 @@ weight ``1`` is used as default. All specified weights must be non-negative
 numbers (with either integer or real values) and at least one of them must
 be non-zero.
 
+Predictions' missing strategy
+-----------------------------
+
+Sometimes the available data lacks some of the features our models use to
+predict. In these occasions, BigML offers two different ways of handling
+input data with missing values, that is to say, the missing strategy. When the
+path to the prediction reaches a split point that checks
+the value of a field which is missing in your input data, using the
+``last prediction`` strategy the final prediction will be the prediction for
+the last node in the path before that point, and using the ``proportional``
+strategy it will be a weighted average of all the predictions for the final
+nodes reached considering that both branches of the split are possible.
+
+BigMLer adds the ``--missing-strategy`` option, that can be set either to
+``last`` or ``proportional`` to choose the behavior in such cases. Last
+prediction is the one used when this option is not used.::
+
+    bigmler --model model/52b8a12037203f48bc00001a \
+            --missing-strategy proportional --test my_test.csv
+
+
+Models with missing splits
+--------------------------
+
+Another configuration argument that can change models when
+the training data has instances with missing values in some of its features
+is ``--missing-splits``. By setting this flag, the model building algorithm
+will be able to include the instances
+that have missing values for the field used to split the data in each node
+in one of the stemming branches. This will, obviously, affect also the
+predictions given by the model for input data with missing values. Here's an
+example to build
+a model using missing-splits and predict with it.::
+
+    bigmler --dataset dataset/52b8a12037203f48bc00023b \
+            --missing-splits --test my_test.csv
+
 
 Fitering Sources
 ----------------
@@ -1559,6 +1596,15 @@ Basic Functionality
                                     It's allowed values are ``smart``,
                                     ``statistical`` and ``no-pruning``
                                     The default value is ``smart``
+--missing-strategy STRATEGY         The strategy applied predicting when a
+                                    missing value is found in a model split.
+                                    It's allowed values are ``last`` or 
+                                    ``proportional``.
+                                    The default value is ``last``
+--missing-splits                    Turns on the missing_splits flag in model
+                                    creation. The model splits can include
+                                    in one of its branches the data with
+                                    missing values
 --evaluate                          Turns on evaluation mode
 --resume                            Retries command execution
 --stack-level LEVEL                 Level of the retried command in the stack
@@ -1656,6 +1702,8 @@ Data Configuration
                                     cross-validation)
 --args-separator                    Character used as separator in multi-valued
                                     arguments (default is comma)
+--no-missing-splits                 Turns off the missing_splits flag in model
+                                    creation.
 
 Remote Resources
 ----------------
