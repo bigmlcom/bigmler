@@ -430,6 +430,15 @@ def get_main_options(defaults=None, constants=None):
             'choices': ["gazibit"],
             'help': "Output report formats."},
 
+        # Set it to use the missing splits operators: including missing values
+        # in tree branches.
+        '--missing-splits': {
+            'action': 'store_true',
+            'dest': 'missing_splits',
+            'default': defaults.get('missing_splits', False),
+            'help': ("Accept missing values as valid in some branches of the"
+                     "tree.")},
+
         # Disables reports upload.
         '--no-upload': {
             'action': 'store_false',
@@ -546,6 +555,15 @@ def get_main_options(defaults=None, constants=None):
             'action': 'store_false',
             'dest': 'dataset_off',
             'default': defaults.get('dataset_off', False),
-            'help': "Turning off the dataset-off flag."}}
+            'help': "Turning off the dataset-off flag."},
+
+        # No missing_splits used: Don't include missing values in branches
+        # of the tree.
+        '--no-missing-splits': {
+            'action': 'store_false',
+            'dest': 'missing_splits',
+            'default': defaults.get('missing_splits', False),
+            'help': ("Turning off the --missing-splits flag: don't include"
+                     " missing values in branches of the tree.")}}
 
     return options

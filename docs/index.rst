@@ -1771,7 +1771,7 @@ Analyze subcommand Options
 --exclude-features          Comma-separated list of features in the dataset
                             to be excluded from the features analysis
 
-Custer Specific Subcommand Options
+Cluster Specific Subcommand Options
 ----------------------------------
 
 --model MODEL                     BigML model Id

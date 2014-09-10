@@ -82,12 +82,32 @@ def i_create_all_resources_proportional(step, data=None, test=None, output=None)
     shell_execute(command, output, test=test)
 
 
+@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" with a missing-splits model and log predictions in "([^"]*)"$')
+def i_create_all_resources_missing_splits(step, data=None, test=None, output=None):
+    if data is None or test is None or output is None:
+        assert False
+    command = ("bigmler --train " + data + " --test " + test +
+               " --missing-splits" +
+               " --store --output " + output + " --max-batch-models 1")
+    shell_execute(command, output, test=test)
+
+
 @step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" remotely with proportional missing strategy and log predictions in "([^"]*)"$')
 def i_create_all_resources_remote_proportional(step, data=None, test=None, output=None):
     if data is None or test is None or output is None:
         assert False
     command = ("bigmler --train " + data + " --test " + test +
                " --missing-strategy proportional --remote" +
+               " --store --output " + output + " --max-batch-models 1")
+    shell_execute(command, output, test=test)
+
+
+@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" remotely with a missing-splits model and log predictions in "([^"]*)"$')
+def i_create_all_resources_remote_missing_splits(step, data=None, test=None, output=None):
+    if data is None or test is None or output is None:
+        assert False
+    command = ("bigmler --train " + data + " --test " + test +
+               " --missing-splits --remote" +
                " --store --output " + output + " --max-batch-models 1")
     shell_execute(command, output, test=test)
 

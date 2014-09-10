@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__version__ = '1.12.4'
+__version__ = '1.13.0'
 
 if __name__ == '__main__':
     import sys
