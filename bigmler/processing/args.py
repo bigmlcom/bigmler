@@ -85,14 +85,6 @@ def get_flags(args):
     return flags, train_stdin, test_stdin
 
 
-def get_attribute(args, attribute):
-    """Returns the associated attribute, if present, in the args object
-
-    """
-
-    return None if not hasattr(args, attribute) else args.attribute
-
-
 def get_command_message(args):
     """Rebuilds the command message based on the args list
 
@@ -409,8 +401,8 @@ def transform_args(command_args, flags, api, user_defaults):
     command_args.json_args = {}
 
     for resource_type in RESOURCE_TYPES:
-        attributes_file = get_attribute(command_args,
-                                        "%s_attribute" % resource_type)
+        attributes_file = getattr(command_args,
+                                  "%s_attributes" % resource_type, None)
         if attributes_file is not None:
             command_args.json_args[resource_type] = u.read_json(
                 attributes_file)

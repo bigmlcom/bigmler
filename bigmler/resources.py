@@ -1109,8 +1109,18 @@ def set_batch_prediction_args(args, fields=None,
 
     if args.prediction_info == FULL_FORMAT:
         batch_prediction_args.update(all_fields=True)
+    if args.prediction_fields:
+        batch_prediction_args.update(all_fields=False)
+        prediction_fields = []
+        for field in args.prediction_fields.split(args.args_separator):
+            field = field.strip()
+            if not field in fields.fields:
+                field = fields.field_id(field)
+            prediction_fields.append(field)
+        batch_prediction_args.update(output_fields=prediction_fields)
     if args.missing_strategy:
         batch_prediction_args.update(missing_strategy=args.missing_strategy)
+
     if ('batch_prediction' in args.json_args and
             args.json_args['batch_prediction']):
         batch_prediction_args.update(args.json_args['batch_prediction'])
@@ -1127,6 +1137,7 @@ def create_batch_prediction(model_or_ensemble, test_dataset,
     """
     if api is None:
         api = bigml.api.BigML()
+
     message = dated("Creating batch prediction.\n")
     log_message(message, log_file=session_file, console=args.verbosity)
     batch_prediction = api.create_batch_prediction(model_or_ensemble,
