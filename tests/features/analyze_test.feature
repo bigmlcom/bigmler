@@ -28,9 +28,9 @@ Feature: Produce model analysis from a dataset
         Then the best feature selection is "<selection>", with "<metric>" of <metric_value>
 
         Examples:
-        | data                | output                    | kfold | metric   | selection   | metric_value |
-        | ../data/iris_2f.csv | ./scenario_a_2/evaluation | 2     | accuracy | petal width | 99.90%       |
-        | ../data/iris_2f.csv | ./scenario_a_3/evaluation | 2     | phi      | petal width | 0.999000     |
+        | data                | output                    | kfold | metric   | selection   | metric_value 
+        | ../data/iris_2f.csv | ./scenario_a_2/evaluation | 2     | accuracy | petal width | 100.00%      
+        | ../data/iris_2f.csv | ./scenario_a_3/evaluation | 2     | phi      | petal width | 1            
 
 
     Scenario: Successfully building feature selection from dataset setting objective:
@@ -45,7 +45,7 @@ Feature: Produce model analysis from a dataset
 
         Examples:
         | data                | objective     |output                    | kfold | metric   | selection   | metric_value |
-        | ../data/iris_2f.csv | 0             |./scenario_a_5/evaluation | 2     | r_squared| species     | 0.457090     |
+        | ../data/iris_2f.csv | 0             |./scenario_a_5/evaluation | 2     | r_squared| species     | 0.352845     |
 
 
 
@@ -63,7 +63,7 @@ Feature: Produce model analysis from a dataset
 
         Examples:
         | data                 | field               | objective     |output                    | output_dir | kfold | metric   | selection   | metric_value |
-        | ../data/iris_2fd.csv | sepal length        | species         |./scenario_a_6/evaluation |./scenario_a_6 | 2     | recall   | petal width | 99.90%     |
+        | ../data/iris_2fd.csv | sepal length        | species         |./scenario_a_6/evaluation |./scenario_a_6 | 2     | recall   | petal width | 100.00%     |
 
 
     Scenario: Successfully building nodes threshold analysis from dataset:
@@ -78,7 +78,7 @@ Feature: Produce model analysis from a dataset
 
         Examples:
         | data                | output                  | min_nodes | max_nodes | nodes_step | kfold | metric   | node_threshold   | metric_value |
-        | ../data/iris.csv | ./scenario_a_4/evaluation | 3         | 14        | 2         |2     | precision  | 9                | 95.64%         |
+        | ../data/iris.csv | ./scenario_a_4/evaluation | 3         | 14        | 2         |2     | precision  | 9                | 94.71%         |
 
     Scenario: Successfully building feature selection from dataset excluding features:
         Given I create BigML dataset uploading train "<data>" file in "<output>"
@@ -92,4 +92,4 @@ Feature: Produce model analysis from a dataset
 
         Examples:
         | data                | output                    | kfold | features              | args_separator | metric   | selection   | metric_value |
-        | ../data/iris.csv | ./scenario_a_7/evaluation | 2     | petal length!sepal width | !              | accuracy | petal width | 95.23%      |
+        | ../data/iris.csv | ./scenario_a_7/evaluation | 2     | petal length!sepal width | !              | accuracy | petal width | 95.33%      |

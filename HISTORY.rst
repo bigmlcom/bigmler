@@ -3,6 +3,11 @@
 History
 -------
 
+1.13.1 (2014-09-22)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing bug: bigmler analyze was needlessly sampling data to evaluate.
+
 1.13.0 (2014-09-10)
 ~~~~~~~~~~~~~~~~~~~
 

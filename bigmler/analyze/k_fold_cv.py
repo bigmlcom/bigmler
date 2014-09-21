@@ -27,6 +27,7 @@ import os
 import sys
 import json
 import re
+import csv
 
 import bigml
 
@@ -86,6 +87,8 @@ DEFAULT_KFOLDS = 5
 #subcommands
 SUBCOMMAND_LOG = u".bigmler_subcmd"
 SESSIONS_LOG = u"bigmler_sessions"
+FEATURES_LOG = u"features_sets.csv"
+NODES_LOG = u"nodes_sets.csv"
 
 #name max length
 NAME_MAX_LENGTH = 127
@@ -93,6 +96,7 @@ NAME_MAX_LENGTH = 127
 subcommand_list = []
 subcommand_file = None
 session_file = None
+
 
 
 def set_subcommand_file(output_dir):
@@ -385,14 +389,15 @@ def create_kfold_evaluations(datasets_file, args, common_options,
         sys.exit("Failed to retrieve evaluation.")
 
 
-def find_max_state(states):
-    maxval = -1
-    maxstate = None
-    for (state, value) in states:
-        if value > maxval:
-            maxstate = state
-            maxval = value
-    return maxstate, maxval
+def find_max_state(states_list):
+
+    max_state, max_score, max_metric_value = (
+        None, - float('inf'), - float('inf'))
+    for (state, score, metric_value) in states_list:
+        if score > max_score or max_state is None and max_score == score:
+            max_state, max_score, max_metric_value = (
+                state, score, metric_value)
+    return max_state, max_score, max_metric_value
 
 
 def expand_state(parent):
@@ -414,89 +419,106 @@ def best_first_search(datasets_file, api, args, common_options,
 
     """
     counter = 0
-    if staleness is None:
-        staleness = DEFAULT_STALENESS
-    if penalty is None:
-        penalty = DEFAULT_PENALTY
-    # retrieving the first dataset in the file
-    try:
-        with open(datasets_file) as datasets_handler:
-            dataset_id = datasets_handler.readline().strip()
-    except IOError, exc:
-        sys.exit("Could not read the generated datasets file: %s" % str(exc))
-    dataset = api.check_resource(dataset_id, api.get_dataset)
-    # initial feature set
-    fields = Fields(dataset)
-    excluded_features = ([] if args.exclude_features is None else
-                         args.exclude_features.split(
-                             args.args_separator))
-    excluded_ids = [fields.field_id(feature) for
-                    feature in excluded_features]
-    objective_id = fields.field_id(objective_name)
-    field_ids = [field_id for field_id in fields.preferred_fields()
-                 if field_id != objective_id and
-                 not field_id in excluded_ids]
-    initial_state = [False for field_id in field_ids]
-    open_list = [(initial_state, 0)]
-    closed_list = []
-    best_score = -1
-    best_unchanged_count = 0
-    metric = args.maximize
-    while best_unchanged_count < staleness and open_list:
-        (state, score) = find_max_state(open_list)
-        state_fields = [fields.field_name(field_ids[i])
-                        for (i, val) in enumerate(state) if val]
-        closed_list.append((state, score))
-        open_list.remove((state, score))
-        if (score - EPSILON) > best_score:
-            best_state = state
-            best_score = score
-            best_unchanged_count = 0
-            if state_fields:
-                message = 'New best state: %s\n' % (state_fields)
-                u.log_message(message, log_file=session_file,
-                              console=args.verbosity)
-                if metric in PERCENT_EVAL_METRICS:
-                    message = '%s = %0.2f%%\n' % (metric.capitalize(),
-                                                  score * 100)
-                else:
-                    message = '%s = %f\n' % (metric.capitalize(),
-                                             score)
-                u.log_message(message, log_file=session_file,
-                              console=args.verbosity)
+    loop_counter = 0
+    features_file = os.path.normpath(os.path.join(args.output_dir,
+                                                  FEATURES_LOG))
+    with open(features_file, 'w', 0) as features_handler:      
+        features_writer = csv.writer(features_handler, lineterminator="\n")
+        features_writer.writerow([
+            "step", "state", "score", "metric_value", "best_score"])
+        features_handler.flush()
+        if staleness is None:
+            staleness = DEFAULT_STALENESS
+        if penalty is None:
+            penalty = DEFAULT_PENALTY
+        # retrieving the first dataset in the file
+        try:
+            with open(datasets_file) as datasets_handler:
+                dataset_id = datasets_handler.readline().strip()
+        except IOError, exc:
+            sys.exit("Could not read the generated datasets file: %s" %
+                     str(exc))
+        dataset = api.check_resource(dataset_id, api.get_dataset)
+        # initial feature set
+        fields = Fields(dataset)
+        excluded_features = ([] if args.exclude_features is None else
+                             args.exclude_features.split(
+                                 args.args_separator))
+        excluded_ids = [fields.field_id(feature) for
+                        feature in excluded_features]
+        objective_id = fields.field_id(objective_name)
+        field_ids = [field_id for field_id in fields.preferred_fields()
+                     if field_id != objective_id and
+                     not field_id in excluded_ids]
+        initial_state = [False for field_id in field_ids]
+        open_list = [(initial_state, - float('inf'), -float('inf'))]
+        closed_list = []
+        best_state, best_score, best_metric_value = open_list[0]
+        best_unchanged_count = 0
+        metric = args.maximize
+        while best_unchanged_count < staleness and open_list:
+            loop_counter += 1
+            features_set = find_max_state(open_list)
+            state, score, metric_value = features_set
+            features_writer.writerow([
+                loop_counter, [int(in_set) for in_set in state],
+                score, metric_value, best_score])
+            features_handler.flush()
+            state_fields = [fields.field_name(field_ids[index])
+                            for (index, in_set) in enumerate(state) if in_set]
+            closed_list.append(features_set)
+            open_list.remove(features_set)
+            if (score - EPSILON) > best_score:
+                best_state, best_score, best_metric_value = features_set
+                best_unchanged_count = 0
+                if state_fields:
+                    message = 'New best state: %s\n' % (state_fields)
+                    u.log_message(message, log_file=session_file,
+                                  console=args.verbosity)
+                    if metric in PERCENT_EVAL_METRICS:
+                        message = '%s = %0.2f%% (score = %s)\n' % (
+                            metric.capitalize(), metric_value * 100, score)
+                    else:
+                        message = '%s = %f (score = %s)\n' % (
+                            metric.capitalize(),metric_value, score)
+                    u.log_message(message, log_file=session_file,
+                                  console=args.verbosity)
+            else:
+                best_unchanged_count += 1
+
+            children = expand_state(state)
+            for child in children:
+                if (child not in [state for state, _, _ in open_list] and
+                        child not in [state for state, _, _ in closed_list]):
+                    input_fields = [fields.field_name(field_id)
+                                    for (i, field_id)
+                                    in enumerate(field_ids) if child[i]]
+                    # create models and evaluation with input_fields
+                    args.model_fields = args.args_separator.join(input_fields)
+                    counter += 1
+                    (score,
+                     metric_value,
+                     metric,
+                     resume) = kfold_evaluate(datasets_file,
+                                              args, counter, common_options,
+                                              penalty=penalty, resume=resume,
+                                              metric=metric)
+                    open_list.append((child, score, metric_value))
+
+        best_features = [fields.field_name(field_ids[i]) for (i, score)
+                         in enumerate(best_state) if score]
+        message = (u'The best feature subset is: %s \n'
+                   % u", ".join(best_features))
+        u.log_message(message, log_file=session_file, console=1)
+        if metric in PERCENT_EVAL_METRICS:
+            message = (u'%s = %0.2f%%\n' % (metric.capitalize(),
+                                            (best_metric_value * 100)))
         else:
-            best_unchanged_count += 1
-
-        children = expand_state(state)
-        for child in children:
-            if (child not in [state for state, _ in open_list]
-                    and child not in [state for state, _ in closed_list]):
-                input_fields = [fields.field_name(field_id) for (i, field_id)
-                                in enumerate(field_ids) if child[i]]
-                # create models and evaluation with input_fields
-                args.model_fields = args.args_separator.join(input_fields)
-                counter += 1
-                (score, metric,
-                 resume) = kfold_evaluate(datasets_file,
-                                          args, counter, common_options,
-                                          penalty=penalty, resume=resume,
-                                          metric=metric)
-                open_list.append((child, score))
-
-    best_features = [fields.field_name(field_ids[i]) for (i, score)
-                     in enumerate(best_state) if score]
-    message = (u'The best feature subset is: %s \n'
-               % u", ".join(best_features))
-    u.log_message(message, log_file=session_file, console=1)
-    if metric in PERCENT_EVAL_METRICS:
-        message = (u'%s = %0.2f%%\n' % (metric.capitalize(),
-                                        (best_score * 100)))
-    else:
-        message = (u'%s = %f\n' % (metric.capitalize(), best_score))
-    u.log_message(message, log_file=session_file, console=1)
-    message = (u'Evaluated %d/%d feature subsets\n' %
-               ((len(open_list) + len(closed_list)), 2 ** len(field_ids)))
-    u.log_message(message, log_file=session_file, console=1)
+            message = (u'%s = %f\n' % (metric.capitalize(), best_metric_value))
+        u.log_message(message, log_file=session_file, console=1)
+        message = (u'Evaluated %d/%d feature subsets\n' %
+                   ((len(open_list) + len(closed_list)), 2 ** len(field_ids)))
+        u.log_message(message, log_file=session_file, console=1)
 
 
 def kfold_evaluate(datasets_file, args, counter, common_options,
@@ -524,6 +546,7 @@ def kfold_evaluate(datasets_file, args, counter, common_options,
                      % metric)
     return (evaluation[avg_metric] -
             penalty * len(args.model_fields.split(args.args_separator)),
+            evaluation[avg_metric],
             metric_literal, resume)
 
 
@@ -533,57 +556,72 @@ def best_node_threshold(datasets_file, args, common_options,
     """Selecting the node_limit to be used in the model construction
 
     """
-    args.output_dir = os.path.normpath(os.path.join(args.output_dir,
-                                                    "node_th"))
-    max_nodes = args.max_nodes + 1
-    if args.min_nodes is None:
-        args.min_nodes = DEFAULT_MIN_NODES
-    if args.nodes_step is None:
-        args.nodes_step = DEFAULT_NODES_STEP
-    node_threshold = args.min_nodes
-    if staleness is None:
-        staleness = DEFAULT_STALENESS
-    if penalty is None:
-        penalty = DEFAULT_NODES_PENALTY
-    best_score = -1
-    best_unchanged_count = 0
-    metric = args.maximize
-    score = best_score
-    while best_unchanged_count < staleness and node_threshold < max_nodes:
-        (score,
-         metric,
-         resume) = node_threshold_evaluate(datasets_file, args,
-                                           node_threshold, common_options,
-                                           penalty=penalty, resume=resume,
-                                           metric=metric)
-        if (score - EPSILON) > best_score:
-            best_threshold = node_threshold
-            best_score = score
-            best_unchanged_count = 0
-            message = 'New best node threshold: %s\n' % (best_threshold)
-            u.log_message(message, log_file=session_file,
-                          console=args.verbosity)
-            if metric in PERCENT_EVAL_METRICS:
-                message = '%s = %0.2f%%\n' % (metric.capitalize(),
-                                              score * 100)
-            else:
-                message = '%s = %f\n' % (metric.capitalize(),
-                                         score)
-            u.log_message(message, log_file=session_file,
-                          console=args.verbosity)
-        else:
-            best_unchanged_count += 1
-        node_threshold += args.nodes_step
+    loop_counter = 0
+    nodes_file = os.path.normpath(os.path.join(args.output_dir,
+                                               NODES_LOG))
+    with open(nodes_file, 'w', 0) as nodes_handler:      
+        nodes_writer = csv.writer(nodes_handler, lineterminator="\n")
+        nodes_writer.writerow([
+            "step", "node_threshold", "score", "metric_value", "best_score"])
+        nodes_handler.flush()
+        args.output_dir = os.path.normpath(os.path.join(args.output_dir,
+                                                        "node_th"))
+        max_nodes = args.max_nodes + 1
 
-    message = ('The best node threshold is: %s \n'
-               % best_threshold)
-    u.log_message(message, log_file=session_file, console=1)
-    if metric in PERCENT_EVAL_METRICS:
-        message = ('%s = %0.2f%%\n' % (metric.capitalize(),
-                                       (best_score * 100)))
-    else:
-        message = ('%s = %f\n' % (metric.capitalize(), best_score))
-    u.log_message(message, log_file=session_file, console=1)
+        if args.min_nodes is None:
+            args.min_nodes = DEFAULT_MIN_NODES
+        if args.nodes_step is None:
+            args.nodes_step = DEFAULT_NODES_STEP
+        node_threshold = args.min_nodes
+        if staleness is None:
+            staleness = DEFAULT_STALENESS
+        if penalty is None:
+            penalty = DEFAULT_NODES_PENALTY
+        best_score = - float('inf')
+        best_unchanged_count = 0
+        metric = args.maximize
+        score = best_score
+        while best_unchanged_count < staleness and node_threshold < max_nodes:
+            loop_counter += 1
+            (score,
+             metric_value,
+             metric,
+             resume) = node_threshold_evaluate(datasets_file, args,
+                                               node_threshold, common_options,
+                                               penalty=penalty, resume=resume,
+                                               metric=metric)
+            nodes_writer.writerow([
+                loop_counter, node_threshold, score, metric_value, best_score])
+            nodes_handler.flush()
+            if (score - EPSILON) > best_score:
+                best_threshold = node_threshold
+                best_score = score
+                best_unchanged_count = 0
+                message = 'New best node threshold: %s\n' % (best_threshold)
+                u.log_message(message, log_file=session_file,
+                              console=args.verbosity)
+                if metric in PERCENT_EVAL_METRICS:
+                    message = '%s = %0.2f%% (score = %s)\n' % (
+                        metric.capitalize(), metric_value * 100, score)
+                else:
+                    message = '%s = %f (score = %s)\n' % (metric.capitalize(),
+                                                          metric_value,
+                                                          score)
+                u.log_message(message, log_file=session_file,
+                              console=args.verbosity)
+            else:
+                best_unchanged_count += 1
+            node_threshold += args.nodes_step
+
+        message = ('The best node threshold is: %s \n'
+                   % best_threshold)
+        u.log_message(message, log_file=session_file, console=1)
+        if metric in PERCENT_EVAL_METRICS:
+            message = ('%s = %0.2f%%\n' % (metric.capitalize(),
+                                           (best_score * 100)))
+        else:
+            message = ('%s = %f\n' % (metric.capitalize(), best_score))
+        u.log_message(message, log_file=session_file, console=1)
 
 
 def node_threshold_evaluate(datasets_file, args, node_threshold,
@@ -607,6 +645,7 @@ def node_threshold_evaluate(datasets_file, args, node_threshold,
             sys.exit("Failed to find %s or r-squared in the evaluation"
                      % metric)
     return (evaluation[avg_metric] - penalty * node_threshold,
+            evaluation[avg_metric], 
             metric_literal, resume)
 
 

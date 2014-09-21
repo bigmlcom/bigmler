@@ -456,7 +456,8 @@ def set_model_args(args, name=None, objective_field=None, fields=None,
         if args.cross_validation_rate > 0:
             args.sample_rate = 1 - args.cross_validation_rate
             args.replacement = False
-        elif args.sample_rate == 1 and args.test_datasets is None:
+        elif (args.sample_rate == 1 and args.test_datasets is None
+              and not args.dataset_off):
             args.sample_rate = EVALUATE_SAMPLE_RATE
     if model_fields and fields is not None:
         input_fields = configure_input_fields(fields, model_fields)

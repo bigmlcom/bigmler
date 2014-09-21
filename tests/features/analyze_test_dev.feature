@@ -16,4 +16,4 @@ Feature: Produce model analysis from a dataset in dev mode
 
         Examples:
         | data                | output                    | kfold | metric   | selection   | metric_value |
-        | ../data/iris_2f.csv | ./scenario_a_2/evaluation | 2     | accuracy | petal width | 99.90%       |
+        | ../data/iris_2f.csv | ./scenario_a_2/evaluation | 2     | accuracy | petal width | 100.00%       |
