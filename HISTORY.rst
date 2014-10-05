@@ -3,6 +3,11 @@
 History
 -------
 
+1.13.2 (2014-10-05)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing bug: --source-attributes and --dataset-attributes where not updated.
+
 1.13.1 (2014-09-22)
 ~~~~~~~~~~~~~~~~~~~
 

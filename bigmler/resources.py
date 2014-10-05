@@ -141,8 +141,8 @@ def wait_for_available_tasks(inprogress, max_parallel, get_function,
         time.sleep(max_parallel * wait_step)
 
 
-def set_source_args(data_set_header, args, name=None,
-                    multi_label_data=None):
+def set_source_args(args, name=None, multi_label_data=None,
+                    data_set_header=None, fields=None):
     """Returns a source arguments dict
 
     """
@@ -152,8 +152,10 @@ def set_source_args(data_set_header, args, name=None,
         "name": name,
         "description": args.description_,
         "category": args.category,
-        "tags": args.tag,
-        "source_parser": {"header": data_set_header}}
+        "tags": args.tag}
+    # if header is set, use it
+    if data_set_header is not None:
+        source_args.update({"source_parser": {"header": data_set_header}})
     # If user has given an OS locale, try to add the locale used in bigml.com
     if args.user_locale is not None:
         source_locale = bigml_locale(args.user_locale)
@@ -175,8 +177,21 @@ def set_source_args(data_set_header, args, name=None,
         source_args.update({
             "user_metadata": {
                 "multi_label_data": multi_label_data}})
-    if 'source' in args.json_args and args.json_args['source']:
+    # to update fields attributes or types
+    updated_values = None
+    if args.field_attributes_:
+        updated_values = args.field_attributes_
+    if args.types_:
+        updated_values = args.types_
+    if updated_values and fields:
+        update_fields = {}
+        for (column, value) in updated_values.iteritems():
+            update_fields.update({
+                fields.field_id(column): value})
+        source_args.update({"fields": update_fields})
+    if args.json_args.get('source'):
         source_args.update(args.json_args['source'])
+
     return source_args
 
 
@@ -254,22 +269,18 @@ def get_source(source, api=None, verbosity=True,
     return source
 
 
-def update_source_fields(source, updated_values, fields, api=None,
-                         verbosity=True, session_file=None):
-    """Update remote source with new fields values
+def update_source(source, source_args, args,
+                  api=None, session_file=None):
+    """Updates source properties
 
     """
     if api is None:
         api = bigml.api.BigML()
-    update_fields = {}
-    for (column, value) in updated_values.iteritems():
-        update_fields.update({
-            fields.field_id(column): value})
     message = dated("Updating source. %s\n" %
                     get_url(source))
     log_message(message, log_file=session_file,
-                console=verbosity)
-    source = api.update_source(source, {"fields": update_fields})
+                console=args.verbosity)
+    source = api.update_source(source, source_args)
     check_resource_error(source, "Failed to update source: ")
     return source
 

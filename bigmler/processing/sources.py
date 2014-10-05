@@ -54,7 +54,8 @@ def test_source_processing(api, args, resume,
                 message=message, log_file=session_file, console=args.verbosity)
 
         if not resume:
-            source_args = r.set_source_args(args.test_header, args, name=name)
+            source_args = r.set_source_args(args, name=name,
+                                            data_set_header=args.test_header)
             test_source = r.create_source(args.test_set, source_args, args,
                                           api, path, session_file, log,
                                           source_type="test")
@@ -117,8 +118,9 @@ def source_processing(api, args, resume,
     # we create a new dataset to test with.
     data_set, data_set_header = r.data_to_source(args)
     if data_set is not None:
-        source_args = r.set_source_args(data_set_header, args,
-                                        multi_label_data=multi_label_data)
+        source_args = r.set_source_args(args,
+                                        multi_label_data=multi_label_data,
+                                        data_set_header=data_set_header)
         source = r.create_source(data_set, source_args, args, api,
                                  path, session_file, log)
 
@@ -140,14 +142,11 @@ def source_processing(api, args, resume,
                 csv_properties['data_locale'] = source_parser['locale']
 
         fields = Fields(source['object']['fields'], **csv_properties)
-        if args.field_attributes_:
-            source = r.update_source_fields(source, args.field_attributes_,
-                                            fields, api, args.verbosity,
-                                            session_file)
-        if args.types_:
-            source = r.update_source_fields(source, args.types_, fields, api,
-                                            args.verbosity, session_file)
-        if args.field_attributes_ or args.types_:
+        if (args.field_attributes_ or args.types_
+                or args.json_args.get('source')):
+            source_args = r.set_source_args(args, fields=fields)
+            source = r.update_source(source, source_args, args, api,
+                                     session_file)
             fields = Fields(source['object']['fields'], **csv_properties)
 
     return source, resume, csv_properties, fields
