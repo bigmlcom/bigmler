@@ -22,7 +22,9 @@ def store_init_resources():
     """
     sources = world.api.list_sources()
     if sources['code'] == HTTP_UNAUTHORIZED:
-        print "Check your credentials and the BigML domain they belong to"
+        assert False, ("Unable to list your sources. Please check the"
+                       " BigML domain and credentials to be:\n\n%s" %
+                       world.api.connection_info())
     assert sources['code'] == HTTP_OK
     world.init_sources_count = sources['meta']['total_count']
 

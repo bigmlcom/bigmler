@@ -29,6 +29,7 @@ import bigmler.resources as r
 import bigmler.checkpoint as c
 
 from bigml.fields import Fields
+from bigml.util import bigml_locale
 
 from bigmler.train_reader import TrainReader
 
@@ -75,21 +76,20 @@ def test_source_processing(api, args, resume,
             if 'missing_tokens' in source_parser:
                 csv_properties['missing_tokens'] = (
                     source_parser['missing_tokens'])
-            if 'data_locale' in source_parser:
+            if 'locale' in source_parser:
                 csv_properties['data_locale'] = source_parser['locale']
+                if (args.user_locale is not None and
+                    bigml_locale(args.user_locale) == source_parser['locale']):
+                    args.user_locale = None
 
         fields = Fields(test_source['object']['fields'], **csv_properties)
-        if args.field_attributes:
-            test_source = r.update_source_fields(test_source,
-                                                 args.field_attributes_,
-                                                 fields, api, args.verbosity,
-                                                 session_file)
-        if args.types:
-            test_source = r.update_source_fields(test_source, args.types_,
-                                                 fields, api, args.verbosity,
-                                                 session_file)
-        if args.field_attributes or args.types:
-            fields = Fields(test_source['object']['fields'], **csv_properties)
+
+        if (args.field_attributes_ or args.types_ or args.user_locale
+                or args.json_args.get('source')):
+            test_source_args = r.set_source_args(args, fields=fields)
+            test_source = r.update_source(test_source, source_args, args, api,
+                                          session_file)
+            fields = Fields(source['object']['fields'], **csv_properties)
 
     return test_source, resume, csv_properties, fields
 
@@ -138,11 +138,15 @@ def source_processing(api, args, resume,
             if 'missing_tokens' in source_parser:
                 csv_properties['missing_tokens'] = (
                     source_parser['missing_tokens'])
-            if 'data_locale' in source_parser:
+            if 'locale' in source_parser:
                 csv_properties['data_locale'] = source_parser['locale']
-
+                # No changes if user locale is the one in the source.
+                if (args.user_locale is not None and
+                    bigml_locale(args.user_locale) == source_parser['locale']):
+                    args.user_locale = None
         fields = Fields(source['object']['fields'], **csv_properties)
-        if (args.field_attributes_ or args.types_
+
+        if (args.field_attributes_ or args.types_ or args.user_locale
                 or args.json_args.get('source')):
             source_args = r.set_source_args(args, fields=fields)
             source = r.update_source(source, source_args, args, api,

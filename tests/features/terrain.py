@@ -7,6 +7,7 @@ from lettuce import before, after, world
 
 from bigml.api import BigML
 from bigml.api import HTTP_NO_CONTENT
+from subprocess import check_call
 from common_steps import (store_init_resources, store_final_resources,
                           check_init_equals_final)
 
@@ -22,14 +23,53 @@ def delete(object_list, delete_method):
         counter = 0
         result = delete_method(obj_id)
         while result['code'] != HTTP_NO_CONTENT and counter < MAX_RETRIES:
-            print "Failed to delete %s with code %s. Retrying." % (obj_id,
-                                                                   result['code'])
+            print ("Failed to delete %s with code %s. Retrying." %
+                   (obj_id, result['code']))
             time.sleep(3)
             counter += 1
             result = delete_method(obj_id)
         if counter == MAX_RETRIES:
             print ("Retries to delete the created resources are exhausted."
                    " Failed to delete.")
+
+
+def bigmler_delete(directory, output_dir=None):
+    """Deletes all remote resources found in the bigmler directory and
+       the local directory itself.
+
+    """
+    try:
+        retcode = check_call("bigmler delete --output-dir " + output_dir +
+                             " --from-dir " + directory, shell=True)
+        if retcode == 0:
+            if os.path.exists(directory):
+                shutil.rmtree(directory)
+    except OSError as e:
+        pass
+
+
+@before.all
+def print_connection_info():
+    world.USERNAME = os.environ.get('BIGML_USERNAME')
+    world.API_KEY = os.environ.get('BIGML_API_KEY')
+    if world.USERNAME is None or world.API_KEY is None:
+        assert False, ("Tests use the BIGML_USERNAME and BIGML_API_KEY"
+                       " environment variables to authenticate the"
+                       " connection, but they seem to be unset. Please,"
+                       "set them before testing.")
+    else:
+        assert True
+    world.api = BigML(world.USERNAME, world.API_KEY)
+    print world.api.connection_info()
+
+    world.folders = []
+    output_dir = "./last_run"
+    for _, subFolders, _ in os.walk("./"):
+        for folder in subFolders:
+            if folder.startswith("scenario"):
+                bigmler_delete(folder, output_dir=output_dir)
+    if os.path.exists(output_dir):
+        shutil.rmtree(output_dir)
 
 
 @before.each_feature
@@ -48,7 +88,6 @@ def setup_resources(feature):
     world.datasets = []
     world.models = []
     world.predictions = []
-    world.folders = []
     world.evaluations = []
     world.ensembles = []
     world.batch_predictions = []

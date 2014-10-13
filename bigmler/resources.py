@@ -155,6 +155,7 @@ def set_source_args(args, name=None, multi_label_data=None,
     """Returns a source arguments dict
 
     """
+
     if name is None:
         name = args.name
     source_args = {
@@ -174,6 +175,7 @@ def set_source_args(args, name=None, multi_label_data=None,
                                                   LOCALE_DEFAULT),
                         log_file=None, console=True)
             source_locale = LOCALE_DEFAULT
+        source_args.update({'source_parser': {}})
         source_args["source_parser"].update({'locale': source_locale})
     # If user has set a training separator, use it.
     if args.training_separator is not None:
@@ -294,6 +296,7 @@ def update_source(source, source_args, args,
                 console=args.verbosity)
     source = api.update_source(source, source_args)
     check_resource_error(source, "Failed to update source: ")
+    source = check_resource(source, api.get_source)
     return source
 
 
@@ -421,9 +424,11 @@ def publish_dataset(dataset, args, api=None, session_file=None):
     public_dataset = {"private": False}
     if args.dataset_price:
         public_dataset.update(price=args.dataset_price)
-    return update_dataset(dataset, public_dataset, args.verbosity, api=api,
-                          session_file=session_file)
-
+    dataset = update_dataset(dataset, public_dataset, args.verbosity, api=api,
+                             session_file=session_file)
+    check_resource_error(dataset, "Failed to update dataset: ")
+    dataset = check_resource(dataset, api.get_dataset)
+    return dataset
 
 def update_dataset(dataset, dataset_args, args,
                    api=None, path=None, session_file=None):
@@ -445,6 +450,7 @@ def update_dataset(dataset, dataset_args, args,
         if args.reports:
             report(args.reports, path, dataset)
     check_resource_error(dataset, "Failed to update dataset: ")
+    dataset = check_resource(dataset, api.get_dataset)
     return dataset
 
 
@@ -656,6 +662,7 @@ def update_model(model, model_args, args,
     model = api.update_model(model, model_args)
     check_resource_error(model, "Failed to update model: %s"
                          % model['resource'])
+    model = check_resource(model, api.get_model, query_string=ALL_FIELDS_QS)
     if is_shared(model):
         message = dated("Shared model link. %s\n" %
                         get_url(model, shared=True))
@@ -1108,6 +1115,7 @@ def update_evaluation(evaluation, evaluation_args, args,
     evaluation = api.update_evaluation(evaluation, evaluation_args)
     check_resource_error(evaluation, "Failed to update evaluation: %s"
                          % evaluation['resource'])
+    evaluation = check_resource(evaluation, api.get_evaluation)
     if is_shared(evaluation):
         message = dated("Shared evaluation link. %s\n" %
                         get_url(evaluation, shared=True))
@@ -1423,6 +1431,7 @@ def update_cluster(cluster, cluster_args, args,
     cluster = api.update_cluster(cluster, cluster_args)
     check_resource_error(cluster, "Failed to update cluster: %s"
                          % cluster['resource'])
+    cluster = check_resource(cluster, api.get_cluster, query_string=FIELDS_QS)
     if is_shared(cluster):
         message = dated("Shared cluster link. %s\n" %
                         get_url(cluster, shared=True))

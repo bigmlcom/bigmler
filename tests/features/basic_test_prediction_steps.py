@@ -885,6 +885,17 @@ def i_check_source_locale(step, bigml_locale):
         assert False, str(exc)
 
 
+@step(r'the type of field "(.*)" is "(.*)"')
+def i_check_source_locale(step, field_id, field_type):
+    try:
+        if world.source['object']["fields"][field_id]['optype'] == field_type:
+            assert True
+        else:
+            assert False
+    except KeyError, exc:
+        assert False, str(exc)
+
+
 @step(r'I create BigML resources uploading train "(.*)" file to evaluate and log evaluation in "(.*)"')
 def i_create_all_resources_to_evaluate(step, data=None, output=None):
     if data is None or output is None:
@@ -939,12 +950,12 @@ def i_create_all_resources_to_evaluate_and_share(step, data=None, output=None):
         assert False
 
 
-@step(r'I create a BigML source from file "(.*)" with locale "(.*)" storing results in "(.*)"')
-def i_create_all_resources_to_evaluate_with_locale(step, data=None, locale=None, output=None):
-    if data is None or locale is None or output is None:
+@step(r'I create a BigML source from file "([^"]*)" with locale "([^"]*)" and types file "([^"]*)" storing results in "(.*)"$')
+def i_create_source_with_locale(step, data=None, locale=None, types=None, output=None):
+    if data is None or locale is None or output is None or types is None:
         assert False
     try:
-        retcode = check_call("bigmler --train " + data + " --locale " + locale + " --store --output " + output + " --no-dataset --no-model --store", shell=True)
+        retcode = check_call("bigmler --train " + data + " --locale " + locale + " --types " + types + " --store --output " + output + " --no-dataset --no-model --store", shell=True)
         if retcode < 0:
             assert False
         else:
