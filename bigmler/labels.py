@@ -89,8 +89,11 @@ def multi_label_sync(objective_field, labels, multi_label_data, fields,
             and 'multi_label_fields' in multi_label_data):
         multi_label_fields = multi_label_data['multi_label_fields']
     if fields is not None:
-        objective_id = fields.field_id(objective_field)
-        objective_name = fields.field_name(objective_id)
+        try:
+            objective_id = fields.field_id(objective_field)
+            objective_name = fields.field_name(objective_id)
+        except ValueError, exc:
+            sys.exit(exc)
         objective_column = fields.field_column_number(objective_id)
         multi_label_data['objective_name'] = objective_name
         multi_label_data['objective_column'] = objective_column

@@ -58,9 +58,12 @@ def use_prediction_headers(prediction_headers, output, test_reader,
 
     """
     exclude = []
-    if not objective_field in fields.fields:
-        objective_field = fields.field_id(objective_field)
-    objective_name = fields.field_name(objective_field)
+    try:
+        if not objective_field in fields.fields:
+            objective_field = fields.field_id(objective_field)
+        objective_name = fields.field_name(objective_field)
+    except ValueError, exc:
+        sys.exit(exc)
     headers = [objective_name]
 
     if args.prediction_info in [NORMAL_FORMAT, FULL_FORMAT]:

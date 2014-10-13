@@ -3,6 +3,11 @@
 History
 -------
 
+1.13.3 (2014-10-13)
+~~~~~~~~~~~~~~~~~~~
+
+- Updating bindings version and fixing code accordingly.
+
 1.13.2 (2014-10-05)
 ~~~~~~~~~~~~~~~~~~~
 

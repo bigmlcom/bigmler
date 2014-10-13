@@ -104,7 +104,10 @@ def get_new_objective(fields, objective):
     """
     if objective is None:
         return None
-    objective_id = fields.field_id(objective)
+    try:
+        objective_id = fields.field_id(objective)
+    except ValueError, exc:
+        sys.exit(exc)
     if fields.objective_field == fields.field_column_number(objective_id):
         return None
     return objective
@@ -292,15 +295,18 @@ def create_categories_datasets(dataset, distribution,
             category_selector += ") v \"%s\")" % other_label
             category_generator = "(let (v (f %s)) %s)" % (
                 fields.objective_field, category_selector)
-            dataset_args = {
-                "all_but": [fields.objective_field],
-                "new_fields": [
-                    {"name": fields.field_name(fields.objective_field),
-                     "field": category_generator,
-                     "label": "max_categories: %s" % args.max_categories}],
-                "user_metadata":
-                {"max_categories": args.max_categories,
-                 "other_label": other_label}}
+            try:
+                dataset_args = {
+                    "all_but": [fields.objective_field],
+                    "new_fields": [
+                        {"name": fields.field_name(fields.objective_field),
+                         "field": category_generator,
+                         "label": "max_categories: %s" % args.max_categories}],
+                    "user_metadata":
+                    {"max_categories": args.max_categories,
+                     "other_label": other_label}}
+            except ValueError, exc:
+                sys.exit(exc)
             new_dataset = r.create_dataset(
                 dataset, dataset_args, args, api=api, path=path,
                 session_file=session_file, log=log, dataset_type="parts")

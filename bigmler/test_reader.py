@@ -55,7 +55,10 @@ class TestReader(object):
         self.fields = fields
         if (objective_field is not None and
                 not objective_field in fields.fields):
-            objective_field = fields.field_id(objective_field)
+            try:
+                objective_field = fields.field_id(objective_field)
+            except ValueError, exc:
+                sys.exit(exc)
         self.objective_field = objective_field
         self.test_separator = (test_separator.decode("string_escape")
                                if test_separator is not None
@@ -79,10 +82,14 @@ class TestReader(object):
             # that may be present or not
             if objective_field is not None:
                 objective_field = fields.field_column_number(objective_field)
-            fields_names = [fields.fields[fields.field_id(i)]
-                            ['name'] for i in
-                            sorted(fields.fields_by_column_number.keys())
-                            if objective_field is None or i != objective_field]
+            try:
+                fields_names = [fields.fields[fields.field_id(i)]
+                                ['name'] for i in
+                                sorted(fields.fields_by_column_number.keys())
+                                if objective_field is None or
+                                i != objective_field]
+            except ValueError, exc:
+                sys.exit(exc)
             self.headers = [unicode(header, "utf-8")
                             for header in self.headers]
             self.exclude = [i for i in range(len(self.headers))

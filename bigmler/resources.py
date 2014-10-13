@@ -76,7 +76,10 @@ def configure_input_fields(fields, user_given_fields):
         preferred_fields = fields.preferred_fields()
         input_fields = preferred_fields.keys()
         for name in user_given_fields:
-            field_id = fields.field_id(name[1:])
+            try:
+                field_id = fields.field_id(name[1:])
+            except ValueError, exc:
+                sys.exit(exc)
             if name[0] == ADD_PREFIX:
                 if not field_id in input_fields:
                     input_fields.append(field_id)
@@ -86,7 +89,10 @@ def configure_input_fields(fields, user_given_fields):
     else:
         input_fields = []
         for name in user_given_fields:
-            input_fields.append(fields.field_id(name))
+            try:
+                input_fields.append(fields.field_id(name))
+            except ValueError, exc:
+                sys.exit(exc)
     return input_fields
 
 
@@ -105,7 +111,10 @@ def relative_input_fields(fields, user_given_fields):
         if not name in user_given_fields:
             input_fields.append("%s%s" % (REMOVE_PREFIX, name))
     for name in user_given_fields:
-        field_id = fields.field_id(name)
+        try:
+            field_id = fields.field_id(name)
+        except ValueError, exc:
+            sys.exit(exc)
         input_fields.append("%s%s" % (ADD_PREFIX, name))
 
     return input_fields
@@ -186,8 +195,11 @@ def set_source_args(args, name=None, multi_label_data=None,
     if updated_values and fields:
         update_fields = {}
         for (column, value) in updated_values.iteritems():
-            update_fields.update({
-                fields.field_id(column): value})
+            try:
+                update_fields.update({
+                    fields.field_id(column): value})
+            except ValueError, exc:
+                sys.exit(exc)
         source_args.update({"fields": update_fields})
     if args.json_args.get('source'):
         source_args.update(args.json_args['source'])
@@ -311,7 +323,10 @@ def set_dataset_args(args, fields, multi_label_data=None):
     if multi_label_data is not None and objective_field is None:
         objective_field = multi_label_data['objective_name']
     if objective_field is not None and fields is not None:
-        objective_id = fields.field_id(objective_field)
+        try:
+            objective_id = fields.field_id(objective_field)
+        except ValueError, exc:
+            sys.exit(exc)
         dataset_args.update(objective_field={'id': objective_id})
 
     if args.json_filter:
@@ -453,8 +468,11 @@ def set_model_args(args, name=None, objective_field=None, fields=None,
         "missing_splits": args.missing_splits
     }
     if objective_field is not None and fields is not None:
-        model_args.update({"objective_field":
-                           fields.field_id(objective_field)})
+        try:
+            model_args.update({"objective_field":
+                               fields.field_id(objective_field)})
+        except ValueError, exc:
+            sys.exit(exc)
     # If evaluate flag is on and no test_split flag is provided,
     # we choose a deterministic sampling with
     # args.sample_rate (80% by default) of the data to create the model
@@ -484,7 +502,10 @@ def set_model_args(args, name=None, objective_field=None, fields=None,
         model_args.update(balance_objective=True)
 
     if args.weight_field:
-        weight_field = fields.field_id(args.weight_field)
+        try:
+            weight_field = fields.field_id(args.weight_field)
+        except ValueError, exc:
+            sys.exit(exc)
         model_args.update(weight_field=weight_field)
 
     if args.objective_weights:
@@ -516,8 +537,11 @@ def set_label_model_args(args, fields, labels, multi_label_data):
         model_fields = relative_input_fields(fields, args.model_fields_)
     if objective_field is None:
         objective_field = fields.objective_field
-    objective_id = fields.field_id(objective_field)
-    objective_field = fields.field_name(objective_id)
+    try:
+        objective_id = fields.field_id(objective_field)
+        objective_field = fields.field_name(objective_id)
+    except ValueError, exc:
+        sys.exit(exc)
     all_labels = get_all_labels(multi_label_data)
     model_args_list = []
 
@@ -695,7 +719,10 @@ def set_label_ensemble_args(args, labels, multi_label_data,
         args.model_fields_ = relative_input_fields(fields, args.model_fields_)
     if args.objective_field is None:
         args.objective_field = fields.objective_field
-    objective_id = fields.field_id(args.objective_field)
+    try:
+        objective_id = fields.field_id(args.objective_field)
+    except ValueError, exc:
+        sys.exit(exc)
     objective_field = fields.fields[objective_id]['name']
     ensemble_args_list = []
 
@@ -737,8 +764,11 @@ def set_ensemble_args(args, name=None,
         "missing_splits": args.missing_splits
     }
     if objective_field is not None and fields is not None:
-        ensemble_args.update({"objective_field":
-                              fields.field_id(objective_field)})
+        try:
+            ensemble_args.update({"objective_field":
+                                  fields.field_id(objective_field)})
+        except ValueError, exc:
+            sys.exit(exc)
     # If evaluate flag is on and no test_split flag is provided,
     # we choose a deterministic sampling with
     # args.sample_rate (80% by default) of the data to create the model
@@ -760,7 +790,10 @@ def set_ensemble_args(args, name=None,
     if args.balance:
         ensemble_args.update(balance_objective=True)
     if args.weight_field:
-        weight_field = fields.field_id(args.weight_field)
+        try:
+            weight_field = fields.field_id(args.weight_field)
+        except ValueError, exc:
+            sys.exit(exc)
         ensemble_args.update(weight_field=weight_field)
     if args.objective_weights:
         ensemble_args.update(objective_weights=args.objective_weights_json)
@@ -890,9 +923,12 @@ def map_fields(fields_map, model_fields, dataset_fields):
     """
     update_map = {}
     for (model_column, dataset_column) in fields_map.iteritems():
-        update_map.update({
-            model_fields.field_id(model_column):
-            dataset_fields.field_id(dataset_column)})
+        try:
+            update_map.update({
+                model_fields.field_id(model_column):
+                dataset_fields.field_id(dataset_column)})
+        except ValueError, exc:
+            sys.exit(exc)
 
     return update_map
 
@@ -949,7 +985,10 @@ def set_label_evaluation_args(args, labels, all_labels,
 
     """
     if objective_field is None:
-        objective_id = fields.field_id(fields.objective_field)
+        try:
+            objective_id = fields.field_id(fields.objective_field)
+        except ValueError, exc:
+            sys.exit(exc)
         objective_field = fields.fields[objective_id]['name']
     evaluation_args_list = []
 
@@ -1127,7 +1166,10 @@ def set_batch_prediction_args(args, fields=None,
         for field in args.prediction_fields.split(args.args_separator):
             field = field.strip()
             if not field in fields.fields:
-                field = fields.field_id(field)
+                try:
+                    field = fields.field_id(field)
+                except ValueError, exc:
+                    sys.exit(exc)
             prediction_fields.append(field)
         batch_prediction_args.update(output_fields=prediction_fields)
     if args.missing_strategy:

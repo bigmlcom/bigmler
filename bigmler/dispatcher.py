@@ -300,7 +300,10 @@ def compute_output(api, args):
     # Check if the dataset has a categorical objective field and it
     # has a max_categories limit for categories
     if args.max_categories > 0 and len(datasets) == 1:
-        objective_id = fields.field_id(fields.objective_field)
+        try:
+            objective_id = fields.field_id(fields.objective_field)
+        except ValueError, exc:
+            sys.exit(exc)
         if pd.check_max_categories(fields.fields[objective_id]):
             distribution = pd.get_categories_distribution(dataset,
                                                           objective_id)

@@ -226,8 +226,11 @@ def create_kfold_datasets_file(args, api, common_options, resume=False):
         # check that kfold_field is unique
         fields = Fields(dataset, objective_field=args.objective_field,
                         objective_field_present=True)
-        objective_id = fields.field_id(fields.objective_field)
-        objective_name = fields.field_name(objective_id)
+        try:
+            objective_id = fields.field_id(fields.objective_field)
+            objective_name = fields.field_name(objective_id)
+        except ValueError, exc:
+            sys.exit(exc)
         kfold_field_name = avoid_duplicates(DEFAULT_KFOLD_FIELD, fields)
         # create jsons to generate partial datasets
         selecting_file_list, resume = create_kfold_json(args, kfold_field_name,
@@ -444,9 +447,12 @@ def best_first_search(datasets_file, api, args, common_options,
         excluded_features = ([] if args.exclude_features is None else
                              args.exclude_features.split(
                                  args.args_separator))
-        excluded_ids = [fields.field_id(feature) for
-                        feature in excluded_features]
-        objective_id = fields.field_id(objective_name)
+        try:
+            excluded_ids = [fields.field_id(feature) for
+                            feature in excluded_features]
+            objective_id = fields.field_id(objective_name)
+        except ValueError, exc:
+            sys.exit(exc)
         field_ids = [field_id for field_id in fields.preferred_fields()
                      if field_id != objective_id and
                      not field_id in excluded_ids]
@@ -464,8 +470,12 @@ def best_first_search(datasets_file, api, args, common_options,
                 loop_counter, [int(in_set) for in_set in state],
                 score, metric_value, best_score])
             features_handler.flush()
-            state_fields = [fields.field_name(field_ids[index])
-                            for (index, in_set) in enumerate(state) if in_set]
+            try:
+                state_fields = [fields.field_name(field_ids[index])
+                                for (index, in_set) in enumerate(state)
+                                if in_set]
+            except ValueError, exc:
+                sys.exit(exc)
             closed_list.append(features_set)
             open_list.remove(features_set)
             if (score - EPSILON) > best_score:
@@ -490,9 +500,12 @@ def best_first_search(datasets_file, api, args, common_options,
             for child in children:
                 if (child not in [state for state, _, _ in open_list] and
                         child not in [state for state, _, _ in closed_list]):
-                    input_fields = [fields.field_name(field_id)
-                                    for (i, field_id)
-                                    in enumerate(field_ids) if child[i]]
+                    try:
+                        input_fields = [fields.field_name(field_id)
+                                        for (i, field_id)
+                                        in enumerate(field_ids) if child[i]]
+                    except ValueError, exc:
+                        sys.exit(exc)
                     # create models and evaluation with input_fields
                     args.model_fields = args.args_separator.join(input_fields)
                     counter += 1
@@ -504,9 +517,11 @@ def best_first_search(datasets_file, api, args, common_options,
                                               penalty=penalty, resume=resume,
                                               metric=metric)
                     open_list.append((child, score, metric_value))
-
-        best_features = [fields.field_name(field_ids[i]) for (i, score)
-                         in enumerate(best_state) if score]
+        try:
+            best_features = [fields.field_name(field_ids[i]) for (i, score)
+                             in enumerate(best_state) if score]
+        except ValueError, exc:
+            sys.exit(exc)
         message = (u'The best feature subset is: %s \n'
                    % u", ".join(best_features))
         u.log_message(message, log_file=session_file, console=1)
