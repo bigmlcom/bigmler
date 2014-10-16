@@ -210,7 +210,7 @@ def create_kfold_datasets_file(args, api, common_options, resume=False):
     # retrieve dataset
     dataset_id = bigml.api.get_dataset_id(args.dataset)
     if dataset_id:
-        dataset = api.check_resource(dataset_id, api.get_dataset)
+        dataset = api.check_resource(dataset_id)
         try:
             args.objective_field = int(args.objective_field)
         except (TypeError, ValueError):
@@ -441,7 +441,7 @@ def best_first_search(datasets_file, api, args, common_options,
         except IOError, exc:
             sys.exit("Could not read the generated datasets file: %s" %
                      str(exc))
-        dataset = api.check_resource(dataset_id, api.get_dataset)
+        dataset = api.check_resource(dataset_id)
         # initial feature set
         fields = Fields(dataset)
         excluded_features = ([] if args.exclude_features is None else

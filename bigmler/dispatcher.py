@@ -459,8 +459,7 @@ def compute_output(api, args):
                     path=path, log=log)
             else:
                 test_source_id = bigml.api.get_source_id(args.test_source)
-                test_source = api.check_resource(test_source_id,
-                                                 api.get_source)
+                test_source = api.check_resource(test_source_id)
             if args.test_dataset is None:
             # create test dataset from test source
                 dataset_args = r.set_basic_dataset_args(args, name=test_name)
@@ -469,8 +468,7 @@ def compute_output(api, args):
                     resume, session_file=session_file, path=path, log=log)
             else:
                 test_dataset_id = bigml.api.get_dataset_id(args.test_dataset)
-                test_dataset = api.check_resource(test_dataset_id,
-                                                  api.get_dataset)
+                test_dataset = api.check_resource(test_dataset_id)
 
             csv_properties.update(objective_field=None,
                                   objective_field_present=False)

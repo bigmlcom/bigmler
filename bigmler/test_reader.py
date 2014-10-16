@@ -139,10 +139,10 @@ class TestReader(object):
 
         """
         new_row = row[:]
-        if not filtering:
-            return dict(zip(self.headers, new_row))
         for index in self.exclude:
             del new_row[index]
+        if not filtering:
+            return dict(zip(self.headers, new_row))
         return self.fields.pair(new_row, self.headers, self.objective_field)
 
     def number_of_tests(self):
