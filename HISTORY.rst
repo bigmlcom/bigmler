@@ -9,6 +9,7 @@ History
 - Fixing bug: source updates failed when using --locale and --types flags
   together.
 - Updating bindings version and fixing code accordingly.
+- Adding --k option to bigmler cluster to change the number of centroids.
 
 1.13.2 (2014-10-05)
 ~~~~~~~~~~~~~~~~~~~

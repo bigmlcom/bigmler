@@ -53,6 +53,14 @@ def get_cluster_options(defaults=None):
                      " per line (e.g., cluster/50a206a8035d0706dc000376"
                      ").")},
 
+        # Number of centroids to be generated in the cluster
+        '--k': {
+            'action': 'store',
+            'type': int,
+            'dest': 'cluster_k',
+            'default': defaults.get('cluster_k', None),
+            'help': "Number of centroids to be generated in the cluster."},
+
         # Does not create a cluster just a dataset.
         '--no-cluster': {
             'action': 'store_true',

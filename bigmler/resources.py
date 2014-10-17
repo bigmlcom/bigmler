@@ -1243,11 +1243,13 @@ def set_cluster_args(args, name=None, fields=None,
         "tags": args.tag
     }
 
+    if args.cluster_k:
+        cluster_args.update({"k": args.cluster_k})
     if cluster_fields and fields is not None:
         input_fields = configure_input_fields(fields, cluster_fields)
         cluster_args.update(input_fields=input_fields)
 
-    if 'cluster' in args.json_args and args.json_args['cluster']:
+    if args.json_args.get('cluster'):
         cluster_args.update(args.json_args['cluster'])
 
     return cluster_args

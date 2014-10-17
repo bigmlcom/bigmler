@@ -1191,7 +1191,13 @@ cannot issue a centroid prediction for input data that has missing values in
 its numeric fields, so centroid predictions will give a "-" string as output
 in this case.
 
-You can also generate the datasets associated to each centroid of a cluster.
+You can change the number of centroids used to group the data in the
+clustering procedure::
+
+    bigmler cluster --dataset dataset/53b1f71437203f5ac30004ed \
+                    --k 3
+
+And also generate the datasets associated to each centroid of a cluster.
 Using the ``--cluster-datasets`` option
 
     bigmler cluster --cluster cluster/53b1f71437203f5ac30004f0 \
@@ -1831,6 +1837,7 @@ Cluster Specific Subcommand Options
 --clusters PATH                   Path to a file containing cluster/ids. One
                                   cluster
                                   per line (e.g., cluster/4f824203ce80051)
+--k NUMBER_OF_CENTROIDS           Number of final centroids in the clustering
 --no-cluster                      No cluster will be generated
 --cluster-fields                  Comma-separated list of fields that will be
                                   used in the cluster construction

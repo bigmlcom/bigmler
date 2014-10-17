@@ -154,6 +154,7 @@ FLAGS = {
         {'flag': 'cluster_fields', 'type': 'string'},
         {'flag': 'cluster', 'type': 'string'},
         {'flag': 'clusters', 'type': 'string'},
+        {'flag': 'k', 'type': 'integer'},
         {'flag': 'no_cluster', 'type': 'boolean'},
         {'flag': 'cluster_attributes', 'type': 'string'},
         {'flag': 'cluster_datasets', 'type': 'string'}]}
