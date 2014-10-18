@@ -5,7 +5,7 @@ import time
 
 from lettuce import before, after, world
 
-from bigml.api import BigML
+from bigml.api import BigML, get_resource_type
 from bigml.api import HTTP_NO_CONTENT
 from subprocess import check_call
 from common_steps import (store_init_resources, store_final_resources,
@@ -14,14 +14,14 @@ from common_steps import (store_init_resources, store_final_resources,
 MAX_RETRIES = 10
 
 
-def delete(object_list, delete_method):
+def delete(object_list):
     """Deletes the objects in object_list using the api delete method
 
     """
 
     for obj_id in object_list:
         counter = 0
-        result = delete_method(obj_id)
+        result = world.api.deleters[get_resource_type(obj_id)](obj_id)
         while result['code'] != HTTP_NO_CONTENT and counter < MAX_RETRIES:
             print ("Failed to delete %s with code %s. Retrying." %
                    (obj_id, result['code']))
@@ -31,6 +31,7 @@ def delete(object_list, delete_method):
         if counter == MAX_RETRIES:
             print ("Retries to delete the created resources are exhausted."
                    " Failed to delete.")
+    object_list = []
 
 
 def bigmler_delete(directory, output_dir=None):
@@ -94,6 +95,9 @@ def setup_resources(feature):
     world.clusters = []
     world.centroids = []
     world.batch_centroids = []
+    world.anomalies = []
+    world.anomaly_scores = []
+    world.batch_anomaly_scores = []
     world.source_lower = None
     world.source_upper = None
     world.source_reference = None
@@ -109,35 +113,19 @@ def cleanup_resources(feature):
         except:
             pass
 
-    delete(world.clusters, world.api.delete_cluster)
-    world.clusters = []
-
-    delete(world.sources, world.api.delete_source)
-    world.sources = []
-
-    delete(world.datasets, world.api.delete_dataset)
-    world.datasets = []
-
-    delete(world.models, world.api.delete_model)
-    world.models = []
-
-    delete(world.predictions, world.api.delete_prediction)
-    world.predictions = []
-
-    delete(world.evaluations, world.api.delete_evaluation)
-    world.evaluations = []
-
-    delete(world.ensembles, world.api.delete_ensemble)
-    world.ensembles = []
-
-    delete(world.batch_predictions, world.api.delete_batch_prediction)
-    world.batch_predictions = []
-
-    delete(world.centroids, world.api.delete_centroid)
-    world.centroids = []
-
-    delete(world.batch_centroids, world.api.delete_batch_centroid)
-    world.batch_centroids = []
+    delete(world.clusters)
+    delete(world.sources)
+    delete(world.datasets)
+    delete(world.models)
+    delete(world.predictions)
+    delete(world.evaluations)
+    delete(world.ensembles)
+    delete(world.batch_predictions)
+    delete(world.centroids)
+    delete(world.batch_centroids)
+    delete(world.anomalies)
+    delete(world.anomaly_scores)
+    delete(world.batch_anomaly_scores)
 
     store_final_resources()
 

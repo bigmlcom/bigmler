@@ -316,6 +316,18 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
+    # Parses anomaly input fields if provided.
+    try:
+        if command_args.anomaly_fields:
+            anomaly_fields_arg = map(lambda x: x.strip(),
+                                     command_args.anomaly_fields.split(
+                                     command_args.args_separator))
+            command_args.anomaly_fields_ = anomaly_fields_arg
+        else:
+            command_args.anomaly_fields_ = []
+    except AttributeError:
+        pass
+
     model_ids = []
     try:
         # Parses model/ids if provided.
@@ -387,6 +399,26 @@ def get_output_args(api, command_args, resume):
             command_args.cluster_datasets_ = cluster_datasets_arg
         else:
             command_args.cluster_datasets_ = []
+    except AttributeError:
+        pass
+
+    anomaly_ids = []
+    try:
+        # Parses anomaly/ids if provided.
+        if command_args.anomalies:
+            anomaly_ids = u.read_resources(command_args.anomalies)
+        command_args.anomaly_ids_ = anomaly_ids
+    except AttributeError:
+        pass
+
+    # Retrieve anomaly/ids if provided.
+    try:
+        if command_args.anomaly_tag:
+            anomaly_ids = (anomaly_ids +
+                           u.list_ids(api.list_anomalies,
+                                      "tags__in=%s" %
+                                      command_args.anomaly_tag))
+        command_args.anomaly_ids_ = anomaly_ids
     except AttributeError:
         pass
 
@@ -539,9 +571,12 @@ def transform_args(command_args, flags, api, user_defaults):
         (hasattr(command_args, 'cluster') and command_args.cluster) or
         (hasattr(command_args, 'clusters') and command_args.clusters) or
         (hasattr(command_args, 'model_tag') and command_args.model_tag) or
+        (hasattr(command_args, 'anomaly') and command_args.anomaly) or
+        (hasattr(command_args, 'anomalies') and command_args.anomalies) or
         (hasattr(command_args, 'ensemble_tag')
          and command_args.ensemble_tag) or
-        (hasattr(command_args, 'cluster_tag') and command_args.cluster_tag))
+        (hasattr(command_args, 'cluster_tag') and command_args.cluster_tag) or
+        (hasattr(command_args, 'anomaly_tag') and command_args.anomaly_tag))
 
     command_args.has_datasets_ = (
         (hasattr(command_args, 'dataset') and command_args.dataset) or

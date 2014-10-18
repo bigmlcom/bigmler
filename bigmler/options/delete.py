@@ -95,6 +95,27 @@ def get_delete_options(defaults=None):
             'help': ("Select batch prediction tagged with tag to"
                      " be deleted.")},
 
+        # Anomaly detectors selected by tag to be deleted.
+        '--anomaly-tag': {
+            'dest': 'anomaly_tag',
+            'default': defaults.get('anomaly_tag', None),
+            'help': ("Select anomaly tagged with tag to"
+                     " be deleted.")},
+
+        # Anomaly scores selected by tag to be deleted.
+        '--anomaly-score-tag': {
+            'dest': 'anomaly_score_tag',
+            'default': defaults.get('anomaly_score_tag', None),
+            'help': ("Select anomaly score tagged with tag to"
+                     " be deleted.")},
+
+        # Batch anomaly scores selected by tag to be deleted.
+        '--batch-anomaly-score-tag': {
+            'dest': 'batch_anomaly_score_tag',
+            'default': defaults.get('batch_anomaly_score_tag', None),
+            'help': ("Select batch anomaly score tagged with tag to"
+                     " be deleted.")},
+
         # Resources selected by tag to be deleted.
         '--all-tag': {
             'dest': 'all_tag',

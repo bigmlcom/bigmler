@@ -272,27 +272,16 @@ def delete(api, delete_list):
     """ Deletes the resources given in the list.
 
     """
-    delete_functions = {bigml.api.SOURCE_RE: api.delete_source,
-                        bigml.api.DATASET_RE: api.delete_dataset,
-                        bigml.api.MODEL_RE: api.delete_model,
-                        bigml.api.PREDICTION_RE: api.delete_prediction,
-                        bigml.api.EVALUATION_RE: api.delete_evaluation,
-                        bigml.api.ENSEMBLE_RE: api.delete_ensemble,
-                        bigml.api.BATCH_PREDICTION_RE:
-                            api.delete_batch_prediction,
-                        bigml.api.CLUSTER_RE: api.delete_cluster,
-                        bigml.api.CENTROID_RE: api.delete_centroid,
-                        bigml.api.BATCH_CENTROID_RE: api.delete_centroid}
     for resource_id in delete_list:
         resource_type = None
         try:
-            for resource_type in delete_functions:
+            for resource_type, resource_re in bigml.api.RESOURCE_RE.items():
                 try:
-                    bigml.api.get_resource(resource_type, resource_id)
+                    bigml.api.get_resource(resource_re, resource_id)
                     break
                 except ValueError:
                     pass
-            delete_functions[resource_type](resource_id)
+            api.deleters[resource_type](resource_id)
         except ValueError:
             console_log("Failed to delete resource %s" % resource_id)
 

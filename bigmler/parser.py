@@ -31,8 +31,9 @@ from bigmler.options.multilabel import get_multi_label_options
 from bigmler.options.main import get_main_options
 from bigmler.options.analyze import get_analyze_options
 from bigmler.options.cluster import get_cluster_options
+from bigmler.options.anomaly import get_anomaly_options
 
-SUBCOMMANDS = ["main", "analyze", "cluster", "delete"]
+SUBCOMMANDS = ["main", "analyze", "cluster", "anomaly", "delete"]
 MAIN = SUBCOMMANDS[0]
 
 
@@ -137,6 +138,30 @@ under the License.""" % version
         '--reports': main_options['--reports'],
         '--remote': main_options['--remote'],
         '--no-batch': main_options['--no-batch']})
+
+    defaults = general_defaults["BigMLer anomaly"]
+    subcommand_options["anomaly"] = get_anomaly_options(defaults=defaults)
+    # general options
+    subcommand_options["anomaly"].update(common_options)
+    subcommand_options["anomaly"].update(source_options)
+    subcommand_options["anomaly"].update(dataset_options)
+    subcommand_options["anomaly"].update(test_options)
+    subcommand_options["anomaly"].update({
+        '--cpp': main_options['--cpp'],
+        '--fields-map': main_options['--fields-map'],
+        '--source-tag': delete_options['--source-tag'],
+        '--dataset-tag': delete_options['--dataset-tag'],
+        '--anomaly-tag': delete_options['--anomaly-tag'],
+        '--anomaly-score-tag': delete_options['--anomaly-score-tag'],
+        '--batch-anomaly-score-tag': delete_options['--batch-anomaly-score-tag'],
+        '--prediction-info': main_options['--prediction-info'],
+        '--prediction-header': main_options['--prediction-header'],
+        '--prediction-fields': main_options['--prediction-fields'],
+        '--reports': main_options['--reports'],
+        '--remote': main_options['--remote'],
+        '--no-batch': main_options['--no-batch']})
+
+
     subcommand_options["delete"] = delete_options
     subcommand_options["delete"].update(common_options)
 

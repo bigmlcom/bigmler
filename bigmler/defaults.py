@@ -139,7 +139,9 @@ FLAGS = {
         {'flag': 'batch_centroid_tag', 'type': 'string'},
         {'flag': 'to_csv', 'type': 'string'},
         {'flag': 'resource_types', 'type': 'string'},
-        {'flag': 'dry_run', 'type': 'boolean'}],
+        {'flag': 'dry_run', 'type': 'boolean'},
+        {'flag': 'anomaly_tag', 'type': 'string'},
+        {'flag': 'anomaly_score_tag', 'type': 'string'}],
     'BigMLer analyze': [
         {'flag': 'k-fold', 'type': 'integer'},
         {'flag': 'cv', 'type': 'boolean'},
@@ -157,7 +159,13 @@ FLAGS = {
         {'flag': 'k', 'type': 'integer'},
         {'flag': 'no_cluster', 'type': 'boolean'},
         {'flag': 'cluster_attributes', 'type': 'string'},
-        {'flag': 'cluster_datasets', 'type': 'string'}]}
+        {'flag': 'cluster_datasets', 'type': 'string'}],
+    'BigMLer anomaly': [
+        {'flag': 'anomaly_fields', 'type': 'string'},
+        {'flag': 'anomaly', 'type': 'string'},
+        {'flag': 'anomalies', 'type': 'string'},
+        {'flag': 'no_anomaly', 'type': 'boolean'},
+        {'flag': 'anomaly_attributes', 'type': 'string'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):

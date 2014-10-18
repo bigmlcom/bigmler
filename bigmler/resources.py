@@ -1442,3 +1442,204 @@ def update_cluster(cluster, cluster_args, args,
             report(args.reports, path, cluster)
 
     return cluster
+
+
+def set_batch_anomaly_score_args(args, fields=None,
+                                 dataset_fields=None):
+    """Return batch anomaly score args dict
+
+    """
+    batch_anomaly_score_args = {
+        "name": args.name,
+        "description": args.description_,
+        "tags": args.tag,
+        "header": args.prediction_header,
+    }
+
+    if args.fields_map_ and fields is not None:
+        if dataset_fields is None:
+            dataset_fields = fields
+        batch_anomaly_score_args.update({
+            "fields_map": map_fields(args.fields_map_,
+                                     fields, dataset_fields)})
+
+    if args.prediction_info == FULL_FORMAT:
+        batch_anomaly_score_args.update(all_fields=True)
+
+    json_args = args.json_args.get('batch_anomaly_score')
+    if json_args:
+        batch_anomaly_score_args.update(json_args)
+
+    return batch_anomaly_score_args
+
+
+def set_anomaly_args(args, name=None, fields=None,
+                     anomaly_fields=None):
+    """Return anomaly arguments dict
+
+    """
+    if name is None:
+        name = args.name
+    if anomaly_fields is None:
+        anomaly_fields = args.anomaly_fields_
+
+    anomaly_args = {
+        "name": name,
+        "description": args.description_,
+        "category": args.category,
+        "tags": args.tag
+    }
+
+    if anomaly_fields and fields is not None:
+        input_fields = configure_input_fields(fields, anomaly_fields)
+        anomaly_args.update(input_fields=input_fields)
+
+    if args.json_args.get('anomaly'):
+        anomaly_args.update(args.json_args['anomaly'])
+
+    return anomaly_args
+
+
+def create_anomalies(datasets, anomaly_ids, anomaly_args,
+                     args, api=None, path=None,
+                     session_file=None, log=None):
+    """Create remote anomalies
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+
+    anomalies = anomaly_ids[:]
+    existing_anomalies = len(anomalies)
+    anomaly_args_list = []
+    datasets = datasets[existing_anomalies:]
+    # if resuming and all anomalies were created,
+    # there will be no datasets left
+    if datasets:
+        if isinstance(anomaly_args, list):
+            anomaly_args_list = anomaly_args
+
+        # Only one anomaly per command, at present
+        number_of_anomalies = 1
+        message = dated("Creating %s.\n" %
+                        plural("anomaly detector", number_of_anomalies))
+        log_message(message, log_file=session_file,
+                    console=args.verbosity)
+
+        query_string = FIELDS_QS
+        inprogress = []
+        for i in range(0, number_of_anomalies):
+            wait_for_available_tasks(inprogress, args.max_parallel_anomalies,
+                                     api.get_anomaly, "anomaly",
+                                     query_string=query_string)
+            if anomaly_args_list:
+                anomaly_args = anomaly_args_list[i]
+
+            anomaly = api.create_anomaly(datasets, anomaly_args, retries=None)
+            anomaly_id = check_resource_error(anomaly,
+                                              "Failed to create anomaly: ")
+            log_message("%s\n" % anomaly_id, log_file=log)
+            anomaly_ids.append(anomaly_id)
+            inprogress.append(anomaly_id)
+            anomalies.append(anomaly)
+            log_created_resources("anomalies", path, anomaly_id, open_mode='a')
+
+        if args.verbosity:
+            if bigml.api.get_status(anomaly)['code'] != bigml.api.FINISHED:
+                try:
+                    anomaly = api.check_resource(anomaly,
+                                                 query_string=query_string)
+                except ValueError, exception:
+                    sys.exit("Failed to get a finished anomaly: %s" %
+                             str(exception))
+                anomalies[0] = anomaly
+            message = dated("Anomaly created: %s.\n" %
+                            get_url(anomaly))
+            log_message(message, log_file=session_file,
+                        console=args.verbosity)
+            if args.reports:
+                report(args.reports, path, anomaly)
+
+    return anomalies, anomaly_ids
+
+
+def get_anomalies(anomaly_ids, args, api=None, session_file=None):
+    """Retrieves remote anomalies in its actual status
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+    anomaly_id = ""
+    anomalies = anomaly_ids
+    anomaly_id = anomaly_ids[0]
+    message = dated("Retrieving %s. %s\n" %
+                    (plural("anomaly detector", len(anomaly_ids)),
+                     get_url(anomaly_id)))
+    log_message(message, log_file=session_file, console=args.verbosity)
+    # only one anomaly to predict at present
+    try:
+        query_string = FIELDS_QS
+        anomaly = api.check_resource(anomaly_ids[0],
+                                     query_string=query_string)
+    except ValueError, exception:
+        sys.exit("Failed to get a finished anomaly: %s" % str(exception))
+    anomalies[0] = anomaly
+
+    return anomalies, anomaly_ids
+
+
+def create_batch_anomaly_score(anomaly, test_dataset,
+                               batch_anomaly_score_args, args,
+                               api=None, session_file=None,
+                               path=None, log=None):
+    """Creates remote batch anomaly score
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+    message = dated("Creating batch anomaly score.\n")
+    log_message(message, log_file=session_file, console=args.verbosity)
+    batch_anomaly_score = api.create_batch_anomaly_score(
+        anomaly, test_dataset, batch_anomaly_score_args, retries=None)
+    log_created_resources(
+        "batch_anomaly_score", path,
+        bigml.api.get_batch_anomaly_score_id(batch_anomaly_score),
+        open_mode='a')
+    batch_anomaly_score_id = check_resource_error(
+        batch_anomaly_score, "Failed to create batch prediction: ")
+    try:
+        batch_anomaly_score = api.check_resource(batch_anomaly_score)
+    except ValueError, exception:
+        sys.exit("Failed to get a finished batch anomaly score: %s"
+                 % str(exception))
+    message = dated("Batch anomaly score created: %s\n"
+                    % get_url(batch_anomaly_score))
+    log_message(message, log_file=session_file, console=args.verbosity)
+    log_message("%s\n" % batch_anomaly_score_id, log_file=log)
+    if args.reports:
+        report(args.reports, path, batch_anomaly_score)
+    return batch_anomaly_score
+
+def update_anomaly(anomaly, anomaly_args, args,
+                   api=None, path=None, session_file=None):
+    """Updates anomaly properties
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+    message = dated("Updating anomaly detector. %s\n" %
+                    get_url(anomaly))
+    log_message(message, log_file=session_file,
+                console=args.verbosity)
+    anomaly = api.update_anomaly(anomaly, anomaly_args)
+    check_resource_error(anomaly, "Failed to update anomaly: %s"
+                         % anomaly['resource'])
+    anomaly = api.check_resource(anomaly, query_string=FIELDS_QS)
+    if is_shared(anomaly):
+        message = dated("Shared anomaly link. %s\n" %
+                        get_url(anomaly, shared=True))
+        log_message(message, log_file=session_file, console=args.verbosity)
+        if args.reports:
+            report(args.reports, path, anomaly)
+
+    return anomaly

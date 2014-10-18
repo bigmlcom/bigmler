@@ -14,6 +14,7 @@ from ml_test_evaluation_steps import i_create_all_ml_resources_for_evaluation
 from max_categories_test_prediction_steps import i_check_create_max_categories_datasets, i_create_all_mc_resources
 from basic_batch_test_prediction_steps import i_check_create_test_source, i_check_create_test_dataset
 from basic_cluster_prediction_steps import i_create_all_cluster_resources, i_check_create_cluster
+from basic_anomaly_prediction_steps import i_create_all_anomaly_resources, i_check_create_anomaly
 from ml_test_prediction_steps import i_create_all_mlm_resources
 from common_steps import check_debug
 
@@ -1107,7 +1108,8 @@ def i_have_previous_scenario_or_reproduce_it(step, scenario, kwargs):
                  'scenario_mc_1': [(i_create_all_mc_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_max_categories_datasets, False), (i_check_create_models, False)],
                  'scenario_r1': [(i_create_all_resources_batch, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_max_categories_datasets, False), (i_check_create_models, False), (i_check_create_test_source, False), (i_check_create_test_dataset, False)],
                  'scenario_mlm_1': [(i_create_all_mlm_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models, False)],
-                'scenario_c_1': [(i_create_all_cluster_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_cluster, False)]}
+                'scenario_c_1': [(i_create_all_cluster_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_cluster, False)],
+                'scenario_an_1': [(i_create_all_anomaly_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_anomaly, False)]}
     if os.path.exists("./%s/" % scenario):
         assert True
     else:

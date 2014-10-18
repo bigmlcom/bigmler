@@ -3,6 +3,12 @@
 History
 -------
 
+1.14.0 (2014-10-19)
+~~~~~~~~~~~~~~~~~~~
+
+- Adding bigmler anomaly as new subcommand to generate anomaly detectors,
+  anomaly scores and batch anomaly scores.
+
 1.13.3 (2014-10-13)
 ~~~~~~~~~~~~~~~~~~~
 

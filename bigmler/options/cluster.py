@@ -20,7 +20,7 @@
 """
 
 def get_cluster_options(defaults=None):
-    """Adding arguments for the analyze subcommand
+    """Adding arguments for the cluster subcommand
 
     """
 

@@ -49,6 +49,7 @@ import sys
 from bigmler.dispatcher import main_dispatcher
 from bigmler.analyze.dispatcher import analyze_dispatcher
 from bigmler.cluster.dispatcher import cluster_dispatcher
+from bigmler.anomaly.dispatcher import anomaly_dispatcher
 from bigmler.delete.dispatcher import delete_dispatcher
 from bigmler.parser import SUBCOMMANDS
 from bigmler.utils import SYSTEM_ENCODING
@@ -87,11 +88,17 @@ def main(args=sys.argv[1:]):
             analyze_dispatcher(args=new_args)
         elif new_args[0] == "cluster":
             cluster_dispatcher(args=new_args)
+        elif new_args[0] == "anomaly":
+            anomaly_dispatcher(args=new_args)
         elif new_args[0] == "delete":
             delete_dispatcher(args=new_args)
     else:
         sys.exit("BigMLer used with no arguments. Check:\nbigmler --help\n\nor"
-                 "\n\nbigmler analyze --help\n\n for a list of options")
+                 "\n\nbigmler analyze --help\n\n"
+                 "\n\nbigmler cluster --help\n\n"
+                 "\n\nbigmler anomaly --help\n\n"
+                 "\n\nbigmler delete --help\n\n"
+                 " for a list of options")
 
 if __name__ == '__main__':
     main(sys.argv[1:])

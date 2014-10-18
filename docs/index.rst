@@ -24,6 +24,9 @@ functionality, there are two additional subcommands:
 - bigmler cluster     Used to generate clusters and centroids' predictions.
                       See :ref:`bigmler-cluster`.
 
+- bigmler anomaly     Used to generate anomaly detectors and anomaly scores.
+                      See :ref:`bigmler-anomaly`.
+
 - bigmler delete      Used to delete the remotely created resources. See
                       :ref:`bigmler-delete`.
 
@@ -1206,6 +1209,61 @@ Using the ``--cluster-datasets`` option
 you can generate the datasets associated to a comma-separated list of
 centroid names. If no centroid name is provided, all datasets are generated.
 
+
+.. _bigmler-anomaly:
+
+Anomaly subcommand
+------------------
+
+The ``bigmler anomaly`` subcommand generates all the resources needed to buid
+an anomaly detection model and/or predict the anomaly scores associated to your
+test data. As usual, the simplest call::
+
+    bigmler anomaly --train data/tiny_kdd.csv
+
+uploads the data in the ``data/tiny_kdd.csv`` file and generates
+the corresponding ``source``, ``dataset`` and ``anomaly`` objects in BigML. You
+can use any of the generated objects to produce new anomaly detectors.
+For instance, you could set a subgroup of the fields of the generated dataset
+to produce a different anomaly detector by using::
+
+    bigmler anomaly --dataset dataset/53b1f71437203f5ac30004ed \
+                    --anomaly-fields="-urgent"
+
+that would exclude the field ``urgent`` from the anomaly detector
+creation input fields.
+
+Similarly to the models and datasets, the generated anomaly detectors
+can be shared using the ``--shared`` option, e.g.::
+
+    bigmler anomaly --source source/53b1f71437203f5ac30004e0 \
+                    --shared
+
+will generate a secret link for both the created dataset and anomaly detector
+that can be used to share the resource selectively.
+
+The anomaly detector can be used to assign an anomaly score to each new
+input data set. The anomaly score is a number between 0 (not anomalous)
+and 1 (highest anomaly). The command::
+
+    bigmler anomaly --anomaly anomaly/53b1f71437203f5ac30005c0 \
+                    --test data/test_kdd.csv
+
+would produce a file ``anomaly_scores.csv`` with the anomaly score associated
+to each input. When the command is executed, the anomaly detector
+information is downloaded
+to your local computer and the anomaly score predictions are computed locally,
+with no more latencies involved. Just in case you prefer to use BigML
+to compute the anomaly score predictions remotely, you can do so too::
+
+    bigmler anomaly --anomaly anomaly/53b1f71437203f5ac30005c0 \
+                    --test data/my_test.csv --remote
+
+would create a remote source and dataset from the test file data,
+generate a ``batch anomaly score`` also remotely and finally
+download the result to your computer.
+
+
 .. _bigmler-delete:
 
 Delete subcommand
@@ -1264,6 +1322,9 @@ or restricting the operation to a specific type::
     bigmler delete --cluster-tag my_tag
     bigmler delete --centroid-tag my_tag
     bigmler delete --batch-centroid-tag my_tag
+    bigmler delete --anomaly-tag my_tag
+    bigmler delete --anomaly-score-tag my_tag
+    bigmler delete --batch-anomaly-score-tag my_tag
 
 
 You can also delete resources by date. The options ``--newer-than`` and
@@ -1828,11 +1889,6 @@ Analyze subcommand Options
 Cluster Specific Subcommand Options
 ----------------------------------
 
---model MODEL                     BigML model Id
---models PATH                     Path to a file containing model/ids. One
-                                  model per
-                                  line (e.g., model/4f824203ce80053)
-
 --cluster CLUSTER                 BigML cluster Id
 --clusters PATH                   Path to a file containing cluster/ids. One
                                   cluster
@@ -1848,51 +1904,71 @@ Cluster Specific Subcommand Options
                                   If no CENTROID_NAMES argument is provided
                                   all datasets are generated
 
+Anomaly Specific Subcommand Options
+----------------------------------
+
+--anomaly ANOMALY                 BigML anomaly Id
+--anomalies PATH                  Path to a file containing anomaly/ids. One
+                                  anomaly
+                                  per line (e.g., anomaly/4f824203ce80051)
+--no-anomaly                      No anomaly detector will be generated
+--anomaly-fields                  Comma-separated list of fields that will be
+                                  used in the anomaly detector construction
+--anomaly-attributes PATH         Path to a JSON file containing attributes to
+                                  be used in the anomaly creation call
+
 Delete Subcommand Options
 -------------------------
 
---ids LIST_OF_IDS           Comma separated list of ids to be deleted
---from-file FILE_OF_IDS     Path to a file containing the resources' ids to be
-                            deleted
---from-dir                  Path to a directory where BigMLer has stored
-                            its session data and created resources
---all-tag TAG               Retrieves resources that were tagged with tag to
-                            delete them
---source-tag TAG            Retrieves sources that were tagged with tag to
-                            delete them
---dataset-tag TAG           Retrieves datasets that were tagged with tag to
-                            delete them
---model-tag TAG             Retrieves models that were tagged with tag to
-                            delete them
---prediction-tag TAG        Retrieves predictions that were tagged with tag to
-                            delete them
---evaluation-tag TAG        Retrieves evaluations that were tagged with tag to
-                            delete them
---ensemble-tag TAG          Retrieves ensembles that were tagged with tag to
-                            delete them
---batch-prediction-tag TAG  Retrieves batch predictions that were tagged with
-                            tag to delete them
---cluster-tag TAG           Retrieves clusters that were tagged with
-                            tag to delete them
---centroid-tag TAG          Retrieves centroids that were tagged with
-                            tag to delete them
---batch-centroid-tag TAG    Retrieves batch centroids that were tagged with
-                            tag to delete them
---older-than DATE           Retrieves resources created before the specified
-                            date. Date can be any YYYY-MM-DD string, an
-                            integer meaning the number of days before the
-                            current datetime or a resource id, meaning the
-                            creation datetime of the resource
---newer-than DATE           Retrieves resources created after the specified
-                            date. Date can be any YYYY-MM-DD string, an
-                            integer meaning the number of days before the
-                            current datetime or a resource id, meaning the
-                            creation datetime of the resource
---resource-types            Comma-separated list of types of resources to be
-                            deleted. Allowed values are source, dataset, model,
-                            ensemble, prediction, batch_prediction, cluster,
-                            centroid, batch_centroid
---dry-run                   Delete simulation. No removal.
+--ids LIST_OF_IDS               Comma separated list of ids to be deleted
+--from-file FILE_OF_IDS         Path to a file containing the resources' ids to
+                                be deleted
+--from-dir                      Path to a directory where BigMLer has stored
+                                its session data and created resources
+--all-tag TAG                   Retrieves resources that were tagged with tag
+                                to delete them
+--source-tag TAG                Retrieves sources that were tagged with tag to
+                                delete them
+--dataset-tag TAG               Retrieves datasets that were tagged with tag to
+                                delete them
+--model-tag TAG                 Retrieves models that were tagged with tag to
+                                delete them
+--prediction-tag TAG            Retrieves predictions that were tagged with tag
+                                to delete them
+--evaluation-tag TAG            Retrieves evaluations that were tagged with tag
+                                to delete them
+--ensemble-tag TAG              Retrieves ensembles that were tagged with tag
+                                to delete them
+--batch-prediction-tag TAG      Retrieves batch predictions that were tagged
+                                with tag to delete them
+--cluster-tag TAG               Retrieves clusters that were tagged with
+                                tag to delete them
+--centroid-tag TAG              Retrieves centroids that were tagged with
+                                tag to delete them
+--batch-centroid-tag TAG        Retrieves batch centroids that were tagged with
+                                tag to delete them
+--anomaly-tag TAG               Retrieves anomalies that were tagged with
+                                tag to delete them
+--anomaly-score-tag TAG         Retrieves anomaly scores that were tagged with
+                                tag to delete them
+--batch-anomlay-score-tag TAG   Retrieves batch anomaly scores that were
+                                tagged with tag to delete them
+--older-than DATE               Retrieves resources created before the
+                                specified
+                                date. Date can be any YYYY-MM-DD string, an
+                                integer meaning the number of days before the
+                                current datetime or a resource id, meaning the
+                                creation datetime of the resource
+--newer-than DATE               Retrieves resources created after the specified
+                                date. Date can be any YYYY-MM-DD string, an
+                                integer meaning the number of days before the
+                                current datetime or a resource id, meaning the
+                                creation datetime of the resource
+--resource-types                Comma-separated list of types of resources to
+                                be deleted. Allowed values are source, dataset,
+                                model, ensemble, prediction, batch_prediction,
+                                cluster, centroid, batch_centroid
+--dry-run                       Delete simulation. No removal.
 
 Prior Versions Compatibility Issues
 -----------------------------------

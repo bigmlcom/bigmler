@@ -296,3 +296,46 @@ def is_dataset_exported(filename):
             return True
     except IOError:
         return False
+
+
+def is_batch_anomaly_score_created(path):
+    """Checks existence and reads the batch anomaly score id from the
+       batch_anomaly_score file in the path directory
+
+    """
+    batch_anomaly_score_id = None
+    try:
+        with open("%s%sbatch_anomaly_score"
+                  % (path, os.sep)) as batch_prediction_file:
+            batch_anomaly_score_id = batch_prediction_file.readline().strip()
+            try:
+                batch_anomaly_score_id = bigml.api.get_batch_anomaly_score_id(
+                    batch_anomaly_score_id)
+                return True, batch_anomaly_score_id
+            except ValueError:
+                return False, None
+    except IOError:
+        return False, None
+
+
+def are_anomalies_created(path, number_of_anomalies):
+    """Checks existence and reads the anomaly detector ids from the
+       anomalies file in the path directory
+
+    """
+    anomaly_ids = []
+    try:
+        with open("%s%sanomalies" % (path, os.sep)) as anomalies_file:
+            for line in anomalies_file:
+                anomaly = line.strip()
+                try:
+                    anomaly_id = bigml.api.get_anomaly_id(anomaly)
+                    anomaly_ids.append(anomaly_id)
+                except ValueError:
+                    return False, anomaly_ids
+        if len(anomaly_ids) == number_of_anomaly:
+            return True, anomaly_ids
+        else:
+            return False, anomaly_ids
+    except IOError:
+        return False, anomaly_ids
