@@ -27,7 +27,7 @@ import bigmler.checkpoint as c
 from bigml.fields import Fields, DEFAULT_MISSING_TOKENS
 
 def has_anomalies(args):
-    """Returns if some kind of anomaly detector is given
+    """Returns whether some kind of anomaly detector is given
 
     """
     return args.anomaly or args.anomalies or args.anomaly_tag

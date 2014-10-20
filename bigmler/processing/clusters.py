@@ -27,7 +27,7 @@ from bigml.fields import Fields, DEFAULT_MISSING_TOKENS
 
 
 def has_clusters(args):
-    """Returns if some kind of cluster
+    """Returns whether some kind of cluster
 
     """
     return args.cluster or args.clusters or args.cluster_tag

@@ -114,8 +114,9 @@ def anomaly_dispatcher(args=sys.argv[1:]):
 
 
 def compute_output(api, args):
-    """ Creates one or more models using the `training_set` or uses the ids
-    of previously created BigML models to make predictions for the `test_set`.
+    """ Creates one or more anomaly detectors using the `training_set`
+        or uses the ids of previously created BigML models to make
+        predictions for the `test_set`.
 
     """
     source = None
