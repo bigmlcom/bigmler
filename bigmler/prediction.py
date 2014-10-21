@@ -21,11 +21,13 @@ from __future__ import absolute_import
 import csv
 import sys
 import ast
+import gc
 
 import bigml.api
 
 import bigmler.utils as u
 import bigmler.checkpoint as c
+
 
 
 from bigml.model import Model
@@ -299,15 +301,22 @@ def local_predict(models, test_reader, output, args, options=None,
     """Get local predictions and combine them to get a final prediction
 
     """
-    local_model = MultiModel(models)
+
+    single_model = len(models) == 1
     test_set_header = test_reader.has_headers()
+    kwargs = {"by_name": test_set_header, "with_confidence": True,
+              "missing_strategy": args.missing_strategy}
+    if single_model:
+        local_model = Model(models[0])
+    else:
+        local_model = MultiModel(models)
+        kwargs.update({"method": args.method, "options": options})
     for input_data in test_reader:
         input_data_dict = test_reader.dict(input_data)
         prediction = local_model.predict(
-            input_data_dict, by_name=test_set_header, method=args.method,
-            with_confidence=True, options=options,
-            missing_strategy=args.missing_strategy)
-        write_prediction(prediction, output,
+            input_data_dict, **kwargs)
+        write_prediction(prediction[0: 2],
+                         output,
                          args.prediction_info, input_data, exclude)
 
 
@@ -401,6 +410,8 @@ def local_batch_predict(models, test_reader, prediction_file, api, args,
 
         if complete_models:
             local_model = MultiModel(complete_models)
+            # added to ensure garbage collection at each step of the loop
+            gc.collect()
             try:
                 local_model.batch_predict(
                     input_data_list, output_path, by_name=test_set_header,
@@ -514,6 +525,7 @@ def predict(models, fields, args, api=None, log=None,
     test_reader = TestReader(test_set, test_set_header, fields,
                              objective_field,
                              test_separator=args.test_separator)
+
     prediction_file = output
     output_path = u.check_dir(output)
     output = csv.writer(open(output, 'w', 0), lineterminator="\n")
@@ -551,7 +563,8 @@ def predict(models, fields, args, api=None, log=None,
             local_model = Model(models[0])
             args.threshold_class = local_model.tree.distribution[0][0]
         options.update(category=args.threshold_class)
-    # For a small number of models, we build a MultiModel using all of
+    # For a model we build a Model and for a small number of models,
+    # we build a MultiModel using all of
     # the given models and issue a combined prediction
     if (len(models) < args.max_batch_models and not args.multi_label
             and args.max_categories == 0 and args.method != COMBINATION):

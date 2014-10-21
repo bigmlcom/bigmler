@@ -23,6 +23,7 @@ import sys
 import os
 import re
 import datetime
+import gc
 
 import bigml.api
 import bigmler.utils as u
@@ -351,6 +352,7 @@ def compute_output(api, args):
                                            args.max_categories)
         other_label = get_metadata(dataset, 'other_label',
                                    other_label)
+
     models, model_ids, ensemble_ids, resume = pm.models_processing(
         datasets, models, model_ids,
         api, args, resume, fields=fields,
@@ -406,10 +408,14 @@ def compute_output(api, args):
                 ensemble_id = ensemble_ids[0]
             else:
                 ensemble_id = get_ensemble_id(model)
-            local_ensemble = Ensemble(ensemble_id, api=api)
+            local_ensemble = Ensemble(ensemble_id, api=api,
+                                      max_models=args.max_batch_models)
         fields = pm.get_model_fields(
             model, csv_properties, args, single_model=single_model,
             multi_label_data=multi_label_data, local_ensemble=local_ensemble)
+        # Free memory after getting fields
+        local_ensemble = None
+        gc.collect()
 
     # Fills in all_labels from user_metadata
     if args.multi_label and not all_labels:

@@ -120,8 +120,8 @@ def relative_input_fields(fields, user_given_fields):
     return input_fields
 
 
-def wait_for_available_tasks(inprogress, max_parallel, get_function,
-                             resource_type, query_string=None, wait_step=2):
+def wait_for_available_tasks(inprogress, max_parallel, api,
+                             resource_type, wait_step=2):
     """According to the max_parallel number of parallel resources to be
        created, when the number of in progress resources reaches the limit,
        it checks the ones in inprogress to see if there's a
@@ -130,14 +130,11 @@ def wait_for_available_tasks(inprogress, max_parallel, get_function,
 
     """
 
-    check_kwargs = {"retries": 0}
-    if query_string:
-        check_kwargs.update(query_string=query_string)
+    check_kwargs = {"retries": 0, "query_string": "full=false", "api": api}
     while len(inprogress) == max_parallel:
         for j in range(0, len(inprogress)):
             try:
-                ready = check_resource(inprogress[j], get_function,
-                                       **check_kwargs)
+                ready = check_resource(inprogress[j], **check_kwargs)
                 status = bigml.api.get_status(ready)
                 if status['code'] == bigml.api.FINISHED:
                     del inprogress[j]
@@ -601,8 +598,7 @@ def create_models(datasets, model_ids, model_args,
             inprogress = []
             for i in range(0, args.number_of_models):
                 wait_for_available_tasks(inprogress, args.max_parallel_models,
-                                         api.get_model, "model",
-                                         query_string=query_string)
+                                         api, "model")
                 if model_args_list:
                     model_args = model_args_list[i]
                 if args.cross_validation_rate > 0:
@@ -837,8 +833,7 @@ def create_ensembles(datasets, ensemble_ids, ensemble_args, args,
         inprogress = []
         for i in range(0, number_of_ensembles):
             wait_for_available_tasks(inprogress, args.max_parallel_ensembles,
-                                     api.get_ensemble, "ensemble",
-                                     query_string=query_string,
+                                     api, "ensemble",
                                      wait_step=args.number_of_models)
 
             if ensemble_args_list:
@@ -1047,7 +1042,7 @@ def create_evaluations(model_ids, datasets, evaluation_args, args, api=None,
         if args.test_dataset_ids or args.dataset_off:
             dataset = remaining_datasets[i]
         wait_for_available_tasks(inprogress, args.max_parallel_evaluations,
-                                 api.get_evaluation, "evaluation")
+                                 api, "evaluation")
 
         if evaluation_args_list != []:
             evaluation_args = evaluation_args_list[i]
@@ -1284,8 +1279,7 @@ def create_clusters(datasets, cluster_ids, cluster_args,
         inprogress = []
         for i in range(0, number_of_clusters):
             wait_for_available_tasks(inprogress, args.max_parallel_clusters,
-                                     api.get_cluster, "cluster",
-                                     query_string=query_string)
+                                     api, "cluster")
             if cluster_args_list:
                 cluster_args = cluster_args_list[i]
 
@@ -1530,8 +1524,7 @@ def create_anomalies(datasets, anomaly_ids, anomaly_args,
         inprogress = []
         for i in range(0, number_of_anomalies):
             wait_for_available_tasks(inprogress, args.max_parallel_anomalies,
-                                     api.get_anomaly, "anomaly",
-                                     query_string=query_string)
+                                     api, "anomaly")
             if anomaly_args_list:
                 anomaly_args = anomaly_args_list[i]
 
