@@ -313,7 +313,8 @@ def local_predict(models, test_reader, output, args, options=None,
         local_model = MultiModel(models)
         kwargs.update({"method": args.method, "options": options})
     for input_data in test_reader:
-        input_data_dict = test_reader.dict(input_data, filtering=False)
+        input_data_dict = test_reader.dict(input_data,
+                                           filtering=not test_set_header)
         prediction = local_model.predict(
             input_data_dict, **kwargs)
         write_prediction(prediction[0: 2],
