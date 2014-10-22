@@ -1158,7 +1158,7 @@ def set_batch_prediction_args(args, fields=None,
             "fields_map": map_fields(args.fields_map_,
                                      fields, dataset_fields)})
 
-    if args.prediction_info == NORMAL_FORMAT:
+    if args.prediction_info in [NORMAL_FORMAT, FULL_FORMAT]:
         batch_prediction_args.update(confidence=True)
 
     if args.prediction_info == FULL_FORMAT:

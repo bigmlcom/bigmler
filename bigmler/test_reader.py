@@ -77,7 +77,6 @@ class TestReader(object):
         self.exclude = []
         if test_set_header:
             self.headers = self.test_reader.next()
-            self.raw_headers = self.headers
             # validate headers against model fields excluding objective_field,
             # that may be present or not
             if objective_field is not None:
@@ -92,6 +91,7 @@ class TestReader(object):
                 sys.exit(exc)
             self.headers = [unicode(header, "utf-8")
                             for header in self.headers]
+            self.raw_headers = self.headers[:]
             self.exclude = [i for i in range(len(self.headers))
                             if not self.headers[i] in fields_names]
 

@@ -118,13 +118,14 @@ def write_prediction(prediction, output=sys.stdout,
     # handles (prediction, confidence) input
     if isinstance(prediction, tuple):
         prediction, confidence = prediction
-    # handles "prediction" input
-    if isinstance(prediction, basestring):
-        prediction = prediction.encode("utf-8")
     # handles [prediction] or [prediction, confidence, ...] input
     if isinstance(prediction, list):
         prediction, confidence = ((prediction[0], None) if len(prediction) == 1
                                   else prediction)
+    # handles "prediction" input
+    if isinstance(prediction, basestring):
+        prediction = prediction.encode("utf-8")
+
     row = []
     # input data is added if prediction format is BRIEF (no confidence) or FULL
     if prediction_info != NORMAL_FORMAT:
@@ -312,13 +313,12 @@ def local_predict(models, test_reader, output, args, options=None,
         local_model = MultiModel(models)
         kwargs.update({"method": args.method, "options": options})
     for input_data in test_reader:
-        input_data_dict = test_reader.dict(input_data)
+        input_data_dict = test_reader.dict(input_data, filtering=False)
         prediction = local_model.predict(
             input_data_dict, **kwargs)
         write_prediction(prediction[0: 2],
                          output,
                          args.prediction_info, input_data, exclude)
-
 
 def local_batch_predict(models, test_reader, prediction_file, api, args,
                         resume=False, output_path=None, output=None,
@@ -330,6 +330,7 @@ def local_batch_predict(models, test_reader, prediction_file, api, args,
     """Get local predictions form partial Multimodel, combine and save to file
 
     """
+
     def draw_progress_bar(current, total):
         """Draws a text based progress report.
 

@@ -3,6 +3,14 @@
 History
 -------
 
+1.14.1 (2014-10-23)
+~~~~~~~~~~~~~~~~~~~
+
+- Improving perfomance in individual model predictions.
+- Forcing garbage collection to lower memory usage in ensemble's predictions.
+- Fixing bug: batch predictions were not adding confidence when
+  --prediction-info full was used.
+
 1.14.0 (2014-10-19)
 ~~~~~~~~~~~~~~~~~~~
 
