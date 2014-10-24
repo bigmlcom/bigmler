@@ -78,7 +78,6 @@ def i_create_anomaly_resources_from_anomaly_file(step, anomaly_file=None, test=N
     command = ("bigmler anomaly --anomalies " + anomaly_file +
                " --test " + test +
                " --store --output " + output)
-    print command
     shell_execute(command, output, test=test)
 
 
