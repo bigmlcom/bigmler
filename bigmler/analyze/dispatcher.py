@@ -92,7 +92,9 @@ def analyze_dispatcher(args=sys.argv[1:]):
     # create api instance form args
     api = a.get_api_instance(command_args,
                              u.check_dir(session_file))
-
+    # --maximize flag will be deprecated. Use --optimize flag.
+    if command_args.maximize is not None and command_args.optimize is None:
+        command_args.optimize = command_args.maximize
     # k-fold cross-validation
     if command_args.cv and command_args.dataset is not None:
         create_kfold_cv(command_args, api, command.common_options,

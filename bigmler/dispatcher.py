@@ -513,8 +513,9 @@ def compute_output(api, args):
         message = u.dated("Combining votes.\n")
         u.log_message(message, log_file=session_file,
                       console=args.verbosity)
+
         combine_votes(args.votes_files_, local_model.to_prediction,
-                      output, args.method)
+                      output, method=args.method)
 
     # If evaluate flag is on, create remote evaluation and save results in
     # json and human-readable format.

@@ -26,7 +26,10 @@ import os
 
 ACCURACY = "accuracy"
 BIGML_MAX_NODES = os.environ.get("BIGML_MAX_NODES", 2000)
+MINIMIZE_OPTIONS = ["mean_squared_error", "mean_absolute_error"]
 MAXIMIZE_OPTIONS = [ACCURACY, "precision", "recall", "phi", "f_measure",
+                    "r_squared"]
+OPTIMIZE_OPTIONS = [ACCURACY, "precision", "recall", "phi", "f_measure",
                     "mean_squared_error", "mean_absolute_error", "r_squared"]
 
 def get_analyze_options(defaults=None):
@@ -103,7 +106,16 @@ def get_analyze_options(defaults=None):
             "dest": 'maximize',
             "choices": MAXIMIZE_OPTIONS,
             "default": defaults.get('maximize', ACCURACY),
-            "help": "Evaluation measure to be maximized."},
+            "help": ("Evaluation measure to be maximized. This flag will be"
+                     " deprecated. Please, use --optimize.")},
+
+        # Optimize: evaluation measure to be optimized
+        '--optimize': {
+            "action": 'store',
+            "dest": 'optimize',
+            "choices": OPTIMIZE_OPTIONS,
+            "default": defaults.get('optimize', ACCURACY),
+            "help": "Evaluation measure to be optimized."},
 
         # Min_nodes: Minimum number of nodes to start the node threshold
         # analysis

@@ -92,6 +92,7 @@ class TestReader(object):
             self.headers = [unicode(header, "utf-8")
                             for header in self.headers]
             self.raw_headers = self.headers[:]
+
             self.exclude = [i for i in range(len(self.headers))
                             if not self.headers[i] in fields_names]
 
@@ -121,6 +122,7 @@ class TestReader(object):
                                      (",".join(fields_names),
                                       ",".join(self.headers))).encode("utf-8"))
 
+
     def __iter__(self):
         """Iterator method
 
@@ -142,7 +144,12 @@ class TestReader(object):
         """
         new_row = row[:]
         if not filtering:
-            return dict(zip(self.raw_headers, new_row))
+            if self.test_set_header:
+                headers = self.raw_headers
+            else:
+                headers = [self.fields.fields_by_column_number[column] for
+                           column in self.fields.columns]
+            return dict(zip(headers, new_row))
         for index in self.exclude:
             del new_row[index]
         return self.fields.pair(new_row, self.headers, self.objective_field)

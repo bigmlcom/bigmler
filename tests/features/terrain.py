@@ -21,7 +21,8 @@ def delete(object_list):
 
     for obj_id in object_list:
         counter = 0
-        result = world.api.deleters[get_resource_type(obj_id)](obj_id)
+        delete_method = world.api.deleters[get_resource_type(obj_id)]
+        result = delete_method(obj_id)
         while result['code'] != HTTP_NO_CONTENT and counter < MAX_RETRIES:
             print ("Failed to delete %s with code %s. Retrying." %
                    (obj_id, result['code']))
@@ -106,12 +107,6 @@ def setup_resources(feature):
 def cleanup_resources(feature):
     if os.path.exists('./tmp'):
         shutil.rmtree('./tmp')
-
-    for folder in world.folders:
-        try:
-            shutil.rmtree(folder)
-        except:
-            pass
 
     delete(world.clusters)
     delete(world.sources)

@@ -3,6 +3,15 @@
 History
 -------
 
+1.14.2 (2014-10-30)
+~~~~~~~~~~~~~~~~~~~
+
+- Refactoring predictions code, improving some cases performance and memory
+  usage.
+- Adding the --fast option to speed prediction by not storing partial results
+  in files.
+- Adding the --optimize option to the bigmler analyze --features command.
+
 1.14.1 (2014-10-23)
 ~~~~~~~~~~~~~~~~~~~
 

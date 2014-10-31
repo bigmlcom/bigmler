@@ -44,8 +44,9 @@ Feature: Produce model analysis from a dataset
         Then the best feature selection is "<selection>", with "<metric>" of <metric_value>
 
         Examples:
-        | data                | objective     |output                    | kfold | metric   | selection   | metric_value |
-        | ../data/iris_2f.csv | 0             |./scenario_a_5/evaluation | 2     | r_squared| species     | 0.352845     |
+        | data                | objective     |output                    | kfold | metric   | selection            | metric_value |
+        | ../data/iris_2f.csv | 0             |./scenario_a_5/evaluation | 2     | r_squared| species              | 0.352845     |
+        | ../data/iris_2f.csv | 0             |./scenario_a_8/evaluation | 2     | mean_squared_error| species     | 0.475200     |
 
 
 

@@ -564,6 +564,25 @@ def get_main_options(defaults=None, constants=None):
             'dest': 'missing_splits',
             'default': defaults.get('missing_splits', False),
             'help': ("Turning off the --missing-splits flag: don't include"
-                     " missing values in branches of the tree.")}}
+                     " missing values in branches of the tree.")},
+
+        # Used in models combinations, ensembles predictions. Keeps prediction
+        # in memory to be combined and no partial results are stored in files.
+        '--fast': {
+            'action': 'store_true',
+            'dest': 'fast',
+            'default': defaults.get('fast', True),
+            'help': ("Enables fast ensemble's predictions with no partial"
+                     " results files.")},
+
+        # Used in models combinations, ensembles predictions. Stores
+        # predictions for each model in files that can be used and combined
+        # later
+        '--no-fast': {
+            'action': 'store_false',
+            'dest': 'fast',
+            'default': defaults.get('fast', True),
+            'help': ("Enables fast ensemble's predictions with partial"
+                     " results files.")}}
 
     return options

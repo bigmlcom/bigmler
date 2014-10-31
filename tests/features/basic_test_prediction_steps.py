@@ -60,7 +60,7 @@ def i_create_kfold_cross_validation_objective(step, k_folds=None, objective=None
                              world.dataset['resource'] +
                              " --features --k-folds " + k_folds +
                              " --output " + world.directory +
-                             " --maximize " + metric +
+                             " --optimize " + metric +
                              " --objective " + objective,
                              shell=True)
         if retcode < 0:
@@ -145,7 +145,7 @@ def i_create_all_resources(step, data=None, test=None, output=None):
     if data is None or test is None or output is None:
         assert False
     command = ("bigmler --train " + data + " --test " + test +
-               " --store --output " + output + " --max-batch-models 1")
+               " --store --output " + output + " --max-batch-models 1 --no-fast")
     shell_execute(command, output, test=test)
 
 
@@ -273,7 +273,7 @@ def i_create_resources_from_ensemble_with_replacement(step, number_of_models=Non
 
 @step(r'I create BigML resources using ensemble of (.*) models to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_ensemble(step, number_of_models=None, test=None, output=None):
-    i_create_resources_from_ensemble_generic(step, number_of_models, " --no-replacement", test, output)
+    i_create_resources_from_ensemble_generic(step, number_of_models, " --no-fast --no-replacement", test, output)
 
 def i_create_resources_from_ensemble_generic(step, number_of_models=None, no_replacement="", test=None, output=None):
     if number_of_models is None or test is None or output is None:
@@ -1017,7 +1017,7 @@ def i_create_nodes_analysis(step, min_nodes=None, max_nodes=None, nodes_step=Non
                              " --nodes-step " + nodes_step +
                              " --k-folds " + k_fold +
                              " --output " + world.directory +
-                             " --maximize " + metric,
+                             " --optimize " + metric,
                              shell=True)
         if retcode < 0:
             assert False
@@ -1040,7 +1040,7 @@ def i_create_kfold_cross_validation(step, k_folds=None, features=None, args_sepa
                              " --output " + world.directory +
                              " --exclude-features \"" + features + "\"" +
                              " --args-separator " + args_separator +
-                             " --maximize " + metric,
+                             " --optimize " + metric,
                              shell=True)
         if retcode < 0:
             assert False
@@ -1061,7 +1061,7 @@ def i_create_kfold_cross_validation_in_dev(step, k_folds=None, metric=None):
                              world.dataset['resource'] +
                              " --features --dev --k-folds " + k_folds +
                              " --output " + world.directory +
-                             " --maximize " + metric,
+                             " --optimize " + metric,
                              shell=True)
         if retcode < 0:
             assert False
@@ -1083,7 +1083,7 @@ def i_create_kfold_cross_validation(step, k_folds=None, metric=None):
                              world.dataset['resource'] +
                              " --features --k-folds " + k_folds +
                              " --output " + world.directory +
-                             " --maximize " + metric,
+                             " --optimize " + metric,
                              shell=True)
         if retcode < 0:
             assert False
@@ -1099,7 +1099,7 @@ def i_create_kfold_cross_validation(step, k_folds=None, metric=None):
 def i_have_previous_scenario_or_reproduce_it(step, scenario, kwargs):
     scenarios = {'scenario1': [(i_create_all_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_model, False)],
                  'scenario1_r': [(i_create_all_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_model, False)],
-                 'scenario5': [(i_create_resources_from_ensemble, True), (i_check_create_models, False)], 
+                 'scenario5': [(i_create_resources_from_ensemble, True), (i_check_create_ensemble, False)], 
                  'scenario_e1': [(i_create_all_resources_to_evaluate, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_model, False), (i_check_create_evaluation, False)],
                  'scenario_ml_1': [(i_create_all_ml_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models, False)],
                  'scenario_ml_6': [(i_create_all_ml_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models, False)],

@@ -32,6 +32,7 @@ import bigmler.checkpoint as c
 
 from bigml.model import Model
 from bigml.multimodel import MultiModel, read_votes
+from bigml.ensemble import Ensemble
 from bigml.util import localize, console_log, get_predictions_file_name
 from bigml.multivote import (PLURALITY_CODE, THRESHOLD_CODE, MultiVote,
                              ws_confidence)
@@ -74,7 +75,7 @@ def use_prediction_headers(prediction_headers, output, test_reader,
             args.prediction_fields is not None):
         # Try to retrieve headers from the test file
         if test_reader.has_headers():
-            input_headers = test_reader.raw_headers
+            input_headers = test_reader.raw_headers[:]
             if objective_name in input_headers:
                 exclude.append(input_headers.index(objective_name))
         else:
@@ -302,7 +303,6 @@ def local_predict(models, test_reader, output, args, options=None,
     """Get local predictions and combine them to get a final prediction
 
     """
-
     single_model = len(models) == 1
     test_set_header = test_reader.has_headers()
     kwargs = {"by_name": test_set_header, "with_confidence": True,
@@ -310,16 +310,142 @@ def local_predict(models, test_reader, output, args, options=None,
     if single_model:
         local_model = Model(models[0])
     else:
-        local_model = MultiModel(models)
+        local_model = Ensemble(models, max_models=args.max_batch_models)
         kwargs.update({"method": args.method, "options": options})
     for input_data in test_reader:
-        input_data_dict = test_reader.dict(input_data,
-                                           filtering=not test_set_header)
+        input_data_dict = dict(zip(test_reader.raw_headers, input_data))
         prediction = local_model.predict(
             input_data_dict, **kwargs)
         write_prediction(prediction[0: 2],
                          output,
                          args.prediction_info, input_data, exclude)
+
+
+def retrieve_models_split(models_split, api, query_string=FIELDS_QS,
+                          labels=None, multi_label_data=None, ordered=True,
+                          models_order=None):
+    """Returns a list of full model structures ready to be fed to the
+       MultiModel object to produce predictions. Models are also stored
+       locally in the output directory when the --store flag is used
+
+    """
+    complete_models = []
+    if models_order is None:
+        models_order = []
+    for index in range(len(models_split)):
+        model = models_split[index]
+        if (isinstance(model, basestring) or
+                bigml.api.get_status(model)['code'] != bigml.api.FINISHED):
+            try:
+                model = u.check_resource(model, api.get_model,
+                                         query_string)
+            except ValueError, exception:
+                sys.exit("Failed to get model: %s. %s" % (model,
+                                                          str(exception)))
+
+        # When user selects the labels in multi-label predictions, we must
+        # filter the models that will be used to predict
+        if labels and multi_label_data:
+            objective_column = str(multi_label_data['objective_column'])
+            labels_info = multi_label_data[
+                'generated_fields'][objective_column]
+            labels_columns = [label_info[1] for label_info in labels_info
+                              if label_info[0] in labels]
+            model_objective_id = model['object']['objective_fields'][0]
+            model_fields = model['object']['model']['fields']
+            model_objective = model_fields[model_objective_id]
+            model_column = model_objective['column_number']
+            if model_column in labels_columns:
+                # When the list of models comes from a --model-tag
+                # selection, the models are not retrieved in the same
+                # order they were created. We must keep track of the
+                # label they are associated with to label their
+                # predictions properly
+                if not ordered:
+                    models_order.append(model_column)
+                complete_models.append(model)
+        else:
+            complete_models.append(model)
+    return complete_models, models_order
+
+
+def aggregate_multivote(multivote, options, labels, models_per_label, ordered,
+                        models_order, label_separator=None):
+    """Aggregate the model's predictions for multi-label fields in a
+       concatenated format into a final prediction
+
+    """
+
+    if label_separator is None:
+        label_separator = ","
+    predictions = multivote.predictions
+
+    if ordered and models_per_label == 1:
+        # as multi-labeled models are created from end to start votes
+        # must be reversed to match
+        predictions.reverse()
+    else:
+        predictions = [prediction for (_, prediction)
+                       in sorted(zip(models_order, predictions))]
+
+    if (labels is None or
+            len(labels) * models_per_label != len(predictions)):
+        sys.exit("Failed to make a multi-label prediction. No"
+                 " valid label info is found.")
+    prediction_list = []
+    confidence_list = []
+    # In the following case, we must vote each label using the models
+    # in the ensemble and the chosen method
+
+    if models_per_label > 1:
+        label_predictions = [predictions[i: i + models_per_label] for
+                             i in range(0, len(predictions),
+                                        models_per_label)]
+        predictions = []
+        for label_prediction in label_predictions:
+            label_multivote = MultiVote(label_prediction)
+            prediction, confidence = label_multivote.combine(
+                method=AGGREGATION, with_confidence=True, options=options)
+            predictions.append({'prediction': prediction,
+                                'confidence': confidence})
+    for vote_index in range(0, len(predictions)):
+        if ast.literal_eval(predictions[vote_index]['prediction']):
+            prediction_list.append(labels[vote_index])
+            confidence = str(predictions[vote_index]['confidence'])
+            confidence_list.append(confidence)
+    prediction = [label_separator.join(prediction_list),
+                  label_separator.join(confidence_list)]
+    return prediction
+
+
+def combine_multivote(multivote, other_label=OTHER):
+    """Combine in a global distribution the distribution of predictions
+       obtained with models when each one is built on a subset of training
+       data that has a subset of categories.
+
+    """
+    predictions = multivote.predictions
+    global_distribution = []
+    for prediction in predictions:
+        prediction_category = None
+        prediction_instances = 0
+        for category, instances in prediction['distribution']:
+            if category != other_label:
+                if instances > prediction_instances:
+                    prediction_category = category
+                    prediction_instances = instances
+        if prediction_category is not None:
+            prediction_confidence = ws_confidence(
+                prediction_category, prediction['distribution'])
+            global_distribution.append([prediction_category,
+                                        prediction_confidence])
+    if global_distribution:
+        prediction = sorted(global_distribution, key=lambda x: x[1],
+                            reverse=True)[0]
+    else:
+        prediction = [None, None]
+    return prediction
+
 
 def local_batch_predict(models, test_reader, prediction_file, api, args,
                         resume=False, output_path=None, output=None,
@@ -341,7 +467,6 @@ def local_batch_predict(models, test_reader, prediction_file, api, args,
             localize(current), localize(total), pct))
 
     max_models = args.max_batch_models
-    label_separator = args.label_separator
     if labels is None:
         labels = []
     test_set_header = test_reader.has_headers()
@@ -355,17 +480,17 @@ def local_batch_predict(models, test_reader, prediction_file, api, args,
     models_total = len(models)
     models_splits = [models[index:(index + max_models)] for index
                      in range(0, models_total, max_models)]
-    input_data_list = []
+    # Input data is stored as a list and predictions are made for all rows
+    # with each model
     raw_input_data_list = []
     for input_data in test_reader:
         raw_input_data_list.append(input_data)
-        input_data_list.append(test_reader.dict(input_data))
     total_votes = []
+    models_order = []
     models_count = 0
-    if not ordered:
-        models_order = []
     single_model = models_total == 1
     query_string = FIELDS_QS if single_model else ALL_FIELDS_QS
+    # processing the models in slots
     for models_split in models_splits:
         if resume:
             for model in models_split:
@@ -374,133 +499,69 @@ def local_batch_predict(models, test_reader, prediction_file, api, args,
                 c.checkpoint(c.are_predictions_created,
                              pred_file,
                              test_reader.number_of_tests(), debug=args.debug)
-        complete_models = []
+        # retrieving the full models allowed by --max-batch-models to be used
+        # in a multimodel slot
+        complete_models, models_order = retrieve_models_split(
+            models_split, api, query_string=query_string, labels=labels,
+            multi_label_data=multi_label_data, ordered=ordered,
+            models_order=models_order)
 
-        for index in range(len(models_split)):
-            model = models_split[index]
-            if (isinstance(model, basestring) or
-                    bigml.api.get_status(model)['code'] != bigml.api.FINISHED):
-                try:
-                    model = u.check_resource(model, api.get_model,
-                                             query_string)
-                except ValueError, exception:
-                    sys.exit("Failed to get model: %s. %s" % (model,
-                                                              str(exception)))
-            # When user selects the labels in multi-label predictions, we must
-            # filter the models that will be used to predict
-            if labels:
-                objective_column = str(multi_label_data['objective_column'])
-                labels_info = multi_label_data[
-                    'generated_fields'][objective_column]
-                labels_columns = [label_info[1] for label_info in labels_info
-                                  if label_info[0] in labels]
-                model_objective_id = model['object']['objective_fields'][0]
-                model_fields = model['object']['model']['fields']
-                model_objective = model_fields[model_objective_id]
-                model_column = model_objective['column_number']
-                if model_column in labels_columns:
-                    # When the list of models comes from a --model-tag
-                    # selection, the models are not retrieved in the same
-                    # order they were created. We must keep track of the
-                    # label they are associated with to label their
-                    # predictions properly
-                    if not ordered:
-                        models_order.append(model_column)
-                    complete_models.append(model)
-            else:
-                complete_models.append(model)
-
+        # predicting with the multimodel slot
         if complete_models:
-            local_model = MultiModel(complete_models)
+            local_model = MultiModel(complete_models, api=api)
             # added to ensure garbage collection at each step of the loop
             gc.collect()
             try:
-                local_model.batch_predict(
-                    input_data_list, output_path, by_name=test_set_header,
-                    reuse=True, missing_strategy=args.missing_strategy)
+                votes = local_model.batch_predict(
+                    raw_input_data_list, output_path, by_name=test_set_header,
+                    reuse=True, missing_strategy=args.missing_strategy,
+                    headers=test_reader.raw_headers, to_file=(not args.fast))
             except ImportError:
                 sys.exit("Failed to find the numpy and scipy libraries needed"
                          " to use proportional missing strategy for"
                          " regressions. Please, install them manually")
-
-            votes = local_model.batch_votes(output_path)
+            
+            # extending the votes for each input data with the new model-slot
+            # predictions
+            if not args.fast:
+                votes = local_model.batch_votes(output_path)
             models_count += max_models
             if models_count > models_total:
                 models_count = models_total
             if args.verbosity:
                 draw_progress_bar(models_count, models_total)
+
             if total_votes:
                 for index in range(0, len(votes)):
                     predictions = total_votes[index]
                     predictions.extend(votes[index].predictions)
             else:
                 total_votes = votes
-    message = u.dated("Combining predictions.\n")
-    u.log_message(message, log_file=session_file, console=args.verbosity)
 
-    if label_separator is None:
-        label_separator = ","
+    if not single_model:
+        message = u.dated("Combining predictions.\n")
+        u.log_message(message, log_file=session_file, console=args.verbosity)
+
+    # combining the votes to issue the final prediction for each input data
     for index in range(0, len(total_votes)):
         multivote = total_votes[index]
         input_data = raw_input_data_list[index]
-        if method == AGGREGATION:
-            predictions = multivote.predictions
 
-            if ordered and models_per_label == 1:
-                # as multi-labelled models are created from end to start votes
-                # must be reversed to match
-                predictions.reverse()
-            else:
-                predictions = [prediction for (_, prediction)
-                               in sorted(zip(models_order, predictions))]
-            if (labels is None or
-                    len(labels) * models_per_label != len(predictions)):
-                sys.exit("Failed to make a multi-label prediction. No"
-                         " valid label info is found.")
-            prediction_list = []
-            confidence_list = []
-            # In the following case, we must vote each label using the models
-            # in the ensemble and the chosen method
-
-            if models_per_label > 1:
-                label_predictions = [predictions[i: i + models_per_label] for
-                                     i in range(0, len(predictions),
-                                                models_per_label)]
-                predictions = []
-                for label_prediction in label_predictions:
-                    label_multivote = MultiVote(label_prediction)
-                    prediction, confidence = label_multivote.combine(
-                        method=method, with_confidence=True, options=options)
-                    predictions.append({'prediction': prediction,
-                                        'confidence': confidence})
-            for vote_index in range(0, len(predictions)):
-                if ast.literal_eval(predictions[vote_index]['prediction']):
-                    prediction_list.append(labels[vote_index])
-                    confidence = str(predictions[vote_index]['confidence'])
-                    confidence_list.append(confidence)
-            prediction = [label_separator.join(prediction_list),
-                          label_separator.join(confidence_list)]
+        if single_model:
+            # single model predictions need no combination
+            prediction = [multivote.predictions[0]['prediction'],
+                          multivote.predictions[0]['confidence']]           
+        elif method == AGGREGATION:
+            # multi-labeled fields: predictions are concatenated
+            prediction = aggregate_multivote(
+                multivote, options, labels, models_per_label, ordered,
+                models_order, label_separator=args.label_separator)
         elif method == COMBINATION:
-            predictions = multivote.predictions
-            global_distribution = []
-            for prediction in predictions:
-                prediction_category = None
-                prediction_instances = 0
-                for category, instances in prediction['distribution']:
-                    if category != other_label:
-                        if instances > prediction_instances:
-                            prediction_category = category
-                            prediction_instances = instances
-                if prediction_category is not None:
-                    prediction_confidence = ws_confidence(
-                        prediction_category, prediction['distribution'])
-                    global_distribution.append([prediction_category,
-                                                prediction_confidence])
-            if global_distribution:
-                prediction = sorted(global_distribution, key=lambda x: x[1],
-                                    reverse=True)[0]
-            else:
-                prediction = [None, None]
+            # used in --max-categories flag: each model slot contains a
+            # subset of categories and the predictions for all of them
+            # are combined in a global distribution to obtain the final
+            # prediction
+            prediction = combine_multivote(multivote, other_label=other_label)
         else:
             prediction = multivote.combine(method=method, with_confidence=True,
                                            options=options)
@@ -568,8 +629,9 @@ def predict(models, fields, args, api=None, log=None,
     # For a model we build a Model and for a small number of models,
     # we build a MultiModel using all of
     # the given models and issue a combined prediction
-    if (len(models) < args.max_batch_models and not args.multi_label
-            and args.max_categories == 0 and args.method != COMBINATION):
+    if (len(models) <= args.max_batch_models and args.fast and
+            not args.multi_label and args.max_categories == 0
+            and args.method != COMBINATION):
         local_predict(models, test_reader, output, args, options, exclude)
     # For large numbers of models, we split the list of models in chunks
     # and build a MultiModel for each chunk, issue and store predictions
@@ -586,6 +648,7 @@ def predict(models, fields, args, api=None, log=None,
             method = COMBINATION
         else:
             method = args.method
+
         # For multi-labelled models, the --models flag keeps the order
         # of the labels and the models but the --model-tag flag
         # retrieves the models with no order, so the correspondence with

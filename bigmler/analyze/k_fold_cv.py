@@ -39,7 +39,7 @@ from copy import copy
 from bigml.fields import Fields
 
 from bigmler.dispatcher import main_dispatcher
-from bigmler.options.analyze import ACCURACY
+from bigmler.options.analyze import ACCURACY, MINIMIZE_OPTIONS
 
 AVG_PREFIX = "average_%s"
 R_SQUARED = "r_squared"
@@ -461,7 +461,7 @@ def best_first_search(datasets_file, api, args, common_options,
         closed_list = []
         best_state, best_score, best_metric_value = open_list[0]
         best_unchanged_count = 0
-        metric = args.maximize
+        metric = args.optimize
         while best_unchanged_count < staleness and open_list:
             loop_counter += 1
             features_set = find_max_state(open_list)
@@ -515,7 +515,7 @@ def best_first_search(datasets_file, api, args, common_options,
                      resume) = kfold_evaluate(datasets_file,
                                               args, counter, common_options,
                                               penalty=penalty, resume=resume,
-                                              metric=metric)
+                                              metric=metric) 
                     open_list.append((child, score, metric_value))
         try:
             best_features = [fields.field_name(field_ids[i]) for (i, score)
@@ -532,7 +532,8 @@ def best_first_search(datasets_file, api, args, common_options,
             message = (u'%s = %f\n' % (metric.capitalize(), best_metric_value))
         u.log_message(message, log_file=session_file, console=1)
         message = (u'Evaluated %d/%d feature subsets\n' %
-                   ((len(open_list) + len(closed_list)), 2 ** len(field_ids)))
+                   ((len(open_list) + len(closed_list) - 1),
+                    2 ** len(field_ids) - 1))
         u.log_message(message, log_file=session_file, console=1)
 
 
@@ -559,8 +560,10 @@ def kfold_evaluate(datasets_file, args, counter, common_options,
         if not avg_metric in evaluation:
             sys.exit("Failed to find %s or r-squared in the evaluation"
                      % metric)
-    return (evaluation[avg_metric] -
-            penalty * len(args.model_fields.split(args.args_separator)),
+    invert = -1 if metric in MINIMIZE_OPTIONS else 1
+    return (invert * (evaluation[avg_metric] -
+                      invert * penalty *
+                      len(args.model_fields.split(args.args_separator))),
             evaluation[avg_metric],
             metric_literal, resume)
 
@@ -594,7 +597,7 @@ def best_node_threshold(datasets_file, args, common_options,
             penalty = DEFAULT_NODES_PENALTY
         best_score = - float('inf')
         best_unchanged_count = 0
-        metric = args.maximize
+        metric = args.optimize
         score = best_score
         while best_unchanged_count < staleness and node_threshold < max_nodes:
             loop_counter += 1
@@ -659,7 +662,9 @@ def node_threshold_evaluate(datasets_file, args, node_threshold,
         if not avg_metric in evaluation:
             sys.exit("Failed to find %s or r-squared in the evaluation"
                      % metric)
-    return (evaluation[avg_metric] - penalty * node_threshold,
+    invert = -1 if metric in MINIMIZE_OPTIONS else 1
+    return (invert * (evaluation[avg_metric] -
+                      invert * penalty * node_threshold),
             evaluation[avg_metric], 
             metric_literal, resume)
 
