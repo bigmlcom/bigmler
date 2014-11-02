@@ -1097,14 +1097,14 @@ Would select the best subset of features using 10-fold cross-validation
 and a ``0.2%`` penalty per feature, stopping after 3 non-improving iterations.
 
 Depending on the machine learning problem you intend to tackle, you might
-want to maximize other evaluation metric, such as ``precision`` or
-``recall``. The ``--maximize`` option will allow you to set the evaluation
-metric you'd like to maximize.
+want to optimize other evaluation metric, such as ``precision`` or
+``recall``. The ``--optimize`` option will allow you to set the evaluation
+metric you'd like to optimize.
 
 ::
 
     bigmler analyze --dataset dataset/5357eb2637203f1668000004 \
-                    --features --maximize recall
+                    --features --optimize recall
 
 You should be aware that the smart feature selection command still generates
 a high number of BigML resources. Using ``k`` as the ``k-folds`` number and
@@ -1121,7 +1121,7 @@ will find for you the best performing model by changing the number of nodes
 in its tree. You provide the ``--min-nodes`` and ``--max-nodes`` that define
 the range and ``--nodes-step`` controls the increment in each step. The command
 runs a k-fold evaluation (see ``--k-folds`` option) on a model built with each
-node threshold in you range and tries to maximize the evaluation metric you
+node threshold in you range and tries to optimize the evaluation metric you
 chose (again, default is ``accuracy``). If improvement stops (see
 the --staleness option) or the node threshold reaches the ``--max-nodes``
 limit, the process ends and shows the node threshold that
@@ -1491,6 +1491,7 @@ The set of negative flags is:
 --no-multi-dataset          as opposed to --multi-dataset
 --unshared                  as opposed to --shared
 --upload                    as opposed to --no-upload
+--fast                      as opposed to --no-fast
 
 Support
 =======
@@ -1791,6 +1792,11 @@ Remote Resources
 --remote                    Computes predictions remotely (in batch mode by
                             default)
 --no-batch                  Remote predictions are computed individually
+--no-fast                   Ensemble's local predictions are computed
+                            storing the predictions of each model in
+                            a separate local file before combining them
+                            (the default is --fast, that keeps in memory
+                            each model's prediction)
 --model-tag MODEL_TAG       Retrieve models that were tagged with tag
 --ensemble-tag ENSEMBLE_TAG Retrieve ensembles that were tagged with tag
 
@@ -1873,7 +1879,7 @@ Analyze subcommand Options
                             features in the smart selection features mode
                             (default is 0.001). Also used in node threshold
                             selection (default is 0)
---maximize METRIC           Metric that is being maximized in the smart
+--optimize METRIC           Metric that is being optimized in the smart
                             selection features mode or the node threshold
                             search mode (default is accuracy)
 --nodes                     Sets the node threshold search mode

@@ -515,7 +515,7 @@ def best_first_search(datasets_file, api, args, common_options,
                      resume) = kfold_evaluate(datasets_file,
                                               args, counter, common_options,
                                               penalty=penalty, resume=resume,
-                                              metric=metric) 
+                                              metric=metric)
                     open_list.append((child, score, metric_value))
         try:
             best_features = [fields.field_name(field_ids[i]) for (i, score)
