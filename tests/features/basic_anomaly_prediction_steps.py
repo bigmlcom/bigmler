@@ -127,6 +127,15 @@ def i_check_anomaly_scores(step, check_file):
             if len(check_row) != len(row):
                 assert False
             for index in range(len(row)):
+                dot = row[index].find(".")
+                if dot > 0 or (check_row[index].find(".") > 0
+                               and check_row[index].endswith(".0")):
+                    try:
+                        decimal_places = min(len(row[index]), len(check_row[index])) - dot - 1
+                        row[index] = round(float(row[index]), decimal_places)
+                        check_row[index] = round(float(check_row[index]), decimal_places)    
+                    except ValueError:
+                        pass
                 if check_row[index] != row[index]:
                     print row, check_row
                     assert False
