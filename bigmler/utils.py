@@ -43,7 +43,10 @@ BRIEF_MODEL_QS = "exclude=root,fields"
 # Base Domain
 BIGML_DOMAIN = os.environ.get('BIGML_DOMAIN', 'bigml.io')
 BIGML_DASHBOARD_URL = os.environ.get('BIGML_DASHBOARD_URL')
-RESOURCE_URL = ("https://%s/dashboard/" % (BIGML_DOMAIN[:-3] + '.com')
+BIGML_DASHBOARD_DOMAIN = (
+    "%s.com" % BIGML_DOMAIN[:-3] if BIGML_DOMAIN[-3:] == '.io' else
+    BIGML_DOMAIN.replace("-io.", "."))
+RESOURCE_URL = ("https://%s/dashboard/" % BIGML_DASHBOARD_DOMAIN
                 if BIGML_DASHBOARD_URL is None
                 else BIGML_DASHBOARD_URL)
 RESOURCE_SHARED_URL = "%s/shared/" % "/".join(RESOURCE_URL.split('/')[:-2])

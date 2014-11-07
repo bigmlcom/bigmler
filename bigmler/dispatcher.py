@@ -336,6 +336,8 @@ def compute_output(api, args):
             dataset, api, args, resume, fields=fields,
             session_file=session_file, path=path, log=log)
         datasets[0] = dataset
+        # rebuild fields structure for new ids and fields
+        fields = pd.get_fields_structure(dataset, csv_properties)
     if args.multi_label and dataset and multi_label_data is None:
         multi_label_data = l.get_multi_label_data(dataset)
         (args.objective_field,

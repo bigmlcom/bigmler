@@ -30,13 +30,14 @@ def i_create_dataset(step, data=None, output_dir=None):
         assert False, str(exc)
 
 
-@step(r'I create a new BigML dataset using the specs in JSON file "(.*)"')
-def i_create_dataset_new_fields(step, json_file=None):
-    if json_file is None:
+@step(r'I create a new BigML dataset using the specs in JSON file "(.*)" and a model with "(.*)"')
+def i_create_dataset_new_fields(step, json_file=None, model_fields=None):
+    if json_file is None or model_fields is None:
         assert False
     try:
         command = ("bigmler --dataset " + world.dataset['resource'] +
-                   " --no-model --store --output-dir " + world.output +
+                   " --model-fields \"" + model_fields + "\" --store" +
+                   " --output-dir " + world.output +
                    " --new-fields " + json_file)
         command = check_debug(command)
         retcode = check_call(command, shell=True)
@@ -46,6 +47,7 @@ def i_create_dataset_new_fields(step, json_file=None):
             assert True
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
+
 
 @step(r'I update the dataset using the specs in JSON file "(.*)"')
 def i_update_dataset_new_properties(step, json_file=None):

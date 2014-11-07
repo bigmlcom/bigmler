@@ -7,13 +7,14 @@ Feature: Create a new dataset from an old one by combining its fields or from a 
         Given I create a BigML dataset from "<data>" and store logs in "<output_dir>"
         And I check that the source has been created
         And I check that the dataset has been created
-        And I create a new BigML dataset using the specs in JSON file "<new_fields>"
+        And I create a new BigML dataset using the specs in JSON file "<new_fields>" and a model with "<model_fields>"
         And I check that the new dataset has been created
+        And I check that the model has been created
         Then I check that the new dataset has field "<field>"
 
         Examples:
-        |data |output_dir  |new_fields | field |
-        |../data/iris.csv | ./scenario_d_1 |../data/new_fields.json| outlier? |
+        |data |output_dir  |new_fields | field | model_fields
+        |../data/iris.csv | ./scenario_d_1 |../data/new_fields.json| outlier? |petal length,outlier?,species
 
     Scenario: Successfully updating a dataset with attributes in a JSON file
         Given I create a BigML dataset from "<data>" and store logs in "<output_dir>"
