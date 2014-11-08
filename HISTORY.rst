@@ -3,6 +3,12 @@
 History
 -------
 
+1.14.4 (2014-11-10)
+~~~~~~~~~~~~~~~~~~~
+
+- Adding the capability of creating a model/cluster/anomaly and its
+  corresponding batch prediction from a train/test split using --test-split.
+
 1.14.3 (2014-11-10)
 ~~~~~~~~~~~~~~~~~~~
 

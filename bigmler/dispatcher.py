@@ -121,6 +121,16 @@ def has_train(args):
             args.datasets or args.train_stdin)
 
 
+def get_test_dataset(args):
+    """Returns the dataset id from one of the possible user options:
+       --test-dataset --test-datasets
+
+    """
+    return (args.test_dataset if args.test_dataset is not None
+            else None if not args.test_dataset_ids
+            else args.test_dataset_ids[0])
+
+
 def main_dispatcher(args=sys.argv[1:]):
     """Parses command line and calls the different processing functions
 
@@ -207,6 +217,7 @@ def compute_output(api, args):
     multi_label_data = None
     multi_label_fields = []
     local_ensemble = None
+    test_dataset = None
 
     # variables from command-line options
     resume = args.resume_
@@ -434,9 +445,11 @@ def compute_output(api, args):
         other_label = get_metadata(model, 'other_label',
                                    other_label)
     # If predicting
-    if models and has_test(args) and not args.evaluate:
+    if (models and (has_test(args) or (test_dataset and args.remote))
+        and not args.evaluate):
         models_per_label = 1
-        test_dataset = None
+        if test_dataset is None:
+            test_dataset = get_test_dataset(args)
 
         if args.multi_label:
             # When prediction starts from existing models, the
@@ -468,14 +481,14 @@ def compute_output(api, args):
             else:
                 test_source_id = bigml.api.get_source_id(args.test_source)
                 test_source = api.check_resource(test_source_id)
-            if args.test_dataset is None:
+            if test_dataset is None:
             # create test dataset from test source
                 dataset_args = r.set_basic_dataset_args(args, name=test_name)
                 test_dataset, resume = pd.alternative_dataset_processing(
                     test_source, "test", dataset_args, api, args,
                     resume, session_file=session_file, path=path, log=log)
             else:
-                test_dataset_id = bigml.api.get_dataset_id(args.test_dataset)
+                test_dataset_id = bigml.api.get_dataset_id(test_dataset)
                 test_dataset = api.check_resource(test_dataset_id)
 
             csv_properties.update(objective_field=None,

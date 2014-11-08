@@ -37,7 +37,7 @@ from bigmler.reports import clear_reports, upload_reports
 from bigmler.command import Command, StoredCommand
 from bigmler.dispatcher import (SESSIONS_LOG, command_handling,
                                 clear_log_files,
-                                has_test, has_train)
+                                has_test, has_train, get_test_dataset)
 
 COMMAND_LOG = u".bigmler_anomaly"
 DIRS_LOG = u".bigmler_anomaly_dir_stack"
@@ -124,6 +124,7 @@ def compute_output(api, args):
     anomaly = None
     anomalies = None
     fields = None
+    test_dataset = None
     # no multi-label support at present
 
     # variables from command-line options
@@ -233,9 +234,11 @@ def compute_output(api, args):
         fields = pa.get_anomaly_fields(anomaly, csv_properties, args)
 
     # If predicting
-    if anomalies and has_test(args):
-        test_dataset = None
-
+    if anomalies and (has_test(args) or (test_dataset and args.remote)):
+        # test dataset can be defined by --test-split or --test-dataset or
+        # --test-datasets
+        if test_dataset is None:
+            test_dataset = get_test_dataset(args)
         # Remote anomaly scores: scores are computed as batch anomaly scores
         # in bigml.com except when --no-batch flag is set on
         if args.remote and not args.no_batch:
@@ -250,18 +253,16 @@ def compute_output(api, args):
                     session_file=session_file, path=path, log=log)
             else:
                 test_source_id = bigml.api.get_source_id(args.test_source)
-                test_source = api.check_resource(test_source_id,
-                                                 api.get_source)
-            if args.test_dataset is None:
+                test_source = api.check_resource(test_source_id)
+            if test_dataset is None:
                 # create test dataset from test source
                 dataset_args = r.set_basic_dataset_args(args, name=test_name)
                 test_dataset, resume = pd.alternative_dataset_processing(
                     test_source, "test", dataset_args, api, args,
                     resume, session_file=session_file, path=path, log=log)
             else:
-                test_dataset_id = bigml.api.get_dataset_id(args.test_dataset)
-                test_dataset = api.check_resource(test_dataset_id,
-                                                  api.get_dataset)
+                test_dataset_id = bigml.api.get_dataset_id(test_dataset)
+                test_dataset = api.check_resource(test_dataset_id)
             test_fields = pd.get_fields_structure(test_dataset,
                                                   csv_properties)
             batch_anomaly_score_args = r.set_batch_anomaly_score_args(

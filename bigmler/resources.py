@@ -361,7 +361,8 @@ def set_dataset_split_args(name, description, args, sample_rate,
         "sample_rate": sample_rate,
         "out_of_bag": out_of_bag
     }
-    if args.multi_label and multi_label_data is not None:
+    if (hasattr(args, "multi_label") and
+        args.multi_label and multi_label_data is not None):
         dataset_args.update(
             user_metadata={'multi_label_data': multi_label_data})
     return dataset_args
