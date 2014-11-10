@@ -9,7 +9,8 @@ from bigmler.checkpoint import file_number_of_lines
 from common_steps import check_debug
 
 
-def shell_execute(command, output, test=None, options=None):
+def shell_execute(command, output, test=None, options=None,
+                  data=None, test_split=None):
     """Excute bigmler command in shell
 
     """
@@ -26,6 +27,10 @@ def shell_execute(command, output, test=None, options=None):
                 if options is None or options.find('--prediction-header') == -1:
                     # test file has headers in it, so first line must be ignored
                     world.test_lines -= 1
+            if test_split is not None:
+                data_lines = file_number_of_lines(data) - 1
+                world.test_lines = int(data_lines * float(test_split))
+                
             world.output = output
             assert True
     except (OSError, CalledProcessError, IOError) as exc:
@@ -142,3 +147,22 @@ def i_check_anomaly_scores(step, check_file):
         assert True
     except Exception, exc:
         assert False, str(exc)
+
+
+@step(r'I create BigML resources uploading train "(.*?)" file to find anomaly scores for "(.*?)" remotely with mapping file "(.*)" and log predictions in "([^"]*)"$')
+def i_create_all_anomaly_resources_with_mapping(step, data=None, test=None, fields_map=None, output=None):
+    if data is None or test is None or output is None or fields_map is None:
+        assert False
+    command = ("bigmler anomaly --remote --train " + data + " --test " + test +
+               " --fields-map " + fields_map +
+               " --store --output " + output)
+    shell_execute(command, output, test=test)
+
+
+@step(r'I create BigML resources uploading train "(.*?)" file to find anomaly scores with test split "(.*?)" remotely and log predictions in "([^"]*)"$')
+def i_create_all_anomaly_resources_with_test_split(step, data=None, test_split=None, output=None):
+    if data is None or output is None or test_split is None:
+        assert False
+    command = ("bigmler anomaly --remote --train " + data + " --test-split " + test_split +
+               " --store --output " + output)
+    shell_execute(command, output, data=data, test_split=test_split)

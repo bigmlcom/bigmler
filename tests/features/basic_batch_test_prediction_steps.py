@@ -65,3 +65,18 @@ def i_check_create_batch_centroid(step):
         assert True
     except Exception, exc:
         assert False, str(exc)
+
+
+@step(r'I check that the batch anomaly scores prediction has been created')
+def i_check_create_batch_anomaly_scores(step):
+    batch_prediction_file = "%s%sbatch_anomaly_score" % (world.directory, os.sep)
+    try:
+        batch_prediction_file = open(batch_prediction_file, "r")
+        batch_anomaly_score = check_resource(batch_prediction_file.readline().strip(),
+                                          world.api.get_batch_anomaly_score)
+        world.batch_anomaly_scores.append(batch_anomaly_score['resource'])
+        world.batch_anomaly_score = batch_anomaly_score
+        batch_prediction_file.close()
+        assert True
+    except Exception, exc:
+        assert False, str(exc)

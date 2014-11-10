@@ -9,7 +9,8 @@ from bigmler.checkpoint import file_number_of_lines
 from common_steps import check_debug
 
 
-def shell_execute(command, output, test=None, options=None):
+def shell_execute(command, output, test=None, options=None,
+                  data=None, test_split=None):
     """Excute bigmler command in shell
 
     """
@@ -26,6 +27,10 @@ def shell_execute(command, output, test=None, options=None):
                 if options is None or options.find('--prediction-header') == -1:
                     # test file has headers in it, so first line must be ignored
                     world.test_lines -= 1
+            if test_split is not None:
+                data_lines = file_number_of_lines(data) - 1
+                world.test_lines = int(data_lines * float(test_split))
+                
             world.output = output
             assert True
     except (OSError, CalledProcessError, IOError) as exc:

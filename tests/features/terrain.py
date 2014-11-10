@@ -124,13 +124,14 @@ def cleanup_resources(feature):
 
     store_final_resources()
 
-    check_init_equals_final()
-
     for folder in world.folders:
         try:
             shutil.rmtree(folder)
         except:
             pass
+
+    check_init_equals_final()
+
 
 @after.each_scenario
 def cleanup_output(scenario):

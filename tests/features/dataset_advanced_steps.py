@@ -167,6 +167,7 @@ def i_check_create_multi_dataset(step):
     except Exception, exc:
         assert False, str(exc)
 
+
 @step(r'file "(.*)" is like file "(.*)"$')
 def i_files_equal(step, local_file, data):
     contents_local_file = open(os.path.join(world.directory,
