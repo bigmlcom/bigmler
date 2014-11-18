@@ -1196,7 +1196,8 @@ def set_batch_prediction_args(args, fields=None,
     if args.missing_strategy:
         batch_prediction_args.update(missing_strategy=args.missing_strategy)
 
-    update_attributes(dataset_args, args.json_args.get('batch_prediction'))
+    update_attributes(batch_prediction_args,
+                      args.json_args.get('batch_prediction'))
 
     return batch_prediction_args
 
@@ -1260,7 +1261,7 @@ def set_cluster_args(args, name=None, fields=None,
         input_fields = configure_input_fields(fields, cluster_fields)
         cluster_args.update(input_fields=input_fields)
 
-    update_attributes(dataset_args, args.json_args.get('cluster'))
+    update_attributes(cluster_args, args.json_args.get('cluster'))
 
     return cluster_args
 
@@ -1373,7 +1374,8 @@ def set_batch_centroid_args(args, fields=None,
     if args.prediction_info == FULL_FORMAT:
         batch_centroid_args.update(all_fields=True)
 
-    update_attributes(dataset_args, args.json_args.get('batch_centroid'))
+    update_attributes(batch_centroid_args,
+                      args.json_args.get('batch_centroid'))
 
     return batch_centroid_args
 
@@ -1474,7 +1476,8 @@ def set_batch_anomaly_score_args(args, fields=None,
     if args.prediction_info == FULL_FORMAT:
         batch_anomaly_score_args.update(all_fields=True)
 
-    update_attributes(dataset_args, args.json_args.get('batch_anomaly_score'))
+    update_attributes(batch_anomaly_score_args,
+                      args.json_args.get('batch_anomaly_score'))
 
     return batch_anomaly_score_args
 
@@ -1500,7 +1503,7 @@ def set_anomaly_args(args, name=None, fields=None,
         input_fields = configure_input_fields(fields, anomaly_fields)
         anomaly_args.update(input_fields=input_fields)
 
-    update_attributes(dataset_args, args.json_args.get('anomaly'))
+    update_attributes(anomaly_args, args.json_args.get('anomaly'))
 
     return anomaly_args
 
