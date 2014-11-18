@@ -361,7 +361,7 @@ def set_dataset_args(args, fields, multi_label_data=None):
             and multi_label_data is not None):
         dataset_args.update(
             user_metadata={'multi_label_data': multi_label_data})
-     update_attributes(dataset_args, args.json_args.get('dataset'))
+    update_attributes(dataset_args, args.json_args.get('dataset'))
     return dataset_args
 
 
