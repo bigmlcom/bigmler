@@ -105,19 +105,19 @@ def update_attributes(updatable_attributes, new_attributes, by_column=False,
        by_column: set to True is keys are the column position of the field
        fields: Fields object info
     """
-
-    fields_substructure = updatable_attributes.get("fields", {})
-    field_attributes = new_attributes.get("fields", {})
-    if field_attributes and (not by_column or fields):
-        for field_key, value in field_attributes.items():
-            field_id = (field_key if not by_column
-                        else fields.field_id(field_key))
-            if not field_id in fields_substructure.keys():
-                fields_substructure.update({field_id: {}})
-            fields_substructure[field_id].update(value)
-        updatable_attributes.update({"fields": fields_substructure})
-    else:
-        updatable_attributes.update(new_attributes)
+    if new_attributes:
+        fields_substructure = updatable_attributes.get("fields", {})
+        field_attributes = new_attributes.get("fields", {})
+        if field_attributes and (not by_column or fields):
+            for field_key, value in field_attributes.items():
+                field_id = (field_key if not by_column
+                            else fields.field_id(field_key))
+                if not field_id in fields_substructure.keys():
+                    fields_substructure.update({field_id: {}})
+                fields_substructure[field_id].update(value)
+            updatable_attributes.update({"fields": fields_substructure})
+        else:
+            updatable_attributes.update(new_attributes)
 
 
 def relative_input_fields(fields, user_given_fields):
@@ -222,9 +222,7 @@ def set_source_args(args, name=None, multi_label_data=None,
                               {"fields": args.types_},
                               by_column=True, fields=fields)
 
-        if args.json_args.get('source'):
-            update_attributes(source_args,
-                              args.json_args['source'])
+        update_attributes(source_args, args.json_args.get('source'))
     return source_args
 
 
@@ -363,11 +361,7 @@ def set_dataset_args(args, fields, multi_label_data=None):
             and multi_label_data is not None):
         dataset_args.update(
             user_metadata={'multi_label_data': multi_label_data})
-    # to update fields attributes or types you must have a previous fields
-    # structure (at update time)
-    if args.json_args.get('dataset'):
-        update_attributes(dataset_args,
-                          args.json_args['dataset'])
+     update_attributes(dataset_args, args.json_args.get('dataset'))
     return dataset_args
 
 
@@ -544,11 +538,7 @@ def set_model_args(args, name=None, objective_field=None, fields=None,
         model_args.update(
             user_metadata={'other_label': other_label,
                            'max_categories': args.max_categories})
-    # to update fields attributes or types you must have a previous fields
-    # structure (at update time)
-    if args.json_args.get('model'):
-        update_attributes(model_args,
-                          args.json_args['model'])
+    update_attributes(model_args, args.json_args.get('model'))
 
     model_args.update(sample_rate=args.sample_rate,
                       replacement=args.replacement,
@@ -829,20 +819,13 @@ def set_ensemble_args(args, name=None,
     if args.objective_weights:
         ensemble_args.update(objective_weights=args.objective_weights_json)
 
-    # to update fields attributes or types you must have a previous fields
-    # structure (at update time)
-    if args.json_args.get('model'):
-        update_attributes(ensemble_args,
-                          args.json_args['model'])
+    update_attributes(ensemble_args, args.json_args.get('model'))
     ensemble_args.update(sample_rate=args.sample_rate,
                          replacement=args.replacement,
                          randomize=args.randomize,
                          tlp=args.tlp)
-    # to update fields attributes or types you must have a previous fields
-    # structure (at update time)
-    if args.json_args.get('ensemble'):
-        update_attributes(ensemble_args,
-                          args.json_args['ensemble'])
+
+    update_attributes(ensemble_args, args.json_args.get('ensemble'))
     return ensemble_args
 
 
@@ -993,11 +976,8 @@ def set_evaluation_args(args, fields=None,
                                                          dataset_fields)})
     if args.missing_strategy:
         evaluation_args.update(missing_strategy=args.missing_strategy)
-    # to update fields attributes or types you must have a previous fields
-    # structure (at update time)
-    if args.json_args.get('evaluation'):
-        update_attributes(evaluation_args,
-                          args.json_args['evaluation'])
+
+    update_attributes(evaluation_args, args.json_args.get('evaluation'))
     # Two cases to use out_of_bag and sample_rate: standard evaluations where
     # only the training set is provided, and cross_validation
     # [--dataset|--test] [--model|--models|--model-tag|--ensemble] --evaluate
@@ -1216,11 +1196,7 @@ def set_batch_prediction_args(args, fields=None,
     if args.missing_strategy:
         batch_prediction_args.update(missing_strategy=args.missing_strategy)
 
-    # to update fields attributes or types you must have a previous fields
-    # structure (at update time)
-    if args.json_args.get('batch_prediction'):
-        update_attributes(dataset_args,
-                          args.json_args['batch_prediction'])
+    update_attributes(dataset_args, args.json_args.get('batch_prediction'))
 
     return batch_prediction_args
 
@@ -1284,11 +1260,7 @@ def set_cluster_args(args, name=None, fields=None,
         input_fields = configure_input_fields(fields, cluster_fields)
         cluster_args.update(input_fields=input_fields)
 
-    # to update fields attributes or types you must have a previous fields
-    # structure (at update time)
-    if args.json_args.get('cluster'):
-        update_attributes(dataset_args,
-                          args.json_args['cluster'])
+    update_attributes(dataset_args, args.json_args.get('cluster'))
 
     return cluster_args
 
@@ -1401,11 +1373,7 @@ def set_batch_centroid_args(args, fields=None,
     if args.prediction_info == FULL_FORMAT:
         batch_centroid_args.update(all_fields=True)
 
-    # to update fields attributes or types you must have a previous fields
-    # structure (at update time)
-    if args.json_args.get('batch_centroid'):
-        update_attributes(dataset_args,
-                          args.json_args['batch_centroid'])
+    update_attributes(dataset_args, args.json_args.get('batch_centroid'))
 
     return batch_centroid_args
 
@@ -1506,11 +1474,7 @@ def set_batch_anomaly_score_args(args, fields=None,
     if args.prediction_info == FULL_FORMAT:
         batch_anomaly_score_args.update(all_fields=True)
 
-    # to update fields attributes or types you must have a previous fields
-    # structure (at update time)
-    if args.json_args.get('batch_anomaly_score'):
-        update_attributes(dataset_args,
-                          args.json_args['batch_anomaly_score'])
+    update_attributes(dataset_args, args.json_args.get('batch_anomaly_score'))
 
     return batch_anomaly_score_args
 
@@ -1536,11 +1500,7 @@ def set_anomaly_args(args, name=None, fields=None,
         input_fields = configure_input_fields(fields, anomaly_fields)
         anomaly_args.update(input_fields=input_fields)
 
-    # to update fields attributes or types you must have a previous fields
-    # structure (at update time)
-    if args.json_args.get('anomaly'):
-        update_attributes(dataset_args,
-                          args.json_args['anomaly'])
+    update_attributes(dataset_args, args.json_args.get('anomaly'))
 
     return anomaly_args
 
