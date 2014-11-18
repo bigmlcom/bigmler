@@ -72,14 +72,14 @@ def i_create_all_resources_to_model(step, data=None, output=None):
 def i_create_kfold_cross_validation_objective(step, k_folds=None, objective=None, metric=None):
     if k_folds is None or metric is None or objective is None:
         assert False
-    try:
-        retcode = check_call("bigmler analyze --dataset " +
+    command = ("bigmler analyze --dataset " +
                              world.dataset['resource'] +
                              " --features --k-folds " + k_folds +
                              " --output " + world.directory +
                              " --optimize " + metric +
-                             " --objective " + objective,
-                             shell=True)
+                             " --objective " + objective)
+    try:
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
