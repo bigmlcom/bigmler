@@ -1263,6 +1263,12 @@ would create a remote source and dataset from the test file data,
 generate a ``batch anomaly score`` also remotely and finally
 download the result to your computer.
 
+Similarly, you can split your data in train/test datasets to build the
+anomaly detector and create batch anomaly scores with the test portion of
+data::
+
+    bigmler anomaly --train data/tiny_kdd.csv --test-split 0.2 --remote
+
 
 .. _bigmler-delete:
 

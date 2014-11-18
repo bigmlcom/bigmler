@@ -134,14 +134,15 @@ Feature: Upload source and produce test predictions
         | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | 0.05 | ./scenario1/dataset | ./scenario12/cross-validation   | ./check_files/cross_validation.json   |
 
     Scenario: Successfully building a source with a given locale and storing its result
-        Given I create a BigML source from file "<data>" with locale "<locale>" and types file "<types>" storing results in "<output>"
+        Given I create a BigML source from file "<data>" with locale "<locale>", field attributes "<field_attributes>" and types file "<types>" storing results in "<output>"
         Then I check that the stored source file exists
         And the locale of the source is "<bigml_locale>"
         And the type of field "<field_id>" is "<type>"
+        And the label of field "<field_id>" is "<label>"
 
         Examples:
-        |data             | locale        |types             | output                    | bigml_locale | field_id | type
-        | ../data/iris.csv| es_ES.UTF-8   |../data/types.txt |./scenario13/store_file    | es_ES        | 000004   | text
+        |data             | locale        | field_attributes | types             | output                    | bigml_locale | field_id | type | label
+        | ../data/iris.csv| es_ES.UTF-8   |../data/field_attributes.txt |../data/types.txt |./scenario13/store_file    | es_ES        | 000004   | text | species label
 
 
     Scenario: Successfully building test predictions from start with user-given separator:

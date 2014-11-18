@@ -3,6 +3,12 @@
 History
 -------
 
+1.14.4 (2014-11-14)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing bug: --field-attributes was not working when used in addition
+  to --types option.
+
 1.14.4 (2014-11-10)
 ~~~~~~~~~~~~~~~~~~~
 

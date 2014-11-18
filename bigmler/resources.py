@@ -185,24 +185,31 @@ def set_source_args(args, name=None, multi_label_data=None,
         source_args.update({
             "user_metadata": {
                 "multi_label_data": multi_label_data}})
-    # to update fields attributes or types
-    updated_values = None
-    if args.field_attributes_:
-        updated_values = args.field_attributes_
-    if args.types_:
-        updated_values = args.types_
-    if updated_values and fields:
-        update_fields = {}
-        for (column, value) in updated_values.iteritems():
-            try:
-                update_fields.update({
-                    fields.field_id(column): value})
-            except ValueError, exc:
-                sys.exit(exc)
-        source_args.update({"fields": update_fields})
-    if args.json_args.get('source'):
-        source_args.update(args.json_args['source'])
 
+    # to update fields attributes or types you must have a previous fields
+    # structure (at update time)
+    if fields:
+        updated_values = {}
+        if args.field_attributes_:
+            updated_values.update(args.field_attributes_)
+        if args.types_:
+            for column, value in args.types_.iteritems():
+                if not column in updated_values:
+                    updated_values.update({column: value})
+                else:
+                    updated_values[column].update(value)
+        if updated_values and fields:
+            update_fields = {}
+            for (column, value) in updated_values.iteritems():
+                try:
+                    update_fields.update({
+                        fields.field_id(column): value})
+                except ValueError, exc:
+                    sys.exit(exc)
+            source_args.update({"fields": update_fields})
+
+        if args.json_args.get('source'):
+            source_args.update(args.json_args['source'])
     return source_args
 
 
