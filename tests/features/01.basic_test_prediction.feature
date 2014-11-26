@@ -180,3 +180,24 @@ Feature: Upload source and produce test predictions
         Examples:
         |scenario    | kwargs                                                  | number_of_models | test                    | output                  | output2 | output3
         | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | 10              | ../data/test_iris.csv   | ./scenario16/predictions.csv   | ./scenario16/predictions2.csv | ./scenario16/predictions3.csv 
+
+    Scenario: Successfully building test predictions from local model
+        Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>        
+        And I create BigML resources using local model in "<scenario>" to test "<test>" and log predictions in "<output>"
+        And I check that the predictions are ready
+        Then the local prediction file is like "<predictions_file>"
+
+        Examples:
+        |scenario    | kwargs                                                  | test                    | output                        |predictions_file           |
+        | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | ../data/test_iris.csv   | ./scenario17/predictions.csv   | ./check_files/predictions_iris.csv   |
+
+    Scenario: Successfully building test predictions from ensemble
+        Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs> 
+        Given I have previously executed "<scenario2>" or reproduce it with arguments <kwargs2> 
+        And I create BigML resources using local ensemble of <number_of_models> models in "<scenario2>" to test "<test>" and log predictions in "<output>"
+        And I check that the predictions are ready
+        Then the local prediction file is like "<predictions_file>"
+
+        Examples:
+        |scenario    | kwargs                                                  |scenario2    | kwargs2                                                  | number_of_models | test                    | output                        |predictions_file                      |
+        | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | scenario5| {"number_of_models": 10, "output": "./scenario5/predictions.csv", "test": "../data/test_iris.csv"}       | 10               | ../data/test_iris.csv   | ./scenario18/predictions.csv   | ./check_files/predictions_iris.csv   |

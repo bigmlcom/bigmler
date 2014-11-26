@@ -3,6 +3,12 @@
 History
 -------
 
+1.14.6 (2014-11-26)
+~~~~~~~~~~~~~~~~~~~
+
+- Adding the --model-file, --cluster-file, --anomaly-file and --ensemble-file
+  to produce entirely local predictions.
+
 1.14.5 (2014-11-14)
 ~~~~~~~~~~~~~~~~~~~
 

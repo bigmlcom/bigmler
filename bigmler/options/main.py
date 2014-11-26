@@ -57,6 +57,14 @@ def get_main_options(defaults=None, constants=None):
                      " per line (e.g., model/50a206a8035d0706dc000376"
                      ").")},
 
+        # If a BigML json file containing a model structure is provided,
+        # the script will use it.
+        '--model-file': {
+            'action': 'store',
+            'dest': 'model_file',
+            'default': defaults.get('model_file', None),
+            'help': "BigML model JSON structure file."},
+
         # Sets pruning.
         '--pruning': {
             'action': 'store',
@@ -288,6 +296,14 @@ def get_main_options(defaults=None, constants=None):
             'help': ("Path to a file containing ensemble/ids. One "
                      "ensemble per line (e.g., "
                      "ensemble/50a206a8035d0706dc000376).")},
+
+        # If a BigML json file containing a model structure is provided,
+        # the script will use it.
+        '--ensemble-file': {
+            'action': 'store',
+            'dest': 'ensemble_file',
+            'default': defaults.get('ensemble_file', None),
+            'help': "BigML ensemble JSON structure file."},
 
         # Threshold. Minimum necessary number of votes to issue a prediction.
         '--threshold': {

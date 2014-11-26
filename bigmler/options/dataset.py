@@ -44,6 +44,14 @@ def get_dataset_options(defaults=None):
                      " one dataset per line"
                      " (e.g., dataset/50a20697035d0706da0004a4).")},
 
+        # If a BigML json file containing a dataset structure is provided,
+        # the script will use it.
+        '--dataset-file': {
+            'action': 'store',
+            'dest': 'dataset_file',
+            'default': defaults.get('dataset_file', None),
+            'help': "BigML dataset JSON structure file."},
+
         # Sampling to use when using bagging.
         '--sample-rate': {
             'action': 'store',

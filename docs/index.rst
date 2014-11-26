@@ -1391,6 +1391,48 @@ that contain the tag ``my_source`` and were created after the one given as
 to console, and the complete list can be found in the ``bigmler_sessions``
 file.
 
+Additional Features
+===================
+
+Using local models to predict
+-----------------------------
+
+Most of the previously described commands need the remote resources to
+be downloaded to work. For instance, when you want to create a new
+model from an existing dataset, BigMLer is going to download the dataset
+JSON structure to extract the fields and objective field information,
+and only then ask for the model creation. As mentioned,
+the ``--store`` flag forces BigMLer to store the downloaded JSON
+structures in local files inside your output directory. If you use that flag
+when building a model with BigMLer, then the model is stored in your computer.
+This model file contains all the information you need in order to make
+new predictions, so you can use the
+``--model-file`` option to set the path to this file and predict
+the value of your objective field for new input data with no reference at all
+to your remote resources. You could even delete the original remote model and
+work exclusively with the locally downloaded file::
+
+    bigmler --model-file my_dir/model_532db2b637203f3f1a000136 \
+            --test data/test_iris.csv
+
+The same is available for clusters::
+
+    bigmler cluster --cluster-file my_dir/cluster_532db2b637203f3f1a000348 \
+                    --test data/test_diabetes.csv
+
+or anomaly detectors::
+
+    bigmler anomaly --anomaly-file my_dir/anomaly_532db2b637203f3f1a00053a \
+                    --test data/test_kdd.csv
+
+Even for ensembles::
+
+    bigmler --ensemble-file my_dir/ensemble_532db2b637203f3f1a00053b \
+            --test data/test_iris.csv --store
+
+where we added the ``--store`` flag to ensure that also the downloaded models
+that set up the ensemble are stored and used from the local repository.
+
 
 Resuming Previous Commands
 --------------------------
@@ -1514,7 +1556,7 @@ Requirements
 
 Python 2.7 is currently supported by BigMLer.
 
-BigMLer requires `bigml 1.9.6 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 1.9.7 <https://github.com/bigmlcom/python>`_  or
 higher. Using proportional missing strategy will additionally request
 the use of the `numpy <http://www.numpy.org/>`_ and
 `scipy <http://www.scipy.org/>`_ libraries. They are not
@@ -1639,7 +1681,7 @@ General configuration
                 values of the ``BIGML_USERNAME`` environment variable
 --api-key       BigML's api_key. If left unspecified, it will default to the
                 values of the ``BIGML_API_KEY`` environment variable
---dev           Uses FREE development environment. Sizes must be under 1MB
+--dev           Uses FREE development environment. Sizes must be under 16MB
                 though
 --debug         Activates debug level and shows log info for each https request
 
@@ -1806,7 +1848,6 @@ Remote Resources
 --model-tag MODEL_TAG       Retrieve models that were tagged with tag
 --ensemble-tag ENSEMBLE_TAG Retrieve ensembles that were tagged with tag
 
-
 Ensembles
 ---------
 --number-of-models NUMBER_OF_MODELS     Number of models to create
@@ -1850,6 +1891,12 @@ Public Resources
 
 Notice that datasets and models will be made public without assigning any price
 to them.
+
+Local Resources
+---------------
+
+--model-file PATH            Path to a JSON file containing the model info
+--ensemble-file PATH         Path to a JSON file containing the ensemble info
 
 Fancy Options
 -------------
@@ -1915,6 +1962,8 @@ Cluster Specific Subcommand Options
                                   generate the related datasets from a cluster.
                                   If no CENTROID_NAMES argument is provided
                                   all datasets are generated
+--cluster-file PATH               Path to a JSON file containing the cluster
+                                  info
 
 Anomaly Specific Subcommand Options
 ----------------------------------
@@ -1928,6 +1977,8 @@ Anomaly Specific Subcommand Options
                                   used in the anomaly detector construction
 --anomaly-attributes PATH         Path to a JSON file containing attributes to
                                   be used in the anomaly creation call
+--anomaly-file PATH               Path to a JSON file containing the anomaly
+                                  info
 
 Delete Subcommand Options
 -------------------------

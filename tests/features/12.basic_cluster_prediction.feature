@@ -69,3 +69,13 @@ Feature: Upload source and produce centroids for test data
         Examples:
         |scenario    | kwargs                                                  | centroid_names        | output                      | datasets_number |
         | scenario_c_1| {"data": "../data/diabetes.csv", "output": "./scenario_c_1/centroids.csv", "test": "../data/diabetes.csv"}   || Cluster 1,Cluster 2 | ./scenario_c_6/centroids.csv | 2 |
+
+    Scenario: Successfully building test predictions from cluster
+        Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>        
+        And I create BigML resources using local cluster in "<scenario>" to find centroids for "<test>" and log predictions in "<output>"
+        And I check that the centroids are ready
+        Then the local centroids file is like "<predictions_file>"
+
+        Examples:
+        |scenario    | kwargs                                                  | test                    | output                        |predictions_file           |
+        | scenario_c_1| {"data": "../data/diabetes.csv", "output": "./scenario_c_1/centroids.csv", "test": "../data/diabetes.csv"}   | ../data/diabetes.csv   | ./scenario_c_7/centroids.csv   | ./check_files/centroids_diabetes.csv   |

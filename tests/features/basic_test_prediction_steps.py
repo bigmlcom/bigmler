@@ -249,6 +249,20 @@ def i_create_resources_from_dataset_objective_model(step, objective=None, fields
     shell_execute(command.encode(SYSTEM_ENCODING), output, test=test)
 
 
+@step(r'I create BigML resources using local model in "(.*)" to test "(.*)" and log predictions in "(.*)"')
+def i_create_resources_from_local_model(step, directory=None, test=None, output=None):
+    if test is None or output is None or directory is None:
+        assert False
+    with open(os.path.join(directory, "models")) as model_file:
+        model_id = model_file.read().strip()
+    command = ("bigmler --model-file " +
+               os.path.join(directory,
+                            model_id.replace("/", "_")) +
+               " --test " +
+               test + " --store --output " + output + " --max-batch-models 1")
+    shell_execute(command, output, test=test)
+
+
 @step(r'I create BigML resources using model to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_model(step, test=None, output=None):
     if test is None or output is None:
@@ -280,6 +294,35 @@ def i_create_resources_from_ensemble_with_threshold(step, test=None, output2=Non
         if retcode < 0:
             assert False
         else:
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+
+@step(r'I create BigML resources using local ensemble of (.*) models in "(.*)" to test "(.*)" and log predictions in "(.*)"')
+def i_create_resources_from_local_ensemble(step, number_of_models=None, directory=None, test=None, output=None):
+    if number_of_models is None or test is None or output is None or directory is None:
+        assert False
+    world.directory = os.path.dirname(output)
+    world.folders.append(world.directory)
+    with open(os.path.join(directory, "ensembles")) as ensemble_file:
+        ensemble_id = ensemble_file.read().strip()
+    try:
+        command = ("bigmler --ensemble-file " +
+                   os.path.join(directory,
+                                ensemble_id.replace("/", "_")) +
+                   " --test " + test + " --store" +
+                   " --output " + output)
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.test_lines = file_number_of_lines(test)
+            # test file has headers in it, so first line must be ignored
+            world.test_lines -= 1
+            world.output = output
+            world.number_of_models = len(world.ensemble['object']['models'])
             assert True
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)

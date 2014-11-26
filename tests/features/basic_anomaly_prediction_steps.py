@@ -66,6 +66,20 @@ def i_create_anomaly_resources_from_dataset(step, test=None, output=None):
     shell_execute(command, output, test=test)
 
 
+@step(r'I create BigML resources using local anomaly detector in "(.*)" to find anomaly scores for "(.*?)" and log predictions in "([^"]*)"$')
+def i_create_anomaly_resources_from_local_anomaly_detector(step, directory=None, test=None, output=None):
+    if test is None or output is None or directory is None:
+        assert False
+    with open(os.path.join(directory, "anomalies")) as handler:
+        anomaly_id = handler.readline().strip()
+    command = ("bigmler anomaly --anomaly-file " +
+               os.path.join(directory,
+                            anomaly_id.replace("/", "_")) +
+               " --test " + test +
+               " --store --output " + output)
+    shell_execute(command, output, test=test)
+
+
 @step(r'I create BigML resources using anomaly detector to find anomaly scores for "(.*?)" and log predictions in "([^"]*)"$')
 def i_create_anomaly_resources_from_anomaly_detector(step, test=None, output=None):
     if test is None or output is None:

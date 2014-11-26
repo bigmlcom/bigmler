@@ -55,10 +55,10 @@ COMMANDS = {"selection":
                 "main --dataset %s --new-field %s --no-model --output-dir %s",
             "objective":
                 ("main --dataset %s --no-model --name %s "
-                 "--output-dir %s"),
+                 "--output-dir %s --store"),
             "create_cv":
                 ("main --datasets %s --output-dir %s --dataset-off --evaluate"
-                 " --name %s"),
+                 " --name %s --dataset-file %s"),
             "node_threshold":
                 ("main --datasets %s --node-threshold %s --output-dir %s"
                  " --dataset-off --evaluate")}
@@ -361,7 +361,11 @@ def create_kfold_evaluations(datasets_file, args, common_options,
     name_suffix = "_subset_%s" % counter
     name_max_length = NAME_MAX_LENGTH - len(name_suffix)
     name = "%s%s" % (args.name[0: name_max_length], name_suffix)
-    command = COMMANDS["create_cv"] % (datasets_file, output_dir, name)
+    dataset_id = u.read_datasets(datasets_file)[0]
+    model_dataset = os.path.normpath(
+        os.path.join(u.check_dir(datasets_file), dataset_id.replace("/", "_")))
+    command = COMMANDS["create_cv"] % (datasets_file, output_dir, name,
+                                       model_dataset)
     command_args = command.split()
     if model_fields:
         command_args.append("--model-fields")
@@ -441,7 +445,13 @@ def best_first_search(datasets_file, api, args, common_options,
         except IOError, exc:
             sys.exit("Could not read the generated datasets file: %s" %
                      str(exc))
-        dataset = api.check_resource(dataset_id)
+        try:
+            stored_dataset = os.path.normpath(
+                os.path.join(args.output_dir, dataset_id.replace("/", "_")))
+            with open(stored_dataset) as dataset_handler:
+                dataset = json.loads(dataset_handler.read())
+        except IOError:
+            dataset = api.check_resource(dataset_id)
         # initial feature set
         fields = Fields(dataset)
         excluded_features = ([] if args.exclude_features is None else

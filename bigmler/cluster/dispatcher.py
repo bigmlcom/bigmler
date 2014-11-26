@@ -124,6 +124,7 @@ def compute_output(api, args):
     clusters = None
     fields = None
     test_dataset = None
+    datasets = None
     # no multi-label support at present
 
     # variables from command-line options
@@ -157,17 +158,34 @@ def compute_output(api, args):
         log = args.log_file
         # If --clear_logs the log files are cleared
         clear_log_files([log])
+    if args.source_file:
+        # source is retrieved from the contents of the given local JSON file
+        source, csv_properties, fields = u.read_local_resource(
+            args.source_file,
+            csv_properties=csv_properties)
+    else:
+        # source is retrieved from the remote object
+        source, resume, csv_properties, fields = ps.source_processing(
+            api, args, resume,
+            csv_properties=csv_properties,
+            session_file=session_file, path=path, log=log)
 
-    source, resume, csv_properties, fields = ps.source_processing(
-        api, args, resume,
-        csv_properties=csv_properties,
-        session_file=session_file, path=path, log=log)
-
-    datasets, resume, csv_properties, fields = pd.dataset_processing(
-        source, api, args, resume,
-        fields=fields,
-        csv_properties=csv_properties,
-        session_file=session_file, path=path, log=log)
+    if args.dataset_file:
+        # dataset is retrieved from the contents of the given local JSON file
+        model_dataset, csv_properties, fields = u.read_local_resource(
+            args.dataset_file,
+            csv_properties=csv_properties)
+        if not args.datasets:
+            datasets = [model_dataset]
+            dataset = model_dataset
+        else:
+            datasets = u.read_datasets(args.datasets)
+    if not datasets:
+        datasets, resume, csv_properties, fields = pd.dataset_processing(
+            source, api, args, resume,
+            fields=fields,
+            csv_properties=csv_properties,
+            session_file=session_file, path=path, log=log)
     if datasets:
         dataset = datasets[0]
         if args.to_csv is not None:
@@ -197,12 +215,20 @@ def compute_output(api, args):
             dataset, api, args, resume, fields=fields,
             session_file=session_file, path=path, log=log)
         datasets[0] = dataset
-
-    clusters, cluster_ids, resume = pc.clusters_processing(
-        datasets, clusters, cluster_ids, api, args, resume, fields=fields,
-        session_file=session_file, path=path, log=log)
-    if clusters:
-        cluster = clusters[0]
+    if args.cluster_file:
+        # cluster is retrieved from the contents of the given local JSON file
+        cluster, csv_properties, fields = u.read_local_resource(
+            args.cluster_file,
+            csv_properties=csv_properties)
+        clusters = [cluster]
+        cluster_ids = [cluster['resource']]
+    else:
+        # cluster is retrieved from the remote object
+        clusters, cluster_ids, resume = pc.clusters_processing(
+            datasets, clusters, cluster_ids, api, args, resume, fields=fields,
+            session_file=session_file, path=path, log=log)
+        if clusters:
+            cluster = clusters[0]
 
     # We update the cluster's public state if needed
     if cluster:

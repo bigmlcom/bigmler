@@ -38,7 +38,7 @@ Feature: Upload source and produce anomaly scores for test data
         |scenario    | kwargs                                                  | test                    | output                        |predictions_file           |
         | scenario_an_1| {"data": "../data/tiny_kdd.csv", "output": "./scenario_an_1/anomaly_scores.csv", "test": "../data/test_kdd.csv"}   | ../data/test_kdd.csv   | ./scenario_an_3/anomaly_scores.csv   | ./check_files/anomaly_scores_kdd.csv   |
 
-    Scenario: Successfully building test predictions from cluster
+    Scenario: Successfully building test predictions from anomaly
         Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>        
         And I create BigML resources using anomaly detector to find anomaly scores for "<test>" and log predictions in "<output>"
         And I check that the anomaly scores are ready
@@ -48,7 +48,7 @@ Feature: Upload source and produce anomaly scores for test data
         |scenario    | kwargs                                                  | test                    | output                        |predictions_file           |
         | scenario_an_1| {"data": "../data/tiny_kdd.csv", "output": "./scenario_an_1/anomaly_scores.csv", "test": "../data/test_kdd.csv"}   | ../data/test_kdd.csv   | ./scenario_an_4/anomaly_scores.csv   | ./check_files/anomaly_scores_kdd.csv   |
 
-    Scenario: Successfully building test predictions from clusters file
+    Scenario: Successfully building test predictions from anomaly detector file
         Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
         And I create BigML resources using anomaly detector in file "<anomaly_file>" to find anomaly scores for "<test>" and log predictions in "<output>"
         And I check that the anomaly scores are ready
@@ -57,3 +57,13 @@ Feature: Upload source and produce anomaly scores for test data
         Examples:
         |scenario    | kwargs                                                  | anomaly_file        | test                  | output                      |predictions_file                    |
         | scenario_an_1| {"data": "../data/tiny_kdd.csv", "output": "./scenario_an_1/anomaly_scores.csv", "test": "../data/test_kdd.csv"}   | ./scenario_an_1/anomalies | ../data/test_kdd.csv | ./scenario_an_5/anomaly_scores.csv | ./check_files/anomaly_scores_kdd.csv |
+
+    Scenario: Successfully building test predictions from anomaly
+        Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>        
+        And I create BigML resources using local anomaly detector in "<scenario>" to find anomaly scores for "<test>" and log predictions in "<output>"
+        And I check that the anomaly scores are ready
+        Then the local anomaly scores file is like "<predictions_file>"
+
+        Examples:
+        |scenario    | kwargs                                                  | test                    | output                        |predictions_file           |
+        | scenario_an_1| {"data": "../data/tiny_kdd.csv", "output": "./scenario_an_1/anomaly_scores.csv", "test": "../data/test_kdd.csv"}   | ../data/test_kdd.csv   | ./scenario_an_6/anomaly_scores.csv   | ./check_files/anomaly_scores_kdd.csv   |

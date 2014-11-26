@@ -120,6 +120,20 @@ def i_create_cluster_resources_from_source(step, test=None, output=None):
     shell_execute(command, output, test=test)
 
 
+@step(r'I create BigML resources using local cluster in "(.*)" to find centroids for "(.*)" and log predictions in "(.*)"')
+def i_create_cluster_resources_from_local_cluster(step, directory=None, test=None, output=None):
+    if test is None or output is None or directory is None:
+        assert False
+    with open(os.path.join(directory, "clusters")) as handler:
+        cluster_id = handler.readline().strip()
+    command = ("bigmler cluster --cluster-file " +
+               os.path.join(directory,
+                            cluster_id.replace("/", "_")) +
+               " --test " + test +
+               " --store --output " + output)
+    shell_execute(command, output, test=test)
+
+
 @step(r'I create BigML resources using cluster to find centroids for "(.*)" and log predictions in "(.*)"')
 def i_create_cluster_resources_from_cluster(step, test=None, output=None):
     if test is None or output is None:

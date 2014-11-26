@@ -54,6 +54,15 @@ def get_anomaly_options(defaults=None):
                      " anomaly/50a206a8035d0706dc000376"
                      ").")},
 
+        # If a BigML json file containing an anomaly structure is provided,
+        # the script will use it to generate
+        # anomaly score predictions.
+        '--anomaly-file': {
+            'action': 'store',
+            'dest': 'anomaly_file',
+            'default': defaults.get('anomaly_file', None),
+            'help': "BigML anomaly detector JSON structure file."},
+
         # Does not create an anomaly detector, just a dataset.
         '--no-anomaly': {
             'action': 'store_true',

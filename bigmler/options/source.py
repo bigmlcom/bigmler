@@ -42,6 +42,14 @@ def get_source_options(defaults=None):
             "default": defaults.get('source', None),
             "help": "BigML source Id."},
 
+        # If a BigML json file containing a source structure is provided,
+        # the script will use it.
+        '--source-file': {
+            'action': 'store',
+            'dest': 'source_file',
+            'default': defaults.get('source_file', None),
+            'help': "BigML source JSON structure file."},
+
         # The path to a file containing names if you want to alter BigML's
         # default field names or the ones provided by the train file header.
         # Kept for backwards compatibility

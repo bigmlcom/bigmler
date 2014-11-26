@@ -36,6 +36,7 @@ import bigmler.processing.models as pm
 
 from bigml.model import Model
 from bigml.ensemble import Ensemble
+from bigml.basemodel import retrieve_resource
 
 from bigmler.evaluation import evaluate, cross_validate
 from bigmler.defaults import DEFAULTS_FILE
@@ -118,7 +119,8 @@ def has_train(args):
 
     """
     return (args.training_set or args.source or args.dataset or
-            args.datasets or args.train_stdin)
+            args.datasets or args.source_file or args.dataset_file or
+            args.train_stdin or args.source_file)
 
 
 def get_test_dataset(args):
@@ -218,6 +220,7 @@ def compute_output(api, args):
     multi_label_fields = []
     local_ensemble = None
     test_dataset = None
+    datasets = None
 
     # variables from command-line options
     resume = args.resume_
@@ -273,11 +276,17 @@ def compute_output(api, args):
             labels = all_labels
     else:
         all_labels = labels
-
-    source, resume, csv_properties, fields = ps.source_processing(
-        api, args, resume,
-        csv_properties=csv_properties, multi_label_data=multi_label_data,
-        session_file=session_file, path=path, log=log)
+    if args.source_file:
+        # source is retrieved from the contents of the given local JSON file
+        source, csv_properties, fields = u.read_local_resource(
+            args.source_file,
+            csv_properties=csv_properties)
+    else:
+        # source is retrieved from the remote object
+        source, resume, csv_properties, fields = ps.source_processing(
+            api, args, resume,
+            csv_properties=csv_properties, multi_label_data=multi_label_data,
+            session_file=session_file, path=path, log=log)
     if args.multi_label and source:
         multi_label_data = l.get_multi_label_data(source)
         (args.objective_field,
@@ -288,12 +297,25 @@ def compute_output(api, args):
                                                   multi_label_data,
                                                   fields,
                                                   multi_label_fields)
-    datasets, resume, csv_properties, fields = pd.dataset_processing(
-        source, api, args, resume,
-        fields=fields,
-        csv_properties=csv_properties,
-        multi_label_data=multi_label_data,
-        session_file=session_file, path=path, log=log)
+
+    if args.dataset_file:
+        # dataset is retrieved from the contents of the given local JSON file
+        model_dataset, csv_properties, fields = u.read_local_resource(
+            args.dataset_file,
+            csv_properties=csv_properties)
+        if not args.datasets:
+            datasets = [model_dataset]
+            dataset = model_dataset
+        else:
+            datasets = u.read_datasets(args.datasets)
+    if not datasets:
+        # dataset is retrieved from the remote object
+        datasets, resume, csv_properties, fields = pd.dataset_processing(
+            source, api, args, resume,
+            fields=fields,
+            csv_properties=csv_properties,
+            multi_label_data=multi_label_data,
+            session_file=session_file, path=path, log=log)
     if datasets:
         dataset = datasets[0]
         if args.to_csv is not None:
@@ -365,12 +387,33 @@ def compute_output(api, args):
                                            args.max_categories)
         other_label = get_metadata(dataset, 'other_label',
                                    other_label)
-
-    models, model_ids, ensemble_ids, resume = pm.models_processing(
-        datasets, models, model_ids,
-        api, args, resume, fields=fields,
-        session_file=session_file, path=path, log=log, labels=labels,
-        multi_label_data=multi_label_data, other_label=other_label)
+    if args.model_file:
+        # model is retrieved from the contents of the given local JSON file
+        model, csv_properties, fields = u.read_local_resource(
+            args.model_file,
+            csv_properties=csv_properties)
+        models = [model]
+        model_ids = [model['resource']]
+        ensemble_ids = []
+    elif args.ensemble_file:
+        # model is retrieved from the contents of the given local JSON file
+        ensemble, csv_properties, fields = u.read_local_resource(
+            args.ensemble_file,
+            csv_properties=csv_properties)
+        model_ids = ensemble['object']['models'][:]
+        ensemble_ids = [ensemble['resource']]
+        models = model_ids[:]
+        model = retrieve_resource(bigml.api.BigML(storage='./storage'),
+                                  models[0],
+                                  query_string=r.FIELDS_QS)
+        models[0] = model
+    else:
+        # model is retrieved from the remote object
+        models, model_ids, ensemble_ids, resume = pm.models_processing(
+            datasets, models, model_ids,
+            api, args, resume, fields=fields,
+            session_file=session_file, path=path, log=log, labels=labels,
+            multi_label_data=multi_label_data, other_label=other_label)
     if models:
         model = models[0]
         single_model = len(models) == 1

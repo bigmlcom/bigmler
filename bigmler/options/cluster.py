@@ -53,6 +53,14 @@ def get_cluster_options(defaults=None):
                      " per line (e.g., cluster/50a206a8035d0706dc000376"
                      ").")},
 
+        # If a BigML json file containing a cluster structure is provided,
+        # the script will use it.
+        '--cluster-file': {
+            'action': 'store',
+            'dest': 'cluster_file',
+            'default': defaults.get('cluster_file', None),
+            'help': "BigML cluster JSON structure file."},
+
         # Number of centroids to be generated in the cluster
         '--k': {
             'action': 'store',

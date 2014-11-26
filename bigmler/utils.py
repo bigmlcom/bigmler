@@ -33,7 +33,8 @@ except ImportError:
     import json
 
 import bigml.api
-from bigml.util import console_log
+from bigml.util import console_log, empty_resource
+from bigml.fields import get_fields_structure, Fields
 
 PAGE_LENGTH = 200
 ATTRIBUTE_NAMES = ['name', 'label', 'description']
@@ -249,6 +250,30 @@ def read_votes_files(dirs_list, path):
         os.chdir(current_directory)
     group_predictions.close()
     return predictions_files
+
+
+def read_local_resource(path, csv_properties=None):
+    """Read the JSON resource structure information from the given file.
+
+    """
+    resource = empty_resource()
+    if csv_properties is None:
+        csv_properties = {}
+    fields = None
+
+    with open(path, "r") as resource_file:
+        try:
+            resource = json.loads(resource_file.read())
+        except IOError:
+            pass
+    fields, resource_locale, missing_tokens = get_fields_structure(resource)
+    if missing_tokens:
+        csv_properties['missing_tokens'] = missing_tokens
+    if resource_locale:
+        csv_properties['data_locale'] = resource_locale
+    if fields:
+        fields = Fields(resource, **csv_properties)
+    return resource, csv_properties, fields
 
 
 def list_ids(api_function, query_string):

@@ -12,7 +12,7 @@ Feature: Upload multi-label source and produce test predictions
 
         Examples:
         |tag |label_separator |number_of_labels | data                   |training_separator |number_of_models | test                        | output                                   |
-        |my_multilabel_1|:|7| ../data/multilabel.csv |,|3| ../data/test_multilabel.csv | ./scenario_mle_1/predictions.csv
+        |my_multilabel_1|:|7| ../data/multilabel.csv |,|10| ../data/test_multilabel.csv | ./scenario_mle_1/predictions.csv
 
 
     Scenario: Successfully building test predictions from source
@@ -24,7 +24,7 @@ Feature: Upload multi-label source and produce test predictions
 
         Examples:
         |scenario    | kwargs                                                  |number_of_models |test                    | output                               |
-        | scenario_mle_1| {"tag": "my_multilabel_1", "data": "../data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "./scenario_mle_1/predictions.csv", "test": "../data/test_multilabel.csv", "number_of_models": 3}   |3| ../data/test_multilabel.csv   | ./scenario_mle_2/predictions.csv   
+        | scenario_mle_1| {"tag": "my_multilabel_1", "data": "../data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "./scenario_mle_1/predictions.csv", "test": "../data/test_multilabel.csv", "number_of_models": 10}   |10| ../data/test_multilabel.csv   | ./scenario_mle_2/predictions.csv   
 
     Scenario: Successfully building test predictions from dataset
         Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
@@ -34,4 +34,4 @@ Feature: Upload multi-label source and produce test predictions
 
         Examples:
         |scenario    | kwargs                                                  | number_of_models |test                    | output                                   |
-        | scenario_mle_1| {"tag": "my_multilabel_1", "data": "../data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "./scenario_mle_1/predictions.csv", "test": "../data/test_multilabel.csv", "number_of_models": 3}    |3| ../data/test_multilabel.csv   | ./scenario_mle_3/predictions.csv    
+        | scenario_mle_1| {"tag": "my_multilabel_1", "data": "../data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "./scenario_mle_1/predictions.csv", "test": "../data/test_multilabel.csv", "number_of_models": 10}    |10| ../data/test_multilabel.csv   | ./scenario_mle_3/predictions.csv    

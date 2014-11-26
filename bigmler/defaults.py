@@ -47,6 +47,7 @@ FLAGS = {
         {'flag': 'source', 'type': 'string'},
         {'flag': 'dataset', 'type': 'string'},
         {'flag': 'model', 'type': 'string'},
+        {'flag': 'model_file', 'type': 'string'},
         {'flag': 'remote', 'type': 'boolean'},
         {'flag': 'models', 'type': 'string'},
         {'flag': 'datasets', 'type': 'string'},
@@ -87,6 +88,7 @@ FLAGS = {
         {'flag': 'store', 'type': 'boolean'},
         {'flag': 'test_split', 'type': 'float'},
         {'flag': 'ensemble', 'type': 'string'},
+        {'flag': 'ensemble_file', 'type': 'string'},
         {'flag': 'tlp', 'type': 'int'},
         {'flag': 'prediction_info', 'type': 'string'},
         {'flag': 'max_parallel_evaluations', 'type': 'int'},
@@ -157,6 +159,7 @@ FLAGS = {
     'BigMLer cluster': [
         {'flag': 'cluster_fields', 'type': 'string'},
         {'flag': 'cluster', 'type': 'string'},
+        {'flag': 'cluster_file', 'type': 'string'},
         {'flag': 'clusters', 'type': 'string'},
         {'flag': 'k', 'type': 'integer'},
         {'flag': 'no_cluster', 'type': 'boolean'},
@@ -165,6 +168,7 @@ FLAGS = {
     'BigMLer anomaly': [
         {'flag': 'anomaly_fields', 'type': 'string'},
         {'flag': 'anomaly', 'type': 'string'},
+        {'flag': 'anomaly_file', 'type': 'string'},
         {'flag': 'anomalies', 'type': 'string'},
         {'flag': 'no_anomaly', 'type': 'boolean'},
         {'flag': 'anomaly_attributes', 'type': 'string'}]}
