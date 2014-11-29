@@ -7,6 +7,7 @@ from subprocess import check_call, CalledProcessError
 from bigml.api import check_resource
 from bigmler.processing.models import MONTECARLO_FACTOR
 from bigmler.checkpoint import file_number_of_lines
+from bigmler.utils import storage_file_name
 from bigmler.utils import SYSTEM_ENCODING
 from ml_test_prediction_steps import i_create_all_ml_resources
 from ml_test_prediction_steps import i_create_all_ml_resources_and_ensembles
@@ -256,8 +257,7 @@ def i_create_resources_from_local_model(step, directory=None, test=None, output=
     with open(os.path.join(directory, "models")) as model_file:
         model_id = model_file.read().strip()
     command = ("bigmler --model-file " +
-               os.path.join(directory,
-                            model_id.replace("/", "_")) +
+               storage_file_name(directory, model_id) +
                " --test " +
                test + " --store --output " + output + " --max-batch-models 1")
     shell_execute(command, output, test=test)
@@ -309,8 +309,7 @@ def i_create_resources_from_local_ensemble(step, number_of_models=None, director
         ensemble_id = ensemble_file.read().strip()
     try:
         command = ("bigmler --ensemble-file " +
-                   os.path.join(directory,
-                                ensemble_id.replace("/", "_")) +
+                   storage_file_name(directory, ensemble_id) +
                    " --test " + test + " --store" +
                    " --output " + output)
         command = check_debug(command)

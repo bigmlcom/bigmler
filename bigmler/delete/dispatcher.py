@@ -178,7 +178,12 @@ def filtered_selectors(args, api):
          api.list_batch_predictions, None),
         ("centroid", args.centroid_tag, api.list_centroids, None),
         ("batchcentroid", args.batch_centroid_tag,
-         api.list_batch_centroids, None)]
+         api.list_batch_centroids, None),
+        ("anomaly", args.anomaly_tag, api.list_anomalies, None),
+        ("anomalyscore", args.anomaly_score_tag, api.list_anomaly_scores,
+         None),
+        ("batchanomalyscore", args.batch_anomaly_score_tag,
+         api.list_batch_anomaly_scores, None)]
 
     if args.all_tag is None and any([resource[1] is not None for resource in
                                      resource_selectors]):

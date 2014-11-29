@@ -25,10 +25,11 @@ import os
 import bigml.api
 import bigmler.utils as u
 import bigmler.resources as r
+import bigmler.pre_model_steps as pms
 import bigmler.processing.args as a
+import bigmler.processing.anomalies as pa
 import bigmler.processing.sources as ps
 import bigmler.processing.datasets as pd
-import bigmler.processing.anomalies as pa
 
 from bigmler.defaults import DEFAULTS_FILE
 #from bigmler.centroid import centroid, remote_centroid
@@ -119,13 +120,9 @@ def compute_output(api, args):
         predictions for the `test_set`.
 
     """
-    source = None
-    dataset = None
+
     anomaly = None
     anomalies = None
-    fields = None
-    test_dataset = None
-    datasets = None
     # no multi-label support at present
 
     # variables from command-line options
@@ -159,63 +156,14 @@ def compute_output(api, args):
         log = args.log_file
         # If --clear_logs the log files are cleared
         clear_log_files([log])
-    if args.source_file:
-        # source is retrieved from the contents of the given local JSON file
-        source, csv_properties, fields = u.read_local_resource(
-            args.source_file,
-            csv_properties=csv_properties)
-    else:
-        # source is retrieved from the remote object
-        source, resume, csv_properties, fields = ps.source_processing(
-            api, args, resume,
-            csv_properties=csv_properties,
-            session_file=session_file, path=path, log=log)
-    if args.dataset_file:
-        # dataset is retrieved from the contents of the given local JSON file
-        model_dataset, csv_properties, fields = u.read_local_resource(
-            args.dataset_file,
-            csv_properties=csv_properties)
-        if not args.datasets:
-            datasets = [model_dataset]
-            dataset = model_dataset
-        else:
-            datasets = u.read_datasets(args.datasets)
-    if not datasets:
-        # dataset is retrieved from the remote object
-        datasets, resume, csv_properties, fields = pd.dataset_processing(
-            source, api, args, resume,
-            fields=fields,
-            csv_properties=csv_properties,
-            session_file=session_file, path=path, log=log)
-    if datasets:
-        dataset = datasets[0]
-        if args.to_csv is not None:
-            resume = pd.export_dataset(dataset, api, args, resume,
-                                       session_file=session_file, path=path)
-
-    # If test_split is used, split the dataset in a training and a test dataset
-    # according to the given split
-    if args.test_split > 0:
-        dataset, test_dataset, resume = pd.split_processing(
-            dataset, api, args, resume,
-            session_file=session_file, path=path, log=log)
-        datasets[0] = dataset
-
-    # If multi-dataset flag is on, generate a new dataset from the given
-    # list of datasets
-    if args.multi_dataset:
-        dataset, resume = pd.create_new_dataset(
-            datasets, api, args, resume, fields=fields,
-            session_file=session_file, path=path, log=log)
-        datasets = [dataset]
-
-    # Check if the dataset has a generators file associated with it, and
-    # generate a new dataset with the specified field structure
-    if args.new_fields:
-        dataset, resume = pd.create_new_dataset(
-            dataset, api, args, resume, fields=fields,
-            session_file=session_file, path=path, log=log)
-        datasets[0] = dataset
+    # basic pre-model step: creating or retrieving the source related info
+    source, resume, csv_properties, fields = pms.get_source_info(
+        api, args, resume, csv_properties, session_file, path, log)
+    # basic pre-model step: creating or retrieving the dataset related info
+    (dataset, datasets, test_dataset, resume,
+     csv_properties, fields) = pms.get_dataset_info(
+        api, args, resume, source,
+        csv_properties, fields, session_file, path, log)
     if args.anomaly_file:
         # anomaly is retrieved from the contents of the given local JSON file
         anomaly, csv_properties, fields = u.read_local_resource(

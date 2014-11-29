@@ -8,6 +8,8 @@ History
 
 - Adding the --model-file, --cluster-file, --anomaly-file and --ensemble-file
   to produce entirely local predictions.
+- Fixing bug: the bigmler delete subcommand was not using the --anomaly-tag,
+  --anomaly-score-tag and --batch-anomaly-score-tag options.
 
 1.14.5 (2014-11-14)
 ~~~~~~~~~~~~~~~~~~~

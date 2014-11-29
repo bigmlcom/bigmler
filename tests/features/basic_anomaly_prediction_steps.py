@@ -5,6 +5,7 @@ import json
 from lettuce import step, world
 from subprocess import check_call, CalledProcessError
 from bigml.api import check_resource
+from bigmler.utils import storage_file_name
 from bigmler.checkpoint import file_number_of_lines
 from common_steps import check_debug
 
@@ -73,8 +74,7 @@ def i_create_anomaly_resources_from_local_anomaly_detector(step, directory=None,
     with open(os.path.join(directory, "anomalies")) as handler:
         anomaly_id = handler.readline().strip()
     command = ("bigmler anomaly --anomaly-file " +
-               os.path.join(directory,
-                            anomaly_id.replace("/", "_")) +
+               storage_file_name(directory, anomaly_id) +
                " --test " + test +
                " --store --output " + output)
     shell_execute(command, output, test=test)

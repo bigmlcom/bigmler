@@ -446,8 +446,7 @@ def best_first_search(datasets_file, api, args, common_options,
             sys.exit("Could not read the generated datasets file: %s" %
                      str(exc))
         try:
-            stored_dataset = os.path.normpath(
-                os.path.join(args.output_dir, dataset_id.replace("/", "_")))
+            stored_dataset = u.storage_file_name(args.output_dir, dataset_id)
             with open(stored_dataset) as dataset_handler:
                 dataset = json.loads(dataset_handler.read())
         except IOError:

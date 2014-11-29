@@ -5,6 +5,7 @@ import json
 from lettuce import step, world
 from subprocess import check_call, CalledProcessError
 from bigml.api import check_resource
+from bigmler.utils import storage_file_name
 from bigmler.checkpoint import file_number_of_lines
 from common_steps import check_debug
 
@@ -127,8 +128,7 @@ def i_create_cluster_resources_from_local_cluster(step, directory=None, test=Non
     with open(os.path.join(directory, "clusters")) as handler:
         cluster_id = handler.readline().strip()
     command = ("bigmler cluster --cluster-file " +
-               os.path.join(directory,
-                            cluster_id.replace("/", "_")) +
+               storage_file_name(directory, cluster_id) +
                " --test " + test +
                " --store --output " + output)
     shell_execute(command, output, test=test)

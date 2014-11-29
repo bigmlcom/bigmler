@@ -266,6 +266,15 @@ def read_local_resource(path, csv_properties=None):
             resource = json.loads(resource_file.read())
         except IOError:
             pass
+    resource_id = resource.get('resource')
+    if resource_id is None:
+        sys.exit("Failed to extract a BigML resource structure from the"
+                 " contents of file %s." % path)
+    if resource.get('object') is None:
+        resource = {'resource': resource_id,
+                    'object': resource,
+                    'error': None,
+                    'code': bigml.api.HTTP_OK}
     fields, resource_locale, missing_tokens = get_fields_structure(resource)
     if missing_tokens:
         csv_properties['missing_tokens'] = missing_tokens
@@ -610,3 +619,12 @@ def print_generated_files(path, log_file=None, verbosity=1):
     message = (u"\nGenerated files:\n\n" +
                print_tree(path, u" ") + u"\n")
     log_message(message, log_file=log_file, console=verbosity)
+
+
+def storage_file_name(directory, resource_id):
+    """Returns the path to the JSON file that contains a stored resource
+       structure
+
+    """
+    return os.path.normpath(
+        os.path.join(directory, resource_id.replace("/", "_")))
