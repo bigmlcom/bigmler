@@ -121,7 +121,14 @@ class TestReader(object):
                                      u" headers." %
                                      (",".join(fields_names),
                                       ",".join(self.headers))).encode("utf-8"))
-
+        else:
+            columns = fields.fields_columns[:]
+            if objective_field is not None:
+                if fields.field_column_number(objective_field) in columns:
+                    columns.remove(fields.field_column_number(objective_field))
+            self.headers = [fields.fields_by_column_number[column] for
+                            column in columns]
+            self.raw_headers = self.headers
 
     def __iter__(self):
         """Iterator method

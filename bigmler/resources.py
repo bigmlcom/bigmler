@@ -611,7 +611,7 @@ def create_models(datasets, model_ids, model_args,
             single_model = args.number_of_models == 1 and existing_models == 0
             # if there's more than one model the first one must contain
             # the entire field structure to be used as reference.
-            query_string = (FIELDS_QS if single_model
+            query_string = (FIELDS_QS if single_model and args.test_header
                             else ALL_FIELDS_QS)
             inprogress = []
             for i in range(0, args.number_of_models):
@@ -708,8 +708,9 @@ def get_models(model_ids, args, api=None, session_file=None):
             try:
                 # if there's more than one model the first one must contain
                 # the entire field structure to be used as reference.
-                query_string = (ALL_FIELDS_QS if not single_model
-                                and (len(models) == 0 or args.multi_label)
+                query_string = (ALL_FIELDS_QS if ((not single_model
+                                and (len(models) == 0 or args.multi_label)) or
+                                not args.test_header)
                                 else FIELDS_QS)
                 model = check_resource(model, api.get_model,
                                        query_string=query_string)
@@ -720,13 +721,15 @@ def get_models(model_ids, args, api=None, session_file=None):
         model = models[0]
     else:
         try:
-            query_string = (ALL_FIELDS_QS if not single_model
+            query_string = (ALL_FIELDS_QS if not single_model or
+                            not args.test_header
                             else FIELDS_QS)
             model = check_resource(model_ids[0], api.get_model,
                                    query_string=query_string)
         except ValueError, exception:
             sys.exit("Failed to get a finished model: %s" % str(exception))
         models[0] = model
+
     return models, model_ids
 
 

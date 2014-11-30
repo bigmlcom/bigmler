@@ -158,6 +158,15 @@ def i_create_all_resources_batch(step, data=None, test=None, output=None):
     shell_execute(command, output, test=test)
 
 
+@step(r'I create BigML resources uploading train "(.*?)" file with no headers to test "(.*?)" with no headers and log predictions in "([^"]*)"$')
+def i_create_all_resources_with_no_headers(step, data=None, test=None, output=None):
+    if data is None or test is None or output is None:
+        assert False
+    command = ("bigmler --train " + data + " --test " + test +
+               " --store --output " + output + " --max-batch-models 1 --no-fast --no-train-header --no-test-header")
+    shell_execute(command, output, test=test, options='--prediction-header')
+
+
 @step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" and log predictions in "([^"]*)"$')
 def i_create_all_resources(step, data=None, test=None, output=None):
     if data is None or test is None or output is None:

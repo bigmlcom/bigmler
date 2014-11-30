@@ -3,6 +3,18 @@ Feature: Upload source and produce test predictions
     I need to upload a train set
     Then I need to create a dataset and a model and a local model to predict
 
+    Scenario: Successfully building test predictions from start with no headers:
+        Given I create BigML resources uploading train "<data>" file with no headers to test "<test>" with no headers and log predictions in "<output>"
+        And I check that the source has been created
+        And I check that the dataset has been created
+        And I check that the model has been created
+        And I check that the predictions are ready
+        Then the local prediction file is like "<predictions_file>"
+
+        Examples:
+        | data               | test                    | output                        |predictions_file           |
+        | ../data/iris_nh.csv   | ../data/test_iris_nh.csv   | ./scenario1_nh/predictions.csv   | ./check_files/predictions_iris.csv   |
+
     Scenario: Successfully building test predictions from start:
         Given I create BigML resources uploading train "<data>" file to test "<test>" and log predictions in "<output>"
         And I check that the source has been created

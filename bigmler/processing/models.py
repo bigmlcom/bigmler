@@ -189,7 +189,7 @@ def models_processing(datasets, models, model_ids,
 
 
 def get_model_fields(model, csv_properties, args, single_model=True,
-                     multi_label_data=None, local_ensemble=None):
+                     multi_label_data=None):
     """Retrieves fields info from model resource
 
     """
@@ -199,7 +199,8 @@ def get_model_fields(model, csv_properties, args, single_model=True,
     if args.user_locale is None:
         args.user_locale = model['object'].get('locale', None)
     csv_properties.update(data_locale=args.user_locale)
-    if single_model and 'model_fields' in model['object']['model']:
+    if (single_model and 'model_fields' in model['object']['model'] and
+        args.test_header):
         model_fields = model['object']['model']['model_fields'].keys()
         csv_properties.update(include=model_fields)
     else:
@@ -223,8 +224,6 @@ def get_model_fields(model, csv_properties, args, single_model=True,
                                      "name": objective_field,
                                      "column_number": objective_column}
     else:
-        if local_ensemble is not None:
-            fields_dict = copy.deepcopy(local_ensemble.fields)
         objective_field = model['object']['objective_fields']
         if isinstance(objective_field, list):
             objective_field = objective_field[0]

@@ -405,7 +405,7 @@ def compute_output(api, args):
         models = model_ids[:]
         model = retrieve_resource(bigml.api.BigML(storage='./storage'),
                                   models[0],
-                                  query_string=r.FIELDS_QS)
+                                  query_string=r.ALL_FIELDS_QS)
         models[0] = model
     else:
         # model is retrieved from the remote object
@@ -437,8 +437,10 @@ def compute_output(api, args):
         if isinstance(model, basestring):
             if not args.evaluate:
                 query_string = MINIMUM_MODEL
+            elif not args.test_header:
+                query_string = r.ALL_FIELDS_QS
             else:
-                query_string = r.FIELDS_QS
+                query_string = "%s;%s" % (r.ALL_FIELDS_QS, r.FIELDS_QS)
             model = u.check_resource(model, api.get_model,
                                      query_string=query_string)
         if (args.black_box or args.white_box or
@@ -468,7 +470,7 @@ def compute_output(api, args):
                                       max_models=args.max_batch_models)
         fields = pm.get_model_fields(
             model, csv_properties, args, single_model=single_model,
-            multi_label_data=multi_label_data, local_ensemble=local_ensemble)
+            multi_label_data=multi_label_data)
         # Free memory after getting fields
         local_ensemble = None
         gc.collect()

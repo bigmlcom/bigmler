@@ -10,6 +10,7 @@ History
   to produce entirely local predictions.
 - Fixing bug: the bigmler delete subcommand was not using the --anomaly-tag,
   --anomaly-score-tag and --batch-anomaly-score-tag options.
+- Fixing bug: the --no-test-header flag was not working.
 
 1.14.5 (2014-11-14)
 ~~~~~~~~~~~~~~~~~~~
