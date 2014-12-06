@@ -1060,6 +1060,15 @@ to build the model for testing. The generated
 evaluations are placed in your output directory and its average is stored in
 ``evaluation.txt`` and ``evaluation.json``.
 
+Similarly, you'll be able to create an evaluation for ensembles. Using the
+same command above and adding the options to define the ensembles' properties,
+such as ``--number-of-models``, ``--sample-rate``, ``--randomize`` or
+``--replacement``::
+
+    bigmler analyze --dataset dataset/5357eb2637203f1668000004 \
+                    --cross-validation --k-folds 5 --number-of-models 20
+                    --sample-rate 0.8 --replacement
+
 More insights can be drawn from the ``bigmler analyze --features`` command. In
 this case, the aim of the command is to analyze the complete set of features
 in your dataset to single out the ones that produce models with better

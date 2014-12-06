@@ -585,8 +585,11 @@ def compute_output(api, args):
         if args.dataset_off and not args.test_dataset_ids:
             args.test_dataset_ids = datasets
         if args.test_dataset_ids:
+            eval_ensembles = len(ensemble_ids) == len(args.test_dataset_ids)
+            models_or_ensembles = (ensemble_ids if eval_ensembles else
+                                   models)
             # Evaluate the models with the corresponding test datasets.
-            resume = evaluate(models, args.test_dataset_ids, api,
+            resume = evaluate(models_or_ensembles, args.test_dataset_ids, api,
                               args, resume,
                               fields=fields, dataset_fields=dataset_fields,
                               session_file=session_file, path=path,

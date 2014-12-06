@@ -838,13 +838,19 @@ def create_ensembles(datasets, ensemble_ids, ensemble_args, args,
     """Create ensembles from input data
 
     """
+
     if api is None:
         api = bigml.api.BigML()
     ensembles = ensemble_ids[:]
+    existing_ensembles = len(ensembles)
     model_ids = []
     ensemble_args_list = []
     if isinstance(ensemble_args, list):
         ensemble_args_list = ensemble_args
+    if args.dataset_off and args.evaluate:
+        args.test_dataset_ids = datasets[:]
+    if not args.multi_label:
+        datasets = datasets[existing_ensembles:]
     if number_of_ensembles > 0:
         message = dated("Creating %s.\n" %
                         plural("ensemble", number_of_ensembles))
@@ -859,8 +865,16 @@ def create_ensembles(datasets, ensemble_ids, ensemble_args, args,
 
             if ensemble_args_list:
                 ensemble_args = ensemble_args_list[i]
-            ensemble = api.create_ensemble(datasets, ensemble_args,
-                                           retries=None)
+
+            if args.dataset_off and args.evaluate:
+                multi_dataset = args.test_dataset_ids[:]
+                del multi_dataset[i + existing_ensembles]
+                ensemble = api.create_ensemble(multi_dataset,
+                                               ensemble_args,
+                                               retries=None)
+            else:
+                ensemble = api.create_ensemble(datasets, ensemble_args,
+                                               retries=None)
             ensemble_id = check_resource_error(ensemble,
                                                "Failed to create ensemble: ")
             log_message("%s\n" % ensemble_id, log_file=log)

@@ -3,6 +3,11 @@
 History
 -------
 
+1.15.0 (2014-12-06)
+~~~~~~~~~~~~~~~~~~~
+
+- Adding k-fold cross-validation for ensembles in bigmler analyze.
+
 1.14.6 (2014-11-26)
 ~~~~~~~~~~~~~~~~~~~
 

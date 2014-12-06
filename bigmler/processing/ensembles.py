@@ -36,23 +36,32 @@ def ensemble_processing(datasets, api, args, resume,
 
     """
     ensembles = []
-    number_of_ensembles = 1
+    ensemble_ids = []
+    number_of_ensembles = len(datasets)
 
     if resume:
-        message = u.dated("Ensemble not found. Resuming.\n")
-        resume, ensembles = c.checkpoint(
+        resume, ensemble_ids = c.checkpoint(
             c.are_ensembles_created, path, number_of_ensembles,
             debug=args.debug,
             message=message, log_file=session_file, console=args.verbosity)
+        if not resume:
+            message = u.dated("Found %s ensembles out of %s. Resuming.\n"
+                              % (len(ensembles_ids),
+                                 number_of_ensembles))
+            u.log_message(message, log_file=session_file,
+                          console=args.verbosity)
+        ensembles = ensemble_ids
+        number_of_ensembles -= len(ensemble_ids)
     try:
         ensemble = ensembles[0]
     except IndexError:
         ensemble = None
 
-    if ensemble is None:
+    if number_of_ensembles > 0:
         ensemble_args = r.set_ensemble_args(args, fields=fields)
         ensembles, ensemble_ids, models, model_ids = r.create_ensembles(
             datasets, ensembles, ensemble_args, args, api=api, path=path,
+            number_of_ensembles=number_of_ensembles,
             session_file=session_file, log=log)
     return ensembles, ensemble_ids, models, model_ids, resume
 

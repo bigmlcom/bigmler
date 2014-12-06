@@ -103,7 +103,7 @@ def models_processing(datasets, models, model_ids,
 
         elif args.number_of_models > 1:
             ensembles = []
-            # Ensemble of models
+            # Ensembles of models
             (ensembles, ensemble_ids,
              models, model_ids, resume) = ensemble_processing(
                  datasets, api, args, resume,
@@ -156,7 +156,7 @@ def models_processing(datasets, models, model_ids,
     elif args.models or args.model_tag:
         models = model_ids[:]
 
-    if args.ensemble:
+    if args.ensemble and not args.evaluate:
         ensemble = r.get_ensemble(args.ensemble, api, args.verbosity,
                                   session_file)
         ensemble_ids = [ensemble]

@@ -370,6 +370,18 @@ def create_kfold_evaluations(datasets_file, args, common_options,
     if model_fields:
         command_args.append("--model-fields")
         command_args.append(model_fields)
+    if args.number_of_models > 1:
+        command_args.append("--number-of-models")
+        command_args.append(str(args.number_of_models))
+        # ensembles options
+        if args.sample_rate < 1:
+            command_args.append("--sample-rate")
+            command_args.append(str(args.sample_rate))
+        if args.replacement:
+            command_args.append("--replacement")
+        if args.randomize:
+            command_args.append("--randomize")
+
     common_options_list = u.get_options_list(args, common_options,
                                              prioritary=command_args)
     command_args.extend(common_options_list)

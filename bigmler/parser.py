@@ -115,7 +115,11 @@ under the License.""" % version
             '--max-parallel-evaluations'],
         '--model-fields': main_options['--model-fields'],
         '--balance': main_options['--balance'],
-        '--no-balance': main_options['--no-balance']})
+        '--no-balance': main_options['--no-balance'],
+        '--number-of-models': main_options['--number-of-models'],
+        '--sample-rate': main_options['--sample-rate'],
+        '--replacement': main_options['--replacement'],
+        '--randomize': main_options['--randomize']})
 
     defaults = general_defaults["BigMLer cluster"]
     subcommand_options["cluster"] = get_cluster_options(defaults=defaults)
