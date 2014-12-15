@@ -3,6 +3,13 @@
 History
 -------
 
+1.15.1 (2014-12-15)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing bug: ensembles' evaluations failed when using the ensemble id.
+- Fixing bug: bigmler analyze lacked model configuration options (weight-field,
+  objective-fields, pruning, model-attributes...)
+
 1.15.0 (2014-12-06)
 ~~~~~~~~~~~~~~~~~~~
 

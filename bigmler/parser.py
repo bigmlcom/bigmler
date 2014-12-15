@@ -119,6 +119,15 @@ under the License.""" % version
         '--number-of-models': main_options['--number-of-models'],
         '--sample-rate': main_options['--sample-rate'],
         '--replacement': main_options['--replacement'],
+        '--missing-splits': main_options['--missing-splits'],
+        '--pruning': main_options['--pruning'],
+        '--weight-field': main_options['--weight-field'],
+        '--replacement': main_options['--replacement'],
+        '--objective-weights': main_options['--objective-weights'],
+        '--replacement': main_options['--replacement'],
+        '--model-attributes': main_options['--model-attributes'],
+        '--ensemble-attributes': main_options['--ensemble-attributes'],
+        '--tlp': main_options['--tlp'],
         '--randomize': main_options['--randomize']})
 
     defaults = general_defaults["BigMLer cluster"]

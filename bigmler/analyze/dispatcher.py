@@ -83,7 +83,8 @@ def analyze_dispatcher(args=sys.argv[1:]):
 
         if command_args.model_fields:
             model_fields = command_args.model_fields.split(',')
-            command_args.model_fields_ = map(str.strip, model_fields)
+            command_args.model_fields_ = [model_field.strip()
+                                          for model_field in model_fields]
         else:
             command_args.model_fields_ = {}
         u.sys_log_message(u"%s\n" % os.path.abspath(command_args.output_dir),

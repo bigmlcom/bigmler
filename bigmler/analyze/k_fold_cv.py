@@ -348,6 +348,46 @@ def create_kfold_datasets(dataset, args,
     return datasets_file, resume
 
 
+def add_model_args(command_args, args):
+    """Adds the command options used to configure models or ensembles
+
+    """
+    if args.balance:
+        command_args.append("--balance")
+    if args.missing_splits:
+        command_args.append("--missing-splits")
+    if args.pruning:
+        command_args.append("--pruning")
+        command_args.append(args.pruning)
+    if args.weight_field:
+        command_args.append("--weight-field")
+        command_args.append(args.weight_field)
+    if args.objective_weights:
+        command_args.append("--objective-weights")
+        command_args.append(args.objective_weights)
+    if args.tlp:
+        command_args.append("--tlp")
+        command_args.append(str(args.tlp))
+    if args.model_attributes:
+        command_args.append("--model-attributes")
+        command_args.append(args.model_attributes)
+    if args.number_of_models > 1:
+        command_args.append("--number-of-models")
+        command_args.append(str(args.number_of_models))
+        # ensembles options
+        if args.sample_rate < 1:
+            command_args.append("--sample-rate")
+            command_args.append(str(args.sample_rate))
+        if args.replacement:
+            command_args.append("--replacement")
+        if args.randomize:
+            command_args.append("--randomize")
+        if args.ensemble_attributes:
+            command_args.append("--ensemble-attributes")
+            command_args.append(args.ensemble_attributes)
+    return command_args
+
+
 def create_kfold_evaluations(datasets_file, args, common_options,
                              resume=False, counter=0):
     """ Create k-fold cross-validation from a datasets file
@@ -370,18 +410,7 @@ def create_kfold_evaluations(datasets_file, args, common_options,
     if model_fields:
         command_args.append("--model-fields")
         command_args.append(model_fields)
-    if args.number_of_models > 1:
-        command_args.append("--number-of-models")
-        command_args.append(str(args.number_of_models))
-        # ensembles options
-        if args.sample_rate < 1:
-            command_args.append("--sample-rate")
-            command_args.append(str(args.sample_rate))
-        if args.replacement:
-            command_args.append("--replacement")
-        if args.randomize:
-            command_args.append("--randomize")
-
+    command_args = add_model_options(command_args, args)
     common_options_list = u.get_options_list(args, common_options,
                                              prioritary=command_args)
     command_args.extend(common_options_list)

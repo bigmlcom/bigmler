@@ -414,6 +414,7 @@ def compute_output(api, args):
             api, args, resume, fields=fields,
             session_file=session_file, path=path, log=log, labels=labels,
             multi_label_data=multi_label_data, other_label=other_label)
+
     if models:
         model = models[0]
         single_model = len(models) == 1

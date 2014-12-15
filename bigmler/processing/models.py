@@ -156,13 +156,13 @@ def models_processing(datasets, models, model_ids,
     elif args.models or args.model_tag:
         models = model_ids[:]
 
-    if args.ensemble and not args.evaluate:
-        ensemble = r.get_ensemble(args.ensemble, api, args.verbosity,
-                                  session_file)
-        ensemble_ids = [ensemble]
-        model_ids = ensemble['object']['models']
-
-        models = model_ids[:]
+    if args.ensemble:
+        ensemble_ids = [args.ensemble]
+        if not args.evaluate:
+            ensemble = r.get_ensemble(args.ensemble, api, args.verbosity,
+                                      session_file)
+            model_ids = ensemble['object']['models']
+            models = model_ids[:]
 
     if args.ensembles or args.ensemble_tag:
         model_ids = []
