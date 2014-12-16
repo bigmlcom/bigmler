@@ -348,7 +348,7 @@ def create_kfold_datasets(dataset, args,
     return datasets_file, resume
 
 
-def add_model_args(command_args, args):
+def add_model_options(command_args, args):
     """Adds the command options used to configure models or ensembles
 
     """

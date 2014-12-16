@@ -89,3 +89,21 @@ Feature: Upload source and produce evaluation
         Examples:
         | data             | output                   | split    | key         | value |
         | ../data/iris.csv | ./scenario_e6/evaluation | 0.2      | average_phi | 0.85  |
+
+
+    Scenario: Successfully building ensemble evaluations from start and test-split:
+        Given I create BigML resources uploading train "<data>" file to evaluate an ensemble of <number_of_models> models with test-split <split> and log evaluation in "<output>"
+        And I check that the source has been created
+        And I check that the dataset has been created
+        And I check that the train dataset has been created
+        And I check that the test dataset has been created
+        And I check that the ensemble has been created
+        And I check that the evaluation has been created
+        Then the evaluation key "<key>" value for the model is greater than <value>
+        And I evaluate the ensemble in directory "<directory>" with the dataset in directory "<directory>" and log evaluation in "<output2>"
+        And I check that the evaluation has been created
+        Then the evaluation key "<key>" value for the model is greater than <value>
+
+        Examples:
+        | data             | output                   | split    | number_of_models | key         | value | directory      | output2
+        | ../data/iris.csv | ./scenario_e8/evaluation | 0.2      | 5                | average_phi | 0.94  | ./scenario_e8/ | ./scenario_e9/evaluation

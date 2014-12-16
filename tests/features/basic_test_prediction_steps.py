@@ -367,6 +367,7 @@ def i_create_resources_from_ensemble_generic(step, number_of_models=None, no_rep
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
+
 @step(r'I create BigML (multi-label\s)?resources using models in file "(.*)" with objective "(.*)" to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_models_file_with_objective(step, multi_label=None, models_file=None, objective=None, test=None, output=None):
     if (models_file is None or test is None or output is None

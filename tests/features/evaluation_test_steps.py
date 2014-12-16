@@ -26,6 +26,15 @@ def given_i_create_bigml_resources_using_source_to_evaluate(step, output=None):
         assert False
 
 
+def read_id_from_file(path):
+    """Reading the id in first line in a file
+
+    """
+
+    with open(path) as id_file:
+        return id_file.readline().strip()
+
+
 @step(r'I create BigML resources using dataset to evaluate and log evaluation in "(.*)"')
 def given_i_create_bigml_resources_using_dataset_to_evaluate(step, output=None):
     if output is None:
@@ -186,3 +195,45 @@ def i_check_evaluation_key(step, key=None, value=None):
         evaluation_file_json.close()
     except:
         assert False
+
+
+@step(r'I create BigML resources uploading train "(.*)" file to evaluate an ensemble of (\d+) models with test-split (.*) and log evaluation in "(.*)"')
+def i_create_with_split_to_evaluate_ensemble(step, data=None, number_of_models=None, split=None, output=None):
+    if data is None or split is None or output is None:
+        assert False
+    try:
+        retcode = check_call("bigmler --evaluate --train " + data +
+                             " --test-split " + split +
+                             " --number-of-models " + number_of_models +
+                             " --output " + output, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.directory = os.path.dirname(output)
+            world.folders.append(world.directory)
+            world.output = output
+            assert True
+    except OSError as e:
+        assert False
+
+
+@step(r'I evaluate the ensemble in directory "(.*)" with the dataset in directory "(.*)" and log evaluation in "(.*)"')
+def i_evaluate_ensemble_with_dataset(step, ensemble_dir=None, dataset_dir=None, output=None):
+    if ensemble_dir is None or dataset_dir is None or output is None:
+        assert False
+    world.directory = os.path.dirname(output)
+    world.folders.append(world.directory)
+    ensemble_id = read_id_from_file(os.path.join(ensemble_dir, "ensembles"))
+    dataset_id = read_id_from_file(os.path.join(dataset_dir, "dataset_test"))
+    try:
+        command = ("bigmler --dataset " + dataset_id +
+                   " --ensemble " + ensemble_id + " --store" +
+                   " --output " + output + " --evaluate")
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.output = output
+            assert True
+    except OSError as exc:
+        assert False, str(exc)
