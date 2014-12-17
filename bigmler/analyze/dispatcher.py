@@ -96,6 +96,11 @@ def analyze_dispatcher(args=sys.argv[1:]):
     # --maximize flag will be deprecated. Use --optimize flag.
     if command_args.maximize is not None and command_args.optimize is None:
         command_args.optimize = command_args.maximize
+    incompatible_flags = [command_args.cv, command_args.features,
+                          command_args.nodes]
+    if sum([int(flag) for flag in incompatible_flags]):
+        sys.exit("The following flags cannot be used together:\n    --features"
+                 "\n    --cross-validation\n    --nodes")
     # k-fold cross-validation
     if command_args.cv and command_args.dataset is not None:
         create_kfold_cv(command_args, api, command.common_options,
