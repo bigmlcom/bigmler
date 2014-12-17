@@ -157,7 +157,8 @@ def models_processing(datasets, models, model_ids,
         models = model_ids[:]
 
     if args.ensemble:
-        ensemble_ids = [args.ensemble]
+        if not args.ensemble in ensemble_ids:
+            ensemble_ids.append(args.ensemble)
         if not args.evaluate:
             ensemble = r.get_ensemble(args.ensemble, api, args.verbosity,
                                       session_file)

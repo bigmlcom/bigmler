@@ -1041,12 +1041,14 @@ def set_label_evaluation_args(args, labels, all_labels,
     return evaluation_args_list
 
 
-def create_evaluations(model_ids, datasets, evaluation_args, args, api=None,
+def create_evaluations(model_or_ensemble_ids, datasets, evaluation_args,
+                       args, api=None,
                        path=None, session_file=None, log=None,
                        existing_evaluations=0):
     """Create evaluations for a list of models
 
-       ``model_ids``: list of model ids to create an evaluation of
+       ``model_or_ensemble_ids``: list of model or ensemble ids to create
+                                  an evaluation of
        ``datasets``: dataset objects or ids to evaluate with
        ``evaluation_args``: arguments for the ``create_evaluation`` call
        ``args``: input values for bigmler flags
@@ -1056,6 +1058,7 @@ def create_evaluations(model_ids, datasets, evaluation_args, args, api=None,
        ``log``: user provided log file
        ``existing_evaluations``: evaluations found when attempting resume
     """
+
     evaluations = []
     dataset = datasets[0]
     evaluation_args_list = []
@@ -1063,7 +1066,7 @@ def create_evaluations(model_ids, datasets, evaluation_args, args, api=None,
         evaluation_args_list = evaluation_args
     if api is None:
         api = bigml.api.BigML()
-    remaining_ids = model_ids[existing_evaluations:]
+    remaining_ids = model_or_ensemble_ids[existing_evaluations:]
     if args.test_dataset_ids or args.dataset_off:
         remaining_datasets = datasets[existing_evaluations:]
     number_of_evaluations = len(remaining_ids)

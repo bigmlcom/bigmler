@@ -3,6 +3,11 @@
 History
 -------
 
+1.15.1 (2014-12-17)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing bug: k-fold cross-validation failed for ensembles.
+
 1.15.1 (2014-12-15)
 ~~~~~~~~~~~~~~~~~~~
 
