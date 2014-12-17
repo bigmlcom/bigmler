@@ -98,7 +98,7 @@ def analyze_dispatcher(args=sys.argv[1:]):
         command_args.optimize = command_args.maximize
     incompatible_flags = [command_args.cv, command_args.features,
                           command_args.nodes]
-    if sum([int(flag) for flag in incompatible_flags]):
+    if sum([int(bool(flag)) for flag in incompatible_flags]) > 1:
         sys.exit("The following flags cannot be used together:\n    --features"
                  "\n    --cross-validation\n    --nodes")
     # k-fold cross-validation
