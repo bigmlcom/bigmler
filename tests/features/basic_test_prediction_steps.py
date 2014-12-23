@@ -1034,6 +1034,26 @@ def i_create_all_resources_to_evaluate_and_share(step, data=None, output=None):
         assert False
 
 
+@step(r'I create BigML dataset uploading train "(.*)" file with attributes "(.*)" in "(.*)"')
+def i_create_dataset(step, data=None, attributes=None, output=None):
+    if data is None or output is None or attributes is None:
+        assert False
+    try:
+        retcode = check_call("bigmler --train " + data +
+                             " --source-attributes " + attributes +
+                             " --no-model --store --output " + output,
+                             shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.directory = os.path.dirname(output)
+            world.folders.append(world.directory)
+            world.output = output
+            assert True
+    except OSError as e:
+        assert False
+
+
 @step(r'I create BigML dataset uploading train "(.*)" file in "(.*)"')
 def i_create_dataset(step, data=None, output=None):
     if data is None or output is None:

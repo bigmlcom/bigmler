@@ -43,6 +43,7 @@ def i_create_all_cluster_resources(step, data=None, test=None, output=None):
     if data is None or test is None or output is None:
         assert False
     command = ("bigmler cluster --train " + data + " --test " + test +
+               " --k 8" +
                " --store --output " + output)
     shell_execute(command, output, test=test)
 
@@ -106,7 +107,7 @@ def i_create_cluster_resources_from_dataset(step, test=None, output=None):
     if test is None or output is None:
         assert False
     command = ("bigmler cluster --dataset " +
-               world.dataset['resource'] + " --test " + test +
+               world.dataset['resource'] + " --test " + test +  " --k 8" +
                " --store --output " + output)
     shell_execute(command, output, test=test)
 
@@ -116,7 +117,7 @@ def i_create_cluster_resources_from_source(step, test=None, output=None):
     if test is None or output is None:
         assert False
     command = ("bigmler cluster --source " +
-               world.source['resource'] + " --test " + test +
+               world.source['resource'] + " --test " + test + " --k 8" +
                " --store --output " + output)
     shell_execute(command, output, test=test)
 
@@ -139,7 +140,7 @@ def i_create_cluster_resources_from_cluster(step, test=None, output=None):
     if test is None or output is None:
         assert False
     command = ("bigmler cluster --cluster " +
-               world.cluster['resource'] + " --test " + test +
+               world.cluster['resource'] + " --test " + test + " --k 8" +
                " --store --output " + output)
     shell_execute(command, output, test=test)
 
@@ -158,7 +159,8 @@ def i_create_cluster_resources_from_clusters_file(step, clusters_file=None, test
 def i_create_all_cluster_resources_with_mapping(step, data=None, test=None, fields_map=None, output=None):
     if data is None or test is None or output is None or fields_map is None:
         assert False
-    command = ("bigmler cluster --remote --train " + data + " --test " + test +
+    command = ("bigmler cluster --remote --train " + data +
+               " --test " + test + " --k 8" +
                " --fields-map " + fields_map +
                " --store --output " + output)
     shell_execute(command, output, test=test)

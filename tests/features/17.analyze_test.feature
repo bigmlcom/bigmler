@@ -96,7 +96,7 @@ Feature: Produce model analysis from a dataset
         | ../data/iris.csv | ./scenario_a_7/evaluation | 2     | petal length!sepal width | !              | accuracy | petal width | 95.33%      |
 
     Scenario: Successfully building feature selection for a category from dataset:
-        Given I create BigML dataset uploading train "<data>" file in "<output>"
+        Given I create BigML dataset uploading train "<data>" file with attributes "<attributes>" in "<output>"
         And I check that the source has been created
         And I check that the dataset has been created
         And I create BigML feature selection <kfold>-fold cross-validations improving "<metric>" for category "<category>"
@@ -106,5 +106,5 @@ Feature: Produce model analysis from a dataset
         Then the best feature selection is "<selection>", with "<metric>" of <metric_value>
 
         Examples:
-        | data                | output                    | kfold | metric   | category | selection   | metric_value 
-        | ../data/spam.csv    | ./scenario_a_9/evaluation | 2     | recall   | spam     | Message     | 54.52%      
+        | data                | attributes | output                    | kfold | metric   | category | selection   | metric_value 
+        | ../data/spam.csv    | ../data/spam_attributes.json |./scenario_a_9/evaluation | 2     | recall   | spam     | Message     | 61.24%      
