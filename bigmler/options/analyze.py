@@ -117,6 +117,15 @@ def get_analyze_options(defaults=None):
             "default": defaults.get('optimize', ACCURACY),
             "help": "Evaluation measure to be optimized."},
 
+        # Optimize-category: in categorical models, name of the category
+        # whose evaluation measure is to be optimized
+        '--optimize-category': {
+            "action": 'store',
+            "dest": 'optimize_category',
+            "default": defaults.get('optimize-category', None),
+            "help": ("Name of the category whose evaluation measure"
+                     " is to be optimized.")},
+
         # Min_nodes: Minimum number of nodes to start the node threshold
         # analysis
         '--min-nodes': {

@@ -3,6 +3,12 @@
 History
 -------
 
+1.15.2 (2014-12-23)
+~~~~~~~~~~~~~~~~~~~
+
+- Adding --optimize-category in bigmler analyze subcommands to select
+  the category whose evaluations will be optimized.
+
 1.15.1 (2014-12-17)
 ~~~~~~~~~~~~~~~~~~~
 

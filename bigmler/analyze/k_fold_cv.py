@@ -43,6 +43,7 @@ from bigmler.options.analyze import ACCURACY, MINIMIZE_OPTIONS
 
 AVG_PREFIX = "average_%s"
 R_SQUARED = "r_squared"
+PER_CLASS = "per_class_statistics"
 
 EXTENDED_DATASET = "kfold_dataset.json"
 TEST_DATASET = "kfold_dataset-%s.json"
@@ -587,6 +588,20 @@ def best_first_search(datasets_file, api, args, common_options,
         u.log_message(message, log_file=session_file, console=1)
 
 
+def extract_evaluation_info(evaluation, category):
+    """Returns the evaluation metrics for the chosen
+       category or the average.
+
+    """
+    evaluation = evaluation.get("model", {})
+    if category and PER_CLASS in evaluation:
+        eval_per_class = evaluation.get(PER_CLASS, {})
+        for class_evaluation in eval_per_class:
+            if category == class_evaluation["class_name"]:
+                return class_evaluation
+    return evaluation
+
+        
 def kfold_evaluate(datasets_file, args, counter, common_options,
                    penalty=DEFAULT_PENALTY,
                    metric=ACCURACY, resume=False):
@@ -601,7 +616,8 @@ def kfold_evaluate(datasets_file, args, counter, common_options,
                                                   resume=resume,
                                                   counter=counter)
 
-    evaluation = evaluation.get('model', {})
+    evaluation = extract_evaluation_info(
+        evaluation, args.optimize_category)
     avg_metric = AVG_PREFIX % metric
     metric_literal = metric
     if not avg_metric in evaluation:
@@ -703,7 +719,8 @@ def node_threshold_evaluate(datasets_file, args, node_threshold,
         datasets_file, args, common_options, resume=resume,
         node_threshold=node_threshold)
 
-    evaluation = evaluation.get('model', {})
+    evaluation = extract_evaluation_info(
+        evaluation, args.optimize_category)
     avg_metric = AVG_PREFIX % metric
     metric_literal = metric
     if not avg_metric in evaluation:

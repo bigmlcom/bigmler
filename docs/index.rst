@@ -1115,6 +1115,19 @@ metric you'd like to optimize.
     bigmler analyze --dataset dataset/5357eb2637203f1668000004 \
                     --features --optimize recall
 
+For categorical models, the evaluation values are obtained by counting
+the positive and negative matches for all the instances in
+the test set, but sometimes it can be more useful to optimize the
+performance of the model for a single category. This can be specially
+important in highly non-balanced datasets or when the cost function is
+mainly associated to one of the existing classes in the objective field.
+Using ``--optimize-category" you can set the category whose evaluation
+metrics you'd like to optimize::
+
+    bigmler analyze --dataset dataset/5357eb2637203f1668000004 \
+                    --features --optimize recall \
+                    --optimize-category Iris-setosa
+
 You should be aware that the smart feature selection command still generates
 a high number of BigML resources. Using ``k`` as the ``k-folds`` number and
 ``n`` as the number of explored feature sets, it will be generating ``k``
@@ -1930,29 +1943,33 @@ Fancy Options
 Analyze subcommand Options
 --------------------------
 
---cross-validation          Sets the k-fold cross-validation mode
---k-folds                   Number of folds used in k-fold cross-validation
-                            (default is 5)
---features                  Sets the smart selection features mode
---staleness INTEGER         Number of iterations with no improvement that
-                            is considered the limit for the analysis to stop
-                            (default is 5)
---penalty FLOAT             Coefficient used to penalyze models with many
-                            features in the smart selection features mode
-                            (default is 0.001). Also used in node threshold
-                            selection (default is 0)
---optimize METRIC           Metric that is being optimized in the smart
-                            selection features mode or the node threshold
-                            search mode (default is accuracy)
---nodes                     Sets the node threshold search mode
---min-nodes INTEGER         Minimum number of nodes to start the node
-                            threshold search mode (default 3)
---max-nodes INTEGER         Maximum number of nodes to end the node threshold
-                            search mode (default 2000)
---nodes-step INTEGER        Step in the node threshold search iteration
-                            (default 50)
---exclude-features          Comma-separated list of features in the dataset
-                            to be excluded from the features analysis
+--cross-validation              Sets the k-fold cross-validation mode
+--k-folds                       Number of folds used in k-fold cross-validation
+                                (default is 5)
+--features                      Sets the smart selection features mode
+--staleness INTEGER             Number of iterations with no improvement that
+                                is considered the limit for the analysis to stop
+                                (default is 5)
+--penalty FLOAT                 Coefficient used to penalyze models with many
+                                features in the smart selection features mode
+                                (default is 0.001). Also used in node threshold
+                                selection (default is 0)
+--optimize METRIC               Metric that is being optimized in the smart
+                                selection features mode or the node threshold
+                                search mode (default is accuracy)
+--optimize-category CATEGORY    Category whoese metric is being optimized in
+                                the smart selection features mode or
+                                the node threshold search mode (only for
+                                categorical models)
+--nodes                         Sets the node threshold search mode
+--min-nodes INTEGER             Minimum number of nodes to start the node
+                                threshold search mode (default 3)
+--max-nodes INTEGER             Maximum number of nodes to end the node threshold
+                                search mode (default 2000)
+--nodes-step INTEGER            Step in the node threshold search iteration
+                                (default 50)
+--exclude-features              Comma-separated list of features in the dataset
+                                to be excluded from the features analysis
 
 Cluster Specific Subcommand Options
 ----------------------------------

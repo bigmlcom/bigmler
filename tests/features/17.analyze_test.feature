@@ -94,3 +94,17 @@ Feature: Produce model analysis from a dataset
         Examples:
         | data                | output                    | kfold | features              | args_separator | metric   | selection   | metric_value |
         | ../data/iris.csv | ./scenario_a_7/evaluation | 2     | petal length!sepal width | !              | accuracy | petal width | 95.33%      |
+
+    Scenario: Successfully building feature selection for a category from dataset:
+        Given I create BigML dataset uploading train "<data>" file in "<output>"
+        And I check that the source has been created
+        And I check that the dataset has been created
+        And I create BigML feature selection <kfold>-fold cross-validations improving "<metric>" for category "<category>"
+        And I check that the <kfold>-datasets have been created
+        And I check that the <kfold>-models have been created
+        And I check that all the <kfold>-fold cross-validations have been created
+        Then the best feature selection is "<selection>", with "<metric>" of <metric_value>
+
+        Examples:
+        | data                | output                    | kfold | metric   | category | selection   | metric_value 
+        | ../data/spam.csv    | ./scenario_a_9/evaluation | 2     | recall   | spam     | Message     | 54.52%      

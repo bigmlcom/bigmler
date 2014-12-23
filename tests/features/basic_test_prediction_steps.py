@@ -1138,6 +1138,26 @@ def i_create_kfold_cross_validation_in_dev(step, k_folds=None, metric=None):
     except OSError as e:
         assert False
 
+@step(r'I create BigML feature selection (\d*)-fold cross-validations improving "(.*)" for category "(.*)"$')
+def i_create_kfold_cross_validation(step, k_folds=None, metric=None, category=None):
+    if k_folds is None or metric is None or category is None:
+        assert False
+    try:
+        retcode = check_call("bigmler analyze --dataset " +
+                             world.dataset['resource'] +
+                             " --features --k-folds " + k_folds +
+                             " --output " + world.directory +
+                             " --optimize " + metric +
+                             " --optimize-category " + category,
+                             shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.output = os.path.join(world.directory, "test", "kfold1",
+                                        "evaluation")
+            assert True
+    except OSError as e:
+        assert False
 
 
 @step(r'I create BigML feature selection (\d*)-fold cross-validations improving "(.*)"$')
