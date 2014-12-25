@@ -156,7 +156,7 @@ FLAGS = {
         {'flag': 'min_nodes', 'type': 'integer'},
         {'flag': 'nodes_step', 'type': 'integer'},
         {'flag': 'exclude_features', 'type': 'string'},
-        {'flag': 'optimize_category', 'type': 'string'},],
+        {'flag': 'optimize_category', 'type': 'string'}],
     'BigMLer cluster': [
         {'flag': 'cluster_fields', 'type': 'string'},
         {'flag': 'cluster', 'type': 'string'},

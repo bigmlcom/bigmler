@@ -595,8 +595,7 @@ def extract_evaluation_info(evaluation, category):
     """
     evaluation = evaluation.get("model", {})
     if category and PER_CLASS in evaluation:
-        eval_per_class = evaluation.get(PER_CLASS, {})
-        for class_evaluation in eval_per_class:
+        for class_evaluation in evaluation[PER_CLASS]:
             if category == class_evaluation["class_name"]:
                 return class_evaluation
     return evaluation
