@@ -86,6 +86,10 @@ def store_init_resources():
     world.init_batch_anomaly_scores_count = batch_anomaly_scores['meta'][
         'total_count']
 
+    projects = world.api.list_projects()
+    check_http_code(projects)
+    world.init_projects_count = projects['meta']['total_count']
+
 
 def store_final_resources():
     """Store the final existing resources grouped by resource_type
@@ -144,6 +148,10 @@ def store_final_resources():
     world.final_batch_anomaly_scores_count = batch_anomaly_scores['meta'][
         'total_count']
 
+    projects = world.api.list_projects()
+    check_http_code(projects)
+    world.final_projects_count = projects['meta']['total_count']
+
 def check_init_equals_final():
     """Checks that the number of resources grouped by type has not changed
 
@@ -161,6 +169,7 @@ def check_init_equals_final():
     assert world.final_anomalies_count == world.init_anomalies_count, "init: %s, final: %s" % (world.init_anomalies_count, world.final_anomalies_count)
     assert world.final_anomaly_scores_count == world.init_anomaly_scores_count, "init: %s, final: %s" % (world.init_anomaly_scores_count, world.final_anomaly_scores_count)
     assert world.final_batch_anomaly_scores_count == world.init_batch_anomaly_scores_count, "init: %s, final: %s" % (world.init_batch_anomaly_scores_count, world.final_batch_anomaly_scores_count)
+    assert world.final_projects_count == world.init_projects_count, "init: %s, final: %s" % (world.init_projects_count, world.final_projects_count)
 
 
 @step(r'I want to use api in DEV mode')
@@ -219,3 +228,7 @@ def i_want_api_dev_mode(step):
     check_http_code(batch_anomaly_scores)
     world.init_batch_anomaly_scores_count = batch_anomaly_scores['meta'][
         'total_count']
+
+    projects = world.api.list_projects()
+    check_http_code(projects)
+    world.init_projects_count = projects['meta']['total_count']

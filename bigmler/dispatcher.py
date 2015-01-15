@@ -133,6 +133,22 @@ def get_test_dataset(args):
             else args.test_dataset_ids[0])
 
 
+def get_objective_id(args, fields):
+    """Returns the objective id set by the user or the default
+
+    """
+    if args.objective_field is not None:
+        try:
+            objective_id = u.get_objective_id(fields, args.objective_field)
+            fields.update_objective_field(
+                fields.field_column_number(objective_id), True)
+        except (KeyError, ValueError), exc:
+            sys.exit(exc)
+    else:
+        return fields.field_id(fields.objective_field)
+    return objective_id
+
+
 def main_dispatcher(args=sys.argv[1:]):
     """Parses command line and calls the different processing functions
 
@@ -322,6 +338,10 @@ def compute_output(api, args):
             resume = pd.export_dataset(dataset, api, args, resume,
                                        session_file=session_file, path=path)
 
+        # Now we have a dataset, let's check if there's an objective_field
+        # given by the user and update it in the fields structure
+        args.objective_id_ = get_objective_id(args, fields)
+
     # If test_split is used, split the dataset in a training and a test dataset
     # according to the given split
     if args.test_split > 0:
@@ -330,17 +350,13 @@ def compute_output(api, args):
             multi_label_data=multi_label_data,
             session_file=session_file, path=path, log=log)
         datasets[0] = dataset
-
+ 
     # Check if the dataset has a categorical objective field and it
     # has a max_categories limit for categories
     if args.max_categories > 0 and len(datasets) == 1:
-        try:
-            objective_id = fields.field_id(fields.objective_field)
-        except ValueError, exc:
-            sys.exit(exc)
-        if pd.check_max_categories(fields.fields[objective_id]):
+        if pd.check_max_categories(fields.fields[args.objective_id_]):
             distribution = pd.get_categories_distribution(dataset,
-                                                          objective_id)
+                                                          args.objective_id_)
             if distribution and len(distribution) > args.max_categories:
                 categories = [element[0] for element in distribution]
                 other_label = pd.create_other_label(categories, other_label)
@@ -371,6 +387,7 @@ def compute_output(api, args):
         datasets[0] = dataset
         # rebuild fields structure for new ids and fields
         fields = pd.get_fields_structure(dataset, csv_properties)
+        args.objective_id_ = get_objective_id(args, fields)
     if args.multi_label and dataset and multi_label_data is None:
         multi_label_data = l.get_multi_label_data(dataset)
         (args.objective_field,

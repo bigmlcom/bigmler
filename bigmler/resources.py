@@ -184,6 +184,8 @@ def set_source_args(args, name=None, multi_label_data=None,
         "description": args.description_,
         "category": args.category,
         "tags": args.tag}
+    if args.project_id is not None:
+        source_args.update({"project": args.project_id})
     # if header is set, use it
     if data_set_header is not None:
         source_args.update({"source_parser": {"header": data_set_header}})
@@ -471,15 +473,17 @@ def update_dataset(dataset, dataset_args, args,
     return dataset
 
 
-def set_model_args(args, name=None, objective_field=None, fields=None,
+def set_model_args(args, name=None, objective_id=None, fields=None,
                    model_fields=None, other_label=None):
     """Return model arguments dict
 
     """
     if name is None:
         name = args.name
-    if objective_field is None and args.max_categories is None:
-        objective_field = args.objective_field
+    if objective_id is None and args.max_categories is None:
+        objective_id = args.objective_id_
+    if args.max_categories > 0:
+        objective_id = args.objective_field
     if model_fields is None:
         model_fields = args.model_fields_
 
@@ -490,12 +494,9 @@ def set_model_args(args, name=None, objective_field=None, fields=None,
         "tags": args.tag,
         "missing_splits": args.missing_splits
     }
-    if objective_field is not None and fields is not None:
-        try:
-            model_args.update({"objective_field":
-                               fields.field_id(objective_field)})
-        except ValueError, exc:
-            sys.exit(exc)
+    if objective_id is not None and fields is not None:
+        model_args.update({"objective_field": objective_id})
+
     # If evaluate flag is on and no test_split flag is provided,
     # we choose a deterministic sampling with
     # args.sample_rate (80% by default) of the data to create the model
@@ -572,7 +573,7 @@ def set_label_model_args(args, fields, labels, multi_label_data):
             args.name, label, all_labels, model_fields,
             objective_field)
         model_args = set_model_args(args, name=new_name,
-                                    objective_field=label_field, fields=fields,
+                                    objective_id=label_field, fields=fields,
                                     model_fields=single_label_fields)
         if multi_label_data is not None:
             model_args.update(
@@ -757,7 +758,7 @@ def set_label_ensemble_args(args, labels, multi_label_data,
             args.name, label, all_labels, args.model_fields_,
             objective_field)
         ensemble_args = set_ensemble_args(args, name=new_name,
-                                          objective_field=label_field,
+                                          objective_id=label_field,
                                           model_fields=single_label_fields,
                                           fields=fields)
         if multi_label_data is not None:
@@ -768,14 +769,14 @@ def set_label_ensemble_args(args, labels, multi_label_data,
 
 
 def set_ensemble_args(args, name=None,
-                      objective_field=None, model_fields=None, fields=None):
+                      objective_id=None, model_fields=None, fields=None):
     """Return ensemble arguments dict
 
     """
     if name is None:
         name = args.name
-    if objective_field is None:
-        objective_field = args.objective_field
+    if objective_id is None:
+        objective_id = args.objective_id_
     if model_fields is None:
         model_fields = args.model_fields_
 
@@ -787,12 +788,9 @@ def set_ensemble_args(args, name=None,
         "tags": args.tag,
         "missing_splits": args.missing_splits
     }
-    if objective_field is not None and fields is not None:
-        try:
-            ensemble_args.update({"objective_field":
-                                  fields.field_id(objective_field)})
-        except ValueError, exc:
-            sys.exit(exc)
+    if objective_id is not None and fields is not None:
+        ensemble_args.update({"objective_field": objective_id})
+
     # If evaluate flag is on and no test_split flag is provided,
     # we choose a deterministic sampling with
     # args.sample_rate (80% by default) of the data to create the model
@@ -1272,7 +1270,10 @@ def set_cluster_args(args, name=None, fields=None,
         "name": name,
         "description": args.description_,
         "category": args.category,
-        "tags": args.tag
+        "tags": args.tag,
+        "seed": SEED if args.seed is None else args.seed,
+        "cluster_seed": (SEED if args.cluster_seed is None
+                         else args.cluster_seed)
     }
 
     if args.cluster_k:
@@ -1516,7 +1517,10 @@ def set_anomaly_args(args, name=None, fields=None,
         "name": name,
         "description": args.description_,
         "category": args.category,
-        "tags": args.tag
+        "tags": args.tag,
+        "seed": SEED if args.seed is None else args.seed,
+        "anomaly_seed": (SEED if args.anomaly_seed is None
+                         else args.anomaly_seed)
     }
 
     if anomaly_fields and fields is not None:
@@ -1670,3 +1674,66 @@ def update_anomaly(anomaly, anomaly_args, args,
             report(args.reports, path, anomaly)
 
     return anomaly
+
+
+def set_project_args(args, name=None):
+    """Return project arguments dict
+
+    """
+    if name is None:
+        name = args.name
+    project_args = {
+        "name": name,
+        "description": args.description_,
+        "category": args.category,
+        "tags": args.tag
+    }
+
+    return project_args
+
+
+def create_project(project_args, args, api=None,
+                   session_file=None, path=None, log=None):
+    """Creates remote project
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+    message = dated("Creating project.\n")
+    log_message(message, log_file=session_file, console=args.verbosity)
+    project = api.create_project(project_args)
+    log_created_resources("project", path,
+                          bigml.api.get_project_id(project), open_mode='a')
+    project_id = check_resource_error(project, "Failed to create project: ")
+    try:
+        project = check_resource(project, api=api)
+    except ValueError, exception:
+        sys.exit("Failed to get a finished project: %s" % str(exception))
+    message = dated("Project \"%s\" has been created.\n" %
+                    project['object']['name'])
+    log_message(message, log_file=session_file, console=args.verbosity)
+    log_message("%s\n" % project_id, log_file=log)
+    if args.reports:
+        report(args.reports, path, project)
+    return project
+
+
+def get_project_by_name(project, api=None, verbosity=True, session_file=None):
+    """Retrieves the project info by project name
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+    project_id = None
+
+    if (isinstance(project, basestring) or
+            bigml.api.get_status(project)['code'] != bigml.api.FINISHED):
+        message = dated("Retrieving project info.\n")
+        log_message(message, log_file=session_file,
+                    console=verbosity)
+        projects = api.list_projects(query_string="name=%s" % project)
+        projects = projects.get('objects', [])
+        if projects:
+            project_id = projects[0]['resource']
+
+    return project_id

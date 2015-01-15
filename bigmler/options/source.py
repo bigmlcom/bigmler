@@ -130,6 +130,22 @@ def get_source_options(defaults=None):
             'action': 'store',
             'dest': 'training_separator',
             'default': defaults.get('training_separator', None),
-            'help': ("Training set field separator.")}}
+            'help': ("Training set field separator.")},
+
+        # Name of the project to be created and/or used in resource creation
+        '--project': {
+            'action': 'store',
+            'dest': 'project',
+            'default': defaults.get('project', None),
+            'help': ("Name of the project to be created and/or used in"
+                     "resource creation.")},
+
+        # Id of the project to be used in source creation
+        '--project-id': {
+            'action': 'store',
+            'dest': 'project_id',
+            'default': defaults.get('project_id', None),
+            'help': ("Id of the project to be used in"
+                     "source creation.")}}
 
     return options

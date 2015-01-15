@@ -628,3 +628,17 @@ def storage_file_name(directory, resource_id):
     """
     return os.path.normpath(
         os.path.join(directory, resource_id.replace("/", "_")))
+
+
+def get_objective_id(fields, objective):
+    """Checks if the objective given by the user in the --objective flag
+       is in the list of fields. Returns its column number or None otherwise.
+
+    """
+    if objective is None:
+        return None
+    try:
+        objective_id = fields.field_id(objective)
+    except ValueError:
+        return None
+    return objective_id

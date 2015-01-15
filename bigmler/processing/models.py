@@ -140,9 +140,9 @@ def models_processing(datasets, models, model_ids,
 
                 models = model_ids
                 args.number_of_models -= len(model_ids)
-
             model_args = r.set_model_args(args,
                                           fields=fields,
+                                          objective_id=args.objective_id_,
                                           model_fields=args.model_fields_,
                                           other_label=other_label)
             models, model_ids = r.create_models(datasets, models,

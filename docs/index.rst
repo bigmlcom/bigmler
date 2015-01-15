@@ -319,6 +319,29 @@ Please note:
     - BigMLer will add the name, category, description, and tags to all the
       newly created resources in each request.
 
+Projects
+--------
+
+Each resource created in BigML can be associated to a ``project``. Projects are
+intended for organizational purposes, and BigMLer can create projects
+each time a ``source`` is created using a ``--project``
+option. For instance::
+
+    bigmler --train data/iris.csv --project "my new project"
+
+will first check for the existence of a project by that name. If it exists,
+will associate the source, dataset and model resources to this project.
+If it doesn't, a new ``project`` is created and then associated.
+
+You can also associate resources to an existing ``project`` by specifying
+the option ``--project-id`` followed by its id::
+
+    bigmler --train data/iris.csv --project-id project/524487ef37203f0d6b000894
+
+Note: Once a ``source`` has been associated to a ``project``, all the resources
+derived from this ``source`` will be automatically associated to the same
+``project``.
+
 
 Using previous Sources, Datasets, and Models
 --------------------------------------------
@@ -1578,7 +1601,7 @@ Requirements
 
 Python 2.7 is currently supported by BigMLer.
 
-BigMLer requires `bigml 1.9.7 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 1.10.0 <https://github.com/bigmlcom/python>`_  or
 higher. Using proportional missing strategy will additionally request
 the use of the `numpy <http://www.numpy.org/>`_ and
 `scipy <http://www.scipy.org/>`_ libraries. They are not
@@ -1753,6 +1776,10 @@ Basic Functionality
 --max-parallel-evaluations MAX_PARALLEL_EVALUATIONS   Maximum number of
                                                       evaluations
                                                       to create in parallel
+--project PROJECT_NAME              Project name for the project to be
+                                    associated to newly created sources
+--project-id PROJECT_ID             Project id for the project to be
+                                    associated to newly created sources
 
 Content
 -------
@@ -1990,6 +2017,7 @@ Cluster Specific Subcommand Options
                                   all datasets are generated
 --cluster-file PATH               Path to a JSON file containing the cluster
                                   info
+--cluster-seed SEED               Seed to generate deterministic clusters
 
 Anomaly Specific Subcommand Options
 ----------------------------------
@@ -2005,6 +2033,7 @@ Anomaly Specific Subcommand Options
                                   be used in the anomaly creation call
 --anomaly-file PATH               Path to a JSON file containing the anomaly
                                   info
+--anomaly-seed SEED               Seed to generate deterministic anomalies
 
 Delete Subcommand Options
 -------------------------

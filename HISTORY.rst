@@ -3,6 +3,16 @@
 History
 -------
 
+1.15.4 (2015-01-15)
+~~~~~~~~~~~~~~~~~~~
+
+- Adding the --project and --project-id to manage projects and associate
+  them to newly created sources.
+- Adding the --cluster-seed and --anomaly-seed options to choose the seed
+  for deterministic clusters and anomalies.
+- Refactoring dataset processing to avoid setting the objective field when
+  possible.
+
 1.15.3 (2014-12-26)
 ~~~~~~~~~~~~~~~~~~~
 

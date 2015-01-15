@@ -83,6 +83,13 @@ def get_anomaly_options(defaults=None):
             'action': 'store_false',
             'dest': 'no_anomaly',
             'default': defaults.get('no_anomaly', False),
-            'help': "Create an anomaly detector."}}
+            'help': "Create an anomaly detector."},
+
+        # The seed to be used in anomaly detector building.
+        '--anomaly-seed': {
+            'action': 'store',
+            'dest': 'anomaly_seed',
+            'default': defaults.get('anomaly_seed', None),
+            'help': "The seed to be used in anomaly building."}}
 
     return options

@@ -99,6 +99,7 @@ def setup_resources(feature):
     world.anomalies = []
     world.anomaly_scores = []
     world.batch_anomaly_scores = []
+    world.projects = []
     world.source_lower = None
     world.source_upper = None
     world.source_reference = None
@@ -121,6 +122,7 @@ def cleanup_resources(feature):
     delete(world.anomalies)
     delete(world.anomaly_scores)
     delete(world.batch_anomaly_scores)
+    delete(world.projects)
 
     store_final_resources()
 

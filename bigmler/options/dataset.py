@@ -111,12 +111,12 @@ def get_dataset_options(defaults=None):
             'default': defaults.get('no_dataset', False),
             'help': "Do not create a dataset."},
 
-        # Seed. The value used in dataset's splits as seed
+        # Seed. The value used in dataset's splits and sampling as seed
         '--seed': {
             'action': 'store',
             'dest': 'seed',
             'default': defaults.get('seed', None),
-            'help': "Value used as seed in dataset splits."},
+            'help': "Value used as seed in dataset splits and sampling."},
 
         # The path to a file containing dataset attributes.
         '--dataset-attributes': {

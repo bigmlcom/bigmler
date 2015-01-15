@@ -27,6 +27,7 @@ import bigml.api
 import bigmler.utils as u
 import bigmler.resources as r
 import bigmler.checkpoint as c
+import bigmler.processing.projects as pp
 
 from bigml.fields import Fields
 from bigml.util import bigml_locale
@@ -86,9 +87,12 @@ def test_source_processing(api, args, resume,
 
         if (args.field_attributes_ or args.types_ or args.user_locale
                 or args.json_args.get('source')):
+            # avoid updating project_id in source
+            project_id, args.project_id = args.project_id, None
             test_source_args = r.set_source_args(args, fields=fields)
             test_source = r.update_source(test_source, source_args, args, api,
                                           session_file)
+            args.project_id = project_id
             fields = Fields(source['object']['fields'], **csv_properties)
 
     return test_source, resume, csv_properties, fields
@@ -118,6 +122,9 @@ def source_processing(api, args, resume,
     # we create a new dataset to test with.
     data_set, data_set_header = r.data_to_source(args)
     if data_set is not None:
+        # Check if there's a created project for it
+        args.project_id = pp.project_processing(
+            api, args, resume, session_file=session_file, path=path, log=log)
         source_args = r.set_source_args(args,
                                         multi_label_data=multi_label_data,
                                         data_set_header=data_set_header)
@@ -148,9 +155,12 @@ def source_processing(api, args, resume,
 
         if (args.field_attributes_ or args.types_ or args.user_locale
                 or args.json_args.get('source')):
+            # avoid updating project_id in source
+            project_id, args.project_id = args.project_id, None
             source_args = r.set_source_args(args, fields=fields)
             source = r.update_source(source, source_args, args, api,
                                      session_file)
+            args.project_id = project_id
             fields = Fields(source['object']['fields'], **csv_properties)
 
     return source, resume, csv_properties, fields

@@ -100,6 +100,13 @@ def get_cluster_options(defaults=None):
             'default': defaults.get('cluster_datasets', None),
             'help': ("Comma-separated list of centroid names. The"
                      " related datasets will be generated. All datasets "
-                     "will be generated if empty.")}}
+                     "will be generated if empty.")},
+
+        # The seed to be used in cluster building.
+        '--cluster-seed': {
+            'action': 'store',
+            'dest': 'cluster_seed',
+            'default': defaults.get('cluster_seed', None),
+            'help': "The seed to be used in cluster building."}}
 
     return options

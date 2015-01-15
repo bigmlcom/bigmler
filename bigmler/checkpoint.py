@@ -339,3 +339,23 @@ def are_anomalies_created(path, number_of_anomalies):
             return False, anomaly_ids
     except IOError:
         return False, anomaly_ids
+
+
+def is_project_created(path):
+    """Checks existence and reads project id from the
+       project file in the path directory
+
+    """
+    project_id = None
+    try:
+        with open("%s%sproject"
+                  % (path, os.sep)) as project_file:
+            project_id = project_file.readline().strip()
+            try:
+                project_id = bigml.api.get_project_id(
+                    project_id)
+                return True, project_id
+            except ValueError:
+                return False, None
+    except IOError:
+        return False, None

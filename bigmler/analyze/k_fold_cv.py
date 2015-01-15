@@ -53,10 +53,8 @@ NEW_FIELD = ('{"row_offset": %s, "row_step": %s,'
              ' "objective_field": {"id": "%s"}}')
 
 COMMANDS = {"selection":
-                "main --dataset %s --new-field %s --no-model --output-dir %s",
-            "objective":
-                ("main --dataset %s --no-model --name %s "
-                 "--output-dir %s --store"),
+                ("main --dataset %s --new-field %s --no-model --output-dir %s"
+                 " --store"),
             "create_cv":
                 ("main --datasets %s --output-dir %s --dataset-off --evaluate"
                  " --name %s --dataset-file %s"),
@@ -149,7 +147,7 @@ def create_kfold_cv(args, api, common_options, resume=False):
     set_subcommand_file(args.output_dir)
     if resume:
         retrieve_subcommands()
-    datasets_file, _, resume = create_kfold_datasets_file(
+    datasets_file, objective_name, resume = create_kfold_datasets_file(
         args, api, common_options, resume=resume)
     if datasets_file is not None:
         args.output_dir = os.path.normpath(
@@ -158,6 +156,7 @@ def create_kfold_cv(args, api, common_options, resume=False):
         message = ('Creating the kfold evaluations.........\n')
         u.log_message(message, log_file=session_file,
                       console=args.verbosity)
+        args.objective_field = objective_name
         create_kfold_evaluations(datasets_file, args, common_options,
                                  resume=resume)
 
@@ -172,6 +171,7 @@ def create_features_analysis(args, api, common_options, resume=False):
         retrieve_subcommands()
     datasets_file, objective_name, resume = create_kfold_datasets_file(
         args, api, common_options, resume=resume)
+    args.objective_field = objective_name
     message = ('Creating the best features set..........\n')
     u.log_message(message, log_file=session_file,
                   console=args.verbosity)
@@ -188,8 +188,9 @@ def create_nodes_analysis(args, api, common_options, resume=False):
     set_subcommand_file(args.output_dir)
     if resume:
         retrieve_subcommands()
-    datasets_file, _, resume = create_kfold_datasets_file(
+    datasets_file, objective_name, resume = create_kfold_datasets_file(
         args, api, common_options, resume=resume)
+    args.objective_field = objective_name
     message = ('Creating the node threshold set..........\n')
     u.log_message(message, log_file=session_file,
                   console=args.verbosity)
@@ -316,36 +317,7 @@ def create_kfold_datasets(dataset, args,
         else:
             u.sys_log_message(command, log_file=subcommand_file)
             main_dispatcher(args=command_args)
-    # updating the datasets to set the objective field
     datasets_file = os.path.normpath(os.path.join(output_dir, "dataset_gen"))
-    with open(datasets_file) as datasets_handler:
-        index = 0
-        for line in datasets_handler:
-            dataset_id = line.strip()
-            command = COMMANDS["objective"] % (dataset_id,
-                                               "dataset_%s" % index,
-                                               output_dir)
-            command_args = command.split()
-            command_args.append("--objective")
-            command_args.append(objective)
-            common_options_list = u.get_options_list(args, common_options,
-                                                     prioritary=command_args)
-            command_args.extend(common_options_list)
-            command = rebuild_command(command_args)
-            if resume:
-                next_command = subcommand_list.pop()
-                if different_command(next_command, command):
-                    resume = False
-                    u.sys_log_message(command, log_file=subcommand_file)
-                    main_dispatcher(args=command_args)
-                elif not subcommand_list:
-                    main_dispatcher(args=['main', '--resume'])
-                    resume = False
-            else:
-                u.sys_log_message(command, log_file=subcommand_file)
-                main_dispatcher(args=command_args)
-            index += 1
-
     return datasets_file, resume
 
 
@@ -411,6 +383,8 @@ def create_kfold_evaluations(datasets_file, args, common_options,
     if model_fields:
         command_args.append("--model-fields")
         command_args.append(model_fields)
+    command_args.append("--objective")
+    command_args.append(args.objective_field)
     command_args = add_model_options(command_args, args)
     common_options_list = u.get_options_list(args, common_options,
                                              prioritary=command_args)
@@ -751,6 +725,8 @@ def create_node_th_evaluations(datasets_file, args, common_options,
     common_options_list = u.get_options_list(args, common_options,
                                              prioritary=command_args)
     command_args.extend(common_options_list)
+    command_args.append("--objective")
+    command_args.append(args.objective_field)
     command = rebuild_command(command_args)
     if resume:
         next_command = subcommand_list.pop()

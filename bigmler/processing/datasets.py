@@ -125,6 +125,17 @@ def csv_name(user_filename, path, dataset):
     return os.path.join(path, user_filename)
 
 
+def check_dataset_update(args, dataset):
+    """Checks if the dataset information must be updated.
+
+    """
+    return (args.dataset_attributes or
+            (args.shared_flag and r.shared_changed(args.shared, dataset)) or
+            (((hasattr(args, 'max_categories') and args.max_categories > 0) or
+              (hasattr(args, 'multi_label') and args.multi_label)) and
+             args.objective_field))
+
+
 def dataset_processing(source, api, args, resume,
                        fields=None,
                        csv_properties=None,
@@ -187,9 +198,12 @@ def dataset_processing(source, api, args, resume,
             new_objective = get_new_objective(fields, args.objective_field)
         else:
             new_objective = None
-
-        if (new_objective is not None or args.dataset_attributes or
-            (args.shared_flag and r.shared_changed(args.shared, dataset))):
+        updated = False
+        # We'll update the dataset if
+        #  the flag --dataset_attributes is used
+        #  the --multi-label flag is used and there's an --objective-field
+        #  the --max-categories flag is used and there's an --objective-field
+        if check_dataset_update(args, dataset):
             dataset_args = r.set_dataset_args(args, fields)
             if args.shared_flag and r.shared_changed(args.shared, dataset):
                 dataset_args.update(shared=args.shared)
@@ -197,9 +211,12 @@ def dataset_processing(source, api, args, resume,
                                        api=api, path=path,
                                        session_file=session_file)
             dataset = r.get_dataset(dataset, api, args.verbosity, session_file)
-            if new_objective is not None:
-                csv_properties.update(objective_field=args.objective_field,
-                                      objective_field_present=True)
+            updated = True
+        if new_objective is not None:
+            csv_properties.update(objective_field=args.objective_field,
+                                  objective_field_present=True)
+            updated = True
+        if updated:
             fields = Fields(dataset['object']['fields'], **csv_properties)
         if not datasets:
             datasets = [dataset]
