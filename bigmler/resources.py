@@ -1204,9 +1204,9 @@ def set_batch_prediction_args(args, fields=None,
         prediction_fields = []
         for field in args.prediction_fields.split(args.args_separator):
             field = field.strip()
-            if not field in fields.fields:
+            if not field in dataset_fields.fields:
                 try:
-                    field = fields.field_id(field)
+                    field = dataset_fields.field_id(field)
                 except ValueError, exc:
                     sys.exit(exc)
             prediction_fields.append(field)

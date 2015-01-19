@@ -453,7 +453,7 @@ def compute_output(api, args):
     # We update the model's public state if needed
     if model:
         if isinstance(model, basestring):
-            if not args.evaluate:
+            if not args.evaluate and not has_test(args):
                 query_string = MINIMUM_MODEL
             elif not args.test_header:
                 query_string = r.ALL_FIELDS_QS

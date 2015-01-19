@@ -3,6 +3,12 @@
 History
 -------
 
+1.15.5 (2015-01-20)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing bug: Failed field retrieval for batch predictions starting from
+  source or dataset test data.
+
 1.15.4 (2015-01-15)
 ~~~~~~~~~~~~~~~~~~~
 

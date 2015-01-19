@@ -13,7 +13,7 @@ from ml_test_prediction_steps import i_create_all_ml_resources
 from ml_test_prediction_steps import i_create_all_ml_resources_and_ensembles
 from ml_test_evaluation_steps import i_create_all_ml_resources_for_evaluation
 from max_categories_test_prediction_steps import i_check_create_max_categories_datasets, i_create_all_mc_resources
-from basic_batch_test_prediction_steps import i_check_create_test_source, i_check_create_test_dataset
+from basic_batch_test_prediction_steps import i_check_create_test_source, i_check_create_test_dataset, i_check_create_batch_prediction
 from basic_cluster_prediction_steps import i_create_all_cluster_resources, i_check_create_cluster
 from basic_anomaly_prediction_steps import i_create_all_anomaly_resources, i_check_create_anomaly
 from ml_test_prediction_steps import i_create_all_mlm_resources
@@ -37,6 +37,8 @@ def shell_execute(command, output, test=None, options=None):
                 if options is None or options.find('--prediction-header') == -1:
                     # test file has headers in it, so first line must be ignored
                     world.test_lines -= 1
+            elif options is not None and options.find('--prediction-header') > -1:
+                world.test_lines += 1
             world.output = output
             assert True
     except (OSError, CalledProcessError, IOError) as exc:
@@ -239,6 +241,16 @@ def i_create_resources_from_dataset(step, multi_label=None, test=None, output=No
                world.dataset['resource'] + " --test " + test +
                " --store --output " + output)
     shell_execute(command, output, test=test)
+
+@step(r'I create BigML resources using a model to test the previous test dataset remotely with prediction headers and fields "(.*)" and log predictions in "(.*)"')
+def i_create_resources_from_model_batch(step, fields=None, output=None):
+    if output is None or fields is None:
+        assert False
+    command = ("bigmler --model " + world.model['resource'] + " --test-dataset " +
+               world.test_dataset['resource'] + " --store --remote " +
+               "--prediction-header --prediction-info full " +
+               "--prediction-fields \"" + fields + "\" --output " + output)
+    shell_execute(command, output, options="--prediction-header")
 
 @step(r'I create BigML resources using dataset to test the previous test dataset remotely and log predictions in "(.*)"')
 def i_create_resources_from_dataset_batch(step, output=None):
@@ -1212,7 +1224,7 @@ def i_have_previous_scenario_or_reproduce_it(step, scenario, kwargs):
                  'scenario_mle_1': [(i_create_all_ml_resources_and_ensembles, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models_in_ensembles, False)],
                  'scenario_ml_e1': [(i_create_all_ml_resources_for_evaluation, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models, False)],
                  'scenario_mc_1': [(i_create_all_mc_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_max_categories_datasets, False), (i_check_create_models, False)],
-                 'scenario_r1': [(i_create_all_resources_batch, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_max_categories_datasets, False), (i_check_create_models, False), (i_check_create_test_source, False), (i_check_create_test_dataset, False)],
+                 'scenario_r1': [(i_create_all_resources_batch, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_model, False), (i_check_create_test_source, False), (i_check_create_test_dataset, False), (i_check_create_batch_prediction, False)],
                  'scenario_mlm_1': [(i_create_all_mlm_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models, False)],
                 'scenario_c_1': [(i_create_all_cluster_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_cluster, False)],
                 'scenario_an_1': [(i_create_all_anomaly_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_anomaly, False)]}

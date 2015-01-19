@@ -62,3 +62,14 @@ Feature: Upload source and produce remote batch test predictions
         Examples:
         |scenario    | kwargs                                                  | test                    | output                        |predictions_file           |
         | scenario_r1| {"data": "../data/iris.csv", "output": "./scenario_r1/predictions.csv", "test": "../data/test_iris.csv"}   | ../data/test_iris.csv   | ./scenario_r3/predictions.csv   | ./check_files/predictions_iris.csv   |
+
+    Scenario: Successfully building test predictions from dataset and prediction format info
+        Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
+        And I create BigML resources using a model to test the previous test dataset remotely with prediction headers and fields "<fields>" and log predictions in "<output>"
+        And I check that the batch prediction has been created
+        And I check that the predictions are ready
+        Then the local prediction file is like "<predictions_file>"
+
+        Examples:
+        |scenario    | kwargs                                                  | test                    | fields | output                        |predictions_file           |
+        | scenario_r1| {"data": "../data/iris.csv", "output": "./scenario_r1/predictions.csv", "test": "../data/test_iris.csv"}   | ../data/test_iris.csv   | sepal length,sepal width | ./scenario_r4/predictions.csv   | ./check_files/predictions_iris_format.csv   |
