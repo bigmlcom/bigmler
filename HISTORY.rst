@@ -3,6 +3,11 @@
 History
 -------
 
+1.15.6 (2015-01-28)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing bug: using --model-fields with --max-categories failed.
+
 1.15.5 (2015-01-20)
 ~~~~~~~~~~~~~~~~~~~
 

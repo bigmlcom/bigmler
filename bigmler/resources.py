@@ -64,35 +64,53 @@ def shared_changed(shared, resource):
     return is_shared(resource) != shared
 
 
-def configure_input_fields(fields, user_given_fields):
+def configure_input_fields(fields, user_given_fields, by_name=False):
     """ Returns the input fields used in the new resource creation as given
 
         The user can choose to write all the fields that will be used in the
         new resource or modify the set of fields retrieved from the
         resource that will be used to create the new one.
     """
+    def modify_input_fields(prefix, field, input_fields):
+        """Adds or removes according to the prefix in the given field
+           this field from the list of input fields.
+
+        """
+        if prefix == ADD_PREFIX:
+            if not field in input_fields:
+                input_fields.append(field)
+        elif field in input_fields:
+            input_fields.remove(field)
+
     # case of adding and removing fields to the dataset preferred field set
     if all([name[0] in ADD_REMOVE_PREFIX for name in user_given_fields]):
         preferred_fields = fields.preferred_fields()
         input_fields = preferred_fields.keys()
+        if by_name:
+            input_fields = [fields.field_name(field_id) for field_id in
+                            input_fields]
         for name in user_given_fields:
-            try:
-                field_id = fields.field_id(name[1:])
-            except ValueError, exc:
-                sys.exit(exc)
-            if name[0] == ADD_PREFIX:
-                if not field_id in input_fields:
-                    input_fields.append(field_id)
-            elif field_id in input_fields:
-                input_fields.remove(field_id)
+            prefix = name[0]
+            field_name = name[1:]
+            if by_name:
+                modify_input_fields(prefix, field_name, input_fields)
+            else:
+                try:
+                    field_id = fields.field_id(field_name)
+                except ValueError, exc:
+                    sys.exit(exc)
+                modify_input_fields(prefix, field_id, input_fields)
     # case of user given entire list of fields
     else:
-        input_fields = []
-        for name in user_given_fields:
-            try:
-                input_fields.append(fields.field_id(name))
-            except ValueError, exc:
-                sys.exit(exc)
+        if by_name:
+            return user_given_fields
+        else:
+            input_fields = []
+            for name in user_given_fields:
+                try:
+                    input_fields.append(fields.field_id(name))
+                except ValueError, exc:
+                    sys.exit(exc)
     return input_fields
 
 
@@ -513,8 +531,9 @@ def set_model_args(args, name=None, objective_id=None, fields=None,
               and not args.dataset_off):
             args.sample_rate = EVALUATE_SAMPLE_RATE
     if model_fields and fields is not None:
-        input_fields = configure_input_fields(fields, model_fields)
-        model_args.update(input_fields=input_fields)
+            input_fields = configure_input_fields(
+                fields, model_fields, by_name=(args.max_categories > 0))
+            model_args.update(input_fields=input_fields)
 
     if args.pruning and args.pruning != 'smart':
         model_args.update(stat_pruning=(args.pruning == 'statistical'))

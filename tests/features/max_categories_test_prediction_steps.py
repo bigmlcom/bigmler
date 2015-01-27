@@ -8,6 +8,32 @@ from bigmler.checkpoint import file_number_of_lines
 from bigml.api import check_resource
 from common_steps import check_debug
 
+
+@step(r'I create BigML resources with (\d+) as categories limit and (.*) as objective field and model fields "(.*)" using dataset to test "(.*)" and log predictions in "(.*)"')
+def i_create_all_mc_resources_from_dataset_with_model_fields(step, max_categories=None, objective=None, model_fields=None, test=None, output=None):
+    if max_categories is None or test is None or output is None or model_fields is None:
+        assert False
+    world.directory = os.path.dirname(output)
+    world.folders.append(world.directory)
+    try:
+        command = ("bigmler --dataset " + world.dataset['resource'] +
+                   " --max-categories " + max_categories + " --objective " +
+                   objective + " --test " + test + " --store --output " +
+                   output + " --model-fields \"" + model_fields + "\"")
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.test_lines = file_number_of_lines(test)
+            # test file has headers in it, so first line must be ignored
+            world.test_lines -= 1
+            world.output = output
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+
 @step(r'I create BigML resources from "(.*)" with (\d+) as categories limit and (.*) as objective field to test "(.*)" and log predictions in "(.*)"')
 def i_create_all_mc_resources(step, data, max_categories=None, objective=None, test=None, output=None):
     if max_categories is None or test is None or output is None or objective is None:
