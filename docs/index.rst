@@ -590,7 +590,7 @@ some of its fields or simply tagging their rows. Using BigMLer, you can set the
 ``--new-fields`` option to a file path that contains a JSON structure that
 describes the fields you want to select or exclude from the original dataset,
 or the ones you want to combine and
-the `Flatline expression <https://github.com/bigmlcom/flatline>` to
+the `Flatline expression <https://github.com/bigmlcom/flatline>`_ to
 combine them. This structure
 must follow the rules of a specific languange described in the `Transformations
 item of the developers
