@@ -1398,6 +1398,7 @@ will delete all resources created less than two days ago (now being
 than 2014-03-21 14:00:00.00000).
 
 ::
+
     bigmler delete --older-than 2014-03-20 --newer-than 2014-03-19
 
 will delete all resources created during 2014, March the 19th (creation time
