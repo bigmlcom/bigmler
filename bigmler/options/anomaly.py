@@ -90,6 +90,22 @@ def get_anomaly_options(defaults=None):
             'action': 'store',
             'dest': 'anomaly_seed',
             'default': defaults.get('anomaly_seed', None),
-            'help': "The seed to be used in anomaly building."}}
+            'help': "The seed to be used in anomaly building."},
+
+        # The path to a file containing anomaly score attributes.
+        '--anomaly-score-attributes': {
+            'action': 'store',
+            'dest': 'anomaly_score_attributes',
+            'default': defaults.get('anomaly_score_attributes', None),
+            'help': ("Path to a json file describing anomaly score"
+                     " attributes.")},
+
+        # The path to a file containing batch anomaly score attributes.
+        '--batch-anomaly-score-attributes': {
+            'action': 'store',
+            'dest': 'batch_anomaly_score_attributes',
+            'default': defaults.get('batch_anomaly_score_attributes', None),
+            'help': ("Path to a json file describing batch anomaly score"
+                     " attributes.")}}
 
     return options

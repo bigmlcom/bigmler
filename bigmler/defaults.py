@@ -146,7 +146,9 @@ FLAGS = {
         {'flag': 'anomaly_score_tag', 'type': 'string'},
         {'flag': 'fast', 'type': 'boolean'},
         {'flag': 'project', 'type': 'string'},
-        {'flag': 'project_id', 'type': 'string'}],
+        {'flag': 'project_id', 'type': 'string'},
+        {'flag': 'no_csv', 'type': 'boolean'},
+        {'flag': 'to_dataset', 'type': 'boolean'}],
     'BigMLer analyze': [
         {'flag': 'k-fold', 'type': 'integer'},
         {'flag': 'cv', 'type': 'boolean'},
@@ -167,6 +169,8 @@ FLAGS = {
         {'flag': 'k', 'type': 'integer'},
         {'flag': 'no_cluster', 'type': 'boolean'},
         {'flag': 'cluster_attributes', 'type': 'string'},
+        {'flag': 'centroid_attributes', 'type': 'string'},
+        {'flag': 'batch_centroid_attributes', 'type': 'string'},
         {'flag': 'cluster_datasets', 'type': 'string'}],
     'BigMLer anomaly': [
         {'flag': 'anomaly_fields', 'type': 'string'},
@@ -174,7 +178,9 @@ FLAGS = {
         {'flag': 'anomaly_file', 'type': 'string'},
         {'flag': 'anomalies', 'type': 'string'},
         {'flag': 'no_anomaly', 'type': 'boolean'},
-        {'flag': 'anomaly_attributes', 'type': 'string'}]}
+        {'flag': 'anomaly_attributes', 'type': 'string'},
+        {'flag': 'anomaly_score_attributes', 'type': 'string'},
+        {'flag': 'batch_anomaly_score_attributes', 'type': 'string'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):

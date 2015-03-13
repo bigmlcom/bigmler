@@ -689,5 +689,17 @@ def remote_predict(model, test_dataset, batch_prediction_args, args,
     if not resume:
         batch_prediction = create_batch_prediction(
             model_or_ensemble, test_dataset, batch_prediction_args,
-            args, api, session_file=session_file, path=path, log=log)
-    api.download_batch_prediction(batch_prediction, prediction_file)
+            args, api, session_file=session_file, path=path, log=log)    
+    if not args.no_csv:
+        api.download_batch_prediction(batch_prediction, prediction_file)
+    if args.to_dataset:
+        batch_prediction = bigml.api.check_resource(batch_prediction, api=api)
+        new_dataset = bigml.api.get_dataset_id(
+            batch_prediction['object']['output_dataset_resource'])
+        if new_dataset is not None:
+            message = u.dated("Batch prediction dataset created: %s\n"
+                              % u.get_url(new_dataset))
+            u.log_message(message, log_file=session_file,
+                          console=args.verbosity)
+            u.log_created_resources("batch_prediction_dataset",
+                                    path, new_dataset, open_mode='a')

@@ -128,7 +128,10 @@ under the License.""" % version
         '--model-attributes': main_options['--model-attributes'],
         '--ensemble-attributes': main_options['--ensemble-attributes'],
         '--tlp': main_options['--tlp'],
-        '--randomize': main_options['--randomize']})
+        '--randomize': main_options['--randomize'],
+        '--no-csv': main_options['--no-csv'],
+        '--no-no-csv': main_options['--no-no-csv'],
+        '--to-dataset': main_options['--to-dataset']})
 
     defaults = general_defaults["BigMLer cluster"]
     subcommand_options["cluster"] = get_cluster_options(defaults=defaults)
@@ -150,7 +153,10 @@ under the License.""" % version
         '--prediction-fields': main_options['--prediction-fields'],
         '--reports': main_options['--reports'],
         '--remote': main_options['--remote'],
-        '--no-batch': main_options['--no-batch']})
+        '--no-batch': main_options['--no-batch'],
+        '--no-csv': main_options['--no-csv'],
+        '--no-no-csv': main_options['--no-no-csv'],
+        '--to-dataset': main_options['--to-dataset']})
 
     defaults = general_defaults["BigMLer anomaly"]
     subcommand_options["anomaly"] = get_anomaly_options(defaults=defaults)
@@ -172,7 +178,10 @@ under the License.""" % version
         '--prediction-fields': main_options['--prediction-fields'],
         '--reports': main_options['--reports'],
         '--remote': main_options['--remote'],
-        '--no-batch': main_options['--no-batch']})
+        '--no-batch': main_options['--no-batch'],
+        '--no-csv': main_options['--no-csv'],
+        '--no-no-csv': main_options['--no-no-csv'],
+        '--to-dataset': main_options['--to-dataset']})
 
 
     subcommand_options["delete"] = delete_options

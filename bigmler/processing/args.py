@@ -40,7 +40,8 @@ NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
 MISSING_STRATEGIES = {'last': LAST_PREDICTION, 'proportional': PROPORTIONAL}
 DEFAULT_DESCRIPTION = "Created using BigMLer"
 RESOURCE_TYPES = ["source", "dataset", "model", "ensemble", "batch_prediction",
-                  "cluster", "centroid", "batch_centroid"]
+                  "cluster", "centroid", "batch_centroid", "anomaly",
+                  "anomaly_score", "batch_anomaly_score"]
 
 
 def non_compatible(args, option):

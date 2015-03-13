@@ -107,6 +107,22 @@ def get_cluster_options(defaults=None):
             'action': 'store',
             'dest': 'cluster_seed',
             'default': defaults.get('cluster_seed', None),
-            'help': "The seed to be used in cluster building."}}
+            'help': "The seed to be used in cluster building."},
+
+        # The path to a file containing batch prediction attributes.
+        '--batch-centroid-attributes': {
+            'action': 'store',
+            'dest': 'batch_centroid_attributes',
+            'default': defaults.get('batch_centroid_attributes', None),
+            'help': ("Path to a json file describing batch centroid"
+                     " attributes.")},
+                     
+        # The path to a file containing centroid attributes.
+        '--centroid-attributes': {
+            'action': 'store',
+            'dest': 'centroid_attributes',
+            'default': defaults.get('centroid_attributes', None),
+            'help': ("Path to a json file describing centroid"
+                     " attributes.")}}
 
     return options

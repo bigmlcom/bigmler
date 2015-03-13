@@ -179,4 +179,17 @@ def remote_anomaly_score(anomaly, test_dataset, batch_anomaly_score_args, args,
         batch_anomaly_score = create_batch_anomaly_score(
             anomaly_id, test_dataset, batch_anomaly_score_args,
             args, api, session_file=session_file, path=path, log=log)
-    api.download_batch_anomaly_score(batch_anomaly_score, prediction_file)
+    if not args.no_csv:
+        api.download_batch_anomaly_score(batch_anomaly_score, prediction_file)
+    if args.to_dataset:
+        batch_anomaly_score = bigml.api.check_resource(batch_anomaly_score,
+                                                       api=api)
+        new_dataset = bigml.api.get_dataset_id(
+            batch_anomaly_score['object']['output_dataset_resource'])
+        if new_dataset is not None:
+            message = u.dated("Batch anomaly score dataset created: %s\n"
+                              % u.get_url(new_dataset))
+            u.log_message(message, log_file=session_file,
+                          console=args.verbosity)
+            u.log_created_resources("batch_anomaly_score_dataset",
+                                    path, new_dataset, open_mode='a')

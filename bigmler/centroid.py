@@ -178,4 +178,16 @@ def remote_centroid(cluster, test_dataset, batch_centroid_args, args,
         batch_centroid = create_batch_centroid(
             cluster_id, test_dataset, batch_centroid_args,
             args, api, session_file=session_file, path=path, log=log)
-    api.download_batch_centroid(batch_centroid, prediction_file)
+    if not args.no_csv:
+        api.download_batch_centroid(batch_centroid, prediction_file)
+    if args.to_dataset:
+        batch_centroid = bigml.api.check_resource(batch_centroid, api=api)
+        new_dataset = bigml.api.get_dataset_id(
+            batch_centroid['object']['output_dataset_resource'])
+        if new_dataset is not None:
+            message = u.dated("Batch centroid dataset created: %s\n"
+                              % u.get_url(new_dataset))
+            u.log_message(message, log_file=session_file,
+                          console=args.verbosity)
+            u.log_created_resources("batch_centroid_dataset",
+                                    path, new_dataset, open_mode='a')

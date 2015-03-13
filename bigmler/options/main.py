@@ -599,6 +599,30 @@ def get_main_options(defaults=None, constants=None):
             'dest': 'fast',
             'default': defaults.get('fast', True),
             'help': ("Enables fast ensemble's predictions with partial"
-                     " results files.")}}
+                     " results files.")},
+
+        # Does not create a csv as output of a batch prediction.
+        '--no-csv': {
+            'action': 'store_true',
+            'dest': 'no_csv',
+            'default': defaults.get('no_csv', False),
+            'help': ("Do not create a csv file as output of a batch"
+                     " prediction.")},
+
+        # Create a csv as output (as opposed to --no-csv).
+        '--no-no-csv': {
+            'action': 'store_false',
+            'dest': 'no_csv',
+            'default': defaults.get('no_csv', False),
+            'help': ("Create a csv file as output of a batch"
+                     " prediction (as opposed to --no-csv)")},
+
+        # Create a dataset as ouput of a batch prediction
+        '--to-dataset': {
+            'action': 'store_true',
+            'dest': 'to_dataset',
+            'default': defaults.get('to_dataset', False),
+            'help': ("Create a dataset as ouput of a batch"
+                     " prediction.")}}
 
     return options

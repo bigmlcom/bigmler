@@ -1504,6 +1504,7 @@ def set_batch_anomaly_score_args(args, fields=None,
         "description": args.description_,
         "tags": args.tag,
         "header": args.prediction_header,
+        "output_dataset": args.to_dataset
     }
 
     if args.fields_map_ and fields is not None:
@@ -1515,6 +1516,18 @@ def set_batch_anomaly_score_args(args, fields=None,
 
     if args.prediction_info == FULL_FORMAT:
         batch_anomaly_score_args.update(all_fields=True)
+    if args.prediction_fields:
+        batch_anomaly_score_args.update(all_fields=False)
+        prediction_fields = []
+        for field in args.prediction_fields.split(args.args_separator):
+            field = field.strip()
+            if not field in dataset_fields.fields:
+                try:
+                    field = dataset_fields.field_id(field)
+                except ValueError, exc:
+                    sys.exit(exc)
+            prediction_fields.append(field)
+        batch_anomaly_score_args.update(output_fields=prediction_fields)
 
     update_attributes(batch_anomaly_score_args,
                       args.json_args.get('batch_anomaly_score'))
