@@ -108,7 +108,7 @@ def setup_resources(feature):
 def cleanup_resources(feature):
     if os.path.exists('./tmp'):
         shutil.rmtree('./tmp')
-
+    """
     delete(world.clusters)
     delete(world.sources)
     delete(world.datasets)
@@ -133,7 +133,7 @@ def cleanup_resources(feature):
             pass
 
     check_init_equals_final()
-
+    """
 
 @after.each_scenario
 def cleanup_output(scenario):

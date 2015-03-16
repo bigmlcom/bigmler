@@ -7,6 +7,9 @@ History
 ~~~~~~~~~~~~~~~~~~~
 
 - Fixing docs formatting errors.
+- Adding --to-dataset and --no-csv flags causing batch predictions,
+  batch centroids and batch anomaly scores to be stored in a new remote
+  dataset and not in a local CSV respectively.
 
 1.15.6 (2015-01-28)
 ~~~~~~~~~~~~~~~~~~~

@@ -38,6 +38,15 @@ def shell_execute(command, output, test=None, options=None,
         assert False, str(exc)
 
 
+@step(r'I create BigML resources uploading train "(.*?)" file to find anomaly scores with test split "(.*?)" remotely saved to dataset with no CSV output and log resources in "([^"]*)"$')
+def i_create_all_anomaly_resources_with_test_split(step, data=None, test_split=None, output_dir=None):
+    if data is None or output_dir is None or test_split is None:
+        assert False
+    command = ("bigmler anomaly --remote --train " + data + " --test-split " + test_split +
+               " --store --no-csv --to-dataset --output-dir " + output_dir)
+    shell_execute(command, "%s/x.csv" % output_dir, data=data, test_split=test_split)
+
+
 @step(r'I create BigML resources uploading train "(.*?)" file to create anomaly scores for "(.*?)" and log predictions in "([^"]*)"$')
 def i_create_all_anomaly_resources(step, data=None, test=None, output=None):
     if data is None or test is None or output is None:
@@ -180,3 +189,27 @@ def i_create_all_anomaly_resources_with_test_split(step, data=None, test_split=N
     command = ("bigmler anomaly --remote --train " + data + " --test-split " + test_split +
                " --store --output " + output)
     shell_execute(command, output, data=data, test_split=test_split)
+
+
+@step(r'no local CSV file is created')
+def i_check_no_local_CSV(step):
+    files = [file_name for file_name in os.listdir(world.directory)
+             if file_name.endswith('.csv')]
+    if len(files) == 0:
+        assert True
+    else:
+        assert False, ", ".join(files)
+
+
+@step(r'I check that the batch anomaly scores dataset exists')
+def i_check_create_batch_anomaly_score_dataset(step):
+    dataset_file = "%s%sbatch_anomaly_score_dataset" % (world.directory, os.sep)
+    try:
+        dataset_file = open(dataset_file, "r")
+        dataset = check_resource(dataset_file.readline().strip(),
+                                 api=world.api)
+        world.datasets.append(dataset['resource'])
+        dataset_file.close()
+        assert True
+    except Exception, exc:
+        assert False, str(exc)

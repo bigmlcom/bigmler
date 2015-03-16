@@ -45,6 +45,15 @@ def shell_execute(command, output, test=None, options=None):
         assert False, str(exc)
 
 
+@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" remotely to a dataset with no CSV output and log resources in "([^"]*)"$')
+def i_create_all_resources_batch_to_dataset(step, data=None, test=None, output_dir=None):
+    if data is None or test is None or output_dir is None:
+        assert False
+    command = ("bigmler --train " + data + " --test " + test +
+               " --store --no-csv --to-dataset --output-dir " + output_dir + " --remote")
+    shell_execute(command, "%s/x.csv" % output_dir, test=test)
+
+
 @step(r'I create a BigML source from file "([^"]*)" with locale "([^"]*)", field attributes "([^"]*)" and types file "([^"]*)" storing results in "(.*)"$')
 def i_create_source_with_locale(step, data=None, locale=None, field_attributes=None, types=None, output=None):
     if data is None or locale is None or output is None or types is None or field_attributes is None:

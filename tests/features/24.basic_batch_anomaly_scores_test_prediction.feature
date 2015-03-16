@@ -31,5 +31,20 @@ Feature: Upload source and produce remote batch anomaly scores test predictions
         Then the local anomaly scores file is like "<predictions_file>"
 
         Examples:
-        | data             | test                  | test_split | output                 |predictions_file           |
-        | ../data/iris.csv | ../data/test_iris.csv | 0.2 | ./scenario_ab_2/anomalies.csv | ./check_files/anomaly_scores_iris.csv |
+        | data             | test_split | output                 |predictions_file           |
+        | ../data/iris.csv | 0.2 | ./scenario_ab_2/anomalies.csv | ./check_files/anomaly_scores_iris.csv |
+        
+    Scenario: Successfully building test anomaly score predictions from test split in a dataset:
+        Given I create BigML resources uploading train "<data>" file to find anomaly scores with test split "<test_split>" remotely saved to dataset with no CSV output and log resources in "<output_dir>" 
+        And I check that the source has been created
+        And I check that the dataset has been created 
+        And I check that the anomaly detector has been created
+        And I check that the train dataset has been created
+        And I check that the dataset has been created from the test file
+        And I check that the batch anomaly scores prediction has been created
+        Then I check that the batch anomaly scores dataset exists
+        And no local CSV file is created
+
+        Examples:
+        | data             | test_split | output_dir      |
+        | ../data/iris.csv | 0.2        | ./scenario_ab_3 |

@@ -155,6 +155,17 @@ def i_create_cluster_resources_from_clusters_file(step, clusters_file=None, test
     shell_execute(command, output, test=test)
 
 
+@step(r'I create BigML resources uploading train "(.*?)" file to find centroids for "(.*?)" remotely to dataset with no CSV and log resources in "([^"]*)"$')
+def i_create_all_cluster_resources_to_dataset(step, data=None, test=None, output_dir=None):
+    if data is None or test is None or output_dir is None:
+        assert False
+    command = ("bigmler cluster --remote --train " + data +
+               " --test " + test + " --k 8" +
+               " --to-dataset --no-csv " +
+               " --store --output-dir " + output_dir)
+    shell_execute(command, "%s/x.csv" % output_dir, test=test)
+
+
 @step(r'I create BigML resources uploading train "(.*?)" file to find centroids for "(.*?)" remotely with mapping file "(.*)" and log predictions in "([^"]*)"$')
 def i_create_all_cluster_resources_with_mapping(step, data=None, test=None, fields_map=None, output=None):
     if data is None or test is None or output is None or fields_map is None:

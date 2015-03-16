@@ -80,3 +80,31 @@ def i_check_create_batch_anomaly_scores(step):
         assert True
     except Exception, exc:
         assert False, str(exc)
+
+
+@step(r'I check that the batch predictions dataset exists')
+def i_check_create_batch_predictions_dataset(step):
+    dataset_file = "%s%sbatch_prediction_dataset" % (world.directory, os.sep)
+    try:
+        dataset_file = open(dataset_file, "r")
+        dataset = check_resource(dataset_file.readline().strip(),
+                                 api=world.api)
+        world.datasets.append(dataset['resource'])
+        dataset_file.close()
+        assert True
+    except Exception, exc:
+        assert False, str(exc)
+        
+        
+@step(r'I check that the batch centroids dataset exists')
+def i_check_create_batch_centroids_dataset(step):
+    dataset_file = "%s%sbatch_centroid_dataset" % (world.directory, os.sep)
+    try:
+        dataset_file = open(dataset_file, "r")
+        dataset = check_resource(dataset_file.readline().strip(),
+                                 api=world.api)
+        world.datasets.append(dataset['resource'])
+        dataset_file.close()
+        assert True
+    except Exception, exc:
+        assert False, str(exc)

@@ -146,7 +146,15 @@ save it to local storage just as it did for local predictions::
 This command will create a source, dataset and model for your training data, 
 a source and dataset for your test data and a batch prediction using the model
 and the test dataset. The results will be stored in the
-``my_dir/remote_predictions.csv`` file. In case you prefer BigMLer to issue
+``my_dir/remote_predictions.csv`` file. If you prefer the result not to be
+dowloaded but to be stored as a new dataset remotely, add ``--no-csv`` and
+``to-dataset`` to the command line. This can be specially helpful when
+dealing with a high number of scores or when adding to the final result
+the original dataset fields with ``--prediction-info full``, that may result
+in a large CSV to be created as output.
+
+
+In case you prefer BigMLer to issue
 one-by-one remote prediction calls, you can use the ``--no-batch`` flag::
 
     bigmler --train data/iris.csv --test data/test_iris.csv \
@@ -1228,7 +1236,12 @@ the centroid predictions remotely, you can do so too::
 
 would create a remote source and dataset from the test file data,
 generate a ``batch centroid`` also remotely and finally download the result
-to your computer.
+to your computer. If you prefer the result not to be
+dowloaded but to be stored as a new dataset remotely, add ``--no-csv`` and
+``to-dataset`` to the command line. This can be specially helpful when
+dealing with a high number of scores or when adding to the final result
+the original dataset fields with ``--prediction-info full``, that may result
+in a large CSV to be created as output.
 
 The k-means algorithm used in clustering can only use training data that has
 no missing values in their numeric fields. Any data that does not comply with
@@ -1306,7 +1319,12 @@ to compute the anomaly score predictions remotely, you can do so too::
 
 would create a remote source and dataset from the test file data,
 generate a ``batch anomaly score`` also remotely and finally
-download the result to your computer.
+download the result to your computer. If you prefer the result not to be
+dowloaded but to be stored as a new dataset remotely, add ``--no-csv`` and
+``to-dataset`` to the command line. This can be specially helpful when
+dealing with a high number of scores or when adding to the final result
+the original dataset fields with ``--prediction-info full``, that may result
+in a large CSV to be created as output.
 
 Similarly, you can split your data in train/test datasets to build the
 anomaly detector and create batch anomaly scores with the test portion of
@@ -1586,6 +1604,7 @@ The set of negative flags is:
 --unshared                  as opposed to --shared
 --upload                    as opposed to --no-upload
 --fast                      as opposed to --no-fast
+--no-no-csv                 as opposed to --no-csv
 
 Support
 =======
@@ -1781,6 +1800,12 @@ Basic Functionality
                                     associated to newly created sources
 --project-id PROJECT_ID             Project id for the project to be
                                     associated to newly created sources
+--no-csv                            Causes the output of a batch prediction,
+                                    batch centroid or batch anomaly score
+                                    not to be downloaded as a CSV file
+--to-dataset                        Causes the output of a batch prediction,
+                                    batch centroid or batch anomaly score
+                                    to be stored remotely as a new dataset
 
 Content
 -------
@@ -2019,22 +2044,36 @@ Cluster Specific Subcommand Options
 --cluster-file PATH               Path to a JSON file containing the cluster
                                   info
 --cluster-seed SEED               Seed to generate deterministic clusters
+--centroid-attributes PATH        Path to a JSON file containing attributes to
+                                  be used in the centroid creation call
+--batch-centroid-attributes PATH  Path to a JSON file containing attributes to
+                                  be used in the batch centroid creation call
 
 Anomaly Specific Subcommand Options
 ----------------------------------
 
---anomaly ANOMALY                 BigML anomaly Id
---anomalies PATH                  Path to a file containing anomaly/ids. One
-                                  anomaly
-                                  per line (e.g., anomaly/4f824203ce80051)
---no-anomaly                      No anomaly detector will be generated
---anomaly-fields                  Comma-separated list of fields that will be
-                                  used in the anomaly detector construction
---anomaly-attributes PATH         Path to a JSON file containing attributes to
-                                  be used in the anomaly creation call
---anomaly-file PATH               Path to a JSON file containing the anomaly
-                                  info
---anomaly-seed SEED               Seed to generate deterministic anomalies
+--anomaly ANOMALY                       BigML anomaly Id
+--anomalies PATH                        Path to a file containing anomaly/ids.
+                                        One anomaly per line
+                                        (e.g., anomaly/4f824203ce80051)
+--no-anomaly                            No anomaly detector will be generated
+--anomaly-fields                        Comma-separated list of fields that
+                                        will be used in the anomaly
+                                        detector construction
+--anomaly-attributes PATH               Path to a JSON file containing
+                                        attributes to
+                                        be used in the anomaly creation call
+--anomaly-file PATH                     Path to a JSON file containing
+                                        the anomaly info
+--anomaly-seed SEED                     Seed to generate deterministic
+                                        anomalies
+--anomaly-score-attributes PATH         Path to a JSON file containing
+                                        attributes to be used in the anomaly
+                                        score creation call
+--batch-anomaly-score-attributes PATH   Path to a JSON file containing
+                                        attributes to
+                                        be used in the batch anomaly score
+                                        creation call
 
 Delete Subcommand Options
 -------------------------

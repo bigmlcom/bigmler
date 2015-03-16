@@ -1104,7 +1104,6 @@ def create_evaluations(model_or_ensemble_ids, datasets, evaluation_args,
         if args.cross_validation_rate > 0:
             new_seed = get_basic_seed(i + existing_evaluations)
             evaluation_args.update(seed=new_seed)
-
         evaluation = api.create_evaluation(model, dataset, evaluation_args,
                                            retries=None)
         evaluation_id = check_resource_error(evaluation,
@@ -1203,7 +1202,8 @@ def set_batch_prediction_args(args, fields=None,
         "description": args.description_,
         "tags": args.tag,
         "header": args.prediction_header,
-        "combiner": args.method
+        "combiner": args.method,
+        "output_dataset": args.to_dataset
     }
 
     if args.fields_map_ and fields is not None:
@@ -1402,6 +1402,7 @@ def set_batch_centroid_args(args, fields=None,
         "description": args.description_,
         "tags": args.tag,
         "header": args.prediction_header,
+        "output_dataset": args.to_dataset
     }
 
     if args.fields_map_ and fields is not None:
