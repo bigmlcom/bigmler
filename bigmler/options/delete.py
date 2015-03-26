@@ -156,6 +156,12 @@ def get_delete_options(defaults=None):
             'default': defaults.get('batch_centroid_tag', None),
             'help': "Retrieve batch centroids that were tagged with tag."},
 
+        # Use it to retrieve batch centroids that were tagged with tag.
+        '--sample-tag': {
+            'dest': 'sample_tag',
+            'default': defaults.get('sample_tag', None),
+            'help': "Retrieve samples that were tagged with tag."},
+
         # Use it to limit the resources to be deleted.
         '--resource-types': {
             'dest': 'resource_types',

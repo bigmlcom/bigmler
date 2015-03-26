@@ -42,7 +42,7 @@ RESOURCES_LOG_FILES = set(['source', 'dataset', 'dataset_train',
                            'dataset_parts', 'dataset_multi', 'models',
                            'ensembles', 'evaluations',
                            'clusters', 'batch_prediction', 'batch_centroid',
-                           'anomalies', 'batch_anomaly_score'])
+                           'anomalies', 'batch_anomaly_score', 'sample'])
 
 def retrieve_resources(directory):
     """Searches recusively the user-given directory for resource log files

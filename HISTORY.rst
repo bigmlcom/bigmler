@@ -3,13 +3,14 @@
 History
 -------
 
-2.0.0 (2015-02-28)
+2.0.0 (2015-03-26)
 ~~~~~~~~~~~~~~~~~~~
 
 - Fixing docs formatting errors.
 - Adding --to-dataset and --no-csv flags causing batch predictions,
   batch centroids and batch anomaly scores to be stored in a new remote
   dataset and not in a local CSV respectively.
+- Adding the sample subcommand to generate samples from datasets
 
 1.15.6 (2015-01-28)
 ~~~~~~~~~~~~~~~~~~~

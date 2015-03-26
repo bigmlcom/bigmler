@@ -180,7 +180,27 @@ FLAGS = {
         {'flag': 'no_anomaly', 'type': 'boolean'},
         {'flag': 'anomaly_attributes', 'type': 'string'},
         {'flag': 'anomaly_score_attributes', 'type': 'string'},
-        {'flag': 'batch_anomaly_score_attributes', 'type': 'string'}]}
+        {'flag': 'batch_anomaly_score_attributes', 'type': 'string'}],
+    'BigMLer sample': [
+        {'flag': 'anomaly_fields', 'type': 'string'},
+        {'flag': 'sample', 'type': 'string'},
+        {'flag': 'sample_file', 'type': 'string'},
+        {'flag': 'samples', 'type': 'string'},
+        {'flag': 'no_sample', 'type': 'boolean'},
+        {'flag': 'sample_attributes', 'type': 'string'},
+        {'flag': 'sample_header', 'type': 'boolean'},
+        {'flag': 'fields_filter', 'type': 'string'},
+        {'flag': 'row_index', 'type': 'integer'},
+        {'flag': 'mode', 'type': 'string'},
+        {'flag': 'occurrence', 'type': 'integer'},
+        {'flag': 'precision', 'type': 'integer'},
+        {'flag': 'rows', 'type': 'integer'},
+        {'flag': 'row_offset', 'type': 'integer'},
+        {'flag': 'row_order_by', 'type': 'string'},
+        {'flag': 'row_fields', 'type': 'string'},
+        {'flag': 'stat_fields', 'type': 'string'},
+        {'flag': 'stat_field', 'type': 'string'},
+        {'flag': 'unique', 'type': 'boolean'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):

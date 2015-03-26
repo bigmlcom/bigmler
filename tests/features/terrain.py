@@ -100,6 +100,7 @@ def setup_resources(feature):
     world.anomaly_scores = []
     world.batch_anomaly_scores = []
     world.projects = []
+    world.samples = []
     world.source_lower = None
     world.source_upper = None
     world.source_reference = None
@@ -108,7 +109,7 @@ def setup_resources(feature):
 def cleanup_resources(feature):
     if os.path.exists('./tmp'):
         shutil.rmtree('./tmp')
-    """
+
     delete(world.clusters)
     delete(world.sources)
     delete(world.datasets)
@@ -123,6 +124,7 @@ def cleanup_resources(feature):
     delete(world.anomaly_scores)
     delete(world.batch_anomaly_scores)
     delete(world.projects)
+    delete(world.samples)
 
     store_final_resources()
 
@@ -133,7 +135,7 @@ def cleanup_resources(feature):
             pass
 
     check_init_equals_final()
-    """
+
 
 @after.each_scenario
 def cleanup_output(scenario):

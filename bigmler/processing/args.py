@@ -423,6 +423,50 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
+    sample_ids = []
+    try:
+        # Parses sample/ids if provided.
+        if command_args.samples:
+            sample_ids = u.read_resources(command_args.samples)
+        command_args.sample_ids_ = sample_ids
+    except AttributeError:
+        pass
+
+    # Retrieve sample/ids if provided.
+    try:
+        if command_args.sample_tag:
+            sample_ids = (sample_ids +
+                           u.list_ids(api.list_samples,
+                                      "tags__in=%s" %
+                                      command_args.sample_tag))
+        command_args.sample_ids_ = sample_ids
+    except AttributeError:
+        pass
+
+    # Parses sample row fields
+    try:
+        if command_args.row_fields:
+            row_fields_arg = [field.strip() for field in
+                              command_args.row_fields.split(
+                                  command_args.args_separator)]
+            command_args.row_fields_ = row_fields_arg
+        else:
+            command_args.row_fields_ = []
+    except AttributeError:
+        pass
+
+    # Parses sample stat_fields
+    try:
+        if command_args.stat_fields:
+            stat_fields_arg = [field.strip() for field in
+                               command_args.stat_fields.split(
+                                   command_args.args_separator)]
+            command_args.stat_fields_ = stat_fields_arg
+        else:
+            command_args.stat_fields_ = []
+    except AttributeError:
+        pass
+
     return {"api": api, "args": command_args}
 
 
@@ -467,10 +511,13 @@ def transform_args(command_args, flags, api, user_defaults):
 
     test_dataset_ids = None
     command_args.test_dataset_ids = []
-    # Parses dataset/id if provided.
-    if command_args.test_datasets:
-        test_dataset_ids = u.read_datasets(command_args.test_datasets)
-        command_args.test_dataset_ids = test_dataset_ids
+    try:
+        # Parses dataset/id if provided.
+        if command_args.test_datasets:
+            test_dataset_ids = u.read_datasets(command_args.test_datasets)
+            command_args.test_dataset_ids = test_dataset_ids
+    except AttributeError:
+        pass
 
     # Retrieve dataset/ids if provided.
     if command_args.dataset_tag:
@@ -534,11 +581,14 @@ def transform_args(command_args, flags, api, user_defaults):
             command_args.replacement = True
     except AttributeError:
         pass
-
-    # Old value for --prediction-info='full data' maps to 'full'
-    if command_args.prediction_info == 'full data':
-        print "WARNING: 'full data' is a deprecated value. Use 'full' instead"
-        command_args.prediction_info = FULL_FORMAT
+    try:
+        # Old value for --prediction-info='full data' maps to 'full'
+        if command_args.prediction_info == 'full data':
+            print ("WARNING: 'full data' is a deprecated value. Use"
+                   " 'full' instead")
+            command_args.prediction_info = FULL_FORMAT
+    except AttributeError:
+        pass
 
     # Parses class, weight pairs for objective weight
     try:

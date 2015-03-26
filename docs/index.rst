@@ -661,6 +661,7 @@ fields with respect to the first one, the file would read
 where ``dataset/53330bce37203f222e00004b`` would be the id of the
 second dataset in the multi-dataset.
 
+
 Model Weights
 -------------
 
@@ -1332,6 +1333,61 @@ data::
 
     bigmler anomaly --train data/tiny_kdd.csv --test-split 0.2 --remote
 
+.. _bigmler-sample:
+
+Sample subcommand
+-----------------
+
+You can extract samples from your datasets in BigML using the
+``bigmler sample`` subcommand. When a new sample is requested, a copy
+of the dataset is stored in a special format in an in-memory cache.
+This sample can then be used, before its expiration time, to
+extract data from the related dataset by setting some options like the
+number of rows or the fields to be retrieved. You can either begin from
+scratch uploading your data to BigML, creating the corresponding source and
+dataset and extracting your sample from it::
+
+    bigmler sample --train data/iris.csv --rows 10 --row-offset 20
+
+This command will create a source, a dataset, a sample object, whose id will
+be stored in the ``samples`` file in the output directory,
+and extract 10 rows of data
+starting from the 21st that will be stored in the ``sample.csv`` file.
+
+You can reuse an existing sample by using its id in the command.
+
+::
+
+    bigmler sample --sample sample/53b1f71437203f5ac303d5c0 \
+                   --sample-header --row-order-by="-petal length" \
+                   --row-fields "petal length,petal width" --mode linear
+
+will create a new ``sample.csv`` file with a headers row where only the
+``petal length`` and ``petal width`` are retrieved. The ``--mode linear``
+option will cause the first available rows to be returned and the
+``--row-order-by="-petal length"`` option returns these rows sorted in
+descending order according to the contents of ``petal length``.
+
+You can also add to the sample rows some statistical information by using the
+``--stat-field`` or ``--stat-fields`` options. Adding them to the command
+will generate a ``stat-info.json`` file where the Pearson's and Spearman's
+correlations, and linear regression terms will be stored in a JSON format.
+
+You can also apply a filter to select the sample rows by the values in
+their fields using the ``--fields-filter`` option. This must be set to
+ a string containing the conditions that must be met using field ids
+and values.
+
+::
+
+    bigmler sample --sample sample/53b1f71437203f5ac303d5c0 \
+                   --fields-filter "000001=&!000004=Iris-setosa"
+
+With this command, only rows where field id ``000001`` is missing and
+field id ``000004`` is not ``Iris-setosa`` will be retrieved. Other available
+options can be found in the `Samples subcommand Options <#samples-option>`_
+section.
+
 
 .. _bigmler-delete:
 
@@ -1340,7 +1396,7 @@ Delete subcommand
 
 You have seen that BigMLer is an agile tool that empowers you to create a
 great number of resources easily. This is a tremedous help, but it also can
-lead to a garbage-prone environment. To keep a control of the each new created
+lead to a garbage-prone environment. To keep a control of each new created
 remote resource use the flag `--resources-log` followed by the name of the log
 file you choose.::
 
@@ -1621,7 +1677,7 @@ Requirements
 
 Python 2.7 is currently supported by BigMLer.
 
-BigMLer requires `bigml 2.2.0 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 3.0.2 <https://github.com/bigmlcom/python>`_  or
 higher. Using proportional missing strategy will additionally request
 the use of the `numpy <http://www.numpy.org/>`_ and
 `scipy <http://www.scipy.org/>`_ libraries. They are not
@@ -2074,6 +2130,56 @@ Anomaly Specific Subcommand Options
                                         attributes to
                                         be used in the batch anomaly score
                                         creation call
+.._sample_options
+
+Samples Subcommand Options
+--------------------------
+
+--sample SAMPLE                         BigML sample Id
+--samples PATH                          Path to a file containing sample/ids.
+                                        One sample per line
+                                        (e.g., sample/4f824203ce80051)
+--no-sample                             No sample will be generated
+--sample-fields FIELD_NAMES             Comma-separated list of fields that
+                                        will be used in the sample
+                                        detector construction
+--sample-attributes PATH                Path to a JSON file containing
+                                        attributes to
+                                        be used in the sample creation call
+--fields-filter QUERY                   Query string that will be used as
+                                        filter before selecting the sample
+                                        rows. The query string can be built
+                                        using the field ids, their values and
+                                        the usual operators. You can see some
+                                        examples in the `developers section <https://bigml.com/developers/samples#filtering-rows-from-a-sample>`_
+--sample-header                         Adds a headers row to the sample.csv
+                                        output
+--row-index                             Prepends acolumn to the sample rows
+                                        with the absolute row number
+--occurrence                            Prepends a column to the sample rows
+                                        with the number of occurences of each
+                                        row. When used with --row-index,
+                                        the occurrence column will be placed
+                                        after the index column
+--precision                             Decimal numbers precision
+--rows SIZE                             Number of rows returned
+--row-offset OFFSET                     Skip the given number of rows
+--row-order-by FIELD_NAME               Field name whose values will be used
+                                        to sort the returned rows
+--row-fields FIELD_NAMES                Comma-separated list of fields that
+                                        will be returned in the sample
+--stat-fields FIELD_NAME,FIELD_NAME     Two comma-separated numeric field names
+                                        that will be used to compute their
+                                        Pearson's and Spearman's correlations
+                                        and linear regression terms
+--stat-field FIELD_NAME                 Numeric field that will be used to
+                                        compute
+                                        Pearson's and Spearman's correlations
+                                        and linear regression terms against
+                                        the rest of numeric fields in the
+                                        sample
+--unique                                Repeated rows are removed from the
+                                        sample
 
 Delete Subcommand Options
 -------------------------

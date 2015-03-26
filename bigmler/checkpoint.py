@@ -359,3 +359,26 @@ def is_project_created(path):
                 return False, None
     except IOError:
         return False, None
+
+
+def are_samples_created(path, number_of_samples):
+    """Checks existence and reads the samples ids from the samples file in the
+       path directory
+
+    """
+    sample_ids = []
+    try:
+        with open("%s%ssamples" % (path, os.sep)) as samples_file:
+            for line in samples_file:
+                cluster = line.strip()
+                try:
+                    sample_id = bigml.api.get_sample_id(sample)
+                    sample_ids.append(sample_id)
+                except ValueError:
+                    return False, sample_ids
+        if len(sample_ids) == number_of_samples:
+            return True, sample_ids
+        else:
+            return False, sample_ids
+    except IOError:
+        return False, sample_ids

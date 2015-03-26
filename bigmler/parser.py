@@ -32,8 +32,9 @@ from bigmler.options.main import get_main_options
 from bigmler.options.analyze import get_analyze_options
 from bigmler.options.cluster import get_cluster_options
 from bigmler.options.anomaly import get_anomaly_options
+from bigmler.options.sample import get_sample_options
 
-SUBCOMMANDS = ["main", "analyze", "cluster", "anomaly", "delete"]
+SUBCOMMANDS = ["main", "analyze", "cluster", "anomaly", "sample", "delete"]
 MAIN = SUBCOMMANDS[0]
 
 
@@ -183,6 +184,18 @@ under the License.""" % version
         '--no-no-csv': main_options['--no-no-csv'],
         '--to-dataset': main_options['--to-dataset']})
 
+    defaults = general_defaults["BigMLer sample"]
+    subcommand_options["sample"] = get_sample_options(defaults=defaults)
+    # general options
+    subcommand_options["sample"].update(common_options)
+    subcommand_options["sample"].update(source_options)
+    subcommand_options["sample"].update(dataset_options)
+    subcommand_options["sample"].update({
+        '--cpp': main_options['--cpp'],
+        '--source-tag': delete_options['--source-tag'],
+        '--dataset-tag': delete_options['--dataset-tag'],
+        '--sample-tag': delete_options['--sample-tag'],
+        '--reports': main_options['--reports']})
 
     subcommand_options["delete"] = delete_options
     subcommand_options["delete"].update(common_options)
