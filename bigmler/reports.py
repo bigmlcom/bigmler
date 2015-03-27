@@ -166,8 +166,6 @@ def gazibit_upload(output_file, exit_flag=False):
                          code)
         elif exit_flag:
             sys.exit("Failed to find the report file")
-    except IOError, excio:
-        sys.exit("ERROR: failed to read report file: %s" % str(excio))
     except ValueError:
         sys.exit("Malformed response")
     except requests.ConnectionError, exc:
@@ -176,6 +174,8 @@ def gazibit_upload(output_file, exit_flag=False):
         sys.exit("Request timed out")
     except requests.RequestException:
         sys.exit("Ambiguous exception occurred")
+    except IOError, excio:
+        sys.exit("ERROR: failed to read report file: %s" % str(excio))
 
 
 REPORTS = {'gazibit': add_gazibit_links}

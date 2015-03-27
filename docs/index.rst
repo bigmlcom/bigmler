@@ -1384,7 +1384,10 @@ and values.
                    --fields-filter "000001=&!000004=Iris-setosa"
 
 With this command, only rows where field id ``000001`` is missing and
-field id ``000004`` is not ``Iris-setosa`` will be retrieved. Other available
+field id ``000004`` is not ``Iris-setosa`` will be retrieved. You can check
+the available operators and syntax in the
+`samples' developers doc <https://bigml.com/developers/samples#filtering-ro>`_ .
+More available
 options can be found in the `Samples subcommand Options <#samples-option>`_
 section.
 

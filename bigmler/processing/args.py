@@ -44,6 +44,32 @@ RESOURCE_TYPES = ["source", "dataset", "model", "ensemble", "batch_prediction",
                   "anomaly_score", "batch_anomaly_score"]
 
 
+def has_test(args):
+    """Returns if some kind of test data is given in args.
+
+    """
+    return (args.test_set or args.test_source or args.test_dataset or
+            args.test_stdin or args.test_datasets)
+
+
+def has_train(args):
+    """Returns if some kind of train data is given in args.
+
+    """
+    return (args.training_set or args.source or args.dataset or
+            args.datasets or args.source_file or args.dataset_file or
+            args.train_stdin or args.source_file)
+
+
+def has_model(args):
+    """Boolean that is set when any model option is used
+
+    """
+    return (args.model or args.models or args.model_tag or args.model_file
+            or args.ensemble or args.ensembles or args.ensemble_tag
+            or args.ensemble_file)
+
+
 def non_compatible(args, option):
     """Return non_compatible options
 
@@ -77,11 +103,11 @@ def get_flags(args):
             if value:
                 args[i] = "%s%s" % (flag, value)
             flags.append(flag)
-            if (flag == '--train' and
-                (i == len(args) - 1 or args[i + 1].startswith("--"))):
+            if (flag == '--train' and (
+                    i == len(args) - 1 or args[i + 1].startswith("--"))):
                 train_stdin = True
-            elif (flag == '--test' and
-                  (i == len(args) - 1 or args[i + 1].startswith("--"))):
+            elif (flag == '--test' and (
+                    i == len(args) - 1 or args[i + 1].startswith("--"))):
                 test_stdin = True
     return flags, train_stdin, test_stdin
 
@@ -149,15 +175,9 @@ def parse_and_check(command):
         pass
 
     try:
-        if (command_args.evaluate
-            and not (command_args.training_set or command_args.source
-                     or command_args.dataset or command_args.datasets)
-            and not ((command_args.test_set or command_args.test_split or
-                      command_args.test_datasets) and
-                     (command_args.model or
-                      command_args.models or command_args.model_tag or
-                      command_args.ensemble or command_args.ensembles or
-                      command_args.ensemble_tag))):
+        if (command_args.evaluate and not has_train(command_args) and
+                not (has_test(command_args) or command_args.test_split) and
+                has_model(command_args)):
             parser.error("Evaluation wrong syntax.\n"
                          "\nTry for instance:\n\nbigmler --train data/iris.csv"
                          " --evaluate\nbigmler --model "
@@ -284,9 +304,9 @@ def get_output_args(api, command_args, resume):
     # Parses dataset fields if provided.
     try:
         if command_args.dataset_fields:
-            dataset_fields_arg = [arg.strip() for arg in
-                                  command_args.dataset_fields.split(
-                                  command_args.args_separator)]
+            dataset_fields_arg = [
+                field.strip() for field in command_args.dataset_fields.split(
+                    command_args.args_separator)]
             command_args.dataset_fields_ = dataset_fields_arg
         else:
             command_args.dataset_fields_ = []
@@ -296,9 +316,9 @@ def get_output_args(api, command_args, resume):
     # Parses model input fields if provided.
     try:
         if command_args.model_fields:
-            model_fields_arg = map(lambda x: x.strip(),
-                                   command_args.model_fields.split(
-                                       command_args.args_separator))
+            model_fields_arg = [
+                field.strip() for field in command_args.model_fields.split(
+                    command_args.args_separator)]
             command_args.model_fields_ = model_fields_arg
         else:
             command_args.model_fields_ = []
@@ -308,9 +328,9 @@ def get_output_args(api, command_args, resume):
     # Parses cluster input fields if provided.
     try:
         if command_args.cluster_fields:
-            cluster_fields_arg = map(lambda x: x.strip(),
-                                     command_args.cluster_fields.split(
-                                     command_args.args_separator))
+            cluster_fields_arg = [
+                field.strip() for field in command_args.cluster_fields.split(
+                    command_args.args_separator)]
             command_args.cluster_fields_ = cluster_fields_arg
         else:
             command_args.cluster_fields_ = []
@@ -320,9 +340,9 @@ def get_output_args(api, command_args, resume):
     # Parses anomaly input fields if provided.
     try:
         if command_args.anomaly_fields:
-            anomaly_fields_arg = map(lambda x: x.strip(),
-                                     command_args.anomaly_fields.split(
-                                     command_args.args_separator))
+            anomaly_fields_arg = [
+                field.strip() for field in command_args.anomaly_fields.split(
+                    command_args.args_separator)]
             command_args.anomaly_fields_ = anomaly_fields_arg
         else:
             command_args.anomaly_fields_ = []
@@ -351,8 +371,10 @@ def get_output_args(api, command_args, resume):
     # Reads votes files in the provided directories.
     try:
         if command_args.votes_dirs:
-            dirs = [dir.strip() for dir in command_args.votes_dirs.split(
-                command_args.args_separator)]
+            dirs = [
+                directory.strip() for directory in
+                command_args.votes_dirs.split(
+                    command_args.args_separator)]
             votes_path = os.path.dirname(command_args.predictions)
             votes_files = u.read_votes_files(dirs, votes_path)
             command_args.votes_files_ = votes_files
@@ -394,9 +416,10 @@ def get_output_args(api, command_args, resume):
     # Parses cluster names to generate datasets if provided
     try:
         if command_args.cluster_datasets:
-            cluster_datasets_arg = map(lambda x: x.strip(),
-                                       command_args.cluster_datasets.split(
-                                        command_args.args_separator))
+            cluster_datasets_arg = [
+                dataset.strip() for dataset in
+                command_args.cluster_datasets.split(
+                    command_args.args_separator)]
             command_args.cluster_datasets_ = cluster_datasets_arg
         else:
             command_args.cluster_datasets_ = []
@@ -435,10 +458,10 @@ def get_output_args(api, command_args, resume):
     # Retrieve sample/ids if provided.
     try:
         if command_args.sample_tag:
-            sample_ids = (sample_ids +
-                           u.list_ids(api.list_samples,
-                                      "tags__in=%s" %
-                                      command_args.sample_tag))
+            sample_ids = (
+                sample_ids + u.list_ids(api.list_samples,
+                                        "tags__in=%s" %
+                                        command_args.sample_tag))
         command_args.sample_ids_ = sample_ids
     except AttributeError:
         pass
@@ -546,11 +569,11 @@ def transform_args(command_args, flags, api, user_defaults):
     # Checks combined votes method
     try:
         if (command_args.method and command_args.method != COMBINATION_LABEL
-            and not (command_args.method in COMBINATION_WEIGHTS.keys())):
+                and not (command_args.method in COMBINATION_WEIGHTS.keys())):
             command_args.method = 0
         else:
-            combiner_methods = dict([[value, key]
-                                    for key, value in COMBINER_MAP.items()])
+            combiner_methods = dict(
+                [[value, key] for key, value in COMBINER_MAP.items()])
             combiner_methods[COMBINATION_LABEL] = COMBINATION
             command_args.method = combiner_methods.get(command_args.method, 0)
     except AttributeError:

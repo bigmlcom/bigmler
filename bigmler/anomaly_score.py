@@ -134,7 +134,7 @@ def local_anomaly_score(anomalies, test_reader, output, args,
         except Exception:
             anomaly_score_info = {'score': NO_ANOMALY_SCORE}
         write_anomaly_score(anomaly_score_info['score'], output,
-                       args.prediction_info, input_data, exclude)
+                            args.prediction_info, input_data, exclude)
 
 
 def anomaly_score(anomalies, fields, args, session_file=None):

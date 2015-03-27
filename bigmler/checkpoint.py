@@ -333,7 +333,7 @@ def are_anomalies_created(path, number_of_anomalies):
                     anomaly_ids.append(anomaly_id)
                 except ValueError:
                     return False, anomaly_ids
-        if len(anomaly_ids) == number_of_anomaly:
+        if len(anomaly_ids) == number_of_anomalies:
             return True, anomaly_ids
         else:
             return False, anomaly_ids
@@ -370,7 +370,7 @@ def are_samples_created(path, number_of_samples):
     try:
         with open("%s%ssamples" % (path, os.sep)) as samples_file:
             for line in samples_file:
-                cluster = line.strip()
+                sample = line.strip()
                 try:
                     sample_id = bigml.api.get_sample_id(sample)
                     sample_ids.append(sample_id)

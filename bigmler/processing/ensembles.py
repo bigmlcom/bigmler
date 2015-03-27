@@ -42,20 +42,15 @@ def ensemble_processing(datasets, api, args, resume,
     if resume:
         resume, ensemble_ids = c.checkpoint(
             c.are_ensembles_created, path, number_of_ensembles,
-            debug=args.debug,
-            message=message, log_file=session_file, console=args.verbosity)
+            debug=args.debug)
         if not resume:
             message = u.dated("Found %s ensembles out of %s. Resuming.\n"
-                              % (len(ensembles_ids),
+                              % (len(ensemble_ids),
                                  number_of_ensembles))
             u.log_message(message, log_file=session_file,
                           console=args.verbosity)
         ensembles = ensemble_ids
         number_of_ensembles -= len(ensemble_ids)
-    try:
-        ensemble = ensembles[0]
-    except IndexError:
-        ensemble = None
 
     if number_of_ensembles > 0:
         ensemble_args = r.set_ensemble_args(args, fields=fields)

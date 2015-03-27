@@ -33,7 +33,7 @@ from bigmler.analyze.k_fold_cv import (create_kfold_cv,
                                        create_nodes_analysis)
 from bigmler.dispatcher import (SESSIONS_LOG, command_handling,
                                 clear_log_files)
-from bigmler.command import Command, StoredCommand
+from bigmler.command import get_stored_command
 
 
 COMMAND_LOG = u".bigmler_analyze"
@@ -56,17 +56,9 @@ def analyze_dispatcher(args=sys.argv[1:]):
     command_args = command.parser.parse_args(command.args)
     resume = command_args.resume
     if resume:
-        # Keep the debug option if set
-        debug = command_args.debug
-        # Restore the args of the call to resume from the command log file
-        stored_command = StoredCommand(args, COMMAND_LOG, DIRS_LOG)
-        command = Command(None, stored_command=stored_command)
-        # Logs the issued command and the resumed command
-        session_file = os.path.join(stored_command.output_dir, SESSIONS_LOG)
-        stored_command.log_command(session_file=session_file)
-        # Parses resumed arguments.
-        command_args = command.parser.parse_args(command.args)
-        command_args.debug = debug
+        command_args, session_file, _ = get_stored_command(
+            args, command_args.debug, command_log=COMMAND_LOG,
+            dirs_log=DIRS_LOG, sessions_log=SESSIONS_LOG)
     else:
         if command_args.output_dir is None:
             command_args.output_dir = a.NOW

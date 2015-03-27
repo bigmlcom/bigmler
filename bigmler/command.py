@@ -37,6 +37,11 @@ from bigmler.prediction import MAX_MODELS
 from bigmler.parser import create_parser
 
 
+COMMAND_LOG = u".bigmler"
+DIRS_LOG = u".bigmler_dir_stack"
+SESSIONS_LOG = u"bigmler_sessions"
+
+
 def tail(file_handler, window=1):
     """Returns the last n lines of a file.
 
@@ -73,6 +78,25 @@ def get_log_reversed(file_name, stack_level):
     """
     lines_list = tail(open(file_name, "r"), window=(stack_level + 1))
     return lines_list[0].decode(u.SYSTEM_ENCODING)
+
+
+def get_stored_command(args, debug=False, command_log=COMMAND_LOG,
+                       dirs_log=DIRS_LOG, sessions_log=SESSIONS_LOG):
+    """Restoring the saved command from stack to the arguments object
+
+    """
+    # Restore the args of the call to resume from the command log file
+    stored_command = StoredCommand(args, command_log, dirs_log)
+    command = Command(None, stored_command=stored_command)
+    # Logs the issued command and the resumed command
+    session_file = os.path.join(stored_command.output_dir, sessions_log)
+    stored_command.log_command(session_file=session_file)
+    # Parses resumed arguments.
+    command_args = a.parse_and_check(command)
+    if debug:
+        # set debug on if it wasn't in the stored command but now is
+        command_args.debug = True
+    return command_args, session_file, stored_command.output_dir
 
 
 class Command(object):

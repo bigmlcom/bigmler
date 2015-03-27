@@ -22,7 +22,6 @@ from __future__ import absolute_import
 import sys
 import os
 import re
-import datetime
 import gc
 
 import bigml.api
@@ -35,7 +34,7 @@ import bigmler.processing.datasets as pd
 import bigmler.processing.models as pm
 
 from bigml.model import Model
-from bigml.ensemble import Ensemble
+#from bigml.ensemble import Ensemble
 from bigml.basemodel import retrieve_resource
 
 from bigmler.evaluation import evaluate, cross_validate
@@ -44,11 +43,10 @@ from bigmler.prediction import predict, combine_votes, remote_predict
 from bigmler.prediction import (OTHER, COMBINATION,
                                 THRESHOLD_CODE)
 from bigmler.reports import clear_reports, upload_reports
-from bigmler.command import Command, StoredCommand
+from bigmler.command import Command, get_stored_command
+from bigmler.command import COMMAND_LOG, DIRS_LOG, SESSIONS_LOG
 
-COMMAND_LOG = u".bigmler"
-DIRS_LOG = u".bigmler_dir_stack"
-SESSIONS_LOG = u"bigmler_sessions"
+
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 MINIMUM_MODEL = "full=false"
 
@@ -106,23 +104,6 @@ def clear_log_files(log_files):
             pass
 
 
-def has_test(args):
-    """Returns if some kind of test data is given in args.
-
-    """
-    return (args.test_set or args.test_source or args.test_dataset or
-            args.test_stdin or args.test_datasets)
-
-
-def has_train(args):
-    """Returns if some kind of train data is given in args.
-
-    """
-    return (args.training_set or args.source or args.dataset or
-            args.datasets or args.source_file or args.dataset_file or
-            args.train_stdin or args.source_file)
-
-
 def get_test_dataset(args):
     """Returns the dataset id from one of the possible user options:
        --test-dataset --test-datasets
@@ -166,16 +147,9 @@ def main_dispatcher(args=sys.argv[1:]):
                       else 'predictions.csv')
     resume = command_args.resume
     if command_args.resume:
-        # Keep the debug option if set
-        debug = command_args.debug
-        # Restore the args of the call to resume from the command log file
-        stored_command = StoredCommand(args, COMMAND_LOG, DIRS_LOG)
-        command = Command(None, stored_command=stored_command)
-        # Logs the issued command and the resumed command
-        session_file = os.path.join(stored_command.output_dir, SESSIONS_LOG)
-        stored_command.log_command(session_file=session_file)
-        # Parses resumed arguments.
-        command_args = a.parse_and_check(command)
+        command_args, session_file, stored_command = get_stored_command(
+            args, command_args.debug, command_log=COMMAND_LOG,
+            dirs_log=DIRS_LOG, sessions_log=SESSIONS_LOG)
         default_output = ('evaluation' if command_args.evaluate
                           else 'predictions.csv')
         if command_args.predictions is None:
@@ -207,11 +181,9 @@ def main_dispatcher(args=sys.argv[1:]):
                           log_file=DIRS_LOG)
 
     # Creates the corresponding api instance
-    if resume and debug:
-        command_args.debug = True
     api = a.get_api_instance(command_args, u.check_dir(session_file))
 
-    if (has_train(command_args) or has_test(command_args)
+    if (a.has_train(command_args) or a.has_test(command_args)
             or command_args.votes_dirs):
         output_args = a.get_output_args(api, command_args, resume)
         a.transform_args(command_args, command.flags, api,
@@ -234,7 +206,7 @@ def compute_output(api, args):
     ensemble_ids = []
     multi_label_data = None
     multi_label_fields = []
-    local_ensemble = None
+    #local_ensemble = None
     test_dataset = None
     datasets = None
 
@@ -350,7 +322,7 @@ def compute_output(api, args):
             multi_label_data=multi_label_data,
             session_file=session_file, path=path, log=log)
         datasets[0] = dataset
- 
+
     # Check if the dataset has a categorical objective field and it
     # has a max_categories limit for categories
     if args.max_categories > 0 and len(datasets) == 1:
@@ -453,7 +425,7 @@ def compute_output(api, args):
     # We update the model's public state if needed
     if model:
         if isinstance(model, basestring):
-            if not args.evaluate and not has_test(args):
+            if not args.evaluate and not a.has_test(args):
                 query_string = MINIMUM_MODEL
             elif not args.test_header:
                 query_string = r.ALL_FIELDS_QS
@@ -484,13 +456,15 @@ def compute_output(api, args):
                 ensemble_id = ensemble_ids[0]
             else:
                 ensemble_id = get_ensemble_id(model)
+            """
             local_ensemble = Ensemble(ensemble_id, api=api,
                                       max_models=args.max_batch_models)
+            """
         fields = pm.get_model_fields(
             model, csv_properties, args, single_model=single_model,
             multi_label_data=multi_label_data)
         # Free memory after getting fields
-        local_ensemble = None
+        # local_ensemble = None
         gc.collect()
 
     # Fills in all_labels from user_metadata
@@ -508,8 +482,8 @@ def compute_output(api, args):
         other_label = get_metadata(model, 'other_label',
                                    other_label)
     # If predicting
-    if (models and (has_test(args) or (test_dataset and args.remote))
-        and not args.evaluate):
+    if (models and (a.has_test(args) or (test_dataset and args.remote))
+            and not args.evaluate):
         models_per_label = 1
         if test_dataset is None:
             test_dataset = get_test_dataset(args)
@@ -535,12 +509,12 @@ def compute_output(api, args):
             # create test source from file
             test_name = "%s - test" % args.name
             if args.test_source is None:
-                (test_source,
-                 resume,
-                 csv_properties,
-                 test_fields) = ps.test_source_processing(
+                test_properties = ps.test_source_processing(
                     api, args, resume, session_file=session_file,
                     path=path, log=log)
+
+                (test_source, resume, csv_properties,
+                 test_fields) = test_properties
             else:
                 test_source_id = bigml.api.get_source_id(args.test_source)
                 test_source = api.check_resource(test_source_id)

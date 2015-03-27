@@ -80,7 +80,8 @@ def test_source_processing(api, args, resume,
             if 'locale' in source_parser:
                 csv_properties['data_locale'] = source_parser['locale']
                 if (args.user_locale is not None and
-                    bigml_locale(args.user_locale) == source_parser['locale']):
+                        bigml_locale(args.user_locale) ==
+                        source_parser['locale']):
                     args.user_locale = None
 
         fields = Fields(test_source['object']['fields'], **csv_properties)
@@ -90,10 +91,10 @@ def test_source_processing(api, args, resume,
             # avoid updating project_id in source
             project_id, args.project_id = args.project_id, None
             test_source_args = r.set_source_args(args, fields=fields)
-            test_source = r.update_source(test_source, source_args, args, api,
-                                          session_file)
+            test_source = r.update_source(test_source, test_source_args, args,
+                                          api, session_file)
             args.project_id = project_id
-            fields = Fields(source['object']['fields'], **csv_properties)
+            fields = Fields(test_source['object']['fields'], **csv_properties)
 
     return test_source, resume, csv_properties, fields
 
@@ -107,8 +108,8 @@ def source_processing(api, args, resume,
     """
     source = None
     fields = None
-    if (args.training_set or
-        (hasattr(args, "evaluate") and args.evaluate and args.test_set)):
+    if (args.training_set or (
+            hasattr(args, "evaluate") and args.evaluate and args.test_set)):
         # If resuming, try to extract args.source form log files
 
         if resume:
@@ -149,7 +150,8 @@ def source_processing(api, args, resume,
                 csv_properties['data_locale'] = source_parser['locale']
                 # No changes if user locale is the one in the source.
                 if (args.user_locale is not None and
-                    bigml_locale(args.user_locale) == source_parser['locale']):
+                        bigml_locale(args.user_locale) ==
+                        source_parser['locale']):
                     args.user_locale = None
         fields = Fields(source['object']['fields'], **csv_properties)
 

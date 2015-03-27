@@ -182,7 +182,7 @@ def get_delete_options(defaults=None):
             'default': defaults.get('dry_run', False),
             'help': "Deletes the ids retrieved to be deleted."},
 
-        # Retrieves the ids of the resources that have been logged in the 
+        # Retrieves the ids of the resources that have been logged in the
         # directory to add them to the delete list.
         '--from-dir': {
             'dest': 'from_dir',

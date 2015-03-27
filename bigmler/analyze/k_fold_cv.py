@@ -241,7 +241,6 @@ def create_kfold_datasets_file(args, api, common_options, resume=False):
         # generate test datasets
         datasets_file, resume = create_kfold_datasets(dataset_id, args,
                                                       selecting_file_list,
-                                                      objective_name,
                                                       common_options,
                                                       resume=resume)
         return datasets_file, objective_name, resume
@@ -287,7 +286,7 @@ def avoid_duplicates(field_name, fields, affix="_"):
 
 
 def create_kfold_datasets(dataset, args,
-                          selecting_file_list, objective,
+                          selecting_file_list,
                           common_options, resume=False):
     """Calling the bigmler procedure to create the k-fold datasets
 
@@ -445,7 +444,7 @@ def best_first_search(datasets_file, api, args, common_options,
     loop_counter = 0
     features_file = os.path.normpath(os.path.join(args.output_dir,
                                                   FEATURES_LOG))
-    with open(features_file, 'w', 0) as features_handler:      
+    with open(features_file, 'w', 0) as features_handler:
         features_writer = csv.writer(features_handler, lineterminator="\n")
         features_writer.writerow([
             "step", "state", "score", "metric_value", "best_score"])
@@ -515,7 +514,7 @@ def best_first_search(datasets_file, api, args, common_options,
                             metric.capitalize(), metric_value * 100, score)
                     else:
                         message = '%s = %f (score = %s)\n' % (
-                            metric.capitalize(),metric_value, score)
+                            metric.capitalize(), metric_value, score)
                     u.log_message(message, log_file=session_file,
                                   console=args.verbosity)
             else:
@@ -574,7 +573,7 @@ def extract_evaluation_info(evaluation, category):
                 return class_evaluation
     return evaluation
 
-        
+
 def kfold_evaluate(datasets_file, args, counter, common_options,
                    penalty=DEFAULT_PENALTY,
                    metric=ACCURACY, resume=False):
@@ -616,7 +615,7 @@ def best_node_threshold(datasets_file, args, common_options,
     loop_counter = 0
     nodes_file = os.path.normpath(os.path.join(args.output_dir,
                                                NODES_LOG))
-    with open(nodes_file, 'w', 0) as nodes_handler:      
+    with open(nodes_file, 'w', 0) as nodes_handler:
         nodes_writer = csv.writer(nodes_handler, lineterminator="\n")
         nodes_writer.writerow([
             "step", "node_threshold", "score", "metric_value", "best_score"])
@@ -705,7 +704,7 @@ def node_threshold_evaluate(datasets_file, args, node_threshold,
     invert = -1 if metric in MINIMIZE_OPTIONS else 1
     return (invert * (evaluation[avg_metric] -
                       invert * penalty * node_threshold),
-            evaluation[avg_metric], 
+            evaluation[avg_metric],
             metric_literal, resume)
 
 

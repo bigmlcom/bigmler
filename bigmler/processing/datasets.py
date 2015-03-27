@@ -52,7 +52,8 @@ def check_max_categories(field):
        Only categorical or full terms only text are allowed.
 
     """
-    return field['optype'] == 'categorical' or (field['optype'] == 'text' and
+    return field['optype'] == 'categorical' or (
+        field['optype'] == 'text' and
         field['term_analysis']['token_mode'] == TM_FULL_TERM)
 
 
@@ -146,8 +147,8 @@ def dataset_processing(source, api, args, resume,
     """
     datasets = []
     dataset = None
-    if (args.training_set or args.source or
-        (hasattr(args, "evaluate") and args.evaluate and args.test_set)):
+    if (args.training_set or args.source or (
+            hasattr(args, "evaluate") and args.evaluate and args.test_set)):
         # if resuming, try to extract args.dataset form log files
         if resume:
             message = u.dated("Dataset not found. Resuming.\n")
@@ -183,7 +184,7 @@ def dataset_processing(source, api, args, resume,
         dataset = r.get_dataset(dataset, api, args.verbosity, session_file)
 
         if ('object' in dataset and 'objective_field' in dataset['object'] and
-            'column_number' in dataset['object']['objective_field']):
+                'column_number' in dataset['object']['objective_field']):
             dataset_objective = dataset[
                 'object']['objective_field']['column_number']
             csv_properties.update(objective_field=dataset_objective,
@@ -259,16 +260,18 @@ def split_processing(dataset, api, args, resume,
     test_dataset = None
     sample_rate = 1 - args.test_split
     dataset_alternative_args = r.set_dataset_split_args(
-        "%s - train (%s %%)" % (args.name, int(sample_rate * 100)),
-                                args.description_, args, sample_rate,
-                                out_of_bag=False,
-                                multi_label_data=multi_label_data)
+        "%s - train (%s %%)" % (
+            args.name, int(sample_rate * 100)),
+        args.description_, args, sample_rate,
+        out_of_bag=False,
+        multi_label_data=multi_label_data)
     train_dataset, resume = alternative_dataset_processing(
         dataset, "train", dataset_alternative_args, api, args,
         resume, session_file=session_file, path=path, log=log)
     dataset_alternative_args = r.set_dataset_split_args(
-        "%s - test (%s %%)" % (args.name,
-        int(args.test_split * 100)), args.description_, args,
+        "%s - test (%s %%)" % (
+            args.name, int(args.test_split * 100)),
+        args.description_, args,
         sample_rate, out_of_bag=True, multi_label_data=multi_label_data)
     test_dataset, resume = alternative_dataset_processing(
         dataset, "test", dataset_alternative_args, api, args,
@@ -391,7 +394,7 @@ def export_dataset(dataset, api, args, resume,
         message = u.dated("Exporting dataset to CSV file: %s\n" % filename)
         u.log_message(message, log_file=session_file,
                       console=args.verbosity)
-        
+
     if not resume:
         api.download_dataset(dataset, filename=filename)
     return resume

@@ -28,7 +28,7 @@ import bigmler.utils as u
 import bigmler.processing.args as a
 
 from bigmler.defaults import DEFAULTS_FILE
-from bigmler.command import Command, StoredCommand
+from bigmler.command import get_stored_command
 from bigmler.dispatcher import (SESSIONS_LOG, command_handling,
                                 clear_log_files)
 
@@ -38,7 +38,7 @@ LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 ROWS_LIMIT = 15
 INDENT_IDS = 26
 RESOURCES_LOG_FILES = set(['source', 'dataset', 'dataset_train',
-                           'dataset_test', 'dataset_gen',  'dataset_cluster',
+                           'dataset_test', 'dataset_gen', 'dataset_cluster',
                            'dataset_parts', 'dataset_multi', 'models',
                            'ensembles', 'evaluations',
                            'clusters', 'batch_prediction', 'batch_centroid',
@@ -51,7 +51,7 @@ def retrieve_resources(directory):
     """
     log_ids = []
     if os.path.isdir(directory):
-        for root, dirs, files in os.walk(directory):
+        for root, _, files in os.walk(directory):
             for resources_file in files:
                 if resources_file in RESOURCES_LOG_FILES:
                     for line in open(os.path.join(root, resources_file)):
@@ -59,7 +59,7 @@ def retrieve_resources(directory):
                         if resource_id is not None:
                             log_ids.append(resource_id)
     return list(set(log_ids))
- 
+
 
 def time_interval_qs(args, api):
     """Building the query string from the time interval user parameters.
@@ -183,7 +183,8 @@ def filtered_selectors(args, api):
         ("anomalyscore", args.anomaly_score_tag, api.list_anomaly_scores,
          None),
         ("batchanomalyscore", args.batch_anomaly_score_tag,
-         api.list_batch_anomaly_scores, None)]
+         api.list_batch_anomaly_scores, None),
+        ("sample", args.sample_tag, api.list_samples, None)]
 
     if args.all_tag is None and any([resource[1] is not None for resource in
                                      resource_selectors]):
@@ -208,18 +209,10 @@ def delete_dispatcher(args=sys.argv[1:]):
 
     # Parses command line arguments.
     command_args = a.parse_and_check(command)
-    resume = command_args.resume
     if command_args.resume:
-        # Keep the debug option if set
-        debug = command_args.debug
-        # Restore the args of the call to resume from the command log file
-        stored_command = StoredCommand(args, COMMAND_LOG, DIRS_LOG)
-        command = Command(None, stored_command=stored_command)
-        # Logs the issued command and the resumed command
-        session_file = os.path.join(stored_command.output_dir, SESSIONS_LOG)
-        stored_command.log_command(session_file=session_file)
-        # Parses resumed arguments.
-        command_args = a.parse_and_check(command)
+        command_args, session_file, _ = get_stored_command(
+            args, command_args.debug, command_log=COMMAND_LOG,
+            dirs_log=DIRS_LOG, sessions_log=SESSIONS_LOG)
     else:
         if command_args.output_dir is None:
             command_args.output_dir = a.NOW
@@ -244,8 +237,6 @@ def delete_dispatcher(args=sys.argv[1:]):
         clear_log_files(LOG_FILES)
 
     # Creates the corresponding api instance
-    if resume and debug:
-        command_args.debug = True
     api = a.get_api_instance(command_args, u.check_dir(session_file))
 
     delete_resources(command_args, api)

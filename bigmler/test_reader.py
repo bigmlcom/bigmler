@@ -99,15 +99,6 @@ class TestReader(object):
             self.exclude.reverse()
             if self.exclude:
                 if len(self.headers) > len(self.exclude):
-                    """
-                    print (u"WARNING: predictions will be processed but some "
-                           u"data might not be used. The used fields will be:"
-                           u"\n\n%s"
-                           u"\n\nwhile the headers found in the test file are:"
-                           u"\n\n%s" %
-                           (",".join(fields_names),
-                            ",".join(self.headers))).encode("utf-8")
-                    """
                     for index in self.exclude:
                         del self.headers[index]
                 else:

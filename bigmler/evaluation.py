@@ -47,8 +47,8 @@ def evaluate(models_or_ensembles, datasets, api, args, resume,
         session_file=session_file, path=path, log=log,
         labels=labels, all_labels=all_labels, objective_field=objective_field)
     if args.multi_label:
-        file_labels = map(slugify,
-                          u.objective_field_names(models_or_ensembles, api))
+        file_labels = [slugify(name) for name in
+                       u.objective_field_names(models_or_ensembles, api)]
     for index in range(0, len(evaluations)):
         evaluation = evaluations[index]
         evaluation = r.get_evaluation(evaluation, api, args.verbosity,

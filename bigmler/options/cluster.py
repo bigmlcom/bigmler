@@ -116,7 +116,7 @@ def get_cluster_options(defaults=None):
             'default': defaults.get('batch_centroid_attributes', None),
             'help': ("Path to a json file describing batch centroid"
                      " attributes.")},
-                     
+
         # The path to a file containing centroid attributes.
         '--centroid-attributes': {
             'action': 'store',

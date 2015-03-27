@@ -272,9 +272,9 @@ def remote_predict_ensemble(ensemble_id, test_reader, prediction_file, api,
     if output_path is None:
         output_path = u.check_dir(prediction_file)
 
-    if (not resume or
-        not c.checkpoint(c.are_predictions_created, prediction_file,
-                         test_reader.number_of_tests(), debug=args.debug)[0]):
+    if (not resume or not c.checkpoint(
+            c.are_predictions_created, prediction_file,
+            test_reader.number_of_tests(), debug=args.debug)[0]):
         message = u.dated("Creating remote predictions.")
         u.log_message(message, log_file=session_file,
                       console=args.verbosity)
@@ -520,7 +520,7 @@ def local_batch_predict(models, test_reader, prediction_file, api, args,
                 sys.exit("Failed to find the numpy and scipy libraries needed"
                          " to use proportional missing strategy for"
                          " regressions. Please, install them manually")
-            
+
             # extending the votes for each input data with the new model-slot
             # predictions
             if not args.fast:
@@ -550,7 +550,7 @@ def local_batch_predict(models, test_reader, prediction_file, api, args,
         if single_model:
             # single model predictions need no combination
             prediction = [multivote.predictions[0]['prediction'],
-                          multivote.predictions[0]['confidence']]           
+                          multivote.predictions[0]['confidence']]
         elif method == AGGREGATION:
             # multi-labeled fields: predictions are concatenated
             prediction = aggregate_multivote(
@@ -689,7 +689,7 @@ def remote_predict(model, test_dataset, batch_prediction_args, args,
     if not resume:
         batch_prediction = create_batch_prediction(
             model_or_ensemble, test_dataset, batch_prediction_args,
-            args, api, session_file=session_file, path=path, log=log)    
+            args, api, session_file=session_file, path=path, log=log)
     if not args.no_csv:
         api.download_batch_prediction(batch_prediction, prediction_file)
     if args.to_dataset:

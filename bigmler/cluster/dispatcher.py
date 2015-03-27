@@ -34,10 +34,9 @@ import bigmler.processing.datasets as pd
 from bigmler.defaults import DEFAULTS_FILE
 from bigmler.centroid import centroid, remote_centroid
 from bigmler.reports import clear_reports, upload_reports
-from bigmler.command import Command, StoredCommand
+from bigmler.command import get_stored_command
 from bigmler.dispatcher import (SESSIONS_LOG, command_handling,
-                                clear_log_files,
-                                has_test, has_train, get_test_dataset)
+                                clear_log_files, get_test_dataset)
 
 COMMAND_LOG = u".bigmler_cluster"
 DIRS_LOG = u".bigmler_cluster_dir_stack"
@@ -61,18 +60,11 @@ def cluster_dispatcher(args=sys.argv[1:]):
     command_args = a.parse_and_check(command)
     resume = command_args.resume
     if command_args.resume:
-        # Keep the debug option if set
-        debug = command_args.debug
-        # Restore the args of the call to resume from the command log file
-        stored_command = StoredCommand(args, COMMAND_LOG, DIRS_LOG)
-        command = Command(None, stored_command=stored_command)
-        # Logs the issued command and the resumed command
-        session_file = os.path.join(stored_command.output_dir, SESSIONS_LOG)
-        stored_command.log_command(session_file=session_file)
-        # Parses resumed arguments.
-        command_args = a.parse_and_check(command)
+        command_args, session_file, output_dir = get_stored_command(
+            args, command_args.debug, command_log=COMMAND_LOG,
+            dirs_log=DIRS_LOG, sessions_log=SESSIONS_LOG)
         if command_args.predictions is None:
-            command_args.predictions = os.path.join(stored_command.output_dir,
+            command_args.predictions = os.path.join(output_dir,
                                                     DEFAULT_OUTPUT)
     else:
         if command_args.output_dir is None:
@@ -100,12 +92,10 @@ def cluster_dispatcher(args=sys.argv[1:]):
                           log_file=DIRS_LOG)
 
     # Creates the corresponding api instance
-    if resume and debug:
-        command_args.debug = True
     api = a.get_api_instance(command_args, u.check_dir(session_file))
 
     # Selects the action to perform
-    if (has_train(command_args) or has_test(command_args)
+    if (a.has_train(command_args) or a.has_test(command_args)
             or command_args.cluster_datasets is not None):
         output_args = a.get_output_args(api, command_args, resume)
         a.transform_args(command_args, command.flags, api,
@@ -160,10 +150,11 @@ def compute_output(api, args):
     source, resume, csv_properties, fields = pms.get_source_info(
         api, args, resume, csv_properties, session_file, path, log)
     # basic pre-model step: creating or retrieving the dataset related info
-    (dataset, datasets, test_dataset, resume,
-     csv_properties, fields) = pms.get_dataset_info(
+    dataset_properties = pms.get_dataset_info(
         api, args, resume, source,
         csv_properties, fields, session_file, path, log)
+    (_, datasets, test_dataset,
+     resume, csv_properties, fields) = dataset_properties
     if args.cluster_file:
         # cluster is retrieved from the contents of the given local JSON file
         cluster, csv_properties, fields = u.read_local_resource(
@@ -182,7 +173,7 @@ def compute_output(api, args):
     # We update the cluster's public state if needed
     if cluster:
         if isinstance(cluster, basestring):
-            if args.cluster_datasets is None and not has_test(args):
+            if args.cluster_datasets is None and not a.has_test(args):
                 query_string = MINIMUM_MODEL
             else:
                 query_string = ''
@@ -208,7 +199,7 @@ def compute_output(api, args):
         fields = pc.get_cluster_fields(cluster, csv_properties, args)
 
     # If predicting
-    if clusters and (has_test(args) or (test_dataset and args.remote)):
+    if clusters and (a.has_test(args) or (test_dataset and args.remote)):
         if test_dataset is None:
             test_dataset = get_test_dataset(args)
 
@@ -218,12 +209,11 @@ def compute_output(api, args):
             # create test source from file
             test_name = "%s - test" % args.name
             if args.test_source is None:
-                (test_source,
-                 resume,
-                 csv_properties,
-                 test_fields) = ps.test_source_processing(
+                test_properties = ps.test_source_processing(
                     api, args, resume, name=test_name,
                     session_file=session_file, path=path, log=log)
+                (test_source, resume,
+                 csv_properties, test_fields) = test_properties
             else:
                 test_source_id = bigml.api.get_source_id(args.test_source)
                 test_source = api.check_resource(test_source_id)
@@ -252,7 +242,7 @@ def compute_output(api, args):
     if cluster and args.cluster_datasets is not None:
         centroids_info = cluster['object']['clusters']['clusters']
         centroids = {centroid['name']: centroid['id']
-                          for centroid in centroids_info}
+                     for centroid in centroids_info}
         datasets = cluster['object']['cluster_datasets']
         if args.cluster_datasets == '':
             centroid_ids = centroids.values()
@@ -260,7 +250,7 @@ def compute_output(api, args):
             centroid_ids = [centroids[cluster_name] for cluster_name in
                             args.cluster_datasets_
                             if datasets[centroids[cluster_name]] == '']
-        
+
         for centroid_id in centroid_ids:
             dataset_args = {'centroid': centroid_id}
             r.create_dataset(cluster, dataset_args, args, api=api, path=path,

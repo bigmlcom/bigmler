@@ -14,7 +14,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-"""BigMLer - cluster subcommand processing dispatching
+"""BigMLer - sample subcommand processing dispatching
 
 """
 from __future__ import absolute_import
@@ -22,21 +22,18 @@ from __future__ import absolute_import
 import sys
 import os
 
-import bigml.api
 import bigmler.utils as u
 import bigmler.resources as r
 import bigmler.pre_model_steps as pms
 import bigmler.processing.args as a
 import bigmler.processing.samples as psa
-import bigmler.processing.sources as ps
-import bigmler.processing.datasets as pd
 
 from bigmler.defaults import DEFAULTS_FILE
-from bigmler.command import Command, StoredCommand
+from bigmler.command import get_stored_command
 from bigmler.dispatcher import (SESSIONS_LOG, command_handling,
-                                clear_log_files,
-                                has_train)
+                                clear_log_files)
 from bigmler.sampleoutput import sample_file
+from bigmler.reports import clear_reports, upload_reports
 
 COMMAND_LOG = u".bigmler_sample"
 DIRS_LOG = u".bigmler_sample_dir_stack"
@@ -49,7 +46,7 @@ def has_sample(args):
     """Returns if some kind of sample id is given in args.
 
     """
-    return (args.sample or args.samples or args.sample_tag)
+    return args.sample or args.samples or args.sample_tag
 
 
 def sample_dispatcher(args=sys.argv[1:]):
@@ -67,17 +64,10 @@ def sample_dispatcher(args=sys.argv[1:]):
     command_args = a.parse_and_check(command)
     resume = command_args.resume
     if command_args.resume:
-        # Keep the debug option if set
-        debug = command_args.debug
-        # Restore the args of the call to resume from the command log file
-        stored_command = StoredCommand(args, COMMAND_LOG, DIRS_LOG)
-        command = Command(None, stored_command=stored_command)
-        # Logs the issued command and the resumed command
-        session_file = os.path.join(stored_command.output_dir, SESSIONS_LOG)
-        stored_command.log_command(session_file=session_file)
-        # Parses resumed arguments.
-        command_args = a.parse_and_check(command)
-        command_args.predictions = os.path.join(stored_command.output_dir,
+        command_args, session_file, output_dir = get_stored_command(
+            args, command_args.debug, command_log=COMMAND_LOG,
+            dirs_log=DIRS_LOG, sessions_log=SESSIONS_LOG)
+        command_args.predictions = os.path.join(output_dir,
                                                 DEFAULT_OUTPUT)
     else:
         if command_args.output_dir is None:
@@ -104,12 +94,10 @@ def sample_dispatcher(args=sys.argv[1:]):
                           log_file=DIRS_LOG)
 
     # Creates the corresponding api instance
-    if resume and debug:
-        command_args.debug = True
     api = a.get_api_instance(command_args, u.check_dir(session_file))
 
     # Selects the action to perform
-    if (has_train(command_args) or has_sample(command_args)):
+    if a.has_train(command_args) or has_sample(command_args):
         output_args = a.get_output_args(api, command_args, resume)
         a.transform_args(command_args, command.flags, api,
                          command.user_defaults)
@@ -159,10 +147,11 @@ def compute_output(api, args):
     source, resume, csv_properties, fields = pms.get_source_info(
         api, args, resume, csv_properties, session_file, path, log)
     # basic pre-sample step: creating or retrieving the dataset related info
-    (dataset, datasets, test_dataset, resume,
-     csv_properties, fields) = pms.get_dataset_info(
+    dataset_properties = pms.get_dataset_info(
         api, args, resume, source,
         csv_properties, fields, session_file, path, log)
+    (_, datasets, _, resume,
+     csv_properties, fields) = dataset_properties
     if args.sample_file:
         # sample is retrieved from the contents of the given local JSON file
         sample, csv_properties, fields = u.read_local_resource(
@@ -173,7 +162,7 @@ def compute_output(api, args):
     else:
         # sample is retrieved from the remote object
         samples, sample_ids, resume = psa.samples_processing(
-            datasets, samples, sample_ids, api, args, resume, fields=fields,
+            datasets, samples, sample_ids, api, args, resume,
             session_file=session_file, path=path, log=log)
         if samples:
             sample = samples[0]

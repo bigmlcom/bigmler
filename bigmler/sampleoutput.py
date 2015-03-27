@@ -19,7 +19,6 @@
 from __future__ import absolute_import
 
 import csv
-import sys
 import json
 import os
 
@@ -30,7 +29,7 @@ import bigmler.resources as r
 STAT_KEYS = ["spearman_correlation", "pearson_correlation", "slope",
              "intercept", "spearman_correlations", "pearson_correlations",
              "slopes", "intercepts"]
-
+LINEAR_MODE = "linear"
 
 def translate_to_id(value, fields):
     """Tries to translate to the corresponding id a field name maybe
@@ -59,7 +58,6 @@ def translate_to_id(value, fields):
             except ValueError:
                 print ("WARNING: Failed to find \"%s\" in the sample fields"
                        " structure")
-                pass
         return ids
 
 
@@ -86,10 +84,16 @@ def sample_query_string(args, fields):
         query_string.append('rows=%s' % args.rows)
     if args.row_offset:
         query_string.append('row_offset=%s' % args.row_offset)
-    if args.row_order_by: 
-        row_order_by_id = translate_to_id(args.row_order_by, fields)
-        if row_order_by_id:
-            query_string.append('row_order_by=%s' % row_order_by_id)
+    if args.row_order_by:
+        if args.mode is None:
+            args.mode = LINEAR_MODE
+        elif args.mode != LINEAR_MODE:
+            print ("WARNING: --row-order-by can only be used with \"linear\""
+                   " --mode. Ignoring --row-order-by.")
+        else:
+            row_order_by_id = translate_to_id(args.row_order_by, fields)
+            if row_order_by_id:
+                query_string.append('row_order_by=%s' % row_order_by_id)
     if args.row_fields_:
         row_fields_ids = translate_to_id(args.row_fields_, fields)
         if row_fields_ids:

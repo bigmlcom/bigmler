@@ -400,7 +400,7 @@ def set_dataset_split_args(name, description, args, sample_rate,
         "out_of_bag": out_of_bag
     }
     if (hasattr(args, "multi_label") and
-        args.multi_label and multi_label_data is not None):
+            args.multi_label and multi_label_data is not None):
         dataset_args.update(
             user_metadata={'multi_label_data': multi_label_data})
     return dataset_args
@@ -531,9 +531,9 @@ def set_model_args(args, name=None, objective_id=None, fields=None,
               and not args.dataset_off):
             args.sample_rate = EVALUATE_SAMPLE_RATE
     if model_fields and fields is not None:
-            input_fields = configure_input_fields(
-                fields, model_fields, by_name=(args.max_categories > 0))
-            model_args.update(input_fields=input_fields)
+        input_fields = configure_input_fields(
+            fields, model_fields, by_name=(args.max_categories > 0))
+        model_args.update(input_fields=input_fields)
 
     if args.pruning and args.pruning != 'smart':
         model_args.update(stat_pruning=(args.pruning == 'statistical'))
@@ -728,10 +728,12 @@ def get_models(model_ids, args, api=None, session_file=None):
             try:
                 # if there's more than one model the first one must contain
                 # the entire field structure to be used as reference.
-                query_string = (ALL_FIELDS_QS if ((not single_model
-                                and (len(models) == 0 or args.multi_label)) or
-                                not args.test_header)
-                                else FIELDS_QS)
+                query_string = (
+                    ALL_FIELDS_QS if (
+                        (not single_model and (
+                            len(models) == 0 or args.multi_label)) or
+                        not args.test_header)
+                    else FIELDS_QS)
                 model = check_resource(model, api.get_model,
                                        query_string=query_string)
             except ValueError, exception:
@@ -873,7 +875,6 @@ def create_ensembles(datasets, ensemble_ids, ensemble_args, args,
                         plural("ensemble", number_of_ensembles))
         log_message(message, log_file=session_file,
                     console=args.verbosity)
-        query_string = ALL_FIELDS_QS
         inprogress = []
         for i in range(0, number_of_ensembles):
             wait_for_available_tasks(inprogress, args.max_parallel_ensembles,
@@ -1565,6 +1566,20 @@ def set_anomaly_args(args, name=None, fields=None,
     return anomaly_args
 
 
+def set_publish_anomaly_args(args):
+    """Set args to publish anomaly
+
+    """
+    public_anomaly = {}
+    if args.public_anomaly:
+        public_anomaly = {"private": False}
+        if args.model_price:
+            public_anomaly.update(price=args.model_price)
+        if args.cpp:
+            public_anomaly.update(credits_per_prediction=args.cpp)
+    return public_anomaly
+
+
 def create_anomalies(datasets, anomaly_ids, anomaly_args,
                      args, api=None, path=None,
                      session_file=None, log=None):
@@ -1805,7 +1820,6 @@ def create_samples(datasets, sample_ids, sample_args,
     datasets = datasets[existing_samples:]
     # if resuming and all samples were created, there will be no datasets left
     if datasets:
-        dataset = datasets[0]
         if isinstance(sample_args, list):
             sample_args_list = sample_args
 
@@ -1902,3 +1916,13 @@ def get_samples(sample_ids, args,
     samples[0] = sample
 
     return samples, sample_ids
+
+
+def set_publish_sample_args(args):
+    """Set args to publish sample
+
+    """
+    public_sample = {}
+    if args.public_sample:
+        public_sample = {"private": False}
+    return public_sample

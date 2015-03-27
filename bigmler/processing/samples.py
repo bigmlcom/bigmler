@@ -27,14 +27,14 @@ from bigml.fields import Fields, DEFAULT_MISSING_TOKENS
 
 
 def has_samples(args):
-    """Returns whether some kind of sample
+    """Returns whether there's some kind of sample option in the command
 
     """
     return args.sample or args.samples or args.sample_tag
 
 
 def needs_sample_fields(args):
-    """checks whether there's any argument that need the sample fields
+    """checks whether there's any argument that needs the sample fields
        structure to be translated into field ids
 
     """
@@ -43,7 +43,7 @@ def needs_sample_fields(args):
 
 
 def samples_processing(datasets, samples, sample_ids,
-                       api, args, resume, fields=None,
+                       api, args, resume,
                        session_file=None, path=None,
                        log=None):
     """Creates or retrieves samples from the input data

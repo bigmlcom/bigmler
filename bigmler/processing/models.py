@@ -201,7 +201,7 @@ def get_model_fields(model, csv_properties, args, single_model=True,
         args.user_locale = model['object'].get('locale', None)
     csv_properties.update(data_locale=args.user_locale)
     if (single_model and 'model_fields' in model['object']['model'] and
-        args.test_header):
+            args.test_header):
         model_fields = model['object']['model']['model_fields'].keys()
         csv_properties.update(include=model_fields)
     else:
