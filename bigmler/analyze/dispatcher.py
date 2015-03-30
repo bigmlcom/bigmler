@@ -99,11 +99,16 @@ def analyze_dispatcher(args=sys.argv[1:]):
                         resume=resume)
 
     # features analysis
-    if command_args.features:
+    elif command_args.features:
         create_features_analysis(command_args, api, command.common_options,
                                  resume=resume)
 
     # node threshold analysis
-    if command_args.nodes:
+    elif command_args.nodes:
         create_nodes_analysis(command_args, api, command.common_options,
                               resume=resume)
+    else:
+        sys.exit("You must choose one of the available analysis: --features,"
+                 " --nodes or --cross-validation. Add your prefered option to"
+                 " the command line or type\n    bigmler analyze --help\n"
+                 " to see all the available options.")
