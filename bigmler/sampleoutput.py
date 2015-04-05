@@ -117,10 +117,9 @@ def sample_file(sample, fields, args, api, path=None, session_file=None):
 
     """
     query_string = sample_query_string(args, fields)
-    print query_string
     sample = r.get_samples([sample], args, api,
-                           session_file=session_file,
-                           query_string=query_string)[0][0]
+                            session_file=session_file,
+                            query_string=query_string)[0][0]
     output = args.predictions
     output = csv.writer(open(output, 'w', 0), lineterminator="\n")
     headers = [field['name'] for field in sample['object']['sample']['fields']]

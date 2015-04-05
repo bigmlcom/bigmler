@@ -1910,7 +1910,7 @@ def get_samples(sample_ids, args,
                                 query_string=query_string)
         check_resource_error(sample, "Failed to create sample: %s"
                              % sample['resource'])
-        sample = check_resource(sample, api=api)
+        sample = check_resource(sample, api=api, query_string=query_string)
     except ValueError, exception:
         sys.exit("Failed to get a finished sample: %s" % str(exception))
     samples[0] = sample

@@ -127,7 +127,6 @@ def cleanup_resources(feature):
     delete(world.samples)
 
     store_final_resources()
-
     for folder in world.folders:
         try:
             shutil.rmtree(folder)
