@@ -147,13 +147,13 @@ def main_dispatcher(args=sys.argv[1:]):
                       else 'predictions.csv')
     resume = command_args.resume
     if command_args.resume:
-        command_args, session_file, stored_command = get_stored_command(
+        command_args, session_file, output_dir = get_stored_command(
             args, command_args.debug, command_log=COMMAND_LOG,
             dirs_log=DIRS_LOG, sessions_log=SESSIONS_LOG)
         default_output = ('evaluation' if command_args.evaluate
                           else 'predictions.csv')
         if command_args.predictions is None:
-            command_args.predictions = os.path.join(stored_command.output_dir,
+            command_args.predictions = os.path.join(output_dir,
                                                     default_output)
     else:
         if command_args.output_dir is None:

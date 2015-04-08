@@ -3,8 +3,13 @@
 History
 -------
 
+2.0.1 (2015-04-09)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug: resuming commands failed retrieving the output directory
+
 2.0.0 (2015-03-26)
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 - Fixing docs formatting errors.
 - Adding --to-dataset and --no-csv flags causing batch predictions,
