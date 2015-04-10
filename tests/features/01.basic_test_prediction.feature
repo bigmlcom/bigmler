@@ -18,7 +18,7 @@ Feature: Upload source and produce test predictions
     Scenario: Successfully building test predictions from start:
         Given I create BigML resources uploading train "<data>" file to test "<test>" and log predictions in "<output>"
         And I check that the source has been created
-        And I check that the dataset has been created 
+        And I check that the dataset has been created
         And I check that the model has been created
         And I check that the predictions are ready
         Then the local prediction file is like "<predictions_file>"
@@ -53,7 +53,7 @@ Feature: Upload source and produce test predictions
         | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | ../data/test_iris.csv   | ./scenario3/predictions.csv   | ./check_files/predictions_iris.csv   |
 
     Scenario: Successfully building test predictions from model
-        Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>        
+        Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
         And I create BigML resources using model to test "<test>" and log predictions in "<output>"
         And I check that the predictions are ready
         Then the local prediction file is like "<predictions_file>"
@@ -160,8 +160,8 @@ Feature: Upload source and produce test predictions
     Scenario: Successfully building test predictions from start with user-given separator:
         Given I create BigML resources uploading train "<data>" file to test "<test>" and log predictions in "<output>" with "<separator>" as test field separator
         And I check that the source has been created
-        And I check that the dataset has been created 
-        And I check that the model has been created 
+        And I check that the dataset has been created
+        And I check that the model has been created
         And I check that the predictions are ready
         Then the local prediction file is like "<predictions_file>"
 
@@ -172,8 +172,8 @@ Feature: Upload source and produce test predictions
     Scenario: Successfully building test predictions from start with different prediction file format:
         Given I create BigML resources uploading train "<data>" file to test "<test>" and log predictions in "<output>" with prediction options "<options>"
         And I check that the source has been created
-        And I check that the dataset has been created 
-        And I check that the model has been created 
+        And I check that the dataset has been created
+        And I check that the model has been created
         And I check that the predictions are ready
         Then the local prediction file is like "<predictions_file>"
 
@@ -182,7 +182,7 @@ Feature: Upload source and produce test predictions
         | ../data/iris.csv   | ../data/test_iris.csv   |./scenario15/predictions.csv   |--prediction-header --prediction-fields 'petal length,petal width' --prediction-info full | ./check_files/predictions_iris_h.csv   |
 
     Scenario: Successfully building threshold test predictions from ensemble
-        Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs> 
+        Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
         And I create BigML resources using ensemble of <number_of_models> models with replacement to test "<test>" and log predictions in "<output>"
         And I check that the ensemble has been created
         And I check that the predictions are ready
@@ -194,7 +194,7 @@ Feature: Upload source and produce test predictions
         | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | 10              | ../data/test_iris.csv   | ./scenario16/predictions.csv   | ./scenario16/predictions2.csv | ./scenario16/predictions3.csv 
 
     Scenario: Successfully building test predictions from local model
-        Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>        
+        Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
         And I create BigML resources using local model in "<scenario>" to test "<test>" and log predictions in "<output>"
         And I check that the predictions are ready
         Then the local prediction file is like "<predictions_file>"
@@ -204,8 +204,8 @@ Feature: Upload source and produce test predictions
         | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | ../data/test_iris.csv   | ./scenario17/predictions.csv   | ./check_files/predictions_iris.csv   |
 
     Scenario: Successfully building test predictions from ensemble
-        Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs> 
-        Given I have previously executed "<scenario2>" or reproduce it with arguments <kwargs2> 
+        Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
+        Given I have previously executed "<scenario2>" or reproduce it with arguments <kwargs2>
         And I create BigML resources using local ensemble of <number_of_models> models in "<scenario2>" to test "<test>" and log predictions in "<output>"
         And I check that the predictions are ready
         Then the local prediction file is like "<predictions_file>"
@@ -213,3 +213,15 @@ Feature: Upload source and produce test predictions
         Examples:
         |scenario    | kwargs                                                  |scenario2    | kwargs2                                                  | number_of_models | test                    | output                        |predictions_file                      |
         | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | scenario5| {"number_of_models": 10, "output": "./scenario5/predictions.csv", "test": "../data/test_iris.csv"}       | 10               | ../data/test_iris.csv   | ./scenario18/predictions.csv   | ./check_files/predictions_iris.csv   |
+
+    Scenario: Successfully building test predictions from start using median:
+        Given I create BigML resources uploading train "<data>" file using the median to test "<test>" and log predictions in "<output>"
+        And I check that the source has been created
+        And I check that the dataset has been created
+        And I check that the model has been created
+        And I check that the predictions are ready
+        Then the local prediction file is like "<predictions_file>"
+
+        Examples:
+        | data               | test                    | output                       |predictions_file           |
+        | ../data/grades.csv | ../data/test_grades.csv | ./scenario19/predictions.csv | ./check_files/predictions_grades_median.csv |

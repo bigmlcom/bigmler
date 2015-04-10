@@ -45,6 +45,15 @@ def shell_execute(command, output, test=None, options=None):
         assert False, str(exc)
 
 
+@step(r'I create BigML resources uploading train "(.*?)" file using the median to test "(.*?)" and log predictions in "([^"]*)"$')
+def i_create_all_resources_with_median(step, data=None, test=None, output=None):
+    if data is None or test is None or output is None:
+        assert False
+    command = ("bigmler --train " + data + " --test " + test +
+               " --store --output " + output + " --median --max-batch-models 1 --no-fast")
+    shell_execute(command, output, test=test)
+
+
 @step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" remotely to a dataset with no CSV output and log resources in "([^"]*)"$')
 def i_create_all_resources_batch_to_dataset(step, data=None, test=None, output_dir=None):
     if data is None or test is None or output_dir is None:

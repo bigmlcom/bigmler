@@ -9,7 +9,7 @@ and models, create ensembles,
 make local predictions from multiple models, and simplify many other machine
 learning tasks. For additional information, see
 the
-`full documentation for BigMLer on Read the Docs <http://bigmler.readthedocs.org>`_. 
+`full documentation for BigMLer on Read the Docs <http://bigmler.readthedocs.org>`_.
 
 BigMLer is open sourced under the `Apache License, Version
 2.0 <http://www.apache.org/licenses/LICENSE-2.0.html>`_.
@@ -29,7 +29,7 @@ Requirements
 
 Python 2.7 is currently supported by BigMLer.
 
-BigMLer requires `bigml 3.0.2 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 4.0.0 <https://github.com/bigmlcom/python>`_  or
 higher. Using proportional missing strategy will additionally request
 the use of the `numpy <http://www.numpy.org/>`_ and
 `scipy <http://www.scipy.org/>`_ libraries. They are not
@@ -47,12 +47,16 @@ BigMLer Installation
 ====================
 
 To install the latest stable release with
-`pip <http://www.pip-installer.org/>`_::
+`pip <http://www.pip-installer.org/>`_
+
+.. code-block:: bash
 
     $ pip install bigmler
 
 You can also install the development version of bigmler directly
-from the Git repository::
+from the Git repository
+
+.. code-block:: bash
 
     $ pip install -e git://github.com/bigmlcom/bigmler.git#egg=bigmler
 
@@ -70,13 +74,17 @@ transmitted over HTTPS.
 BigML module will look for your username and API key in the environment
 variables ``BIGML_USERNAME`` and ``BIGML_API_KEY`` respectively. You can
 add the following lines to your ``.bashrc`` or ``.bash_profile`` to set
-those variables automatically when you log in::
+those variables automatically when you log in
+
+.. code-block:: bash
 
     export BIGML_USERNAME=myusername
     export BIGML_API_KEY=ae579e7e53fb9abd646a6ff8aa99d4afe83ac291
 
 Otherwise, you can initialize directly when running the BigMLer
-script as follows::
+script as follows
+
+.. code-block:: bash
 
     bigmler --train data/iris.csv --username myusername --api_key ae579e7e53fb9abd646a6ff8aa99d4afe83ac291
 
@@ -93,21 +101,29 @@ To install BigMLer on Windows environments, you'll need `Python for Windows
 In addition to that, you'll need the ``pip`` tool to install BigMLer. To
 install pip, first you need to open your command line window (write ``cmd`` in
 the input field that appears when you click on ``Start`` and hit ``enter``),
-download this `python file <http://python-distribute.org/distribute_setup.py>`_ 
-and execute it::
+download this `python file <http://python-distribute.org/distribute_setup.py>`_
+and execute it
+
+.. code-block:: bash
 
     c:\Python27\python.exe distribute_setup.py
 
-After that, you'll be able to install ``pip`` by typing the following command::
+After that, you'll be able to install ``pip`` by typing the following command
+
+.. code-block:: bash
 
     c:\Python27\Scripts\easy_install.exe pip
 
-And finally, to install BigMLer, just type::
+And finally, to install BigMLer, just type
+
+.. code-block:: bash
 
     c:\Python27\Scripts\pip.exe install bigmler
 
 and BigMLer should be installed in your computer. Then
-issuing::
+issuing
+
+.. code-block:: bash
 
     bigmler --version
 
@@ -115,7 +131,9 @@ should show BigMLer version information.
 
 Finally, to start using BigMLer to handle your BigML resources, you need to
 set your credentials in BigML for authentication. If you want them to be
-permanently stored in your system, use::
+permanently stored in your system, use
+
+.. code-block:: bash
 
     setx BIGML_USERNAME myusername
     setx BIGML_API_KEY ae579e7e53fb9abd646a6ff8aa99d4afe83ac291
@@ -125,7 +143,9 @@ BigML Development Mode
 ======================
 
 Also, you can instruct BigMLer to work in BigML's Sandbox
-environment by using the parameter ``---dev``::
+environment by using the parameter ``---dev``
+
+.. code-block:: bash
 
     bigmler --train data/iris.csv --dev
 
@@ -136,11 +156,15 @@ Using BigMLer
 =============
 
 To run BigMLer you can use the console script directly. The `--help` option will
-describe all the available options::
+describe all the available options
+
+.. code-block:: bash
 
     bigmler --help
 
-Alternatively you can just call bigmler as follows::
+Alternatively you can just call bigmler as follows
+
+.. code-block:: bash
 
     python bigmler.py --help
 
@@ -156,18 +180,24 @@ sections in `BigMLer on Read the Docs <http://bigmler.readthedocs.org>`_ if you 
 Basics
 ------
 
-You can create a new model just with ::
+You can create a new model just with
+
+.. code-block:: bash
 
     bigmler --train data/iris.csv
 
 If you check your `dashboard at BigML <https://bigml.com/dashboard>`_, you will
 see a new source, dataset, and model. Isn't it magic?
 
-You can generate predictions for a test set using::
+You can generate predictions for a test set using
+
+.. code-block:: bash
 
     bigmler --train data/iris.csv --test data/test_iris.csv
 
-You can also specify a file name to save the newly created predictions::
+You can also specify a file name to save the newly created predictions
+
+.. code-block:: bash
 
     bigmler --train data/iris.csv --test data/test_iris.csv --output predictions
 
@@ -177,7 +207,9 @@ With ``--prediction-info``
 flag set to ``brief`` only the prediction result will be stored (default is
 ``normal`` and includes confidence information).
 
-A different ``objective field`` (the field that you want to predict) can be selected using::
+A different ``objective field`` (the field that you want to predict) can be selected using
+
+.. code-block:: bash
 
     bigmler --train data/iris.csv --test data/test_iris.csv  --objective 'sepal length'
 
@@ -187,13 +219,17 @@ column in your dataset.
 Also, if your test file uses a particular field separator for its data,
 you can tell BigMLer using ``--test-separator``.
 For example, if your test file uses the tab character as field separator the
-call should be like::
+call should be like
+
+.. code-block:: bash
 
     bigmler --train data/iris.csv --test data/test_iris.tsv \
             --test-separator '\t'
 
 If you don't provide a file name for your training source, BigMLer will try to
-read it from the standard input::
+read it from the standard input
+
+.. code-block:: bash
 
     cat data/iris.csv | bigmler --train
 
@@ -201,7 +237,9 @@ BigMLer will try to use the locale of the model both to create a new source
 (if ``--train`` flag is used) and to interpret test data. In case
 it fails, it will try ``en_US.UTF-8``
 or ``English_United States.1252`` and a warning message will be printed.
-If you want to change this behaviour you can specify your preferred locale::
+If you want to change this behaviour you can specify your preferred locale
+
+.. code-block:: bash
 
     bigmler --train data/iris.csv --test data/test_iris.csv \
     --locale "English_United States.1252"
@@ -231,12 +269,16 @@ Running the Tests
 -----------------
 
 To run the tests you will need to install
-`lettuce <http://packages.python.org/lettuce/tutorial/simple.html>`_::
+`lettuce <http://packages.python.org/lettuce/tutorial/simple.html>`_
+
+.. code-block:: bash
 
     $ pip install lettuce
 
 and set up your authentication via environment variables, as explained
-above. With that in place, you can run the test suite simply by::
+above. With that in place, you can run the test suite simply by
+
+.. code-block:: bash
 
     $ cd tests
     $ lettuce

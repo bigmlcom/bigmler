@@ -316,6 +316,10 @@ def local_predict(models, test_reader, output, args, options=None,
         input_data_dict = dict(zip(test_reader.raw_headers, input_data))
         prediction = local_model.predict(
             input_data_dict, **kwargs)
+        if single_model and args.median:
+            # only single models' predictions can be based on the median value
+            # predict
+            prediction[0] = prediction[-1]
         write_prediction(prediction[0: 2],
                          output,
                          args.prediction_info, input_data, exclude)
@@ -326,7 +330,7 @@ def retrieve_models_split(models_split, api, query_string=FIELDS_QS,
                           models_order=None):
     """Returns a list of full model structures ready to be fed to the
        MultiModel object to produce predictions. Models are also stored
-       locally in the output directory when the --store flag is used
+       locally in the output directory when the --store flag is used.
 
     """
     complete_models = []
@@ -515,7 +519,8 @@ def local_batch_predict(models, test_reader, prediction_file, api, args,
                 votes = local_model.batch_predict(
                     raw_input_data_list, output_path, by_name=test_set_header,
                     reuse=True, missing_strategy=args.missing_strategy,
-                    headers=test_reader.raw_headers, to_file=(not args.fast))
+                    headers=test_reader.raw_headers, to_file=(not args.fast),
+                    use_median=args.median)
             except ImportError:
                 sys.exit("Failed to find the numpy and scipy libraries needed"
                          " to use proportional missing strategy for"

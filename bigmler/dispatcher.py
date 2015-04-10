@@ -130,6 +130,35 @@ def get_objective_id(args, fields):
     return objective_id
 
 
+def check_args_coherence(args):
+    """Checks the given options for coherence and completitude
+
+    """
+    # It is compulsory to have a description to publish either datasets or
+    # models
+    if (not args.description_ and
+            (args.black_box or args.white_box or args.public_dataset)):
+        sys.exit("You should provide a description to publish.")
+
+    # When using --max-categories, it is compulsory to specify also the
+    # objective_field
+    if args.max_categories > 0 and args.objective_field is None:
+        sys.exit("When --max-categories is used, you must also provide the"
+                 " --objective field name or column number")
+
+    # When using --new-fields, it is compulsory to specify also a dataset
+    # id
+    if args.new_fields and not args.dataset:
+        sys.exit("To use --new-fields you must also provide a dataset id"
+                 " to generate the new dataset from it.")
+    # The --median option is only available for single models, not for
+    # ensembles
+    if args.median and args.number_of_models > 1:
+        print ("WARNING: the --median option is only available for model's"
+               " predictions. Using the mean value in the predicted node"
+               " instead.")
+
+
 def main_dispatcher(args=sys.argv[1:]):
     """Parses command line and calls the different processing functions
 
@@ -216,23 +245,7 @@ def compute_output(api, args):
     output = args.predictions
     dataset_fields = args.dataset_fields_
 
-    # It is compulsory to have a description to publish either datasets or
-    # models
-    if (not args.description_ and
-            (args.black_box or args.white_box or args.public_dataset)):
-        sys.exit("You should provide a description to publish.")
-
-    # When using --max-categories, it is compulsory to specify also the
-    # objective_field
-    if args.max_categories > 0 and args.objective_field is None:
-        sys.exit("When --max-categories is used, you must also provide the"
-                 " --objective field name or column number")
-
-    # When using --new-fields, it is compulsory to specify also a dataset
-    # id
-    if args.new_fields and not args.dataset:
-        sys.exit("To use --new-fields you must also provide a dataset id"
-                 " to generate the new dataset from it.")
+    check_args_coherence(args)
 
     path = u.check_dir(output)
     session_file = "%s%s%s" % (path, os.sep, SESSIONS_LOG)

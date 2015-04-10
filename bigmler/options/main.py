@@ -623,6 +623,22 @@ def get_main_options(defaults=None, constants=None):
             'dest': 'to_dataset',
             'default': defaults.get('to_dataset', False),
             'help': ("Create a dataset as ouput of a batch"
+                     " prediction.")},
+
+        # Use median as predicted value in local models predictions
+        '--median': {
+            'action': 'store_true',
+            'dest': 'median',
+            'default': defaults.get('median', False),
+            'help': ("Use medtan instead on mean as node"
+                     " prediction.")},
+
+        # Use mean as predicted value in local models predictions
+        '--no-median': {
+            'action': 'store_false',
+            'dest': 'median',
+            'default': defaults.get('median', False),
+            'help': ("Use mean instead on median as node"
                      " prediction.")}}
 
     return options

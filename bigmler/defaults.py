@@ -148,7 +148,8 @@ FLAGS = {
         {'flag': 'project', 'type': 'string'},
         {'flag': 'project_id', 'type': 'string'},
         {'flag': 'no_csv', 'type': 'boolean'},
-        {'flag': 'to_dataset', 'type': 'boolean'}],
+        {'flag': 'to_dataset', 'type': 'boolean'},
+        {'flag': 'median', 'type': 'boolean'}],
     'BigMLer analyze': [
         {'flag': 'k-fold', 'type': 'integer'},
         {'flag': 'cv', 'type': 'boolean'},

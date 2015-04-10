@@ -3,6 +3,15 @@
 History
 -------
 
+2.1.0 (2015-04-10)
+~~~~~~~~~~~~~~~~~~
+
+- Adding --median flag to use median instead of mean in single models'
+  predictions.
+- Updating underlying BigML python bindings' version to 4.0.0 (Python 3
+  compatible).
+
+
 2.0.1 (2015-04-09)
 ~~~~~~~~~~~~~~~~~~
 
@@ -270,7 +279,7 @@ History
 ~~~~~~~~~~~~~~~~~~
 
 - Adding the ``analyze`` subcommand. The subcommand presents new features,
-  such as: 
+  such as:
 
     ``--cross-validation`` that performs k-fold cross-validation,
     ``--features`` that selects the best features to increase accuracy
@@ -364,7 +373,7 @@ History
 
 - Fix to allow the input data for multi-label predictions to be expanded.
 - Fix to retrieve from the models definition info the labels that were
-  given by the user in its creation in multi-label models. 
+  given by the user in its creation in multi-label models.
 
 1.4.0 (2014-01-20)
 ~~~~~~~~~~~~~~~~~~
@@ -378,7 +387,7 @@ History
 
 - Adding new --source-attributes, --ensemble-attributes,
   --evaluation-attributes and --batch-prediction-attributes options.
-- Refactoring --multi-label resources to include its related info in 
+- Refactoring --multi-label resources to include its related info in
   the user_metadata attribute.
 - Refactoring the main routine.
 - Adding --batch-prediction-tag for delete operations.
@@ -476,7 +485,7 @@ History
 
 - Adapting to predictions issued by the high performance prediction server and
   the 0.9.0 version of the python bindings.
-- Support for shared models using the same version on python bindings. 
+- Support for shared models using the same version on python bindings.
 - Support for different server names using environment variables.
 
 0.4.1 (2013-10-02)
