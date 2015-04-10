@@ -58,7 +58,7 @@ distutils.core.setup(
                 'bigmler.cluster', 'bigmler.anomaly',
                 'bigmler.options', 'bigmler.delete', 'bigmler.sample'],
     include_package_data = True,
-    install_requires = ['bigml>=3.0.2, <3.1.0'],
+    install_requires = ['bigml>=4.0.1, <4.1.0'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',

@@ -801,9 +801,9 @@ fields with respect to the first one, the file would read
 
 .. code-block::
 
-{"fields_maps": {"dataset/53330bce37203f222e00004b": {"000000": "000001",
-                                                      "000001": "000000"}}
-}
+    {"fields_maps": {"dataset/53330bce37203f222e00004b": {"000000": "000001",
+                                                          "000001": "000000"}}
+    }
 
 where ``dataset/53330bce37203f222e00004b`` would be the id of the
 second dataset in the multi-dataset.
@@ -1936,31 +1936,35 @@ want to override the dev mode used by default you should use
 
 The set of negative flags is:
 
---no-debug                  as opposed to --debug
---no-dev                    as opposed to --dev
---no-train-header           as opposed to --train-header
---no-test-header            as opposed to --test-header
---local                     as opposed to --remote
---no-replacement            as opposed to --replacement
---no-randomize              as opposed to --randomize
---no-no-tag                 as opposed to --no-tag
---no-public-dataset         as opposed to --public-dataset
---no-black-box              as opposed to --black-box
---no-white-box              as opposed to --white-box
---no-progress-bar           as opposed to --progress-bar
---no-no-dataset             as opposed to --no-dataset
---no-no-model               as opposed to --no-model
---no-clear-logs             as opposed to --clear-logs
---no-store                  as opposed to --store
---no-multi-label            as opposed to --multi-label
---no-prediction-header      as opposed to --prediction-header
---batch                     as opposed to --no-batch
---no-balance                as opposed to --balance
---no-multi-dataset          as opposed to --multi-dataset
---unshared                  as opposed to --shared
---upload                    as opposed to --no-upload
---fast                      as opposed to --no-fast
---no-no-csv                 as opposed to --no-csv
+
+==============================  ===============================================
+``--no-debug``                  as opposed to ``--debug``
+``--no-dev``                    as opposed to ``--dev``
+``--no-train-header``           as opposed to ``--train-header``
+``--no-test-header``            as opposed to ``--test-header``
+``--local``                     as opposed to ``--remote``
+``--no-replacement``            as opposed to ``--replacement``
+``--no-randomize``              as opposed to ``--randomize``
+``--no-no-tag``                 as opposed to ``--no-tag``
+``--no-public-dataset``         as opposed to ``--public-dataset``
+``--no-black-box``              as opposed to ``--black-box``
+``--no-white-box``              as opposed to ``--white-box``
+``--no-progress-bar``           as opposed to ``--progress-bar``
+``--no-no-dataset``             as opposed to ``--no-dataset``
+``--no-no-model``               as opposed to ``--no-model``
+``--no-clear-logs``             as opposed to ``--clear-logs``
+``--no-store``                  as opposed to ``--store``
+``--no-multi-label``            as opposed to ``--multi-label``
+``--no-prediction-header``      as opposed to ``--prediction-header``
+``--batch``                     as opposed to ``--no-batch``
+``--no-balance``                as opposed to ``--balance``
+``--no-multi-dataset``          as opposed to ``--multi-dataset``
+``--unshared``                  as opposed to ``--shared``
+``--upload``                    as opposed to ``--no-upload``
+``--fast``                      as opposed to ``--no-fast``
+``--no-no-csv``                 as opposed to ``--no-csv``
+``--no-median``                 as opposed to ``--median``
+==============================  ===============================================
 
 Support
 =======
@@ -1977,7 +1981,7 @@ Requirements
 
 Python 2.7 is currently supported by BigMLer.
 
-BigMLer requires `bigml 4.0.0 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 4.0.1 <https://github.com/bigmlcom/python>`_  or
 higher. Using proportional missing strategy will additionally request
 the use of the `numpy <http://www.numpy.org/>`_ and
 `scipy <http://www.scipy.org/>`_ libraries. They are not
@@ -2122,208 +2126,362 @@ Optional Arguments
 
 General configuration
 ---------------------
---username      BigML's username. If left unspecified, it will default to the
-                values of the ``BIGML_USERNAME`` environment variable
---api-key       BigML's api_key. If left unspecified, it will default to the
-                values of the ``BIGML_API_KEY`` environment variable
---dev           Uses FREE development environment. Sizes must be under 16MB
-                though
---debug         Activates debug level and shows log info for each https request
+
+==============   ==============================================================
+``--username``   BigML's username. If left unspecified, it will default to the
+                 values of the ``BIGML_USERNAME`` environment variable
+``--api-key``    BigML's api_key. If left unspecified, it will default to the
+                 values of the ``BIGML_API_KEY`` environment variable
+``--dev``        Uses FREE development environment. Sizes must be under 16MB
+                 though
+``--debug``      Activates debug level and shows log info for each https
+                 request
+==============   ==============================================================
 
 Basic Functionality
 -------------------
 
---train TRAINING_SET                Full path to a training set. It can be a
-                                    remote URL to a (gzipped or compressed) CSV
-                                    file. The protocol schemes can be http,
-                                    https, s3, azure, odata
---test TEST_SET                     Full path to a test set. A file containing
-                                    the data that
-                                    you want to input to generate predictions
---objective OBJECTIVE_FIELD         The column number  of the Objective Field
-                                    (the field that you want to predict) or its
-                                    name
---output PREDICTIONS                Full path to a file to save predictions.
-                                    If left unspecified, it will default to an
-                                    auto-generated file created by BigMLer. It
-                                    overrides --output-dir
---output-dir DIRECTORY              Directory where all the session files
-                                    will be stored. It is overriden by --output
---method METHOD                     Prediction method used: ``plurality``,
-                                    ``"confidence weighted"``,
-                                    ``"probability weighted"``, ``threshold``
-                                    or ``combined``.
---pruning PRUNING_TYPE              The pruning applied in building the model.
-                                    It's allowed values are ``smart``,
-                                    ``statistical`` and ``no-pruning``
-                                    The default value is ``smart``
---missing-strategy STRATEGY         The strategy applied predicting when a
-                                    missing value is found in a model split.
-                                    It's allowed values are ``last`` or
-                                    ``proportional``.
-                                    The default value is ``last``
---missing-splits                    Turns on the missing_splits flag in model
-                                    creation. The model splits can include
-                                    in one of its branches the data with
-                                    missing values
---evaluate                          Turns on evaluation mode
---resume                            Retries command execution
---stack-level LEVEL                 Level of the retried command in the stack
---cross-validation-rate RATE        Fraction of the training data held out for
-                                    Monte-Carlo cross-validation
---number-of-evaluations NUMBER_OF_EVALUATIONS    Number of runs that will be
-                                                 used in cross-validation
---max-parallel-evaluations MAX_PARALLEL_EVALUATIONS   Maximum number of
-                                                      evaluations
-                                                      to create in parallel
---project PROJECT_NAME              Project name for the project to be
-                                    associated to newly created sources
---project-id PROJECT_ID             Project id for the project to be
-                                    associated to newly created sources
---no-csv                            Causes the output of a batch prediction,
-                                    batch centroid or batch anomaly score
-                                    not to be downloaded as a CSV file
---to-dataset                        Causes the output of a batch prediction,
-                                    batch centroid or batch anomaly score
-                                    to be stored remotely as a new dataset
---median                            Predictions for single models are returned
-                                    based on the median of the distribution
-                                    in the predicted node
+===========================================================   =================
+``--train`` *TRAINING_SET*                                    Full path to a
+                                                              training set.
+                                                              It can be a
+                                                              remote URL to
+                                                              a (gzipped or
+                                                              compressed) CSV
+                                                              file. The
+                                                              protocol schemes
+                                                              can be http,
+                                                              https, s3, azure,
+                                                              odata
+``--test`` *TEST_SET*                                         Full path to a
+                                                              test set. A file
+                                                              containing
+                                                              the data that
+                                                              you want to input
+                                                              to generate
+                                                              predictions
+``--objective`` *OBJECTIVE_FIELD*                             The column number
+                                                              of the Objective
+                                                              Field
+                                                              (the field that
+                                                              you want to
+                                                              predict) or its
+                                                              name
+``--output`` *PREDICTIONS*                                    Full path to a
+                                                              file to save
+                                                              predictions.
+                                                              If unspecified,
+                                                              it will default
+                                                              to an
+                                                              auto-generated
+                                                              file created by
+                                                              BigMLer. It
+                                                              overrides
+                                                              ``--output-dir``
+``--output-dir`` *DIRECTORY*                                  Directory where
+                                                              all the session
+                                                              files
+                                                              will be stored.
+                                                              It is overriden
+                                                              by ``--output``
+``--method`` *METHOD*                                         Prediction method
+                                                              used:
+                                                              ``plurality``,
+                                                              ``"confidence
+                                                              weighted"``,
+                                                              ``"probability
+                                                              weighted"``,
+                                                              ``threshold``
+                                                              or ``combined``
+``--pruning`` *PRUNING_TYPE*                                  The pruning
+                                                              applied in
+                                                              building the
+                                                              model.
+                                                              It's allowed
+                                                              values are
+                                                              ``smart``,
+                                                              ``statistical``
+                                                              and
+                                                              ``no-pruning``
+                                                              The default value
+                                                              is ``smart``
+``--missing-strategy`` *STRATEGY*                             The strategy
+                                                              applied
+                                                              predicting
+                                                              when a
+                                                              missing value is
+                                                              found in a model
+                                                              split.
+                                                              It's allowed
+                                                              values are
+                                                              ``last`` or
+                                                              ``proportional``.
+                                                              The default value
+                                                              is ``last``
+``--missing-splits``                                          Turns on the
+                                                              missing_splits
+                                                              flag in model
+                                                              creation. The
+                                                              model splits can
+                                                              include
+                                                              in one of its
+                                                              branches the data
+                                                              with
+                                                              missing values
+``--evaluate``                                                Turns on
+                                                              evaluation mode
+``--resume``                                                  Retries command
+                                                              execution
+``--stack-level`` *LEVEL*                                     Level of the
+                                                              retried command
+                                                              in the stack
+``--cross-validation-rate`` *RATE*                            Fraction of the
+                                                              training data
+                                                              held
+                                                              out for
+                                                              Monte-Carlo
+                                                              cross-validation
+``--number-of-evaluations`` *NUMBER_OF_EVALUATIONS*           Number of runs
+                                                              that will be
+                                                              used in
+                                                              cross-validation
+``--max-parallel-evaluations`` *MAX_PARALLEL_EVALUATIONS*     Maximum number of
+                                                              evaluations
+                                                              to create in
+                                                              parallel
+``--project`` *PROJECT_NAME*                                  Project name for
+                                                              the project to be
+                                                              associated to
+                                                              newly created
+                                                              sources
+``--project-id`` *PROJECT_ID*                                 Project id for
+                                                              the project to be
+                                                              associated to
+                                                              newly created
+                                                              sources
+``--no-csv``                                                  Causes the output
+                                                              of a batch
+                                                              prediction,
+                                                              batch centroid or
+                                                              batch anomaly
+                                                              score
+                                                              not to be
+                                                              downloaded as a
+                                                              CSV file
+``--to-dataset``                                              Causes the output
+                                                              of a batch
+                                                              prediction,
+                                                              batch centroid or
+                                                              batch anomaly
+                                                              score
+                                                              to be stored
+                                                              remotely as a new
+                                                              dataset
+``--median``                                                  Predictions for
+                                                              single models are
+                                                              returned
+                                                              based on the
+                                                              median of the
+                                                              distribution
+                                                              in the predicted
+                                                              node
+===========================================================   =================
 
 Content
 -------
---name NAME                     Name for the resources in BigML.
---category CATEGORY             Category code. See
+
+=============================== ===============================================
+``--name`` *NAME*               Name for the resources in BigML.
+``--category`` *CATEGORY*       Category code. See
                                 `full list <https://bigml.com/developers/sources#s_categories>`_.
---description DESCRIPTION       Path to a file with a description in plain text
+``--description`` *DESCRIPTION* Path to a file with a description in plain text
                                 or markdown
---tag TAG                       Tag to later retrieve new resources
---no-tag                        Puts BigMLer default tag if no other tag is given
+``--tag`` *TAG*                 Tag to later retrieve new resources
+``--no-tag``                    Puts BigMLer default tag if no other tag is
+                                given
+=============================== ===============================================
 
 Data Configuration
 ------------------
---no-train-header                   The train set file hasn't a header
---no-test-header                    The test set file hasn't a header
---field-attributes PATH             Path to a file describing field attributes
-                                    One definition per line
-                                    (e.g., 0,'Last Name')
---types PATH                        Path to a file describing field types.
-                                    One definition per line
-                                    (e.g., 0, 'numeric')
---test-field-attributes PATH        Path to a file describing test field
-                                    attributes. One definition per line
-                                    (e.g., 0,'Last Name')
---test-types PATH                   Path to a file describing test field types.
-                                    One definition per line
-                                    (e.g., 0, 'numeric')
---dataset-fields DATASET_FIELDS     Comma-separated list of field column
-                                    numbers to include in the dataset
---model-fields MODEL_FIELDS         Comma-separated list of input fields
-                                    (predictors) to create the model
---source-attributes PATH            Path to a file containing a JSON expression
-                                    with attributes to be used as arguments
-                                    in create source calls
---dataset-attributes PATH           Path to a file containing a JSON expression
-                                    with attributes to be used as arguments
-                                    in create dataset calls
---model-attributes PATH             Path to a file containing a JSON expression
-                                    with attributes to be used as arguments
-                                    in create model calls
---ensemble-attributes PATH          Path to a file containing a JSON expression
-                                    with attributes to be used as arguments
-                                    in create ensemble calls
---evaluation-attributes PATH        Path to a file containing a JSON expression
-                                    with attributes to be used as arguments
-                                    in create evaluation calls
---batch_prediction-attributes PATH  Path to a file containing a JSON expression
-                                    with attributes to be used as arguments
-                                    in create batch prediction calls
---json-filter PATH                  Path to a file containing a JSON expression
-                                    to filter the source
---lisp-filter PATH                  Path to a file containing a LISP expression
-                                    to filter the source
---locale LOCALE                     Locale code string
---fields-map PATH                   Path to a file containing the dataset to
-                                    model fields map for evaluation
---test-separator SEPARATOR          Character used as test data field separator
---prediction-header                 Include a headers row in the prediction file
---prediction-fields TEST_FIELDS     Comma-separated list of fields of the test
-                                    file to be included in the prediction file
---max-categories CATEGORIES_NUMBER  Sets the maximum number of categories that
-                                    will be used in a dataset. When more
-                                    categories are found, new datasets are
-                                    generated to analize the remaining
-                                    categories
---new-fields PATH                   Path to a file containing a JSON expression
-                                    used to generate a new dataset with new
-                                    fields created via `Flatline <https://github.com/bigmlcom/flatline>`
-                                    by combining or setting their values
---node-threshold                    Maximum number or nodes to grow the tree
-                                    with
---balance                           Automatically balance data to treat all
-                                    classes evenly
---weight-field FIELD                Field name or column number that contains
-                                    the weights to be used for each instance
---shared                            Creates a secret link for every
-                                    dataset, model or evaluation used in the
-                                    command
---reports                           Report formats: "gazibit"
---no-upload                         Disables reports upload
---dataset-off                       Sets the evaluation mode that uses
-                                    the list of test datasets and extracts
-                                    one each time to test the model built
-                                    with the rest of them (k-fold
-                                    cross-validation)
---args-separator                    Character used as separator in multi-valued
-                                    arguments (default is comma)
---no-missing-splits                 Turns off the missing_splits flag in model
-                                    creation.
+
+========================================= =====================================
+``--no-train-header``                     The train set file hasn't a header
+``--no-test-header``                      The test set file hasn't a header
+``--field-attributes`` *PATH*             Path to a file describing field
+                                          attributes
+                                          One definition per line
+                                          (e.g., 0,'Last Name')
+``--types`` *PATH*                        Path to a file describing field
+                                          types.
+                                          One definition per line
+                                          (e.g., 0, 'numeric')
+``--test-field-attributes`` *PATH*        Path to a file describing test field
+                                          attributes. One definition per line
+                                          (e.g., 0,'Last Name')
+``--test-types`` *PATH*                   Path to a file describing test field
+                                          types.
+                                          One definition per line
+                                          (e.g., 0, 'numeric')
+``--dataset-fields`` *DATASET_FIELDS*     Comma-separated list of field column
+                                          numbers to include in the dataset
+``--model-fields`` *MODEL_FIELDS*         Comma-separated list of input fields
+                                          (predictors) to create the model
+``--source-attributes`` *PATH*            Path to a file containing a JSON
+                                          expression
+                                          with attributes to be used as
+                                          arguments
+                                          in create source calls
+``--dataset-attributes`` *PATH*           Path to a file containing a JSON
+                                          expression
+                                          with attributes to be used as
+                                          arguments
+                                          in create dataset calls
+``--model-attributes`` *PATH*             Path to a file containing a JSON
+                                          expression
+                                          with attributes to be used as
+                                          arguments
+                                          in create model calls
+``--ensemble-attributes`` *PATH*          Path to a file containing a JSON
+                                          expression
+                                          with attributes to be used as
+                                          arguments
+                                          in create ensemble calls
+``--evaluation-attributes`` *PATH*        Path to a file containing a JSON
+                                          expression
+                                          with attributes to be used as
+                                          arguments
+                                          in create evaluation calls
+``--batch_prediction-attributes`` *PATH*  Path to a file containing a JSON
+                                          expression
+                                          with attributes to be used as
+                                          arguments
+                                          in create batch prediction calls
+``--json-filter`` *PATH*                  Path to a file containing a JSON
+                                          expression
+                                          to filter the source
+``--lisp-filter`` *PATH*                  Path to a file containing a LISP
+                                          expression
+                                          to filter the source
+``--locale`` *LOCALE*                     Locale code string
+``--fields-map`` *PATH*                   Path to a file containing the dataset
+                                          to
+                                          model fields map for evaluation
+``--test-separator`` *SEPARATOR*          Character used as test data field
+                                          separator
+``--prediction-header``                   Include a headers row in the
+                                          prediction
+                                          file
+``--prediction-fields`` *TEST_FIELDS*     Comma-separated list of fields of the
+                                          test
+                                          file to be included in the
+                                          prediction file
+``--max-categories`` *CATEGORIES_NUMBER*  Sets the maximum number of
+                                          categories that
+                                          will be used in a dataset. When more
+                                          categories are found, new datasets
+                                          are
+                                          generated to analize the remaining
+                                          categories
+``--new-fields`` *PATH*                   Path to a file containing a JSON
+                                          expression
+                                          used to generate a new dataset with
+                                          new
+                                          fields created via `Flatline <https://github.com/bigmlcom/flatline>`
+                                          by combining or setting their values
+``--node-threshold``                      Maximum number or nodes to grow the
+                                          tree with
+``--balance``                             Automatically balance data to treat
+                                          all classes evenly
+``--weight-field`` *FIELD*                Field name or column number that
+                                          contains
+                                          the weights to be used for each
+                                          instance
+``--shared``                              Creates a secret link for every
+                                          dataset, model or evaluation used
+                                          in the
+                                          command
+``--reports``                             Report formats: "gazibit"
+``--no-upload``                           Disables reports upload
+``--dataset-off``                         Sets the evaluation mode that uses
+                                          the list of test datasets and
+                                          extracts
+                                          one each time to test the model built
+                                          with the rest of them (k-fold
+                                          cross-validation)
+``--args-separator``                      Character used as separator in
+                                          multi-valued
+                                          arguments (default is comma)
+``--no-missing-splits``                   Turns off the missing_splits flag in
+                                          model
+                                          creation.
+========================================= =====================================
 
 Remote Resources
 ----------------
---source SOURCE             BigML source Id
---dataset DATASET           BigML dataset Id
---datasets PATH             Path to a file containing a dataset Id
---model MODEL               BigML model Id
---models PATH               Path to a file containing model/ids. One model per
-                            line (e.g., model/4f824203ce80053)
---ensemble ENSEMBLE         BigML ensemble Id
---ensembles PATH            Path to a file containing ensembles Ids
---test-source SOURCE        BigML test source Id (only for remote predictions)
---test-dataset DATASET      BigML test dataset Id (only for remote predictions)
---test-datasets PATH        Path to the file that contains datasets ids used
-                            in evaluations, one id per line.
---source SOURCE             BigML source Id
---dataset DATASET           BigML dataset Id
---remote                    Computes predictions remotely (in batch mode by
-                            default)
---no-batch                  Remote predictions are computed individually
---no-fast                   Ensemble's local predictions are computed
-                            storing the predictions of each model in
-                            a separate local file before combining them
-                            (the default is --fast, that keeps in memory
-                            each model's prediction)
---model-tag MODEL_TAG       Retrieve models that were tagged with tag
---ensemble-tag ENSEMBLE_TAG Retrieve ensembles that were tagged with tag
+
+================================= =============================================
+``--source`` *SOURCE*             BigML source Id
+``--dataset`` *DATASET*           BigML dataset Id
+``--datasets`` *PATH*             Path to a file containing a dataset Id
+``--model`` *MODEL*               BigML model Id
+``--models`` *PATH*               Path to a file containing model/ids. One
+                                  model per
+                                  line (e.g., model/4f824203ce80053)
+``--ensemble`` *ENSEMBLE*         BigML ensemble Id
+``--ensembles`` *PATH*            Path to a file containing ensembles Ids
+``--test-source`` *SOURCE*        BigML test source Id (only for remote
+                                  predictions)
+``--test-dataset`` *DATASET*      BigML test dataset Id (only for remote
+                                  predictions)
+``--test-datasets`` *PATH*        Path to the file that contains datasets ids
+                                  used
+                                  in evaluations, one id per line.
+``--source`` *SOURCE*             BigML source Id
+``--dataset`` *DATASET*           BigML dataset Id
+``--remote``                      Computes predictions remotely (in batch mode
+                                  by default)
+``--no-batch``                    Remote predictions are computed individually
+``--no-fast``                     Ensemble's local predictions are computed
+                                  storing the predictions of each model in
+                                  a separate local file before combining them
+                                  (the default is --fast, that keeps in memory
+                                  each model's prediction)
+``--model-tag`` *MODEL_TAG*       Retrieve models that were tagged with tag
+``--ensemble-tag`` *ENSEMBLE_TAG* Retrieve ensembles that were tagged with tag
+================================= =============================================
+
 
 Ensembles
 ---------
---number-of-models NUMBER_OF_MODELS     Number of models to create
---sample-rate SAMPLE_RATE               Sample rate to use (a float between
-                                        0.01 and 1)
---replacement                           Use replacement when sampling
---max-parallel-models MAX_PARALLEL_MODELS    Max number of models to create in
-                                             parallel
---max-batch-models MAX_BATCH_MODELS     Max number of local models to be
-                                        predicted from in parallel. For
-                                        ensembles with a number of models over
-                                        it, predictions are stored in files as
-                                        they are computed and retrived and
-                                        combined eventually
---randomize                             Use a random set of fields to split on
---combine-votes LIST_OF_DIRS            Combines the votes of models generated
-                                        in a list of directories
---tlp LEVEL                             Task-level parallelization
+
+================================================= =============================
+``--number-of-models`` *NUMBER_OF_MODELS*         Number of models to create
+``--sample-rate`` *SAMPLE_RATE*                   Sample rate to use (a float
+                                                  between
+                                                  0.01 and 1)
+``--replacement``                                 Use replacement when sampling
+``--max-parallel-models`` *MAX_PARALLEL_MODELS*   Max number of models to
+                                                  create in parallel
+``--max-batch-models`` *MAX_BATCH_MODELS*         Max number of local models
+                                                  to be
+                                                  predicted from in parallel.
+                                                  For
+                                                  ensembles with a number of
+                                                  models
+                                                  over
+                                                  it, predictions are stored in
+                                                  files as
+                                                  they are computed and
+                                                  retrived and
+                                                  combined eventually
+``--randomize``                                   Use a random set of fields to
+                                                  split on
+``--combine-votes`` *LIST_OF_DIRS*                Combines the votes of models
+                                                  generated
+                                                  in a list of directories
+``--tlp`` *LEVEL*                                 Task-level parallelization
+================================================= =============================
+
 
 If you are not choosing to create an ensemble,
 make sure that you tag your models conveniently so that you can
@@ -2331,21 +2489,29 @@ then retrieve them later to generate predictions.
 
 Multi-labels
 ----------------
---multi-label                       Use multiple labels in the objective field
---labels                            Comma-separated list of labels used
---training-separator SEPARATOR      Character used as field separator in train
-                                    data field
---label-separator SEPARATOR         Character used as label separator in the
-                                    multi-labeled objective field
+
+======================================= =======================================
+``--multi-label``                       Use multiple labels in the objective
+                                        field
+``--labels``                            Comma-separated list of labels used
+``--training-separator`` *SEPARATOR*    Character used as field separator in
+                                        train data field
+``--label-separator`` *SEPARATOR*       Character used as label separator in
+                                        the multi-labeled objective field
+======================================= =======================================
+
 
 Public Resources
 ----------------
---public-dataset    Makes newly created dataset public
---black-box         Makes newly created model a public black-box
---white-box         Makes newly created model a public white-box
---model-price       Sets the price for a public model
---dataset-price     Sets the price for a public dataset
---cpp               Sets the credits consumed by prediction
+
+======================== ======================================================
+``--public-dataset``     Makes newly created dataset public
+``--black-box``          Makes newly created model a public black-box
+``--white-box``          Makes newly created model a public white-box
+``--model-price``        Sets the price for a public model
+``--dataset-price``      Sets the price for a public dataset
+``--cpp``                Sets the credits consumed by prediction
+======================== ======================================================
 
 Notice that datasets and models will be made public without assigning any price
 to them.
@@ -2353,221 +2519,307 @@ to them.
 Local Resources
 ---------------
 
---model-file PATH            Path to a JSON file containing the model info
---ensemble-file PATH         Path to a JSON file containing the ensemble info
+==========================   ==================================================
+``--model-file`` *PATH*      Path to a JSON file containing the model info
+``--ensemble-file`` *PATH*   Path to a JSON file containing the ensemble info
+==========================   ==================================================
+
 
 Fancy Options
 -------------
---progress-bar              Shows an update on the bytes uploaded when creating
-                            a new source. This option might run into issues
-                            depending on the locale
-                            settings of your OS
---no-dataset                Does not create a model. BigMLer will only create
-                            a source
---no-model                  Does not create a model. BigMLer will only create
-                            a dataset
---resources-log LOG_FILE    Keeps a log of the resources generated in each
-                            command
---version                   Shows the version number
---verbosity LEVEL           Turns on (1) or off (0) the verbosity.
---clear-logs                Clears the ``.bigmler``, ``.bigmler_dir_stack``,
-                            ``.bigmler_dirs`` and user log file given in
-                            ``--resources-log`` (if any)
---store                     Stores every created or retrieved resource in your
-                            output directory
+
+================================= =============================================
+``--progress-bar``                Shows an update on the bytes uploaded when
+                                  creating
+                                  a new source. This option might run into
+                                  issues
+                                  depending on the locale
+                                  settings of your OS
+``--no-dataset``                  Does not create a model. BigMLer will only
+                                  create a source
+``--no-model``                    Does not create a model. BigMLer will only
+                                  create a dataset
+``--resources-log`` *LOG_FILE*    Keeps a log of the resources generated in
+                                  each command
+``--version``                     Shows the version number
+``--verbosity`` *LEVEL*           Turns on (1) or off (0) the verbosity.
+``--clear-logs``                  Clears the ``.bigmler``,
+                                  ``.bigmler_dir_stack``,
+                                  ``.bigmler_dirs`` and user log file given in
+                                  ``--resources-log`` (if any)
+``--store``                       Stores every created or retrieved resource in
+                                  your output directory
+================================= =============================================
 
 Analyze subcommand Options
 --------------------------
-
---cross-validation              Sets the k-fold cross-validation mode
---k-folds                       Number of folds used in k-fold cross-validation
-                                (default is 5)
---features                      Sets the smart selection features mode
---staleness INTEGER             Number of iterations with no improvement that
-                                is considered the limit for the analysis to stop
-                                (default is 5)
---penalty FLOAT                 Coefficient used to penalyze models with many
-                                features in the smart selection features mode
-                                (default is 0.001). Also used in node threshold
-                                selection (default is 0)
---optimize METRIC               Metric that is being optimized in the smart
-                                selection features mode or the node threshold
-                                search mode (default is accuracy)
---optimize-category CATEGORY    Category whoese metric is being optimized in
-                                the smart selection features mode or
-                                the node threshold search mode (only for
-                                categorical models)
---nodes                         Sets the node threshold search mode
---min-nodes INTEGER             Minimum number of nodes to start the node
-                                threshold search mode (default 3)
---max-nodes INTEGER             Maximum number of nodes to end the node threshold
-                                search mode (default 2000)
---nodes-step INTEGER            Step in the node threshold search iteration
-                                (default 50)
---exclude-features              Comma-separated list of features in the dataset
-                                to be excluded from the features analysis
+===================================== =========================================
+``--cross-validation``                Sets the k-fold cross-validation mode
+``--k-folds``                         Number of folds used in k-fold
+                                      cross-validation
+                                      (default is 5)
+``--features``                        Sets the smart selection features mode
+``--staleness`` *INTEGER*             Number of iterations with no improvement
+                                      that
+                                      is considered the limit for the analysis
+                                      to stop
+                                      (default is 5)
+``--penalty`` *FLOAT*                 Coefficient used to penalyze models with
+                                      many
+                                      features in the smart selection features
+                                      mode
+                                      (default is 0.001). Also used in node
+                                      threshold
+                                      selection (default is 0)
+``--optimize`` *METRIC*               Metric that is being optimized in the
+                                      smart
+                                      selection features mode or the node
+                                      threshold
+                                      search mode (default is accuracy)
+``--optimize-category`` *CATEGORY*    Category whoese metric is being optimized
+                                      in
+                                      the smart selection features mode or
+                                      the node threshold search mode (only for
+                                      categorical models)
+``--nodes``                           Sets the node threshold search mode
+``--min-nodes`` *INTEGER*             Minimum number of nodes to start the node
+                                      threshold search mode (default 3)
+``--max-nodes`` *INTEGER*             Maximum number of nodes to end the node
+                                      threshold
+                                      search mode (default 2000)
+``--nodes-step`` *INTEGER*            Step in the node threshold search
+                                      iteration
+                                      (default 50)
+``--exclude-features``                Comma-separated list of features in the
+                                      dataset
+                                      to be excluded from the features analysis
+===================================== =========================================
 
 Cluster Specific Subcommand Options
 ----------------------------------
 
---cluster CLUSTER                   BigML cluster Id
---clusters PATH                     Path to a file containing cluster/ids. One
-                                    cluster
-                                    per line (e.g., cluster/4f824203ce80051)
---k NUMBER_OF_CENTROIDS             Number of final centroids in the clustering
---no-cluster                        No cluster will be generated
---cluster-fields                    Comma-separated list of fields that will be
-                                    used in the cluster construction
---cluster-attributes PATH Path to a JSON file containing attributes to
-                                    be used in the cluster creation call
---cluster-datasets CENTROID_NAMES   Comma-separated list of centroid names to
-                                    generate the related datasets from a
-                                    cluster.
-                                    If no CENTROID_NAMES argument is provided
-                                    all datasets are generated
---cluster-file PATH                 Path to a JSON file containing the cluster
-                                    info
---cluster-seed SEED                 Seed to generate deterministic clusters
---centroid-attributes PATH          Path to a JSON file containing attributes
-                                    to be used in the centroid creation call
---batch-centroid-attributes PATH    Path to a JSON file containing attributes
-                                    to be used in the batch centroid creation
-                                    call
+========================================= =====================================
+``--cluster`` *CLUSTER*                   BigML cluster Id
+``--clusters`` *PATH*                     Path to a file containing
+                                          cluster/ids. One
+                                          cluster
+                                          per line (e.g.,
+                                          cluster/4f824203ce80051)
+``--k`` *NUMBER_OF_CENTROIDS*             Number of final centroids in the
+                                          clustering
+``--no-cluster``                          No cluster will be generated
+``--cluster-fields``                      Comma-separated list of fields that
+                                          will be
+                                          used in the cluster construction
+``--cluster-attributes`` *PATH*           Path to a JSON file containing
+                                          attributes to
+                                          be used in the cluster creation call
+``--cluster-datasets`` *CENTROID_NAMES*   Comma-separated list of centroid
+                                          names to
+                                          generate the related datasets from a
+                                          cluster.
+                                          If no CENTROID_NAMES argument is
+                                          provided
+                                          all datasets are generated
+``--cluster-file`` *PATH*                 Path to a JSON file containing the
+                                          cluster
+                                          info
+``--cluster-seed`` *SEED*                 Seed to generate deterministic
+                                          clusters
+``--centroid-attributes`` *PATH*          Path to a JSON file containing
+                                          attributes
+                                          to be used in the centroid creation
+                                          call
+``--batch-centroid-attributes`` *PATH*    Path to a JSON file containing
+                                          attributes
+                                          to be used in the batch centroid
+                                          creation call
+========================================= =====================================
+
 
 Anomaly Specific Subcommand Options
 ----------------------------------
 
---anomaly ANOMALY                       BigML anomaly Id
---anomalies PATH                        Path to a file containing anomaly/ids.
-                                        One anomaly per line
-                                        (e.g., anomaly/4f824203ce80051)
---no-anomaly                            No anomaly detector will be generated
---anomaly-fields                        Comma-separated list of fields that
-                                        will be used in the anomaly
-                                        detector construction
---anomaly-attributes PATH               Path to a JSON file containing
-                                        attributes to
-                                        be used in the anomaly creation call
---anomaly-file PATH                     Path to a JSON file containing
-                                        the anomaly info
---anomaly-seed SEED                     Seed to generate deterministic
-                                        anomalies
---anomaly-score-attributes PATH         Path to a JSON file containing
-                                        attributes to be used in the anomaly
-                                        score creation call
---batch-anomaly-score-attributes PATH   Path to a JSON file containing
-                                        attributes to
-                                        be used in the batch anomaly score
-                                        creation call
+============================================= =================================
+``--anomaly`` *ANOMALY*                       BigML anomaly Id
+``--anomalies`` *PATH*                        Path to a file containing
+                                              anomaly/ids.
+                                              One anomaly per line
+                                              (e.g., anomaly/4f824203ce80051)
+``--no-anomaly``                              No anomaly detector will be
+                                              generated
+``--anomaly-fields``                          Comma-separated list of fields
+                                              that
+                                              will be used in the anomaly
+                                              detector construction
+``--anomaly-attributes`` *PATH*               Path to a JSON file containing
+                                              attributes to
+                                              be used in the anomaly creation
+                                              call
+``--anomaly-file`` *PATH*                     Path to a JSON file containing
+                                              the anomaly info
+``--anomaly-seed`` *SEED*                     Seed to generate deterministic
+                                              anomalies
+``--anomaly-score-attributes`` *PATH*         Path to a JSON file containing
+                                              attributes to be used in the
+                                              anomaly
+                                              score creation call
+``--batch-anomaly-score-attributes`` *PATH*   Path to a JSON file containing
+                                              attributes to
+                                              be used in the batch anomaly
+                                              score creation call
+============================================= =================================
 
-
-.._sample_options
+.._sample_options:
 
 
 Samples Subcommand Options
 --------------------------
 
-=====================================   =======================================
-``--sample`` *SAMPLE*                   BigML sample Id
---samples PATH                          Path to a file containing sample/ids.
-                                        One sample per line
-                                        (e.g., sample/4f824203ce80051)
---no-sample                             No sample will be generated
---sample-fields FIELD_NAMES             Comma-separated list of fields that
-                                        will be used in the sample
-                                        detector construction
---sample-attributes PATH                Path to a JSON file containing
-                                        attributes to
-                                        be used in the sample creation call
---fields-filter QUERY                   Query string that will be used as
-                                        filter before selecting the sample
-                                        rows. The query string can be built
-                                        using the field ids, their values and
-                                        the usual operators. You can see some
-                                        examples in the `developers section <https://bigml.com/developers/samples#filtering-rows-from-a-sample>`_
---sample-header                         Adds a headers row to the sample.csv
-                                        output
---row-index                             Prepends acolumn to the sample rows
-                                        with the absolute row number
---occurrence                            Prepends a column to the sample rows
-                                        with the number of occurences of each
-                                        row. When used with --row-index,
-                                        the occurrence column will be placed
-                                        after the index column
---precision                             Decimal numbers precision
---rows SIZE                             Number of rows returned
---row-offset OFFSET                     Skip the given number of rows
---row-order-by FIELD_NAME               Field name whose values will be used
-                                        to sort the returned rows
---row-fields FIELD_NAMES                Comma-separated list of fields that
-                                        will be returned in the sample
---stat-fields FIELD_NAME,FIELD_NAME     Two comma-separated numeric field names
-                                        that will be used to compute their
-                                        Pearson's and Spearman's correlations
-                                        and linear regression terms
---stat-field FIELD_NAME                 Numeric field that will be used to
-                                        compute
-                                        Pearson's and Spearman's correlations
-                                        and linear regression terms against
-                                        the rest of numeric fields in the
-                                        sample
---unique                                Repeated rows are removed from the
-                                        sample
-=====================================   =======================================
+============================================= =================================
+``--sample`` *SAMPLE*                         BigML sample Id
+``--samples`` *PATH*                          Path to a file containing
+                                              sample/ids.
+                                              One sample per line
+                                              (e.g., sample/4f824203ce80051)
+``--no-sample``                               No sample will be generated
+``--sample-fields`` *FIELD_NAMES*             Comma-separated list of fields
+                                              that
+                                              will be used in the sample
+                                              detector construction
+``--sample-attributes`` *PATH*                Path to a JSON file containing
+                                              attributes to
+                                              be used in the sample creation
+                                              call
+``--fields-filter`` *QUERY*                   Query string that will be used as
+                                              filter before selecting the
+                                              sample
+                                              rows. The query string can be
+                                              built
+                                              using the field ids, their
+                                              values and
+                                              the usual operators. You can see
+                                              some
+                                              examples in the
+                                              `developers section <https://bigml.com/developers/samples#filtering-rows-from-a-sample>`_
+``--sample-header``                           Adds a headers row to the
+                                              sample.csv
+                                              output
+``--row-index``                               Prepends acolumn to the sample
+                                              rows
+                                              with the absolute row number
+``--occurrence``                              Prepends a column to the sample
+                                              rows
+                                              with the number of occurences of
+                                              each
+                                              row. When used with --row-index,
+                                              the occurrence column will be
+                                              placed
+                                              after the index column
+``--precision``                               Decimal numbers precision
+``--rows SIZE``                               Number of rows returned
+``--row-offset`` *OFFSET*                     Skip the given number of rows
+``--row-order-by`` *FIELD_NAME*               Field name whose values will be
+                                              used
+                                              to sort the returned rows
+``--row-fields`` *FIELD_NAMES*                Comma-separated list of fields
+                                              that
+                                              will be returned in the sample
+``--stat-fields`` *FIELD_NAME,FIELD_NAME*     Two comma-separated numeric field
+                                              names
+                                              that will be used to compute
+                                              their
+                                              Pearson's and Spearman's
+                                              correlations
+                                              and linear regression terms
+``--stat-field`` *FIELD_NAME*                 Numeric field that will be used
+                                              to compute
+                                              Pearson's and Spearman's
+                                              correlations
+                                              and linear regression terms
+                                              against
+                                              the rest of numeric fields in the
+                                              sample
+``--unique``                                  Repeated rows are removed from
+                                              the sample
+============================================= =================================
 
 
 Delete Subcommand Options
 -------------------------
 
---ids LIST_OF_IDS               Comma separated list of ids to be deleted
---from-file FILE_OF_IDS         Path to a file containing the resources' ids to
-                                be deleted
---from-dir                      Path to a directory where BigMLer has stored
-                                its session data and created resources
---all-tag TAG                   Retrieves resources that were tagged with tag
-                                to delete them
---source-tag TAG                Retrieves sources that were tagged with tag to
-                                delete them
---dataset-tag TAG               Retrieves datasets that were tagged with tag to
-                                delete them
---model-tag TAG                 Retrieves models that were tagged with tag to
-                                delete them
---prediction-tag TAG            Retrieves predictions that were tagged with tag
-                                to delete them
---evaluation-tag TAG            Retrieves evaluations that were tagged with tag
-                                to delete them
---ensemble-tag TAG              Retrieves ensembles that were tagged with tag
-                                to delete them
---batch-prediction-tag TAG      Retrieves batch predictions that were tagged
-                                with tag to delete them
---cluster-tag TAG               Retrieves clusters that were tagged with
-                                tag to delete them
---centroid-tag TAG              Retrieves centroids that were tagged with
-                                tag to delete them
---batch-centroid-tag TAG        Retrieves batch centroids that were tagged with
-                                tag to delete them
---anomaly-tag TAG               Retrieves anomalies that were tagged with
-                                tag to delete them
---anomaly-score-tag TAG         Retrieves anomaly scores that were tagged with
-                                tag to delete them
---batch-anomlay-score-tag TAG   Retrieves batch anomaly scores that were
-                                tagged with tag to delete them
---older-than DATE               Retrieves resources created before the
-                                specified
-                                date. Date can be any YYYY-MM-DD string, an
-                                integer meaning the number of days before the
-                                current datetime or a resource id, meaning the
-                                creation datetime of the resource
---newer-than DATE               Retrieves resources created after the specified
-                                date. Date can be any YYYY-MM-DD string, an
-                                integer meaning the number of days before the
-                                current datetime or a resource id, meaning the
-                                creation datetime of the resource
---resource-types                Comma-separated list of types of resources to
-                                be deleted. Allowed values are source, dataset,
-                                model, ensemble, prediction, batch_prediction,
-                                cluster, centroid, batch_centroid
---dry-run                       Delete simulation. No removal.
+===================================== =========================================
+``--ids`` *LIST_OF_IDS*               Comma separated list of ids to be deleted
+``--from-file`` *FILE_OF_IDS*         Path to a file containing the resources'
+                                      ids to be deleted
+``--from-dir``                        Path to a directory where BigMLer has
+                                      stored
+                                      its session data and created resources
+``--all-tag`` *TAG*                   Retrieves resources that were tagged
+                                      with tag
+                                      to delete them
+``--source-tag`` *TAG*                Retrieves sources that were tagged
+                                      with tag to
+                                      delete them
+``--dataset-tag`` *TAG*               Retrieves datasets that were tagged
+                                      with tag to
+                                      delete them
+``--model-tag`` *TAG*                 Retrieves models that were tagged
+                                      with tag to
+                                      delete them
+``--prediction-tag`` *TAG*            Retrieves predictions that were tagged
+                                      with tag
+                                      to delete them
+``--evaluation-tag`` *TAG*            Retrieves evaluations that were tagged
+                                      with tag
+                                      to delete them
+``--ensemble-tag`` *TAG*              Retrieves ensembles that were tagged
+                                      with tag
+                                      to delete them
+``--batch-prediction-tag`` *TAG*      Retrieves batch predictions that
+                                      were tagged
+                                      with tag to delete them
+``--cluster-tag`` *TAG*               Retrieves clusters that were tagged with
+                                      tag to delete them
+``--centroid-tag`` *TAG*              Retrieves centroids that were tagged with
+                                      tag to delete them
+``--batch-centroid-tag`` *TAG*        Retrieves batch centroids that were
+                                      tagged with
+                                      tag to delete them
+``--anomaly-tag`` *TAG*               Retrieves anomalies that were tagged with
+                                      tag to delete them
+``--anomaly-score-tag`` *TAG*         Retrieves anomaly scores that were
+                                      tagged with
+                                      tag to delete them
+``--batch-anomlay-score-tag`` *TAG*   Retrieves batch anomaly scores that were
+                                      tagged with tag to delete them
+``--older-than`` *DATE*               Retrieves resources created before the
+                                      specified
+                                      date. Date can be any YYYY-MM-DD string,
+                                      an
+                                      integer meaning the number of days
+                                      before the
+                                      current datetime or a resource id,
+                                      meaning the
+                                      creation datetime of the resource
+``--newer-than`` *DATE*               Retrieves resources created after the
+                                      specified
+                                      date. Date can be any YYYY-MM-DD string,
+                                      an
+                                      integer meaning the number of days
+                                      before the
+                                      current datetime or a resource id,
+                                      meaning the
+                                      creation datetime of the resource
+``--resource-types``                  Comma-separated list of types of
+                                      resources to
+                                      be deleted. Allowed values are source,
+                                      dataset,
+                                      model, ensemble, prediction,
+                                      batch_prediction,
+                                      cluster, centroid, batch_centroid
+``--dry-run``                         Delete simulation. No removal.
+===================================== =========================================
 
 Prior Versions Compatibility Issues
 -----------------------------------
