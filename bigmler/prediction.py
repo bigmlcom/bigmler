@@ -316,7 +316,7 @@ def local_predict(models, test_reader, output, args, options=None,
         input_data_dict = dict(zip(test_reader.raw_headers, input_data))
         prediction = local_model.predict(
             input_data_dict, **kwargs)
-        if single_model and args.median:
+        if single_model and args.median and local_model.tree.regression:
             # only single models' predictions can be based on the median value
             # predict
             prediction[0] = prediction[-1]
