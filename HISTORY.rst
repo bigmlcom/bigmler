@@ -8,7 +8,7 @@ History
 
 - Adding --median flag to use median instead of mean in single models'
   predictions.
-- Updating underlying BigML python bindings' version to 4.0.1 (Python 3
+- Updating underlying BigML python bindings' version to 4.0.2 (Python 3
   compatible).
 
 
