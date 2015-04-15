@@ -109,13 +109,11 @@ def get_test_dataset(args):
        --test-dataset --test-datasets
 
     """
-    test_dataset_ids = None
     args.test_dataset_ids = []
     try:
         # Parses dataset/id if provided.
         if args.test_datasets:
-            test_dataset_ids = u.read_datasets(args.test_datasets)
-            args.test_dataset_ids = test_dataset_ids
+            args.test_dataset_ids = u.read_datasets(args.test_datasets)
     except AttributeError:
         pass
     return (args.test_dataset if args.test_dataset is not None
