@@ -106,6 +106,20 @@ def get_anomaly_options(defaults=None):
             'dest': 'batch_anomaly_score_attributes',
             'default': defaults.get('batch_anomaly_score_attributes', None),
             'help': ("Path to a json file describing batch anomaly score"
-                     " attributes.")}}
+                     " attributes.")},
+
+        # Creates scores using the training dataset for the anomaly detector
+        '--score': {
+            'action': 'store_true',
+            'dest': 'score',
+            'default': defaults.get('score', False),
+            'help': "Creates scores for the training dataset."},
+
+        # Doesn't create scores (as opposed to --score)
+        '--no-score': {
+            'action': 'store_false',
+            'dest': 'score',
+            'default': defaults.get('score', False),
+            'help': "Doesn't create scores for the training dataset."}}
 
     return options

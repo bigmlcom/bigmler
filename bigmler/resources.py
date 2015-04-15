@@ -807,7 +807,8 @@ def set_ensemble_args(args, name=None,
         "number_of_models": args.number_of_models,
         "category": args.category,
         "tags": args.tag,
-        "missing_splits": args.missing_splits
+        "missing_splits": args.missing_splits,
+        "seed": SEED if args.seed is None else args.seed
     }
     if objective_id is not None and fields is not None:
         ensemble_args.update({"objective_field": objective_id})

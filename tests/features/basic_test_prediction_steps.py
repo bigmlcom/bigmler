@@ -45,6 +45,18 @@ def shell_execute(command, output, test=None, options=None):
         assert False, str(exc)
 
 
+@step(r'I create BigML resources from "(.*)" using ensemble of (.*) models to test "(.*)" using median and log predictions in "(.*)"')
+def i_create_resources_from_ensemble_using_median(step, data=None, number_of_models=None, test=None, output=None):
+    if data is None or test is None or output is None or number_of_models is None:
+        assert False
+    command = ("bigmler --train " + data + " --test " + test +
+               " --store --output " + output +
+               " --number-of-models " + number_of_models +
+               " --median --max-batch-models 1 --no-fast")
+    world.number_of_models = int(number_of_models)
+    shell_execute(command, output, test=test)
+
+
 @step(r'I create BigML resources uploading train "(.*?)" file using the median to test "(.*?)" and log predictions in "([^"]*)"$')
 def i_create_all_resources_with_median(step, data=None, test=None, output=None):
     if data is None or test is None or output is None:
@@ -254,7 +266,7 @@ def i_create_resources_from_dataset_with_objective(step, multi_label=None, objec
 def i_create_resources_from_dataset(step, multi_label=None, test=None, output=None):
     if test is None or output is None:
         assert False
-    multi_label = "" if multi_label is None else " --multi-label " 
+    multi_label = "" if multi_label is None else " --multi-label "
     command = ("bigmler "+ multi_label +"--dataset " +
                world.dataset['resource'] + " --test " + test +
                " --store --output " + output)
@@ -627,8 +639,8 @@ def i_check_create_model(step):
 @step(r'I check that the (\d*)-models have been created')
 def i_check_create_kfold_models(step, kfolds):
     directory = os.path.dirname(os.path.dirname(world.output))
-    
-    directories = [os.path.join(directory, folder) 
+
+    directories = [os.path.join(directory, folder)
                    for folder in os.listdir(directory) if
                    os.path.isdir(os.path.join(directory, folder))]
     for directory in directories:
@@ -718,10 +730,10 @@ def i_check_create_models_in_ensembles(step, in_ensemble=True):
             if in_ensemble:
                 ensemble_id = "ensemble/%s" % model['object']['ensemble_id']
                 if not ensemble_id in world.ensembles:
-                    world.ensembles.append(ensemble_id) 
+                    world.ensembles.append(ensemble_id)
             else:
                 world.models.append(model_id)
-   
+
             assert True
         except Exception, exc:
             assert False, str(exc)
@@ -760,7 +772,7 @@ def check_create_kfold_cross_validation(step, kfolds, directory):
 @step(r'I check that all the (\d*)-fold cross-validations have been created')
 def i_check_create_all_kfold_cross_validations(step, kfolds):
     directory = os.path.dirname(os.path.dirname(world.output))
-    directories = [os.path.join(directory, folder) 
+    directories = [os.path.join(directory, folder)
                    for folder in os.listdir(directory) if
                    os.path.isdir(os.path.join(directory, folder))]
     for directory in directories:
@@ -912,12 +924,12 @@ def i_check_predictions(step, check_file):
                 assert False
             for index in range(len(row)):
                 dot = row[index].find(".")
-                if dot > 0 or (check_row[index].find(".") > 0 
+                if dot > 0 or (check_row[index].find(".") > 0
                                and check_row[index].endswith(".0")):
                     try:
                         decimal_places = min(len(row[index]), len(check_row[index])) - dot - 1
                         row[index] = round(float(row[index]), decimal_places)
-                        check_row[index] = round(float(check_row[index]), decimal_places)    
+                        check_row[index] = round(float(check_row[index]), decimal_places)
                     except ValueError:
                         pass
                 if check_row[index] != row[index]:
@@ -949,7 +961,7 @@ def i_check_cross_validation(step, check_file):
             cv_content = json.loads(cv_handler.read())
         with open(check_file, "U") as check_handler:
             check_content = json.loads(check_handler.read())
-        if cv_content['model'] == check_content['model']: 
+        if cv_content['model'] == check_content['model']:
             assert True
         else:
             assert False, "content: %s, check: %s" % (cv_content, check_content)
@@ -1235,7 +1247,7 @@ def i_create_kfold_cross_validation(step, k_folds=None, metric=None):
 def i_have_previous_scenario_or_reproduce_it(step, scenario, kwargs):
     scenarios = {'scenario1': [(i_create_all_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_model, False)],
                  'scenario1_r': [(i_create_all_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_model, False)],
-                 'scenario5': [(i_create_resources_from_ensemble, True), (i_check_create_ensemble, False)], 
+                 'scenario5': [(i_create_resources_from_ensemble, True), (i_check_create_ensemble, False)],
                  'scenario_e1': [(i_create_all_resources_to_evaluate, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_model, False), (i_check_create_evaluation, False)],
                  'scenario_ml_1': [(i_create_all_ml_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models, False)],
                  'scenario_ml_6': [(i_create_all_ml_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models, False)],

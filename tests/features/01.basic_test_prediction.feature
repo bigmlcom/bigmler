@@ -32,7 +32,7 @@ Feature: Upload source and produce test predictions
     Scenario: Successfully building test predictions from source
         Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
         And I create BigML resources using source to test "<test>" and log predictions in "<output>"
-        And I check that the dataset has been created 
+        And I check that the dataset has been created
         And I check that the model has been created
         And I check that the predictions are ready
         Then the local prediction file is like "<predictions_file>"
@@ -64,7 +64,7 @@ Feature: Upload source and produce test predictions
 
 
     Scenario: Successfully building test predictions from ensemble
-        Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs> 
+        Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
         And I create BigML resources using ensemble of <number_of_models> models to test "<test>" and log predictions in "<output>"
         And I check that the ensemble has been created
         And I check that the predictions are ready
@@ -77,7 +77,7 @@ Feature: Upload source and produce test predictions
 
     Scenario: Successfully building test predictions from models file
         Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
-        And I have previously executed "<scenario2>" or reproduce it with arguments <kwargs2> 
+        And I have previously executed "<scenario2>" or reproduce it with arguments <kwargs2>
         And I create BigML resources using models in file "<models_file>" to test "<test>" and log predictions in "<output>"
         And I check that the predictions are ready
         Then the local prediction file is like "<predictions_file>"
@@ -191,7 +191,7 @@ Feature: Upload source and produce test predictions
 
         Examples:
         |scenario    | kwargs                                                  | number_of_models | test                    | output                  | output2 | output3
-        | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | 10              | ../data/test_iris.csv   | ./scenario16/predictions.csv   | ./scenario16/predictions2.csv | ./scenario16/predictions3.csv 
+        | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | 10              | ../data/test_iris.csv   | ./scenario16/predictions.csv   | ./scenario16/predictions2.csv | ./scenario16/predictions3.csv
 
     Scenario: Successfully building test predictions from local model
         Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
@@ -225,3 +225,17 @@ Feature: Upload source and produce test predictions
         Examples:
         | data               | test                    | output                       |predictions_file           |
         | ../data/grades.csv | ../data/test_grades.csv | ./scenario19/predictions.csv | ./check_files/predictions_grades_median.csv |
+
+
+    Scenario: Successfully building test predictions using median from ensemble
+        Given I create BigML resources from "<data>" using ensemble of <number_of_models> models to test "<test>" using median and log predictions in "<output>"
+        And I check that the source has been created
+        And I check that the dataset has been created
+        And I check that the ensemble has been created
+        And I check that the models in the ensembles have been created
+        And I check that the predictions are ready
+        Then the local prediction file is like "<predictions_file>"
+
+        Examples:
+        |data               | number_of_models | test                      | output                         | predictions_file                         |
+        | ../data/grades.csv| 5                | ../data/test_grades.csv   | ./scenario20/predictions.csv   | ./check_files/predictions_grades_median_e.csv   |

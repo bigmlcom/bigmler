@@ -3,6 +3,13 @@
 History
 -------
 
+2.2.0 (2015-04-15)
+~~~~~~~~~~~~~~~~~~
+
+- Adding --score flag to create batch anomaly scores for the training set.
+- Allowing --median to be used also in ensembles predictions.
+- Using --seed option also in ensembles.
+
 2.1.0 (2015-04-10)
 ~~~~~~~~~~~~~~~~~~
 

@@ -109,6 +109,15 @@ def get_test_dataset(args):
        --test-dataset --test-datasets
 
     """
+    test_dataset_ids = None
+    args.test_dataset_ids = []
+    try:
+        # Parses dataset/id if provided.
+        if args.test_datasets:
+            test_dataset_ids = u.read_datasets(args.test_datasets)
+            args.test_dataset_ids = test_dataset_ids
+    except AttributeError:
+        pass
     return (args.test_dataset if args.test_dataset is not None
             else None if not args.test_dataset_ids
             else args.test_dataset_ids[0])
@@ -151,10 +160,11 @@ def check_args_coherence(args):
     if args.new_fields and not args.dataset:
         sys.exit("To use --new-fields you must also provide a dataset id"
                  " to generate the new dataset from it.")
-    # The --median option is only available for single models, not for
-    # ensembles
-    if args.median and args.number_of_models > 1:
-        print ("WARNING: the --median option is only available for model's"
+    # The --median option is only available for local predictions, not for
+    # remote ones.
+    if args.median and args.remote:
+        args.median = False
+        print ("WARNING: the --median option is only available for local"
                " predictions. Using the mean value in the predicted node"
                " instead.")
 
@@ -469,10 +479,6 @@ def compute_output(api, args):
                 ensemble_id = ensemble_ids[0]
             else:
                 ensemble_id = get_ensemble_id(model)
-            """
-            local_ensemble = Ensemble(ensemble_id, api=api,
-                                      max_models=args.max_batch_models)
-            """
         fields = pm.get_model_fields(
             model, csv_properties, args, single_model=single_model,
             multi_label_data=multi_label_data)

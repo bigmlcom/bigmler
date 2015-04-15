@@ -31,12 +31,19 @@ def shell_execute(command, output, test=None, options=None,
             if test_split is not None:
                 data_lines = file_number_of_lines(data) - 1
                 world.test_lines = int(data_lines * float(test_split))
-                
+
             world.output = output
             assert True
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
+@step(r'I create BigML resources uploading train "(.*?)" file to find anomaly scores for the training set remotely saved to dataset with no CSV output and log resources in "([^"]*)"$')
+def i_create_all_anomaly_resources_without_test_split(step, data=None, output_dir=None):
+    if data is None or output_dir is None:
+        assert False
+    command = ("bigmler anomaly --remote --train " + data +
+               " --store --score --no-csv --to-dataset --output-dir " + output_dir)
+    shell_execute(command, "%s/x.csv" % output_dir, data=data, test_split=1)
 
 @step(r'I create BigML resources uploading train "(.*?)" file to find anomaly scores with test split "(.*?)" remotely saved to dataset with no CSV output and log resources in "([^"]*)"$')
 def i_create_all_anomaly_resources_with_test_split(step, data=None, test_split=None, output_dir=None):
@@ -98,7 +105,7 @@ def i_create_anomaly_resources_from_anomaly_detector(step, test=None, output=Non
                " --store --output " + output)
     shell_execute(command, output, test=test)
 
- 
+
 @step(r'I create BigML resources using anomaly detector in file "(.*?)" to find anomaly scores for "(.*?)" and log predictions in "([^"]*)"$')
 def i_create_anomaly_resources_from_anomaly_file(step, anomaly_file=None, test=None, output=None):
     if anomaly_file is None or test is None or output is None:
@@ -161,7 +168,7 @@ def i_check_anomaly_scores(step, check_file):
                     try:
                         decimal_places = min(len(row[index]), len(check_row[index])) - dot - 1
                         row[index] = round(float(row[index]), decimal_places)
-                        check_row[index] = round(float(check_row[index]), decimal_places)    
+                        check_row[index] = round(float(check_row[index]), decimal_places)
                     except ValueError:
                         pass
                 if check_row[index] != row[index]:

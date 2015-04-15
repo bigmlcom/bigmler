@@ -329,6 +329,9 @@ again weights each predicted value as one,
 ``confidence weighted`` weights each prediction according to the associated
 error and ``probability weighted`` gives the same results as ``plurality``.
 
+As in the model's case, you can base your prediction on the median of the
+predicted node's distribution by adding ``--median`` to your BigMLer command.
+
 It is also possible to enlarge the number of models that build your prediction
 gradually. You can build more than one ensemble for the same test data and
 combine the votes of all of them by using the flag ``combine_votes``
@@ -1592,6 +1595,13 @@ data
 
     bigmler anomaly --train data/tiny_kdd.csv --test-split 0.2 --remote
 
+or if you want to apply the anomaly detector on the same training data set
+to create a batch prediction, use:
+
+.. code-block:: bash
+
+    bigmler anomaly --train data/tiny_kdd.csv --score --remote
+
 .. _bigmler-sample:
 
 Sample subcommand
@@ -1977,6 +1987,7 @@ The set of negative flags is:
 ``--fast``                      as opposed to ``--no-fast``
 ``--no-no-csv``                 as opposed to ``--no-csv``
 ``--no-median``                 as opposed to ``--median``
+``--no-score``                  as opposed to ``--score``
 ==============================  ===============================================
 
 Support
@@ -2606,6 +2617,10 @@ Analyze subcommand Options
 ``--exclude-features``                Comma-separated list of features in the
                                       dataset
                                       to be excluded from the features analysis
+``--score``                           Causes the training set to be run
+                                      through the anomaly detector generating
+                                      a batch anomaly score. Only used with
+                                      the ``--remote`` flag.
 ===================================== =========================================
 
 Cluster Specific Subcommand Options

@@ -311,7 +311,8 @@ def local_predict(models, test_reader, output, args, options=None,
         local_model = Model(models[0])
     else:
         local_model = Ensemble(models, max_models=args.max_batch_models)
-        kwargs.update({"method": args.method, "options": options})
+        kwargs.update({"method": args.method, "options": options,
+                       "median": args.median})
     for input_data in test_reader:
         input_data_dict = dict(zip(test_reader.raw_headers, input_data))
         prediction = local_model.predict(

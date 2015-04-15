@@ -234,8 +234,7 @@ def read_votes_files(dirs_list, path):
     Models' predictions files are expected to be named after the model id,
     for instance: model_50974922035d0706da00003d__predictions.csv
     """
-    file_name = "%s%scombined_predictions" % (path,
-                                              os.sep)
+    file_name = "%s%scombined_predictions" % (path, os.sep)
     check_dir(file_name)
     group_predictions = open(file_name, "w", 0)
     current_directory = os.getcwd()

@@ -199,6 +199,9 @@ def compute_output(api, args):
         fields = pa.get_anomaly_fields(anomaly, csv_properties, args)
 
     # If predicting
+
+    if anomaly and args.score:
+        args.test_dataset = anomaly['object']['dataset']
     if anomalies and (a.has_test(args) or (test_dataset and args.remote)):
         # test dataset can be defined by --test-split or --test-dataset or
         # --test-datasets

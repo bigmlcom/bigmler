@@ -532,15 +532,9 @@ def transform_args(command_args, flags, api, user_defaults):
             command_args.dataset = dataset_ids[0]
         command_args.dataset_ids = dataset_ids
 
-    test_dataset_ids = None
+    # Reading test dataset ids is delayed till the very moment of use to ensure
+    # that the newly generated resources files can be used there too
     command_args.test_dataset_ids = []
-    try:
-        # Parses dataset/id if provided.
-        if command_args.test_datasets:
-            test_dataset_ids = u.read_datasets(command_args.test_datasets)
-            command_args.test_dataset_ids = test_dataset_ids
-    except AttributeError:
-        pass
 
     # Retrieve dataset/ids if provided.
     if command_args.dataset_tag:
@@ -636,6 +630,17 @@ def transform_args(command_args, flags, api, user_defaults):
         command_args.shared_flag = True
     else:
         command_args.shared_flag = False
+
+
+    # Set remote on if scoring a trainind dataset in bigmler anomaly
+    try:
+        if command_args.score:
+            command_args.remote = True
+            if not "--prediction-info" in flags:
+                command_args.prediction_info = FULL_FORMAT
+    except AttributeError:
+        pass
+
 
     command_args.has_models_ = (
         (hasattr(command_args, 'model') and command_args.model) or
