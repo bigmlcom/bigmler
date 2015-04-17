@@ -53,11 +53,13 @@ distutils.core.setup(
     url="https://bigml.com/developers",
     download_url="https://github.com/bigmlcom/bigmler",
     license="http://www.apache.org/licenses/LICENSE-2.0",
-    setup_requires = [],
+    setup_requires = ['nose'],
     packages = ['bigmler', 'bigmler.processing', 'bigmler.analyze',
                 'bigmler.cluster', 'bigmler.anomaly',
-                'bigmler.options', 'bigmler.delete', 'bigmler.sample'],
+                'bigmler.options', 'bigmler.delete', 'bigmler.sample',
+                'bigmler.tests'],
     include_package_data = True,
+    package_data={'bigmler.tests':['data/*.csv', 'data/*.json']},
     install_requires = ['bigml>=4.1.0, <4.2.0'],
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -68,6 +70,7 @@ distutils.core.setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     entry_points={
@@ -75,4 +78,6 @@ distutils.core.setup(
             'bigmler = bigmler.bigmler:main',
         ]
     },
+    test_suite='nose.collector',
+    use_2to3=True
 )
