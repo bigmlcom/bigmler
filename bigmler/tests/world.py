@@ -188,6 +188,22 @@ class World(object):
                         print ("Retries to delete the created resources are"
                                " exhausted. Failed to delete.")
 
+    def check_init_equals_final(self):
+        """ Checks if the counters in init and final timestap are unchanged
+
+        """
+        for resource_type in RESOURCE_TYPES:
+            resource_type = plural(resource_type)
+            if getattr(self, resource_type):
+                counters = self.counters[resource_type]
+                if counters['final'] == counters['init']:
+                    assert True
+                else:
+                    assert False , (
+                        "init %s: %s, final %s: %s" %
+                        (resource_type, counters['init'],
+                         resource_type, counters['final']))
+
 world = World()
 
 def res_filename(file):
@@ -218,17 +234,7 @@ def teardown_module():
         except:
             pass
 
-    for resource_type in RESOURCE_TYPES:
-        resource_type = plural(resource_type)
-        if getattr(world, resource_type):
-            counters = world.counters[resource_type]
-            if counters['final'] == counters['init']:
-                assert True
-            else:
-                assert False , (
-                    "init %s: %s, final %s: %s" %
-                    (resource_type, counters['init'],
-                     resource_type, counters['final']))
+    world.check_init_equals_final()
 
 def teardown_class():
     """Operations to be performed after each class

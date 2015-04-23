@@ -847,8 +847,8 @@ def i_check_gazibit_reports(step, shared=''):
             assert True
         else:
             assert False
-    except:
-        assert False
+    except Exception, exc:
+        assert False, str(exc)
 
 
 #@step(r'I check that the (\d+ )?evaluations have been created')
@@ -1065,7 +1065,7 @@ def i_create_all_resources_to_evaluate_and_share(step, data=None, output=None):
 
 
 #@step(r'I create BigML dataset uploading train "(.*)" file with attributes "(.*)" in "(.*)"')
-def i_create_dataset(step, data=None, attributes=None, output=None):
+def i_create_dataset_with_attributes(step, data=None, attributes=None, output=None):
     if data is None or output is None or attributes is None:
         assert False
     try:
@@ -1146,7 +1146,7 @@ def i_create_nodes_analysis(step, min_nodes=None, max_nodes=None, nodes_step=Non
 
 
 #@step(r'I create BigML feature selection (\d*)-fold cross-validations excluding "(.*)" with separator "(.*)" improving "(.*)"')
-def i_create_kfold_cross_validation(step, k_folds=None, features=None, args_separator=None, metric=None):
+def i_create_kfold_cross_validation_separator_metric_no_fields(step, k_folds=None, features=None, args_separator=None, metric=None):
     if k_folds is None or metric is None or features is None or args_separator is None:
         assert False
     try:
@@ -1189,7 +1189,7 @@ def i_create_kfold_cross_validation_in_dev(step, k_folds=None, metric=None):
         assert False
 
 #@step(r'I create BigML feature selection (\d*)-fold cross-validations improving "(.*)" for category "(.*)"$')
-def i_create_kfold_cross_validation(step, k_folds=None, metric=None, category=None):
+def i_create_kfold_cross_validation_metric_category(step, k_folds=None, metric=None, category=None):
     if k_folds is None or metric is None or category is None:
         assert False
     try:
@@ -1211,7 +1211,7 @@ def i_create_kfold_cross_validation(step, k_folds=None, metric=None, category=No
 
 
 #@step(r'I create BigML feature selection (\d*)-fold cross-validations improving "(.*)"$')
-def i_create_kfold_cross_validation(step, k_folds=None, metric=None):
+def i_create_kfold_cross_validation_metric(step, k_folds=None, metric=None):
     if k_folds is None or metric is None:
         assert False
     try:
