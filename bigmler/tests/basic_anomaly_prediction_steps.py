@@ -38,8 +38,16 @@ def shell_execute(command, output, test=None, options=None,
         assert False, str(exc)
 
 
+#@step(r'I create BigML resources uploading train "(.*?)" file to find anomaly scores for the training set remotely saved to dataset with no CSV output and log resources in "([^"]*)"$')
+def i_create_all_anomaly_resources_without_test_split(step, data=None, output_dir=None):
+    if data is None or output_dir is None:
+        assert False
+    command = ("bigmler anomaly --remote --train " + data +
+               " --store --score --no-csv --to-dataset --output-dir " + output_dir)
+    shell_execute(command, "%s/x.csv" % output_dir, data=data, test_split=1)
+
 #@step(r'I create BigML resources uploading train "(.*?)" file to find anomaly scores with test split "(.*?)" remotely saved to dataset with no CSV output and log resources in "([^"]*)"$')
-def i_create_all_anomaly_resources_with_test_split(step, data=None, test_split=None, output_dir=None):
+def i_create_all_anomaly_resources_with_test_split_no_CSV(step, data=None, test_split=None, output_dir=None):
     if data is None or output_dir is None or test_split is None:
         assert False
     command = ("bigmler anomaly --remote --train " + data + " --test-split " + test_split +
