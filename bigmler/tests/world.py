@@ -207,7 +207,8 @@ class World(object):
 world = World()
 
 def res_filename(file):
-    return pkg_resources.resource_filename('bigml.tests', file)
+    print "../../../%s" % file
+    return pkg_resources.resource_filename('bigmler', "../../../%s" % file)
 
 def setup_module():
     """Operations to be performed before each module
@@ -233,6 +234,7 @@ def teardown_module():
             shutil.rmtree(folder)
         except:
             pass
+
 
     world.check_init_equals_final()
 

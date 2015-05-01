@@ -2,7 +2,7 @@ import os
 import time
 import csv
 import json
-from world import world
+from world import world, res_filename
 from subprocess import check_call, CalledProcessError
 from bigml.api import check_resource
 from bigmler.processing.models import MONTECARLO_FACTOR
@@ -49,7 +49,8 @@ def shell_execute(command, output, test=None, options=None):
 def i_create_all_resources_with_median(step, data=None, test=None, output=None):
     if data is None or test is None or output is None:
         assert False
-    command = ("bigmler --train " + data + " --test " + test +
+    test = res_filename(test)
+    command = ("bigmler --train " + res_filename(data) + " --test " + test +
                " --store --output " + output + " --median --max-batch-models 1 --no-fast")
     shell_execute(command, output, test=test)
 
@@ -58,7 +59,8 @@ def i_create_all_resources_with_median(step, data=None, test=None, output=None):
 def i_create_all_resources_batch_to_dataset(step, data=None, test=None, output_dir=None):
     if data is None or test is None or output_dir is None:
         assert False
-    command = ("bigmler --train " + data + " --test " + test +
+    test = res_filename(test)
+    command = ("bigmler --train " + res_filename(data) + " --test " + test +
                " --store --no-csv --to-dataset --output-dir " + output_dir + " --remote")
     shell_execute(command, "%s/x.csv" % output_dir, test=test)
 
@@ -67,8 +69,10 @@ def i_create_all_resources_batch_to_dataset(step, data=None, test=None, output_d
 def i_create_source_with_locale(step, data=None, locale=None, field_attributes=None, types=None, output=None):
     if data is None or locale is None or output is None or types is None or field_attributes is None:
         assert False
+    field_attributes = res_filename(field_attributes)
+    types = res_filename(types)
     try:
-        retcode = check_call("bigmler --train " + data + " --locale " + locale + " --field-attributes " + field_attributes + " --types " + types + " --output " + output + " --no-dataset --no-model --store", shell=True)
+        retcode = check_call("bigmler --train " + res_filename(data) + " --locale " + locale + " --field-attributes " + field_attributes + " --types " + types + " --output " + output + " --no-dataset --no-model --store", shell=True)
         if retcode < 0:
             assert False
         else:
@@ -84,7 +88,7 @@ def i_create_source_with_locale(step, data=None, locale=None, field_attributes=N
 def i_create_all_resources_to_model(step, data=None, output=None):
     if data is None or output is None:
         assert False
-    command = ("bigmler --train " + data +
+    command = ("bigmler --train " + res_filename(data) +
                " --store --output " + output + " --max-batch-models 1")
     shell_execute(command, output, test=None)
 
@@ -115,7 +119,8 @@ def i_create_kfold_cross_validation_objective(step, k_folds=None, objective=None
 def i_create_all_resources_proportional(step, data=None, test=None, output=None):
     if data is None or test is None or output is None:
         assert False
-    command = ("bigmler --train " + data + " --test " + test +
+    test = res_filename(test)
+    command = ("bigmler --train " + res_filename(data) + " --test " + test +
                " --missing-strategy proportional" +
                " --store --output " + output + " --max-batch-models 1")
     shell_execute(command, output, test=test)
@@ -125,7 +130,8 @@ def i_create_all_resources_proportional(step, data=None, test=None, output=None)
 def i_create_all_resources_missing_splits(step, data=None, test=None, output=None):
     if data is None or test is None or output is None:
         assert False
-    command = ("bigmler --train " + data + " --test " + test +
+    test = res_filename(test)
+    command = ("bigmler --train " + res_filename(data) + " --test " + test +
                " --missing-splits" +
                " --store --output " + output + " --max-batch-models 1")
     shell_execute(command, output, test=test)
@@ -135,7 +141,8 @@ def i_create_all_resources_missing_splits(step, data=None, test=None, output=Non
 def i_create_all_resources_remote_proportional(step, data=None, test=None, output=None):
     if data is None or test is None or output is None:
         assert False
-    command = ("bigmler --train " + data + " --test " + test +
+    test = res_filename(test)
+    command = ("bigmler --train " + res_filename(data) + " --test " + test +
                " --missing-strategy proportional --remote" +
                " --store --output " + output + " --max-batch-models 1")
     shell_execute(command, output, test=test)
@@ -145,7 +152,8 @@ def i_create_all_resources_remote_proportional(step, data=None, test=None, outpu
 def i_create_all_resources_remote_missing_splits(step, data=None, test=None, output=None):
     if data is None or test is None or output is None:
         assert False
-    command = ("bigmler --train " + data + " --test " + test +
+    test = res_filename(test)
+    command = ("bigmler --train " + res_filename(data) + " --test " + test +
                " --missing-splits --remote" +
                " --store --output " + output + " --max-batch-models 1")
     shell_execute(command, output, test=test)
@@ -155,7 +163,8 @@ def i_create_all_resources_remote_missing_splits(step, data=None, test=None, out
 def i_create_all_resources_with_separator(step, data=None, test=None, output=None, separator=None):
     if data is None or test is None or separator is None or output is None:
         assert False
-    command = ("bigmler --train " + data + " --test " + test +
+    test = res_filename(test)
+    command = ("bigmler --train " + res_filename(data) + " --test " + test +
                " --test-separator " + separator + " --store --output " +
                output + " --max-batch-models 1")
     shell_execute(command, output, test=test)
@@ -164,8 +173,9 @@ def i_create_all_resources_with_separator(step, data=None, test=None, output=Non
 def i_create_all_resources_batch_map(step, data=None, test=None, fields_map=None, output=None):
     if data is None or test is None or output is None or fields_map is None:
         assert False
-    command = ("bigmler --train " + data + " --test " + test + " --fields-map "
-               + fields_map + " --store --output " + output + " --remote")
+    test = res_filename(test)
+    command = ("bigmler --train " + res_filename(data) + " --test " + test + " --fields-map "
+               + res_filename(fields_map) + " --store --output " + output + " --remote")
     shell_execute(command, output, test=test)
 
 
@@ -173,7 +183,8 @@ def i_create_all_resources_batch_map(step, data=None, test=None, fields_map=None
 def i_create_all_resources_batch(step, data=None, test=None, output=None):
     if data is None or test is None or output is None:
         assert False
-    command = ("bigmler --train " + data + " --test " + test +
+    test = res_filename(test)
+    command = ("bigmler --train " + res_filename(data) + " --test " + test +
                " --store --output " + output + " --remote")
     shell_execute(command, output, test=test)
 
@@ -182,7 +193,8 @@ def i_create_all_resources_batch(step, data=None, test=None, output=None):
 def i_create_all_resources_with_no_headers(step, data=None, test=None, output=None):
     if data is None or test is None or output is None:
         assert False
-    command = ("bigmler --train " + data + " --test " + test +
+    test = res_filename(test)
+    command = ("bigmler --train " + res_filename(data) + " --test " + test +
                " --store --output " + output + " --max-batch-models 1 --no-fast --no-train-header --no-test-header")
     shell_execute(command, output, test=test, options='--prediction-header')
 
@@ -191,7 +203,8 @@ def i_create_all_resources_with_no_headers(step, data=None, test=None, output=No
 def i_create_all_resources(step, data=None, test=None, output=None):
     if data is None or test is None or output is None:
         assert False
-    command = ("bigmler --train " + data + " --test " + test +
+    test = res_filename(test)
+    command = ("bigmler --train " + res_filename(data) + " --test " + test +
                " --store --output " + output + " --max-batch-models 1 --no-fast")
     shell_execute(command, output, test=test)
 
@@ -200,7 +213,8 @@ def i_create_all_resources(step, data=None, test=None, output=None):
 def i_create_all_resources_with_options(step, data=None, test=None, output=None, options=''):
     if data is None or test is None or output is None:
         assert False
-    command = ("bigmler --train " + data + " --test " + test +
+    test = res_filename(test)
+    command = ("bigmler --train " + res_filename(data) + " --test " + test +
                " --store --output " + output + " --max-batch-models 1 " +
                options.replace("'", "\""))
     shell_execute(command, output, test=test, options=options)
@@ -210,7 +224,7 @@ def i_create_all_resources_with_options(step, data=None, test=None, output=None,
 def i_create_resources_from_source_with_objective(step, multi_label=None, objective=None, model_fields=None, test=None, output=None):
     if test is None or output is None:
         assert False
-
+    test = res_filename(test)
     multi_label = "" if multi_label is None else " --multi-label "
     command = ("bigmler "+ multi_label +"--source " + world.source['resource']
                + " --objective " + objective + " --model-fields \" "
@@ -222,7 +236,7 @@ def i_create_resources_from_source_with_objective(step, multi_label=None, object
 def i_create_resources_from_source(step, multi_label=None, test=None, output=None):
     if test is None or output is None:
         assert False
-
+    test = res_filename(test)
     multi_label = "" if multi_label is None else " --multi-label "
     command = ("bigmler "+ multi_label +"--source " + world.source['resource']
                + " --test " + test + " --store --output " + output)
@@ -242,7 +256,7 @@ def i_create_resources_from_source_batch(step, output=None):
 def i_create_resources_from_dataset_with_objective(step, multi_label=None, objective=None, model_fields=None, test=None, output=None):
     if test is None or output is None:
         assert False
-
+    test = res_filename(test)
     multi_label = "" if multi_label is None else " --multi-label "
     command = ("bigmler "+ multi_label +"--dataset " + world.dataset['resource']
                + " --objective " + objective + " --model-fields \" "
@@ -255,6 +269,7 @@ def i_create_resources_from_dataset(step, multi_label=None, test=None, output=No
     if test is None or output is None:
         assert False
     multi_label = "" if multi_label is None else " --multi-label "
+    test = res_filename(test)
     command = ("bigmler "+ multi_label +"--dataset " +
                world.dataset['resource'] + " --test " + test +
                " --store --output " + output)
@@ -283,6 +298,7 @@ def i_create_resources_from_dataset_batch(step, output=None):
 def i_create_resources_from_dataset_objective_model(step, objective=None, fields=None, test=None, output=None):
     if objective is None or fields is None or test is None or output is None:
         assert False
+    test = res_filename(test)
     command = (u"bigmler --dataset " + world.dataset['resource'] +
                u" --objective " + objective + u" --model-fields " +
                fields + u" --test " + test + u" --store --output " + output)
@@ -293,6 +309,7 @@ def i_create_resources_from_dataset_objective_model(step, objective=None, fields
 def i_create_resources_from_local_model(step, directory=None, test=None, output=None):
     if test is None or output is None or directory is None:
         assert False
+    test = res_filename(test)
     with open(os.path.join(directory, "models")) as model_file:
         model_id = model_file.read().strip()
     command = ("bigmler --model-file " +
@@ -306,6 +323,7 @@ def i_create_resources_from_local_model(step, directory=None, test=None, output=
 def i_create_resources_from_model(step, test=None, output=None):
     if test is None or output is None:
         assert False
+    test = res_filename(test)
     command = ("bigmler --model " + world.model['resource'] + " --test " +
                test + " --store --output " + output + " --max-batch-models 1")
     shell_execute(command, output, test=test)
@@ -315,6 +333,7 @@ def i_create_resources_from_ensemble_with_threshold(step, test=None, output2=Non
     if test is None or output2 is None or output3 is None:
         assert False
     try:
+        test = res_filename(test)
         command = ("bigmler --ensemble " + world.ensemble['resource'] +
                    " --test " + test + " --tag my_ensemble --store --output " +
                    output2 + " --method threshold --threshold " +
@@ -347,6 +366,7 @@ def i_create_resources_from_local_ensemble(step, number_of_models=None, director
     with open(os.path.join(directory, "ensembles")) as ensemble_file:
         ensemble_id = ensemble_file.read().strip()
     try:
+        test = res_filename(test)
         command = ("bigmler --ensemble-file " +
                    storage_file_name(directory, ensemble_id) +
                    " --test " + test + " --store" +
@@ -379,6 +399,7 @@ def i_create_resources_from_ensemble_generic(step, number_of_models=None, no_rep
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
+        test = res_filename(test)
         command = ("bigmler --dataset " + world.dataset['resource'] +
                    " --test " + test + " --number-of-models " +
                    str(number_of_models) + " --tag my_ensemble --store" +
@@ -403,6 +424,7 @@ def i_create_resources_from_models_file_with_objective(step, multi_label=None, m
     if (models_file is None or test is None or output is None
             or objective is None):
         assert False
+    test = res_filename(test)
     multi_label = "" if multi_label is None else " --multi-label "
     command = ("bigmler "+ multi_label +"--models " + models_file + " --test "
                + test + " --store --output " + output
@@ -413,6 +435,7 @@ def i_create_resources_from_models_file_with_objective(step, multi_label=None, m
 def i_create_resources_from_models_file(step, multi_label=None, models_file=None, test=None, output=None):
     if models_file is None or test is None or output is None:
         assert False
+    test = res_filename(test)
     multi_label = "" if multi_label is None else " --multi-label "
     command = ("bigmler "+ multi_label +"--models " + models_file + " --test "
                + test + " --store --output " + output)
@@ -423,6 +446,7 @@ def i_create_resources_from_models_file(step, multi_label=None, models_file=None
 def i_create_resources_from_dataset_file(step, dataset_file=None, test=None, output=None):
     if dataset_file is None or test is None or output is None:
         assert False
+    test = res_filename(test)
     command = ("bigmler --datasets " + dataset_file + " --test " + test +
                " --store --output " + output)
     shell_execute(command, output, test=test)
@@ -501,7 +525,7 @@ def i_create_balanced_model(step, data=None, output_dir=None):
     world.directory = output_dir
     world.folders.append(world.directory)
     try:
-        command = ("bigmler --train " + data + " --balance " +
+        command = ("bigmler --train " + res_filename(data) + " --balance " +
                    " --store --output-dir " + output_dir)
         command = check_debug(command)
         retcode = check_call(command, shell=True)
@@ -519,7 +543,7 @@ def i_create_weighted_field_model(step, data=None, field=None, output_dir=None):
     world.directory = output_dir
     world.folders.append(world.directory)
     try:
-        command = ("bigmler --train " + data + " --weight-field " + field +
+        command = ("bigmler --train " + res_filename(data) + " --weight-field " + field +
                    " --store --output-dir " + output_dir)
         command = check_debug(command)
         retcode = check_call(command, shell=True)
@@ -538,7 +562,8 @@ def i_create_objective_weighted_model(step, data=None, path=None, output_dir=Non
     world.directory = output_dir
     world.folders.append(world.directory)
     try:
-        command = ("bigmler --train " + data + " --objective-weights " + path +
+        command = ("bigmler --train " + res_filename(data) +
+                   " --objective-weights " + res_filename(path) +
                    " --store --output-dir " + output_dir)
         command = check_debug(command)
         retcode = check_call(command, shell=True)
@@ -882,7 +907,6 @@ def i_check_create_evaluations(step, number_of_evaluations=None):
 
 #@step(r'I check that the predictions are ready')
 def i_check_create_predictions(step):
-
     previous_lines = -1
     predictions_lines = 0
     try:
@@ -902,6 +926,7 @@ def i_check_create_predictions(step):
 
 #@step(r'the local prediction file is like "(.*)"')
 def i_check_predictions(step, check_file):
+    check_file = res_filename(check_file)
     predictions_file = world.output
     try:
         predictions_file = csv.reader(open(predictions_file, "U"), lineterminator="\n")
@@ -943,6 +968,7 @@ def i_check_predictions_with_different_thresholds(step, output2, output3):
 
 #@step(r'the cross-validation json model info is like the one in "(.*)"')
 def i_check_cross_validation(step, check_file):
+    check_file = res_filename(check_file)
     cv_file = "%s/cross_validation.json" % world.directory
     try:
         with open(cv_file, "U") as cv_handler:
@@ -1015,7 +1041,7 @@ def i_create_all_resources_to_evaluate(step, data=None, output=None):
     if data is None or output is None:
         assert False
     try:
-        retcode = check_call("bigmler --evaluate --train " + data + " --store --output " + output, shell=True)
+        retcode = check_call("bigmler --evaluate --train " + res_filename(data) + " --store --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -1034,7 +1060,7 @@ def i_create_all_resources_to_evaluate_and_report(
         assert False
     try:
         retcode = check_call("bigmler --evaluate --shared --report gazibit" +
-                             " --train " + data +
+                             " --train " + res_filename(data) +
                              " --store --no-upload --output " + output, shell=True)
         if retcode < 0:
             assert False
@@ -1052,7 +1078,7 @@ def i_create_all_resources_to_evaluate_and_share(step, data=None, output=None):
     if data is None or output is None:
         assert False
     try:
-        retcode = check_call("bigmler --evaluate --shared --train " + data + " --store --output " + output, shell=True)
+        retcode = check_call("bigmler --evaluate --shared --train " + res_filename(data) + " --store --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -1069,8 +1095,8 @@ def i_create_dataset_with_attributes(step, data=None, attributes=None, output=No
     if data is None or output is None or attributes is None:
         assert False
     try:
-        retcode = check_call("bigmler --train " + data +
-                             " --source-attributes " + attributes +
+        retcode = check_call("bigmler --train " + res_filename(data) +
+                             " --source-attributes " + res_filename(attributes) +
                              " --no-model --store --output " + output,
                              shell=True)
         if retcode < 0:
@@ -1089,7 +1115,7 @@ def i_create_dataset(step, data=None, output=None):
     if data is None or output is None:
         assert False
     try:
-        retcode = check_call("bigmler --train " + data + " --no-model --store --output " + output, shell=True)
+        retcode = check_call("bigmler --train " + res_filename(data) + " --no-model --store --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -1265,7 +1291,7 @@ def i_create_dev_dataset(step, data=None, output=None):
     if data is None or output is None:
         assert False
     try:
-        retcode = check_call("bigmler --train " + data + " --no-model --store --dev --output " + output, shell=True)
+        retcode = check_call("bigmler --train " + res_filename(data) + " --no-model --store --dev --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:

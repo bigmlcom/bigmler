@@ -14,16 +14,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import distutils.core
 import os
 import re
 
-# Importing setuptools adds some features like "setup.py develop", but
-# it's optional so swallow the error if it's not there.
-try:
-    import setuptools
-except ImportError:
-    pass
+import setuptools
 
 # Get the path to this project
 project_path = os.path.dirname(__file__)
@@ -43,7 +37,7 @@ for file_name in ('README.rst', 'HISTORY.rst'):
 long_description = '\n\n'.join(file_contents)
 
 
-distutils.core.setup(
+setuptools.setup(
     name="bigmler",
     description="A command-line tool for BigML.io, the public BigML API",
     long_description=long_description,
@@ -58,9 +52,7 @@ distutils.core.setup(
                 'bigmler.cluster', 'bigmler.anomaly',
                 'bigmler.options', 'bigmler.delete', 'bigmler.sample',
                 'bigmler.tests'],
-    include_package_data = True,
-    package_data={'bigmler.tests':['data/*.csv', 'data/*.json']},
-    install_requires = ['bigml>=4.1.0, <4.2.0'],
+    install_requires = ['bigml>=4.1.2, <4.2.0'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',

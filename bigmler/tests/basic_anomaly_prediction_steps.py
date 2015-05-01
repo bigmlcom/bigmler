@@ -2,7 +2,7 @@ import os
 import time
 import csv
 import json
-from world import world
+from world import world, res_filename
 from subprocess import check_call, CalledProcessError
 from bigml.api import check_resource
 from bigmler.utils import storage_file_name
@@ -42,7 +42,7 @@ def shell_execute(command, output, test=None, options=None,
 def i_create_all_anomaly_resources_without_test_split(step, data=None, output_dir=None):
     if data is None or output_dir is None:
         assert False
-    command = ("bigmler anomaly --remote --train " + data +
+    command = ("bigmler anomaly --remote --train " + res_filename(data) +
                " --store --score --no-csv --to-dataset --output-dir " + output_dir)
     shell_execute(command, "%s/x.csv" % output_dir, data=data, test_split=1)
 
@@ -50,7 +50,7 @@ def i_create_all_anomaly_resources_without_test_split(step, data=None, output_di
 def i_create_all_anomaly_resources_with_test_split_no_CSV(step, data=None, test_split=None, output_dir=None):
     if data is None or output_dir is None or test_split is None:
         assert False
-    command = ("bigmler anomaly --remote --train " + data + " --test-split " + test_split +
+    command = ("bigmler anomaly --remote --train " + res_filename(data) + " --test-split " + test_split +
                " --store --no-csv --to-dataset --output-dir " + output_dir)
     shell_execute(command, "%s/x.csv" % output_dir, data=data, test_split=test_split)
 
@@ -59,7 +59,8 @@ def i_create_all_anomaly_resources_with_test_split_no_CSV(step, data=None, test_
 def i_create_all_anomaly_resources(step, data=None, test=None, output=None):
     if data is None or test is None or output is None:
         assert False
-    command = ("bigmler anomaly --train " + data + " --test " + test +
+    test = res_filename(test)
+    command = ("bigmler anomaly --train " + res_filename(data) + " --test " + test +
                " --store --output " + output)
     shell_execute(command, output, test=test)
 
@@ -68,6 +69,7 @@ def i_create_all_anomaly_resources(step, data=None, test=None, output=None):
 def i_create_anomaly_resources_from_source(step, test=None, output=None):
     if test is None or output is None:
         assert False
+    test = res_filename(test)
     command = ("bigmler anomaly --source " + world.source['resource'] +
                " --test " + test +
                " --store --output " + output)
@@ -78,6 +80,7 @@ def i_create_anomaly_resources_from_source(step, test=None, output=None):
 def i_create_anomaly_resources_from_dataset(step, test=None, output=None):
     if test is None or output is None:
         assert False
+    test = res_filename(test)
     command = ("bigmler anomaly --dataset " + world.dataset['resource'] +
                " --test " + test +
                " --store --output " + output)
@@ -88,6 +91,7 @@ def i_create_anomaly_resources_from_dataset(step, test=None, output=None):
 def i_create_anomaly_resources_from_local_anomaly_detector(step, directory=None, test=None, output=None):
     if test is None or output is None or directory is None:
         assert False
+    test = res_filename(test)
     with open(os.path.join(directory, "anomalies")) as handler:
         anomaly_id = handler.readline().strip()
     command = ("bigmler anomaly --anomaly-file " +
@@ -101,6 +105,7 @@ def i_create_anomaly_resources_from_local_anomaly_detector(step, directory=None,
 def i_create_anomaly_resources_from_anomaly_detector(step, test=None, output=None):
     if test is None or output is None:
         assert False
+    test = res_filename(test)
     command = ("bigmler anomaly --anomaly " + world.anomaly['resource'] +
                " --test " + test +
                " --store --output " + output)
@@ -110,7 +115,8 @@ def i_create_anomaly_resources_from_anomaly_detector(step, test=None, output=Non
 #@step(r'I create BigML resources using anomaly detector in file "(.*?)" to find anomaly scores for "(.*?)" and log predictions in "([^"]*)"$')
 def i_create_anomaly_resources_from_anomaly_file(step, anomaly_file=None, test=None, output=None):
     if anomaly_file is None or test is None or output is None:
-        assert False
+        assert Falsee
+    test = res_filename(test)
     command = ("bigmler anomaly --anomalies " + anomaly_file +
                " --test " + test +
                " --store --output " + output)
@@ -154,6 +160,7 @@ def i_check_create_anomaly_scores(step):
 
 #@step(r'the local anomaly scores file is like "(.*)"')
 def i_check_anomaly_scores(step, check_file):
+    check_file = res_filename(check_file)
     predictions_file = world.output
     try:
         predictions_file = csv.reader(open(predictions_file, "U"), lineterminator="\n")
@@ -184,8 +191,9 @@ def i_check_anomaly_scores(step, check_file):
 def i_create_all_anomaly_resources_with_mapping(step, data=None, test=None, fields_map=None, output=None):
     if data is None or test is None or output is None or fields_map is None:
         assert False
-    command = ("bigmler anomaly --remote --train " + data + " --test " + test +
-               " --fields-map " + fields_map +
+    test = res_filename(test)
+    command = ("bigmler anomaly --remote --train " + res_filename(data) + " --test " + test +
+               " --fields-map " + res_filename(fields_map) +
                " --store --output " + output)
     shell_execute(command, output, test=test)
 
@@ -194,6 +202,7 @@ def i_create_all_anomaly_resources_with_mapping(step, data=None, test=None, fiel
 def i_create_all_anomaly_resources_with_test_split(step, data=None, test_split=None, output=None):
     if data is None or output is None or test_split is None:
         assert False
+    data = res_filename(data)
     command = ("bigmler anomaly --remote --train " + data + " --test-split " + test_split +
                " --store --output " + output)
     shell_execute(command, output, data=data, test_split=test_split)

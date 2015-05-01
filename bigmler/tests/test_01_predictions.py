@@ -211,7 +211,7 @@ class TestPrediction(object):
         print self.test_scenario7.__doc__
         examples = [
             ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}',
-             'scenario5', '{"number_of_models": 10, "test": "../data/test_iris.csv", "output": "./scenario5/predictions.csv"}',
+             'scenario5', '{"number_of_models": 10, "test": "data/test_iris.csv", "output": "scenario5/predictions.csv"}',
              'scenario5/models', 'data/test_iris.csv', 'scenario6/predictions.csv', 'check_files/predictions_iris.csv']]
         for example in examples:
             print "\nTesting with:\n", example
@@ -263,7 +263,7 @@ class TestPrediction(object):
         print self.test_scenario9.__doc__
         examples = [
             ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}',
-             'scenario5', '{"number_of_models": 10, "test": "../data/test_iris.csv", "output": "./scenario5/predictions.csv"}',
+             'scenario5', '{"number_of_models": 10, "test": "data/test_iris.csv", "output": "scenario5/predictions.csv"}',
              'scenario1', 'scenario5', 'scenario8/predictions.csv', 'check_files/predictions_iris.csv']]
         for example in examples:
             print "\nTesting with:\n", example
@@ -460,7 +460,7 @@ class TestPrediction(object):
         """
         print self.test_scenario16.__doc__
         examples = [
-            ['scenario1', '{"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}', '10', 'data/test_iris.csv', 'scenario16/predictions.csv', 'scenario16/predictions2.csv', 'scenario16/predictions3.csv']]
+            ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}', '10', 'data/test_iris.csv', 'scenario16/predictions.csv', 'scenario16/predictions2.csv', 'scenario16/predictions3.csv']]
         for example in examples:
             print "\nTesting with:\n", example
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
@@ -485,7 +485,7 @@ class TestPrediction(object):
         """
         print self.test_scenario17.__doc__
         examples = [
-            ['scenario1', '{"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}', 'data/test_iris.csv', 'scenario17/predictions.csv', 'check_files/predictions_iris.csv']]
+            ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}', 'data/test_iris.csv', 'scenario17/predictions.csv', 'check_files/predictions_iris.csv']]
         for example in examples:
             print "\nTesting with:\n", example
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])

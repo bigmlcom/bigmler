@@ -27,9 +27,9 @@ in our `Campfire chatroom <https://bigmlinc.campfirenow.com/f20a0>`_.
 Requirements
 ============
 
-Python 2.7 is currently supported by BigMLer.
+Python 2.7 and 3 are currently supported by BigMLer.
 
-BigMLer requires `bigml 4.0.2 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 4.1.2 <https://github.com/bigmlcom/python>`_  or
 higher. Using proportional missing strategy will additionally request
 the use of the `numpy <http://www.numpy.org/>`_ and
 `scipy <http://www.scipy.org/>`_ libraries. They are not

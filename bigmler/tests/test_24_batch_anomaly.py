@@ -70,7 +70,7 @@ class TestBatchAnomalyScores(object):
             test_pred.i_check_create_test_dataset(self)
             test_batch.i_check_create_batch_anomaly_scores(self)
             test_anomaly.i_check_create_anomaly_scores(self)
-            test_anomaly.i_check_anomaly_scores(self, example[3])
+            test_anomaly.i_check_anomaly_scores(self, example[4])
 
     def test_scenario2(self):
         """

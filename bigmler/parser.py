@@ -71,8 +71,9 @@ under the License.""" % version
     main_parser = argparse.ArgumentParser(
         description="A higher level API to BigML's API.",
         epilog="Happy predictive modeling!",
-        version=version_text,
         formatter_class=argparse.RawTextHelpFormatter)
+    main_parser.add_argument('--version',
+                             action='version', version=version_text)
     subparsers = main_parser.add_subparsers()
 
     # list of options

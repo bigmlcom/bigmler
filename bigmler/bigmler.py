@@ -56,6 +56,8 @@ from bigmler.parser import SUBCOMMANDS
 from bigmler.utils import SYSTEM_ENCODING
 
 
+PYTHON3 = sys.version_info[0] == 3
+
 def check_delete_option(args):
     """Checks if the --delete option (to be deprecated) is used and changes
        its syntax to the corresponding subcommand
@@ -82,7 +84,8 @@ def main(args=sys.argv[1:]):
             new_args = args
         # checks if the old --delete syntax is used
         new_args = check_delete_option(new_args)
-        new_args = [arg.decode(SYSTEM_ENCODING) for arg in new_args]
+        if not PYTHON3:
+            new_args = [arg.decode(SYSTEM_ENCODING) for arg in new_args]
         if new_args[0] == "main":
             main_dispatcher(args=new_args)
         elif new_args[0] == "analyze":

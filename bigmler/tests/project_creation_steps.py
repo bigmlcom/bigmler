@@ -2,7 +2,7 @@ import os
 import time
 import csv
 import json
-from lettuce import step, world
+from world import world, res_filename
 from subprocess import check_call, CalledProcessError
 from bigmler.checkpoint import file_number_of_lines
 from bigmler.utils import SYSTEM_ENCODING
@@ -10,7 +10,7 @@ from bigml.api import check_resource
 from common_steps import check_debug
 
 
-@step(r'I create a BigML source uploading train "(.*)" file and associate it to a new project named "(.*)" storing results in "(.*)"')
+#@step(r'I create a BigML source uploading train "(.*)" file and associate it to a new project named "(.*)" storing results in "(.*)"')
 def i_create_source_with_project(step, data=None, project=None, output_dir=None):
     if data is None:
         assert False
@@ -24,7 +24,7 @@ def i_create_source_with_project(step, data=None, project=None, output_dir=None)
         print project
         previous_projects = world.api.list_projects('name=%s' % project)
     try:
-        command = (u"bigmler --train " + data +
+        command = (u"bigmler --train " + res_filename(data) +
                    u" --no-model --no-dataset --store --output-dir " +
                    output_dir +
                    u" --project=\"" + project + "\"")
@@ -39,14 +39,14 @@ def i_create_source_with_project(step, data=None, project=None, output_dir=None)
         assert False, str(exc)
 
 
-@step(r'I create a BigML source uploading train "(.*)" file and associate it to the last created project id storing results in "(.*)"')
+#@step(r'I create a BigML source uploading train "(.*)" file and associate it to the last created project id storing results in "(.*)"')
 def i_create_source_with_project_id(step, data=None, output_dir=None):
     if data is None:
         assert False
     world.directory = output_dir
     world.folders.append(world.directory)
     try:
-        command = (u"bigmler --train " + data +
+        command = (u"bigmler --train " + res_filename(data) +
                    u" --no-model --no-dataset --store --output-dir " +
                    output_dir +
                    u" --project-id " + world.project['resource'])
@@ -61,7 +61,7 @@ def i_create_source_with_project_id(step, data=None, output_dir=None):
         assert False, str(exc)
 
 
-@step(r'the source is associated to the project')
+#@step(r'the source is associated to the project')
 def check_source_in_project(step):
     if world.project['resource'] == world.source['object']['project']:
         assert True
@@ -71,7 +71,7 @@ def check_source_in_project(step):
                        world.source['object']['project']))
 
 
-@step(r'I check that the project has been created$')
+#@step(r'I check that the project has been created$')
 def i_check_create_project(step):
     project_file = "%s%sproject" % (world.directory, os.sep)
     try:
@@ -86,10 +86,10 @@ def i_check_create_project(step):
         assert False, str(exc)
 
 
-@step(r'the source has no project association')
+#@step(r'the source has no project association')
 def check_source_in_no_project(step):
     if world.source['object']['project'] is None:
         assert True
     else:
-        assert False, ("Source is associated to %s" % 
+        assert False, ("Source is associated to %s" %
                        world.source['object']['project'])

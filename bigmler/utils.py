@@ -26,6 +26,7 @@ import glob
 import os
 import sys
 import datetime
+import io
 
 try:
     import simplejson as json
@@ -36,6 +37,7 @@ import bigml.api
 from bigml.util import console_log, empty_resource
 from bigml.fields import get_fields_structure, Fields
 
+PYTHON3 = sys.version_info[0] == 3
 PAGE_LENGTH = 200
 ATTRIBUTE_NAMES = ['name', 'label', 'description']
 NEW_DIRS_LOG = u".bigmler_dirs"
@@ -81,7 +83,7 @@ def read_field_attributes(path):
     """
     field_attributes = {}
     try:
-        attributes_reader = csv.reader(open(path, "U"), quotechar="'")
+        attributes_reader = csv.reader(open(path, "Ub"), quotechar="'")
     except IOError:
         sys.exit("Error: cannot read field attributes %s" % path)
 
@@ -132,7 +134,7 @@ def read_json(path):
     """
     json_attributes = {}
     try:
-        attributes_reader = open(path, "r")
+        attributes_reader = open(path, "rb")
     except IOError:
         sys.exit("Error: cannot read json file %s" % path)
     try:
@@ -236,7 +238,7 @@ def read_votes_files(dirs_list, path):
     """
     file_name = "%s%scombined_predictions" % (path, os.sep)
     check_dir(file_name)
-    group_predictions = open(file_name, "w", 0)
+    group_predictions = open(file_name, "wb", 0)
     current_directory = os.getcwd()
     predictions_files = []
     for directory in dirs_list:
@@ -260,7 +262,7 @@ def read_local_resource(path, csv_properties=None):
         csv_properties = {}
     fields = None
 
-    with open(path, "r") as resource_file:
+    with open(path, "rb") as resource_file:
         try:
             resource = json.loads(resource_file.read())
         except IOError:
@@ -397,12 +399,14 @@ def log_message(message, log_file=None, console=False):
        If console is True, sends the message to console.
     """
 
-    if isinstance(message, unicode):
+    if isinstance(message, unicode) and not PYTHON3:
         message = message.encode(FILE_ENCODING)
     if console:
         console_log(message)
     if log_file is not None:
-        with open(log_file, 'a', 0) as log_file:
+        if PYTHON3:
+            message = message.encode(FILE_ENCODING)
+        with open(log_file, 'ab', 0) as log_file:
             log_file.write(message)
 
 
@@ -414,7 +418,7 @@ def sys_log_message(message, log_file=None):
     if isinstance(message, unicode):
         message = message.encode(SYSTEM_ENCODING)
     if log_file is not None:
-        with open(log_file, 'a', 0) as log_file:
+        with open(log_file, 'ab', 0) as log_file:
             log_file.write(message)
 
 
@@ -439,7 +443,7 @@ def check_resource_error(resource, message):
     return bigml.api.get_resource_id(resource)
 
 
-def log_created_resources(file_name, path, resource_id, open_mode='w'):
+def log_created_resources(file_name, path, resource_id, open_mode='wb'):
     """Logs the created resources ids in the given file
 
     """
@@ -547,7 +551,7 @@ def read_objective_weights(path):
     """
     objective_weights = []
     try:
-        weights_reader = csv.reader(open(path, "U"), quotechar="'")
+        weights_reader = csv.reader(open(path, "Ub"), quotechar="'")
     except IOError:
         sys.exit("Error: cannot read objective weights %s" % path)
 

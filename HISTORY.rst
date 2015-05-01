@@ -3,6 +3,11 @@
 History
 -------
 
+3.0.0 (2015-04-15)
+~~~~~~~~~~~~~~~~~~
+
+- Supporting Python 3 and changing the test suite to nose.
+
 2.2.0 (2015-04-15)
 ~~~~~~~~~~~~~~~~~~
 

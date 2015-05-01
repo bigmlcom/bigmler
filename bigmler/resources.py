@@ -30,7 +30,7 @@ import bigml.api
 
 from bigmler.utils import (dated, get_url, log_message, plural, check_resource,
                            check_resource_error, log_created_resources,
-                           is_shared)
+                           is_shared, FILE_ENCODING)
 from bigmler.labels import label_model_args, get_all_labels
 from bigmler.reports import report
 from bigml.util import bigml_locale
@@ -113,6 +113,12 @@ def configure_input_fields(fields, user_given_fields, by_name=False):
                     sys.exit(exc)
     return input_fields
 
+
+def utf8(text):
+    """Encodes using the global FILE_ENCODING
+
+    """
+    return text.encode(FILE_ENCODING)
 
 def update_attributes(updatable_attributes, new_attributes, by_column=False,
                       fields=None):
@@ -259,12 +265,13 @@ def create_source(data_set, source_args, args, api=None, path=None,
 
     source = api.create_source(data_set, source_args,
                                progress_bar=args.progress_bar)
+    print "***", data_set, source_args, args.progress_bar
     if path is not None:
         try:
             suffix = "_" + source_type if source_type else ""
-            with open("%s/source%s" % (path, suffix), 'w', 0) as source_file:
-                source_file.write("%s\n" % source['resource'])
-                source_file.write("%s\n" % source['object']['name'])
+            with open("%s/source%s" % (path, suffix), 'wb', 0) as source_file:
+                source_file.write(utf8("%s\n" % source['resource']))
+                source_file.write(utf8("%s\n" % source['object']['name']))
         except IOError, exc:
             sys.exit("%s: Failed to write %s/source" % (str(exc), path))
     source_id = check_resource_error(source, "Failed to create source: ")
@@ -1183,12 +1190,12 @@ def save_evaluation(evaluation, output, api=None):
     """
     if api is None:
         api = bigml.api.BigML()
-    evaluation_json = open(output + '.json', 'w', 0)
+    evaluation_json = open(output + '.json', 'wb', 0)
     evaluation = evaluation.get('object', evaluation).get('result', evaluation)
-    evaluation_json.write(json.dumps(evaluation))
+    evaluation_json.write(utf8(json.dumps(evaluation)))
     evaluation_json.flush()
     evaluation_json.close()
-    evaluation_txt = open(output + '.txt', 'w', 0)
+    evaluation_txt = open(output + '.txt', 'wb', 0)
     api.pprint(evaluation, evaluation_txt)
     evaluation_txt.flush()
     evaluation_txt.close()

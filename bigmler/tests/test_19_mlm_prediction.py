@@ -81,7 +81,7 @@ class TestMLM(object):
         """
         print self.test_scenario2.__doc__
         examples = [
-            ['scenario_mlm_1', '{"tag": "my_multilabelm_1", "data": "../data/multilabel_multi.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "./scenario_mlm_1/predictions.csv", "test": "../data/test_multilabel.csv", "ml_fields": "type,class", "model_fields": "-type,-type - W,-type - A,-type - C,-type - S,-type - R,-type - T,-type - P", "objective": "class"}', 'class', '-type,-type - W,-type - A,-type - C,-type - S,-type - R,-type - T,-type - P', 'data/test_multilabel.csv', 'scenario_mlm_2/predictions.csv', 'check_files/predictions_ml_comma.csv']]
+            ['scenario_mlm_1', '{"tag": "my_multilabelm_1", "data": "data/multilabel_multi.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_mlm_1/predictions.csv", "test": "data/test_multilabel.csv", "ml_fields": "type,class", "model_fields": "-type,-type - W,-type - A,-type - C,-type - S,-type - R,-type - T,-type - P", "objective": "class"}', 'class', '-type,-type - W,-type - A,-type - C,-type - S,-type - R,-type - T,-type - P', 'data/test_multilabel.csv', 'scenario_mlm_2/predictions.csv', 'check_files/predictions_ml_comma.csv']]
         for example in examples:
             print "\nTesting with:\n", example
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
@@ -106,7 +106,7 @@ class TestMLM(object):
         """
         print self.test_scenario3.__doc__
         examples = [
-            ['scenario_mlm_1', '{"tag": "my_multilabelm_1", "data": "../data/multilabel_multi.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "./scenario_mlm_1/predictions.csv", "test": "../data/test_multilabel.csv", "ml_fields": "type,class", "model_fields": "-type,-type - W,-type - A,-type - C,-type - S,-type - R,-type - T,-type - P", "objective": "class"}', 'class', '-type,-type - W,-type - A,-type - C,-type - S,-type - R,-type - T,-type - P', 'data/test_multilabel.csv', 'scenario_mlm_3/predictions.csv', 'check_files/predictions_ml_comma.csv']]
+            ['scenario_mlm_1', '{"tag": "my_multilabelm_1", "data": "data/multilabel_multi.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_mlm_1/predictions.csv", "test": "data/test_multilabel.csv", "ml_fields": "type,class", "model_fields": "-type,-type - W,-type - A,-type - C,-type - S,-type - R,-type - T,-type - P", "objective": "class"}', 'class', '-type,-type - W,-type - A,-type - C,-type - S,-type - R,-type - T,-type - P', 'data/test_multilabel.csv', 'scenario_mlm_3/predictions.csv', 'check_files/predictions_ml_comma.csv']]
         for example in examples:
             print "\nTesting with:\n", example
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
@@ -129,7 +129,7 @@ class TestMLM(object):
         """
         print self.test_scenario4.__doc__
         examples = [
-            ['scenario_mlm_1', '{"tag": "my_multilabelm_1", "data": "../data/multilabel_multi.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "./scenario_mlm_1/predictions.csv", "test": "../data/test_multilabel.csv", "ml_fields": "type,class", "model_fields": "-type,-type - W,-type - A,-type - C,-type - S,-type - R,-type - T,-type - P", "objective": "class"}', 'scenario_mlm_1/models', 'class', 'data/test_multilabel.csv', 'scenario_mlm_4/predictions.csv', 'check_files/predictions_ml_comma.csv']]
+            ['scenario_mlm_1', '{"tag": "my_multilabelm_1", "data": "data/multilabel_multi.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_mlm_1/predictions.csv", "test": "data/test_multilabel.csv", "ml_fields": "type,class", "model_fields": "-type,-type - W,-type - A,-type - C,-type - S,-type - R,-type - T,-type - P", "objective": "class"}', 'scenario_mlm_1/models', 'class', 'data/test_multilabel.csv', 'scenario_mlm_4/predictions.csv', 'check_files/predictions_ml_comma.csv']]
         for example in examples:
             print "\nTesting with:\n", example
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
@@ -151,7 +151,7 @@ class TestMLM(object):
         """
         print self.test_scenario5.__doc__
         examples = [
-            ['scenario_mlm_1', '{"tag": "my_multilabelm_1", "data": "../data/multilabel_multi.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "./scenario_mlm_1/predictions.csv", "test": "../data/test_multilabel.csv", "ml_fields": "type,class", "model_fields": "-type,-type - W,-type - A,-type - C,-type - S,-type - R,-type - T,-type - P", "objective": "class"}', 'Adult,Student', 'class', 'my_multilabelm_1', 'data/test_multilabel.csv', 'scenario_mlm_5/predictions.csv', 'check_files/predictions_ml_labels.csv']]
+            ['scenario_mlm_1', '{"tag": "my_multilabelm_1", "data": "data/multilabel_multi.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_mlm_1/predictions.csv", "test": "data/test_multilabel.csv", "ml_fields": "type,class", "model_fields": "-type,-type - W,-type - A,-type - C,-type - S,-type - R,-type - T,-type - P", "objective": "class"}', 'Adult,Student', 'class', 'my_multilabelm_1', 'data/test_multilabel.csv', 'scenario_mlm_5/predictions.csv', 'check_files/predictions_ml_labels.csv']]
         for example in examples:
             print "\nTesting with:\n", example
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])

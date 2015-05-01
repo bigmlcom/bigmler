@@ -2,7 +2,7 @@ import os
 import time
 import csv
 import json
-from world import world
+from world import world, res_filename
 from subprocess import check_call, CalledProcessError
 from bigml.api import check_resource
 from bigmler.utils import storage_file_name
@@ -42,7 +42,8 @@ def shell_execute(command, output, test=None, options=None,
 def i_create_all_cluster_resources(step, data=None, test=None, output=None):
     if data is None or test is None or output is None:
         assert False
-    command = ("bigmler cluster --train " + data + " --test " + test +
+    test = res_filename(test)
+    command = ("bigmler cluster --train " + res_filename(data) + " --test " + test +
                " --k 8" +
                " --store --output " + output)
     shell_execute(command, output, test=test)
@@ -85,6 +86,7 @@ def i_check_create_centroids(step):
 
 #@step(r'the local centroids file is like "(.*)"')
 def i_check_centroids(step, check_file):
+    check_file = res_filename(check_file)
     predictions_file = world.output
     try:
         predictions_file = csv.reader(open(predictions_file, "U"), lineterminator="\n")
@@ -106,6 +108,7 @@ def i_check_centroids(step, check_file):
 def i_create_cluster_resources_from_dataset(step, test=None, output=None):
     if test is None or output is None:
         assert False
+    test = res_filename(test)
     command = ("bigmler cluster --dataset " +
                world.dataset['resource'] + " --test " + test +  " --k 8" +
                " --store --output " + output)
@@ -116,6 +119,7 @@ def i_create_cluster_resources_from_dataset(step, test=None, output=None):
 def i_create_cluster_resources_from_source(step, test=None, output=None):
     if test is None or output is None:
         assert False
+    test = res_filename(test)
     command = ("bigmler cluster --source " +
                world.source['resource'] + " --test " + test + " --k 8" +
                " --store --output " + output)
@@ -126,6 +130,7 @@ def i_create_cluster_resources_from_source(step, test=None, output=None):
 def i_create_cluster_resources_from_local_cluster(step, directory=None, test=None, output=None):
     if test is None or output is None or directory is None:
         assert False
+    test = res_filename(test)
     with open(os.path.join(directory, "clusters")) as handler:
         cluster_id = handler.readline().strip()
     command = ("bigmler cluster --cluster-file " +
@@ -139,6 +144,7 @@ def i_create_cluster_resources_from_local_cluster(step, directory=None, test=Non
 def i_create_cluster_resources_from_cluster(step, test=None, output=None):
     if test is None or output is None:
         assert False
+    test = res_filename(test)
     command = ("bigmler cluster --cluster " +
                world.cluster['resource'] + " --test " + test + " --k 8" +
                " --store --output " + output)
@@ -149,6 +155,7 @@ def i_create_cluster_resources_from_cluster(step, test=None, output=None):
 def i_create_cluster_resources_from_clusters_file(step, clusters_file=None, test=None, output=None):
     if test is None or output is None or clusters_file is None:
         assert False
+    test = res_filename(test)
     command = ("bigmler cluster --clusters " +
                clusters_file + " --test " + test +
                " --store --output " + output)
@@ -159,7 +166,8 @@ def i_create_cluster_resources_from_clusters_file(step, clusters_file=None, test
 def i_create_all_cluster_resources_to_dataset(step, data=None, test=None, output_dir=None):
     if data is None or test is None or output_dir is None:
         assert False
-    command = ("bigmler cluster --remote --train " + data +
+    test = res_filename(test)
+    command = ("bigmler cluster --remote --train " + res_filename(data) +
                " --test " + test + " --k 8" +
                " --to-dataset --no-csv " +
                " --store --output-dir " + output_dir)
@@ -170,9 +178,10 @@ def i_create_all_cluster_resources_to_dataset(step, data=None, test=None, output
 def i_create_all_cluster_resources_with_mapping(step, data=None, test=None, fields_map=None, output=None):
     if data is None or test is None or output is None or fields_map is None:
         assert False
-    command = ("bigmler cluster --remote --train " + data +
+    test = res_filename(test)
+    command = ("bigmler cluster --remote --train " + res_filename(data) +
                " --test " + test + " --k 8" +
-               " --fields-map " + fields_map +
+               " --fields-map " + res_filename(fields_map) +
                " --store --output " + output)
     shell_execute(command, output, test=test)
 

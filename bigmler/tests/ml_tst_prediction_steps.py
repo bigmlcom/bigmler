@@ -2,7 +2,7 @@ import os
 import time
 import csv
 import json
-from world import world
+from world import world, res_filename
 from subprocess import check_call, CalledProcessError
 from bigmler.checkpoint import file_number_of_lines
 from common_steps import check_debug
@@ -14,8 +14,9 @@ def i_create_all_mlm_resources(step, tag=None, label_separator=None, number_of_l
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     world.number_of_models = int(number_of_labels)
+    test = res_filename(test)
     try:
-        command = ("bigmler --multi-label --train " + data +
+        command = ("bigmler --multi-label --train " + res_filename(data) +
                    " --multi-label-fields " + ml_fields +
                    " --label-separator \"" + label_separator +
                    "\" --training-separator \"" + training_separator +
@@ -44,8 +45,9 @@ def i_create_all_ml_resources(step, tag=None, label_separator=None, number_of_la
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     world.number_of_models = int(number_of_labels)
+    test = res_filename(test)
     try:
-        command = ("bigmler --multi-label --train " + data +
+        command = ("bigmler --multi-label --train " + res_filename(data) +
                    " --label-separator \"" + label_separator +
                    "\" --training-separator \"" + training_separator +
                    "\" --test " + test + " --store --output " + output +
@@ -71,6 +73,7 @@ def i_predict_ml_from_model_tag(step, tag=None, test=None, output=None):
         assert False
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
+    test = res_filename(test)
     try:
         command = ("bigmler --multi-label --model-tag " + tag + " --test " +
                    test + " --store --output " + output +
@@ -95,6 +98,7 @@ def i_predict_ml_from_model_tag_with_labels_with_objective(step, labels=None, ob
         assert False
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
+    test = res_filename(test)
     try:
         command = ("bigmler --multi-label --model-tag " + tag + " --labels " +
                    labels + " --test " + test + " --store --output " + output +
@@ -119,6 +123,7 @@ def i_predict_ml_from_model_tag_with_labels(step, labels=None, tag=None, test=No
         assert False
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
+    test = res_filename(test)
     try:
         command = ("bigmler --multi-label --model-tag " + tag + " --labels " +
                    labels + " --test " + test + " --store --output " + output +
@@ -176,7 +181,7 @@ def i_create_ml_source(step, label_separator=None, number_of_labels=None, data=N
     world.directory = output_dir
     world.folders.append(world.directory)
     try:
-        command = ("bigmler --multi-label --train " + data +
+        command = ("bigmler --multi-label --train " + res_filename(data) +
                    " --label-separator \"" + label_separator +
                    "\" --training-separator \"" + training_separator +
                    "\" --multi-label-fields " + multi_label_fields +
@@ -201,8 +206,9 @@ def i_create_all_ml_resources_and_ensembles(step, tag=None, label_separator=None
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     world.number_of_models = int(number_of_labels) * int(number_of_models)
+    test = res_filename(test)
     try:
-        command = ("bigmler --multi-label --train " + data +
+        command = ("bigmler --multi-label --train " + res_filename(data) +
                    " --label-separator \"" + label_separator +
                    "\" --training-separator \"" + training_separator +
                    "\" --test " + test + " --number-of-models " +
@@ -229,6 +235,7 @@ def i_create_resources_and_ensembles_from_source(step, multi_label=None, number_
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     multi_label = "" if multi_label is None else " --multi-label "
+    test = res_filename(test)
     try:
         command = ("bigmler "+ multi_label +"--source " +
                    world.source['resource'] + " --number-of-models " +
@@ -254,6 +261,7 @@ def i_create_resources_and_ensembles_from_dataset(step, multi_label=None, number
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     multi_label = "" if multi_label is None else " --multi-label "
+    test = res_filename(test)
     try:
         command = ("bigmler "+ multi_label +"--dataset " +
                    world.dataset['resource'] + " --number-of-models " +

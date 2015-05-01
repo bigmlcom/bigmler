@@ -4,7 +4,7 @@ try:
     import simplejson as json
 except ImportError:
     import json
-from world import world
+from world import world, res_filename
 from subprocess import check_call
 from bigml.api import check_resource
 
@@ -57,9 +57,9 @@ def i_create_all_resources_to_evaluate_with_model_and_map(step, data=None, field
     if data is None or fields_map is None or output is None:
         assert False
     try:
-        retcode = check_call("bigmler --evaluate --test " + data + " --model " +
+        retcode = check_call("bigmler --evaluate --test " + res_filename(data) + " --model " +
                        world.model['resource'] + " --output " + output +
-                       " --fields-map " + fields_map,
+                       " --fields-map " + res_filename(fields_map),
                        shell=True)
         if retcode < 0:
             assert False
@@ -77,7 +77,7 @@ def i_create_all_resources_to_evaluate_with_model(step, data=None, output=None):
     if data is None or output is None:
         assert False
     try:
-        retcode = check_call("bigmler --evaluate --test " + data + " --model " +
+        retcode = check_call("bigmler --evaluate --test " + res_filename(data) + " --model " +
                        world.model['resource'] + " --output " + output,
                        shell=True)
         if retcode < 0:
@@ -116,7 +116,7 @@ def i_create_with_split_to_evaluate(step, data=None, split=None, output=None):
     if data is None or split is None or output is None:
         assert False
     try:
-        retcode = check_call("bigmler --evaluate --train " + data + " --test-split " + split +  " --output " + output, shell=True)
+        retcode = check_call("bigmler --evaluate --train " + res_filename(data) + " --test-split " + split +  " --output " + output, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -132,6 +132,7 @@ def i_create_with_split_to_evaluate(step, data=None, split=None, output=None):
 def i_create_proportional_to_evaluate(step, test=None):
     if test is None:
         assert False
+    test = res_filename(test)
     try:
         output_dir = world.directory + "_eval/"
         output = output_dir + os.path.basename(world.output)
@@ -153,6 +154,7 @@ def i_create_proportional_to_evaluate(step, test=None):
 
 #@step(r'the evaluation file is like "(.*)"$')
 def then_the_evaluation_file_is_like(step, check_file_json):
+    check_file_json = res_filename(check_file_json)
     evaluation_file_json = world.output + ".json"
     try:
         evaluation_file_json = open(evaluation_file_json, "U")
@@ -202,7 +204,7 @@ def i_create_with_split_to_evaluate_ensemble(step, data=None, number_of_models=N
     if data is None or split is None or output is None:
         assert False
     try:
-        retcode = check_call("bigmler --evaluate --train " + data +
+        retcode = check_call("bigmler --evaluate --train " + res_filename(data) +
                              " --test-split " + split +
                              " --number-of-models " + number_of_models +
                              " --output " + output, shell=True)

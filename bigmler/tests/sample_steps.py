@@ -2,7 +2,7 @@ import os
 import time
 import csv
 import json
-from lettuce import step, world
+from world import world, res_filename
 from subprocess import check_call, CalledProcessError
 from bigmler.checkpoint import file_number_of_lines
 from bigmler.utils import SYSTEM_ENCODING
@@ -10,7 +10,7 @@ from bigml.api import check_resource
 from common_steps import check_debug
 
 
-@step(r'I create a new sample from the dataset and get the sample using options "(.*)" storing logs in "(.*)"')
+#@step(r'I create a new sample from the dataset and get the sample using options "(.*)" storing logs in "(.*)"')
 def i_create_sample(step, options=None, output_dir=None):
     if options is None or output_dir is None:
         assert False
@@ -31,7 +31,7 @@ def i_create_sample(step, options=None, output_dir=None):
         assert False, str(exc)
 
 
-@step(r'I check that the sample has been created')
+#@step(r'I check that the sample has been created')
 def i_check_create_sample(step):
     sample_file = "%s%ssamples" % (world.directory, os.sep)
     try:
@@ -46,10 +46,11 @@ def i_check_create_sample(step):
         assert False, str(exc)
 
 
-@step(r'the sample contains stat-info like in "(.*)"')
+#@step(r'the sample contains stat-info like in "(.*)"')
 def i_check_sample_stat(step, check_sample_json=None):
     if check_sample_json is None:
         assert False
+    check_sample_json = res_filename(check_sample_json)
     try:
         sample_json = os.path.join(world.directory, "stat_info.json")
         with open(check_sample_json, "r") as check_sample_file:
@@ -65,10 +66,11 @@ def i_check_sample_stat(step, check_sample_json=None):
         assert False, str(exc)
 
 
-@step(r'the sample file is like "(.*)"')
+#@step(r'the sample file is like "(.*)"')
 def i_check_sample_file(step, check_sample_file=None):
     if check_sample_file is None:
         assert False
+    check_sample_file = res_filename(check_sample_file)
     try:
         sample_file = os.path.join(world.directory, "sample.csv")
         with open(check_sample_file, "r") as check_sample_file:

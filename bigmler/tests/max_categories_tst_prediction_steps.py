@@ -2,7 +2,7 @@ import os
 import time
 import csv
 import json
-from world import world
+from world import world, res_filename
 from subprocess import check_call, CalledProcessError
 from bigmler.checkpoint import file_number_of_lines
 from bigml.api import check_resource
@@ -15,6 +15,7 @@ def i_create_all_mc_resources_from_dataset_with_model_fields(step, max_categorie
         assert False
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
+    test = res_filename(test)
     try:
         command = ("bigmler --dataset " + world.dataset['resource'] +
                    " --max-categories " + max_categories + " --objective " +
@@ -40,8 +41,9 @@ def i_create_all_mc_resources(step, data, max_categories=None, objective=None, t
         assert False
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
+    test = res_filename(test)
     try:
-        command = ("bigmler --train " + data + " --max-categories " +
+        command = ("bigmler --train " + res_filename(data) + " --max-categories " +
                    max_categories + " --objective " + objective + " --test " +
                    test + " --store --output " + output)
         command = check_debug(command)
@@ -64,6 +66,7 @@ def i_create_all_mc_resources_from_source(step, max_categories=None, objective=N
         assert False
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
+    test = res_filename(test)
     try:
         command = ("bigmler --source " + world.source['resource'] +
                    " --max-categories " + max_categories +  " --objective " +
@@ -89,6 +92,7 @@ def i_create_all_mc_resources_from_dataset(step, max_categories=None, objective=
         assert False
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
+    test = res_filename(test)
     try:
         command = ("bigmler --dataset " + world.dataset['resource'] +
                    " --max-categories " + max_categories + " --objective " +
@@ -114,6 +118,7 @@ def i_create_all_mc_resources_from_models(step, models_file=None, test=None, out
         assert False
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
+    test = res_filename(test)
     try:
         command = ("bigmler --models " + models_file +
                    " --method combined --test " + test + " --store --output "

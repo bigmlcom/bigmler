@@ -71,7 +71,7 @@ class TestBatchPrediction(object):
             test_batch_pred.i_check_create_test_dataset(self)
             test_batch_pred.i_check_create_batch_prediction(self)
             test_pred.i_check_create_predictions(self)
-            test_pred.i_check_predictions(self, example[3])
+            test_pred.i_check_predictions(self, example[4])
 
     def test_scenario2(self):
         """

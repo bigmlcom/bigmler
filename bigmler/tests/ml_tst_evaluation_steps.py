@@ -2,7 +2,7 @@ import os
 import time
 import csv
 import json
-from world import world
+from world import world, res_filename
 from subprocess import check_call, CalledProcessError
 from bigmler.checkpoint import file_number_of_lines
 from common_steps import check_debug
@@ -15,7 +15,7 @@ def i_create_all_ml_evaluations(step, tag=None, label_separator=None, number_of_
     world.folders.append(world.directory)
     world.number_of_models = int(number_of_labels)
     try:
-        command = "bigmler --multi-label --train " + data + " --label-separator \"" + label_separator + "\" --training-separator \"" + training_separator + "\" --evaluate --store --output " + output + " --tag " + tag + " --max-batch-models 1"
+        command = "bigmler --multi-label --train " + res_filename(data) + " --label-separator \"" + label_separator + "\" --training-separator \"" + training_separator + "\" --evaluate --store --output " + output + " --tag " + tag + " --max-batch-models 1"
         retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
@@ -33,7 +33,7 @@ def i_create_all_ml_resources_for_evaluation(step, tag=None, label_separator=Non
     world.folders.append(world.directory)
     world.number_of_models = int(number_of_labels)
     try:
-        command = "bigmler --multi-label --train " + data + " --label-separator \"" + label_separator + "\" --training-separator \"" + training_separator + "\" --store --output " + output + " --tag " + tag + " --max-batch-models 1"
+        command = "bigmler --multi-label --train " + res_filename(data) + " --label-separator \"" + label_separator + "\" --training-separator \"" + training_separator + "\" --store --output " + output + " --tag " + tag + " --max-batch-models 1"
         retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False

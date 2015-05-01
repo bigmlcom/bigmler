@@ -2,7 +2,7 @@ import os
 import time
 import csv
 import json
-from world import world
+from world import world, res_filename
 from subprocess import check_call, CalledProcessError
 from bigmler.checkpoint import file_number_of_lines
 from bigmler.utils import SYSTEM_ENCODING
@@ -17,7 +17,7 @@ def i_create_dataset(step, data=None, output_dir=None):
     world.directory = output_dir
     world.folders.append(world.directory)
     try:
-        command = (u"bigmler --train " + data +
+        command = (u"bigmler --train " + res_filename(data) +
                    u" --no-model --store --output-dir " + output_dir)
         command = check_debug(command)
         retcode = check_call(command.encode(SYSTEM_ENCODING), shell=True)
@@ -34,6 +34,7 @@ def i_create_dataset(step, data=None, output_dir=None):
 def i_create_dataset_new_fields(step, json_file=None, model_fields=None):
     if json_file is None or model_fields is None:
         assert False
+    json_file = res_filename(json_file)
     try:
         command = ("bigmler --dataset " + world.dataset['resource'] +
                    " --model-fields \"" + model_fields + "\" --store" +
@@ -53,6 +54,7 @@ def i_create_dataset_new_fields(step, json_file=None, model_fields=None):
 def i_update_dataset_new_properties(step, json_file=None):
     if json_file is None:
         assert False
+    json_file = res_filename(json_file)
     try:
         command = ("bigmler --dataset " + world.dataset['resource'] +
                    " --no-model --store --output-dir " + world.output +
@@ -140,10 +142,11 @@ def i_filter_field_from_dataset(step, field=None, output_dir=None):
     if field is None or output_dir is None:
         assert False
     try:
+        empty_json = res_filename('data/empty.json')
         command = ("bigmler --dataset " + world.dataset['resource'] +
                    " --no-model --store --output-dir " + output_dir +
                    " --dataset-fields=\"-" + field + "\""+
-                   " --new-fields ../data/empty.json")
+                   " --new-fields " + empty_json)
         command = check_debug(command)
         retcode = check_call(command, shell=True)
         if retcode < 0:
@@ -170,6 +173,7 @@ def i_check_create_multi_dataset(step):
 
 #@step(r'file "(.*)" is like file "(.*)"$')
 def i_files_equal(step, local_file, data):
+    data = res_filename(data)
     contents_local_file = open(os.path.join(world.directory,
                                             local_file)).read()
     contents_data = open(data).read()

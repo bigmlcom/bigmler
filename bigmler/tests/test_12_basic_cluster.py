@@ -206,4 +206,5 @@ class TestCluster(object):
             print "\nTesting with:\n", example
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_cluster.i_create_cluster_resources_from_local_cluster(self, directory=example[0], test=example[2], output=example[3])
-            test_cluster.i_check_cluster_datasets(self, datasets_number=example[4])
+            test_cluster.i_check_create_centroids(self)
+            test_pred.i_check_predictions(self, example[4])

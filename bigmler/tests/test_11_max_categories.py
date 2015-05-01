@@ -85,7 +85,7 @@ class TestMaxCategories(object):
         """
         print self.test_scenario2.__doc__
         examples = [
-            ['scenario_mc_1', '{"data": "../data/iris.csv", "max_categories": "1", "objective": "species", "output": "scenario_mc_1/predictions.csv", "test": "data/test_iris.csv"}', '1', 'species', 'data/test_iris.csv', 'scenario_mc_2/predictions.csv', 'check_files/predictions_mc.csv']]
+            ['scenario_mc_1', '{"data": "data/iris.csv", "max_categories": "1", "objective": "species", "output": "scenario_mc_1/predictions.csv", "test": "data/test_iris.csv"}', '1', 'species', 'data/test_iris.csv', 'scenario_mc_2/predictions.csv', 'check_files/predictions_mc.csv']]
         for example in examples:
             print "\nTesting with:\n", example
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
@@ -112,7 +112,7 @@ class TestMaxCategories(object):
         """
         print self.test_scenario3.__doc__
         examples = [
-            ['scenario_mc_1', '{"data": "../data/iris.csv", "max_categories": "1", "objective": "species", "output": "scenario_mc_1/predictions.csv", "test": "data/test_iris.csv"}', '1', 'species', 'data/test_iris.csv', 'scenario_mc_3/predictions.csv', 'check_files/predictions_mc.csv']]
+            ['scenario_mc_1', '{"data": "data/iris.csv", "max_categories": "1", "objective": "species", "output": "scenario_mc_1/predictions.csv", "test": "data/test_iris.csv"}', '1', 'species', 'data/test_iris.csv', 'scenario_mc_3/predictions.csv', 'check_files/predictions_mc.csv']]
         for example in examples:
             print "\nTesting with:\n", example
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
@@ -136,7 +136,7 @@ class TestMaxCategories(object):
         """
         print self.test_scenario4.__doc__
         examples = [
-            ['scenario_mc_1', '{"data": "../data/iris.csv", "max_categories": "1", "objective": "species", "output": "scenario_mc_1/predictions.csv", "test": "data/test_iris.csv"}', 'scenario_mc_1/models', 'data/test_iris.csv', 'scenario_mc_4/predictions.csv', 'check_files/predictions_mc.csv']]
+            ['scenario_mc_1', '{"data": "data/iris.csv", "max_categories": "1", "objective": "species", "output": "scenario_mc_1/predictions.csv", "test": "data/test_iris.csv"}', 'scenario_mc_1/models', 'data/test_iris.csv', 'scenario_mc_4/predictions.csv', 'check_files/predictions_mc.csv']]
         for example in examples:
             print "\nTesting with:\n", example
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
@@ -161,7 +161,7 @@ class TestMaxCategories(object):
         """
         print self.test_scenario5.__doc__
         examples = [
-            ['scenario_mc_1', '{"data": "../data/iris.csv", "max_categories": "1", "objective": "species", "output": "scenario_mc_1/predictions.csv", "test": "data/test_iris.csv"}', '1', 'species', 'sepal length,sepal width', 'data/test_iris.csv', 'scenario_mc_5/predictions.csv', 'check_files/predictions_mc2.csv']]
+            ['scenario_mc_1', '{"data": "data/iris.csv", "max_categories": "1", "objective": "species", "output": "scenario_mc_1/predictions.csv", "test": "data/test_iris.csv"}', '1', 'species', 'sepal length,sepal width', 'data/test_iris.csv', 'scenario_mc_5/predictions.csv', 'check_files/predictions_mc2.csv']]
         for example in examples:
             print "\nTesting with:\n", example
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])

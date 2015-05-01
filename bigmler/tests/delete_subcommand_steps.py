@@ -2,7 +2,7 @@ import os
 import time
 import csv
 import json
-from world import world
+from world import world, res_filename
 from subprocess import check_call, CalledProcessError
 from bigml.api import check_resource, HTTP_NOT_FOUND
 from bigmler.checkpoint import file_number_of_lines
@@ -15,7 +15,7 @@ from basic_tst_prediction_steps import shell_execute
 def i_create_source_from_file(step, data=None, output_dir=None):
     if data is None or output_dir is None:
         assert False
-    command = ("bigmler --train " + data + " --store --output-dir " +
+    command = ("bigmler --train " + res_filename(data) + " --store --output-dir " +
                output_dir +
                " --no-dataset --no-model --store")
     shell_execute(command, os.path.join(output_dir, "p.csv"), test=None)
@@ -146,7 +146,7 @@ def i_check_reference_source_exists(step):
 def i_create_source_from_file_with_tag(step, data=None, tag=None, output_dir=None):
     if data is None or output_dir is None or tag is None:
         assert False
-    command = ("bigmler --train " + data + " --store --output-dir " +
+    command = ("bigmler --train " + res_filename(data) + " --store --output-dir " +
                output_dir + " --tag " + tag +
                " --no-dataset --no-model --store")
     shell_execute(command, os.path.join(output_dir, "p.csv"), test=None)
@@ -226,7 +226,7 @@ def i_delete_resources_newer_and_tag(step, tag=None, output_dir=None):
 def i_create_all_resources_in_output_dir(step, data=None, output_dir=None):
     if output_dir is None or data is None:
         assert False
-    command = ("bigmler --train " + data +
+    command = ("bigmler --train " + res_filename(data) +
                " --output-dir " + output_dir)
     shell_execute(command, os.path.join(output_dir, "p.csv"), test=None)
 
