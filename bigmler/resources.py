@@ -265,7 +265,6 @@ def create_source(data_set, source_args, args, api=None, path=None,
 
     source = api.create_source(data_set, source_args,
                                progress_bar=args.progress_bar)
-    print "***", data_set, source_args, args.progress_bar
     if path is not None:
         try:
             suffix = "_" + source_type if source_type else ""
