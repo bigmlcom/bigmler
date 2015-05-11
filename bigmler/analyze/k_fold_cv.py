@@ -114,9 +114,10 @@ def retrieve_subcommands():
 
     """
     global subcommand_list
-    subcommand_list = open(subcommand_file).readlines()
-    subcommand_list = [subcommand.decode(u.SYSTEM_ENCODING)
-                       for subcommand in subcommand_list]
+    subcommand_list = open(subcommand_file, u.open_mode("r")).readlines()
+    if not u.PYTHON3:
+        subcommand_list = [subcommand.decode(u.SYSTEM_ENCODING)
+                           for subcommand in subcommand_list]
     subcommand_list.reverse()
 
 
@@ -267,7 +268,7 @@ def create_kfold_json(args, kfold_field=DEFAULT_KFOLD_FIELD,
             # When resuming, check if the file already exists
             if not resume or not os.path.isfile(selecting_file):
                 resume = False
-                with open(selecting_file, "w") as test_dataset:
+                with open(selecting_file, u.open_mode("w")) as test_dataset:
                     test_dataset.write(new_field)
         return selecting_file_list, resume
     except IOError:
@@ -444,7 +445,7 @@ def best_first_search(datasets_file, api, args, common_options,
     loop_counter = 0
     features_file = os.path.normpath(os.path.join(args.output_dir,
                                                   FEATURES_LOG))
-    with open(features_file, 'w', 0) as features_handler:
+    with open(features_file, u.open_mode("w")) as features_handler:
         features_writer = csv.writer(features_handler, lineterminator="\n")
         features_writer.writerow([
             "step", "state", "score", "metric_value", "best_score"])
@@ -455,14 +456,14 @@ def best_first_search(datasets_file, api, args, common_options,
             penalty = DEFAULT_PENALTY
         # retrieving the first dataset in the file
         try:
-            with open(datasets_file) as datasets_handler:
+            with open(datasets_file, u.open_mode("r")) as datasets_handler:
                 dataset_id = datasets_handler.readline().strip()
         except IOError, exc:
             sys.exit("Could not read the generated datasets file: %s" %
                      str(exc))
         try:
             stored_dataset = u.storage_file_name(args.output_dir, dataset_id)
-            with open(stored_dataset) as dataset_handler:
+            with open(stored_dataset, u.open_mode("r")) as dataset_handler:
                 dataset = json.loads(dataset_handler.read())
         except IOError:
             dataset = api.check_resource(dataset_id)
@@ -615,7 +616,7 @@ def best_node_threshold(datasets_file, args, common_options,
     loop_counter = 0
     nodes_file = os.path.normpath(os.path.join(args.output_dir,
                                                NODES_LOG))
-    with open(nodes_file, 'w', 0) as nodes_handler:
+    with open(nodes_file, u.open_mode("w")) as nodes_handler:
         nodes_writer = csv.writer(nodes_handler, lineterminator="\n")
         nodes_writer.writerow([
             "step", "node_threshold", "score", "metric_value", "best_score"])
@@ -742,7 +743,7 @@ def create_node_th_evaluations(datasets_file, args, common_options,
     evaluation_file = os.path.normpath(os.path.join(output_dir,
                                                     "evaluation.json"))
     try:
-        with open(evaluation_file) as evaluation_handler:
+        with open(evaluation_file, u.open_mode("r")) as evaluation_handler:
             evaluation = json.loads(evaluation_handler.read())
         return evaluation, resume
     except (ValueError, IOError):

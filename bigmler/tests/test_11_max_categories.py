@@ -19,11 +19,31 @@
 """ Testing splitting models according to max categories
 
 """
-from world import world, setup_module, teardown_module, teardown_class
+from __future__ import absolute_import
 
 
-import basic_tst_prediction_steps as test_pred
-import max_categories_tst_prediction_steps as max_cat
+from bigmler.tests.world import (world, common_setup_module,
+                                 common_teardown_module, teardown_class)
+
+
+import bigmler.tests.basic_tst_prediction_steps as test_pred
+import bigmler.tests.max_categories_tst_prediction_steps as max_cat
+
+
+def setup_module():
+    """Setup for the module
+
+    """
+    common_setup_module()
+    test = TestMaxCategories()
+    test.setup_scenario1()
+
+
+def teardown_module():
+    """Teardown for the module
+
+    """
+    common_teardown_module()
 
 
 class TestMaxCategories(object):
@@ -40,7 +60,7 @@ class TestMaxCategories(object):
         """
         pass
 
-    def test_scenario1(self):
+    def setup_scenario1(self):
         """
             Scenario: Successfully building test predictions from training data using datasets with max categories
                 Given I create BigML resources from "<data>" with <max_categories> as categories limit and <objective> as objective field to test "<test>" and log predictions in "<output>"
@@ -55,7 +75,7 @@ class TestMaxCategories(object):
                 |data |max_categories | objective | test                        | output                          |predictions_file           |
                 |../data/iris.csv |1| species |../data/test_iris.csv | ./scenario_mc_1/predictions.csv | ./check_files/predictions_mc.csv |
         """
-        print self.test_scenario1.__doc__
+        print self.setup_scenario1.__doc__
         examples = [
             ['data/iris.csv', '1', 'species', 'data/test_iris.csv', 'scenario_mc_1/predictions.csv', 'check_files/predictions_mc.csv']]
         for example in examples:

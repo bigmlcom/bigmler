@@ -19,12 +19,28 @@
 """ Testing clusters
 
 """
-from world import world, setup_module, teardown_module, teardown_class
+from __future__ import absolute_import
 
 
-import basic_tst_prediction_steps as test_pred
-import basic_cluster_prediction_steps as test_cluster
+from bigmler.tests.world import (world, common_setup_module,
+                                 common_teardown_module, teardown_class)
 
+
+import bigmler.tests.basic_tst_prediction_steps as test_pred
+import bigmler.tests.basic_cluster_prediction_steps as test_cluster
+
+
+def setup_module():
+    """Setup for the module
+
+    """
+    common_setup_module()
+
+def teardown_module():
+    """Teardown for the module
+
+    """
+    common_teardown_module()
 
 class TestCluster(object):
 
@@ -157,13 +173,13 @@ class TestCluster(object):
         """
         print self.test_scenario5.__doc__
         examples = [
-            ['scenario_c_1', '{"data": "data/diabetes.csv", "output": "scenario_c_1/centroids.csv", "test": "data/diabetes.csv"}', 'data/diabetes.csv', 'scenario_c_5/centroids.csv', 'check_files/centroids_diabetes.csv']]
+            ['scenario_c_1', '{"data": "data/diabetes.csv", "output": "scenario_c_1/centroids.csv", "test": "data/diabetes.csv"}', 'scenario_c_1/clusters', 'data/diabetes.csv', 'scenario_c_5/centroids.csv', 'check_files/centroids_diabetes.csv']]
         for example in examples:
             print "\nTesting with:\n", example
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
-            test_cluster.i_create_cluster_resources_from_clusters_file(self, test=example[2], output=example[3])
+            test_cluster.i_create_cluster_resources_from_clusters_file(self, clusters_file=example[2], test=example[3], output=example[4])
             test_cluster.i_check_create_centroids(self)
-            test_pred.i_check_predictions(self, example[4])
+            test_pred.i_check_predictions(self, example[5])
 
 
     def test_scenario6(self):

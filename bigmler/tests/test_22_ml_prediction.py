@@ -19,13 +19,33 @@
 """ Testing Multi-label predictions
 
 """
-from world import world, setup_module, teardown_module, teardown_class
+from __future__ import absolute_import
 
-import basic_tst_prediction_steps as test_pred
-import ml_tst_prediction_steps as ml_pred
-import ml_tst_evaluation_steps as ml_eval
-import evaluation_steps as evaluation
 
+from bigmler.tests.world import (world, common_setup_module,
+                                 common_teardown_module, teardown_class)
+
+import bigmler.tests.basic_tst_prediction_steps as test_pred
+import bigmler.tests.ml_tst_prediction_steps as ml_pred
+import bigmler.tests.ml_tst_evaluation_steps as ml_eval
+import bigmler.tests.evaluation_steps as evaluation
+
+
+
+def setup_module():
+    """Setup for the module
+
+    """
+    common_setup_module()
+    test = TestML()
+    test.setup_scenario1()
+
+
+def teardown_module():
+    """Teardown for the module
+
+    """
+    common_teardown_module()
 
 class TestML(object):
 
@@ -41,7 +61,7 @@ class TestML(object):
         """
         pass
 
-    def test_scenario1(self):
+    def setup_scenario1(self):
         """
             Scenario: Successfully building multi-label test predictions from start:
                 Given I create BigML multi-label resources tagged as "<tag>" with "<label_separator>" label separator and <number_of_labels> labels uploading train "<data>" file with "<training_separator>" field separator to test "<test>" and log predictions in "<output>"
@@ -55,7 +75,7 @@ class TestML(object):
                 |tag |label_separator |number_of_labels | data                   |training_separator | test                        | output                          |predictions_file           |
                 |my_multilabel_1|:|7| ../data/multilabel.csv |,| ../data/test_multilabel.csv | ./scenario_ml_1/predictions.csv | ./check_files/predictions_ml.csv |
         """
-        print self.test_scenario1.__doc__
+        print self.setup_scenario1.__doc__
         examples = [
             ['my_multilabel_1', ':', '7', 'data/multilabel.csv', ',', 'data/test_multilabel.csv', 'scenario_ml_1/predictions.csv', 'check_files/predictions_ml.csv']]
         for example in examples:

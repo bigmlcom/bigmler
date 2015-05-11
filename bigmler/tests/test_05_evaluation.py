@@ -19,11 +19,31 @@
 """ Testing evaluations' creation
 
 """
-from world import world, setup_module, teardown_module, teardown_class
+from __future__ import absolute_import
 
 
-import basic_tst_prediction_steps as test_pred
-import evaluation_steps as evaluation
+from bigmler.tests.world import (world, common_setup_module,
+                                 common_teardown_module, teardown_class)
+
+
+import bigmler.tests.basic_tst_prediction_steps as test_pred
+import bigmler.tests.evaluation_steps as evaluation
+
+
+
+def setup_module():
+    """Setup for the module
+
+    """
+    common_setup_module()
+    test = TestEvaluation()
+    test.setup_scenario1()
+
+def teardown_module():
+    """Teardown for the module
+
+    """
+    common_teardown_module()
 
 
 class TestEvaluation(object):
@@ -40,7 +60,7 @@ class TestEvaluation(object):
         """
         pass
 
-    def test_scenario1(self):
+    def setup_scenario1(self):
         """
             Scenario: Successfully building evaluations from start:
                 Given I create BigML resources uploading train "<data>" file to evaluate and log evaluation in "<output>"
@@ -54,7 +74,7 @@ class TestEvaluation(object):
                 | data             | output                   | json_evaluation_file    |
                 | ../data/iris.csv | ./scenario_e1/evaluation | ./check_files/evaluation_iris.json |
         """
-        print self.test_scenario1.__doc__
+        print self.setup_scenario1.__doc__
         examples = [
             ['data/iris.csv', 'scenario_e1/evaluation', 'check_files/evaluation_iris.json']]
         for example in examples:

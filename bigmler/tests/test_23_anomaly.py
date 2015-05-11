@@ -19,11 +19,30 @@
 """ Testing Anomaly Detector scores
 
 """
-from world import world, setup_module, teardown_module, teardown_class
+from __future__ import absolute_import
 
-import basic_tst_prediction_steps as test_pred
-import basic_anomaly_prediction_steps as test_anomaly
 
+from bigmler.tests.world import (world, common_setup_module,
+                                 common_teardown_module, teardown_class)
+
+import bigmler.tests.basic_tst_prediction_steps as test_pred
+import bigmler.tests.basic_anomaly_prediction_steps as test_anomaly
+
+
+
+def setup_module():
+    """Setup for the module
+
+    """
+    common_setup_module()
+    test = TestAnomaly()
+    test.setup_scenario1()
+
+def teardown_module():
+    """Teardown for the module
+
+    """
+    common_teardown_module()
 
 class TestAnomaly(object):
 
@@ -39,7 +58,7 @@ class TestAnomaly(object):
         """
         pass
 
-    def test_scenario1(self):
+    def setup_scenario1(self):
         """
             Scenario: Successfully building test anomaly scores from scratch:
                 Given I create BigML resources uploading train "<data>" file to create anomaly scores for "<test>" and log predictions in "<output>"
@@ -51,11 +70,11 @@ class TestAnomaly(object):
 
                 Examples:
                 | data                 | test               | output                           |predictions_file           |
-                | ../data/tiny_kdd.csv | ../data/test_kdd.csv | ./scenario_an_1_r/anomaly_scores.csv | ./check_files/anomaly_scores_kdd.csv |
+                | ../data/tiny_kdd.csv | ../data/test_kdd.csv | ./scenario_an_1/anomaly_scores.csv | ./check_files/anomaly_scores_kdd.csv |
         """
-        print self.test_scenario1.__doc__
+        print self.setup_scenario1.__doc__
         examples = [
-            ['data/tiny_kdd.csv', 'data/test_kdd.csv', 'scenario_an_1_r/anomaly_scores.csv', 'check_files/anomaly_scores_kdd.csv']]
+            ['data/tiny_kdd.csv', 'data/test_kdd.csv', 'scenario_an_1/anomaly_scores.csv', 'check_files/anomaly_scores_kdd.csv']]
         for example in examples:
             print "\nTesting with:\n", example
             test_anomaly.i_create_all_anomaly_resources(self, data=example[0], test=example[1], output=example[2])

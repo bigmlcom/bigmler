@@ -22,11 +22,11 @@ from __future__ import absolute_import
 import sys
 import os
 import datetime
-import StringIO
 
 import bigml.api
 
 import bigmler.utils as u
+
 
 from bigml.multivote import COMBINATION_WEIGHTS, COMBINER_MAP
 from bigml.tree import LAST_PREDICTION, PROPORTIONAL
@@ -34,6 +34,12 @@ from bigml.tree import LAST_PREDICTION, PROPORTIONAL
 from bigmler.resources import ADD_REMOVE_PREFIX
 from bigmler.prediction import FULL_FORMAT, COMBINATION, COMBINATION_LABEL
 from bigmler.train_reader import AGGREGATES
+from bigmler.utils import FILE_ENCODING, PYTHON3
+
+if PYTHON3:
+    from io import StringIO
+else:
+    from StringIO import StringIO
 
 # Date and time in format SunNov0412_120510 to name and tag resources
 NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
@@ -232,9 +238,9 @@ def get_output_args(api, command_args, resume):
             if command_args.test_stdin:
                 sys.exit("The standard input can't be used both for training "
                          "and testing. Choose one of them")
-            command_args.training_set = StringIO.StringIO(sys.stdin.read())
+            command_args.training_set = StringIO(sys.stdin.read())
         elif command_args.test_stdin:
-            command_args.test_set = StringIO.StringIO(sys.stdin.read())
+            command_args.test_set = StringIO(sys.stdin.read())
     except AttributeError:
         pass
 

@@ -18,11 +18,11 @@
 """
 from __future__ import absolute_import
 
-import csv
+
 import json
 import os
 
-
+from bigml.io import UnicodeWriter
 import bigmler.resources as r
 
 
@@ -121,25 +121,25 @@ def sample_file(sample, fields, args, api, path=None, session_file=None):
                             session_file=session_file,
                             query_string=query_string)[0][0]
     output = args.predictions
-    output = csv.writer(open(output, 'w', 0), lineterminator="\n")
-    headers = [field['name'] for field in sample['object']['sample']['fields']]
-    if args.sample_header:
-        if args.row_index or args.occurrence:
-            new_headers = []
-            if args.row_index:
-                new_headers.append("index")
-            if args.occurrence:
-                new_headers.append("occurrences")
-                new_headers.extend(headers)
-            headers = new_headers
-        output.writerow(headers)
-    for row in sample['object']['sample']['rows']:
-        output.writerow(row)
-    if args.stat_field or args.stat_fields:
-        stat_info = {}
-        sample_obj = sample['object']['sample']
-        for key in STAT_KEYS:
-            if key in sample_obj:
-                stat_info[key] = sample_obj[key]
-        with open(os.path.join(path, "stat_info.json"), "w") as stat_file:
-            json.dump(stat_info, stat_file)
+    with UnicodeWriter(output, lineterminator="\n") as output:
+        headers = [field['name'] for field in sample['object']['sample']['fields']]
+        if args.sample_header:
+            if args.row_index or args.occurrence:
+                new_headers = []
+                if args.row_index:
+                    new_headers.append("index")
+                if args.occurrence:
+                    new_headers.append("occurrences")
+                    new_headers.extend(headers)
+                headers = new_headers
+            output.writerow(headers)
+        for row in sample['object']['sample']['rows']:
+            output.writerow(row)
+        if args.stat_field or args.stat_fields:
+            stat_info = {}
+            sample_obj = sample['object']['sample']
+            for key in STAT_KEYS:
+                if key in sample_obj:
+                    stat_info[key] = sample_obj[key]
+            with open(os.path.join(path, "stat_info.json"), "w") as stat_file:
+                json.dump(stat_info, stat_file)

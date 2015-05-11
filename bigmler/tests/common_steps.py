@@ -1,6 +1,24 @@
+# -*- coding: utf-8 -*-
+#
+# Copyright 2014-2015 BigML
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+from __future__ import absolute_import
+
+
 import os
 
-from world import world
+from bigmler.tests.world import world
 
 from bigml.api import HTTP_OK, HTTP_UNAUTHORIZED
 
@@ -16,6 +34,7 @@ def check_debug(command):
     command = "%s --verbosity %s" % (command, verbosity)
     return command
 
+
 def check_http_code(resources):
     """Checks the http code in the resource list
 
@@ -25,11 +44,13 @@ def check_http_code(resources):
     else:
         assert False, "Response code: %s" % resources['code']
 
+
 def store_init_resources():
     """Store the initial existing resources grouped by resource_type
 
     """
     world.count_resources('init')
+
 
 def store_final_resources():
     """Store the final existing resources grouped by resource_type
@@ -37,11 +58,13 @@ def store_final_resources():
     """
     world.count_resources('final')
 
+
 def check_init_equals_final():
     """Checks that the number of resources grouped by type has not changed
 
     """
     world.check_init_equals_final()
+
 
 #@step(r'I want to use api in DEV mode')
 def i_want_api_dev_mode(step):

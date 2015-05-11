@@ -87,7 +87,7 @@ def ensemble_per_label(labels, dataset, api, args, resume, fields=None,
                           console=args.verbosity)
             # erase models' info that will be rebuilt
             u.log_created_resources("models", path, None,
-                                    open_mode='w')
+                                    mode='w')
     number_of_ensembles = len(labels) - len(ensemble_ids)
     ensemble_args_list = r.set_label_ensemble_args(
         args,

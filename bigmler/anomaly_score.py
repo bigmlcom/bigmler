@@ -18,7 +18,6 @@
 """
 from __future__ import absolute_import
 
-import csv
 import sys
 
 import bigml.api
@@ -28,8 +27,9 @@ import bigmler.checkpoint as c
 
 
 from bigml.anomaly import Anomaly
+from bigml.io import UnicodeWriter
 
-from bigmler.test_reader import TestReader
+from bigmler.tst_reader import TstReader as TestReader
 from bigmler.resources import NORMAL_FORMAT, FULL_FORMAT
 from bigmler.resources import create_batch_anomaly_score
 
@@ -147,16 +147,17 @@ def anomaly_score(anomalies, fields, args, session_file=None):
     test_reader = TestReader(test_set, test_set_header, fields,
                              None,
                              test_separator=args.test_separator)
-    output = csv.writer(open(output, 'w', 0), lineterminator="\n")
-    # columns to exclude if input_data is added to the prediction field
-    exclude = use_prediction_headers(
-        args.prediction_header, output, test_reader, fields, args)
+    with UnicodeWriter(output, lineterminator="\n") as output:
+        # columns to exclude if input_data is added to the prediction field
+        exclude = use_prediction_headers(
+            args.prediction_header, output, test_reader, fields, args)
 
-    # Local anomaly scores: Anomaly scores are computed locally using
-    # the local anomaly detector method
-    message = u.dated("Creating local anomaly scores.\n")
-    u.log_message(message, log_file=session_file, console=args.verbosity)
-    local_anomaly_score(anomalies, test_reader, output, args, exclude=exclude)
+        # Local anomaly scores: Anomaly scores are computed locally using
+        # the local anomaly detector method
+        message = u.dated("Creating local anomaly scores.\n")
+        u.log_message(message, log_file=session_file, console=args.verbosity)
+        local_anomaly_score(anomalies, test_reader,
+                            output, args, exclude=exclude)
 
 
 def remote_anomaly_score(anomaly, test_dataset, batch_anomaly_score_args, args,
@@ -192,4 +193,4 @@ def remote_anomaly_score(anomaly, test_dataset, batch_anomaly_score_args, args,
             u.log_message(message, log_file=session_file,
                           console=args.verbosity)
             u.log_created_resources("batch_anomaly_score_dataset",
-                                    path, new_dataset, open_mode='a')
+                                    path, new_dataset, mode='a')

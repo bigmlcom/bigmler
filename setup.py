@@ -53,6 +53,7 @@ setuptools.setup(
                 'bigmler.options', 'bigmler.delete', 'bigmler.sample',
                 'bigmler.tests'],
     install_requires = ['bigml>=4.1.2, <4.2.0'],
+    package_data={'bigmler':['static/*.json']},
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
@@ -65,11 +66,11 @@ setuptools.setup(
         'Programming Language :: Python :: 3',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
+    test_suite='bigmler.tests',
+    use_2to3=True,
     entry_points={
         'console_scripts': [
             'bigmler = bigmler.bigmler:main',
         ]
-    },
-    test_suite='nose.collector',
-    use_2to3=True
+    }
 )

@@ -19,10 +19,29 @@
 """ Testing prediction creation
 
 """
-from world import world, setup_module, teardown_module, teardown_class
+from __future__ import absolute_import
+
+from bigmler.tests.world import (world, common_setup_module,
+                                 common_teardown_module,
+                                 teardown_class)
 
 
-import basic_tst_prediction_steps as test_pred
+import bigmler.tests.basic_tst_prediction_steps as test_pred
+
+def setup_module():
+    """Setup for the module
+
+    """
+    common_setup_module()
+    test = TestPrediction()
+    test.setup_scenario02()
+    test.setup_scenario06()
+
+def teardown_module():
+    """Teardown for the module
+
+    """
+    common_teardown_module()
 
 
 class TestPrediction(object):
@@ -31,15 +50,9 @@ class TestPrediction(object):
         """Calling generic teardown for every method
 
         """
-        teardown_class()
+        self.world = teardown_class()
 
-    def setup(self):
-        """No setup operations for every method at present
-
-        """
-        pass
-
-    def test_scenario1(self):
+    def test_scenario01(self):
         """
         Scenario: Successfully building test predictions from start with no headers:
             Given I create BigML resources uploading train "<data>" file with no headers to test "<test>" with no headers and log predictions in "<output>"
@@ -54,8 +67,8 @@ class TestPrediction(object):
             | ../data/iris_nh.csv   | ../data/test_iris_nh.csv   | ./scenario1_nh/predictions.csv   | ./check_files/predictions_iris.csv   |
 
 
-"""
-        print self.test_scenario1.__doc__
+        """
+        print self.test_scenario01.__doc__
         examples = [
             ['data/iris_nh.csv', 'data/test_iris_nh.csv', 'scenario1_nh/predictions.csv', 'check_files/predictions_iris.csv']]
         for example in examples:
@@ -67,7 +80,7 @@ class TestPrediction(object):
             test_pred.i_check_create_predictions(self)
             test_pred.i_check_predictions(self, example[3])
 
-    def test_scenario2(self):
+    def setup_scenario02(self):
         """
         Scenario: Successfully building test predictions from start:
             Given I create BigML resources uploading train "<data>" file to test "<test>" and log predictions in "<output>"
@@ -82,7 +95,7 @@ class TestPrediction(object):
             | ../data/grades.csv | ../data/test_grades.csv | ./scenario1_r/predictions.csv | ./check_files/predictions_grades.csv |
             | ../data/iris.csv   | ../data/test_iris.csv   | ./scenario1/predictions.csv   | ./check_files/predictions_iris.csv   |
         """
-        print self.test_scenario2.__doc__
+        print self.setup_scenario02.__doc__
         examples = [
             ['data/grades.csv', 'data/test_grades.csv', 'scenario1_r/predictions.csv', 'check_files/predictions_grades.csv'],
             ['data/iris.csv', 'data/test_iris.csv', 'scenario1/predictions.csv', 'check_files/predictions_iris.csv']]
@@ -95,7 +108,7 @@ class TestPrediction(object):
             test_pred.i_check_create_predictions(self)
             test_pred.i_check_predictions(self, example[3])
 
-    def test_scenario3(self):
+    def test_scenario03(self):
         """
         Scenario: Successfully building test predictions from source
             Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
@@ -109,7 +122,7 @@ class TestPrediction(object):
             |scenario    | kwargs                                                  | test                    | output                        |predictions_file           |
             | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | ../data/test_iris.csv   | ./scenario2/predictions.csv   | ./check_files/predictions_iris.csv   |
         """
-        print self.test_scenario3.__doc__
+        print self.test_scenario03.__doc__
         examples = [
             ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}', 'data/test_iris.csv', 'scenario2/predictions.csv', 'check_files/predictions_iris.csv']]
         for example in examples:
@@ -121,7 +134,7 @@ class TestPrediction(object):
             test_pred.i_check_create_predictions(self)
             test_pred.i_check_predictions(self, example[4])
 
-    def test_scenario4(self):
+    def test_scenario04(self):
         """
         Scenario: Successfully building test predictions from dataset
             Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
@@ -135,7 +148,7 @@ class TestPrediction(object):
             | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | ../data/test_iris.csv   | ./scenario3/predictions.csv   | ./check_files/predictions_iris.csv   |
 
         """
-        print self.test_scenario4.__doc__
+        print self.test_scenario04.__doc__
         examples = [
             ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}', 'data/test_iris.csv', 'scenario3/predictions.csv', 'check_files/predictions_iris.csv']]
         for example in examples:
@@ -146,7 +159,7 @@ class TestPrediction(object):
             test_pred.i_check_create_predictions(self)
             test_pred.i_check_predictions(self, example[4])
 
-    def test_scenario5(self):
+    def test_scenario05(self):
         """
         Scenario: Successfully building test predictions from model
             Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
@@ -159,7 +172,7 @@ class TestPrediction(object):
             | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | ../data/test_iris.csv   | ./scenario4/predictions.csv   | ./check_files/predictions_iris.csv   |
 
         """
-        print self.test_scenario5.__doc__
+        print self.test_scenario05.__doc__
         examples = [
             ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}', 'data/test_iris.csv', 'scenario4/predictions.csv', 'check_files/predictions_iris.csv']]
         for example in examples:
@@ -169,7 +182,7 @@ class TestPrediction(object):
             test_pred.i_check_create_predictions(self)
             test_pred.i_check_predictions(self, example[4])
 
-    def test_scenario6(self):
+    def setup_scenario06(self):
         """
         Scenario: Successfully building test predictions from ensemble
             Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
@@ -183,7 +196,7 @@ class TestPrediction(object):
             | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | 10               | ../data/test_iris.csv   | ./scenario5/predictions.csv   | ./check_files/predictions_iris.csv   |
 
         """
-        print self.test_scenario6.__doc__
+        print self.setup_scenario06.__doc__
         examples = [
             ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}', '10', 'data/test_iris.csv', 'scenario5/predictions.csv', 'check_files/predictions_iris.csv']]
         for example in examples:
@@ -194,7 +207,7 @@ class TestPrediction(object):
             test_pred.i_check_create_predictions(self)
             test_pred.i_check_predictions(self, example[5])
 
-    def test_scenario7(self):
+    def test_scenario07(self):
         """
         Scenario: Successfully building test predictions from models file
             Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
@@ -208,7 +221,7 @@ class TestPrediction(object):
             | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | scenario5| {"number_of_models": 10, "test": "../data/test_iris.csv", "output": "./scenario5/predictions.csv"}   | ./scenario5/models | ../data/test_iris.csv | ./scenario6/predictions.csv | ./check_files/predictions_iris.csv |
 
         """
-        print self.test_scenario7.__doc__
+        print self.test_scenario07.__doc__
         examples = [
             ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}',
              'scenario5', '{"number_of_models": 10, "test": "data/test_iris.csv", "output": "scenario5/predictions.csv"}',
@@ -221,7 +234,7 @@ class TestPrediction(object):
             test_pred.i_check_create_predictions(self)
             test_pred.i_check_predictions(self, example[7])
 
-    def test_scenario8(self):
+    def test_scenario08(self):
         """
         Scenario: Successfully building test predictions from dataset file
             Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
@@ -235,7 +248,7 @@ class TestPrediction(object):
             | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | ./scenario1/dataset | ../data/test_iris.csv | ./scenario7/predictions.csv | ./check_files/predictions_iris.csv |
 
         """
-        print self.test_scenario8.__doc__
+        print self.test_scenario08.__doc__
         examples = [
             ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}', 'scenario1/dataset', 'data/test_iris.csv', 'scenario7/predictions.csv', 'check_files/predictions_iris.csv']]
         for example in examples:
@@ -246,7 +259,7 @@ class TestPrediction(object):
             test_pred.i_check_create_predictions(self)
             test_pred.i_check_predictions(self, example[5])
 
-    def test_scenario9(self):
+    def test_scenario09(self):
         """
         Scenario: Successfully combining test predictions from existing directories
             Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
@@ -260,7 +273,7 @@ class TestPrediction(object):
 
 
         """
-        print self.test_scenario9.__doc__
+        print self.test_scenario09.__doc__
         examples = [
             ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}',
              'scenario5', '{"number_of_models": 10, "test": "data/test_iris.csv", "output": "scenario5/predictions.csv"}',
@@ -271,7 +284,6 @@ class TestPrediction(object):
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[2], example[3])
             test_pred.i_find_predictions_files(self, directory1=example[4], directory2=example[5], output=example[6])
             test_pred.i_check_predictions(self, example[7])
-
 
     def test_scenario10(self):
         """
@@ -285,8 +297,8 @@ class TestPrediction(object):
                 |scenario    | kwargs                                                  |scenario2    | kwargs2                                                  | directory1  | directory2  | output                         |predictions_file                    | method                 |
                 | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | scenario5| {"number_of_models": 10, "output": "./scenario5/predictions.csv", "test": "../data/test_iris.csv"}   | ./scenario1 | ./scenario5 | ./scenario9/predictions_c.csv  | ./check_files/predictions_iris.csv | "confidence weighted"  |
                 | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | scenario5| {"number_of_models": 10, "output": "./scenario5/predictions.csv", "test": "../data/test_iris.csv"}   | ./scenario1 | ./scenario5 | ./scenario9/predictions_p.csv  | ./check_files/predictions_iris_p.csv | "probability weighted" |
-                | scenario1| {"data": "../data/grades.csv", "output": "./scenario1r/predictions.csv", "test": "../data/test_grades.csv"}   | scenario1_r| {"data": "../data/grades.csv", "output": "./scenario1_r/predictions.csv", "test": "../data/test_grades.csv"}   | ./scenario1_r | ./scenario1_r | ./scenario10/predictions_c.csv | ./check_files/predictions_grades.csv | "confidence weighted"  |
-                | scenario1| {"data": "../data/grades.csv", "output": "./scenario1r/predictions.csv", "test": "../data/test_grades.csv"}   | scenario1_r| {"data": "../data/grades.csv", "output": "./scenario1_r/predictions.csv", "test": "../data/test_grades.csv"}   | ./scenario1_r | ./scenario1_r | ./scenario10/predictions_p.csv | ./check_files/predictions_grades_p.csv | "probability weighted" |
+                | scenario1_r| {"data": "../data/grades.csv", "output": "./scenario1r/predictions.csv", "test": "../data/test_grades.csv"}   | scenario1_r| {"data": "../data/grades.csv", "output": "./scenario1_r/predictions.csv", "test": "../data/test_grades.csv"}   | ./scenario1_r | ./scenario1_r | ./scenario10/predictions_c.csv | ./check_files/predictions_grades.csv | "confidence weighted"  |
+                | scenario1_r| {"data": "../data/grades.csv", "output": "./scenario1r/predictions.csv", "test": "../data/test_grades.csv"}   | scenario1_r| {"data": "../data/grades.csv", "output": "./scenario1_r/predictions.csv", "test": "../data/test_grades.csv"}   | ./scenario1_r | ./scenario1_r | ./scenario10/predictions_p.csv | ./check_files/predictions_grades_p.csv | "probability weighted" |
 
 
 
@@ -299,10 +311,10 @@ class TestPrediction(object):
             ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}',
              'scenario5', '{"number_of_models": 10, "output": "scenario5/predictions.csv", "test": "data/test_iris.csv"}',
              'scenario1', 'scenario5', 'scenario9/predictions_p.csv', 'check_files/predictions_iris_p.csv', '"probability weighted"'],
-            ['scenario1', '{"data": "data/grades.csv", "output": "scenario1r/predictions.csv", "test": "data/test_grades.csv"}',
+            ['scenario1_r', '{"data": "data/grades.csv", "output": "scenario1_r/predictions.csv", "test": "data/test_grades.csv"}',
              'scenario1_r', '{"data": "data/grades.csv", "output": "scenario1_r/predictions.csv", "test": "data/test_grades.csv"}',
              'scenario1_r', 'scenario1_r', 'scenario10/predictions_c.csv', 'check_files/predictions_grades.csv', '"confidence weighted"'],
-            ['scenario1', '{"data": "data/grades.csv", "output": "scenario1r/predictions.csv", "test": "data/test_grades.csv"}',
+            ['scenario1_r', '{"data": "data/grades.csv", "output": "scenario1_r/predictions.csv", "test": "data/test_grades.csv"}',
              'scenario1_r', '{"data": "data/grades.csv", "output": "scenario1_r/predictions.csv", "test": "data/test_grades.csv"}',
              'scenario1_r', 'scenario1_r', 'scenario10/predictions_p.csv', 'check_files/predictions_grades_p.csv', '"probability weighted"']]
         for example in examples:
@@ -311,7 +323,6 @@ class TestPrediction(object):
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[2], example[3])
             test_pred.i_find_predictions_files_with_method(self, directory1=example[4], directory2=example[5], output=example[6], method=example[8])
             test_pred.i_check_predictions(self, example[7])
-
 
     def test_scenario11(self):
         """

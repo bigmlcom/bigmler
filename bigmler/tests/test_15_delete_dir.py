@@ -19,10 +19,23 @@
 """ Testing delete subcommand, --from-dir option
 
 """
-from world import world, setup_module, teardown_module, teardown_class
+from bigmler.tests.world import (world, common_setup_module,
+                                 common_teardown_module, teardown_class)
 
-import delete_subcommand_steps as test_delete
+import bigmler.tests.delete_subcommand_steps as test_delete
 
+
+def setup_module():
+    """Setup for the module
+
+    """
+    common_setup_module()
+
+def teardown_module():
+    """Teardown for the module
+
+    """
+    common_teardown_module()
 
 class TestDeleteDir(object):
 

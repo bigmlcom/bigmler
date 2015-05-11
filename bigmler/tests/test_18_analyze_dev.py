@@ -19,12 +19,28 @@
 """ Testing analyze subcommand in development mode
 
 """
-from world import world, setup_module, teardown_module, teardown_class
+from __future__ import absolute_import
 
-import basic_tst_prediction_steps as test_pred
-import dataset_advanced_steps as dataset
-import common_steps as common
 
+from bigmler.tests.world import (world, common_setup_module,
+                                 common_teardown_module, teardown_class)
+
+import bigmler.tests.basic_tst_prediction_steps as test_pred
+import bigmler.tests.dataset_advanced_steps as dataset
+import bigmler.tests.common_steps as common
+
+
+def setup_module():
+    """Setup for the module
+
+    """
+    common_setup_module()
+
+def teardown_module():
+    """Teardown for the module
+
+    """
+    common_teardown_module()
 
 class TestAnalyzeDev(object):
 

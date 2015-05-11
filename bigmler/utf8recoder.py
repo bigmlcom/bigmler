@@ -1,4 +1,23 @@
+# -*- coding: utf-8 -*-
+#
+# Copyright 2014-2015 BigML
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+from __future__ import absolute_import
+
+
 import codecs
+import sys
 
 
 class UTF8Recoder:
@@ -9,7 +28,10 @@ class UTF8Recoder:
         """Iterator constructor given a file and encoding
 
         """
-        self.reader = codecs.getreader(encoding)(file_name)
+        if sys.version > '3':
+            self.reader = file_name
+        else:
+            self.reader = codecs.getreader(encoding)(file_name)
 
     def __iter__(self):
         """Iterator member
@@ -21,4 +43,6 @@ class UTF8Recoder:
         """Iterator next method
 
         """
-        return self.reader.next().encode("utf-8")
+        if sys.version > '3':
+            return next(self.reader)
+        return next(self.reader).encode("utf-8")

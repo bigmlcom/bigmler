@@ -30,7 +30,8 @@ import bigml.api
 
 from bigmler.utils import (dated, get_url, log_message, plural, check_resource,
                            check_resource_error, log_created_resources,
-                           is_shared, FILE_ENCODING)
+                           decode2,
+                           is_shared, FILE_ENCODING, PYTHON3)
 from bigmler.labels import label_model_args, get_all_labels
 from bigmler.reports import report
 from bigml.util import bigml_locale
@@ -226,7 +227,8 @@ def set_source_args(args, name=None, multi_label_data=None,
         source_args["source_parser"].update({'locale': source_locale})
     # If user has set a training separator, use it.
     if args.training_separator is not None:
-        training_separator = args.training_separator.decode("string_escape")
+        training_separator = decode2(args.training_separator,
+                                    encoding="string_escape")
         source_args["source_parser"].update({'separator': training_separator})
     # If uploading a multi-label file, add the user_metadata info needed to
     # manage the multi-label fields
@@ -235,6 +237,7 @@ def set_source_args(args, name=None, multi_label_data=None,
         source_args.update({
             "user_metadata": {
                 "multi_label_data": multi_label_data}})
+
 
     # to update fields attributes or types you must have a previous fields
     # structure (at update time)
@@ -387,6 +390,7 @@ def set_dataset_args(args, fields, multi_label_data=None):
             and multi_label_data is not None):
         dataset_args.update(
             user_metadata={'multi_label_data': multi_label_data})
+
     update_attributes(dataset_args, args.json_args.get('dataset'))
     return dataset_args
 
@@ -409,6 +413,7 @@ def set_dataset_split_args(name, description, args, sample_rate,
             args.multi_label and multi_label_data is not None):
         dataset_args.update(
             user_metadata={'multi_label_data': multi_label_data})
+
     return dataset_args
 
 
@@ -424,7 +429,7 @@ def create_dataset(source_or_dataset, dataset_args, args, api=None,
     dataset = api.create_dataset(source_or_dataset, dataset_args, retries=None)
     suffix = "_" + dataset_type if dataset_type else ""
     log_created_resources("dataset%s" % suffix, path,
-                          bigml.api.get_dataset_id(dataset), open_mode='a')
+                          bigml.api.get_dataset_id(dataset), mode='a')
     dataset_id = check_resource_error(dataset, "Failed to create dataset: ")
     try:
         dataset = check_resource(dataset, api.get_dataset,
@@ -564,6 +569,7 @@ def set_model_args(args, name=None, objective_id=None, fields=None,
         model_args.update(
             user_metadata={'other_label': other_label,
                            'max_categories': args.max_categories})
+
     update_attributes(model_args, args.json_args.get('model'))
 
     model_args.update(sample_rate=args.sample_rate,
@@ -649,8 +655,8 @@ def create_models(datasets, model_ids, model_args,
                     new_seed = get_basic_seed(i + existing_models)
                     model_args.update(seed=new_seed)
                 # one model per dataset (--max-categories or single model)
-                if (args.max_categories or
-                        (args.test_datasets and args.evaluate)) > 0:
+                if (args.max_categories > 0 or
+                        (args.test_datasets and args.evaluate)):
                     dataset = datasets[i]
                     model = api.create_model(dataset, model_args, retries=None)
                 elif args.dataset_off and args.evaluate:
@@ -667,7 +673,7 @@ def create_models(datasets, model_ids, model_args,
                 model_ids.append(model_id)
                 inprogress.append(model_id)
                 models.append(model)
-                log_created_resources("models", path, model_id, open_mode='a')
+                log_created_resources("models", path, model_id, mode='a')
 
             if args.number_of_models < 2 and args.verbosity:
                 if bigml.api.get_status(model)['code'] != bigml.api.FINISHED:
@@ -791,6 +797,7 @@ def set_label_ensemble_args(args, labels, multi_label_data,
         if multi_label_data is not None:
             ensemble_args.update(
                 user_metadata={'multi_label_data': multi_label_data})
+
         ensemble_args_list.append(ensemble_args)
     return ensemble_args_list
 
@@ -907,7 +914,7 @@ def create_ensembles(datasets, ensemble_ids, ensemble_args, args,
             inprogress.append(ensemble_id)
             ensembles.append(ensemble)
             log_created_resources("ensembles", path, ensemble_id,
-                                  open_mode='a')
+                                  mode='a')
         models, model_ids = retrieve_ensembles_models(ensembles, api, path)
         if number_of_ensembles < 2 and args.verbosity:
             message = dated("Ensemble created: %s.\n" %
@@ -939,7 +946,7 @@ def retrieve_ensembles_models(ensembles, api, path=None):
         model_ids.extend(ensemble['object']['models'])
     if path is not None:
         for model_id in model_ids:
-            log_created_resources("models", path, model_id, open_mode='a')
+            log_created_resources("models", path, model_id, mode='a')
     models = model_ids[:]
     models[0] = check_resource(models[0], api.get_model,
                                query_string=ALL_FIELDS_QS)
@@ -1118,7 +1125,7 @@ def create_evaluations(model_or_ensemble_ids, datasets, evaluation_args,
                                              "Failed to create evaluation: ")
         inprogress.append(evaluation_id)
         log_created_resources("evaluations", path, evaluation_id,
-                              open_mode='a')
+                              mode='a')
         evaluations.append(evaluation)
         log_message("%s\n" % evaluation['resource'], log_file=log)
 
@@ -1189,12 +1196,16 @@ def save_evaluation(evaluation, output, api=None):
     """
     if api is None:
         api = bigml.api.BigML()
-    evaluation_json = open(output + '.json', 'wb', 0)
+    open_mode = 'wt' if PYTHON3 else 'wb'
+    evaluation_json = open(output + '.json', open_mode)
     evaluation = evaluation.get('object', evaluation).get('result', evaluation)
-    evaluation_json.write(utf8(json.dumps(evaluation)))
+    message = json.dumps(evaluation)
+    if not PYTHON3:
+        message = utf8(message)
+    evaluation_json.write(message)
     evaluation_json.flush()
     evaluation_json.close()
-    evaluation_txt = open(output + '.txt', 'wb', 0)
+    evaluation_txt = open(output + '.txt', open_mode)
     api.pprint(evaluation, evaluation_txt)
     evaluation_txt.flush()
     evaluation_txt.close()
@@ -1265,7 +1276,7 @@ def create_batch_prediction(model_or_ensemble, test_dataset,
                                                    retries=None)
     log_created_resources("batch_prediction", path,
                           bigml.api.get_batch_prediction_id(batch_prediction),
-                          open_mode='a')
+                          mode='a')
     batch_prediction_id = check_resource_error(
         batch_prediction, "Failed to create batch prediction: ")
     try:
@@ -1354,7 +1365,7 @@ def create_clusters(datasets, cluster_ids, cluster_args,
             cluster_ids.append(cluster_id)
             inprogress.append(cluster_id)
             clusters.append(cluster)
-            log_created_resources("clusters", path, cluster_id, open_mode='a')
+            log_created_resources("clusters", path, cluster_id, mode='a')
 
         if args.verbosity:
             if bigml.api.get_status(cluster)['code'] != bigml.api.FINISHED:
@@ -1446,7 +1457,7 @@ def create_batch_centroid(cluster, test_dataset,
                                                retries=None)
     log_created_resources("batch_centroid", path,
                           bigml.api.get_batch_centroid_id(batch_centroid),
-                          open_mode='a')
+                          mode='a')
     batch_centroid_id = check_resource_error(
         batch_centroid, "Failed to create batch prediction: ")
     try:
@@ -1628,7 +1639,7 @@ def create_anomalies(datasets, anomaly_ids, anomaly_args,
             anomaly_ids.append(anomaly_id)
             inprogress.append(anomaly_id)
             anomalies.append(anomaly)
-            log_created_resources("anomalies", path, anomaly_id, open_mode='a')
+            log_created_resources("anomalies", path, anomaly_id, mode='a')
 
         if args.verbosity:
             if bigml.api.get_status(anomaly)['code'] != bigml.api.FINISHED:
@@ -1690,7 +1701,7 @@ def create_batch_anomaly_score(anomaly, test_dataset,
     log_created_resources(
         "batch_anomaly_score", path,
         bigml.api.get_batch_anomaly_score_id(batch_anomaly_score),
-        open_mode='a')
+        mode='a')
     batch_anomaly_score_id = check_resource_error(
         batch_anomaly_score, "Failed to create batch prediction: ")
     try:
@@ -1758,7 +1769,7 @@ def create_project(project_args, args, api=None,
     log_message(message, log_file=session_file, console=args.verbosity)
     project = api.create_project(project_args)
     log_created_resources("project", path,
-                          bigml.api.get_project_id(project), open_mode='a')
+                          bigml.api.get_project_id(project), mode='a')
     project_id = check_resource_error(project, "Failed to create project: ")
     try:
         project = check_resource(project, api=api)
@@ -1852,7 +1863,7 @@ def create_samples(datasets, sample_ids, sample_args,
             sample_ids.append(sample_id)
             inprogress.append(sample_id)
             samples.append(sample)
-            log_created_resources("samples", path, sample_id, open_mode='a')
+            log_created_resources("samples", path, sample_id, mode='a')
 
         if args.verbosity:
             if bigml.api.get_status(sample)['code'] != bigml.api.FINISHED:

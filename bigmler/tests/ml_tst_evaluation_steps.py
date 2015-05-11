@@ -1,11 +1,28 @@
+# -*- coding: utf-8 -*-
+#
+# Copyright 2014-2015 BigML
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+from __future__ import absolute_import
+
 import os
 import time
 import csv
 import json
-from world import world, res_filename
+from bigmler.tests.world import world, res_filename
 from subprocess import check_call, CalledProcessError
 from bigmler.checkpoint import file_number_of_lines
-from common_steps import check_debug
+from bigmler.tests.common_steps import check_debug
 
 #@step(r'I create BigML multi-label resources tagged as "(.*)" with "(.*)" label separator and "(\d*)" labels uploading train "(.*)" file with "(.*)" field separator to evaluate and log evaluation in "(.*)"')
 def i_create_all_ml_evaluations(step, tag=None, label_separator=None, number_of_labels=None, data=None, training_separator=None, output=None):

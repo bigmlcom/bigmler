@@ -196,16 +196,16 @@ def multi_label_expansion(training_set, training_set_header,
     message = u.dated("Transforming to extended source.\n")
     u.log_message(message, log_file=session_file,
                   console=args.verbosity)
-    with open(output_file, 'w', 0) as output_handler:
+    with open(output_file, u.open_mode('w')) as output_handler:
         output = csv.writer(output_handler, lineterminator="\n")
         output.writerow(new_headers)
         # read to write new source file with column per label
         input_reader.reset()
         if training_set_header:
-            input_reader.next()
+            input_reader.get_next()
         while True:
             try:
-                row = input_reader.next(extended=True)
+                row = input_reader.get_next(extended=True)
                 output.writerow(row)
             except StopIteration:
                 break

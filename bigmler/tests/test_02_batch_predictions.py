@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-#!/usr/bin/env python
 #
-# Copyright 2015 BigML
+# Copyright 2014-2015 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -15,17 +14,34 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
 """ Testing batch prediction creation
 
 """
-from world import world, setup_module, teardown_module, teardown_class
+from __future__ import absolute_import
 
 
-import basic_tst_prediction_steps as test_pred
-import basic_batch_tst_prediction_steps as test_batch_pred
-import basic_anomaly_prediction_steps as anomaly_pred
+from bigmler.tests.world import (world, common_setup_module,
+                                 common_teardown_module, teardown_class)
 
+import bigmler.tests.basic_tst_prediction_steps as test_pred
+import bigmler.tests.basic_batch_tst_prediction_steps as test_batch_pred
+import bigmler.tests.basic_anomaly_prediction_steps as anomaly_pred
+
+
+
+def setup_module():
+    """Setup for the module
+
+    """
+    common_setup_module()
+    test = TestBatchPrediction()
+    test.setup_scenario2()
+
+def teardown_module():
+    """Teardown for the module
+
+    """
+    common_teardown_module()
 
 class TestBatchPrediction(object):
 
@@ -73,7 +89,7 @@ class TestBatchPrediction(object):
             test_pred.i_check_create_predictions(self)
             test_pred.i_check_predictions(self, example[4])
 
-    def test_scenario2(self):
+    def setup_scenario2(self):
         """
 
             Scenario: Successfully building test predictions from scratch:
@@ -91,7 +107,7 @@ class TestBatchPrediction(object):
                 | data               | test                    | output                        |predictions_file           |
                 | ../data/iris.csv   | ../data/test_iris.csv   | ./scenario_r1/predictions.csv   | ./check_files/predictions_iris.csv   |
         """
-        print self.test_scenario2.__doc__
+        print self.setup_scenario2.__doc__
         examples = [
             ['data/iris.csv', 'data/test_iris.csv', 'scenario_r1/predictions.csv', 'check_files/predictions_iris.csv']]
         for example in examples:

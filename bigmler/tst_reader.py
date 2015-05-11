@@ -25,12 +25,15 @@ import csv
 import sys
 
 from bigml.util import get_csv_delimiter
+from bigml.io import UnicodeReader
 
+from bigmler.utils import PYTHON3, FILE_ENCODING, SYSTEM_ENCODING
+from bigmler.utils import encode2, decode2
 from bigmler.checkpoint import file_number_of_lines
 from bigmler.utf8recoder import UTF8Recoder
 
 
-class TestReader(object):
+class TstReader(object):
     """Retrieves csv info and builds a input data dict
 
     """
@@ -46,11 +49,10 @@ class TestReader(object):
         """
         self.test_set = test_set
         if test_set.__class__.__name__ == "StringIO":
-            self.encode = "utf-8"
-            self.test_set_handler = UTF8Recoder(test_set, self.encode)
-        else:
             self.encode = None
-            self.test_set_handler = open(test_set, "U")
+            self.test_set = UTF8Recoder(test_set, SYSTEM_ENCODING)
+        else:
+            self.encode = None if PYTHON3 else FILE_ENCODING
         self.test_set_header = test_set_header
         self.fields = fields
         if (objective_field is not None and
@@ -60,15 +62,17 @@ class TestReader(object):
             except ValueError, exc:
                 sys.exit(exc)
         self.objective_field = objective_field
-        self.test_separator = (test_separator.decode("string_escape")
+        if test_separator and not PYTHON3:
+            test_separator = decode2(test_separator, encoding="string_escape")
+        self.test_separator = (test_separator
                                if test_separator is not None
                                else get_csv_delimiter())
         if len(self.test_separator) > 1:
             sys.exit("Only one character can be used as test data separator.")
         try:
-            self.test_reader = csv.reader(self.test_set_handler,
-                                          delimiter=self.test_separator,
-                                          lineterminator="\n")
+            self.test_reader = UnicodeReader(self.test_set,
+                                             delimiter=self.test_separator,
+                                             lineterminator="\n").open_reader()
         except IOError:
             sys.exit("Error: cannot read test %s" % test_set)
 
@@ -89,8 +93,6 @@ class TestReader(object):
                                 i != objective_field]
             except ValueError, exc:
                 sys.exit(exc)
-            self.headers = [unicode(header, "utf-8")
-                            for header in self.headers]
             self.raw_headers = self.headers[:]
 
             self.exclude = [i for i in range(len(self.headers))
@@ -132,8 +134,6 @@ class TestReader(object):
 
         """
         row = self.test_reader.next()
-        if self.encode:
-            row = [unicode(item, self.encode).strip() for item in row]
         return row
 
     def dict(self, row, filtering=True):

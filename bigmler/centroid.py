@@ -18,7 +18,7 @@
 """
 from __future__ import absolute_import
 
-import csv
+
 import sys
 
 import bigml.api
@@ -28,8 +28,9 @@ import bigmler.checkpoint as c
 
 
 from bigml.cluster import Cluster
+from bigml.io import UnicodeWriter
 
-from bigmler.test_reader import TestReader
+from bigmler.tst_reader import TstReader as TestReader
 from bigmler.resources import NORMAL_FORMAT, FULL_FORMAT
 from bigmler.resources import create_batch_centroid
 
@@ -147,16 +148,16 @@ def centroid(clusters, fields, args, session_file=None):
     test_reader = TestReader(test_set, test_set_header, fields,
                              None,
                              test_separator=args.test_separator)
-    output = csv.writer(open(output, 'w', 0), lineterminator="\n")
-    # columns to exclude if input_data is added to the prediction field
-    exclude = use_prediction_headers(
-        args.prediction_header, output, test_reader, fields, args)
+    with UnicodeWriter(output, lineterminator="\n") as output:
+        # columns to exclude if input_data is added to the prediction field
+        exclude = use_prediction_headers(
+            args.prediction_header, output, test_reader, fields, args)
 
-    # Local centroids: Centroids are computed locally using clusters'
-    # centroids distances
-    message = u.dated("Creating local centroids.\n")
-    u.log_message(message, log_file=session_file, console=args.verbosity)
-    local_centroid(clusters, test_reader, output, args, exclude=exclude)
+        # Local centroids: Centroids are computed locally using clusters'
+        # centroids distances
+        message = u.dated("Creating local centroids.\n")
+        u.log_message(message, log_file=session_file, console=args.verbosity)
+        local_centroid(clusters, test_reader, output, args, exclude=exclude)
 
 
 def remote_centroid(cluster, test_dataset, batch_centroid_args, args,
@@ -190,4 +191,4 @@ def remote_centroid(cluster, test_dataset, batch_centroid_args, args,
             u.log_message(message, log_file=session_file,
                           console=args.verbosity)
             u.log_created_resources("batch_centroid_dataset",
-                                    path, new_dataset, open_mode='a')
+                                    path, new_dataset, mode='a')

@@ -19,6 +19,9 @@
 """ Mimic World lettuce object
 
 """
+
+from __future__ import absolute_import
+
 import os
 import shutil
 import time
@@ -207,10 +210,10 @@ class World(object):
 world = World()
 
 def res_filename(file):
-    print "../../../%s" % file
     return pkg_resources.resource_filename('bigmler', "../../../%s" % file)
 
-def setup_module():
+
+def common_setup_module():
     """Operations to be performed before each module
 
     """
@@ -218,11 +221,11 @@ def setup_module():
     world.count_resources('init')
     world.clear()
 
-def teardown_module():
+
+def common_teardown_module():
     """Operations to be performed after each module
 
     """
-
     if os.path.exists('./tmp'):
         shutil.rmtree('./tmp')
 
@@ -235,11 +238,12 @@ def teardown_module():
         except:
             pass
 
-
     world.check_init_equals_final()
+
 
 def teardown_class():
     """Operations to be performed after each class
 
     """
     world.output = ""
+    world.directory = ""

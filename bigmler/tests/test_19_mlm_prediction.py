@@ -19,11 +19,26 @@
 """ Testing Multi-label predictions
 
 """
-from world import world, setup_module, teardown_module, teardown_class
+from bigmler.tests.world import (world, common_setup_module,
+                                 common_teardown_module, teardown_class)
 
-import basic_tst_prediction_steps as test_pred
-import ml_tst_prediction_steps as ml_pred
+import bigmler.tests.basic_tst_prediction_steps as test_pred
+import bigmler.tests.ml_tst_prediction_steps as ml_pred
 
+
+def setup_module():
+    """Setup for the module
+
+    """
+    common_setup_module()
+    test = TestMLM()
+    test.setup_scenario1()
+
+def teardown_module():
+    """Teardown for the module
+
+    """
+    common_teardown_module()
 
 class TestMLM(object):
 
@@ -39,7 +54,7 @@ class TestMLM(object):
         """
         pass
 
-    def test_scenario1(self):
+    def setup_scenario1(self):
         """
             Scenario: Successfully building multi-label test predictions from start:
                 Given I create BigML multi-label resources tagged as "<tag>" with "<label_separator>" label separator and <number_of_labels> labels uploading train "<data>" file with "<training_separator>" field separator and "<ml_fields>" as multi-label fields using model_fields "<model_fields>" and objective "<objective>" to test "<test>" and log predictions in "<output>"
@@ -53,7 +68,7 @@ class TestMLM(object):
                 |tag |label_separator |number_of_labels | data                   |training_separator | ml_fields | model_fields | objective | test                        | output                         |predictions_file           |
                 |my_multilabelm_1|:|7| ../data/multilabel_multi.csv |,  | type,class | -type,-type - W,-type - A,-type - C,-type - S,-type - R,-type - T,-type - P | class |../data/test_multilabel.csv | ./scenario_mlm_1/predictions.csv | ./check_files/predictions_ml.csv |
         """
-        print self.test_scenario1.__doc__
+        print self.setup_scenario1.__doc__
         examples = [
             ['my_multilabelm_1', ':', '7', 'data/multilabel_multi.csv', ',', 'type,class', '-type,-type - W,-type - A,-type - C,-type - S,-type - R,-type - T,-type - P', 'class', 'data/test_multilabel.csv', 'scenario_mlm_1/predictions.csv', 'check_files/predictions_ml.csv']]
         for example in examples:

@@ -19,7 +19,6 @@
 """
 from __future__ import absolute_import
 
-import csv
 import fileinput
 import ast
 import glob
@@ -36,6 +35,7 @@ except ImportError:
 import bigml.api
 from bigml.util import console_log, empty_resource
 from bigml.fields import get_fields_structure, Fields
+from bigml.io import UnicodeReader
 
 PYTHON3 = sys.version_info[0] == 3
 PAGE_LENGTH = 200
@@ -83,18 +83,19 @@ def read_field_attributes(path):
     """
     field_attributes = {}
     try:
-        attributes_reader = csv.reader(open(path, "Ub"), quotechar="'")
+        with UnicodeReader(path, quotechar="'") as attributes_reader:
+            for row in attributes_reader:
+                attributes = {}
+                if len(row) > 1:
+                    for index in range(0, min(len(ATTRIBUTE_NAMES),
+                                              len(row) - 1)):
+                        attributes.update(
+                            {ATTRIBUTE_NAMES[index]: row[index + 1]})
+                    field_attributes.update({
+                        int(row[0]): attributes})
+            return field_attributes
     except IOError:
         sys.exit("Error: cannot read field attributes %s" % path)
-
-    for row in attributes_reader:
-        attributes = {}
-        if len(row) > 1:
-            for index in range(0, min(len(ATTRIBUTE_NAMES), len(row) - 1)):
-                attributes.update({ATTRIBUTE_NAMES[index]: row[index + 1]})
-            field_attributes.update({
-                int(row[0]): attributes})
-    return field_attributes
 
 
 def read_types(path):
@@ -134,7 +135,8 @@ def read_json(path):
     """
     json_attributes = {}
     try:
-        attributes_reader = open(path, "rb")
+        open_mode = "rt" if PYTHON3 else "rb"
+        attributes_reader = open(path, open_mode)
     except IOError:
         sys.exit("Error: cannot read json file %s" % path)
     try:
@@ -247,7 +249,10 @@ def read_votes_files(dirs_list, path):
         for predictions_file in glob.glob("model_*_predictions.csv"):
             predictions_files.append("%s%s%s" % (os.getcwd(),
                                                  os.sep, predictions_file))
-            group_predictions.write("%s\n" % predictions_file)
+            message = "%s\n" % predictions_file
+            if PYTHON3:
+                message = message.encode(FILE_ENCODING)
+            group_predictions.write(message)
         os.chdir(current_directory)
     group_predictions.close()
     return predictions_files
@@ -261,8 +266,8 @@ def read_local_resource(path, csv_properties=None):
     if csv_properties is None:
         csv_properties = {}
     fields = None
-
-    with open(path, "rb") as resource_file:
+    open_mode = "rt" if PYTHON3 else "rb"
+    with open(path, open_mode) as resource_file:
         try:
             resource = json.loads(resource_file.read())
         except IOError:
@@ -443,16 +448,19 @@ def check_resource_error(resource, message):
     return bigml.api.get_resource_id(resource)
 
 
-def log_created_resources(file_name, path, resource_id, open_mode='wb'):
+def log_created_resources(file_name, path, resource_id, mode='w'):
     """Logs the created resources ids in the given file
 
     """
     if path is not None:
         file_name = "%s%s%s" % (path, os.sep, file_name)
         try:
-            with open(file_name, open_mode, 0) as resource_file:
+            with open(file_name, "%sb" % mode, 0) as resource_file:
                 if resource_id is not None:
-                    resource_file.write("%s\n" % resource_id)
+                    message = "%s\n" % resource_id
+                    if PYTHON3:
+                        message = message.encode(SYSTEM_ENCODING)
+                    resource_file.write(message)
         except IOError, exc:
             print "Failed to write %s: %s" % (file_name, str(exc))
 
@@ -550,24 +558,24 @@ def read_objective_weights(path):
 
     """
     objective_weights = []
+    import traceback
     try:
-        weights_reader = csv.reader(open(path, "Ub"), quotechar="'")
+        with UnicodeReader(path, quotechar="'") as weights_reader:
+            for row in weights_reader:
+                weights = []
+                if len(row) != 2:
+                    sys.exit("Error: wrong objective field file syntax\n%s" %
+                             ",".join(row))
+                weights = row[:]
+                try:
+                    weights[1] = int(weights[1])
+                except ValueError:
+                    sys.exit("Error: wrong objective field file syntax\n%s" %
+                             ",".join(row))
+                objective_weights.append(weights)
+            return objective_weights
     except IOError:
         sys.exit("Error: cannot read objective weights %s" % path)
-
-    for row in weights_reader:
-        weights = []
-        if len(row) != 2:
-            sys.exit("Error: wrong objective field file syntax\n%s" %
-                     ",".join(row))
-        weights = row[:]
-        try:
-            weights[1] = int(weights[1])
-        except ValueError:
-            sys.exit("Error: wrong objective field file syntax\n%s" %
-                     ",".join(row))
-        objective_weights.append(weights)
-    return objective_weights
 
 
 def is_shared(resource):
@@ -645,3 +653,27 @@ def get_objective_id(fields, objective):
     except ValueError:
         return None
     return objective_id
+
+
+def open_mode(mode):
+    """Python 3 compatible open mode
+
+    """
+    return "%st" % mode if PYTHON3 else "%s" % mode
+
+
+def encode2(value, encoding=FILE_ENCODING):
+    """Conditional encoding only for Python2
+
+    """
+    if isinstance(value, basestring) and not PYTHON3:
+        return value.encode(encoding)
+    return value
+
+def decode2(value, encoding=FILE_ENCODING):
+    """Conditional decoding only for Python2
+
+    """
+    if isinstance(value, basestring) and not PYTHON3:
+        return value.decode(encoding)
+    return value

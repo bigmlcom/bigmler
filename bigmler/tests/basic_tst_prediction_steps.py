@@ -1,26 +1,43 @@
+# -*- coding: utf-8 -*-
+#
+# Copyright 2014-2015 BigML
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+from __future__ import absolute_import
+
 import os
 import time
-import csv
 import json
-from world import world, res_filename
+from bigmler.tests.world import world, res_filename
 from subprocess import check_call, CalledProcessError
 from bigml.api import check_resource
+from bigml.io import UnicodeReader
 from bigmler.processing.models import MONTECARLO_FACTOR
 from bigmler.checkpoint import file_number_of_lines
-from bigmler.utils import storage_file_name
-from bigmler.utils import SYSTEM_ENCODING
-from ml_tst_prediction_steps import i_create_all_ml_resources
-from ml_tst_prediction_steps import i_create_all_ml_resources_and_ensembles
-from ml_tst_evaluation_steps import i_create_all_ml_resources_for_evaluation
-from max_categories_tst_prediction_steps import i_check_create_max_categories_datasets, i_create_all_mc_resources
-from basic_batch_tst_prediction_steps import i_check_create_test_source, i_check_create_test_dataset, i_check_create_batch_prediction
-from basic_cluster_prediction_steps import i_create_all_cluster_resources, i_check_create_cluster
-from basic_anomaly_prediction_steps import i_create_all_anomaly_resources, i_check_create_anomaly
-from ml_tst_prediction_steps import i_create_all_mlm_resources
-from common_steps import check_debug
+from bigmler.utils import storage_file_name, open_mode
+from bigmler.utils import SYSTEM_ENCODING, PYTHON3
+from bigmler.tests.ml_tst_prediction_steps import i_create_all_ml_resources
+from bigmler.tests.ml_tst_prediction_steps import i_create_all_ml_resources_and_ensembles
+from bigmler.tests.ml_tst_evaluation_steps import i_create_all_ml_resources_for_evaluation
+from bigmler.tests.max_categories_tst_prediction_steps import i_check_create_max_categories_datasets, i_create_all_mc_resources
+from bigmler.tests.basic_batch_tst_prediction_steps import i_check_create_test_source, i_check_create_test_dataset, i_check_create_batch_prediction
+from bigmler.tests.basic_cluster_prediction_steps import i_create_all_cluster_resources, i_check_create_cluster
+from bigmler.tests.basic_anomaly_prediction_steps import i_create_all_anomaly_resources, i_check_create_anomaly
+from bigmler.tests.ml_tst_prediction_steps import i_create_all_mlm_resources
+from bigmler.tests.common_steps import check_debug
 
 
-def shell_execute(command, output, test=None, options=None):
+def shell_execute(command, output, test=None, options=None, test_rows=None):
     """Excute bigmler command in shell
 
     """
@@ -37,6 +54,10 @@ def shell_execute(command, output, test=None, options=None):
                 if options is None or options.find('--prediction-header') == -1:
                     # test file has headers in it, so first line must be ignored
                     world.test_lines -= 1
+            elif test_rows is not None:
+                world.test_lines = test_rows
+                if options is not None and options.find('--prediction-header') > -1:
+                    world.test_lines += 1
             elif options is not None and options.find('--prediction-header') > -1:
                 world.test_lines += 1
             world.output = output
@@ -283,7 +304,7 @@ def i_create_resources_from_model_batch(step, fields=None, output=None):
                world.test_dataset['resource'] + " --store --remote " +
                "--prediction-header --prediction-info full " +
                "--prediction-fields \"" + fields + "\" --output " + output)
-    shell_execute(command, output, options="--prediction-header")
+    shell_execute(command, output, options="--prediction-header", test_rows=world.test_dataset['object']['rows'])
 
 #@step(r'I create BigML resources using dataset to test the previous test dataset remotely and log predictions in "(.*)"')
 def i_create_resources_from_dataset_batch(step, output=None):
@@ -291,7 +312,7 @@ def i_create_resources_from_dataset_batch(step, output=None):
         assert False
     command = ("bigmler --dataset " + world.dataset['resource'] + " --test-dataset " +
                world.test_dataset['resource'] + " --store --remote --output " + output)
-    shell_execute(command, output)
+    shell_execute(command, output, test_rows=world.test_dataset['object']['rows'])
 
 
 #@step(r'I create BigML resources using dataset, objective field (.*) and model fields (.*) to test "(.*)" and log predictions in "(.*)"')
@@ -302,7 +323,9 @@ def i_create_resources_from_dataset_objective_model(step, objective=None, fields
     command = (u"bigmler --dataset " + world.dataset['resource'] +
                u" --objective " + objective + u" --model-fields " +
                fields + u" --test " + test + u" --store --output " + output)
-    shell_execute(command.encode(SYSTEM_ENCODING), output, test=test)
+    if not PYTHON3:
+        command = command.encode(SYSTEM_ENCODING)
+    shell_execute(command, output, test=test)
 
 
 #@step(r'I create BigML resources using local model in "(.*)" to test "(.*)" and log predictions in "(.*)"')
@@ -579,9 +602,10 @@ def i_create_objective_weighted_model(step, data=None, path=None, output_dir=Non
 def i_check_create_source(step):
     source_file = "%s%ssource" % (world.directory, os.sep)
     try:
-        source_file = open(source_file, "r")
-        source = check_resource(source_file.readline().strip(),
-                                world.api.get_source)
+        source_file = open(source_file, "rb")
+        source = check_resource(
+            source_file.readline().strip().decode(SYSTEM_ENCODING),
+            world.api.get_source)
         world.sources.append(source['resource'])
         world.source = source
         source_file.close()
@@ -641,6 +665,7 @@ def i_check_create_model(step):
         model_file = open(model_file, "r")
         model = check_resource(model_file.readline().strip(),
                                world.api.get_model)
+        print "*****", model_file, model['resource']
         world.models.append(model['resource'])
         world.model = model
         model_file.close()
@@ -822,16 +847,18 @@ def i_check_feature_selection(step, selection, metric, metric_value):
         assert False
     sessions_file = os.path.join(world.directory, "bigmler_sessions")
     try:
-        with open(sessions_file, "r") as sessions_file:
-            content = sessions_file.read().decode("utf-8")
+        with open(sessions_file, open_mode("r")) as sessions_file:
+            content = sessions_file.read()
+            if not PYTHON3:
+                content = decode("utf-8")
         text = "The best feature subset is: %s \n%s = %s" % (
             selection, metric.capitalize(), metric_value)
         if content.find(text) > -1:
             assert True
         else:
             assert False
-    except:
-        assert False
+    except Exception, exc:
+        assert False, str(exc)
 
 
 #@step(r'the best node threshold is "(.*)", with "(.*)" of (.*)')
@@ -840,8 +867,10 @@ def i_check_node_threshold(step, node_threshold, metric, metric_value):
         assert False
     sessions_file = os.path.join(world.directory, "bigmler_sessions")
     try:
-        with open(sessions_file, "r") as sessions_file:
-            content = sessions_file.read().decode("utf-8")
+        with open(sessions_file, open_mode("r")) as sessions_file:
+            content = sessions_file.read()
+            if not PYTHON3:
+                content = decode("utf-8")
         text = "The best node threshold is: %s \n%s = %s" % (
             node_threshold, metric.capitalize(), metric_value)
         if content.find(text) > -1:
@@ -928,29 +957,29 @@ def i_check_create_predictions(step):
 def i_check_predictions(step, check_file):
     check_file = res_filename(check_file)
     predictions_file = world.output
+    import traceback
     try:
-        predictions_file = csv.reader(open(predictions_file, "U"), lineterminator="\n")
-        check_file = csv.reader(open(check_file, "U"), lineterminator="\n")
-        for row in predictions_file:
-            check_row = check_file.next()
-            if len(check_row) != len(row):
-                assert False
-            for index in range(len(row)):
-                dot = row[index].find(".")
-                if dot > 0 or (check_row[index].find(".") > 0
-                               and check_row[index].endswith(".0")):
-                    try:
-                        decimal_places = min(len(row[index]), len(check_row[index])) - dot - 1
-                        row[index] = round(float(row[index]), decimal_places)
-                        check_row[index] = round(float(check_row[index]), decimal_places)
-                    except ValueError:
-                        pass
-                if check_row[index] != row[index]:
-                    print row, check_row
-                    assert False
-        assert True
+        with UnicodeReader(predictions_file) as predictions_file:
+            with UnicodeReader(check_file) as check_file:
+                for row in predictions_file:
+                    check_row = check_file.next()
+                    if len(check_row) != len(row):
+                        assert False
+                        dot = row[index].find(".")
+                        if dot > 0 or (check_row[index].find(".") > 0
+                                       and check_row[index].endswith(".0")):
+                            try:
+                                decimal_places = min(len(row[index]), len(check_row[index])) - dot - 1
+                                row[index] = round(float(row[index]), decimal_places)
+                                check_row[index] = round(float(check_row[index]), decimal_places)
+                            except ValueError:
+                                pass
+                        if check_row[index] != row[index]:
+                            print row, check_row
+                            assert False
+                assert True
     except Exception, exc:
-        assert False, str(exc)
+        assert False, traceback.format_exc()
 
 
 #@step(r'local predictions for different thresholds in "(.*)" and "(.*)" are different')
@@ -1257,6 +1286,46 @@ def i_create_kfold_cross_validation_metric(step, k_folds=None, metric=None):
         assert False
 
 
+def retrieve_resource(scenario_path, resource_id):
+    """Builds a resource from the contents of its local file
+
+    """
+    resource_file = os.path.join(scenario_path, resource_id.replace("/", "_"))
+    with open(resource_file, open_mode("r")) as resource_handler:
+        return json.loads(resource_handler.read())
+
+
+def retrieve_resources(scenario_path, step):
+    """Retrieves the resource ids and objects from the scenario path
+
+    """
+    try:
+        with open(os.path.join(scenario_path, "source"), open_mode("r")) as source_id_file:
+            source_id = source_id_file.readline().strip()
+            world.source = retrieve_resource(scenario_path, source_id)
+    except:
+        pass
+    try:
+        with open(os.path.join(scenario_path, "dataset"), open_mode("r")) as dataset_id_file:
+            dataset_id = dataset_id_file.readline().strip()
+            world.dataset = retrieve_resource(scenario_path, dataset_id)
+    except:
+        pass
+    try:
+        with open(os.path.join(scenario_path, "dataset_test"), open_mode("r")) as dataset_id_file:
+            dataset_id = dataset_id_file.readline().strip()
+            world.test_dataset = retrieve_resource(scenario_path, dataset_id)
+    except:
+        pass
+    try:
+        with open(os.path.join(scenario_path, "models"), open_mode("r")) as model_id_file:
+            model_id = model_id_file.readline().strip()
+            world.model = retrieve_resource(scenario_path, model_id)
+    except:
+        pass
+
+
+
 #@step(r'I have previously executed "(.*)" or reproduce it with arguments (.*)$')
 def i_have_previous_scenario_or_reproduce_it(step, scenario, kwargs):
     scenarios = {'scenario1': [(i_create_all_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_model, False)],
@@ -1272,7 +1341,9 @@ def i_have_previous_scenario_or_reproduce_it(step, scenario, kwargs):
                  'scenario_mlm_1': [(i_create_all_mlm_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models, False)],
                 'scenario_c_1': [(i_create_all_cluster_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_cluster, False)],
                 'scenario_an_1': [(i_create_all_anomaly_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_anomaly, False)]}
-    if os.path.exists("./%s/" % scenario):
+    scenario_path = "%s/" % scenario
+    if os.path.exists(scenario_path):
+        retrieve_resources(scenario_path, step)
         assert True
     else:
         try:

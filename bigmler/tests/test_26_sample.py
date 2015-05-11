@@ -19,12 +19,28 @@
 """ Testing samples
 
 """
-from world import world, setup_module, teardown_module, teardown_class
+from __future__ import absolute_import
 
-import basic_tst_prediction_steps as test_pred
-import sample_steps as test_sample
-import dataset_advanced_steps as dataset
 
+from bigmler.tests.world import (world, common_setup_module,
+                                 common_teardown_module, teardown_class)
+
+import bigmler.tests.basic_tst_prediction_steps as test_pred
+import bigmler.tests.sample_steps as test_sample
+import bigmler.tests.dataset_advanced_steps as dataset
+
+
+def setup_module():
+    """Setup for the module
+
+    """
+    common_setup_module()
+
+def teardown_module():
+    """Teardown for the module
+
+    """
+    common_teardown_module()
 
 class TestSamples(object):
 
@@ -78,7 +94,7 @@ class TestSamples(object):
                 And I check that the dataset has been created
                 Then I create a new sample from the dataset and get the sample using options "<sample_options>" storing logs in "<output_dir>"
                 And I check that the sample has been created
-                And the sample contains stat-info like in "<sample_JSON>"
+                And the sample JSON is like the one in "<sample_JSON_file>"
 
                 Examples:
                 |data |output_dir  |sample_options | sample_JSON
@@ -94,4 +110,4 @@ class TestSamples(object):
             test_pred.i_check_create_dataset(self)
             test_sample.i_create_sample(self, options=example[2], output_dir=example[1])
             test_sample.i_check_create_sample(self)
-            test_sample.i_check_sample_stat(self, check_sample_json=example[3])
+            test_sample.i_check_sample_json(self, check_sample_file=example[3])

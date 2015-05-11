@@ -19,11 +19,27 @@
 """ Testing predictions with missing splits
 
 """
-from world import world, setup_module, teardown_module, teardown_class
+from __future__ import absolute_import
 
 
-import basic_tst_prediction_steps as test_pred
+from bigmler.tests.world import (world, common_setup_module,
+                                 common_teardown_module, teardown_class)
 
+
+import bigmler.tests.basic_tst_prediction_steps as test_pred
+
+
+def setup_module():
+    """Setup for the module
+
+    """
+    common_setup_module()
+
+def teardown_module():
+    """Teardown for the module
+
+    """
+    common_teardown_module()
 
 class TestMissingSplits(object):
 

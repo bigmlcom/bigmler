@@ -19,11 +19,25 @@
 """ Testing advanced dataset creation (multidatasets)
 
 """
-from world import world, setup_module, teardown_module, teardown_class
+from bigmler.tests.world import (world, common_setup_module,
+                                 common_teardown_module, teardown_class)
 
 
-import dataset_advanced_steps as dataset_adv
-import basic_tst_prediction_steps as test_pred
+import bigmler.tests.dataset_advanced_steps as dataset_adv
+import bigmler.tests.basic_tst_prediction_steps as test_pred
+
+
+def setup_module():
+    """Setup for the module
+
+    """
+    common_setup_module()
+
+def teardown_module():
+    """Teardown for the module
+
+    """
+    common_teardown_module()
 
 
 class TestDatasetAdvanced(object):

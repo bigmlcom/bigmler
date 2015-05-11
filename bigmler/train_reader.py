@@ -25,9 +25,12 @@ import csv
 import sys
 
 from bigml.util import get_csv_delimiter
+from bigml.io import UnicodeReader
 
 from bigmler.checkpoint import file_number_of_lines
 from bigmler.labels import get_label_field
+from bigmler.utils import PYTHON3, SYSTEM_ENCODING, FILE_ENCODING
+from bigmler.utils import encode2, decode2
 
 
 AGGREGATES = {
@@ -54,31 +57,36 @@ class TrainReader(object):
            `labels`: Fields object with the expected fields structure.
         """
         self.training_set = training_set
+        if training_set.__class__.__name__ == "StringIO":
+            self.encode = None
+            self.training_set = UTF8Recoder(test_set, SYSTEM_ENCODING)
+        else:
+            self.encode = None if PYTHON3 else FILE_ENCODING
         self.training_set_header = training_set_header
-        self.training_set_handler = None
         self.training_reader = None
         self.multi_label = multi_label
         self.objective = objective
         if label_aggregates is None:
             label_aggregates = []
         self.label_aggregates = label_aggregates
-
-        self.training_separator = (training_separator.decode("string_escape")
+        self.training_separator = (decode2(training_separator,
+                                           encoding="string_escape")
                                    if training_separator is not None
                                    else get_csv_delimiter())
         if len(self.training_separator) > 1:
             sys.exit("Only one character can be used as test data separator.")
         # opening csv reader
         self.reset()
-        self.label_separator = (label_separator.decode("string_escape")
+        self.label_separator = (decode2(label_separator,
+                                        encoding="string_escape")
                                 if label_separator is not None
                                 else get_csv_delimiter())
 
-        first_row = self.next(reset=not training_set_header)
+        first_row = self.get_next(reset=not training_set_header)
         self.row_length = len(first_row)
 
         if training_set_header:
-            self.headers = [unicode(header, "utf-8") for header in first_row]
+            self.headers = first_row
         else:
             self.headers = [("field_%s" % index) for index in
                             range(0, self.row_length)]
@@ -95,6 +103,12 @@ class TrainReader(object):
                 self.labels = self.fields_labels[self.objective_column]
             self.objective_name = self.headers[self.objective_column]
 
+    def __iter__(self):
+        """Iterator method
+
+        """
+        return self
+
     def get_label_headers(self):
         """Returns a list of headers with the new extended field names for
            each objective label
@@ -109,7 +123,8 @@ class TrainReader(object):
             for aggregate in self.label_aggregates:
                 new_headers.append(get_label_field(
                     self.headers[field_column], aggregate))
-        new_headers = [header.encode("utf-8") for header in new_headers]
+        if not PYTHON3:
+            new_headers = [encode2(header) for header in new_headers]
         return new_headers
 
     def _get_columns(self, fields_list):
@@ -137,7 +152,7 @@ class TrainReader(object):
                                  " it cannot be found in the headers row: \n"
                                  " %s" %
                                  (field,
-                                  ", ".join([header.encode("utf-8")
+                                  ", ".join([encode2(header)
                                              for header in self.headers])))
                     else:
                         column = None
@@ -150,24 +165,23 @@ class TrainReader(object):
 
         """
         try:
-            self.training_set_handler.close()
+            self.training_set.close()
         except (IOError, AttributeError):
             pass
         try:
-            self.training_set_handler = open(self.training_set, "U")
-            self.training_reader = csv.reader(
-                self.training_set_handler, delimiter=self.training_separator,
-                lineterminator="\n")
+            self.training_reader = UnicodeReader(
+                self.training_set, delimiter=self.training_separator,
+                lineterminator="\n").open_reader()
         except IOError:
             sys.exit("Error: cannot read training %s" % self.training_set)
 
-    def __iter__(self):
-        """Iterator method
+    def next(self):
+        """Iterator method for next item
 
         """
-        return self
+        return self.get_next()
 
-    def next(self, extended=False, reset=False):
+    def get_next(self, extended=False, reset=False):
         """Returns the next row. If extended is True, the row is extended with
            a list of booleans depending on whether the label is in the
            objective field value or not. If reset is True, the file is
@@ -184,8 +198,10 @@ class TrainReader(object):
                 aggregated_field_value = row[field_column]
                 field_values = aggregated_field_value.split(
                     self.label_separator)
-                field_values = [value.decode("utf-8").strip() for
+
+                field_values = [value.strip() for
                                 value in field_values]
+
                 labels_row = [int(label in field_values) for label in
                               self.fields_labels[field_column]]
                 row.extend(labels_row)
@@ -193,6 +209,8 @@ class TrainReader(object):
                     row.append(AGGREGATES[aggregate](field_values))
         if reset:
             self.reset()
+        if not PYTHON3:
+            row = [encode2(item) for item in row]
         return row
 
     def number_of_rows(self):
@@ -231,8 +249,7 @@ class TrainReader(object):
         field_value = row[field_column]
         if self.multi_label:
             new_labels = field_value.split(separator)
-            new_labels = map(str.strip, new_labels)
-            new_labels = [label.decode("utf-8").strip()
+            new_labels = [decode2(label).strip()
                           for label in new_labels]
             # TODO: clean user given missing tokens
             for label_index in range(0, len(new_labels)):
