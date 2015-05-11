@@ -24,7 +24,7 @@ from bigml.api import check_resource
 from bigml.io import UnicodeReader
 from bigmler.processing.models import MONTECARLO_FACTOR
 from bigmler.checkpoint import file_number_of_lines
-from bigmler.utils import storage_file_name, open_mode
+from bigmler.utils import storage_file_name, open_mode, decode2
 from bigmler.utils import SYSTEM_ENCODING, PYTHON3
 from bigmler.tests.ml_tst_prediction_steps import i_create_all_ml_resources
 from bigmler.tests.ml_tst_prediction_steps import i_create_all_ml_resources_and_ensembles
@@ -604,7 +604,7 @@ def i_check_create_source(step):
     try:
         source_file = open(source_file, "rb")
         source = check_resource(
-            source_file.readline().strip().decode(SYSTEM_ENCODING),
+            decode2(source_file.readline().strip(), SYSTEM_ENCODING),
             world.api.get_source)
         world.sources.append(source['resource'])
         world.source = source
@@ -850,7 +850,7 @@ def i_check_feature_selection(step, selection, metric, metric_value):
         with open(sessions_file, open_mode("r")) as sessions_file:
             content = sessions_file.read()
             if not PYTHON3:
-                content = decode("utf-8")
+                content = decode2(content)
         text = "The best feature subset is: %s \n%s = %s" % (
             selection, metric.capitalize(), metric_value)
         if content.find(text) > -1:
@@ -870,7 +870,7 @@ def i_check_node_threshold(step, node_threshold, metric, metric_value):
         with open(sessions_file, open_mode("r")) as sessions_file:
             content = sessions_file.read()
             if not PYTHON3:
-                content = decode("utf-8")
+                content = decode2(content)
         text = "The best node threshold is: %s \n%s = %s" % (
             node_threshold, metric.capitalize(), metric_value)
         if content.find(text) > -1:
