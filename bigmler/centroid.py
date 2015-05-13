@@ -158,7 +158,7 @@ def centroid(clusters, fields, args, session_file=None):
         message = u.dated("Creating local centroids.\n")
         u.log_message(message, log_file=session_file, console=args.verbosity)
         local_centroid(clusters, test_reader, output, args, exclude=exclude)
-
+    test_reader.close()
 
 def remote_centroid(cluster, test_dataset, batch_centroid_args, args,
                     api, resume, prediction_file=None, session_file=None,

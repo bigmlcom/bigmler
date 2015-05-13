@@ -665,7 +665,6 @@ def i_check_create_model(step):
         model_file = open(model_file, "r")
         model = check_resource(model_file.readline().strip(),
                                world.api.get_model)
-        print "*****", model_file, model['resource']
         world.models.append(model['resource'])
         world.model = model
         model_file.close()

@@ -166,3 +166,9 @@ class TstReader(object):
 
         """
         return self.test_set_header
+
+    def close(self):
+        """Closing file handler
+
+        """
+        self.test_reader.close_reader()

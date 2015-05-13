@@ -310,3 +310,9 @@ class TrainReader(object):
                 "generated_fields": self.new_fields_info(),
                 "objective_name": self.objective_name,
                 "objective_column": self.objective_column}
+
+    def close(self):
+        """Closing file handler
+
+        """
+        self.training_reader.close_reader()

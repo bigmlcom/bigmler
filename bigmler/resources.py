@@ -1311,8 +1311,10 @@ def set_cluster_args(args, name=None, fields=None,
         "tags": args.tag,
         "seed": SEED if args.seed is None else args.seed,
         "cluster_seed": (SEED if args.cluster_seed is None
-                         else args.cluster_seed)
+                         else args.cluster_seed),
+        "model_clusters": args.model_clusters
     }
+    print cluster_args
 
     if args.cluster_k:
         cluster_args.update({"k": args.cluster_k})

@@ -158,6 +158,7 @@ def anomaly_score(anomalies, fields, args, session_file=None):
         u.log_message(message, log_file=session_file, console=args.verbosity)
         local_anomaly_score(anomalies, test_reader,
                             output, args, exclude=exclude)
+    test_reader.close()
 
 
 def remote_anomaly_score(anomaly, test_dataset, batch_anomaly_score_args, args,

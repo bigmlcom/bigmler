@@ -219,4 +219,5 @@ def multi_label_expansion(training_set, training_set_header,
         output_file = output_file_zip
         objective_field = input_reader.headers[input_reader.objective_column]
 
+    input_reader.close()
     return (output_file, input_reader.get_multi_label_data())

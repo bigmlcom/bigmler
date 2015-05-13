@@ -670,6 +670,7 @@ def predict(models, fields, args, api=None, log=None,
                                 models_per_label=models_per_label,
                                 other_label=other_label,
                                 multi_label_data=multi_label_data)
+    test_reader.close()
 
 
 def remote_predict(model, test_dataset, batch_prediction_args, args,
