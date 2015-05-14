@@ -125,20 +125,15 @@ def get_cluster_options(defaults=None):
             'help': ("Path to a json file describing centroid"
                      " attributes.")},
 
-        # Create models associated to each centroid in a cluster
-        '--model-clusters': {
-            'action': 'store_true',
-            'dest': 'model_clusters',
-            'default': defaults.get('model_clusters', False),
-            'help': ("Create the models associated to each centroid"
-                     " in a cluster.")},
-
-        # Don't create models associated to each centroid in a cluster
-        '--no-model-clusters': {
-            'action': 'store_false',
-            'dest': 'model_clusters',
-            'default': defaults.get('model_clusters', False),
-            'help': ("Don't create the models associated to each centroid"
-                     " in a cluster.")}}
+        # Comma separated list of models to be generated from the cluster.
+        '--cluster-models': {
+            'action': 'store',
+            'dest': 'cluster_models',
+            'nargs': '?',
+            'const': '',
+            'default': defaults.get('cluster_models', None),
+            'help': ("Comma-separated list of centroid names. The"
+                     " related models will be generated. All models "
+                     "will be generated if empty.")}}
 
     return options

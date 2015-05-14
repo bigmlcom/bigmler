@@ -432,6 +432,19 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
+    # Parses cluster names to generate models if provided
+    try:
+        if command_args.cluster_models:
+            cluster_models_arg = [
+                model.strip() for model in
+                command_args.cluster_models.split(
+                    command_args.args_separator)]
+            command_args.cluster_models_ = cluster_models_arg
+        else:
+            command_args.cluster_models_ = []
+    except AttributeError:
+        pass
+
     anomaly_ids = []
     try:
         # Parses anomaly/ids if provided.

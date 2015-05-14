@@ -200,7 +200,7 @@ class TestCluster(object):
         for example in examples:
             print "\nTesting with:\n", example
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
-            test_cluster.i_create_datasets_form_cluster(self, centroids=example[2], output=example[3])
+            test_cluster.i_create_datasets_from_cluster(self, centroids=example[2], output=example[3])
             test_cluster.i_check_cluster_datasets(self, datasets_number=example[4])
 
     def test_scenario7(self):
@@ -224,3 +224,25 @@ class TestCluster(object):
             test_cluster.i_create_cluster_resources_from_local_cluster(self, directory=example[0], test=example[2], output=example[3])
             test_cluster.i_check_create_centroids(self)
             test_pred.i_check_predictions(self, example[4])
+
+    def test_scenario8(self):
+        """
+            Scenario: Successfully generating models from cluster centroids
+                Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
+                And I generate models for "<centroid_names>" centroids and log results in "<output>"
+                Then I check that the <model_number> cluster models are ready
+
+                Examples:
+                |scenario    | kwargs                                                  | centroid_names        | output                      | datasets_number |
+                | scenario_c_1| {"data": "../data/diabetes.csv", "output": "./scenario_c_1/centroids.csv", "test": "../data/diabetes.csv"}   | Cluster 1,Cluster 2 | ./scenario_c_8/centroids.csv | 2 |
+
+        """
+        print self.test_scenario8.__doc__
+        examples = [
+            ['scenario_c_1', '{"data": "data/diabetes.csv", "output": "scenario_c_1/centroids.csv", "test": "data/diabetes.csv"}', 'Cluster 1,Cluster 2', 'scenario_c_8/centroids.csv', '2']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
+            test_cluster.i_create_models_from_cluster(self, centroids=example[2], output=example[3])
+            test_cluster.i_check_create_cluster(self)
+            test_cluster.i_check_cluster_models(self, models_number=example[4])

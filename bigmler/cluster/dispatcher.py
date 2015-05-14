@@ -240,6 +240,7 @@ def compute_output(api, args):
             centroid(clusters, fields, args, session_file=session_file)
 
     if cluster and args.cluster_datasets is not None:
+        cluster = api.check_resource(cluster)
         centroids_info = cluster['object']['clusters']['clusters']
         centroids = {centroid['name']: centroid['id']
                      for centroid in centroids_info}
@@ -249,13 +250,32 @@ def compute_output(api, args):
         else:
             centroid_ids = [centroids[cluster_name] for cluster_name in
                             args.cluster_datasets_
-                            if datasets[centroids[cluster_name]] == '']
+                            if datasets.get(centroids[cluster_name], '') == '']
 
         for centroid_id in centroid_ids:
             dataset_args = {'centroid': centroid_id}
             r.create_dataset(cluster, dataset_args, args, api=api, path=path,
                              session_file=session_file, log=log,
                              dataset_type='cluster')
+
+    if cluster and args.cluster_models is not None:
+        cluster = api.check_resource(cluster)
+        centroids_info = cluster['object']['clusters']['clusters']
+        centroids = {centroid['name']: centroid['id']
+                     for centroid in centroids_info}
+        models = cluster['object']['cluster_models']
+        if args.cluster_models == '':
+            centroid_ids = centroids.values()
+        else:
+            centroid_ids = [centroids[cluster_name] for cluster_name in
+                            args.cluster_models_
+                            if models.get(centroids[cluster_name], '') == '']
+
+        for centroid_id in centroid_ids:
+            model_args = {'centroid': centroid_id}
+            r.create_model(cluster, model_args, args, api=api, path=path,
+                           session_file=session_file, log=log,
+                           model_type='cluster')
 
     u.print_generated_files(path, log_file=session_file,
                             verbosity=args.verbosity)

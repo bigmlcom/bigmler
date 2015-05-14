@@ -173,7 +173,7 @@ FLAGS = {
         {'flag': 'centroid_attributes', 'type': 'string'},
         {'flag': 'batch_centroid_attributes', 'type': 'string'},
         {'flag': 'cluster_datasets', 'type': 'string'},
-        {'flag': 'model_clusters', 'type': 'boolean'}],
+        {'flag': 'cluster_models', 'type': 'string'}],
     'BigMLer anomaly': [
         {'flag': 'anomaly_fields', 'type': 'string'},
         {'flag': 'anomaly', 'type': 'string'},

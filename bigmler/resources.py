@@ -417,16 +417,16 @@ def set_dataset_split_args(name, description, args, sample_rate,
     return dataset_args
 
 
-def create_dataset(source_or_dataset, dataset_args, args, api=None,
+def create_dataset(origin_resource, dataset_args, args, api=None,
                    path=None, session_file=None, log=None, dataset_type=None):
-    """Creates remote dataset from source, dataset or datasets list
+    """Creates remote dataset from source, dataset, cluster or datasets list
 
     """
     if api is None:
         api = bigml.api.BigML()
     message = dated("Creating dataset.\n")
     log_message(message, log_file=session_file, console=args.verbosity)
-    dataset = api.create_dataset(source_or_dataset, dataset_args, retries=None)
+    dataset = api.create_dataset(origin_resource, dataset_args, retries=None)
     suffix = "_" + dataset_type if dataset_type else ""
     log_created_resources("dataset%s" % suffix, path,
                           bigml.api.get_dataset_id(dataset), mode='a')
@@ -692,6 +692,33 @@ def create_models(datasets, model_ids, model_args,
                     report(args.reports, path, model)
 
     return models, model_ids
+
+
+def create_model(cluster, model_args, args, api=None,
+                 path=None, session_file=None, log=None, model_type=None):
+    """Creates remote model from cluster and centroid
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+    message = dated("Creating model.\n")
+    log_message(message, log_file=session_file, console=args.verbosity)
+    model = api.create_model(cluster, model_args, retries=None)
+    suffix = "" if model_type is None else "_%s" % model_type
+    log_created_resources("models%s" % suffix, path,
+                          bigml.api.get_model_id(model), mode='a')
+    model_id = check_resource_error(model, "Failed to create model: ")
+    try:
+        model = check_resource(model, api.get_model,
+                               query_string=ALL_FIELDS_QS)
+    except ValueError, exception:
+        sys.exit("Failed to get a finished model: %s" % str(exception))
+    message = dated("Model created: %s\n" % get_url(model))
+    log_message(message, log_file=session_file, console=args.verbosity)
+    log_message("%s\n" % model_id, log_file=log)
+    if args.reports:
+        report(args.reports, path, model)
+    return model
 
 
 def update_model(model, model_args, args,
@@ -1311,11 +1338,11 @@ def set_cluster_args(args, name=None, fields=None,
         "tags": args.tag,
         "seed": SEED if args.seed is None else args.seed,
         "cluster_seed": (SEED if args.cluster_seed is None
-                         else args.cluster_seed),
-        "model_clusters": args.model_clusters
+                         else args.cluster_seed)
     }
-    print cluster_args
 
+    if args.cluster_models is not None:
+        cluster_args.update({"model_clusters": True})
     if args.cluster_k:
         cluster_args.update({"k": args.cluster_k})
     if cluster_fields and fields is not None:

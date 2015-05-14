@@ -205,7 +205,7 @@ def i_create_all_cluster_resources_with_mapping(step, data=None, test=None, fiel
 
 
 #@step(r'I generate datasets for "(.*?)" centroids and log predictions in "(.*?)"$')
-def i_create_datasets_form_cluster(step, centroids=None, output=None):
+def i_create_datasets_from_cluster(step, centroids=None, output=None):
     if centroids is None or output is None:
         assert False
     command = ("bigmler cluster --cluster " + world.cluster['resource'] +
@@ -229,3 +229,30 @@ def i_check_cluster_datasets(step, datasets_number=None):
                 len(dataset_ids), datasets_number)
     except Exception, exc:
         assert False, str(exc)
+
+
+#@step(r'I check that the (\d+) cluster models are ready$')
+def i_check_cluster_models(step, models_number=None):
+
+    try:
+        models_file = os.path.join(world.directory, "models_cluster")
+        models_file = open(models_file, "r")
+        model_ids = models_file.readlines()
+        world.models.extend(model_ids)
+        if int(models_number) == len(model_ids):
+            assert True
+        else:
+            assert False, "generated models %s, expected %s" % (
+                len(model_ids), models_number)
+    except Exception, exc:
+        assert False, str(exc)
+
+
+#@step(r'I generate models for "(.*?)" centroids and log results in "(.*?)"$')
+def i_create_models_from_cluster(step, centroids=None, output=None):
+    if centroids is None or output is None:
+        assert False
+    command = ("bigmler cluster --dataset " + world.dataset['resource'] +
+               " --cluster-models \"" + centroids +
+               "\" --k 4 --store --output " + output)
+    shell_execute(command, output, test=None)
