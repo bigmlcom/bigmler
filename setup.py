@@ -52,7 +52,7 @@ setuptools.setup(
                 'bigmler.cluster', 'bigmler.anomaly',
                 'bigmler.options', 'bigmler.delete', 'bigmler.sample',
                 'bigmler.tests'],
-    install_requires = ['bigml>=4.1.2, <4.2.0'],
+    install_requires = ['bigml>=4.1.3, <4.2.0'],
     package_data={'bigmler':['static/*.json']},
     classifiers=[
         'Development Status :: 4 - Beta',
