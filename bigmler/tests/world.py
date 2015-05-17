@@ -231,13 +231,13 @@ def common_teardown_module():
 
     world.delete_resources()
     world.count_resources('final', changed=True)
-    """
+
     for folder in world.folders:
         try:
             shutil.rmtree(folder)
         except:
             pass
-    """
+
     world.check_init_equals_final()
 
 

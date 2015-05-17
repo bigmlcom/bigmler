@@ -65,6 +65,18 @@ def shell_execute(command, output, test=None, options=None, test_rows=None):
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
+#@step(r'I create BigML resources from "(.*)" using ensemble of (.*) models to test "(.*)" using median and log predictions in "(.*)"')
+def i_create_resources_from_ensemble_using_median(step, data=None, number_of_models=None, test=None, output=None):
+    if data is None or test is None or output is None or number_of_models is None:
+        assert False
+    data = res_filename(data)
+    test = res_filename(test)
+    command = ("bigmler --train " + data + " --test " + test +
+               " --store --output " + output +
+               " --number-of-models " + number_of_models +
+               " --median --max-batch-models 1 --no-fast")
+    world.number_of_models = int(number_of_models)
+    shell_execute(command, output, test=test)
 
 #@step(r'I create BigML resources uploading train "(.*?)" file using the median to test "(.*?)" and log predictions in "([^"]*)"$')
 def i_create_all_resources_with_median(step, data=None, test=None, output=None):
