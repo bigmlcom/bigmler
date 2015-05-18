@@ -1519,6 +1519,18 @@ you can generate the datasets associated to a comma-separated list of
 centroid names. If no centroid name is provided, all datasets are generated.
 
 
+Similarly, you can generate the models to predict if one instance is associated
+to each centroid of a cluster.
+Using the ``--cluster-models`` option
+
+    bigmler cluster --cluster cluster/53b1f71437203f5ac30004f0 \
+                    --cluster-models "Cluster 1,Cluster 2"
+
+you can generate the models associated to a comma-separated list of
+centroid names. If no centroid name is provided, all models are generated.
+Models can be useful to see which features are important to determine whether
+a certain instance belongs to a concrete cluster.
+
 .. _bigmler-anomaly:
 
 Anomaly subcommand
@@ -2662,6 +2674,13 @@ Cluster Specific Subcommand Options
                                           attributes
                                           to be used in the batch centroid
                                           creation call
+``--cluster-models`` *CENTROID_NAMES*     Comma-separated list of centroid
+                                          names to
+                                          generate the related models from a
+                                          cluster.
+                                          If no CENTROID_NAMES argument is
+                                          provided
+                                          all models are generated
 ========================================= =====================================
 
 
