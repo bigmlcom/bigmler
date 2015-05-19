@@ -614,10 +614,9 @@ def i_create_objective_weighted_model(step, data=None, path=None, output_dir=Non
 def i_check_create_source(step):
     source_file = "%s%ssource" % (world.directory, os.sep)
     try:
-        source_file = open(source_file, "rb")
+        source_file = open(source_file, "r")
         source = check_resource(
-            decode2(source_file.readline().strip(), SYSTEM_ENCODING),
-            world.api.get_source)
+            source_file.readline().strip(), world.api.get_source)
         world.sources.append(source['resource'])
         world.source = source
         source_file.close()
