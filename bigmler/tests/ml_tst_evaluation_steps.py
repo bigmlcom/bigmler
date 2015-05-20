@@ -33,7 +33,7 @@ def i_create_all_ml_evaluations(step, tag=None, label_separator=None, number_of_
     world.number_of_models = int(number_of_labels)
     try:
         command = "bigmler --multi-label --train " + res_filename(data) + " --label-separator \"" + label_separator + "\" --training-separator \"" + training_separator + "\" --evaluate --store --output " + output + " --tag " + tag + " --max-batch-models 1"
-        retcode = check_call(command, shell=True)
+        retcode = check_call(check_debug(command), shell=True)
         if retcode < 0:
             assert False
         else:
@@ -51,7 +51,7 @@ def i_create_all_ml_resources_for_evaluation(step, tag=None, label_separator=Non
     world.number_of_models = int(number_of_labels)
     try:
         command = "bigmler --multi-label --train " + res_filename(data) + " --label-separator \"" + label_separator + "\" --training-separator \"" + training_separator + "\" --store --output " + output + " --tag " + tag + " --max-batch-models 1"
-        retcode = check_call(command, shell=True)
+        retcode = check_call(check_debug(command), shell=True)
         if retcode < 0:
             assert False
         else:
@@ -79,7 +79,8 @@ def i_create_ml_evaluations_from_source(step, output=None):
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
-        retcode = check_call("bigmler --multi-label --source " + world.source['resource'] + " --evaluate --store --output " + output, shell=True)
+        command = "bigmler --multi-label --source " + world.source['resource'] + " --evaluate --store --output " + output
+        retcode = check_call(check_debug(command), shell=True)
         if retcode < 0:
             assert False
         else:

@@ -973,8 +973,8 @@ def i_check_predictions(step, check_file):
             with UnicodeReader(check_file) as check_file:
                 for row in predictions_file:
                     check_row = check_file.next()
-                    if len(check_row) != len(row):
-                        assert False
+                    assert len(check_row) == len(row)
+                    for index in range(len(row)):
                         dot = row[index].find(".")
                         if dot > 0 or (check_row[index].find(".") > 0
                                        and check_row[index].endswith(".0")):
@@ -987,7 +987,6 @@ def i_check_predictions(step, check_file):
                         if check_row[index] != row[index]:
                             print row, check_row
                             assert False
-                assert True
     except Exception, exc:
         assert False, traceback.format_exc()
 

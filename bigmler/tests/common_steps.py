@@ -28,10 +28,14 @@ def check_debug(command):
     """
     debug = os.environ.get('BIGMLER_DEBUG', False)
     verbosity = 0
-    if debug:
+    extend_cmd = ''
+    if debug == '1':
         verbosity = 1
+    elif debug == '2':
+        extend_cmd = ' --debug'
+    command = "%s --verbosity %s%s" % (command, verbosity, extend_cmd)
+    if debug:
         print command
-    command = "%s --verbosity %s" % (command, verbosity)
     return command
 
 
