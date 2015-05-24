@@ -3,10 +3,12 @@
 History
 -------
 
-3.0.0 (2015-04-15)
+3.0.0 (2015-04-25)
 ~~~~~~~~~~~~~~~~~~
 
 - Supporting Python 3 and changing the test suite to nose.
+- Adding --cluster-models option to generate the models related to
+  cluster datasets.
 
 2.2.0 (2015-04-15)
 ~~~~~~~~~~~~~~~~~~
