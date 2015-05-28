@@ -59,7 +59,7 @@ class TestBatchPrediction(object):
 
     def test_scenario1(self):
         """
-            Scenario: Successfully building test predictions from scratch:
+            Scenario 1: Successfully building test predictions from scratch:
                 Given I create BigML resources uploading train "<data>" file to test "<test>" remotely with mapping file "<fields_map>" and log predictions in "<output>"
                 And I check that the source has been created
                 And I check that the dataset has been created
@@ -92,7 +92,7 @@ class TestBatchPrediction(object):
     def setup_scenario2(self):
         """
 
-            Scenario: Successfully building test predictions from scratch:
+            Scenario 2: Successfully building test predictions from scratch:
                 Given I create BigML resources uploading train "<data>" file to test "<test>" remotely and log predictions in "<output>"
                 And I check that the source has been created
                 And I check that the dataset has been created
@@ -124,7 +124,7 @@ class TestBatchPrediction(object):
 
     def test_scenario3(self):
         """
-            Scenario: Successfully building test predictions from source
+            Scenario 3: Successfully building test predictions from source
                 Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
                 And I create BigML resources using source to test the previous test source remotely and log predictions in "<output>"
                 And I check that the dataset has been created
@@ -155,7 +155,7 @@ class TestBatchPrediction(object):
 
     def test_scenario4(self):
         """
-            Scenario: Successfully building test predictions from dataset
+            Scenario 4: Successfully building test predictions from dataset
                 Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
                 And I create BigML resources using dataset to test the previous test dataset remotely and log predictions in "<output>"
                 And I check that the model has been created
@@ -183,7 +183,7 @@ class TestBatchPrediction(object):
 
     def test_scenario5(self):
         """
-            Scenario: Successfully building test predictions from dataset and prediction format info
+            Scenario 5: Successfully building test predictions from dataset and prediction format info
                 Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
                 And I create BigML resources using a model to test the previous test dataset remotely with prediction headers and fields "<fields>" and log predictions in "<output>"
                 And I check that the batch prediction has been created
@@ -209,7 +209,7 @@ class TestBatchPrediction(object):
 
     def test_scenario6(self):
         """
-            Scenario: Successfully building remote test predictions from scratch to a dataset:
+            Scenario 6: Successfully building remote test predictions from scratch to a dataset:
                 Given I create BigML resources uploading train "<data>" file to test "<test>" remotely to a dataset with no CSV output and log resources in "<output_dir>"
                 And I check that the source has been created
                 And I check that the dataset has been created

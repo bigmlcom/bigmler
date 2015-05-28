@@ -2017,7 +2017,7 @@ Requirements
 
 Python 2.7 and 3 are currently supported by BigMLer.
 
-BigMLer requires `bigml 4.1.3 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 4.1.4 <https://github.com/bigmlcom/python>`_  or
 higher. Using proportional missing strategy will additionally request
 the use of the `numpy <http://www.numpy.org/>`_ and
 `scipy <http://www.scipy.org/>`_ libraries. They are not
@@ -2088,12 +2088,12 @@ To install BigMLer on Windows environments, you'll need `Python for Windows
 In addition to that, you'll need the ``pip`` tool to install BigMLer. To
 install pip, first you need to open your command line window (write ``cmd`` in
 the input field that appears when you click on ``Start`` and hit ``enter``),
-download this `python file <http://python-distribute.org/distribute_setup.py>`_
+download this `python file <https://bootstrap.pypa.io/ez_setup.py>`_
 and execute it
 
 .. code-block:: bash
 
-    c:\Python27\python.exe distribute_setup.py
+    c:\Python27\python.exe ez_setup.py
 
 After that, you'll be able to install ``pip`` by typing the following command
 

@@ -62,6 +62,7 @@ def i_check_create_test_dataset(step):
         test_dataset = check_resource(test_dataset_file.readline().strip(),
                                       world.api.get_dataset)
         world.datasets.append(test_dataset['resource'])
+        world.test_lines = test_dataset['object']['rows']
         world.test_dataset = test_dataset
         test_dataset_file.close()
         assert True

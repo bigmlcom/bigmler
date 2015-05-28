@@ -1321,6 +1321,12 @@ def retrieve_resources(scenario_path, step):
     except:
         pass
     try:
+        with open(os.path.join(scenario_path, "source_test"), open_mode("r")) as source_id_file:
+            source_id = source_id_file.readline().strip()
+            world.test_source = retrieve_resource(scenario_path, source_id)
+    except:
+        pass
+    try:
         with open(os.path.join(scenario_path, "dataset_test"), open_mode("r")) as dataset_id_file:
             dataset_id = dataset_id_file.readline().strip()
             world.test_dataset = retrieve_resource(scenario_path, dataset_id)
