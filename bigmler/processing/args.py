@@ -76,6 +76,14 @@ def has_model(args):
             or args.ensemble_file)
 
 
+def has_anomaly(args):
+    """Boolean that is set when any anomaly option is used
+
+    """
+    return (args.anomaly or args.anomalies or args.anomaly_tag or
+            args.anomaly_file)
+
+
 def non_compatible(args, option):
     """Return non_compatible options
 

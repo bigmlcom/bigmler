@@ -31,13 +31,14 @@ import bigmler.processing.anomalies as pa
 import bigmler.processing.sources as ps
 import bigmler.processing.datasets as pd
 
+from bigml.anomaly import Anomaly
 from bigmler.defaults import DEFAULTS_FILE
-#from bigmler.centroid import centroid, remote_centroid
 from bigmler.anomaly_score import anomaly_score, remote_anomaly_score
 from bigmler.reports import clear_reports, upload_reports
 from bigmler.command import get_stored_command
 from bigmler.dispatcher import (SESSIONS_LOG, command_handling,
                                 clear_log_files, get_test_dataset)
+from bigmler.options.anomaly import ANOMALIES_IN
 
 COMMAND_LOG = u".bigmler_anomaly"
 DIRS_LOG = u".bigmler_anomaly_dir_stack"
@@ -96,7 +97,8 @@ def anomaly_dispatcher(args=sys.argv[1:]):
     api = a.get_api_instance(command_args, u.check_dir(session_file))
 
     # Selects the action to perform
-    if a.has_train(command_args) or a.has_test(command_args):
+    if (a.has_train(command_args) or a.has_test(command_args) or
+        a.has_anomaly(command_args)):
         output_args = a.get_output_args(api, command_args, resume)
         a.transform_args(command_args, command.flags, api,
                          command.user_defaults)
@@ -153,7 +155,7 @@ def compute_output(api, args):
     dataset_properties = pms.get_dataset_info(
         api, args, resume, source,
         csv_properties, fields, session_file, path, log)
-    (_, datasets, test_dataset, resume,
+    (dataset, datasets, test_dataset, resume,
      csv_properties, fields) = dataset_properties
     if args.anomaly_file:
         # anomaly is retrieved from the contents of the given local JSON file
@@ -173,7 +175,7 @@ def compute_output(api, args):
     # We update the anomaly's public state if needed
     if anomaly:
         if isinstance(anomaly, basestring):
-            if not a.has_test(args):
+            if not a.has_test(args) and not args.anomalies_dataset:
                 query_string = MINIMUM_MODEL
             else:
                 query_string = ''
@@ -198,8 +200,20 @@ def compute_output(api, args):
     if anomaly and args.test_set:
         fields = pa.get_anomaly_fields(anomaly, csv_properties, args)
 
+    # If creating a top anomalies excluded/included dataset
+    if args.anomalies_dataset and anomaly:
+        origin_dataset = anomaly['object'].get('dataset')
+        if origin_dataset is None:
+            sys.exit("The dataset used to generate the anomaly detector "
+                     "cannot be found. Failed to generate the anomalies "
+                     " dataset.")
+        local_anomaly = Anomaly(anomaly)
+        include = args.anomalies_dataset == ANOMALIES_IN
+        args._anomaly_filter = local_anomaly.anomalies_filter(include=include)
+        new_dataset, resume = pd.create_new_dataset(
+            origin_dataset, api, args, resume, fields=fields,
+            session_file=session_file, path=path, log=log)
     # If predicting
-
     if anomaly and args.score:
         args.test_dataset = anomaly['object']['dataset']
     if anomalies and (a.has_test(args) or (test_dataset and args.remote)):

@@ -19,6 +19,9 @@
 
 """
 
+ANOMALIES_IN = 'in'
+ANOMALIES_OUT = 'out'
+
 def get_anomaly_options(defaults=None):
     """Adding arguments for the anomaly subcommand
 
@@ -120,6 +123,18 @@ def get_anomaly_options(defaults=None):
             'action': 'store_false',
             'dest': 'score',
             'default': defaults.get('score', False),
-            'help': "Doesn't create scores for the training dataset."}}
+            'help': "Doesn't create scores for the training dataset."},
+
+        # Generates a new dataset from the dataset used to create the anomaly
+        # detector, including only the top anomalies or excluding
+        # them.
+        '--anomalies-dataset': {
+            'action': 'store',
+            'dest': 'anomalies_dataset',
+            'default': defaults.get('anomalies_dataset', None),
+            'choices': [ANOMALIES_IN, ANOMALIES_OUT],
+            'help': ("Generates a new dataset from the dataset used to create"
+                     " the anomaly detector, including only the top anomalies"
+                     " or excluding them.")}}
 
     return options

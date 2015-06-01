@@ -183,7 +183,8 @@ FLAGS = {
         {'flag': 'anomaly_attributes', 'type': 'string'},
         {'flag': 'anomaly_score_attributes', 'type': 'string'},
         {'flag': 'batch_anomaly_score_attributes', 'type': 'string'},
-        {'flag': 'score', 'type': 'boolean'}],
+        {'flag': 'score', 'type': 'boolean'},
+        {'flag': 'anomalies-dataset', 'type': 'string'}],
     'BigMLer sample': [
         {'flag': 'anomaly_fields', 'type': 'string'},
         {'flag': 'sample', 'type': 'string'},
