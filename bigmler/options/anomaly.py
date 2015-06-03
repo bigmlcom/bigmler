@@ -135,6 +135,22 @@ def get_anomaly_options(defaults=None):
             'choices': [ANOMALIES_IN, ANOMALIES_OUT],
             'help': ("Generates a new dataset from the dataset used to create"
                      " the anomaly detector, including only the top anomalies"
-                     " or excluding them.")}}
+                     " or excluding them.")},
+
+        # Number of selected top anomalies
+        '--top-n': {
+            'action': 'store',
+            'dest': 'top_n',
+            'default': defaults.get('top_n', 0),
+            'type': int,
+            'help': ("Number of selected top anomalies.")},
+
+        # Number of trees in the anomaly detector
+        '--forest-size': {
+            'action': 'store',
+            'dest': 'forest_size',
+            'default': defaults.get('forest_size', 0),
+            'type': int,
+            'help': ("Number of trees in the anomaly detector.")}}
 
     return options

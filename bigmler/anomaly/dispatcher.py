@@ -98,6 +98,7 @@ def anomaly_dispatcher(args=sys.argv[1:]):
 
     # Selects the action to perform
     if (a.has_train(command_args) or a.has_test(command_args) or
+        command_args.score or
         a.has_anomaly(command_args)):
         output_args = a.get_output_args(api, command_args, resume)
         a.transform_args(command_args, command.flags, api,
@@ -174,13 +175,12 @@ def compute_output(api, args):
 
     # We update the anomaly's public state if needed
     if anomaly:
-        if isinstance(anomaly, basestring):
-            if not a.has_test(args) and not args.anomalies_dataset:
-                query_string = MINIMUM_MODEL
-            else:
-                query_string = ''
-            anomaly = u.check_resource(anomaly, query_string=query_string,
-                                       api=api)
+        if not a.has_test(args) and not args.anomalies_dataset:
+            query_string = MINIMUM_MODEL
+        else:
+            query_string = ''
+        anomaly = u.check_resource(anomaly, query_string=query_string,
+                                   api=api)
         anomalies[0] = anomaly
         if (args.public_anomaly or
                 (args.shared_flag and r.shared_changed(args.shared, anomaly))):

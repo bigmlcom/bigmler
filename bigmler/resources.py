@@ -1584,8 +1584,7 @@ def set_batch_anomaly_score_args(args, fields=None,
     return batch_anomaly_score_args
 
 
-def set_anomaly_args(args, name=None, fields=None,
-                     anomaly_fields=None):
+def set_anomaly_args(args, name=None, fields=None, anomaly_fields=None):
     """Return anomaly arguments dict
 
     """
@@ -1607,6 +1606,11 @@ def set_anomaly_args(args, name=None, fields=None,
     if anomaly_fields and fields is not None:
         input_fields = configure_input_fields(fields, anomaly_fields)
         anomaly_args.update(input_fields=input_fields)
+
+    if args.top_n > 0:
+        anomaly_args.update(top_n=args.top_n)
+    if args.forest_size > 0:
+        anomaly_args.update(forest_size=args.forest_size)
 
     update_attributes(anomaly_args, args.json_args.get('anomaly'))
 

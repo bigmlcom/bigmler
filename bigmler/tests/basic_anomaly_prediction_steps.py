@@ -19,6 +19,7 @@ import os
 import time
 import csv
 import json
+import nose
 from bigmler.tests.world import world, res_filename
 from subprocess import check_call, CalledProcessError
 from bigml.api import check_resource
@@ -78,6 +79,16 @@ def i_create_all_anomaly_resources_with_test_split_no_CSV(step, data=None, test_
     command = ("bigmler anomaly --remote --train " + res_filename(data) + " --test-split " + test_split +
                " --store --no-csv --to-dataset --output-dir " + output_dir)
     shell_execute(command, "%s/x.csv" % output_dir, data=data, test_split=test_split)
+
+
+#@step(r'I create BigML anomaly detector from data <data> with options <options> and generate a new dataset of anomalies in "<output_dir>"$')
+def i_create_anomaly_resources_with_options(step, data=None, options=None, output_dir=None):
+    if data is None or output_dir is None or options is None:
+        assert False
+    command = ("bigmler anomaly --train " + res_filename(data) + " " +
+               options +
+               " --anomalies-dataset in --store --output-dir " + output_dir)
+    shell_execute(command, "%s/x.csv" % output_dir, data=data)
 
 
 #@step(r'I create BigML resources uploading train "(.*?)" file to create anomaly scores for "(.*?)" and log predictions in "([^"]*)"$')
@@ -255,3 +266,21 @@ def i_check_create_batch_anomaly_score_dataset(step):
         assert True
     except Exception, exc:
         assert False, str(exc)
+
+#@step(r'the top anomalies in the anomaly detector are <top_anomalies>')
+def i_check_top_anomalies(step, top_anomalies):
+    nose.tools.assert_equal(
+        int(top_anomalies),
+        len(world.anomaly.get('object', []).get('model', []).get('top_anomalies')))
+
+#@step(r'the forest size in the anomaly detector is <forest_size>')
+def i_check_forest_size(step, forest_size):
+    nose.tools.assert_equal(
+        int(forest_size),
+        world.anomaly.get('object', []).get('forest_size'))
+
+#@step(r'the number of records in the top anomalies dataset is <top_anomalies>')
+def i_check_top_anomalies_dataset_lines_number(step, top_anomalies):
+    nose.tools.assert_equal(
+        int(top_anomalies),
+        world.dataset.get('object', []).get('rows'))

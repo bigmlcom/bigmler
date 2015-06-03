@@ -204,3 +204,34 @@ class TestAnomaly(object):
             test_anomaly.i_create_anomaly_resources_from_local_anomaly_detector(self, example[0], test=example[2], output=example[3])
             test_anomaly.i_check_create_anomaly_scores(self)
             test_anomaly.i_check_anomaly_scores(self, example[4])
+
+    def test_scenario7(self):
+        """
+            Scenario: Successfully building anomalous dataset test predictions from anomaly
+                Given I create BigML anomaly detector from data <data> with options <options> and generate a new dataset of anomalies in "<output_dir>"
+                And I check that the source has been created
+                And I check that the dataset has been created
+                And I check that the anomaly detector has been created
+                Then I check that the new top anomalies dataset has been created
+                And the top anomalies in the anomaly detector are <top_anomalies>
+                And the forest size in the anomaly detector is <forest_size>
+                And the number of records in the top anomalies dataset is <top_anomalies>
+
+                Examples:
+                | data               | options                              | output_dir     | top_anomalies | forest_size |
+                | data/tiny_kdd.csv" | --top-anomalies 15 --forest-size 40 | scenario_an_7  | 15            | 40          |
+
+        """
+        print self.test_scenario7.__doc__
+        examples = [
+            ['data/tiny_kdd.csv', '--top-n 15 --forest-size 40 ', 'scenario_an_7', '15', '40']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            test_anomaly.i_create_anomaly_resources_with_options(self, example[0], example[1], output_dir=example[2])
+            test_pred.i_check_create_source(self)
+            test_pred.i_check_create_dataset(self)
+            test_anomaly.i_check_create_anomaly(self)
+            test_pred.i_check_create_dataset(self, suffix='gen ')
+            test_anomaly.i_check_top_anomalies(self, example[3])
+            test_anomaly.i_check_forest_size(self, example[4])
+            test_anomaly.i_check_top_anomalies_dataset_lines_number(self, example[3])

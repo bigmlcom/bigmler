@@ -1608,7 +1608,7 @@ data
     bigmler anomaly --train data/tiny_kdd.csv --test-split 0.2 --remote
 
 or if you want to apply the anomaly detector on the same training data set
-to create a batch prediction, use:
+to create a batch anomaly score, use:
 
 .. code-block:: bash
 
