@@ -1556,7 +1556,18 @@ to produce a different anomaly detector by using
                     --anomaly-fields="-urgent"
 
 that would exclude the field ``urgent`` from the anomaly detector
-creation input fields.
+creation input fields. You can also change the number of top anomalies
+enclosed in the anomaly detector list and the number of trees that the anomaly
+detector iforest uses. The default values are 10 top anomalies and 128 trees
+per iforest:
+
+.. code-block:: bash
+
+    bigmler anomaly --dataset dataset/53b1f71437203f5ac30004ed \
+                    --top-n 15 --forest-size 50
+
+with this code, the anomaly detector is built using an iforest of 50 trees and
+will produce a list of the 15 top anomalies.
 
 Similarly to the models and datasets, the generated anomaly detectors
 can be shared using the ``--shared`` option, e.g.
@@ -1613,6 +1624,18 @@ to create a batch anomaly score, use:
 .. code-block:: bash
 
     bigmler anomaly --train data/tiny_kdd.csv --score --remote
+
+To extract the top anomalies as a new dataset, or to exclude from the training
+dataset the top anomalies in the anomaly detector, set the
+ ``--anomalies-dataset`` to ``ìn`` or ``out`` respectively:
+
+.. code-block:: bash
+
+    bigmler anomaly --dataset dataset/53b1f71437203f5ac30004ed \
+                    --anomalies-dataset out
+
+will create a new dataset excluding the top anomalous instances according
+to the anomaly detector.
 
 .. _bigmler-sample:
 
@@ -2699,6 +2722,9 @@ Anomaly Specific Subcommand Options
                                               that
                                               will be used in the anomaly
                                               detector construction
+``--top-n``                                   Number of listed top anomalies
+``--forest-size``                             Number of models in the anomaly
+                                              detector iforest
 ``--anomaly-attributes`` *PATH*               Path to a JSON file containing
                                               attributes to
                                               be used in the anomaly creation
@@ -2715,6 +2741,13 @@ Anomaly Specific Subcommand Options
                                               attributes to
                                               be used in the batch anomaly
                                               score creation call
+``--anomalies-datasets`` *[in |out]*          Separates from the training
+                                              dataset the top anomalous
+                                              instances enclosed in the
+                                              top anomalies list and generates
+                                              a new dataset including them
+                                              (``in`` option) or excluding
+                                              them (``out`` option).
 ============================================= =================================
 
 .._sample_options:

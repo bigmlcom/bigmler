@@ -3,6 +3,12 @@
 History
 -------
 
+3.0.1 (2015-06-04)
+~~~~~~~~~~~~~~~~~~
+
+- Adding the --top-n, --forest-size and --anomalies-dataset to the bigmler
+  anomaly subcommand.
+
 3.0.0 (2015-04-25)
 ~~~~~~~~~~~~~~~~~~
 
