@@ -265,17 +265,13 @@ def create_source(data_set, source_args, args, api=None, path=None,
     suffix = "" if source_type is None else "%s " % source_type
     message = dated("Creating %ssource.\n" % suffix)
     log_message(message, log_file=session_file, console=args.verbosity)
-
     source = api.create_source(data_set, source_args,
                                progress_bar=args.progress_bar)
     if path is not None:
-        try:
-            suffix = "_" + source_type if source_type else ""
-            with open("%s/source%s" % (path, suffix), 'wb', 0) as source_file:
-                source_file.write(utf8("%s\n" % source['resource']))
-                source_file.write(utf8("%s\n" % source['object']['name']))
-        except IOError, exc:
-            sys.exit("%s: Failed to write %s/source" % (str(exc), path))
+        suffix = "_" + source_type if source_type else ""
+        log_created_resources("source%s" % suffix, path,
+                      source['resource'], mode='a',
+                      comment=("%s\n" % source['object']['name']))
     source_id = check_resource_error(source, "Failed to create source: ")
     try:
         source = check_resource(source, api.get_source,

@@ -448,7 +448,8 @@ def check_resource_error(resource, message):
     return bigml.api.get_resource_id(resource)
 
 
-def log_created_resources(file_name, path, resource_id, mode='w'):
+def log_created_resources(file_name, path, resource_id, mode='w',
+                          comment=None):
     """Logs the created resources ids in the given file
 
     """
@@ -458,9 +459,13 @@ def log_created_resources(file_name, path, resource_id, mode='w'):
             with open(file_name, "%sb" % mode, 0) as resource_file:
                 if resource_id is not None:
                     message = "%s\n" % resource_id
-                    if PYTHON3:
+                    if PYTHON3 or isinstance(message, unicode):
                         message = message.encode(SYSTEM_ENCODING)
                     resource_file.write(message)
+                if comment is not None:
+                    if PYTHON3 or isinstance(comment, unicode):
+                        comment = comment.encode(SYSTEM_ENCODING)
+                    resource_file.write(comment)
         except IOError, exc:
             print "Failed to write %s: %s" % (file_name, str(exc))
 
