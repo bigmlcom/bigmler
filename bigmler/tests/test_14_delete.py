@@ -92,7 +92,7 @@ class TestDelete(object):
         """
         print self.test_scenario2.__doc__
         examples = [
-            ['data/iris.csv', 'scenario_del_1']]
+            ['data/iris.csv', 'scenario_del_2']]
         for example in examples:
             print "\nTesting with:\n", example
             test_delete.i_create_source_from_file(self, data=example[0], output_dir=example[1])
@@ -172,34 +172,34 @@ class TestDelete(object):
                 Given I create a BigML source from file "<data>" storing results in "<output_dir>"
                 And I check that the source has been created
                 And I store the source id as lower
-                And I create a BigML source from file "<data>" storing results in "<output_dir>"
+                And I create a BigML source from file "<data>" storing results in "<output_dir2>"
                 And I check that the source exists
                 And I store the source id as reference
-                And I create a BigML source from file "<data>" storing results in "<output_dir>"
+                And I create a BigML source from file "<data>" storing results in "<output_dir3>"
                 And I check that the source has been created
                 And I store the source id as upper
                 And I delete the source using --older-than and --newer-than storing results in "<output_dir>"
                 Then I check that the reference source doesn't exist
 
                 Examples:
-                | data               | output_dir
-                | ../data/iris.csv   | ./scenario_del_6
+                | data               | output_dir | output_dir2 | output_dir3
+                | ../data/iris.csv   | ./scenario_del_6 | ./scenario_del_6_2 | ./scenario_del_6_3
         """
         print self.test_scenario6.__doc__
         examples = [
-            ['data/iris.csv', 'scenario_del_6']]
+            ['data/iris.csv', 'scenario_del_6', 'scenario_del_6_2', 'scenario_del_6_3']]
         for example in examples:
             print "\nTesting with:\n", example
             test_delete.i_create_source_from_file(self, data=example[0], output_dir=example[1])
             test_pred.i_check_create_source(self)
             test_delete.i_store_source_id_as_bound(self, which='lower')
-            test_delete.i_create_source_from_file(self, data=example[0], output_dir=example[1])
+            test_delete.i_create_source_from_file(self, data=example[0], output_dir=example[2])
             test_delete.i_check_source_exists(self)
             test_delete.i_store_source_id_as_bound(self, which='reference')
-            test_delete.i_create_source_from_file(self, data=example[0], output_dir=example[1])
+            test_delete.i_create_source_from_file(self, data=example[0], output_dir=example[3])
             test_pred.i_check_create_source(self)
             test_delete.i_store_source_id_as_bound(self, which='upper')
-            test_delete.i_delete_source_older_newer(self, output_dir=example[1])
+            test_delete.i_delete_source_older_newer(self, output_dir=example[3])
             test_delete.i_check_source_does_not_exist(self, source_id=world.source_reference)
 
     def test_scenario7(self):
@@ -208,31 +208,31 @@ class TestDelete(object):
                 Given I create a BigML source from file "<data>" storing results in "<output_dir>"
                 And I check that the source has been created
                 And I store the source id as lower
-                And I create a BigML source from file "<data>" storing results in "<output_dir>"
+                And I create a BigML source from file "<data>" storing results in "<output_dir2>"
                 And I check that the source has been created
                 And I store the source id as reference
-                And I create a BigML source from file "<data>" storing results in "<output_dir>"
+                And I create a BigML source from file "<data>" storing results in "<output_dir3>"
                 And I check that the source has been created
                 And I store the source id as upper
                 And I delete the source using --older-than and --newer-than with resource_types "<resource_types>" storing results in "<output_dir>"
                 Then I check that the reference source exists
 
                 Examples:
-                | data               | output_dir       | resource_types
-                | ../data/iris.csv   | ./scenario_del_7 | dataset,model
+                | data               | output_dir       | resource_types| output_dir2        | output_dir3
+                | ../data/iris.csv   | ./scenario_del_7 | dataset,model | ./scenario_del_7_2 | ./scenario_del_7_3
         """
         print self.test_scenario7.__doc__
         examples = [
-            ['data/iris.csv', 'scenario_del_7', 'dataset,model']]
+            ['data/iris.csv', 'scenario_del_7', 'dataset,model', 'scenario_del_7_2', 'scenario_del_7_3']]
         for example in examples:
             print "\nTesting with:\n", example
             test_delete.i_create_source_from_file(self, data=example[0], output_dir=example[1])
             test_pred.i_check_create_source(self)
             test_delete.i_store_source_id_as_bound(self, which='lower')
-            test_delete.i_create_source_from_file(self, data=example[0], output_dir=example[1])
+            test_delete.i_create_source_from_file(self, data=example[0], output_dir=example[3])
             test_pred.i_check_create_source(self)
             test_delete.i_store_source_id_as_bound(self, which='reference')
-            test_delete.i_create_source_from_file(self, data=example[0], output_dir=example[1])
+            test_delete.i_create_source_from_file(self, data=example[0], output_dir=example[4])
             test_pred.i_check_create_source(self)
             test_delete.i_store_source_id_as_bound(self, which='upper')
             test_delete.i_delete_source_older_newer_with_resource_types(self, resource_types=example[2], output_dir=example[1])
@@ -247,29 +247,29 @@ class TestDelete(object):
                 And I create a BigML source from file "<data>" with tag "<tag1>" storing results in "<output_dir>"
                 And I check that the source exists
                 And I store the source id as reference
-                And I create a BigML source from file "<data>" with tag "<tag2>" storing results in "<output_dir>"
+                And I create a BigML source from file "<data>" with tag "<tag2>" storing results in "<output_dir2>"
                 And I check that the source has been created
                 And I store the source id as upper
-                And I delete the source using --newer-than and --source-tag "<tag1>" storing results in "<output_dir>"
+                And I delete the source using --newer-than and --source-tag "<tag1>" storing results in "<output_dir3>"
                 Then I check that the reference source doesn't exist
                 And I check that the upper source exists
 
                 Examples:
-                | data               | output_dir       | tag1    | tag2
-                | ../data/iris.csv   | ./scenario_del_8 | my_tag1 | my_tag2
+                | data               | output_dir       | tag1    | tag2 | output_dir2       | output_dir3
+                | ../data/iris.csv   | ./scenario_del_8 | my_tag1 | my_tag2 | ./scenario_del_8_2 | ./scenario_del_8_3
         """
         print self.test_scenario8.__doc__
         examples = [
-            ['data/iris.csv', 'scenario_del_8', 'my_tag1', 'my_tag2']]
+            ['data/iris.csv', 'scenario_del_8', 'my_tag1', 'my_tag2', 'scenario_del_8_2', 'scenario_del_8_3']]
         for example in examples:
             print "\nTesting with:\n", example
             test_delete.i_create_source_from_file(self, data=example[0], output_dir=example[1])
             test_pred.i_check_create_source(self)
             test_delete.i_store_source_id_as_bound(self, which='lower')
-            test_delete.i_create_source_from_file_with_tag(self, data=example[0], tag=example[2], output_dir=example[1])
+            test_delete.i_create_source_from_file_with_tag(self, data=example[0], tag=example[2], output_dir=example[4])
             test_delete.i_check_source_exists(self)
             test_delete.i_store_source_id_as_bound(self, which='reference')
-            test_delete.i_create_source_from_file_with_tag(self, data=example[0], tag=example[3], output_dir=example[1])
+            test_delete.i_create_source_from_file_with_tag(self, data=example[0], tag=example[3], output_dir=example[5])
             test_pred.i_check_create_source(self)
             test_delete.i_store_source_id_as_bound(self, which='upper')
             test_delete.i_delete_source_newer_and_tag(self, tag=example[2], output_dir=example[1])
@@ -284,28 +284,28 @@ class TestDelete(object):
                 And I store the source id as lower
                 And I create a BigML source from file "<data>" with tag "<tag1>" storing results in "<output_dir>"
                 And I check that the source exists
-                And I create a BigML dataset from the source with tag "<tag1>" storing results in "<output_dir>"
+                And I create a BigML dataset from the source with tag "<tag1>" storing results in "<output_dir2>"
                 And I check that the dataset exists
-                And I delete the resources using --newer-than and --all-tag "<tag1>" storing results in "<output_dir>"
+                And I delete the resources using --newer-than and --all-tag "<tag1>" storing results in "<output_dir3>"
                 Then I check that the source doesn't exist
                 And I check that the dataset doesn't exist
 
                 Examples:
-                | data               | output_dir       | tag1
-                | ../data/iris.csv   | ./scenario_del_9 | my_tag1
+                | data               | output_dir       | tag1 | output_dir2       | output_dir3
+                | ../data/iris.csv   | ./scenario_del_9 | my_tag1 | ./scenario_del_9_2  | ./scenario_del_9_3
         """
         print self.test_scenario9.__doc__
         examples = [
-            ['data/iris.csv', 'scenario_del_9', 'my_tag1']]
+            ['data/iris.csv', 'scenario_del_9', 'my_tag1', 'scenario_del_9_2', 'scenario_del_9_3']]
         for example in examples:
             print "\nTesting with:\n", example
             test_delete.i_create_source_from_file(self, data=example[0], output_dir=example[1])
             test_pred.i_check_create_source(self)
             test_delete.i_store_source_id_as_bound(self, which='lower')
-            test_delete.i_create_source_from_file_with_tag(self, data=example[0], tag=example[2], output_dir=example[1])
+            test_delete.i_create_source_from_file_with_tag(self, data=example[0], tag=example[2], output_dir=example[3])
             test_delete.i_check_source_exists(self)
             test_delete.i_store_source_id_as_bound(self, which='reference')
-            test_delete.i_create_dataset_from_source_with_tag(self, tag=example[2], output_dir=example[1])
+            test_delete.i_create_dataset_from_source_with_tag(self, tag=example[2], output_dir=example[4])
             test_delete.i_check_dataset_exists(self)
             test_delete.i_delete_resources_newer_and_tag(self, tag=example[2], output_dir=example[1])
             test_delete.i_check_source_does_not_exist(self, source_id=world.source_reference)

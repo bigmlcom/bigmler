@@ -28,13 +28,14 @@ from bigmler.tests.common_steps import check_debug
 from bigmler.tests.basic_tst_prediction_steps import shell_execute
 
 
-#@step(r'I create BigML resources uploading train "(.*)" file to test "(.*)" read from stdin and log predictions in "(.*)"$')
-def i_create_all_resources_to_test_from_stdin(step, data=None, test=None, output=None):
-    if data is None or test is None or output is None:
+#@step(r'I create BigML resources uploading train "(.*)" file to test "(.*)" read from stdin with name "(.*)" and log predictions in "(.*)"$')
+def i_create_all_resources_to_test_from_stdin(step, data=None, test=None, name=None, output=None):
+    if data is None or test is None or output is None or name is None:
         assert False
     test = res_filename(test)
     command = ("cat " + test + "|bigmler --train " + res_filename(data) +
-               " --test --store --output " + output + " --max-batch-models 1")
+               " --test --store --output " + output + " --name \"" +
+               name + "\" --max-batch-models 1")
     shell_execute(command, output, test=test)
 
 

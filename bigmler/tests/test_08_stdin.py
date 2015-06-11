@@ -77,7 +77,7 @@ class TestStdin(object):
     def test_scenario2(self):
         """
             Scenario: Successfully building predictions for data streamed to stdin:
-                Given I create BigML resources uploading train "<data>" file to test "<test>" read from stdin and log predictions in "<output>"
+                Given I create BigML resources uploading train "<data>" file to test "<test>" read from stdin with name "<name>" and log predictions in "<output>"
                 And I check that the source has been created
                 And I check that the dataset has been created
                 And I check that the model has been created
@@ -85,15 +85,15 @@ class TestStdin(object):
                 Then the local prediction file is like "<predictions_file>"
 
                 Examples:
-                | data               | test                    | output                            |predictions_file           |
-                | ../data/iris.csv   | ../data/test_iris.csv   | ./scenario_st_2/predictions.csv   | ./check_files/predictions_iris.csv   |
+                | data               | test                    | output                            |predictions_file           | name |
+                | ../data/iris.csv   | ../data/test_iris.csv   | ./scenario_st_2/predictions.csv   | ./check_files/predictions_iris.csv   | Source name: áéí |
         """
         print self.test_scenario2.__doc__
         examples = [
-            ['data/iris.csv', 'data/test_iris.csv', 'scenario_st_2/predictions.csv', 'check_files/predictions_iris.csv']]
+            ['data/iris.csv', 'data/test_iris.csv', 'scenario_st_2/predictions.csv', 'check_files/predictions_iris.csv', 'Source name: áéí']]
         for example in examples:
             print "\nTesting with:\n", example
-            stdin.i_create_all_resources_to_test_from_stdin(self, data=example[0], test=example[1], output=example[2])
+            stdin.i_create_all_resources_to_test_from_stdin(self, data=example[0], test=example[1], name=example[4], output=example[2])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
             test_pred.i_check_create_model(self)

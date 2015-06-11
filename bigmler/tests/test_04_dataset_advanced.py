@@ -117,11 +117,11 @@ class TestDatasetAdvanced(object):
 
                 Examples:
                 |data |output_dir  |csv_file |
-                |../data/iris.csv | ./scenario_d_4 |dataset.csv
+                |../data/iris.csv | ./scenario_d_3 |dataset.csv
         """
         print self.test_scenario3.__doc__
         examples = [
-            ['data/iris.csv', 'scenario_d_4', 'dataset.csv']]
+            ['data/iris.csv', 'scenario_d_3', 'dataset.csv']]
         for example in examples:
             print "\nTesting with:\n", example
             dataset_adv.i_create_dataset(self, data=example[0], output_dir=example[1])
@@ -136,8 +136,7 @@ class TestDatasetAdvanced(object):
                 Given I create a BigML dataset from "<data>" and store logs in "<output_dir>"
                 And I check that the source has been created
                 And I check that the dataset has been created
-                And I create a BigML dataset from "<data>" and store logs in "<output_dir>"
-                And I check that the source has been created
+                And I create a BigML dataset from previous source and store logs in "<output_dir>"
                 And I check that the dataset has been created
                 And I create a multi-dataset from the datasets file and store logs in "<output_dir2>"
                 And I check that the multi-dataset has been created
@@ -145,18 +144,17 @@ class TestDatasetAdvanced(object):
 
                 Examples:
                 |data |output_dir  |output_dir2 |
-                |../data/iris.csv | ./scenario_d_3 | ./scenario_d_4|
+                |../data/iris.csv | ./scenario_d_4 | ./scenario_d_5|
         """
         print self.test_scenario4.__doc__
         examples = [
-            ['data/iris.csv', 'scenario_d_3', 'scenario_d_4']]
+            ['data/iris.csv', 'scenario_d_4', 'scenario_d_5']]
         for example in examples:
             print "\nTesting with:\n", example
             dataset_adv.i_create_dataset(self, data=example[0], output_dir=example[1])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
-            dataset_adv.i_create_dataset(self, data=example[0], output_dir=example[1])
-            test_pred.i_check_create_source(self)
+            dataset_adv.i_create_dataset_from_source(self, output_dir=example[1])
             test_pred.i_check_create_dataset(self, suffix=None)
             dataset_adv.i_create_multi_dataset(self, example[2])
             dataset_adv.i_check_create_multi_dataset(self)

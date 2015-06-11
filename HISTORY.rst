@@ -8,6 +8,8 @@ History
 
 - Adding the --top-n, --forest-size and --anomalies-dataset to the bigmler
   anomaly subcommand.
+- Fixing bug: source upload failed when using arguments that contain
+  unicodes.
 
 3.0.0 (2015-04-25)
 ~~~~~~~~~~~~~~~~~~

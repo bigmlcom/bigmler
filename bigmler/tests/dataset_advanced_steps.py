@@ -29,12 +29,33 @@ from bigmler.tests.common_steps import check_debug
 
 #@step(r'I create a BigML dataset from "(.*)" and store logs in "(.*)"')
 def i_create_dataset(step, data=None, output_dir=None):
-    if data is None:
+    if data is None or output_dir is None:
         assert False
     world.directory = output_dir
     world.folders.append(world.directory)
     try:
         command = (u"bigmler --train " + res_filename(data) +
+                   u" --no-model --store --output-dir " + output_dir)
+        command = check_debug(command)
+        retcode = check_call(command.encode(SYSTEM_ENCODING), shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.output = output_dir
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+
+#@step(r'I create a BigML dataset from previous source and store logs in "(.*)"')
+def i_create_dataset_from_source(step, output_dir=None):
+    if output_dir is None:
+        assert False
+    world.directory = output_dir
+    world.folders.append(world.directory)
+    try:
+
+        command = ((u"bigmler --source %s" % world.source['resource']) +
                    u" --no-model --store --output-dir " + output_dir)
         command = check_debug(command)
         retcode = check_call(command.encode(SYSTEM_ENCODING), shell=True)
