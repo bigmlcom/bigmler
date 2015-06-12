@@ -44,6 +44,7 @@ COMMAND_LOG = u".bigmler_anomaly"
 DIRS_LOG = u".bigmler_anomaly_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 MINIMUM_MODEL = "full=false"
+EXCLUDE_TREES = "exclude=trees"
 DEFAULT_OUTPUT = u"anomaly_scores.csv"
 
 
@@ -177,8 +178,10 @@ def compute_output(api, args):
     if anomaly:
         if not a.has_test(args) and not args.anomalies_dataset:
             query_string = MINIMUM_MODEL
+        elif not a.has_test(args):
+            query_string = ";".join([EXCLUDE_TREES, r.ALL_FIELDS_QS])
         else:
-            query_string = ''
+            query_string = r.ALL_FIELDS_QS
         anomaly = u.check_resource(anomaly, query_string=query_string,
                                    api=api)
         anomalies[0] = anomaly
