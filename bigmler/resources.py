@@ -470,7 +470,8 @@ def publish_dataset(dataset, args, api=None, session_file=None):
     dataset = update_dataset(dataset, public_dataset, args.verbosity, api=api,
                              session_file=session_file)
     check_resource_error(dataset, "Failed to update dataset: ")
-    dataset = check_resource(dataset, api.get_dataset)
+    dataset = check_resource(dataset, api.get_dataset,
+                             query_string=ALL_FIELDS_QS)
     return dataset
 
 def update_dataset(dataset, dataset_args, args,
@@ -493,7 +494,8 @@ def update_dataset(dataset, dataset_args, args,
         if args.reports:
             report(args.reports, path, dataset)
     check_resource_error(dataset, "Failed to update dataset: ")
-    dataset = check_resource(dataset, api.get_dataset)
+    dataset = check_resource(dataset, api.get_dataset,
+                             query_string=ALL_FIELDS_QS)
 
     return dataset
 

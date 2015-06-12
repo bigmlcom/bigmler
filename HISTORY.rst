@@ -10,6 +10,8 @@ History
   anomaly subcommand.
 - Fixing bug: source upload failed when using arguments that contain
   unicodes.
+- Fixing bug: bigmler analyze subcommand failed for datasets with more than
+  1000 fields.
 
 3.0.0 (2015-04-25)
 ~~~~~~~~~~~~~~~~~~

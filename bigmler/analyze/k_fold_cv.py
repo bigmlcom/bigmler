@@ -40,6 +40,7 @@ from bigml.fields import Fields
 
 from bigmler.dispatcher import main_dispatcher
 from bigmler.options.analyze import ACCURACY, MINIMIZE_OPTIONS
+from bigmler.resources import ALL_FIELDS_QS
 
 AVG_PREFIX = "average_%s"
 R_SQUARED = "r_squared"
@@ -213,7 +214,7 @@ def create_kfold_datasets_file(args, api, common_options, resume=False):
     # retrieve dataset
     dataset_id = bigml.api.get_dataset_id(args.dataset)
     if dataset_id:
-        dataset = api.check_resource(dataset_id)
+        dataset = api.check_resource(dataset_id, query_string=ALL_FIELDS_QS)
         try:
             args.objective_field = int(args.objective_field)
         except (TypeError, ValueError):
@@ -466,7 +467,8 @@ def best_first_search(datasets_file, api, args, common_options,
             with open(stored_dataset, u.open_mode("r")) as dataset_handler:
                 dataset = json.loads(dataset_handler.read())
         except IOError:
-            dataset = api.check_resource(dataset_id)
+            dataset = api.check_resource(dataset_id,
+                                         query_string=ALL_FIELDS_QS)
         # initial feature set
         fields = Fields(dataset)
         excluded_features = ([] if args.exclude_features is None else
