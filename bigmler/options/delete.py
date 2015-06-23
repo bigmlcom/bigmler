@@ -27,10 +27,6 @@ def get_delete_options(defaults=None):
     if defaults is None:
         defaults = {}
     options = {
-        # Changes to delete mode.
-        '--delete': {
-            'action': 'store_true',
-            'help': "Delete command."},
 
         # Resources to be deleted.
         '--ids': {
@@ -189,6 +185,12 @@ def get_delete_options(defaults=None):
             'default': defaults.get('from_dir', None),
             'help': ("Retrieves the ids of the resources logged in the "
                      "directory to add them to the delete list.")},
+
+        # Use it to retrieve projects that were tagged with tag.
+        '--project-tag': {
+            'dest': 'project_tag',
+            'default': defaults.get('project_tag', None),
+            'help': "Retrieve projects that were tagged with tag."},
         }
 
     return options

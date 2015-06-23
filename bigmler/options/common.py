@@ -193,7 +193,7 @@ def get_common_options(defaults=None, constants=None):
             'action': 'store_true',
             'dest': 'no_tag',
             'default': defaults.get('no_tag', True),
-            'help': "No tag resources with default BigMLer tags."},
+            'help': "Tag resources with default BigMLer tags."},
 
         # Evaluations flag: excluding one dataset from the datasets list to test
         '--version': {

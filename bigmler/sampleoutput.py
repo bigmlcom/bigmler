@@ -122,7 +122,8 @@ def sample_file(sample, fields, args, api, path=None, session_file=None):
                             query_string=query_string)[0][0]
     output = args.predictions
     with UnicodeWriter(output, lineterminator="\n") as output:
-        headers = [field['name'] for field in sample['object']['sample']['fields']]
+        headers = [field['name'] for field in
+                   sample['object']['sample']['fields']]
         if args.sample_header:
             if args.row_index or args.occurrence:
                 new_headers = []

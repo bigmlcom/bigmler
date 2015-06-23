@@ -354,6 +354,11 @@ def set_basic_dataset_args(args, name=None):
         "category": args.category,
         "tags": args.tag
     }
+    if args.sample_rate != 1 and args.no_model:
+        dataset_args.update({
+            "seed": SEED if args.seed is None else args.seed,
+            "sample_rate": args.sample_rate
+        })
 
     return dataset_args
 
@@ -1062,8 +1067,9 @@ def set_evaluation_args(args, fields=None,
     # [--train|--dataset] --test-split --evaluate
     if args.test_split > 0 and (args.training_set or args.dataset):
         return evaluation_args
-    # --datasets --test-datasets
-    if args.datasets and (args.test_datasets or args.dataset_off):
+    # --datasets --test-datasets or equivalents
+    #if args.datasets and (args.test_datasets or args.dataset_off):
+    if args.has_datasets_ and (args.has_test_datasets_ or args.dataset_off):
         return evaluation_args
     if args.sample_rate == 1:
         args.sample_rate = EVALUATE_SAMPLE_RATE

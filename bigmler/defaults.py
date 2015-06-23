@@ -144,6 +144,7 @@ FLAGS = {
         {'flag': 'dry_run', 'type': 'boolean'},
         {'flag': 'anomaly_tag', 'type': 'string'},
         {'flag': 'anomaly_score_tag', 'type': 'string'},
+        {'flag': 'project_tag', 'type': 'string'},
         {'flag': 'fast', 'type': 'boolean'},
         {'flag': 'project', 'type': 'string'},
         {'flag': 'project_id', 'type': 'string'},

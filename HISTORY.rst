@@ -3,6 +3,14 @@
 History
 -------
 
+3.0.2 (2015-06-24)
+~~~~~~~~~~~~~~~~~~
+
+- Adding the --project-tag option to bigmler delete.
+- Fixing that the --test-dataset and related options can be used in model
+  evaluation.
+- Fixing bug: bigmler anomalies for datasets with more than 1000 fields failed.
+
 3.0.1 (2015-06-12)
 ~~~~~~~~~~~~~~~~~~
 

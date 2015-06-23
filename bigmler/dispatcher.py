@@ -372,8 +372,9 @@ def compute_output(api, args):
         datasets = [dataset]
 
     # Check if the dataset has a generators file associated with it, and
-    # generate a new dataset with the specified field structure
-    if args.new_fields:
+    # generate a new dataset with the specified field structure. Also
+    # if the --to-dataset flag is used to clone or sample the original dataset
+    if args.new_fields or (args.sample_rate != 1 and args.no_model):
         dataset, resume = pd.create_new_dataset(
             dataset, api, args, resume, fields=fields,
             session_file=session_file, path=path, log=log)
@@ -591,9 +592,11 @@ def compute_output(api, args):
     if args.evaluate:
         # When we resume evaluation and models were already completed, we
         # should use the datasets array as test datasets
-        if args.dataset_off and not args.test_dataset_ids:
+        if args.has_test_datasets_:
+            test_dataset = get_test_dataset(args)
+        if args.dataset_off and not args.has_test_datasets_:
             args.test_dataset_ids = datasets
-        if args.test_dataset_ids:
+        if args.test_dataset_ids and args.dataset_off:
             eval_ensembles = len(ensemble_ids) == len(args.test_dataset_ids)
             models_or_ensembles = (ensemble_ids if eval_ensembles else
                                    models)
@@ -616,8 +619,10 @@ def compute_output(api, args):
                     labels=labels, session_file=session_file)[0]
                 test_set_header = True
 
-            if args.test_split > 0:
+            if args.test_split > 0 or args.has_test_datasets_:
                 dataset = test_dataset
+            dataset = u.check_resource(dataset, api=api,
+                                       query_string=r.ALL_FIELDS_QS)
             dataset_fields = pd.get_fields_structure(dataset, None)
             models_or_ensembles = (ensemble_ids if ensemble_ids != []
                                    else models)

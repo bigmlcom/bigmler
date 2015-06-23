@@ -182,7 +182,12 @@ def compute_output(api, args):
             query_string = ";".join([EXCLUDE_TREES, r.ALL_FIELDS_QS])
         else:
             query_string = r.ALL_FIELDS_QS
-        anomaly = u.check_resource(anomaly, query_string=query_string,
+        try:
+            anomaly_id = anomaly.get('resource', anomaly)
+        except AttributeError:
+            anomaly_id = anomaly
+        anomaly = u.check_resource(anomaly_id,
+                                   query_string=query_string,
                                    api=api)
         anomalies[0] = anomaly
         if (args.public_anomaly or

@@ -64,7 +64,7 @@ def has_train(args):
     """
     return (args.training_set or args.source or args.dataset or
             args.datasets or args.source_file or args.dataset_file or
-            args.train_stdin or args.source_file)
+            args.train_stdin)
 
 
 def has_model(args):
@@ -688,3 +688,12 @@ def transform_args(command_args, flags, api, user_defaults):
         (hasattr(command_args, 'dataset') and command_args.dataset) or
         (hasattr(command_args, 'datasets') and command_args.datasets) or
         (hasattr(command_args, 'dataset_tag') and command_args.dataset_tag))
+
+
+    command_args.has_test_datasets_ = (
+        (hasattr(command_args, 'test_dataset') and
+         command_args.test_dataset) or
+        (hasattr(command_args, 'test_datasets') and
+         command_args.test_datasets) or
+        (hasattr(command_args, 'test_dataset_tag') and
+         command_args.test_dataset_tag))

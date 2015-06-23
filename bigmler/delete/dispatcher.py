@@ -184,7 +184,8 @@ def filtered_selectors(args, api):
          None),
         ("batchanomalyscore", args.batch_anomaly_score_tag,
          api.list_batch_anomaly_scores, None),
-        ("sample", args.sample_tag, api.list_samples, None)]
+        ("sample", args.sample_tag, api.list_samples, None),
+        ("project", args.project_tag, api.list_projects, None)]
 
     if args.all_tag is None and any([resource[1] is not None for resource in
                                      resource_selectors]):
