@@ -3,6 +3,12 @@
 History
 -------
 
+3.0.3 (2015-07-01)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug: dataset generation with a filter on a previous dataset
+  was not working.
+
 3.0.2 (2015-06-24)
 ~~~~~~~~~~~~~~~~~~
 

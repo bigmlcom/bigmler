@@ -234,4 +234,4 @@ class TestAnomaly(object):
             test_pred.i_check_create_dataset(self, suffix='gen ')
             test_anomaly.i_check_top_anomalies(self, example[3])
             test_anomaly.i_check_forest_size(self, example[4])
-            test_anomaly.i_check_top_anomalies_dataset_lines_number(self, example[3])
+            test_anomaly.i_check_dataset_lines_number(self, example[3])

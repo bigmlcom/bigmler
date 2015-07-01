@@ -68,6 +68,31 @@ def i_create_dataset_from_source(step, output_dir=None):
         assert False, str(exc)
 
 
+#@step(r'I create a BigML filtered dataset with filter "(.*)" from previous dataset and store logs in "(.*)"')
+def i_create_filtered_dataset_from_dataset(step, filter_exp=None, output_dir=None):
+    if filter_exp is None or output_dir is None:
+        assert False
+    world.directory = output_dir
+    world.folders.append(world.directory)
+    try:
+        command = (u'echo "' +
+                   filter_exp.replace('"', '\\"') + u'" > ' +
+                   output_dir + u"/filter.lisp")
+        retcode = check_call(command.encode(SYSTEM_ENCODING), shell=True)
+        command = ((u"bigmler --dataset %s" % world.dataset['resource']) +
+                   u" --no-model --store --output-dir " + output_dir +
+                   u" --lisp-filter " + output_dir + "/filter.lisp")
+        command = check_debug(command)
+        retcode = check_call(command.encode(SYSTEM_ENCODING), shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.output = output_dir
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+
 #@step(r'I create a new BigML dataset using the specs in JSON file "(.*)" and a model with "(.*)"')
 def i_create_dataset_new_fields(step, json_file=None, model_fields=None):
     if json_file is None or model_fields is None:

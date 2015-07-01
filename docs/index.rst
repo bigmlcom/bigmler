@@ -530,7 +530,7 @@ data stored in a file or a previous dataset
     bigmler --model model/50a1f43deabcb404d3000079 --test data/iris.csv \
             --evaluate
     bigmler --model model/50a1f43deabcb404d3000079 \
-            --dataset dataset/50a1f441035d0706d9000371 --evaluate
+            --test-dataset dataset/50a1f441035d0706d9000371 --evaluate
 
 As for predictions, you can specify a particular file name to store the
 evaluation in

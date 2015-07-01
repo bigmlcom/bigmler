@@ -365,6 +365,10 @@ def create_new_dataset(datasets, api, args, resume, fields=None,
             dataset_args.update(args.multi_dataset_json)
         elif hasattr(args, 'anomalies_dataset') and args.anomalies_dataset:
             dataset_args.update({'lisp_filter': args._anomaly_filter})
+        elif hasattr(args, 'lisp_filter') and args.lisp_filter:
+            dataset_args.update({'lisp_filter': args.lisp_filter})
+        elif hasattr(args, 'json_filter') and args.json_filter:
+            dataset_args.update({'json_filter': args.json_filter})
         else:
             dataset_args.update(args.dataset_json_generators)
         new_dataset = r.create_dataset(origin_resource, dataset_args,

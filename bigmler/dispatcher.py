@@ -78,6 +78,15 @@ def get_metadata(resource, key, default_value):
     return default_value
 
 
+def has_source(args):
+    """Checks whether the command options include a source or a previous
+       training file
+    """
+    return (args.training_set or args.source or args.source_file or
+        args.train_stdin)
+
+
+
 def command_handling(args, log=COMMAND_LOG):
     """Rebuilds command string, logs it for --resume future requests and
        parses it.
@@ -374,7 +383,8 @@ def compute_output(api, args):
     # Check if the dataset has a generators file associated with it, and
     # generate a new dataset with the specified field structure. Also
     # if the --to-dataset flag is used to clone or sample the original dataset
-    if args.new_fields or (args.sample_rate != 1 and args.no_model):
+    if (args.new_fields or (args.sample_rate != 1 and args.no_model) or
+        (args.lisp_filter or args.json_filter) and not has_source(args)):
         dataset, resume = pd.create_new_dataset(
             dataset, api, args, resume, fields=fields,
             session_file=session_file, path=path, log=log)
@@ -447,7 +457,7 @@ def compute_output(api, args):
     # We update the model's public state if needed
     if model:
         if isinstance(model, basestring):
-            if not args.evaluate and not a.has_test(args):
+            if not args.evaluate and not a.has_train(args):
                 query_string = MINIMUM_MODEL
             elif not args.test_header:
                 query_string = r.ALL_FIELDS_QS

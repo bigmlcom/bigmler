@@ -280,7 +280,7 @@ def i_check_forest_size(step, forest_size):
         world.anomaly.get('object', []).get('forest_size'))
 
 #@step(r'the number of records in the top anomalies dataset is <top_anomalies>')
-def i_check_top_anomalies_dataset_lines_number(step, top_anomalies):
+def i_check_dataset_lines_number(step, lines_number):
     nose.tools.assert_equal(
-        int(top_anomalies),
+        int(lines_number),
         world.dataset.get('object', []).get('rows'))

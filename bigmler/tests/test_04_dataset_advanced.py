@@ -25,6 +25,8 @@ from bigmler.tests.world import (world, common_setup_module,
 
 import bigmler.tests.dataset_advanced_steps as dataset_adv
 import bigmler.tests.basic_tst_prediction_steps as test_pred
+import bigmler.tests.basic_anomaly_prediction_steps as test_anomaly
+
 
 
 def setup_module():
@@ -144,11 +146,11 @@ class TestDatasetAdvanced(object):
 
                 Examples:
                 |data |output_dir  |output_dir2 |
-                |../data/iris.csv | ./scenario_d_4 | ./scenario_d_5|
+                |../data/iris.csv | ./scenario_d_4 | ./scenario_d_4a|
         """
         print self.test_scenario4.__doc__
         examples = [
-            ['data/iris.csv', 'scenario_d_4', 'scenario_d_5']]
+            ['data/iris.csv', 'scenario_d_4', 'scenario_d_4a']]
         for example in examples:
             print "\nTesting with:\n", example
             dataset_adv.i_create_dataset(self, data=example[0], output_dir=example[1])
@@ -159,3 +161,29 @@ class TestDatasetAdvanced(object):
             dataset_adv.i_create_multi_dataset(self, example[2])
             dataset_adv.i_check_create_multi_dataset(self)
             dataset_adv.i_check_multi_dataset_origin(self, output_dir=example[1])
+
+    def test_scenario5(self):
+        """
+            Scenario: Successfully building a filtered dataset from a dataset
+                Given I create a BigML dataset from "<data>" and store logs in "<output_dir>"
+                And I check that the source has been created
+                And I check that the dataset has been created
+                And I create a BigML filtered dataset with filter "<filter_exp>" from previous dataset and store logs in "<output_dir>"
+                And I check that the dataset has been created
+                And the number of records in the dataset is <filtered_records>
+
+                Examples:
+                |data |output_dir | filtered_records | filter_exp
+                |../data/iris.csv | ./scenario_d_5 | 50 | (= (f "000004") "Iris-setosa")
+        """
+        print self.test_scenario5.__doc__
+        examples = [
+            ['data/iris.csv', 'scenario_d_5', '50', '(= (f "000004") "Iris-setosa")']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            dataset_adv.i_create_dataset(self, data=example[0], output_dir=example[1])
+            test_pred.i_check_create_source(self)
+            test_pred.i_check_create_dataset(self, suffix=None)
+            dataset_adv.i_create_filtered_dataset_from_dataset(self, filter_exp=example[3], output_dir=example[1])
+            test_pred.i_check_create_dataset(self, suffix='gen ')
+            test_anomaly.i_check_dataset_lines_number(self, example[2])
