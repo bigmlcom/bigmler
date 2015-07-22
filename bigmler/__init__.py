@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import
 
-__version__ = '3.0.3'
+__version__ = '3.0.4'
 
 if __name__ == '__main__':
     import sys

@@ -3,6 +3,15 @@
 History
 -------
 
+3.0.4 (2015-07-22)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug: bigmler analyze --features could not analyze phi for a user-given
+  category because the metric is called phi_coefficient.
+- Modifying the output of bigmler analyze --features and --nodes to include
+  the command to generate the best performing model and the command to
+  clean all the generated resources.
+
 3.0.3 (2015-07-01)
 ~~~~~~~~~~~~~~~~~~
 

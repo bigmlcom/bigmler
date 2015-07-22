@@ -28,9 +28,10 @@ ACCURACY = "accuracy"
 BIGML_MAX_NODES = os.environ.get("BIGML_MAX_NODES", 2000)
 MINIMIZE_OPTIONS = ["mean_squared_error", "mean_absolute_error"]
 MAXIMIZE_OPTIONS = [ACCURACY, "precision", "recall", "phi", "f_measure",
-                    "r_squared"]
+                    "r_squared", "phi_coefficient"]
 OPTIMIZE_OPTIONS = [ACCURACY, "precision", "recall", "phi", "f_measure",
-                    "mean_squared_error", "mean_absolute_error", "r_squared"]
+                    "mean_squared_error", "mean_absolute_error", "r_squared",
+                    "phi_coefficient"]
 
 def get_analyze_options(defaults=None):
     """Adding arguments for the analyze subcommand
