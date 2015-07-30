@@ -43,6 +43,7 @@ def teardown_module():
     """
     common_teardown_module()
 
+
 class TestBatchPrediction(object):
 
     def teardown(self):
@@ -50,12 +51,13 @@ class TestBatchPrediction(object):
 
         """
         teardown_class()
+        print "\nEnd of tests in: %s\n-------------------\n" % __name__
 
     def setup(self):
-        """No setup operations for every method at present
+        """Debug information
 
         """
-        pass
+        print "\n-------------------\nTests in: %s\n" % __name__
 
     def test_scenario1(self):
         """

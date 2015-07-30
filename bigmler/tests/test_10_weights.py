@@ -47,13 +47,14 @@ class TestWeights(object):
         """Calling generic teardown for every method
 
         """
+        print "\nEnd of tests in: %s\n-------------------\n" % __name__
         teardown_class()
 
     def setup(self):
-        """No setup operations for every method at present
-
         """
-        pass
+            Debug information
+        """
+        print "\n-------------------\nTests in: %s\n" % __name__
 
     def test_scenario1(self):
         """

@@ -385,11 +385,19 @@ def compute_output(api, args):
     # if the --to-dataset flag is used to clone or sample the original dataset
     if (args.new_fields or (args.sample_rate != 1 and args.no_model) or
         (args.lisp_filter or args.json_filter) and not has_source(args)):
+        if fields is None:
+            if isinstance(dataset, basestring):
+                dataset = check_resource(dataset, api=api)
+            fields = Fields(dataset, csv_properties)
+        args.objective_id_ = get_objective_id(args, fields)
+        args.objective_name_ = fields.field_name(args.objective_id_)
         dataset, resume = pd.create_new_dataset(
             dataset, api, args, resume, fields=fields,
             session_file=session_file, path=path, log=log)
         datasets[0] = dataset
         # rebuild fields structure for new ids and fields
+        csv_properties.update({'objective_field': args.objective_name_,
+                               'objective_field_present': True})
         fields = pd.get_fields_structure(dataset, csv_properties)
         args.objective_id_ = get_objective_id(args, fields)
     if args.multi_label and dataset and multi_label_data is None:

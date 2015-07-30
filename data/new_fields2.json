@@ -1,0 +1,1 @@
+{"all_but": ["000001", "000003"], "new_fields": [{"name": "outlier?", "field": "(if (within-percentiles? \"sepal length\" 0.5 0.95) \"significant\" \"outlier\")"}]}

@@ -28,6 +28,8 @@ from bigmler.tests.world import (world, common_setup_module,
 
 import bigmler.tests.basic_tst_prediction_steps as test_pred
 
+
+
 def setup_module():
     """Setup for the module
 
@@ -46,11 +48,18 @@ def teardown_module():
 
 class TestPrediction(object):
 
+    def setup(self):
+        """
+            Debug information
+        """
+        print "\n-------------------\nTests in: %s\n" % __name__
+
     def teardown(self):
         """Calling generic teardown for every method
 
         """
         self.world = teardown_class()
+        print "\nEnd of tests in: %s\n-------------------\n" % __name__
 
     def test_scenario01(self):
         """

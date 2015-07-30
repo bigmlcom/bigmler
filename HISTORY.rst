@@ -3,6 +3,12 @@
 History
 -------
 
+3.0.5 (2015-07-30)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug: bigmler analyze and filtering datasets failed when the origin
+  dataset was a filtered one.
+
 3.0.4 (2015-07-22)
 ~~~~~~~~~~~~~~~~~~
 

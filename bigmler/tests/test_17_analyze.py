@@ -28,6 +28,7 @@ from bigmler.tests.world import (world, common_setup_module,
 import bigmler.tests.basic_tst_prediction_steps as test_pred
 import bigmler.tests.dataset_advanced_steps as dataset
 import bigmler.tests.evaluation_steps as evaluation
+import bigmler.tests.dataset_advanced_steps as dataset_adv
 
 
 def setup_module():
@@ -48,13 +49,14 @@ class TestAnalyze(object):
         """Calling generic teardown for every method
 
         """
+        print "\nEnd of tests in: %s\n-------------------\n" % __name__
         teardown_class()
 
     def setup(self):
-        """No setup operations for every method at present
-
         """
-        pass
+            Debug information
+        """
+        print "\n-------------------\nTests in: %s\n" % __name__
 
     def test_scenario1(self):
         """
@@ -273,3 +275,39 @@ class TestAnalyze(object):
             test_pred.i_check_create_kfold_models(self, example[3])
             test_pred.i_check_create_all_kfold_cross_validations(self, example[3])
             test_pred.i_check_feature_selection(self, example[6], example[4], example[7])
+
+    def test_scenario8(self):
+        """
+            Scenario: Successfully building a new dataset from an existing one and analyzing it
+                Given I create a BigML dataset from "<data>" and store logs in "<output_dir>"
+                And I check that the source has been created
+                And I check that the dataset has been created
+                And I create a new BigML dataset using the specs in JSON file "<new_fields>" and a model with "<model_fields>"
+                And I check that the new dataset has been created
+                And I check that the model has been created
+                And I create BigML nodes analysis from <min_nodes> to <max_nodes> by <nodes_step> with <kfold>-cross-validation improving "<metric>"
+                And I check that the <kfold>-datasets have been created
+                And I check that the <kfold>-models have been created
+                And I check that all the <kfold>-fold cross-validations have been created
+                Then the best node threshold is "<node_threshold>", with "<metric>" of <metric_value>
+
+                Examples:
+                |data |output_dir  |new_fields | field | model_fields| min_nodes | max_nodes | nodes_step | kfold | metric   | node_threshold   | metric_value |
+                |../data/iris.csv | ./scenario_a_10 |../data/new_fields.json| outlier? |petal length,outlier?,species| 3         | 14        | 2         |2     | precision  | 9                | 94.71%         |
+        """
+        print self.test_scenario1.__doc__
+        examples = [
+            ['data/iris.csv', 'scenario_a_10', 'data/new_fields2.json', u'outlier?', u'outlier?,species', '3', '14', '2', '2', 'precision', '5', '98.21%']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            dataset_adv.i_create_dataset(self, data=example[0], output_dir=example[1])
+            test_pred.i_check_create_source(self)
+            test_pred.i_check_create_dataset(self, suffix=None)
+            dataset_adv.i_create_dataset_new_fields(self, json_file=example[2], model_fields=example[4])
+            test_pred.i_check_create_new_dataset(self)
+            test_pred.i_check_create_model(self)
+            test_pred.i_create_nodes_analysis(self, min_nodes=example[5], max_nodes=example[6], nodes_step=example[7], k_fold=example[8], metric=example[9])
+            test_pred.i_check_create_kfold_datasets(self, example[8])
+            test_pred.i_check_create_kfold_models(self, example[8])
+            test_pred.i_check_create_all_kfold_cross_validations(self, example[8])
+            test_pred.i_check_node_threshold(self, example[10], example[9], example[11])
