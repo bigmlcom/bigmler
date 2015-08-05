@@ -3,6 +3,12 @@
 History
 -------
 
+3.1.0 (2015-08-05)
+~~~~~~~~~~~~~~~~~~
+
+- Adding bigmler report subcommand to generate reports for cross-validation
+  results in bigmler analyze.
+
 3.0.5 (2015-07-30)
 ~~~~~~~~~~~~~~~~~~
 

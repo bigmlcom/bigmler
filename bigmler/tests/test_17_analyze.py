@@ -88,6 +88,7 @@ class TestAnalyze(object):
             test_pred.i_check_create_kfold_cross_validation(self, example[2])
             evaluation.then_the_evaluation_file_is_like(self, example[3])
 
+
     def test_scenario2(self):
         """
             Scenario: Successfully building feature selection from dataset:
@@ -99,6 +100,8 @@ class TestAnalyze(object):
                 And I check that the <kfold>-models have been created
                 And I check that all the <kfold>-fold cross-validations have been created
                 Then the best feature selection is "<selection>", with "<metric>" of <metric_value>
+                And I generate a report from the output directory
+                And a symlink file is generated in the reports directory
 
                 Examples:
                 | data                | output                    | kfold | metric   | selection   | metric_value
@@ -119,6 +122,8 @@ class TestAnalyze(object):
             test_pred.i_check_create_kfold_models(self, example[2])
             test_pred.i_check_create_all_kfold_cross_validations(self, example[2])
             test_pred.i_check_feature_selection(self, example[4], example[3], example[5])
+            test_pred.i_generate_report(self)
+            test_pred.is_symlink(self)
 
     def test_scenario3(self):
         """

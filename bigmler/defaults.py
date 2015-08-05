@@ -207,7 +207,11 @@ FLAGS = {
         {'flag': 'row_fields', 'type': 'string'},
         {'flag': 'stat_fields', 'type': 'string'},
         {'flag': 'stat_field', 'type': 'string'},
-        {'flag': 'unique', 'type': 'boolean'}]}
+        {'flag': 'unique', 'type': 'boolean'}],
+    'BigMLer report': [
+        {'flag': 'from_dir', 'type': 'string'},
+        {'flag': 'port', 'type': 'integer'},
+        {'flag': 'no_server', 'type': 'boolean'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):

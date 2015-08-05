@@ -25,10 +25,15 @@ import sys
 import tempfile
 import shutil
 import requests
+import json
+import re
+import copy
+import tempfile
 
 import bigml.api
 
-from bigmler.utils import is_shared, check_dir, get_url
+from bigmler.utils import is_shared, check_dir, get_url, log_created_resources
+from bigmler.options.analyze import ACCURACY, OPTIMIZE_OPTIONS
 
 
 URL_TEMPLATE = "%%BIGML_%s%%"
@@ -37,11 +42,17 @@ SECTION_START_PREFIX = SECTION_START[2: 15]
 SECTION_END = "\n%%BIGML_END_%s%%"
 SECTION_END_PREFIX = SECTION_END[2: 13]
 REPORTS_DIR = "reports"
+ANALYZE_PATH = "test"
+ANALYZE_DIR = "analyze"
 EMBEDDED_RESOURCES = ["MODEL"]
 GAZIBIT = "gazibit"
 BIGMLER_SCRIPT = os.path.dirname(__file__)
+# templates for reports
+ANALYZE_TEMPLATE= "%s/static/analyze.html" % BIGMLER_SCRIPT
 GAZIBIT_PRIVATE = "%s/static/gazibit.json" % BIGMLER_SCRIPT
 GAZIBIT_SHARED = "%s/static/gazibit_shared.json" % BIGMLER_SCRIPT
+
+# gazibit API data
 GAZIBIT_TOKEN = "GAZIBIT_TOKEN"
 GAZIBIT_CREATE_URL = "http://gazibit.com/api/v1/create"
 GAZIBIT_HEADERS = {"X-Gazibit-API-Token": os.environ.get(GAZIBIT_TOKEN),
@@ -51,7 +62,31 @@ GAZIBIT_HEADERS = {"X-Gazibit-API-Token": os.environ.get(GAZIBIT_TOKEN),
                    'User-Agent': ('curl/7.22.0 (x86_64-pc-linux-gnu)'
                                   ' libcurl/7.22.0 OpenSSL/1.0.1'
                                   ' zlib/1.2.3.4 libidn/1.23 librtmp/2.3')}
+
+#analyze options
+CROSS_VALIDATION_FILE = "evaluation.json"
+MODEL_KEY = "model"
+METRICS_FILE = "metrics.json"
+EVALUATIONS_JSON_FILE = "evaluations_json.json"
+SERVER_DIRECTORY = "bigmler/reports/"
+HOME = os.getenv("HOME")
+
+PREFIX = "average_"
+SESSION_FILE = "bigmler_sessions"
+
+
 HTTP_CREATED = 201
+
+
+def check_subdir(path, subdir):
+    """Check whether a directory exists in a path and create it if it doesn't.
+
+    """
+    directory = os.path.join(path, subdir)
+    try:
+        os.stat(directory)
+    except:
+        os.mkdir(directory)
 
 
 def report(report_types_list, output_dir=None, resource=None):
@@ -176,6 +211,129 @@ def gazibit_upload(output_file, exit_flag=False):
         sys.exit("Ambiguous exception occurred")
     except IOError, excio:
         sys.exit("ERROR: failed to read report file: %s" % str(excio))
+
+
+def evaluations_report(args):
+    """Analyze cross-validations in directory and create evaluations report
+
+    """
+    metrics = []
+    evaluations_json = []
+    path = os.path.join(args.from_dir, ANALYZE_PATH)
+
+    for _, directories, _ in os.walk(path):
+        for directory in directories:
+            file_name = os.path.join(path, directory, CROSS_VALIDATION_FILE)
+            kfold_evaluation = json.load(open(file_name))
+            kfold_evaluation['name'] = directory.replace('kfold', '#')
+            evaluation = kfold_evaluation
+            command = get_command_line(os.path.join(path, directory))
+            model_fields = parse_model_fields(command)
+            nodes = parse_nodes(command)
+            if model_fields:
+                evaluation_json = {"model_fields": model_fields,
+                                   "directory": directory,
+                                   "time": os.path.getmtime(file_name)}
+                kfold_evaluation['model_fields'] = model_fields
+            elif nodes:
+                evaluation_json = {"nodes": nodes,
+                                   "directory": directory,
+                                   "time": os.path.getmtime(file_name)}
+                kfold_evaluation['nodes'] = nodes
+            evaluation = evaluation.get(MODEL_KEY, {})
+
+            # read the applicable metrics and add the kfold number info
+            for option in OPTIMIZE_OPTIONS:
+                new_eval = copy.copy(evaluation_json)
+                new_eval["measure"] = option
+                if directory.startswith("node_th"):
+                    new_eval["kfold"] = int(directory.replace("node_th", ""))
+                else:
+                    new_eval["kfold"] = int(directory.replace("kfold", ""))
+                if option in evaluation:
+                    new_eval["value"] = evaluation[option]
+                    metrics.append(new_eval)
+                # check for averaged values too
+                else:
+                    option_pref = "%s%s" % (PREFIX, option)
+                    if option_pref in evaluation:
+                        new_eval["value"] = evaluation[option_pref]
+                        metrics.append(new_eval)
+            evaluations_json.append(kfold_evaluation)
+
+    check_subdir(args.from_dir, REPORTS_DIR)
+    check_subdir(os.path.join(args.from_dir, REPORTS_DIR), ANALYZE_DIR)
+    # generate summary of metrics values
+    json.dump(sorted(metrics, key=lambda x: x['time']),
+              open(os.path.join(args.from_dir, REPORTS_DIR,
+                                ANALYZE_DIR, METRICS_FILE), "w"))
+    # generate list of evaluations
+    json.dump(evaluations_json,
+              open(os.path.join(args.from_dir, REPORTS_DIR, ANALYZE_DIR,
+                                EVALUATIONS_JSON_FILE), "w"))
+
+    # checks the global server directories
+    check_subdir(HOME, SERVER_DIRECTORY.split("/")[0])
+    check_subdir(HOME, SERVER_DIRECTORY)
+
+    # copy templates to directory
+    basename = os.path.basename(ANALYZE_TEMPLATE)
+    base_destination_dir =  os.path.join(
+        os.getcwd(), args.from_dir, REPORTS_DIR)
+    destination_dir = os.path.join(base_destination_dir, ANALYZE_DIR)
+    destination_file = os.path.join(destination_dir, basename)
+    shutil.copyfile(ANALYZE_TEMPLATE, destination_file)
+    dirname = os.path.join(HOME, SERVER_DIRECTORY)
+    symlink = tempfile.NamedTemporaryFile(dir=dirname).name
+    os.symlink(base_destination_dir, symlink)
+
+    #saves the symlink file name in the current reports directory
+    log_created_resources("symlink", base_destination_dir,
+                          symlink, mode='a')
+
+    # returns the link address relative to the server folder
+    return os.path.join(os.path.basename(symlink), ANALYZE_DIR, basename)
+
+
+def get_command_line(path):
+    """Retrieving command line from the session file in the directory
+
+    """
+    try:
+        command_file = os.path.join(path, SESSION_FILE)
+        with open(command_file) as command_file:
+            command = command_file.read()
+        return command
+    except IOError:
+        sys.exit("Not enough information to build the report. Some files may"
+                 " have been deleted.")
+
+
+def parse_model_fields(command):
+    """Parse the list of model fields from the command line text
+
+    """
+
+    pattern = re.compile(r'--model-fields (.+?)\s--')
+    model_fields = pattern.findall(command)
+    model_fields = [] if not model_fields else model_fields[0]
+
+    if (model_fields and model_fields.startswith('"')):
+        model_fields = model_fields[1:]
+    if (model_fields and model_fields.endswith('"')):
+        model_fields = model_fields[:-1]
+    return model_fields
+
+
+def parse_nodes(command):
+    """Parse the node threshold number from the command line text
+
+    """
+
+    pattern = re.compile(r'--node-threshold (\d+?)\s--')
+    nodes = pattern.findall(command)
+    nodes = None if not nodes else nodes[0]
+    return nodes
 
 
 REPORTS = {'gazibit': add_gazibit_links}

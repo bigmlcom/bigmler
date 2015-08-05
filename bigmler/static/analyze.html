@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+html, body{
+  height: 100%;
+}
+*, *:before, *:after {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+body {
+  font: 14px/18px "Helvetica Neue", Helvetica, Arial, sans-serif;
+  margin: 0;
+  position: relative;
+  background: #fff;
+  display: block;
+  color: #333;
+}
+
+.clearfix:after {
+    visibility: hidden;
+    display: block;
+    font-size: 0;
+    content: " ";
+    clear: both;
+    height: 0;
+    }
+.clearfix { display: inline-table; }
+* html .clearfix { height: 1%; }
+.clearfix { display: block; }
+
+
+
+#wrap{
+    min-height: 100%;
+    height: auto;
+    margin: 0 auto -60px;
+    padding: 0 0 60px;
+}
+#header{
+    height: 100px;
+    background: #F7F7F7;
+    border-bottom: 1px solid #D6D8D9;
+    border-top: 4px solid #293A44;
+}
+#header img{
+    margin-top: 10px;
+}
+#footer {
+  height: 60px;
+  background-color: #293A43;
+  color: #5D6F79;
+  text-align: center;
+  font-size: 11px;
+  padding-top: 20px;
+  float: bottom;
+}
+.container{
+  width: 960px;
+  margin: 0 auto;
+  padding: 0 30px;
+}
+#chart {
+  float: left;
+  width: 720px;
+  margin-top: 30px;
+}
+#metrics_chart {
+  float: left;
+  width: 720px;
+  margin-top: 30px;
+}
+#metrics {
+  float: left;
+  margin-top: 30px;
+}
+.sliders{
+  float: left;
+  width: 170px;
+  margin-top: 30px;
+}
+.slider_box{
+  background: #eee;
+  padding: 10px 10px 5px;
+  margin-top:20px;
+  border-radius:5px;
+}
+.sliders label{
+  display: block;
+}
+.sliders input{
+  float: left;
+  margin-bottom: 10px;
+}
+.sliders .value_slider{
+  display: block;
+  font-weight: bold;
+  text-align: center;
+}
+.sliders button {
+  float: left;
+  background: #eee;
+  margin-top:20px;
+  border-radius:5px;
+}
+.legend{
+    font-size: 12px;
+}
+.axis path,
+.axis line {
+    fill: none;
+    stroke: black;
+    shape-rendering: crispEdges;
+}
+
+.axis text {
+    font-family: sans-serif;
+    font-size: 11px;
+}
+.site-title {
+    background: url(https://static.bigml.com/static/img/logo_menu.png) no-repeat 0 0 transparent;
+    margin: 20px 0 0 0;
+    padding: 17px 0 12px 185px;
+    color: #25343d;
+}
+.bottom {
+ margin-top: 150px;
+ float: bottom;
+ height: 70px;
+}
+.hidden {
+ display: none;
+}
+</style>
+<body>
+  <div id="wrap">
+    <div id="header">
+        <div class="container clearfix">
+            <h2 class="site-title"></h2>
+        </div>
+    </div>
+    <div class="container clearfix">
+      <!-- h3>@@SUBTITLE@@</h3 -->
+      <div id="ROC_chart" class="hidden">
+      <div id="chart"></div>
+      <div class="sliders">
+        <div class="clearfix slider_box">
+            <label>Positive class:</label>
+            <div id="classes"></div>
+        </div>
+        <div class="clearfix slider_box">
+            <label>Iso-cost line:</label>
+            <input id="isoline" type="range" min="0" max="100" value="20">
+        </div>
+        <div class="clearfix slider_box">
+            <label>P(+):</label>
+            <input id="prevalence" type="range" min="0" max="40" value="20">
+            <div id="prevalencedisplay" class="value_slider">0.5</div>
+        </div>
+        <div class="clearfix slider_box">
+            <label>FP cost:</label>
+            <input id="fpcost" type="range" min="1" max="250" value="25">
+            <div id="fpcostdisplay"  class="value_slider">0.25</div>
+        </div>
+        <div class="clearfix slider_box">
+            <label>FN cost:</label>
+            <input id="fncost" type="range" min="1" max="250" value="25">
+            <div id="fncostdisplay"  class="value_slider">0.25</div>
+        </div>
+      </div>
+      </div>
+      <div id="metrics_chart"></div>
+      <div class="sliders bottom">
+          <div id="tooltip" class="slider_box"></div>
+      </div>
+    </div>
+  </div>
+  <div id="footer">
+        bigmler analyze results - Powered by BigML <br/>
+        Copyright © 2015 BigML, Inc.
+  </div>
+</body>
+
+<script
+src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js">
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"
+charset="utf-8"></script>
+
+<script>
+
+// Computes Area Under the Curve using Heron's formula
+var AUC = function(tpr, fpr) {
+    a = Math.sqrt(2);
+    b = Math.sqrt(tpr * tpr + fpr * fpr);
+    c = Math.sqrt((1 - tpr) * (1 - tpr) + (1 - fpr) * (1 - fpr));
+    s = (a + b + c) /2;
+    if (tpr == fpr) {
+        return 0.5
+    } else if (tpr > fpr) {
+        return 0.5 + Math.sqrt(s * (s - a) * (s - b) * (s - c));
+    } else {
+        return 0.5 - Math.sqrt(s * (s - a) * (s - b) * (s - c));
+    }
+};
+</script>
+<script>
+
+var margin = {top: 20, right: 60, bottom: 30, left: 60};
+var width = 720 - margin.left - margin.right;
+var height = 480 - margin.top - margin.bottom;
+var xPadding = 20;
+var yPadding = 35;
+
+var xScale = d3.scale.linear()
+               .domain([0, 1])
+               .range([0, width]);
+
+var yScale = d3.scale.linear()
+               .domain([0, 1])
+               .range([height, 0]);
+
+var xAxis = d3.svg.axis()
+              .scale(xScale)
+              .orient("bottom")
+              .ticks(15);
+
+var yAxis = d3.svg.axis()
+              .scale(yScale)
+              .orient("left")
+              .ticks(25);
+
+var lineFunction = d3.svg.line()
+                     .x(function(d) { return xScale(d.x); })
+                     .y(function(d) { return yScale(d.y); })
+                     .interpolate("linear");
+
+
+
+// SVG panel.
+var svg = d3.select("#chart")
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+svg.append('text')
+   .attr("text-anchor", "middle")
+   .attr({'id': 'rocTitle', 'x': 90, 'y': -10})
+   .style({'font-size': '15px', 'font-weight': 'bold', 'fill': 'black'});
+
+d3.select('svg #rocTitle')
+    .text("ROC curve and cost line")
+    .transition()
+    .style('opacity', 1);
+
+
+// Adds X axis
+svg.append("g")
+  .attr("class", "x axis")
+  .attr("transform", "translate(0," + height + ")")
+  .call(xAxis)
+.append("text")
+  .attr("class", "label")
+  .attr("x", width)
+  .attr("y", -6)
+  .style("text-anchor", "end")
+  .text("False Positive Rate");
+
+// Adds Y axis
+svg.append("g")
+  .attr("class", "y axis")
+  .call(yAxis)
+.append("text")
+  .attr("class", "label")
+  .attr("transform", "rotate(-90)")
+  .attr("y", 6)
+  .attr("dy", ".71em")
+  .style("text-anchor", "end")
+  .text("True Positive Rate")
+
+// Draw X-axis grid lines
+svg.selectAll("line.x")
+  .data(xScale.ticks(10))
+  .enter().append("line")
+  .attr("class", "x")
+  .attr("x1", xScale)
+  .attr("x2", xScale)
+  .attr("y1", 0)
+  .attr("y2", height)
+  .style("stroke", "#ccc");
+
+// Draw Y-axis grid lines
+svg.selectAll("line.y")
+  .data(yScale.ticks(10))
+  .enter().append("line")
+  .attr("class", "y")
+  .attr("x1", 0)
+  .attr("x2", width)
+  .attr("y1", yScale)
+  .attr("y2", yScale)
+  .style("stroke", "#ccc");
+</script>
+<script>
+// Loads multiple evaluations
+
+var loadEvaluations = function(options) {
+    $.get( "evaluations_json.json", function( data ) {
+      var evaluations_json = data;
+      var classes = evaluations_json[0].class_names;
+      if (typeof classes !== 'undefined') {
+        $("#ROC_chart").show();
+        var settings = $.extend({
+            callback: function() {},
+            maxInstances: 1,
+            urls: [ ],
+            evaluations_ids: [],
+            evaluations_json: evaluations_json,
+            evaluations: [ ]
+        }, options || {});
+        var s = $('<select id="positiveClass" />');
+        for(var i=0; i < classes.length; i++) {
+          $('<option />', {value: classes[i], text: classes[i]}).appendTo(s);
+        }
+        s.appendTo('#classes');
+        $("#positiveClass").click(function (){changePositiveClass(settings)})
+        changePositiveClass(settings);
+      } else {
+        $("#ROC_chart").hide();
+      }
+    });
+};
+
+changePositiveClass = function(settings) {
+    settings.evaluations = [];
+    settings.positiveClass = $("#positiveClass").val();
+    svg.selectAll('circle').data([]).exit().remove();
+    if ('urls' in settings && settings.urls.length > 0) {
+      $.ajax({
+          url : settings.urls[settings.evaluations.length],
+          dataType: 'jsonp',
+          crossDomain:true,
+          success: function(evaluation) {
+            processEvaluation(settings, evaluation)
+          }
+      });
+    } else {
+      settings.maxAUC = - Infinity;
+      for(var i =0;i<settings.evaluations_json.length;i++) {
+        processEvaluation(settings,
+                          settings.evaluations_ids[i] || undefined,
+                          settings.evaluations_json[i])
+      }
+    }
+    if (settings.evaluations.length < settings.urls.length) {
+        loadEvaluations(settings);
+    } else {
+        settings.callback(settings.evaluations,
+                          settings.maxInstances,
+                          settings.maxAUC);
+    }
+}
+
+var processEvaluation = function(settings, evaluation_id, evaluation)  {
+  var positiveClass = settings.positiveClass;
+
+  var positiveClassIndex = evaluation.class_names.indexOf(positiveClass);
+
+  var truePositiveRate = falsePositiveRate = 0;
+
+  if( positiveClassIndex >= 0 ) {
+    var confusionMatrix = evaluation.model.confusion_matrix;
+    var tpPlusFN = confusionMatrix[positiveClassIndex].reduce(
+      function(total, currentValue) {      
+        return total += currentValue;
+    });
+
+    if (tpPlusFN != 0) { 
+        truePositiveRate = (
+            confusionMatrix[positiveClassIndex][positiveClassIndex] /
+            tpPlusFN);
+    } else {
+        truePositiveRate = NaN;
+    }
+    var fp = 0
+    var fpPlusTN = 0
+    for (var i=0;i<confusionMatrix.length;i++) {
+        if( i == positiveClassIndex )
+          continue;
+
+        fp += confusionMatrix[i][positiveClassIndex]
+
+        fpPlusTN += confusionMatrix[i].reduce(
+          function(total, currentValue, index, array) {          
+            return total += currentValue;
+        });
+    }
+
+    if (fpPlusTN != 0) {
+        falsePositiveRate = fp / fpPlusTN;
+    } else {
+        falsePositiveRate = NaN;
+    }
+
+  }
+  //if (evaluation.sampled_rows > settings.maxInstances) {
+  //    settings.maxInstances = evaluation.sampled_rows
+  //}
+
+  settings.maxInstances = 0.5;
+
+  result = {
+      "resource_id": evaluation_id,
+      "resource": evaluation.name,
+      "fields": evaluation.model_fields,
+      "nodes": evaluation.nodes,
+      "tpr": truePositiveRate,
+      "fpr": falsePositiveRate,
+      "instances": settings.maxInstances,
+      "auc": AUC(truePositiveRate, falsePositiveRate)}
+
+  if (result.auc > settings.maxAUC) {
+    settings.maxAUC = result.auc;
+  }
+  settings.evaluations.push(result);
+
+};
+
+</script>
+
+<script>
+
+var isocost = 0.2
+var prevalence = 0.5
+var pcostpcost = 0.25
+var fncost = 0.25
+var costfp = (1 - prevalence) * fpcost
+var costfn = prevalence * fncost
+var slope = costfp / costfn;
+
+var updateCostLines= function () {
+    costfp = (1 - prevalence) * fpcost;
+    costfn = Math.max(prevalence * fncost, 0.0001);
+    slope = costfp / costfn;
+    if (slope == 0) {
+        slope = 0.0001;
+    }
+
+    isoCostLines.attr("x1", function (cost) {
+        if (1 - cost/(costfn) < 0) {
+            return xScale(Math.min(1, (-1 + cost/(costfn))/slope))
+        } else {
+            return 0
+        }
+    })
+    .attr("x2", function (cost) {
+        if (slope + 1 - cost/(costfn) > 1) {
+            return xScale((1- (1 - cost / (costfn))) / slope)
+        } else {
+            return xScale(1)
+        }
+    })
+    .attr("y1", function (cost) {
+        return yScale(Math.max(0, 1 - cost / (costfn)));})
+    .attr("y2", function (cost) {
+        return yScale(Math.max(0, Math.min(1, slope + 1 - cost / (costfn))));})
+}
+
+// Draw Y-axis grid lines
+var isoCostLines = svg.selectAll("iso-cost")
+  .data([isocost])
+  .enter().append("line")
+  .attr("class", "y")
+  .attr("x1", function (cost) {
+        if (1 - cost/(costfn) < 0) {
+            return xScale(Math.min(1, (-1 + cost / (costfn)) / slope))
+        } else {
+            return 0
+        }
+    })
+    .attr("x2", function (cost) {
+        if (slope + 1 - cost/(costfn) > 1) {
+            return xScale((1- (1 - cost / (costfn))) / slope)
+        } else {
+            return xScale(1)
+        }
+    })
+    .attr("y1", function (cost) {
+        return yScale(Math.max(0, 1 - cost / (costfn)));})
+    .attr("y2", function (cost) {
+        return yScale(Math.max(0, Math.min(1, slope + 1 - cost / (costfn))));})
+  .style("stroke", "red");
+
+d3.select("#selectAll").on("click", function() {
+      d3.selectAll("circle").style("opacity", 1);
+    });
+
+d3.select("#unselectAll").on("click", function() {
+      d3.selectAll("circle").style("opacity", 0);
+    });
+
+d3.select("#isoline").on("change", function() {
+    isocost = this.value/100;
+    isoCostLines.data([isocost]);
+    updateCostLines();});
+
+d3.select("#prevalence").on("change", function() {
+    prevalence = this.value/40;
+    $("#prevalencedisplay").html(prevalence);
+    updateCostLines();});
+
+d3.select("#fpcost").on("change", function() {
+    fpcost = this.value/100;
+    $("#fpcostdisplay").html(fpcost);
+    updateCostLines();});
+
+d3.select("#fncost").on("change", function() {
+    fncost = this.value/100;
+    $("#fncostdisplay").html(fncost);
+    updateCostLines();});
+
+// Evaluation info
+svg.append('text')
+   .attr("text-anchor", "middle")
+   .attr({'id': 'evaluationLabel', 'x': width/2, 'y': height-20})
+   .style({'font-size': '15px', 'font-weight': 'bold', 'fill': 'black'});
+
+var line = d3.svg.line()
+    .interpolate("basis")
+    .x(function(d) {
+        return xScale(d);})
+    .y(function(d) {
+        return yScale(d) });
+
+var data = [0.2,0.2,0.4,0.4];
+svg.append("svg:path").attr("d", line(data))
+
+var path;
+
+loadEvaluations({
+    callback: function(evaluations, maxInstances, maxAUC) {
+        // Draw evaluations
+        svg.selectAll("circle").data(evaluations)
+            .enter()
+            .append("circle")
+            .attr("id", function(evaluation) {
+                return evaluation.resource
+                                 .replace("\\", "_")
+                                 .replace("/", "_");
+             })            
+            .attr("cx", function(evaluation) {
+                return xScale(evaluation.fpr);
+             })
+            .attr("cy", function(evaluation) {
+                return yScale(evaluation.tpr);
+            })
+            .attr("r", function(evaluation) {
+                if (evaluation.auc == maxAUC) {
+                    return 5;
+                }
+                return 3;
+            })
+            .attr("fill",
+              function (evaluation){
+                if (evaluation.auc == maxAUC) {
+                  return "#f55";
+                } else {return "#000";}
+              })
+            .attr("stroke",
+              function (evaluation){
+                if (evaluation.auc == maxAUC) {
+                  return "#f55";
+                } else {return "#000";}})
+            .on('mouseover', function(evaluation) {
+
+                  d3.select("body").style("cursor", "pointer");
+                  console.log(evaluation);
+                  var configuration;
+                  if (typeof evaluation.nodes === 'undefined') {
+                    configuration = ", fields: " + evaluation.fields;
+                  } else {
+                    configuration = ", node threshold: " + evaluation.nodes;
+                  }
+                  d3.select('svg #evaluationLabel')
+                    .text(evaluation.resource + configuration +
+                          ", AUC: " + evaluation.auc.toFixed(2))
+                    .transition()
+                    .style('opacity', 1);
+                  auc = [{"x": evaluation.fpr, "y": evaluation.tpr},
+                         {"x": 0, "y": 0},
+                         {"x": 1, "y": 0},
+                         {"x": 1, "y": 1},
+                         {"x": evaluation.fpr, "y": evaluation.tpr}];
+                  path = svg.append("path")
+                            .attr("d", lineFunction(auc))
+                            .attr("stroke", "blue")
+                            .attr("stroke-width", 2)
+                            .attr("fill", "yellow")
+                            .attr("opacity", "0.25");
+            })
+            .on('mouseout', function(evaluation) {
+                d3.select('svg #evaluationLabel')
+                  .transition()
+                  .duration(1500)
+                  .style('opacity', 0);
+                path.remove();
+
+              d3.select("body").style("cursor", "default");
+            });
+   }
+});
+
+</script>
+
+<script>
+
+var MEASURES = ["accuracy", "precision", "recall", "f_measure", "phi",
+                "phi_coefficient", "mean_squared_error", "mean_absolute_error",
+                "r_squared"];
+var MIN_MEASURES = ["mean_squared_error", "mean_absolute_error"];
+
+var COLORS = d3.scale.category10();
+
+var metricsForm = d3.select("#metrics");
+var legendWidth = 20;
+width = width + legendWidth;
+var metricsList = [];
+var fillMetrics = true;
+
+// Define container
+var chart = d3.select("#metrics_chart")
+  .append("svg")
+    .attr("class", "chart")
+    .attr("width", width + 340)
+    .attr("height", height + 100)
+    .append("g")
+      // move 0,0 slightly down and right to accomodate axes
+     .attr("transform", "translate(50,20)");
+
+// Evaluation info
+chart.append('text')
+   .attr("text-anchor", "middle")
+   .attr({'id': 'metricsLabel', 'x': width + 30, 'y': height-70})
+   .style({'font-size': '15px', 'font-weight': 'bold', 'fill': 'black'});
+
+chart.append('text')
+   .attr("text-anchor", "middle")
+   .attr({'id': 'metricsTitle', 'x': 80, 'y': -10})
+   .style({'font-size': '15px', 'font-weight': 'bold', 'fill': 'black'});
+
+d3.select('svg #metricsTitle')
+    .text("Evaluation metrics")
+    .transition()
+    .style('opacity', 1);
+
+
+
+// add the tooltip area to the webpage
+var tooltip = d3.select("#tooltip")
+    .style("opacity", 0);
+
+function updateData() {
+    d3.json("metrics.json", function(error, data) {
+
+        var measuresLen = MEASURES.length;
+        var optMeasures = {};
+        var foundMeasures = 0;
+        var kfolds = 0, topRange, bottomRange, kfolds, title;
+        console.log(data[0]);
+        title = ((typeof data[0].nodes === 'undefined') ?
+            "Feature selection: models' perfomance" :
+            "Node threshold: models' perfomance");
+        $(".site-title").html(title);
+        for (var i = 0; i < measuresLen; i++) {
+            var measure = MEASURES[i];
+            var isMinOptimal = MIN_MEASURES.indexOf(measure) > -1;
+            var optimizer = isMinOptimal ? d3.min : d3.max;
+            var boundary = isMinOptimal ? + Infinity : - Infinity;
+            optMeasures[measure] = optimizer(data,
+              function (d) {
+                var newData;
+                if (d["measure"] == measure) {
+                  newData = d.value;
+                } else {
+                  newData = boundary;
+                }; return newData;
+            });
+            topRange = d3.max(data, function(d) { return d.value });
+            bottomRange =  d3.min(data, function(d) {return d.value});
+            kfolds = d3.max(data, function(d){ return d.kfold});
+            if (optMeasures[measure] != boundary) {
+                foundMeasures += 1;
+                if (fillMetrics) {
+                  metricsList.push(measure);
+                }
+            }
+        }
+        if (bottomRange > 0) {
+            bottomRange = 0;
+        }
+        if (topRange < 1) {
+            topRange = 1;
+        }
+
+        // Define identity (1:1) scales
+        var x = d3.scale.linear().domain([0,kfolds]).range([0,width]);
+        var y = d3.scale.linear().domain([topRange, bottomRange])
+                                 .range([0,height]);
+
+        // Draw X-axis grid lines
+        chart.selectAll("line.x")
+          .data(x.ticks(5))
+          .enter().append("line")
+          .attr("class", "x")
+          .attr("x1", x)
+          .attr("x2", x)
+          .attr("y1", 0)
+          .attr("y2", height)
+          .style("stroke", "#ccc");
+
+        // Draw Y-axis grid lines
+        chart.selectAll("line.y")
+          .data(y.ticks(10))
+          .enter().append("line")
+          .attr("class", "y")
+          .attr("x1", 0)
+          .attr("x2", width)
+          .attr("y1", y)
+          .attr("y2", y)
+          .style("stroke", "#ccc");
+
+        // Define stock x and y axis
+        var xAxis = d3.svg.axis().scale(x).orient('bottom').ticks(5)
+                      .tickFormat(d3.format("d")).tickSubdivide(0);
+        var yAxis = d3.svg.axis().scale(y).orient('left').ticks(10);
+
+        chart.append('g')
+          .attr("class", "axis")
+          .attr("transform", "translate(" + 0 + "," + height + ")")
+          .call(xAxis)
+          .append("text")
+            .attr("class", "label")
+            .attr("x", width)
+            .attr("y", -6)
+            .style("text-anchor", "end")
+            .text("Evaluation number");
+
+        chart.append('g')
+          .attr("class", "axis")
+          .call(yAxis);
+
+        var filteredData = data.filter(
+            function(d) {return metricsList.indexOf(d.measure) > -1;}
+        );
+        chart.selectAll(".dot").data([]).exit().remove();
+        chart.selectAll(".dot")
+          .data(filteredData)
+        .enter().append("circle")
+          .attr("class", "dot")
+          .attr("r", function(d) {
+            if (d.value == optMeasures[d.measure]) {return 5;}  return 3;})
+          .attr("cx", function(d) {return x(d.kfold);})
+          .attr("cy", function(d) {return y(d.value);})
+          .style("fill", function(d) {
+                if (d.value == optMeasures[d.measure]) {return COLORS[10];}
+                return COLORS(MEASURES.indexOf(d.measure));})
+          .on("mouseover", function(d) {
+              var str = "";
+              var suffix = "";
+              if (d.value == optMeasures[d.measure]) {
+                suffix = " (optimal value)";
+              }
+              if (typeof d.model_fields !== 'undefined') {
+                  str += "<b>" + d.measure.replace(/_/g, " ") + ": " +
+                         d.value + suffix +
+                         "<br/><br/> model_fields: <br/>" +
+                         d.model_fields.replace(/,/g, ", ") +
+                         "</b><br/><br/>folder: " + d.directory;
+              } else {
+                  str += "<b>" + d.measure.replace(/_/g, " ") + ": " +
+                         d.value + suffix +
+                         "<br/><br/> node threshold: <br/>" +
+                         d.nodes +
+                         "</b><br/><br/>folder: " + d.directory;
+              }
+              tooltip.transition()
+                   .duration(200)
+                   .style("opacity", .9);
+              tooltip.html(str)
+                   .style("left", (d3.event.pageX + 5) + "px")
+                   .style("top", (d3.event.pageY - 28) + "px");
+              d3.select(this).style("cursor", "hand");
+          })
+          .on("mouseout", function(d) {
+              tooltip.transition()
+                   .duration(500)
+                   .style("opacity", 0);
+              d3.select(this).style("cursor", "pointer");
+          })
+
+        // draw legend
+        var legend = chart.selectAll(".legend")
+          .data(COLORS.domain())
+        .enter().append("g")
+          .attr("class", "legend")
+          .attr("transform", function(d, i) {
+             return "translate(0," + i * 20 + ")"; });
+
+        // draw legend colored rectangles
+        legend.append("rect")
+          .attr("x", width + 48)
+          .attr("width", 18)
+          .attr("height", 18)
+          .style("fill", COLORS);
+
+        // draw legend text
+        legend.append("text")
+          .attr("x", width + 70)
+          .attr("y", 9)
+          .attr("dy", ".35em")
+          .style("text-anchor", "start")
+          .text(function(d) {return MEASURES[d].replace(/_/g, " ") +
+                             " (best:" +
+                             optMeasures[MEASURES[d]].toFixed(5) + ")";})
+          .on("click", function(evaluationMetric) {
+            fillMetrics = false;
+            // Determine if current line is visible
+            var index = metricsList.indexOf(MEASURES[evaluationMetric])
+            if (index > -1) {
+              delete metricsList[index];
+            }
+            else {
+              metricsList.push(MEASURES[evaluationMetric]);
+            }
+            updateData();
+          })
+          .on("mouseover", function(d) {
+             d3.select(this).style("cursor", "hand");
+          })
+          .on("mouseout", function(d) {
+              d3.select(this).style("cursor", "pointer");
+          });
+    });
+
+}
+
+updateData();
+
+
+</script>>

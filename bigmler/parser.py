@@ -33,8 +33,10 @@ from bigmler.options.analyze import get_analyze_options
 from bigmler.options.cluster import get_cluster_options
 from bigmler.options.anomaly import get_anomaly_options
 from bigmler.options.sample import get_sample_options
+from bigmler.options.report import get_report_options
 
-SUBCOMMANDS = ["main", "analyze", "cluster", "anomaly", "sample", "delete"]
+SUBCOMMANDS = ["main", "analyze", "cluster", "anomaly", "sample",
+               "delete", "report"]
 MAIN = SUBCOMMANDS[0]
 
 
@@ -198,6 +200,9 @@ under the License.""" % version
 
     subcommand_options["delete"] = delete_options
     subcommand_options["delete"].update(common_options)
+
+    defaults = general_defaults["BigMLer report"]
+    subcommand_options["report"] = get_report_options(defaults=defaults)
 
     for subcommand in SUBCOMMANDS:
         subparser = subparsers.add_parser(subcommand)

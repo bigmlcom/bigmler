@@ -35,6 +35,7 @@ from bigmler.tests.basic_cluster_prediction_steps import i_create_all_cluster_re
 from bigmler.tests.basic_anomaly_prediction_steps import i_create_all_anomaly_resources, i_check_create_anomaly
 from bigmler.tests.ml_tst_prediction_steps import i_create_all_mlm_resources
 from bigmler.tests.common_steps import check_debug
+from bigmler.reports import REPORTS_DIR
 
 
 def shell_execute(command, output, test=None, options=None, test_rows=None):
@@ -1292,6 +1293,32 @@ def i_create_kfold_cross_validation_metric(step, k_folds=None, metric=None):
                                         "evaluation")
             assert True
     except OSError as e:
+        assert False
+
+
+#@step(r'I generate a report from the output directory$')
+def i_generate_report(step):
+    try:
+        retcode = check_call("bigmler report --no-server --from-dir " +
+                             world.directory,
+                             shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.output = os.path.join(world.directory, "test", "kfold1",
+                                        "evaluation")
+            assert True
+    except OSError as e:
+        assert False
+
+
+#@step(r'a symlink file is generated in the reports directory$')
+def is_symlink(step):
+    resource_file = os.path.join(world.directory, REPORTS_DIR, "symlink")
+    try:
+        with open(resource_file, open_mode("r")) as resource_handler:
+            assert True
+    except IOError:
         assert False
 
 

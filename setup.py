@@ -49,7 +49,7 @@ setuptools.setup(
     license="http://www.apache.org/licenses/LICENSE-2.0",
     setup_requires = ['nose'],
     packages = ['bigmler', 'bigmler.processing', 'bigmler.analyze',
-                'bigmler.cluster', 'bigmler.anomaly',
+                'bigmler.cluster', 'bigmler.anomaly', 'bigmler.report',
                 'bigmler.options', 'bigmler.delete', 'bigmler.sample',
                 'bigmler.tests'],
     install_requires = ['bigml>=4.1.5, <4.2.0'],
