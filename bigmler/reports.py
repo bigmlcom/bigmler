@@ -68,7 +68,7 @@ CROSS_VALIDATION_FILE = "evaluation.json"
 MODEL_KEY = "model"
 METRICS_FILE = "metrics.json"
 EVALUATIONS_JSON_FILE = "evaluations_json.json"
-SERVER_DIRECTORY = "bigmler/reports/"
+SERVER_DIRECTORY = os.path.join("bigmler", "reports")
 HOME = os.getenv("HOME")
 
 PREFIX = "average_"
@@ -273,7 +273,7 @@ def evaluations_report(args):
                                 EVALUATIONS_JSON_FILE), "w"))
 
     # checks the global server directories
-    check_subdir(HOME, SERVER_DIRECTORY.split("/")[0])
+    check_subdir(HOME, SERVER_DIRECTORY.split(os.sep)[0])
     check_subdir(HOME, SERVER_DIRECTORY)
 
     # copy templates to directory
