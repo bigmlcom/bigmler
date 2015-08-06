@@ -69,7 +69,8 @@ MODEL_KEY = "model"
 METRICS_FILE = "metrics.json"
 EVALUATIONS_JSON_FILE = "evaluations_json.json"
 SERVER_DIRECTORY = os.path.join("bigmler", "reports")
-HOME = os.getenv("HOME")
+HOME = os.getenv("HOME") or (os.path.join(os.getenv("HOMEDRIVE"),
+                             os.getenv("HOMEPATH")))
 
 PREFIX = "average_"
 SESSION_FILE = "bigmler_sessions"
