@@ -284,8 +284,15 @@ def evaluations_report(args):
     destination_file = os.path.join(destination_dir, basename)
     shutil.copyfile(ANALYZE_TEMPLATE, destination_file)
     dirname = os.path.join(HOME, SERVER_DIRECTORY)
+    current_directory = os.getcwd()
+    os.chdir(dirname)
     symlink = tempfile.NamedTemporaryFile(dir=dirname).name
-    os.symlink(base_destination_dir, symlink)
+    try:
+        os.symlink(base_destination_dir, symlink)
+    except AttributeError:
+        os.mkdir(os.path.basename(symlink))
+        shutil.copytree(base_destination_dir, symlink)
+
 
     #saves the symlink file name in the current reports directory
     log_created_resources("symlink", base_destination_dir,

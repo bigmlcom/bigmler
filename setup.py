@@ -53,7 +53,7 @@ setuptools.setup(
                 'bigmler.options', 'bigmler.delete', 'bigmler.sample',
                 'bigmler.tests'],
     install_requires = ['bigml>=4.1.5, <4.2.0'],
-    package_data={'bigmler':['static/*.json', 'static/*.html]},
+    package_data={'bigmler':['static/*.json', 'static/*.html']},
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
