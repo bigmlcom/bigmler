@@ -308,7 +308,7 @@ svg.selectAll("line.y")
 // Loads multiple evaluations
 
 var loadEvaluations = function(options) {
-    $.get( "evaluations_json.json", function( data ) {
+    $.getJSON("evaluations_json.json", function( data ) {
       var evaluations_json = data;
       var classes = evaluations_json[0].class_names;
       if (typeof classes !== 'undefined') {

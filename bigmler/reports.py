@@ -292,7 +292,7 @@ def evaluations_report(args):
         os.symlink(base_destination_dir, symlink)
     except AttributeError:
         os.mkdir(os.path.basename(symlink))
-        shutil.copytree(base_destination_dir, symlink)
+        shutil.copytree(destination_dir, os.path.join(symlink, ANALYZE_DIR))
 
 
     #saves the symlink file name in the current reports directory
