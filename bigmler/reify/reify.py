@@ -22,6 +22,7 @@ from __future__ import absolute_import
 import sys
 import math
 import pprint
+import datetime
 
 from bigml.resourcehandler import RESOURCE_RE, RENAMED_RESOURCES
 from bigml.resourcehandler import get_resource_id, get_resource_type
@@ -37,16 +38,16 @@ ORIGINS = {
     "ensemble": [["dataset", "datasets"]],
     "cluster": [["dataset", "datasets"]],
     "anomaly": [["dataset", "datasets"]],
-    "prediction": [["model", "ensemble"], ["input_data"]],
+    "prediction": [["models", "model"], ["input_data"]],
     "centroid": [["cluster"], ["input_data"]],
     "anomalyscore": [["anomaly"], ["input_data"]],
-    "evaluation": [["model", "ensemble"], ["dataset"]],
-    "batchprediction": [["model", "ensemble"], ["dataset"]],
+    "evaluation": [["models", "model"], ["dataset"]],
+    "batchprediction": [["models", "model"], ["dataset"]],
     "batchcentroid": [["cluster"], ["dataset"]],
     "batchanomalyscore": [["anomaly"], ["dataset"]]
 }
 
-
+QS = 'limit=-1;exclude=root'
 pp = pprint.PrettyPrinter(indent=4)
 
 
@@ -104,8 +105,8 @@ def get_input_fields(resource, referrer={}):
 
     """
     input_fields_ids = resource.get('input_fields', [])
-
     if referrer:
+        referrer_input_fields = [[]]
         # compare fields by name
         resource_fields = Fields(
             {'resource': resource['resource'], 'object': resource})
@@ -114,7 +115,29 @@ def get_input_fields(resource, referrer={}):
         input_fields = [resource_fields.field_name(field_id) for field_id in
                         input_fields_ids]
         input_fields = sorted(input_fields)
-        if input_fields in [[], sorted(referrer_fields.fields_by_name.keys())]:
+        referrer_type = get_resource_type(referrer)
+        if referrer_type == 'dataset':
+            referrer_fields = referrer_fields.preferred_fields()
+            referrer_fields = sorted([field['name']
+                                      for _, field in referrer_fields.items()])
+        else:
+            referrer_fields = sorted(referrer_fields.fields_by_name.keys())
+        # check referrer input fields to see if they are equal
+        referrer_input_fields.append(referrer_fields)
+        # check whether the resource has an objective field not included in
+        # the input fields list
+        resource_type = get_resource_type(resource)
+        if resource_type == 'model':
+            objective_id = resource.get('objective_field')
+            try:
+                objective_id = objective_id.get('id')
+            except AttributeError:
+                pass
+            referrer_objective = resource_fields.field_name(
+                objective_id)
+            referrer_input_fields.append([name for name in referrer_fields
+                                          if name != referrer_objective])
+        if input_fields in referrer_input_fields:
             return []
     return input_fields_ids
 
@@ -133,7 +156,12 @@ class ResourceMap():
         self.api = api
 
     def get_resource(self, resource_id):
-        return self.api.check_resource(resource_id).get('object')
+        """Auxiliar method to retrieve resources. The query string ensures
+           low bandwith usage and full fields structure.
+
+        """
+        return self.api.check_resource(
+            resource_id, query_string=QS).get('object')
 
     def add(self, objects):
         """Extend the list of objects
@@ -228,31 +256,40 @@ class ResourceMap():
 
     def reify_prediction(self, resource):
 
+        resource_type = get_resource_type(resource)
         child = self.get_resource(resource)
-
-        if child.get('models', '') != '':
-            parent = self.get_resource('ensemble/%s' % self.get_resource(child['models'][0])['ensemble_id'])
-        elif child.get('model', '') != '':
-            parent = self.get_resource(child['model'])
+        origin, parent = get_origin_info(child)
+        if origin == 'models':
+            model = self.get_resource(parent[0])
+            parent =  self.get_resource('ensemble/%s' % model['ensemble_id'])
         else:
-            raise Exception("Prediction does not have a valid parent?")
+            parent = self.get_resource(parent)
 
         opts = { "create": {}, "update": {}, "args": {} }
 
-        opts['create'].update( inherit_setting(parent, child, 'category', 0) )
-        opts['create'].update( default_setting(child, 'combiner', 0, None) )
-        opts['create'].update( inherit_setting(parent, child, 'description', '') )
+        # inherited create options
+        pred_defaults = COMMON_DEFAULTS.get("create", {})
+        pred_defaults.update({'tags': [[]]})
+        for attribute, default_value in pred_defaults.items():
+            opts["create"].update(
+                inherit_setting(
+                    parent, child, attribute, default_value[0]))
+
+        # create options
+        dataset_defaults = DEFAULTS[resource_type].get("create", {})
+        for attribute, default_value in dataset_defaults.items():
+            opts["create"].update(
+                default_setting(child, attribute, *default_value))
 
         opts['create'].update( {'input_data': child['input_data']} )
 
-        opts['create'].update( default_setting(child, 'missing_strategy', 0) )
+        # name, exclude automatic naming alternatives
+        autonames = [u'']
+        autonames.append(
+            u'Prediction for %s' % child['objective_field_name'])
+        if not child.get('name', '') in autonames:
+            opts['create'].update({"name": child.get('name', '')})
 
-        if not child.get('name', '') in [ '', 'Prediction for %s' % child['objective_field_name'] ]:
-            opts['create'].update({ "name": child['name'] })
-
-        opts['update'].update( default_setting(child, 'private', True) )
-        opts['create'].update( inherit_setting(parent, child, 'tags', []) )
-        opts['update'].update( default_setting(child, 'threshold', None, {}) )
 
         return ([ child, parent ], opts)
 
@@ -522,14 +559,18 @@ class ResourceMap():
         return ([ child, parent ], opts)
 
     def reify_ensemble(self, resource):
-
+        resource_type = get_resource_type(resource)
         child = self.get_resource(resource)
-        parent = self.get_resource(child['dataset'])
+        origin, parent = get_origin_info(child)
+        parent = self.get_resource(parent)
 
-        [ family, opts ] = reify_model(child['models'][0])
+        [ family, opts ] = self.reify_model(child['models'][0])
 
-        opts['create'].update( default_setting(child, 'number_of_models', 10) )
-        opts['create'].update( default_setting(child, 'tlp', 1) )
+        # create options
+        dataset_defaults = DEFAULTS[resource_type].get("create", {})
+        for attribute, default_value in dataset_defaults.items():
+            opts["create"].update(
+                default_setting(child, attribute, *default_value))
 
         return ([ child, parent ], opts)
 
@@ -540,8 +581,6 @@ class ResourceMap():
 
         resource_type = get_resource_type(resource)
         child = self.get_resource(resource)
-        grandparent = {}
-        parent = {}
         origin, parent = get_origin_info(child)
         parent = self.get_resource(parent)
         # as two-steps result from a cluster
@@ -598,10 +637,11 @@ class ResourceMap():
         # name, exclude automatic naming alternatives
         autonames = [u'']
         autonames.append(
-            u"'%s model" % grandparent.get('name', ''))
+            u"%s model" % grandparent.get('name', ''))
         autonames.append(
             u"Cluster %s - %s" % (int(child.get('centroid', "0"), base=16),
                                   parent['name']))
+        print autonames
         if not child.get('name', '') in autonames:
             opts['create'].update({"name": child.get('name', '')})
 
@@ -703,8 +743,6 @@ class ResourceMap():
 
         if not child.get('range', []) in [ [], [1, grandparent.get('rows', None)] ]:
             opts['create'].update({ "range": child['range'] })
-
-
         return ([ child, parent ], opts)
 
 

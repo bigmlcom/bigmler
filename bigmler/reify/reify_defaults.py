@@ -80,7 +80,22 @@ DEFAULTS = {
             'weight_field': [None, ''],
             'objective_weights': [None, []],
             'missing_splits': [False],
-            'node_threshold': 512
+            'node_threshold': [512]
+        }
+    },
+    "ensemble": {
+        "create": {
+            'number_of_models': [10],
+            'tlp': [1]
+        }
+    },
+    "prediction": {
+        "create": {
+            'combiner': [0, None],
+            'ordering': [0],
+            'missing_strategy': [0],
+            'private': [True],
+            'threshold': [None, {}]
         }
     }
 }
