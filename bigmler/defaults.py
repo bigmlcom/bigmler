@@ -211,7 +211,8 @@ FLAGS = {
     'BigMLer report': [
         {'flag': 'from_dir', 'type': 'string'},
         {'flag': 'port', 'type': 'integer'},
-        {'flag': 'no_server', 'type': 'boolean'}]}
+        {'flag': 'no_server', 'type': 'boolean'}],
+    'BigMLer reify': []}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):
