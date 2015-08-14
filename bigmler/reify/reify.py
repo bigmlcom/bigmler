@@ -34,20 +34,20 @@ ORIGINS = {
     "dataset": [[
         "origin_batch_resource", "cluster", "datasets",
         "origin_dataset", "source"]],
-    "model": [["cluster", "dataset", "datasets"]],
-    "ensemble": [["dataset", "datasets"]],
-    "cluster": [["dataset", "datasets"]],
-    "anomaly": [["dataset", "datasets"]],
-    "prediction": [["models", "model"], ["input_data"]],
-    "centroid": [["cluster"], ["input_data"]],
-    "anomalyscore": [["anomaly"], ["input_data"]],
-    "evaluation": [["models", "model"], ["dataset"]],
+    "model": [["cluster", "datasets", "dataset"]],
+    "ensemble": [["datasets", "dataset"]],
+    "cluster": [["datasets", "dataset"]],
+    "anomaly": [["datasets", "dataset"]],
+    "prediction": [["models", "model"]],
+    "centroid": [["cluster"]],
+    "anomalyscore": [["anomaly"]],
+    "evaluation": [["ensemble", "model"], ["dataset"]],
     "batchprediction": [["models", "model"], ["dataset"]],
     "batchcentroid": [["cluster"], ["dataset"]],
     "batchanomalyscore": [["anomaly"], ["dataset"]]
 }
 
-QS = 'limit=-1;exclude=root'
+QS = 'limit=-1;exclude=root,trees'
 pp = pprint.PrettyPrinter(indent=4)
 
 
@@ -61,15 +61,26 @@ def get_method_suffix(resource_type):
         sys.exit('Non allowed resource type. Check the provided resource ID')
 
 
-def get_origin_info(resource, argument=0):
+def get_origin_info(resource):
     """Key and value that stores the origin resource id
 
     """
     resource_type = get_resource_type(resource)
-    for origin in ORIGINS.get(resource_type, [])[argument]:
-        info = (origin, resource.get(origin))
-        if info[1] is not None:
-            return info
+    origins = ORIGINS.get(resource_type, [])
+    found_origins = []
+    for argument_origins in origins:
+        for origin in argument_origins:
+            info = resource.get(origin)
+            if info:
+                found_origins.append((origin, info))
+                break
+
+    if not found_origins:
+        sys.exit("Failed to find the complete origin information.")
+    if len(found_origins) == 1:
+        return found_origins[0]
+    else:
+        return found_origins
 
 
 def get_fields_changes(resource, referrer={}):
@@ -142,6 +153,82 @@ def get_input_fields(resource, referrer={}):
     return input_fields_ids
 
 
+def non_inherited_opts(resource, referrer, opts, call="create"):
+    """Stores the options that have not been inherited from origin resources
+
+    """
+    for attribute, default_value in COMMON_DEFAULTS[call].items():
+        opts[call].update(
+            inherit_setting(
+                referrer, resource, attribute, default_value[0]))
+
+
+def non_default_opts(resource, opts, call="create"):
+    """Stores the options that are not constant defaults
+
+    """
+    resource_type = get_resource_type(resource)
+    defaults = DEFAULTS[resource_type].get(call, {})
+    for attribute, default_value in defaults.items():
+        opts[call].update(
+            default_setting(resource, attribute, *default_value))
+
+
+
+def common_dataset_opts(resource, referrer, opts, call="create"):
+    """Stores the options that are common to all dataset and model types
+
+    """
+    # not inherited create options
+    non_inherited_opts(resource, referrer, opts)
+
+    # non-default create options
+    non_default_opts(resource, opts)
+
+    # changes in fields structure
+    fields_attributes = get_fields_changes(resource, referrer=referrer)
+    if fields_attributes:
+        opts['create'].update({"fields": fields_attributes})
+
+    # input fields
+    input_fields = get_input_fields(resource, referrer=referrer)
+    if input_fields:
+        opts['create'].update({'input_fields': input_fields})
+
+
+def common_model_opts(resource, referrer, opts, call="create"):
+    """Stores the options that are commont to all the model types
+
+    """
+    common_dataset_opts(resource, referrer, opts, call=call)
+
+    # inherited row range
+    if (not resource.get('range', []) in
+            [[], [1, referrer.get('rows', None)]]):
+        opts['create'].update({ "range": resource['range'] })
+
+
+def common_batch_options(resource, referrer1, referrer2, opts, call="create"):
+    """Stores the options that are common to all batch resources
+
+    """
+    # non-inherited create options
+    non_inherited_opts(resource, referrer1, opts)
+
+    # non-default create options
+    non_default_opts(resource, opts)
+
+    # model to dataset mapping
+    fields = referrer2['fields'].keys()
+    default_map = dict(zip(fields, fields))
+    opts['create'].update(
+        default_setting(resource, 'fields_map', default_map))
+
+    if not child.get('all_fields', False):
+        opts['create'].update(
+            default_setting(resource, 'output_fields', [[]]))
+
+
 class ResourceMap():
     """List of resources in the reverse chain of creation
 
@@ -160,6 +247,7 @@ class ResourceMap():
            low bandwith usage and full fields structure.
 
         """
+
         return self.api.check_resource(
             resource_id, query_string=QS).get('object')
 
@@ -184,7 +272,8 @@ class ResourceMap():
             else:
                 counts[resource_type] = 1
 
-            buf = buf.replace('"%s"' % obj, '%s%s' % ( resource_type, counts[resource_type] ))
+            buf = buf.replace('"%s"' % obj, '%s%s' % (
+                resource_type, counts[resource_type]))
 
         return buf
 
@@ -204,59 +293,68 @@ class ResourceMap():
         source_defaults["name"] = name_as_file
 
         for attribute, default_value in source_defaults.items():
-            opts["create"].update( default_setting(child, attribute, *default_value))
+            opts["create"].update(
+                default_setting(child, attribute, *default_value))
 
         # update options
         source_defaults = DEFAULTS[resource_type].get("update", {})
-        source_defaults.update(COMMON_DEFAULTS.get("update", {}))
 
         for attribute, default_value in source_defaults.items():
-            opts["update"].update( default_setting(child, attribute, *default_value))
+            opts["update"].update(
+                default_setting(child, attribute, *default_value))
 
         return ([ child ], opts)
 
     def reify_anomalyscore(self, resource):
 
         child = self.get_resource(resource)
-        parent = self.get_resource(child['anomaly'])
+        _, parent = get_origin_info(child)
 
         opts = { "create": {}, "update": {}, "args": {} }
 
-        opts['create'].update( inherit_setting(parent, child, 'category', 0) )
-        opts['create'].update( inherit_setting(parent, child, 'description', '') )
-        opts['create'].update( {'input_data': child['input_data']} )
+        # non-inherited create options
+        non_inherited_opts(child, parent, opts)
 
-        if not child.get('name', '') in [ '', 'Score for %s' % parent['name'] ]:
-            opts['create'].update({ "name": child['name'] })
+        opts['create'].update({'input_data': child['input_data']})
 
-        opts['create'].update( inherit_setting(parent, child, 'tags', []) )
+        # name, exclude automatic naming alternatives
+        autonames = [u'']
+        autonames.append(
+            u'Score for %s' % parent['name'])
+        if not child.get('name', '') in autonames:
+            opts['create'].update({"name": child.get('name', '')})
 
         return ([ child, parent ], opts)
 
     def reify_centroid(self, resource):
 
         child = self.get_resource(resource)
-        parent = self.get_resource(child['cluster'])
+        _, parent = get_origin_info(child)
 
         opts = { "create": {}, "update": {}, "args": {} }
 
-        opts['create'].update( inherit_setting(parent, child, 'category', 0) )
-        opts['create'].update( inherit_setting(parent, child, 'description', '') )
+        # non-inherited create options
+        non_inherited_opts(child, parent, opts)
+
+        # non-default create options
+        non_default_opts(child, opts)
+
         opts['create'].update( {'input_data': child['input_data']} )
 
-        opts['create'].update( default_setting(child, 'missing_strategy', 0) )
+        # name, exclude automatic naming alternatives
+        autonames = [u'']
+        autonames.append(
+            u'Centroid for %s' % parent['name'])
+        if not child.get('name', '') in autonames:
+            opts['create'].update({"name": child.get('name', '')})
 
-        if not child.get('name', '') in [ '', 'Centroid for %s' % parent['name'] ]:
-            opts['create'].update({ "name": child['name'] })
-
-        opts['update'].update( default_setting(child, 'private', True) )
-        opts['create'].update( inherit_setting(parent, child, 'tags', []) )
+        # non-default update options
+        non_default_opts(child, opts, call="update")
 
         return ([ child, parent ], opts)
 
     def reify_prediction(self, resource):
 
-        resource_type = get_resource_type(resource)
         child = self.get_resource(resource)
         origin, parent = get_origin_info(child)
         if origin == 'models':
@@ -267,19 +365,11 @@ class ResourceMap():
 
         opts = { "create": {}, "update": {}, "args": {} }
 
-        # inherited create options
-        pred_defaults = COMMON_DEFAULTS.get("create", {})
-        pred_defaults.update({'tags': [[]]})
-        for attribute, default_value in pred_defaults.items():
-            opts["create"].update(
-                inherit_setting(
-                    parent, child, attribute, default_value[0]))
+        # non-inherited create options
+        non_inherited_opts(child, parent, opts)
 
-        # create options
-        dataset_defaults = DEFAULTS[resource_type].get("create", {})
-        for attribute, default_value in dataset_defaults.items():
-            opts["create"].update(
-                default_setting(child, attribute, *default_value))
+        # non-default create options
+        non_default_opts(child, opts)
 
         opts['create'].update( {'input_data': child['input_data']} )
 
@@ -296,281 +386,192 @@ class ResourceMap():
     def reify_batchanomalyscore(self, resource):
 
         child = self.get_resource(resource)
-        parentB = self.get_resource(child['dataset'])
-        parentA = self.get_resource(child['anomaly'])
+        # batch resources have 2 different origins as arguments
+        [(_, parent1),
+         (_, parent2)] = get_origin_info(resource)
+        parent1 = self.get_resource(parent1)
+        parent2 = self.get_resource(parent2)
 
         opts = { "create": {}, "update": {}, "args": {} }
 
-        opts['create'].update( default_setting(child, 'all_fields', False) )
-        opts['create'].update( inherit_setting(parentA, child, 'category', 0) )
-        opts['create'].update( inherit_setting(parentA, child, 'description', '') )
+        # common create options for batch resources
+        common_batch_options(child, parent1, parent2, opts)
 
-        default_map = dict([ (el, el) for el in parentB['fields'] ])
-        opts['create'].update( default_setting(child, 'fields_map', default_map) )
+        # name, exclude automatic naming alternatives
+        autonames = [u'']
+        autonames.append(
+            u'Batch Anomaly Score of %s with %s' % (
+                parent1.get('name', ''), parent2.get('name', '')))
+        if not child.get('name', '') in autonames:
+            opts['create'].update({"name": child.get('name', '')})
 
-        opts['create'].update( default_setting(child, 'header', True) )
+        if child.get('header', True):
+            opts['create'].update(
+                default_setting(child, 'score_name', [None, '']))
 
-        if not child.get('name', '') in [ '', 'Batch Anomaly Score of %s with %s' % ( parentA.get('name', ''), parentB.get('name', '')) ]:
-            opts['create'].update({ "name": child['name'] })
-
-        opts['create'].update( default_setting(child, 'output_dataset', False) )
-
-        if child.get('all_fields', False) == False:
-            opts['create'].update( default_setting(child, 'output_fields', []) )
-
-        if child.get('header', True) == True:
-            opts['create'].update( default_setting(child, 'score_name', None, '') )
-
-        opts['create'].update( default_setting(child, 'separator', ',') )
-        opts['create'].update( inherit_setting(parentA, child, 'tags', []) )
-
-        return ([ child, parentA, parentB ], opts)
+        return ([ child, parent1, parent2 ], opts)
 
     def reify_batchcentroid(self, resource):
 
         child = self.get_resource(resource)
-        parentB = self.get_resource(child['dataset'])
-        parentA = self.get_resource(child['cluster'])
+        # batch resources have 2 different origins as arguments
+        [(_, parent1),
+         (_, parent2)] = get_origin_info(resource)
+        parent1 = self.get_resource(parent1)
+        parent2 = self.get_resource(parent2)
 
         opts = { "create": {}, "update": {}, "args": {} }
 
-        opts['create'].update( default_setting(child, 'all_fields', False) )
-        opts['create'].update( inherit_setting(parentA, child, 'category', 0) )
-        opts['create'].update( default_setting(child, 'distance', False) )
+        # common create options for batch resources
+        common_batch_options(child, parent1, parent2, opts)
 
-        if child.get('header', True) == True:
-            opts['create'].update( default_setting(child, 'distance_name', None, '') )
-            opts['create'].update( default_setting(child, 'centroid_name', None, '') )
+        if child.get('header', True):
+            opts['create'].update(
+                default_setting(child, 'distance_name', [None, '']))
 
-        opts['create'].update( inherit_setting(parentA, child, 'description', '') )
+        # name, exclude automatic naming alternatives
+        autonames = [u'']
+        autonames.append(
+            u'Batch Centroid of %s with %s' % (
+                parent1.get('name', ''), parent2.get('name', '')))
+        if not child.get('name', '') in autonames:
+            opts['create'].update({"name": child.get('name', '')})
 
-        default_map = dict([ (el, el) for el in parentB['fields'] ])
-        opts['create'].update( default_setting(child, 'fields_map', default_map) )
 
-        opts['create'].update( default_setting(child, 'header', True) )
-
-        if not child.get('name', '') in [ '', 'Batch Centroid of %s with %s' % ( parentA.get('name', ''), parentB.get('name', '')) ]:
-            opts['create'].update({ "name": child['name'] })
-
-        opts['create'].update( default_setting(child, 'output_dataset', False) )
-
-        if child.get('all_fields', False) == False:
-            opts['create'].update( default_setting(child, 'output_fields', []) )
-
-        opts['create'].update( default_setting(child, 'separator', ',') )
-        opts['create'].update( inherit_setting(parentA, child, 'tags', []) )
-
-        return ([ child, parentA, parentB ], opts)
+        return ([ child, parent1, parent2 ], opts)
 
     def reify_batchprediction(self, resource):
 
         child = self.get_resource(resource)
-        parentB = self.get_resource(child['dataset'])
-
-        if child['model'] != "":
-            parentA = self.get_resource(child['model'])
-        elif child['ensemble'] != "":
-            parentA = self.get_resource(child['ensemble'])
-        else:
-            raise Exception("Ensemble does not have a valid parent?")
+        # evalutations have 2 different origins as arguments
+        [(_, parent1),
+         (_, parent2)] = get_origin_info(resource)
+        parent1 = self.get_resource(parent1)
+        parent2 = self.get_resource(parent2)
 
         opts = { "create": {}, "update": {}, "args": {} }
 
-        opts['create'].update( default_setting(child, 'all_fields', False) )
-        opts['create'].update( inherit_setting(parentA, child, 'category', 0) )
-        opts['create'].update( default_setting(child, 'confidence_threshold', None) )
-        opts['create'].update( default_setting(child, 'combiner', 0, None) )
-        opts['create'].update( default_setting(child, 'confidence', False) )
-        opts['create'].update( default_setting(child, 'confidence_name', None, '') )
-        opts['create'].update( inherit_setting(parentA, child, 'description', '') )
+        # common create options for batch resources
+        common_batch_options(child, parent1, parent2, opts)
 
-        default_map = dict([ (el, el) for el in parentB['fields'] ])
-        opts['create'].update( default_setting(child, 'fields_map', default_map) )
+        if child.get('header', True):
+            opts['create'].update(
+                default_setting(child, 'prediction_name', [None, '']))
+            opts['create'].update(
+                default_setting(child, 'centroid_name', [None, '']))
 
-        opts['create'].update( default_setting(child, 'header', True) )
-        opts['create'].update( default_setting(child, 'missing_strategy', 0) )
+        # name, exclude automatic naming alternatives
+        autonames = [u'']
+        autonames.append(
+            u'Batch Prediction of %s with %s' % (
+                parent1.get('name', ''), parent2.get('name', '')))
+        if not child.get('name', '') in autonames:
+            opts['create'].update({"name": child.get('name', '')})
 
-        if not child.get('name', '') in [ '', 'Batch Prediction of %s with %s' % ( parentA.get('name', ''), parentB.get('name', '')) ]:
-            opts['create'].update({ "name": child['name'] })
-
-        opts['create'].update( default_setting(child, 'negative_class', None) )
-        opts['create'].update( default_setting(child, 'negative_class_confidence', None) )
-        opts['create'].update( default_setting(child, 'output_dataset', False) )
-
-        if child.get('all_fields', False) == False:
-            opts['create'].update( default_setting(child, 'output_fields', []) )
-
-        opts['create'].update( default_setting(child, 'positive_class', None) )
-
-        if child.get('header', True) == True:
-            opts['create'].update( default_setting(child, 'prediction_name', None, '') )
-
-        opts['create'].update( default_setting(child, 'separator', ',') )
-        opts['create'].update( inherit_setting(parentA, child, 'tags', []) )
-        opts['create'].update( default_setting(child, 'threshold', None) )
-
-        return ([ child, parentA, parentB ], opts)
-
-    #
-    # cluster come from datasets
+        return ([ child, parent1, parent2 ], opts)
 
     def reify_evaluation(self, resource):
+        """ Extracts origin resources and arguments for evaluations:
+            model/ensemble, dataset and args
+
+        """
 
         child = self.get_resource(resource)
-        parentB = self.get_resource(child['dataset'])
+        # evalutations have 2 different origins as arguments
+        [(_, parent1),
+         (_, parent2)] = get_origin_info(resource)
+        parent1 = self.get_resource(parent1)
+        parent2 = self.get_resource(parent2)
 
-        if child['ensemble'] != "":
-            parentA = self.get_resource(child['ensemble'])
-        elif child['model'] != "":
-            parentA = self.get_resource(child['model'])
-        else:
-            raise Exception("Ensemble does not have a valid parent?")
 
         opts = { "create": {}, "update": {}, "args": {} }
 
-        opts['create'].update( inherit_setting(parentA, child, 'category', 0) )
-        opts['create'].update( default_setting(child, 'confidence_threshold', None) )
-        opts['create'].update( default_setting(child, 'combiner', 0, None) )
-        opts['create'].update( inherit_setting(parentA, child, 'description', '') )
+        # non-inherited create options
+        non_inherited_opts(child, parent1, opts)
 
-        default_map = dict([ (el, el) for el in parentB['fields'] ])
-        opts['create'].update( default_setting(child, 'fields_map', default_map) )
+        # non-default create options
+        non_default_opts(child, opts)
 
-        opts['create'].update( default_setting(child, 'missing_strategy', 0) )
+        # model/ensemble to dataset mapping
+        fields = parent2['fields'].keys()
+        default_map = dict(zip(fields, fields))
+        opts['create'].update(
+            default_setting(child, 'fields_map', default_map))
 
-        if not child.get('name', '') in [ '', 'Evaluation of %s with %s' % ( parentA.get('name', ''), parentB.get('name', '')) ]:
-            opts['create'].update({ "name": child['name'] })
+        # name, exclude automatic naming alternatives
+        autonames = [u'']
+        autonames.append(
+            u'Evaluation of %s with %s' % (parent1.get('name', ''),
+                                           parent2.get('name', '')))
+        if not child.get('name', '') in autonames:
+            opts['create'].update({"name": child.get('name', '')})
 
-        opts['create'].update( default_setting(child, 'ordering', 0) )
-        opts['create'].update( default_setting(child, 'out_of_bag', False) )
-        opts['create'].update( default_setting(child, 'negative_class', None) )
-        opts['create'].update( default_setting(child, 'positive_class', None) )
-
-        opts['update'].update( default_setting(child, 'private', True) )
-
-        if not child.get('range', []) in [ [], [1, parentB.get('rows', None)] ]:
+        # range in dataset
+        if not child.get('range', []) in [[], [1, parent2.get('rows', None)]]:
             opts['create'].update({ "range": child['range'] })
 
-        opts['create'].update( default_setting(child, 'replacement', False) )
-        opts['create'].update( default_setting(child, 'sample_rate', 1.0) )
-        opts['create'].update( default_setting(child, 'seed', None) )
-        opts['create'].update( inherit_setting(parentA, child, 'tags', []) )
-        opts['create'].update( default_setting(child, 'threshold', None) )
 
-        return ([ child, parentA, parentB ], opts)
+        return ([ child, parent1, parent2 ], opts)
 
-    #
-    # cluster come from datasets
 
     def reify_anomaly(self, resource):
+        """Extracts origin resource and arguments for anomaly detectors
+
+        """
 
         child = self.get_resource(resource)
-        parent = self.get_resource(child['dataset'])
+        _, parent = get_origin_info(child)
+        parent = self.get_resource(parent)
 
         opts = { "create": {}, "update": {}, "args": {} }
 
-        opts['create'].update( default_setting(child, 'anomaly_seed', None) )
-        opts['create'].update( inherit_setting(parent, child, 'category', 0) )
-        opts['create'].update( default_setting(child, 'constraints', False) )
-        opts['create'].update( inherit_setting(parent, child, 'description', '') )
-        opts['create'].update( default_setting(child, 'excluded_fields', []) )
+        # options common to all model types
+        common_model_opts(child, parent, opts)
 
-        for field in child['model']['fields']:
-            if not field in parent['fields']: continue
-
-            field_opts = {}
-
-            if not child['model']['fields'][field].get("name", "") in [ "", parent['fields'][field].get("name", "") ]:
-                opts['create'].update({ "fields": { field: { "name": child['model']['fields'][field]["name"] } } })
-
-
-        opts['create'].update( default_setting(child, 'id_fields', [] ) )
-
-        if not child.get('input_fields', []) in [ [], [ el for el in sorted(parent['fields'].keys()) if parent['fields'][el]['preferred'] == True ] ]:
-            opts['create'].update( { "input_fields": child['input_fields'] } )
-
-        opts['create'].update( default_setting(child, 'forest_size', 128) )
-
-        if not child.get('name', '') in [ '', '%s anomaly detector' % parent.get('name', '') ]:
-            opts['create'].update({ "name": child['name'] })
-
-        opts['create'].update( default_setting(child, 'out_of_bag', False) )
-
-        if not child.get('range', []) in [ [], [1, parent.get('rows', None)] ]:
-            opts['create'].update({ "range": child['range'] })
-
-        opts['create'].update( default_setting(child, 'replacement', False) )
-        opts['create'].update( default_setting(child, 'sample_rate', 1.0) )
-        opts['create'].update( default_setting(child, 'seed', None) )
-        opts['create'].update( inherit_setting(parent, child, 'tags', []) )
-        opts['create'].update( default_setting(child, 'top_n', 10) )
+        # name, exclude automatic naming alternatives
+        autonames = [u'']
+        autonames.append(
+            u'%s anomaly detector' % parent.get('name', ''))
+        if not child.get('name', '') in autonames:
+            opts['create'].update({"name": child.get('name', '')})
 
         return ([ child, parent ], opts)
 
-    #
-    # cluster come from datasets
-
     def reify_cluster(self, resource):
+        """Extracts origin resources and arguments for clusters
 
+        """
         child = self.get_resource(resource)
-        parent = self.get_resource(child['dataset'])
+        _, parent = get_origin_info(child)
+        parent = self.get_resource(parent)
 
         opts = { "create": {}, "update": {}, "args": {} }
 
-        opts['create'].update( default_setting(child, 'balance_fields', True) )
-        opts['create'].update( inherit_setting(parent, child, 'category', 0) )
-        opts['create'].update( default_setting(child, 'cluster_seed', None) )
-        opts['create'].update( inherit_setting(parent, child, 'description', '') )
-        opts['create'].update( default_setting(child, 'default_numeric_value', None) )
-        opts['create'].update( default_setting(child, 'excluded_fields', []) )
-
-        for field in child['clusters']['fields']:
-            if not field in parent['fields']: continue
-
-            field_opts = {}
-
-            if not child['clusters']['fields'][field].get("name", "") in [ "", parent['fields'][field].get("name", "") ]:
-                opts['create'].update({ "fields": { field: { "name": child['clusters']['fields'][field]["name"] } } })
-
-        opts['create'].update( default_setting(child, 'field_scales', {} ) )
-
-        if not child.get('input_fields', []) in [ [], [ el for el in sorted(parent['fields'].keys()) if parent['fields'][el]['preferred'] == True ] ]:
-            opts['create'].update( { "input_fields": child['input_fields'] } )
+        # options common to all model types
+        common_model_opts(child, parent, opts)
 
         if 'k' in child:
             opts['create'].update( { "k": child['k'] } )
 
-        if not child.get('name', '') in [ '', '%s cluster' % parent.get('name', '') ]:
-            opts['create'].update({ "name": child['name'] })
-
-        opts['create'].update( default_setting(child, 'model_clusters', False) )
-        opts['create'].update( default_setting(child, 'out_of_bag', False) )
-
-        if not child.get('range', []) in [ [], [1, parent.get('rows', None)] ]:
-            opts['create'].update({ "range": child['range'] })
-
-        opts['create'].update( default_setting(child, 'replacement', False) )
-        opts['create'].update( default_setting(child, 'sample_rate', 1.0) )
-        opts['create'].update( default_setting(child, 'seed', None) )
-        opts['create'].update( default_setting(child, 'summary_fields', []) )
-        opts['create'].update( inherit_setting(parent, child, 'tags', []) )
-        opts['create'].update( default_setting(child, 'weight_field', "") )
+        # name, exclude automatic naming alternatives
+        autonames = [u'']
+        autonames.append(
+            u'%s cluster' % parent.get('name', ''))
+        if not child.get('name', '') in autonames:
+            opts['create'].update({"name": child.get('name', '')})
 
         return ([ child, parent ], opts)
 
     def reify_ensemble(self, resource):
-        resource_type = get_resource_type(resource)
+
         child = self.get_resource(resource)
-        origin, parent = get_origin_info(child)
+        _, parent = get_origin_info(child)
         parent = self.get_resource(parent)
 
         [ family, opts ] = self.reify_model(child['models'][0])
 
         # create options
-        dataset_defaults = DEFAULTS[resource_type].get("create", {})
-        for attribute, default_value in dataset_defaults.items():
-            opts["create"].update(
-                default_setting(child, attribute, *default_value))
+        non_default_opts(child, opts)
 
         return ([ child, parent ], opts)
 
@@ -579,7 +580,6 @@ class ResourceMap():
 
     def reify_model(self, resource):
 
-        resource_type = get_resource_type(resource)
         child = self.get_resource(resource)
         origin, parent = get_origin_info(child)
         parent = self.get_resource(parent)
@@ -599,40 +599,8 @@ class ResourceMap():
         opts = { "create": {}, "update": {}, "args": {} }
 
 
-        # inherited create options
-        model_defaults = COMMON_DEFAULTS.get("create", {})
-        model_defaults.update({'tags': [[]]})
-        for attribute, default_value in model_defaults.items():
-            opts["create"].update(
-                inherit_setting(
-                    grandparent, child, attribute, default_value[0]))
-        # create options
-        dataset_defaults = DEFAULTS[resource_type].get("create", {})
-        for attribute, default_value in dataset_defaults.items():
-            opts["create"].update(
-                default_setting(child, attribute, *default_value))
-
-
-        if child.get('randomize') == True:
-            default_random_candidates = int(
-                math.floor(math.sqrt(len(child['input_fields']))))
-            opts['create'].update(
-                default_setting(
-                    child, 'random_candidates', [default_random_candidates] ))
-
-        if (not child.get('range', []) in
-                [[], [1, grandparent.get('rows', None)]]):
-            opts['create'].update({ "range": child['range'] })
-
-        # changes in fields structure
-        fields_attributes = get_fields_changes(child, referrer=grandparent)
-        if fields_attributes:
-            opts['create'].update({"fields": fields_attributes})
-
-        # input fields
-        input_fields = get_input_fields(child, referrer=grandparent)
-        if input_fields:
-            opts['create'].update({'input_fields': input_fields})
+        # options common to all model types
+        common_model_opts(child, grandparent, opts)
 
         # name, exclude automatic naming alternatives
         autonames = [u'']
@@ -641,14 +609,21 @@ class ResourceMap():
         autonames.append(
             u"Cluster %s - %s" % (int(child.get('centroid', "0"), base=16),
                                   parent['name']))
-        print autonames
+
         if not child.get('name', '') in autonames:
             opts['create'].update({"name": child.get('name', '')})
+
+        if child.get('randomize') == True:
+            default_random_candidates = int(
+                math.floor(math.sqrt(len(child['input_fields']))))
+            opts['create'].update(
+                default_setting(
+                    child, 'random_candidates', [default_random_candidates] ))
 
         return ([ child, parent ], opts)
 
     def reify_dataset(self, resource):
-        resource_type = get_resource_type(resource)
+
         child = self.get_resource(resource)
         grandparent = {}
         parent = {}
@@ -668,35 +643,16 @@ class ResourceMap():
         opts = { "create": {}, "update": {}, "args": {} }
 
 
-        # inherited create options
-        dataset_defaults = COMMON_DEFAULTS.get("create", {})
-        for attribute, default_value in dataset_defaults.items():
-            opts["create"].update(
-                inherit_setting(
-                    grandparent, child, attribute, default_value[0]))
-        # create options
-        dataset_defaults = DEFAULTS[resource_type].get("create", {})
-        for attribute, default_value in dataset_defaults.items():
-            opts["create"].update(
-                default_setting(child, attribute, *default_value))
+        # options common to all model types
+        common_dataset_opts(child, grandparent, opts)
 
         # update options
-        dataset_defaults = DEFAULTS[resource_type].get("update", {})
+        dataset_defaults = DEFAULTS["dataset"].get("update", {})
         dataset_defaults.update(COMMON_DEFAULTS.get("update", {}))
 
         for attribute, default_value in dataset_defaults.items():
             opts["update"].update(
                 default_setting(child, attribute, *default_value))
-
-        # changes in fields structure
-        fields_attributes = get_fields_changes(child, referrer=grandparent)
-        if fields_attributes:
-            opts['create'].update({"fields": fields_attributes})
-
-        # input fields
-        input_fields = get_input_fields(child, referrer=grandparent)
-        if input_fields:
-            opts['create'].update({'input_fields': input_fields})
 
         # name, exclude automatic naming alternatives
         autonames = [u'']

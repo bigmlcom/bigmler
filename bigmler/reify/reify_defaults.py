@@ -23,10 +23,8 @@ import json
 COMMON_DEFAULTS = {
     'create': {
         'category': [0],
-        'description': [None, ""]
-    },
-    'update': {
-        'tags': [[]],
+        'description': [None, ""],
+        'tags': [[]]
     }
 }
 
@@ -96,6 +94,96 @@ DEFAULTS = {
             'missing_strategy': [0],
             'private': [True],
             'threshold': [None, {}]
+        }
+    },
+    "evaluation": {
+        "create": {
+            'confidence_threshold': [None],
+            'combiner': [0, None],
+            'missing_strategy': [0],
+            'ordering': [0],
+            'out_of_bag': [False],
+            'negative_class': [None],
+            'positive_class': [None],
+            'replacement': [False],
+            'sample_rate': [1.0],
+            'seed': [None],
+            'threshold': [None]
+        },
+        "update": {
+            'private': [True]
+        }
+    },
+    "anomaly": {
+        "create": {
+            'anomaly_seed': [None],
+            'constraints': [False],
+            'excluded_fields': [[]],
+            'id_fields': [[]],
+            'forest_size': [128],
+            'out_of_bag': [False],
+            'replacement': [False],
+            'sample_rate': [1.0],
+            'seed': [None],
+            'top_n': [10]
+        }
+    },
+    "cluster": {
+        "create": {
+            'balance_fields': [True],
+            'cluster_seed': [None],
+            'default_numeric_value': [None],
+            'excluded_fields': [[]],
+            'field_scales': [{}],
+            'model_clusters': [False],
+            'out_of_bag': [False],
+            'replacement': [False],
+            'sample_rate': [1.0],
+            'seed': [None],
+            'summary_fields': [[]],
+            'weight_field': [""]
+        }
+    },
+    "centroid": {
+        "create": {
+            'missing_strategy': [0]
+        },
+        "update": {
+            'private': [True]
+        },
+    },
+    "batchanomalyscore": {
+        "create":{
+            'all_fields': [False],
+            'header': [True],
+            'output_dataset': [False],
+            'separator': [',']
+        }
+    },
+    "batchcentroid": {
+        "create":{
+            'all_fields': [False],
+            'header': [True],
+            'output_dataset': [False],
+            'separator': [','],
+            'distance': [False]
+        }
+    },
+    "batchprediction": {
+        "create": {
+            'all_fields': False,
+            'confidence_threshold': [None],
+            'combiner': [0, None],
+            'confidence': [False],
+            'confidence_name': [None, ''],
+            'header': [True],
+            'missing_strategy': [0],
+            'negative_class': [None],
+            'negative_class_confidence': [None],
+            'output_dataset': [False],
+            'positive_class': [None],
+            'separator': [','],
+            'threshold': [None]
         }
     }
 }
