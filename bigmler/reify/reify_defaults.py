@@ -34,9 +34,7 @@ DEFAULTS = {
             'name': ["Unnamed inline source"],
             'data': [None, ""],
             'disable_datetime': [False],
-            'file': [None, ""],
             'project': [None],
-            'remote': [None, ""],
             'source_parser': [{
                  "header": True, "locale": "en-US", "missing_tokens": [ "", "NaN", "NULL", "N/A", "null", "-", "#REF!", "#VALUE!", "?", "#NULL!", "#NUM!", "#DIV/0", "n/a", "#NAME?", "NIL", "nil", "na", "#N/A", "NA" ], "quote": "\"", "separator": "," }, { "header": True, "locale": "en_US", "missing_tokens": [ "", "NaN", "NULL", "N/A", "null", "-", "#REF!", "#VALUE!", "?", "#NULL!", "#NUM!", "#DIV/0", "n/a", "#NAME?", "NIL", "nil", "na", "#N/A", "NA" ], "quote": "\"", "separator": "," }]
         },
@@ -171,7 +169,7 @@ DEFAULTS = {
     },
     "batchprediction": {
         "create": {
-            'all_fields': False,
+            'all_fields': [False],
             'confidence_threshold': [None],
             'combiner': [0, None],
             'confidence': [False],
