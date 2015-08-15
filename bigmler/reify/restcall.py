@@ -80,7 +80,7 @@ class RESTCall():
     def reify_python(self, alias=None, out=sys.stdout):
 
         def resource_alias(resource_id):
-            return alias.get(resource_id, resource_id)
+            return alias.get(resource_id, '"%s"' % resource_id)
 
         resource_type = get_resource_type(self.resource_id)
         resource_name = resource_alias(self.resource_id)
