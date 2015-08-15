@@ -388,7 +388,7 @@ class ResourceMap():
         child = self.get_resource(resource)
         # batch resources have 2 different origins as arguments
         [(_, parent1),
-         (_, parent2)] = get_origin_info(resource)
+         (_, parent2)] = get_origin_info(child)
         parent1 = self.get_resource(parent1)
         parent2 = self.get_resource(parent2)
 
@@ -416,7 +416,7 @@ class ResourceMap():
         child = self.get_resource(resource)
         # batch resources have 2 different origins as arguments
         [(_, parent1),
-         (_, parent2)] = get_origin_info(resource)
+         (_, parent2)] = get_origin_info(child)
         parent1 = self.get_resource(parent1)
         parent2 = self.get_resource(parent2)
 
@@ -445,7 +445,7 @@ class ResourceMap():
         child = self.get_resource(resource)
         # evalutations have 2 different origins as arguments
         [(_, parent1),
-         (_, parent2)] = get_origin_info(resource)
+         (_, parent2)] = get_origin_info(child)
         parent1 = self.get_resource(parent1)
         parent2 = self.get_resource(parent2)
 
@@ -479,7 +479,7 @@ class ResourceMap():
         child = self.get_resource(resource)
         # evalutations have 2 different origins as arguments
         [(_, parent1),
-         (_, parent2)] = get_origin_info(resource)
+         (_, parent2)] = get_origin_info(child)
         parent1 = self.get_resource(parent1)
         parent2 = self.get_resource(parent2)
 
@@ -583,6 +583,7 @@ class ResourceMap():
         child = self.get_resource(resource)
         origin, parent = get_origin_info(child)
         parent = self.get_resource(parent)
+        opts = { "create": {}, "update": {}, "args": {} }
         # as two-steps result from a cluster
         if origin in ['cluster']:
             opts['create'].update({"centroid": child['centroid']})
@@ -594,9 +595,6 @@ class ResourceMap():
                     grandparent.get('objective_field').get('id')):
                 opts['create'].update(
                     { "objective_field": child.get('objective_field') })
-
-
-        opts = { "create": {}, "update": {}, "args": {} }
 
 
         # options common to all model types
@@ -629,19 +627,18 @@ class ResourceMap():
         parent = {}
         origin, parent = get_origin_info(child)
         parent = self.get_resource(parent)
+
+        opts = { "create": {}, "update": {}, "args": {} }
+
         # as two-steps result from a cluster or batch prediction, centroid
         # or anomaly score
         if origin in ['origin_batch_resource', 'cluster']:
             if origin == "cluster":
-                opts['args'].update( { "centroid": child['centroid'] } )
+                opts['create'].update( { "centroid": child['centroid'] } )
             origin_gp, grandparent = get_origin_info(parent)
             grandparent = self.get_resource(grandparent)
         else:
             grandparent = parent
-
-
-        opts = { "create": {}, "update": {}, "args": {} }
-
 
         # options common to all model types
         common_dataset_opts(child, grandparent, opts)
@@ -676,10 +673,12 @@ class ResourceMap():
             {'resource': child['resource'], 'object': child})
         objective_id = child['objective_field']['id']
         preferred_fields = resource_fields.preferred_fields()
+        print "preferred", preferred_fields
         max_column = sorted([field['column_number']
                              for _, field in preferred_fields.items()],
                             reverse=True)[0]
-        objective_column = preferred_fields[objective_id]['column_number']
+        objective_column = resource_fields.fields[objective_id][ \
+            'column_number']
         if objective_column != max_column:
             opts['create'].update({ "objective_field": { "id": objective_id}})
 
@@ -728,8 +727,6 @@ def build_reification(family, opts):
     if opts['create'] != {}:
         reification += ', %s' % opts['create']
 
-    if opts['args'] != {}:
-        reification += ', args=%s' % opts['args']
 
     reification += ')'
 
@@ -800,7 +797,6 @@ def reify_resources(args, api):
     """
 
     resource_map = ResourceMap(api)
-#obj = sys.argv[1]
 
     resource_id = get_resource_id(args.resource_id)
     if resource_id is None:
