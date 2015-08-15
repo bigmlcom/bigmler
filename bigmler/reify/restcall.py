@@ -31,16 +31,6 @@ PREFIXES = {
 }
 
 
-def get_method_suffix(resource_type):
-    """Returns the suffix used in the REST method
-
-    """
-    if RESOURCE_RE.get(resource_type):
-        return RENAMED_RESOURCES.get(resource_type, resource_type)
-    else:
-        sys.exit('Non allowed resource type. Check the provided resource ID')
-
-
 class RESTCall():
     """Object to store the REST call definition
 
@@ -62,7 +52,16 @@ class RESTCall():
 
 
     def reify(self, language=None, alias=None, out=sys.stdout):
+        """REST call command line
 
+            language: computing language to write the output in
+            alias: list of aliases for the related resources (e.g
+                    {"source/55c4de8d1fa89c2dc70012d0": "source1"}
+                    will cause the references to
+                    "source/55c4de8d1fa89c2dc70012d0" to be renamed
+                    as "source1")
+            out: output file-like object
+        """
         if not language:
             out.write("\n\n")
             out.write("resource ID: %s\n" % self.resource_id)
@@ -78,18 +77,26 @@ class RESTCall():
                 alias=alias, out=sys.stdout)
 
     def reify_python(self, alias=None, out=sys.stdout):
+        """REST call command line in python. See ``reify`` method.
+
+        """
 
         def resource_alias(resource_id):
+            """Returns the alias if found
+
+            """
             return alias.get(resource_id, '"%s"' % resource_id)
 
         resource_type = get_resource_type(self.resource_id)
         resource_name = resource_alias(self.resource_id)
+        resource_method_suffix = RENAMED_RESOURCES.get(
+            resource_type, resource_type)
         origin_names = [resource_alias(resource_id) for resource_id
                         in self.origins]
         command = "%s = api.%s_%s(%s, %s)\napi.ok(%s)\n\n" % (
             resource_name,
             self.action,
-            get_method_suffix(resource_type),
+            resource_method_suffix,
             ", ".join(origin_names),
             repr(self.args),
             resource_name)
