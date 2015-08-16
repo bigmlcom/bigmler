@@ -79,8 +79,8 @@ def i_create_filtered_dataset_from_dataset(step, filter_exp=None, output_dir=Non
     world.directory = output_dir
     world.folders.append(world.directory)
     try:
-        command = (u'echo "' +
-                   filter_exp.replace('"', '\\"') + u'" > ' +
+        command = (u'echo ' +
+                   filter_exp + u' > ' +
                    output_dir + u"/filter.lisp")
         if not PYTHON3:
             command = command.encode(SYSTEM_ENCODING)
