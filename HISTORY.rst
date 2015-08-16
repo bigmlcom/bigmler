@@ -3,6 +3,12 @@
 History
 -------
 
+3.1.1 (2015-08-16)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug: changing the related Python bindings version to solve encoding
+  problem when using Python 3 on Windows.
+
 3.1.0 (2015-08-05)
 ~~~~~~~~~~~~~~~~~~
 
