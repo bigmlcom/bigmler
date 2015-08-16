@@ -23,7 +23,7 @@ import json
 from bigmler.tests.world import world, res_filename
 from subprocess import check_call, CalledProcessError
 from bigmler.checkpoint import file_number_of_lines
-from bigmler.utils import SYSTEM_ENCODING
+from bigmler.utils import SYSTEM_ENCODING, PYTHON3
 from bigml.api import check_resource
 from bigmler.tests.common_steps import check_debug
 
@@ -46,8 +46,10 @@ def i_create_source_with_project(step, data=None, project=None, output_dir=None)
                    u" --no-model --no-dataset --store --output-dir " +
                    output_dir +
                    u" --project=\"" + project + "\"")
+        if not PYTHON3:
+            command = command.encode(SYSTEM_ENCODING)
         command = check_debug(command)
-        retcode = check_call(command.encode(SYSTEM_ENCODING), shell=True)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -68,8 +70,10 @@ def i_create_source_with_project_id(step, data=None, output_dir=None):
                    u" --no-model --no-dataset --store --output-dir " +
                    output_dir +
                    u" --project-id " + world.project['resource'])
+        if not PYTHON3:
+            command = command.encode(SYSTEM_ENCODING)
         command = check_debug(command)
-        retcode = check_call(command.encode(SYSTEM_ENCODING), shell=True)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:

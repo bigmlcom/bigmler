@@ -22,7 +22,7 @@ import json
 from bigmler.tests.world import world, res_filename
 from subprocess import check_call, CalledProcessError
 from bigmler.checkpoint import file_number_of_lines
-from bigmler.utils import SYSTEM_ENCODING, open_mode
+from bigmler.utils import SYSTEM_ENCODING, PYTHON3, open_mode
 from bigml.api import check_resource
 from bigmler.tests.common_steps import check_debug
 
@@ -38,7 +38,9 @@ def i_create_sample(step, options=None, output_dir=None):
                    u" --store --output-dir " + output_dir +
                    u" " + options)
         command = check_debug(command)
-        retcode = check_call(command.encode(SYSTEM_ENCODING), shell=True)
+        if not PYTHON3:
+            command.encode(SYSTEM_ENCODING)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:

@@ -22,7 +22,7 @@ import json
 from bigmler.tests.world import world, res_filename
 from subprocess import check_call, CalledProcessError
 from bigmler.checkpoint import file_number_of_lines
-from bigmler.utils import SYSTEM_ENCODING
+from bigmler.utils import SYSTEM_ENCODING, PYTHON3
 from bigml.api import check_resource
 from bigmler.tests.common_steps import check_debug
 
@@ -36,8 +36,10 @@ def i_create_dataset(step, data=None, output_dir=None):
     try:
         command = (u"bigmler --train " + res_filename(data) +
                    u" --no-model --store --output-dir " + output_dir)
+        if not PYTHON3:
+            command = command.encode(SYSTEM_ENCODING)
         command = check_debug(command)
-        retcode = check_call(command.encode(SYSTEM_ENCODING), shell=True)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -57,8 +59,10 @@ def i_create_dataset_from_source(step, output_dir=None):
 
         command = ((u"bigmler --source %s" % world.source['resource']) +
                    u" --no-model --store --output-dir " + output_dir)
+        if not PYTHON3:
+            command = command.encode(SYSTEM_ENCODING)
         command = check_debug(command)
-        retcode = check_call(command.encode(SYSTEM_ENCODING), shell=True)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -78,12 +82,16 @@ def i_create_filtered_dataset_from_dataset(step, filter_exp=None, output_dir=Non
         command = (u'echo "' +
                    filter_exp.replace('"', '\\"') + u'" > ' +
                    output_dir + u"/filter.lisp")
-        retcode = check_call(command.encode(SYSTEM_ENCODING), shell=True)
+        if not PYTHON3:
+            command = command.encode(SYSTEM_ENCODING)
+        retcode = check_call(command, shell=True)
         command = ((u"bigmler --dataset %s" % world.dataset['resource']) +
                    u" --no-model --store --output-dir " + output_dir +
                    u" --lisp-filter " + output_dir + "/filter.lisp")
+        if not PYTHON3:
+            command = command.encode(SYSTEM_ENCODING)
         command = check_debug(command)
-        retcode = check_call(command.encode(SYSTEM_ENCODING), shell=True)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
