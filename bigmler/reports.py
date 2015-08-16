@@ -290,7 +290,7 @@ def evaluations_report(args):
     symlink = tempfile.NamedTemporaryFile(dir=dirname).name
     try:
         os.symlink(base_destination_dir, symlink)
-    except AttributeError:
+    except (AttributeError, OSError):
         os.mkdir(os.path.basename(symlink))
         shutil.copytree(destination_dir, os.path.join(symlink, ANALYZE_DIR))
 
