@@ -20,6 +20,9 @@ import os
 import time
 import csv
 import json
+import sys
+
+
 from bigmler.tests.world import world, res_filename
 from subprocess import check_call, CalledProcessError
 from bigml.api import check_resource
