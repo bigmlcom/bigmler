@@ -30,7 +30,7 @@ from bigmler.checkpoint import file_number_of_lines
 from bigmler.tests.common_steps import check_debug
 from bigmler.tests.basic_tst_prediction_steps import shell_execute
 
-CAT = "type " if sys.platform == "win32" else "cat"
+CAT = "type " if sys.platform == "win32" else "cat "
 
 #@step(r'I create BigML resources uploading train "(.*)" file to test "(.*)" read from stdin with name "(.*)" and log predictions in "(.*)"$')
 def i_create_all_resources_to_test_from_stdin(step, data=None, test=None, name=None, output=None):

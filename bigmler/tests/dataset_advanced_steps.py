@@ -19,6 +19,7 @@ import os
 import time
 import csv
 import json
+import sys
 from bigmler.tests.world import world, res_filename
 from subprocess import check_call, CalledProcessError
 from bigmler.checkpoint import file_number_of_lines
@@ -79,6 +80,8 @@ def i_create_filtered_dataset_from_dataset(step, filter_exp=None, output_dir=Non
     world.directory = output_dir
     world.folders.append(world.directory)
     try:
+        if not sys.platform == 'win32':
+            filter_exp = u'"%s"' % filter_exp.replace('"', '\\"')
         command = (u'echo ' +
                    filter_exp + u' > ' +
                    output_dir + u"/filter.lisp")
