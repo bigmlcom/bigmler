@@ -23,7 +23,7 @@ python bigmler.py \
     --no-test-header
 
 # Create an 10-model ensemble using bagging
-python bigmler.py
+python bigmler.py \
     --train train.csv \
     --output submission.csv \
     --objective 0 \
@@ -53,6 +53,7 @@ from bigmler.cluster.dispatcher import cluster_dispatcher
 from bigmler.anomaly.dispatcher import anomaly_dispatcher
 from bigmler.delete.dispatcher import delete_dispatcher
 from bigmler.report.dispatcher import report_dispatcher
+from bigmler.reify.dispatcher import reify_dispatcher
 from bigmler.parser import SUBCOMMANDS
 from bigmler.utils import SYSTEM_ENCODING
 
@@ -99,6 +100,8 @@ def main(args=sys.argv[1:]):
             sample_dispatcher(args=new_args)
         elif new_args[0] == "report":
             report_dispatcher(args=new_args)
+        elif new_args[0] == "reify":
+            reify_dispatcher(args=new_args)
         elif new_args[0] == "delete":
             delete_dispatcher(args=new_args)
     else:
@@ -108,6 +111,7 @@ def main(args=sys.argv[1:]):
                  "\n\nbigmler cluster --help\n\n"
                  "\n\nbigmler anomaly --help\n\n"
                  "\n\nbigmler report --help\n\n"
+                 "\n\nbigmler reify --help\n\n"
                  "\n\nbigmler delete --help\n\n"
                  " for a list of options")
 

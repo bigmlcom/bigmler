@@ -34,9 +34,10 @@ from bigmler.options.cluster import get_cluster_options
 from bigmler.options.anomaly import get_anomaly_options
 from bigmler.options.sample import get_sample_options
 from bigmler.options.report import get_report_options
+from bigmler.options.reify import get_reify_options
 
 SUBCOMMANDS = ["main", "analyze", "cluster", "anomaly", "sample",
-               "delete", "report"]
+               "delete", "report", "reify"]
 MAIN = SUBCOMMANDS[0]
 
 
@@ -203,6 +204,10 @@ under the License.""" % version
 
     defaults = general_defaults["BigMLer report"]
     subcommand_options["report"] = get_report_options(defaults=defaults)
+
+    defaults = general_defaults["BigMLer reify"]
+    subcommand_options["reify"] = get_reify_options(defaults=defaults)
+    subcommand_options["reify"].update(common_options)
 
     for subcommand in SUBCOMMANDS:
         subparser = subparsers.add_parser(subcommand)
