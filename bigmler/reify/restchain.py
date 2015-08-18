@@ -170,8 +170,8 @@ class RESTChain():
 
         """
         child = self.get_resource(resource_id)
-        origin, parent = u.get_origin_info(child)
-        parent = self.get_resource(parent)
+        origin, parent_id = u.get_origin_info(child)
+        parent = self.get_resource(parent_id)
 
         opts = {"create": {}, "update": {}}
 
@@ -205,6 +205,9 @@ class RESTChain():
                           for suffix in suffixes])
         autonames.append(
             u"%s's dataset" % '.'.join(parent['name'].split('.')[0:-1]))
+        autonames.append(
+            u"%s's dataset - merged" %
+            '.'.join(parent['name'].split('.')[0:-1]))
         autonames.append(
             u"Cluster %s - %s" % (int(child.get('centroid', "0"), base=16),
                                   parent['name']))
@@ -241,11 +244,9 @@ class RESTChain():
 
             opts['create'].update({ "new_fields": new_fields })
 
-        if not child.get('range', []) in [ \
-                [], [1, grandparent.get('rows', None)] ]:
-            opts['create'].update({ "range": child['range'] })
+        u.range_opts(child, grandparent, opts)
 
-        calls = self.build_calls(resource_id, [parent['resource']], opts)
+        calls = self.build_calls(resource_id, [parent_id], opts)
         self.add(resource_id, calls)
 
     def reify_model(self, resource_id):

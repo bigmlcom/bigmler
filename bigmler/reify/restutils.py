@@ -32,7 +32,7 @@ from bigmler.reify.reify_defaults import COMMON_DEFAULTS, DEFAULTS
 ORIGINS = {
     "source": [["file_name"]],
     "dataset": [[
-        "origin_batch_resource", "cluster", "datasets",
+        "origin_batch_resource", "cluster", "ranges",
         "origin_dataset", "source"]],
     "model": [["cluster", "datasets", "dataset"]],
     "ensemble": [["datasets", "dataset"]],
@@ -59,6 +59,8 @@ def get_origin_info(resource):
         for origin in argument_origins:
             info = resource.get(origin)
             if info:
+                if origin == 'ranges':
+                    info = info.keys()
                 found_origins.append((origin, info))
                 break
 
@@ -183,12 +185,10 @@ def common_dataset_opts(resource, referrer, opts, call="create"):
         opts['create'].update({'input_fields': input_fields})
 
 
-def common_model_opts(resource, referrer, opts, call="create"):
-    """Stores the options that are commont to all the model types
+def range_opts(resource, referrer, opts, call="create"):
+    """Stores the range option
 
     """
-    common_dataset_opts(resource, referrer, opts, call=call)
-
     # inherited row range
     if resource.get('ranges'):
         rows = sum([row_range[1][1] for
@@ -198,6 +198,16 @@ def common_model_opts(resource, referrer, opts, call="create"):
     elif (not resource.get('range', []) in
             [[], [1, referrer.get('rows', None)]]):
         opts['create'].update({"range": resource['range']})
+
+
+def common_model_opts(resource, referrer, opts, call="create"):
+    """Stores the options that are commont to all the model types
+
+    """
+    common_dataset_opts(resource, referrer, opts, call=call)
+
+    # inherited row range
+    range_opts(resource, referrer, opts, call=call)
 
 
 def common_batch_options(resource, referrer1, referrer2, opts, call="create"):
