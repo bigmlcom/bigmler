@@ -56,6 +56,9 @@ class RESTChain():
            low bandwith usage and full fields structure.
 
         """
+        if (resource_id and not isinstance(resource_id, basestring) and
+                isinstance(resource_id, list)):
+            resource_id = resource_id[0]
         try:
             return self.api.check_resource(
                 resource_id, query_string=QS).get('object')
@@ -71,11 +74,14 @@ class RESTChain():
         if not resource_id in self.calls:
             self.calls[resource_id] = calls
         for call in calls:
-            for origin in call.origins:
-                if not origin in self.calls:
-                    if not origin in self.objects:
-                        self.objects.append(origin)
-                    self.reify_resource(origin)
+            for origins in call.origins:
+                if isinstance(origins, basestring):
+                    origins = [origins]
+                for origin in origins:
+                    if not origin in self.calls:
+                        if not origin in self.objects:
+                            self.objects.append(origin)
+                        self.reify_resource(origin)
 
     def build_calls(self, resource_id, origin_ids, opts):
         """builds the REST API call objects for to obtain the resource
@@ -124,7 +130,7 @@ class RESTChain():
         resource_type = get_resource_type(resource_id)
         child = self.get_resource(resource_id)
 
-        opts = { "create": {}, "update": {}}
+        opts = {"create": {}, "update": {}}
 
         # create options
         source_defaults = DEFAULTS[resource_type].get("create", {})
@@ -173,7 +179,7 @@ class RESTChain():
         # or anomaly score
         if origin in ['origin_batch_resource', 'cluster']:
             if origin == "cluster":
-                opts['create'].update( { "centroid": child['centroid'] } )
+                opts['create'].update({"centroid": child['centroid']})
             origin_gp, grandparent = u.get_origin_info(parent)
             grandparent = self.get_resource(grandparent)
         else:
@@ -246,9 +252,9 @@ class RESTChain():
         """Extracts the REST API arguments from the model JSON structure
 
         """
-        parent, opts = self._inspect_model(resource_id)
+        parent_id, opts = self._inspect_model(resource_id)
 
-        calls = self.build_calls(resource_id, [parent['resource']], opts)
+        calls = self.build_calls(resource_id, [parent_id], opts)
         self.add(resource_id, calls)
 
     def _inspect_model(self, resource_id):
@@ -256,21 +262,26 @@ class RESTChain():
 
         """
         child = self.get_resource(resource_id)
-        origin, parent = u.get_origin_info(child)
-        parent = self.get_resource(parent)
-        opts = { "create": {}, "update": {}}
+        origin, parent_id = u.get_origin_info(child)
+        parent = self.get_resource(parent_id)
+        opts = {"create": {}, "update": {}}
         # as two-steps result from a cluster
-        if origin in ['cluster']:
+        if origin == 'cluster':
             opts['create'].update({"centroid": child['centroid']})
             origin_gp, grandparent = u.get_origin_info(parent)
             grandparent = self.get_resource(grandparent)
+        elif origin == 'datasets':
+            grandparent = parent
+            if (child.get('objective_field') != \
+                    grandparent.get('objective_field').get('id')):
+                opts['create'].update(
+                    { "objective_field": child.get('objective_field') })
         else:
             grandparent = parent
             if (child.get('objective_field') != \
                     grandparent.get('objective_field').get('id')):
                 opts['create'].update(
                     { "objective_field": child.get('objective_field') })
-        return (parent, opts)
 
         # options common to all model types
         u.common_model_opts(child, grandparent, opts)
@@ -292,21 +303,21 @@ class RESTChain():
             opts['create'].update(
                 u.default_setting(
                     child, 'random_candidates', [default_random_candidates] ))
-        return parent, opts
+        return parent_id, opts
 
     def reify_ensemble(self, resource_id):
         """Extracts the REST API arguments from the ensemble JSON structure
 
         """
         child = self.get_resource(resource_id)
-        _, parent = u.get_origin_info(child)
-        parent = self.get_resource(parent)
+        _, parent_id = u.get_origin_info(child)
+        parent = self.get_resource(parent_id)
         # add options defined at model level
         _, opts = self._inspect_model(child['models'][0])
         # create options
         u.non_default_opts(child, opts)
 
-        calls = self.build_calls(resource_id, [parent['resource']], opts)
+        calls = self.build_calls(resource_id, [parent_id], opts)
         self.add(resource_id, calls)
 
     def reify_cluster(self, resource_id):
@@ -314,8 +325,8 @@ class RESTChain():
 
         """
         child = self.get_resource(resource_id)
-        _, parent = u.get_origin_info(child)
-        parent = self.get_resource(parent)
+        _, parent_id = u.get_origin_info(child)
+        parent = self.get_resource(parent_id)
 
         opts = {"create": {}, "update": {}}
 
@@ -332,7 +343,7 @@ class RESTChain():
         if not child.get('name', '') in autonames:
             opts['create'].update({"name": child.get('name', '')})
 
-        calls = self.build_calls(resource_id, [parent['resource']], opts)
+        calls = self.build_calls(resource_id, [parent_id], opts)
         self.add(resource_id, calls)
 
     def reify_anomaly(self, resource_id):
@@ -341,8 +352,8 @@ class RESTChain():
         """
 
         child = self.get_resource(resource_id)
-        _, parent = u.get_origin_info(child)
-        parent = self.get_resource(parent)
+        _, parent_id = u.get_origin_info(child)
+        parent = self.get_resource(parent_id)
 
         opts = { "create": {}, "update": {}}
 
@@ -356,7 +367,7 @@ class RESTChain():
         if not child.get('name', '') in autonames:
             opts['create'].update({"name": child.get('name', '')})
 
-        calls = self.build_calls(resource_id, [parent['resource']], opts)
+        calls = self.build_calls(resource_id, [parent_id], opts)
         self.add(resource_id, calls)
 
     def reify_prediction(self, resource_id):

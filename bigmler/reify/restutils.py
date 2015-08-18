@@ -190,9 +190,14 @@ def common_model_opts(resource, referrer, opts, call="create"):
     common_dataset_opts(resource, referrer, opts, call=call)
 
     # inherited row range
-    if (not resource.get('range', []) in
+    if resource.get('ranges'):
+        rows = sum([row_range[1][1] for
+                    row_range in resource.get('ranges').items()])
+        if resource.get('range') != [1, rows]:
+            opts['create'].update({"range": resource['range']})
+    elif (not resource.get('range', []) in
             [[], [1, referrer.get('rows', None)]]):
-        opts['create'].update({ "range": resource['range'] })
+        opts['create'].update({"range": resource['range']})
 
 
 def common_batch_options(resource, referrer1, referrer2, opts, call="create"):

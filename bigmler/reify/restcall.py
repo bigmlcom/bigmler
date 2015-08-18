@@ -85,7 +85,14 @@ class RESTCall():
             """Returns the alias if found
 
             """
-            return alias.get(resource_id, '"%s"' % resource_id)
+            if isinstance(resource_id, basestring):
+                return alias.get(resource_id, '"%s"' % resource_id)
+            elif isinstance(resource_id, list):
+                alias_names = []
+                for resource_id_id in resource_id:
+                    alias_names.append(
+                        alias.get(resource_id_id, '"%s"' % resource_id_id))
+                return repr(alias_names)
 
         resource_type = get_resource_type(self.resource_id)
         resource_name = resource_alias(self.resource_id)
