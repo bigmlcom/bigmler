@@ -21,18 +21,13 @@ from __future__ import absolute_import
 
 import sys
 import os
-import datetime
 import SimpleHTTPServer
 import thread
 import webbrowser
 import socket
-import shutil
 
-import bigml.api
-import bigmler.utils as u
 import bigmler.processing.args as a
 
-from bigmler.defaults import DEFAULTS_FILE
 from bigmler.dispatcher import command_handling
 from bigmler.reports import (evaluations_report, SERVER_DIRECTORY,
                              HOME, REPORTS_DIR, ANALYZE_TEMPLATE,
@@ -51,8 +46,8 @@ def get_report_url(args):
 
     """
     try:
-        with open(os.path.join(args.from_dir, REPORTS_DIR, "symlink")) as ln:
-            symlink = ln.read()
+        with open(os.path.join(args.from_dir, REPORTS_DIR, "symlink")) as lnk:
+            symlink = lnk.read()
             # currently there's only one template type
             return os.path.join(os.path.basename(symlink),
                                 ANALYZE_DIR,

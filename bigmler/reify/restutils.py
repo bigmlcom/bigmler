@@ -21,12 +21,12 @@
 from __future__ import absolute_import
 
 import sys
-import math
-import pprint
 
 
-from bigml.resourcehandler import get_resource_id, get_resource_type
+from bigml.resourcehandler import get_resource_type
 from bigml.fields import Fields
+
+from bigmler.reify.restcall import RESTCall
 from bigmler.reify.reify_defaults import COMMON_DEFAULTS, DEFAULTS
 
 ORIGINS = {
@@ -72,10 +72,12 @@ def get_origin_info(resource):
         return found_origins
 
 
-def get_fields_changes(resource, referrer={}):
+def get_fields_changes(resource, referrer=None):
     """Changed field attributes
 
     """
+    if referrer is None:
+        referrer = {}
     fields_attributes = {}
     updatable_attrs = ["name", "label", "description"]
     resource_fields = Fields(
@@ -87,7 +89,8 @@ def get_fields_changes(resource, referrer={}):
             {'resource': referrer['resource'], 'object': referrer}).fields
         for field_id in resource_fields.keys():
             field_opts = {}
-            if not field_id in referrer_fields.keys(): continue
+            if not field_id in referrer_fields.keys():
+                continue
             field = resource_fields[field_id]
 
             for attribute in updatable_attrs:
@@ -100,10 +103,12 @@ def get_fields_changes(resource, referrer={}):
     return fields_attributes
 
 
-def get_input_fields(resource, referrer={}):
+def get_input_fields(resource, referrer=None):
     """New list of input fields
 
     """
+    if referrer is None:
+        referrer = {}
     input_fields_ids = resource.get('input_fields', [])
     if referrer:
         referrer_input_fields = [[]]
@@ -169,20 +174,20 @@ def common_dataset_opts(resource, referrer, opts, call="create"):
 
     """
     # not inherited create options
-    non_inherited_opts(resource, referrer, opts)
+    non_inherited_opts(resource, referrer, opts, call=call)
 
     # non-default create options
-    non_default_opts(resource, opts)
+    non_default_opts(resource, opts, call=call)
 
     # changes in fields structure
     fields_attributes = get_fields_changes(resource, referrer=referrer)
     if fields_attributes:
-        opts['create'].update({"fields": fields_attributes})
+        opts[call].update({"fields": fields_attributes})
 
     # input fields
     input_fields = get_input_fields(resource, referrer=referrer)
     if input_fields:
-        opts['create'].update({'input_fields': input_fields})
+        opts[call].update({'input_fields': input_fields})
 
 
 def range_opts(resource, referrer, opts, call="create"):
@@ -194,10 +199,10 @@ def range_opts(resource, referrer, opts, call="create"):
         rows = sum([row_range[1][1] for
                     row_range in resource.get('ranges').items()])
         if resource.get('range') != [1, rows]:
-            opts['create'].update({"range": resource['range']})
-    elif (not resource.get('range', []) in
-            [[], [1, referrer.get('rows', None)]]):
-        opts['create'].update({"range": resource['range']})
+            opts[call].update({"range": resource['range']})
+    elif not resource.get('range', []) in \
+            [[], [1, referrer.get('rows', None)]]:
+        opts[call].update({"range": resource['range']})
 
 
 def common_model_opts(resource, referrer, opts, call="create"):
@@ -215,19 +220,19 @@ def common_batch_options(resource, referrer1, referrer2, opts, call="create"):
 
     """
     # non-inherited create options
-    non_inherited_opts(resource, referrer1, opts)
+    non_inherited_opts(resource, referrer1, opts, call=call)
 
     # non-default create options
-    non_default_opts(resource, opts)
+    non_default_opts(resource, opts, call=call)
 
     # model to dataset mapping
     fields = referrer2['fields'].keys()
     default_map = dict(zip(fields, fields))
-    opts['create'].update(
+    opts[call].update(
         default_setting(resource, 'fields_map', default_map))
 
     if not resource.get('all_fields', False):
-        opts['create'].update(
+        opts[call].update(
             default_setting(resource, 'output_fields', [[]]))
 
 
@@ -249,19 +254,55 @@ def get_resource_alias(resource_id, counts, alias):
 
 
 def inherit_setting(relative, child, key, default):
+    """Returns setting only in case it was not inherited from ancestors
 
-    if not child.get(key, default) in [ default, relative.get(key, default) ]:
-        return { key: child.get(key) }
+    """
+
+    if not child.get(key, default) in [default, relative.get(key, default)]:
+        return {key: child.get(key)}
     else:
         return {}
 
 
 def default_setting(child, key, *defaults):
+    """Returns setting only if it is not a default value
+
+    """
 
     if isinstance(defaults, basestring):
-        defaults = [ defaults ]
+        defaults = [defaults]
 
     if not child.get(key, defaults[0]) in defaults:
-        return { key: child[key] }
+        return {key: child[key]}
     else:
         return {}
+
+
+def non_automatic_name(resource, opts, autonames=None, autoname=None):
+    """Checks whether the name of the resource is in the list of automated
+       names and includes it in the name argument otherwise.
+
+    """
+    if autonames is None:
+        autonames = [u'']
+    if autoname is not None:
+        autonames.append(autoname)
+
+    if not resource.get('name', '') in autonames:
+        opts['create'].update({"name": resource.get('name', '')})
+
+
+def build_calls(resource_id, origin_ids, opts):
+    """Builds the REST API call objects for to obtain the resource
+
+    """
+    calls = []
+    if opts["update"]:
+        calls.append(
+            RESTCall("update", args=opts["update"],
+                     resource_id=resource_id))
+    calls.append(
+        RESTCall("create",
+                 origins=origin_ids,
+                 args=opts["create"], resource_id=resource_id))
+    return calls

@@ -22,19 +22,20 @@
 from __future__ import absolute_import
 
 import sys
+import math
 
 import bigmler.reify.restutils as u
 
 from bigml.resourcehandler import get_resource_id, get_resource_type
 from bigml.fields import Fields
 
-from bigmler.reify.restcall import RESTCall, PREFIXES
+from bigmler.reify.restcall import PREFIXES
 from bigmler.reify.reify_defaults import COMMON_DEFAULTS, DEFAULTS
 
-QS = 'limit=-1;exclude=root,trees'
+GET_QS = 'limit=-1;exclude=root,trees'
 
 
-class RESTChain():
+class RESTChain(object):
 
     """List of REST calls in reverse order leading to the resource creation
 
@@ -61,7 +62,7 @@ class RESTChain():
             resource_id = resource_id[0]
         try:
             return self.api.check_resource(
-                resource_id, query_string=QS).get('object')
+                resource_id, query_string=GET_QS).get('object')
         except ValueError:
             sys.exit("We could not reify the resource. Failed to find"
                      " information for %s in the"
@@ -83,21 +84,6 @@ class RESTChain():
                             self.objects.append(origin)
                         self.reify_resource(origin)
 
-    def build_calls(self, resource_id, origin_ids, opts):
-        """builds the REST API call objects for to obtain the resource
-
-        """
-        calls = []
-        if opts["update"]:
-            calls.append(
-                RESTCall("update", args=opts["update"],
-                         resource_id=resource_id))
-        calls.append(
-            RESTCall("create",
-                     origins=origin_ids,
-                     args=opts["create"], resource_id=resource_id))
-        return calls
-
     def reify(self, language=None, out=sys.stdout):
         """Prints the chain of commands in the user-given language
 
@@ -107,7 +93,7 @@ class RESTChain():
         counts = {}
         alias = {}
         for resource_id in reversed(self.objects):
-            for call in self.calls.get(resource_id,[]):
+            for call in self.calls.get(resource_id, []):
                 u.get_resource_alias(resource_id, counts, alias)
                 call.reify(language, alias=alias, out=out)
 
@@ -161,7 +147,7 @@ class RESTChain():
 
         # TODO: check if the fields have been updated
 
-        calls = self.build_calls(resource_id, [data], opts)
+        calls = u.build_calls(resource_id, [data], opts)
         self.add(resource_id, calls)
 
 
@@ -180,7 +166,7 @@ class RESTChain():
         if origin in ['origin_batch_resource', 'cluster']:
             if origin == "cluster":
                 opts['create'].update({"centroid": child['centroid']})
-            origin_gp, grandparent = u.get_origin_info(parent)
+            _, grandparent = u.get_origin_info(parent)
             grandparent = self.get_resource(grandparent)
         else:
             grandparent = parent
@@ -198,24 +184,27 @@ class RESTChain():
 
         # name, exclude automatic naming alternatives
         autonames = [u'']
-        suffixes = ["filtered", "sampled", "dataset", "extended",
-                    "- batchprediction", "- batchanomalyscore",
-                    "- batchcentroid" ]
+        suffixes = [u"filtered", u"sampled", u"dataset", u"extended",
+                    u"- batchprediction", u"- batchanomalyscore",
+                    u"- batchcentroid"]
         autonames.extend([u'%s %s' % (grandparent.get('name', ''), suffix)
                           for suffix in suffixes])
         autonames.append(
             u"%s's dataset" % '.'.join(parent['name'].split('.')[0:-1]))
         autonames.append(
+            u"%s' dataset" % '.'.join(parent['name'].split('.')[0:-1]))
+        autonames.append(
             u"%s's dataset - merged" %
+            '.'.join(parent['name'].split('.')[0:-1]))
+        autonames.append(
+            u"%s' dataset - merged" %
             '.'.join(parent['name'].split('.')[0:-1]))
         autonames.append(
             u"Cluster %s - %s" % (int(child.get('centroid', "0"), base=16),
                                   parent['name']))
         autonames.append(
             u"Dataset from %s model - segment" % parent['name'])
-
-        if not child.get('name', '') in autonames:
-            opts['create'].update({"name": child.get('name', '')})
+        u.non_automatic_name(child, opts, autonames=autonames)
 
         # objective field
         resource_fields = Fields(
@@ -228,11 +217,11 @@ class RESTChain():
         objective_column = resource_fields.fields[objective_id][ \
             'column_number']
         if objective_column != max_column:
-            opts['create'].update({ "objective_field": { "id": objective_id}})
+            opts['create'].update({"objective_field": {"id": objective_id}})
 
         # resize
         if (child['size'] != grandparent['size'] and
-            get_resource_type(parent) == 'source'):
+                get_resource_type(parent) == 'source'):
             opts['create'].update({"size": child['size']})
 
         # generated fields
@@ -240,13 +229,13 @@ class RESTChain():
             new_fields = child['new_fields']
             for new_field in new_fields:
                 new_field['field'] = new_field['generator']
-                del(new_field['generator'])
+                del new_field['generator']
 
-            opts['create'].update({ "new_fields": new_fields })
+            opts['create'].update({"new_fields": new_fields})
 
         u.range_opts(child, grandparent, opts)
 
-        calls = self.build_calls(resource_id, [parent_id], opts)
+        calls = u.build_calls(resource_id, [parent_id], opts)
         self.add(resource_id, calls)
 
     def reify_model(self, resource_id):
@@ -255,11 +244,12 @@ class RESTChain():
         """
         parent_id, opts = self._inspect_model(resource_id)
 
-        calls = self.build_calls(resource_id, [parent_id], opts)
+        calls = u.build_calls(resource_id, [parent_id], opts)
         self.add(resource_id, calls)
 
     def _inspect_model(self, resource_id):
         """Auxliliary function to use model JSON structure to define ensembles
+           and models
 
         """
         child = self.get_resource(resource_id)
@@ -269,20 +259,20 @@ class RESTChain():
         # as two-steps result from a cluster
         if origin == 'cluster':
             opts['create'].update({"centroid": child['centroid']})
-            origin_gp, grandparent = u.get_origin_info(parent)
+            _, grandparent = u.get_origin_info(parent)
             grandparent = self.get_resource(grandparent)
         elif origin == 'datasets':
             grandparent = parent
-            if (child.get('objective_field') != \
-                    grandparent.get('objective_field').get('id')):
+            if child.get('objective_field') != \
+                    grandparent.get('objective_field').get('id'):
                 opts['create'].update(
-                    { "objective_field": child.get('objective_field') })
+                    {"objective_field": child.get('objective_field')})
         else:
             grandparent = parent
-            if (child.get('objective_field') != \
-                    grandparent.get('objective_field').get('id')):
+            if child.get('objective_field') != \
+                    grandparent.get('objective_field').get('id'):
                 opts['create'].update(
-                    { "objective_field": child.get('objective_field') })
+                    {"objective_field": child.get('objective_field')})
 
         # options common to all model types
         u.common_model_opts(child, grandparent, opts)
@@ -295,15 +285,14 @@ class RESTChain():
             u"Cluster %s - %s" % (int(child.get('centroid', "0"), base=16),
                                   parent['name']))
 
-        if not child.get('name', '') in autonames:
-            opts['create'].update({"name": child.get('name', '')})
+        u.non_automatic_name(child, opts, autonames=autonames)
 
         if child.get('randomize') == True:
             default_random_candidates = int(
                 math.floor(math.sqrt(len(child['input_fields']))))
             opts['create'].update(
-                u.default_setting(
-                    child, 'random_candidates', [default_random_candidates] ))
+                u.default_setting( \
+                    child, 'random_candidates', [default_random_candidates]))
         return parent_id, opts
 
     def reify_ensemble(self, resource_id):
@@ -312,13 +301,12 @@ class RESTChain():
         """
         child = self.get_resource(resource_id)
         _, parent_id = u.get_origin_info(child)
-        parent = self.get_resource(parent_id)
         # add options defined at model level
         _, opts = self._inspect_model(child['models'][0])
         # create options
         u.non_default_opts(child, opts)
 
-        calls = self.build_calls(resource_id, [parent_id], opts)
+        calls = u.build_calls(resource_id, [parent_id], opts)
         self.add(resource_id, calls)
 
     def reify_cluster(self, resource_id):
@@ -335,16 +323,13 @@ class RESTChain():
         u.common_model_opts(child, parent, opts)
 
         if 'k' in child:
-            opts['create'].update({ "k": child['k'] })
+            opts['create'].update({"k": child['k']})
 
         # name, exclude automatic naming alternatives
-        autonames = [u'']
-        autonames.append(
-            u'%s cluster' % parent.get('name', ''))
-        if not child.get('name', '') in autonames:
-            opts['create'].update({"name": child.get('name', '')})
+        u.non_automatic_name( \
+            child, opts, autoname=u'%s cluster' % parent.get('name', ''))
 
-        calls = self.build_calls(resource_id, [parent_id], opts)
+        calls = u.build_calls(resource_id, [parent_id], opts)
         self.add(resource_id, calls)
 
     def reify_anomaly(self, resource_id):
@@ -356,19 +341,17 @@ class RESTChain():
         _, parent_id = u.get_origin_info(child)
         parent = self.get_resource(parent_id)
 
-        opts = { "create": {}, "update": {}}
+        opts = {"create": {}, "update": {}}
 
         # options common to all model types
         u.common_model_opts(child, parent, opts)
 
         # name, exclude automatic naming alternatives
-        autonames = [u'']
-        autonames.append(
-            u'%s anomaly detector' % parent.get('name', ''))
-        if not child.get('name', '') in autonames:
-            opts['create'].update({"name": child.get('name', '')})
+        u.non_automatic_name(
+            child, opts,
+            autoname=u'%s anomaly detector' % parent.get('name', ''))
 
-        calls = self.build_calls(resource_id, [parent_id], opts)
+        calls = u.build_calls(resource_id, [parent_id], opts)
         self.add(resource_id, calls)
 
     def reify_prediction(self, resource_id):
@@ -379,7 +362,7 @@ class RESTChain():
         origin, parent = u.get_origin_info(child)
         if origin == 'models':
             model = self.get_resource(parent[0])
-            parent =  self.get_resource('ensemble/%s' % model['ensemble_id'])
+            parent = self.get_resource('ensemble/%s' % model['ensemble_id'])
         else:
             parent = self.get_resource(parent)
 
@@ -391,16 +374,14 @@ class RESTChain():
         # non-default create options
         u.non_default_opts(child, opts)
 
-        opts['create'].update( {'input_data': child['input_data']} )
+        opts['create'].update({'input_data': child['input_data']})
 
         # name, exclude automatic naming alternatives
-        autonames = [u'']
-        autonames.append(
-            u'Prediction for %s' % child['objective_field_name'])
-        if not child.get('name', '') in autonames:
-            opts['create'].update({"name": child.get('name', '')})
+        u.non_automatic_name(
+            child, opts,
+            autoname=u'Prediction for %s' % child['objective_field_name'])
 
-        calls = self.build_calls(resource_id, [parent['resource']], opts)
+        calls = u.build_calls(resource_id, [parent['resource']], opts)
         self.add(resource_id, calls)
 
     def reify_centroid(self, resource_id):
@@ -419,19 +400,16 @@ class RESTChain():
         # non-default create options
         u.non_default_opts(child, opts)
 
-        opts['create'].update( {'input_data': child['input_data']} )
+        opts['create'].update({'input_data': child['input_data']})
 
         # name, exclude automatic naming alternatives
-        autonames = [u'']
-        autonames.append(
-            u'Centroid for %s' % parent['name'])
-        if not child.get('name', '') in autonames:
-            opts['create'].update({"name": child.get('name', '')})
-
+        u.non_automatic_name(
+            child, opts,
+            autoname=u'Centroid for %s' % parent['name'])
         # non-default update options
         u.non_default_opts(child, opts, call="update")
 
-        calls = self.build_calls(resource_id, [parent['resource']], opts)
+        calls = u.build_calls(resource_id, [parent['resource']], opts)
         self.add(resource_id, calls)
 
     def reify_anomalyscore(self, resource_id):
@@ -443,7 +421,7 @@ class RESTChain():
         _, parent = u.get_origin_info(child)
         parent = self.get_resource(parent)
 
-        opts = { "create": {}, "update": {}}
+        opts = {"create": {}, "update": {}}
 
         # non-inherited create options
         u.non_inherited_opts(child, parent, opts)
@@ -451,22 +429,20 @@ class RESTChain():
         opts['create'].update({'input_data': child['input_data']})
 
         # name, exclude automatic naming alternatives
-        autonames = [u'']
-        autonames.append(
-            u'Score for %s' % parent['name'])
-        if not child.get('name', '') in autonames:
-            opts['create'].update({"name": child.get('name', '')})
+        u.non_automatic_name(
+            child, opts,
+            autoname=u'Score for %s' % parent['name'])
 
-        calls = self.build_calls(resource_id, [parent['resource']], opts)
+        calls = u.build_calls(resource_id, [parent['resource']], opts)
         self.add(resource_id, calls)
 
-    def reify_evaluation(self, resource):
+    def reify_evaluation(self, resource_id):
         """ Extracts the REST API arguments from the evaluation JSON structure:
             model/ensemble, dataset and args
 
         """
 
-        child = self.get_resource(resource)
+        child = self.get_resource(resource_id)
         # evalutations have 2 different origins as arguments
         [(_, parent1),
          (_, parent2)] = u.get_origin_info(child)
@@ -489,18 +465,17 @@ class RESTChain():
             u.default_setting(child, 'fields_map', default_map))
 
         # name, exclude automatic naming alternatives
-        autonames = [u'']
-        autonames.append(
-            u'Evaluation of %s with %s' % (parent1.get('name', ''),
-                                           parent2.get('name', '')))
-        if not child.get('name', '') in autonames:
-            opts['create'].update({"name": child.get('name', '')})
+        u.non_automatic_name(
+            child, opts,
+            autoname=u'Evaluation of %s with %s' % \
+                (parent1.get('name', ''),
+                 parent2.get('name', '')))
 
         # range in dataset
         if not child.get('range', []) in [[], [1, parent2.get('rows', None)]]:
-            opts['create'].update({ "range": child['range'] })
+            opts['create'].update({"range": child['range']})
 
-        calls = self.build_calls(
+        calls = u.build_calls(
             resource_id, [parent1['resource'], parent2['resource']], opts)
         self.add(resource_id, calls)
 
@@ -514,7 +489,6 @@ class RESTChain():
         # evalutations have 2 different origins as arguments
         [(_, parent1),
          (_, parent2)] = u.get_origin_info(child)
-        print parent1, parent2
         parent1 = self.get_resource(parent1)
         parent2 = self.get_resource(parent2)
 
@@ -530,14 +504,13 @@ class RESTChain():
                 u.default_setting(child, 'centroid_name', [None, '']))
 
         # name, exclude automatic naming alternatives
-        autonames = [u'']
-        autonames.append(
-            u'Batch Prediction of %s with %s' % (
-                parent1.get('name', ''), parent2.get('name', '')))
-        if not child.get('name', '') in autonames:
-            opts['create'].update({"name": child.get('name', '')})
+        u.non_automatic_name(
+            child, opts,
+            autoname=u'Batch Prediction of %s with %s' % \
+                (parent1.get('name', ''),
+                 parent2.get('name', '')))
 
-        calls = self.build_calls(
+        calls = u.build_calls(
             resource_id, [parent1['resource'], parent2['resource']], opts)
         self.add(resource_id, calls)
 
@@ -564,14 +537,13 @@ class RESTChain():
                 u.default_setting(child, 'distance_name', [None, '']))
 
         # name, exclude automatic naming alternatives
-        autonames = [u'']
-        autonames.append(
-            u'Batch Centroid of %s with %s' % (
-                parent1.get('name', ''), parent2.get('name', '')))
-        if not child.get('name', '') in autonames:
-            opts['create'].update({"name": child.get('name', '')})
+        u.non_automatic_name(
+            child, opts,
+            autoname=u'Batch Centroid of %s with %s' % \
+                (parent1.get('name', ''),
+                 parent2.get('name', '')))
 
-        calls = self.build_calls(
+        calls = u.build_calls(
             resource_id, [parent1['resource'], parent2['resource']], opts)
         self.add(resource_id, calls)
 
@@ -594,17 +566,16 @@ class RESTChain():
         u.common_batch_options(child, parent1, parent2, opts)
 
         # name, exclude automatic naming alternatives
-        autonames = [u'']
-        autonames.append(
-            u'Batch Anomaly Score of %s with %s' % (
-                parent1.get('name', ''), parent2.get('name', '')))
-        if not child.get('name', '') in autonames:
-            opts['create'].update({"name": child.get('name', '')})
+        u.non_automatic_name(
+            child, opts,
+            autoname=u'Batch Anomaly Score of %s with %s' % \
+                (parent1.get('name', ''),
+                 parent2.get('name', '')))
 
         if child.get('header', True):
             opts['create'].update(
                 u.default_setting(child, 'score_name', [None, '']))
 
-        calls = self.build_calls(
+        calls = u.build_calls(
             resource_id, [parent1['resource'], parent2['resource']], opts)
         self.add(resource_id, calls)

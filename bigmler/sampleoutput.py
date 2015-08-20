@@ -118,8 +118,8 @@ def sample_file(sample, fields, args, api, path=None, session_file=None):
     """
     query_string = sample_query_string(args, fields)
     sample = r.get_samples([sample], args, api,
-                            session_file=session_file,
-                            query_string=query_string)[0][0]
+                           session_file=session_file,
+                           query_string=query_string)[0][0]
     output = args.predictions
     with UnicodeWriter(output, lineterminator="\n") as output:
         headers = [field['name'] for field in

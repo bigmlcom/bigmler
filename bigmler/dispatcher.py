@@ -23,6 +23,7 @@ import sys
 import os
 import re
 import gc
+import shutil
 
 import bigml.api
 import bigmler.utils as u
@@ -83,7 +84,7 @@ def has_source(args):
        training file
     """
     return (args.training_set or args.source or args.source_file or
-        args.train_stdin)
+            args.train_stdin)
 
 
 
@@ -214,13 +215,7 @@ def main_dispatcher(args=sys.argv[1:]):
         session_file = os.path.join(directory, SESSIONS_LOG)
         u.log_message(command.command + "\n", log_file=session_file)
         try:
-            defaults_file = open(DEFAULTS_FILE, 'r')
-            contents = defaults_file.read()
-            defaults_file.close()
-            defaults_copy = open(os.path.join(directory, DEFAULTS_FILE),
-                                 'w', 0)
-            defaults_copy.write(contents)
-            defaults_copy.close()
+            shutil.copy(DEFAULTS_FILE, os.path.join(directory, DEFAULTS_FILE))
         except IOError:
             pass
         u.sys_log_message(u"%s\n" % os.path.abspath(directory),
@@ -383,8 +378,8 @@ def compute_output(api, args):
     # Check if the dataset has a generators file associated with it, and
     # generate a new dataset with the specified field structure. Also
     # if the --to-dataset flag is used to clone or sample the original dataset
-    if (args.new_fields or (args.sample_rate != 1 and args.no_model) or
-        (args.lisp_filter or args.json_filter) and not has_source(args)):
+    if args.new_fields or (args.sample_rate != 1 and args.no_model) or \
+            (args.lisp_filter or args.json_filter) and not has_source(args):
         if fields is None:
             if isinstance(dataset, basestring):
                 dataset = check_resource(dataset, api=api)

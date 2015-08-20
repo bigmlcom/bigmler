@@ -25,7 +25,6 @@ import glob
 import os
 import sys
 import datetime
-import io
 
 try:
     import simplejson as json
@@ -135,8 +134,7 @@ def read_json(path):
     """
     json_attributes = {}
     try:
-        open_mode = "rt" if PYTHON3 else "rb"
-        attributes_reader = open(path, open_mode)
+        attributes_reader = open(path, open_mode('r'))
     except IOError:
         sys.exit("Error: cannot read json file %s" % path)
     try:
@@ -266,8 +264,7 @@ def read_local_resource(path, csv_properties=None):
     if csv_properties is None:
         csv_properties = {}
     fields = None
-    open_mode = "rt" if PYTHON3 else "rb"
-    with open(path, open_mode) as resource_file:
+    with open(path, open_mode('r')) as resource_file:
         try:
             resource = json.loads(resource_file.read())
         except IOError:
@@ -563,7 +560,6 @@ def read_objective_weights(path):
 
     """
     objective_weights = []
-    import traceback
     try:
         with UnicodeReader(path, quotechar="'") as weights_reader:
             for row in weights_reader:

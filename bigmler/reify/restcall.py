@@ -23,7 +23,7 @@ from __future__ import absolute_import
 import sys
 
 
-from bigml.resourcehandler import RESOURCE_RE, RENAMED_RESOURCES
+from bigml.resourcehandler import RENAMED_RESOURCES
 from bigml.resourcehandler import get_resource_type
 
 PREFIXES = {
@@ -31,11 +31,12 @@ PREFIXES = {
 }
 
 
-class RESTCall():
+class RESTCall(object):
     """Object to store the REST call definition
 
     """
-    def __init__(self, action, origins=None, args=None, resource_id=None):
+    def __init__(self, action, origins=None, args=None, resource_id=None,
+                 resource_type=None):
         """Constructor for the REST call definition
 
             resource_id: ID for the generated resource
@@ -49,6 +50,7 @@ class RESTCall():
                        action == "update" else origins
         self.args = args or {}
         self.resource_id = resource_id
+        self.resource_type = resource_type
 
 
     def reify(self, language=None, alias=None, out=sys.stdout):
@@ -71,7 +73,7 @@ class RESTCall():
         else:
             try:
                 reify_handler = getattr(self, "reify_%s" % language)
-            except Exception:
+            except AttributeError:
                 reify_handler = self.reify
             reify_handler(
                 alias=alias, out=sys.stdout)
@@ -100,11 +102,13 @@ class RESTCall():
             resource_type, resource_type)
         origin_names = [resource_alias(resource_id) for resource_id
                         in self.origins]
-        command = "%s = api.%s_%s(%s, %s)\napi.ok(%s)\n\n" % (
+        arguments = ", ".join(origin_names)
+        if self.args:
+            arguments = "%s, %s" % (arguments, repr(self.args))
+        command = "%s = api.%s_%s(%s)\napi.ok(%s)\n\n" % (
             resource_name,
             self.action,
             resource_method_suffix,
-            ", ".join(origin_names),
-            repr(self.args),
+            arguments,
             resource_name)
         out.write(command)

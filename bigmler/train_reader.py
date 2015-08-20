@@ -21,7 +21,6 @@
 """
 from __future__ import absolute_import
 
-import csv
 import sys
 
 from bigml.util import get_csv_delimiter
@@ -31,6 +30,7 @@ from bigmler.checkpoint import file_number_of_lines
 from bigmler.labels import get_label_field
 from bigmler.utils import PYTHON3, SYSTEM_ENCODING, FILE_ENCODING
 from bigmler.utils import encode2, decode2
+from bigmler.utf8recoder import UTF8Recoder
 
 
 AGGREGATES = {
@@ -57,9 +57,10 @@ class TrainReader(object):
            `labels`: Fields object with the expected fields structure.
         """
         self.training_set = training_set
+
         if training_set.__class__.__name__ == "StringIO":
             self.encode = None
-            self.training_set = UTF8Recoder(test_set, SYSTEM_ENCODING)
+            self.training_set = UTF8Recoder(training_set, SYSTEM_ENCODING)
         else:
             self.encode = None if PYTHON3 else FILE_ENCODING
         self.training_set_header = training_set_header

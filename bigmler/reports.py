@@ -28,12 +28,11 @@ import requests
 import json
 import re
 import copy
-import tempfile
 
 import bigml.api
 
 from bigmler.utils import is_shared, check_dir, get_url, log_created_resources
-from bigmler.options.analyze import ACCURACY, OPTIMIZE_OPTIONS
+from bigmler.options.analyze import OPTIMIZE_OPTIONS
 
 
 URL_TEMPLATE = "%%BIGML_%s%%"
@@ -48,7 +47,7 @@ EMBEDDED_RESOURCES = ["MODEL"]
 GAZIBIT = "gazibit"
 BIGMLER_SCRIPT = os.path.dirname(__file__)
 # templates for reports
-ANALYZE_TEMPLATE= "%s/static/analyze.html" % BIGMLER_SCRIPT
+ANALYZE_TEMPLATE = "%s/static/analyze.html" % BIGMLER_SCRIPT
 GAZIBIT_PRIVATE = "%s/static/gazibit.json" % BIGMLER_SCRIPT
 GAZIBIT_SHARED = "%s/static/gazibit_shared.json" % BIGMLER_SCRIPT
 
@@ -69,8 +68,8 @@ MODEL_KEY = "model"
 METRICS_FILE = "metrics.json"
 EVALUATIONS_JSON_FILE = "evaluations_json.json"
 SERVER_DIRECTORY = os.path.join("bigmler", "reports")
-HOME = os.getenv("HOME") or (os.path.join(os.getenv("HOMEDRIVE"),
-                             os.getenv("HOMEPATH")))
+HOME = os.getenv("HOME") or (
+    os.path.join(os.getenv("HOMEDRIVE"), os.getenv("HOMEPATH")))
 
 PREFIX = "average_"
 SESSION_FILE = "bigmler_sessions"
@@ -86,7 +85,7 @@ def check_subdir(path, subdir):
     directory = os.path.join(path, subdir)
     try:
         os.stat(directory)
-    except:
+    except OSError:
         os.mkdir(directory)
 
 
@@ -279,13 +278,13 @@ def evaluations_report(args):
 
     # copy templates to directory
     basename = os.path.basename(ANALYZE_TEMPLATE)
-    base_destination_dir =  os.path.join(
+    base_destination_dir = os.path.join(
         os.getcwd(), args.from_dir, REPORTS_DIR)
     destination_dir = os.path.join(base_destination_dir, ANALYZE_DIR)
     destination_file = os.path.join(destination_dir, basename)
     shutil.copyfile(ANALYZE_TEMPLATE, destination_file)
     dirname = os.path.join(HOME, SERVER_DIRECTORY)
-    current_directory = os.getcwd()
+    # current_directory = os.getcwd()
     os.chdir(dirname)
     symlink = tempfile.NamedTemporaryFile(dir=dirname).name
     try:
@@ -326,9 +325,9 @@ def parse_model_fields(command):
     model_fields = pattern.findall(command)
     model_fields = [] if not model_fields else model_fields[0]
 
-    if (model_fields and model_fields.startswith('"')):
+    if model_fields and model_fields.startswith('"'):
         model_fields = model_fields[1:]
-    if (model_fields and model_fields.endswith('"')):
+    if model_fields and model_fields.endswith('"'):
         model_fields = model_fields[:-1]
     return model_fields
 

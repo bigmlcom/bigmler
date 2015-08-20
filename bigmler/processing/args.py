@@ -34,7 +34,7 @@ from bigml.tree import LAST_PREDICTION, PROPORTIONAL
 from bigmler.resources import ADD_REMOVE_PREFIX
 from bigmler.prediction import FULL_FORMAT, COMBINATION, COMBINATION_LABEL
 from bigmler.train_reader import AGGREGATES
-from bigmler.utils import FILE_ENCODING, PYTHON3
+from bigmler.utils import PYTHON3
 
 if PYTHON3:
     from io import StringIO

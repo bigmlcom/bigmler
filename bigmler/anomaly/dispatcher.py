@@ -21,6 +21,7 @@ from __future__ import absolute_import
 
 import sys
 import os
+import shutil
 
 import bigml.api
 import bigmler.utils as u
@@ -82,13 +83,7 @@ def anomaly_dispatcher(args=sys.argv[1:]):
         session_file = os.path.join(directory, SESSIONS_LOG)
         u.log_message(command.command + "\n", log_file=session_file)
         try:
-            defaults_file = open(DEFAULTS_FILE, 'r')
-            contents = defaults_file.read()
-            defaults_file.close()
-            defaults_copy = open(os.path.join(directory, DEFAULTS_FILE),
-                                 'w', 0)
-            defaults_copy.write(contents)
-            defaults_copy.close()
+            shutil.copy(DEFAULTS_FILE, os.path.join(directory, DEFAULTS_FILE))
         except IOError:
             pass
         u.sys_log_message(u"%s\n" % os.path.abspath(directory),
@@ -99,8 +94,8 @@ def anomaly_dispatcher(args=sys.argv[1:]):
 
     # Selects the action to perform
     if (a.has_train(command_args) or a.has_test(command_args) or
-        command_args.score or
-        a.has_anomaly(command_args)):
+            command_args.score or
+            a.has_anomaly(command_args)):
         output_args = a.get_output_args(api, command_args, resume)
         a.transform_args(command_args, command.flags, api,
                          command.user_defaults)
@@ -157,7 +152,7 @@ def compute_output(api, args):
     dataset_properties = pms.get_dataset_info(
         api, args, resume, source,
         csv_properties, fields, session_file, path, log)
-    (dataset, datasets, test_dataset, resume,
+    (_, datasets, test_dataset, resume,
      csv_properties, fields) = dataset_properties
     if args.anomaly_file:
         # anomaly is retrieved from the contents of the given local JSON file
@@ -217,8 +212,8 @@ def compute_output(api, args):
                      " dataset.")
         local_anomaly = Anomaly(anomaly)
         include = args.anomalies_dataset == ANOMALIES_IN
-        args._anomaly_filter = local_anomaly.anomalies_filter(include=include)
-        new_dataset, resume = pd.create_new_dataset(
+        args.anomaly_filter_ = local_anomaly.anomalies_filter(include=include)
+        _, resume = pd.create_new_dataset(
             origin_dataset, api, args, resume, fields=fields,
             session_file=session_file, path=path, log=log)
     # If predicting

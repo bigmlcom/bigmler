@@ -22,6 +22,7 @@ from __future__ import absolute_import
 import sys
 import os
 import datetime
+import shutil
 
 import bigml.api
 import bigmler.utils as u
@@ -221,13 +222,7 @@ def delete_dispatcher(args=sys.argv[1:]):
         session_file = os.path.join(directory, SESSIONS_LOG)
         u.log_message(command.command + "\n", log_file=session_file)
         try:
-            defaults_file = open(DEFAULTS_FILE, 'r')
-            contents = defaults_file.read()
-            defaults_file.close()
-            defaults_copy = open(os.path.join(directory, DEFAULTS_FILE),
-                                 'w', 0)
-            defaults_copy.write(contents)
-            defaults_copy.close()
+            shutil.copy(DEFAULTS_FILE, os.path.join(directory, DEFAULTS_FILE))
         except IOError:
             pass
         u.sys_log_message(u"%s\n" % os.path.abspath(directory),

@@ -17,7 +17,6 @@
 """BigMLer - defaults for reify subcommand
 
 """
-import json
 
 
 COMMON_DEFAULTS = {
@@ -35,8 +34,22 @@ DEFAULTS = {
             'data': [None, ""],
             'disable_datetime': [False],
             'project': [None],
-            'source_parser': [{
-                 "header": True, "locale": "en-US", "missing_tokens": [ "", "NaN", "NULL", "N/A", "null", "-", "#REF!", "#VALUE!", "?", "#NULL!", "#NUM!", "#DIV/0", "n/a", "#NAME?", "NIL", "nil", "na", "#N/A", "NA" ], "quote": "\"", "separator": "," }, { "header": True, "locale": "en_US", "missing_tokens": [ "", "NaN", "NULL", "N/A", "null", "-", "#REF!", "#VALUE!", "?", "#NULL!", "#NUM!", "#DIV/0", "n/a", "#NAME?", "NIL", "nil", "na", "#N/A", "NA" ], "quote": "\"", "separator": "," }]
+            'source_parser': [ \
+                {"header": True, "locale": "en-US",
+                 "missing_tokens": [ \
+                    "", "NaN", "NULL", "N/A", "null", "-", "#REF!", "#VALUE!",
+                    "?", "#NULL!", "#NUM!", "#DIV/0", "n/a", "#NAME?", "NIL",
+                    "nil", "na", "#N/A", "NA"],
+                 "quote": "\"",
+                 "separator": ","},
+                {"header": True,
+                 "locale": "en_US",
+                 "missing_tokens": [ \
+                     "", "NaN", "NULL", "N/A", "null", "-", "#REF!", "#VALUE!",
+                     "?", "#NULL!", "#NUM!", "#DIV/0", "n/a", "#NAME?", "NIL",
+                     "nil", "na", "#N/A", "NA"],
+                 "quote": "\"",
+                 "separator": ","}]
         },
         "update": {
             "term_analysis": [{"enabled": True}]

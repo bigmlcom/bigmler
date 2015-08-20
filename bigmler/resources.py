@@ -228,7 +228,7 @@ def set_source_args(args, name=None, multi_label_data=None,
     # If user has set a training separator, use it.
     if args.training_separator is not None:
         training_separator = decode2(args.training_separator,
-                                    encoding="string_escape")
+                                     encoding="string_escape")
         source_args["source_parser"].update({'separator': training_separator})
     # If uploading a multi-label file, add the user_metadata info needed to
     # manage the multi-label fields
@@ -269,9 +269,10 @@ def create_source(data_set, source_args, args, api=None, path=None,
                                progress_bar=args.progress_bar)
     if path is not None:
         suffix = "_" + source_type if source_type else ""
-        log_created_resources("source%s" % suffix, path,
-                      source['resource'], mode='a',
-                      comment=("%s\n" % source['object']['name']))
+        log_created_resources(
+            "source%s" % suffix, path,
+            source['resource'], mode='a',
+            comment=("%s\n" % source['object']['name']))
     source_id = check_resource_error(source, "Failed to create source: ")
     try:
         source = check_resource(source, api.get_source,
