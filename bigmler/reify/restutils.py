@@ -287,7 +287,6 @@ def non_automatic_name(resource, opts, autonames=None, autoname=None):
         autonames = [u'']
     if autoname is not None:
         autonames.append(autoname)
-
     if not resource.get('name', '') in autonames:
         opts['create'].update({"name": resource.get('name', '')})
 

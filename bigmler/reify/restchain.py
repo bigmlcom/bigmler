@@ -186,19 +186,13 @@ class RESTChain(object):
         autonames = [u'']
         suffixes = [u"filtered", u"sampled", u"dataset", u"extended",
                     u"- batchprediction", u"- batchanomalyscore",
-                    u"- batchcentroid"]
+                    u"- batchcentroid", u"- merged"]
         autonames.extend([u'%s %s' % (grandparent.get('name', ''), suffix)
                           for suffix in suffixes])
         autonames.append(
             u"%s's dataset" % '.'.join(parent['name'].split('.')[0:-1]))
         autonames.append(
             u"%s' dataset" % '.'.join(parent['name'].split('.')[0:-1]))
-        autonames.append(
-            u"%s's dataset - merged" %
-            '.'.join(parent['name'].split('.')[0:-1]))
-        autonames.append(
-            u"%s' dataset - merged" %
-            '.'.join(parent['name'].split('.')[0:-1]))
         autonames.append(
             u"Cluster %s - %s" % (int(child.get('centroid', "0"), base=16),
                                   parent['name']))
