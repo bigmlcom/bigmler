@@ -29,10 +29,14 @@ import bigmler.reify.restutils as u
 from bigml.resourcehandler import get_resource_id, get_resource_type
 from bigml.fields import Fields
 
-from bigmler.reify.restcall import PREFIXES
 from bigmler.reify.reify_defaults import COMMON_DEFAULTS, DEFAULTS
 
 GET_QS = 'limit=-1;exclude=root,trees'
+PREFIXES = {
+    "python": ('"""Python code to reify %s\n\n"""\n\n'
+               'from bigml.api import BigML\napi = BigML()\n\n')
+}
+
 
 
 class RESTChain(object):
@@ -42,7 +46,7 @@ class RESTChain(object):
     """
 
 
-    def __init__(self, api, resource_id):
+    def __init__(self, api, resource_id, add_fields):
         """Constructor: empty list of objects and REST calls
 
         """
@@ -50,6 +54,7 @@ class RESTChain(object):
         self.calls = {}
         self.objects = [resource_id]
         self.api = api
+        self.add_fields = add_fields
         self.reify_resource(resource_id)
 
     def get_resource(self, resource_id):
@@ -84,18 +89,19 @@ class RESTChain(object):
                             self.objects.append(origin)
                         self.reify_resource(origin)
 
-    def reify(self, language=None, out=sys.stdout):
+    def reify(self, language=None):
         """Prints the chain of commands in the user-given language
 
         """
-        prefix = PREFIXES.get(language, "")
-        out.write(prefix)
+        prefix = PREFIXES.get(language, "") % self.objects[0]
+        out = prefix
         counts = {}
         alias = {}
         for resource_id in reversed(self.objects):
             for call in self.calls.get(resource_id, []):
                 u.get_resource_alias(resource_id, counts, alias)
-                call.reify(language, alias=alias, out=out)
+                out += call.reify(language, alias=alias)
+        return out
 
     def reify_resource(self, resource_id):
         """Redirects to the reify method according to the resource type
@@ -145,7 +151,9 @@ class RESTChain(object):
             opts["update"].update(
                 u.default_setting(child, attribute, *default_value))
 
-        # TODO: check if the fields have been updated
+        # We add the information for the updatable fields only when requested.
+        if self.add_fields:
+            opts["update"].update({"fields": u.get_fields_changes(child)})
 
         calls = u.build_calls(resource_id, [data], opts)
         self.add(resource_id, calls)
@@ -268,6 +276,10 @@ class RESTChain(object):
                 opts['create'].update(
                     {"objective_field": child.get('objective_field')})
 
+        # the objective field name is automatically added to tags
+        objective_field_name = child.get('objective_field_name','')
+        if objective_field_name in child.get('tags'):
+            child['tags'].remove(objective_field_name)
         # options common to all model types
         u.common_model_opts(child, grandparent, opts)
 
@@ -297,6 +309,10 @@ class RESTChain(object):
         _, parent_id = u.get_origin_info(child)
         # add options defined at model level
         _, opts = self._inspect_model(child['models'][0])
+        # the default value for replacement in models is the oposite, so
+        # it will be added afterwards
+        if 'replacement' in opts['create']:
+            del opts['create']['replacement']
         # create options
         u.non_default_opts(child, opts)
 
@@ -316,7 +332,7 @@ class RESTChain(object):
         # options common to all model types
         u.common_model_opts(child, parent, opts)
 
-        if 'k' in child:
+        if child.get('critical_value') is None and  'k' in child:
             opts['create'].update({"k": child['k']})
 
         # name, exclude automatic naming alternatives
@@ -565,10 +581,6 @@ class RESTChain(object):
             autoname=u'Batch Anomaly Score of %s with %s' % \
                 (parent1.get('name', ''),
                  parent2.get('name', '')))
-
-        if child.get('header', True):
-            opts['create'].update(
-                u.default_setting(child, 'score_name', [None, '']))
 
         calls = u.build_calls(
             resource_id, [parent1['resource'], parent2['resource']], opts)

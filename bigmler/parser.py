@@ -207,7 +207,14 @@ under the License.""" % version
 
     defaults = general_defaults["BigMLer reify"]
     subcommand_options["reify"] = get_reify_options(defaults=defaults)
-    subcommand_options["reify"].update(common_options)
+    reify_common_options_list = ['clear-logs', 'username', 'api-key','version',
+                                 'dev', 'no-dev', 'output-dir', 'verbosity',
+                                 'resume', 'stack-level', 'debug', 'store']
+    reify_common_options = {}
+    for option in reify_common_options_list:
+        option = '--%s' % option
+        reify_common_options.update({option: common_options[option]})
+    subcommand_options["reify"].update(reify_common_options)
 
     for subcommand in SUBCOMMANDS:
         subparser = subparsers.add_parser(subcommand)

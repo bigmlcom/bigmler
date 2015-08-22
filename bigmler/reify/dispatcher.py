@@ -35,6 +35,7 @@ from bigmler.reify.reify import reify_resources
 COMMAND_LOG = u".bigmler_reify"
 DIRS_LOG = u".bigmler_reify_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
+DEFAULT_OUTPUT = "reify.py"
 
 
 def reify_dispatcher(args=sys.argv[1:]):
@@ -50,9 +51,24 @@ def reify_dispatcher(args=sys.argv[1:]):
         command_args, session_file, _ = get_stored_command(
             args, command_args.debug, command_log=COMMAND_LOG,
             dirs_log=DIRS_LOG, sessions_log=SESSIONS_LOG)
+        if command_args.output is None:
+            command_args.output = os.path.join(output_dir,
+                                               DEFAULT_OUTPUT)
     else:
         if command_args.output_dir is None:
             command_args.output_dir = a.NOW
+        if command_args.output is None:
+            command_args.output = os.path.join(command_args.output_dir,
+                                               DEFAULT_OUTPUT)
+        if len(os.path.dirname(command_args.output).strip()) == 0:
+            command_args.output = os.path.join(command_args.output_dir,
+                                               command_args.output)
+        directory = u.check_dir(command_args.output)
+        command_args.output_dir = directory
+        session_file = os.path.join(directory, SESSIONS_LOG)
+        u.log_message(command.command + "\n", log_file=session_file)
+
+
         directory = u.check_dir(os.path.join(command_args.output_dir, "tmp"))
         session_file = os.path.join(directory, SESSIONS_LOG)
         u.log_message(command.command + "\n", log_file=session_file)

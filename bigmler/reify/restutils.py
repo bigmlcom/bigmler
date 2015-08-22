@@ -29,6 +29,11 @@ from bigml.fields import Fields
 from bigmler.reify.restcall import RESTCall
 from bigmler.reify.reify_defaults import COMMON_DEFAULTS, DEFAULTS
 
+DEFAULT_UPDATABLE = ["name", "label", "description"]
+
+SOURCE_UPDATABLE = ["name", "label", "description",
+                    "optype", "locale" , "missing_tokens"]
+
 ORIGINS = {
     "source": [["file_name"]],
     "dataset": [[
@@ -72,18 +77,31 @@ def get_origin_info(resource):
         return found_origins
 
 
-def get_fields_changes(resource, referrer=None):
+def get_fields_changes(resource, referrer=None,
+                       updatable_attrs=DEFAULT_UPDATABLE):
     """Changed field attributes
 
     """
     if referrer is None:
         referrer = {}
     fields_attributes = {}
-    updatable_attrs = ["name", "label", "description"]
+
     resource_fields = Fields(
         {'resource': resource['resource'], 'object': resource}).fields
+    resource_type = get_resource_type(resource)
+    # for sources, extract all the updatable attributes
     if get_resource_type(resource) == 'source':
-        updatable_attrs.append("optype")
+        updatable_attrs = SOURCE_UPDATABLE
+        for field_id in resource_fields.keys():
+            field_opts = {}
+            field = resource_fields[field_id]
+            for attribute in updatable_attrs:
+                if field.get(attribute):
+                    field_opts.update({attribute: field[attribute]})
+            if field_opts != {}:
+                fields_attributes.update({field_id: field_opts})
+        return fields_attributes
+    # for the rest of resources, check which attributes changed
     if referrer:
         referrer_fields = Fields(
             {'resource': referrer['resource'], 'object': referrer}).fields
@@ -231,10 +249,6 @@ def common_batch_options(resource, referrer1, referrer2, opts, call="create"):
     opts[call].update(
         default_setting(resource, 'fields_map', default_map))
 
-    if not resource.get('all_fields', False):
-        opts[call].update(
-            default_setting(resource, 'output_fields', [[]]))
-
 
 def get_resource_alias(resource_id, counts, alias):
     """Creates a human-friendly alias for the resource
@@ -271,7 +285,6 @@ def default_setting(child, key, *defaults):
 
     if isinstance(defaults, basestring):
         defaults = [defaults]
-
     if not child.get(key, defaults[0]) in defaults:
         return {key: child[key]}
     else:
@@ -296,12 +309,12 @@ def build_calls(resource_id, origin_ids, opts):
 
     """
     calls = []
-    if opts["update"]:
-        calls.append(
-            RESTCall("update", args=opts["update"],
-                     resource_id=resource_id))
     calls.append(
         RESTCall("create",
                  origins=origin_ids,
                  args=opts["create"], resource_id=resource_id))
+    if opts["update"]:
+        calls.append(
+            RESTCall("update", args=opts["update"],
+                     resource_id=resource_id))
     return calls

@@ -20,23 +20,17 @@
 
 from __future__ import absolute_import
 
-import sys
-
 
 from bigml.resourcehandler import RENAMED_RESOURCES
 from bigml.resourcehandler import get_resource_type
-
-PREFIXES = {
-    "python": "from bigml.api import BigML\napi = BigML()\n\n"
-}
 
 
 class RESTCall(object):
     """Object to store the REST call definition
 
     """
-    def __init__(self, action, origins=None, args=None, resource_id=None,
-                 resource_type=None):
+    def __init__(self, action, origins=None, args=None,
+                 resource_id=None, resource_type=None):
         """Constructor for the REST call definition
 
             resource_id: ID for the generated resource
@@ -49,11 +43,15 @@ class RESTCall(object):
         self.origins = [resource_id] if origins is None and \
                        action == "update" else origins
         self.args = args or {}
+        input_data = self.args.get("input_data")
+        if input_data:
+            del self.args["input_data"]
+        self.input_data = input_data
         self.resource_id = resource_id
         self.resource_type = resource_type
 
 
-    def reify(self, language=None, alias=None, out=sys.stdout):
+    def reify(self, language=None, alias=None):
         """REST call command line
 
             language: computing language to write the output in
@@ -62,23 +60,25 @@ class RESTCall(object):
                     will cause the references to
                     "source/55c4de8d1fa89c2dc70012d0" to be renamed
                     as "source1")
-            out: output file-like object
         """
+        out = ""
         if not language:
-            out.write("\n\n")
-            out.write("resource ID: %s\n" % self.resource_id)
-            out.write("action: %s\n" % self.action)
-            out.write("origins: %s\n" % self.origins)
-            out.write("args: %s\n" % self.args)
+            out += "\n\n"
+            out += "resource ID: %s\n" % self.resource_id
+            out += "action: %s\n" % self.action
+            out += "origins: %s\n" % self.origins
+            out += "args: %s\n" % self.args
+            out += "input data: %s\n" % self.input_data
+            return out
         else:
             try:
                 reify_handler = getattr(self, "reify_%s" % language)
             except AttributeError:
                 reify_handler = self.reify
-            reify_handler(
-                alias=alias, out=sys.stdout)
+            return reify_handler(
+                alias=alias)
 
-    def reify_python(self, alias=None, out=sys.stdout):
+    def reify_python(self, alias=None):
         """REST call command line in python. See ``reify`` method.
 
         """
@@ -103,12 +103,14 @@ class RESTCall(object):
         origin_names = [resource_alias(resource_id) for resource_id
                         in self.origins]
         arguments = ", ".join(origin_names)
+        if self.input_data:
+            arguments = "%s, %s" % (arguments, repr(self.input_data))
         if self.args:
             arguments = "%s, %s" % (arguments, repr(self.args))
-        command = "%s = api.%s_%s(%s)\napi.ok(%s)\n\n" % (
+        out = "%s = api.%s_%s(%s)\napi.ok(%s)\n\n" % (
             resource_name,
             self.action,
             resource_method_suffix,
             arguments,
             resource_name)
-        out.write(command)
+        return out

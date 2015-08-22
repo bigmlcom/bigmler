@@ -34,5 +34,8 @@ def reify_resources(args, api):
     if resource_id is None:
         sys.exit("Failed to match a valid resource ID. Please, check: %s"
                  % args.resource_id)
-    api_calls = RESTChain(api, resource_id)
-    api_calls.reify("python")
+    api_calls = RESTChain(api, resource_id, args.add_fields)
+    output = api_calls.reify("python")
+    with open(args.output, "w") as reify_file:
+        reify_file.write(output)
+    sys.stdout.write(output)

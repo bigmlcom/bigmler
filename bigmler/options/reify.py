@@ -34,6 +34,36 @@ def get_reify_options(defaults=None):
             'default': defaults.get('resource_id', None),
             'help': ("ID for the resource to be reified.")},
 
-        }
+        # Language for the output (currently only python available)
+        '--language': {
+            'dest': 'language',
+            'default': defaults.get('language', 'python'),
+            'choices': ["python"],
+            'help': ("Language for the resource to be reified in.")},
+
+        # Name of the file to output the code.
+        "--output": {
+            'action': 'store',
+            'dest': 'output',
+            'default': defaults.get('output', None),
+            'help': "Path to the file to output the reify code."},
+
+        # Add updatable field structure information to the source update call
+        '--add-fields': {
+            'action': 'store_true',
+            'dest': 'add_fields',
+            'default': defaults.get('add_fields', False),
+            'help': ("Add the updatable fields structure information"
+                     " to the source update call.")},
+
+        # Don't add the updatable field structure information to the
+        # source update call. As opposed to --add-fields
+        '--no-add-fields': {
+            'action': 'store_false',
+            'dest': 'add_fields',
+            'default': defaults.get('add_fields', False),
+            'help': ("Don't add the updatable fields structure information"
+                     " to the source update call.")},
+    }
 
     return options

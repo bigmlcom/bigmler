@@ -212,7 +212,9 @@ FLAGS = {
         {'flag': 'from_dir', 'type': 'string'},
         {'flag': 'port', 'type': 'integer'},
         {'flag': 'no_server', 'type': 'boolean'}],
-    'BigMLer reify': []}
+    'BigMLer reify': [
+        {'flag': 'language', 'type': 'string'},
+        {'flag': 'add_fields', 'type': 'boolean'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):

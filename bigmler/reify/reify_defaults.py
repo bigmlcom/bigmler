@@ -95,6 +95,7 @@ DEFAULTS = {
     "ensemble": {
         "create": {
             'number_of_models': [10],
+            'replacement': [True],
             'tlp': [1]
         }
     },
@@ -143,6 +144,7 @@ DEFAULTS = {
         "create": {
             'balance_fields': [True],
             'cluster_seed': [None],
+            'critical_value': [None, 5],
             'default_numeric_value': [None],
             'excluded_fields': [[]],
             'field_scales': [{}],
@@ -168,7 +170,8 @@ DEFAULTS = {
             'all_fields': [False],
             'header': [True],
             'output_dataset': [False],
-            'separator': [',']
+            'separator': [','],
+            'score_name': ['score', None, '']
         }
     },
     "batchcentroid": {
@@ -192,6 +195,7 @@ DEFAULTS = {
             'negative_class': [None],
             'negative_class_confidence': [None],
             'output_dataset': [False],
+            'output_fields': [None, []],
             'positive_class': [None],
             'separator': [','],
             'threshold': [None]
