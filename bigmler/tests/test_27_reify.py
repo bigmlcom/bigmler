@@ -71,11 +71,11 @@ class TestSamples(object):
 
                 Examples:
                 | data | output | params |check_file | language
-                | iris.csv | scenario_re1/reify.py | {"name": "my_source_name"}|../check_files/reify_source.py | python
+                | data/iris.csv | scenario_re1/reify.py | {"name": "my_source_name"}|../check_files/reify_source.py | python
         """
         print self.test_scenario1.__doc__
         examples = [
-            ['iris.csv', 'scenario_re1/reify.py', {"name": "my_source_name"}, 'check_files/reify_source.py', 'python']]
+            ['data/iris.csv', 'scenario_re1/reify.py', {"name": "my_source_name"}, 'check_files/reify_source.py', 'python']]
 
         for example in examples:
             print "\nTesting with:\n", example
@@ -96,11 +96,11 @@ class TestSamples(object):
 
                 Examples:
                 | data | output | params |check_file | language
-                | iris.csv | scenario_re2/reify.py | {"name": "my_dataset_name"}|../check_files/reify_dataset.py | python
+                | data/iris.csv | scenario_re2/reify.py | {"name": "my_dataset_name"}|../check_files/reify_dataset.py | python
         """
         print self.test_scenario2.__doc__
         examples = [
-            ['iris.csv', 'scenario_re2/reify.py', {"name": "my_dataset_name"}, 'check_files/reify_dataset.py', 'python']]
+            ['data/iris.csv', 'scenario_re2/reify.py', {"name": "my_dataset_name"}, 'check_files/reify_dataset.py', 'python']]
 
         for example in examples:
             print "\nTesting with:\n", example
@@ -122,11 +122,11 @@ class TestSamples(object):
 
                 Examples:
                 | data | output | params |check_file | language
-                | iris.csv | scenario_re3/reify.py | {"name": "my_model_name"}|../check_files/reify_model.py | python
+                | data/iris.csv | scenario_re3/reify.py | {"name": "my_model_name"}|../check_files/reify_model.py | python
         """
         print self.test_scenario3.__doc__
         examples = [
-            ['iris.csv', 'scenario_re3/reify.py', {"name": "my_model_name"}, 'check_files/reify_model.py', 'python']]
+            ['data/iris.csv', 'scenario_re3/reify.py', {"name": "my_model_name"}, 'check_files/reify_model.py', 'python']]
 
         for example in examples:
             print "\nTesting with:\n", example
@@ -149,11 +149,11 @@ class TestSamples(object):
 
                 Examples:
                 | data | output | params |check_file | language | input_data
-                | iris.csv | scenario_re4/reify.py | {"name": "my_prediction_name"}|../check_files/reify_prediction.py | python | {'petal length': 0.5}
+                | data/iris.csv | scenario_re4/reify.py | {"name": "my_prediction_name"}|../check_files/reify_prediction.py | python | {'petal length': 0.5}
         """
         print self.test_scenario4.__doc__
         examples = [
-            ['iris.csv', 'scenario_re4/reify.py', {"name": "my_prediction_name"}, 'check_files/reify_prediction.py', 'python', {'petal length': 0.5}]]
+            ['data/iris.csv', 'scenario_re4/reify.py', {"name": "my_prediction_name"}, 'check_files/reify_prediction.py', 'python', {'petal length': 0.5}]]
 
         for example in examples:
             print "\nTesting with:\n", example
@@ -177,11 +177,11 @@ class TestSamples(object):
 
                 Examples:
                 | data | output | params |check_file | language
-                | iris.csv | scenario_re5/reify.py | {"name": "my_cluster_name"}|../check_files/reify_cluster.py | python
+                | data/iris.csv | scenario_re5/reify.py | {"name": "my_cluster_name"}|../check_files/reify_cluster.py | python
         """
         print self.test_scenario5.__doc__
         examples = [
-            ['iris.csv', 'scenario_re5/reify.py', {"name": "my_cluster_name"}, 'check_files/reify_cluster.py', 'python']]
+            ['data/iris.csv', 'scenario_re5/reify.py', {"name": "my_cluster_name"}, 'check_files/reify_cluster.py', 'python']]
 
         for example in examples:
             print "\nTesting with:\n", example
@@ -205,11 +205,11 @@ class TestSamples(object):
 
                 Examples:
                 | data | output | params |check_file | language
-                | iris.csv | scenario_re6/reify.py | {"name": "my_anomaly_name"}|../check_files/reify_anomaly.py | python
+                | data/iris.csv | scenario_re6/reify.py | {"name": "my_anomaly_name"}|../check_files/reify_anomaly.py | python
         """
         print self.test_scenario6.__doc__
         examples = [
-            ['iris.csv', 'scenario_re6/reify.py', {"name": "my_anomaly_name"}, 'check_files/reify_anomaly.py', 'python']]
+            ['data/iris.csv', 'scenario_re6/reify.py', {"name": "my_anomaly_name"}, 'check_files/reify_anomaly.py', 'python']]
 
         for example in examples:
             print "\nTesting with:\n", example
@@ -234,11 +234,11 @@ class TestSamples(object):
 
                 Examples:
                 | data | output | params |check_file | language | input_data
-                | iris.csv | scenario_re7/reify.py | {"name": "my_centroid_name"}|../check_files/reify_anomaly.py | python | {"petal length": 0.5, "sepal length": 1, "petal width": 0.5, "sepal width": 1, "species": "Iris-setosa"}
+                | data/iris.csv | scenario_re7/reify.py | {"name": "my_centroid_name"}|../check_files/reify_anomaly.py | python | {"petal length": 0.5, "sepal length": 1, "petal width": 0.5, "sepal width": 1, "species": "Iris-setosa"}
         """
         print self.test_scenario7.__doc__
         examples = [
-            ['iris.csv', 'scenario_re7/reify.py', {"name": "my_centroid_name"}, 'check_files/reify_centroid.py', 'python', {"petal length": 0.5, "sepal length": 1, "petal width": 0.5, "sepal width": 1, "species": "Iris-setosa"}]]
+            ['data/iris.csv', 'scenario_re7/reify.py', {"name": "my_centroid_name"}, 'check_files/reify_centroid.py', 'python', {"petal length": 0.5, "sepal length": 1, "petal width": 0.5, "sepal width": 1, "species": "Iris-setosa"}]]
 
         for example in examples:
             print "\nTesting with:\n", example
@@ -264,11 +264,11 @@ class TestSamples(object):
 
                 Examples:
                 | data | output | params |check_file | language | input_data
-                | iris.csv | scenario_re8/reify.py | {"name": "my_anomaly_score_name"}|../check_files/reify_anomaly_score.py | python | {"petal length": 0.5, "sepal length": 1, "petal width": 0.5, "sepal width": 1, "species": "Iris-setosa"}
+                | data/iris.csv | scenario_re8/reify.py | {"name": "my_anomaly_score_name"}|../check_files/reify_anomaly_score.py | python | {"petal length": 0.5, "sepal length": 1, "petal width": 0.5, "sepal width": 1, "species": "Iris-setosa"}
         """
         print self.test_scenario8.__doc__
         examples = [
-            ['iris.csv', 'scenario_re8/reify.py', {"name": "my_anomaly_score_name"}, 'check_files/reify_anomaly_score.py', 'python', {"petal length": 0.5, "sepal length": 1, "petal width": 0.5, "sepal width": 1, "species": "Iris-setosa"}]]
+            ['data/iris.csv', 'scenario_re8/reify.py', {"name": "my_anomaly_score_name"}, 'check_files/reify_anomaly_score.py', 'python', {"petal length": 0.5, "sepal length": 1, "petal width": 0.5, "sepal width": 1, "species": "Iris-setosa"}]]
 
         for example in examples:
             print "\nTesting with:\n", example
@@ -294,11 +294,11 @@ class TestSamples(object):
 
                 Examples:
                 | data | output | params |check_file | language
-                | iris.csv | scenario_re9/reify.py | {"name": "my_batch_prediction_name"}|../check_files/reify_batch_prediction.py | python
+                | data/iris.csv | scenario_re9/reify.py | {"name": "my_batch_prediction_name"}|../check_files/reify_batch_prediction.py | python
         """
         print self.test_scenario9.__doc__
         examples = [
-            ['iris.csv', 'scenario_re9/reify.py', {"name": "my_batch_prediction_name"}, 'check_files/reify_batch_prediction.py', 'python']]
+            ['data/iris.csv', 'scenario_re9/reify.py', {"name": "my_batch_prediction_name"}, 'check_files/reify_batch_prediction.py', 'python']]
 
         for example in examples:
             print "\nTesting with:\n", example
@@ -323,11 +323,11 @@ class TestSamples(object):
 
                 Examples:
                 | data | output | params |check_file | language
-                | iris.csv | scenario_re10/reify.py | {"name": "my_batch_centroid_name"}|../check_files/reify_batch_centroid.py | python
+                | data/iris.csv | scenario_re10/reify.py | {"name": "my_batch_centroid_name"}|../check_files/reify_batch_centroid.py | python
         """
         print self.test_scenario10.__doc__
         examples = [
-            ['iris.csv', 'scenario_re10/reify.py', {"name": "my_batch_centroid_name"}, 'check_files/reify_batch_centroid.py', 'python']]
+            ['data/iris.csv', 'scenario_re10/reify.py', {"name": "my_batch_centroid_name"}, 'check_files/reify_batch_centroid.py', 'python']]
 
         for example in examples:
             print "\nTesting with:\n", example
@@ -352,11 +352,11 @@ class TestSamples(object):
 
                 Examples:
                 | data | output | params |check_file | language
-                | iris.csv | scenario_re11/reify.py | {"name": "my_batch_anomaly_score_name"}|../check_files/reify_batch_anomaly_score.py | python
+                | data/iris.csv | scenario_re11/reify.py | {"name": "my_batch_anomaly_score_name"}|../check_files/reify_batch_anomaly_score.py | python
         """
         print self.test_scenario11.__doc__
         examples = [
-            ['iris.csv', 'scenario_re11/reify.py', {"name": "my_batch_anomaly_score_name"}, 'check_files/reify_batch_anomaly_score.py', 'python']]
+            ['data/iris.csv', 'scenario_re11/reify.py', {"name": "my_batch_anomaly_score_name"}, 'check_files/reify_batch_anomaly_score.py', 'python']]
 
         for example in examples:
             print "\nTesting with:\n", example
@@ -381,11 +381,11 @@ class TestSamples(object):
 
                 Examples:
                 | data | output | params |check_file | language
-                | iris.csv | scenario_re12/reify.py | {"name": "my_evaluation_name"}|../check_files/reify_evaluation.py | python
+                | data/iris.csv | scenario_re12/reify.py | {"name": "my_evaluation_name"}|../check_files/reify_evaluation.py | python
         """
         print self.test_scenario12.__doc__
         examples = [
-            ['iris.csv', 'scenario_re12/reify.py', {"name": "my_evaluation_name"}, 'check_files/reify_evaluation.py', 'python']]
+            ['data/iris.csv', 'scenario_re12/reify.py', {"name": "my_evaluation_name"}, 'check_files/reify_evaluation.py', 'python']]
 
         for example in examples:
             print "\nTesting with:\n", example
@@ -409,11 +409,11 @@ class TestSamples(object):
 
                 Examples:
                 | data | output | params |check_file | language
-                | iris.csv | scenario_re13/reify.py | {"name": "my_ensemble_name"}|../check_files/reify_ensemble.py | python
+                | data/iris.csv | scenario_re13/reify.py | {"name": "my_ensemble_name"}|../check_files/reify_ensemble.py | python
         """
         print self.test_scenario13.__doc__
         examples = [
-            ['iris.csv', 'scenario_re13/reify.py', {"name": "my_ensemble_name"}, 'check_files/reify_ensemble.py', 'python']]
+            ['data/iris.csv', 'scenario_re13/reify.py', {"name": "my_ensemble_name"}, 'check_files/reify_ensemble.py', 'python']]
 
         for example in examples:
             print "\nTesting with:\n", example
