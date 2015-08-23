@@ -46,7 +46,7 @@ def teardown_module():
     """
     common_teardown_module()
 
-class TestSamples(object):
+class TestReify(object):
 
     def teardown(self):
         """Calling generic teardown for every method
