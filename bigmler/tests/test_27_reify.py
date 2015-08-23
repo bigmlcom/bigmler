@@ -422,3 +422,28 @@ class TestSamples(object):
             test_reify.i_create_output(self, example[1], example[4], resource_type='ensemble')
             test_reify.i_check_output_file(self, output=example[1],
                                            check_file=example[3])
+
+    def test_scenario14(self):
+        """
+            Scenario: Successfully building a source reify output with fields in python
+                Given I create a BigML source with data "<data>" and params "<params>"
+                And I check that the source has been created
+                Then I create a reify output in "<output>" for "<language>"
+                And the "<output>" file is like "<check_file>"
+
+                Examples:
+                | data | output | params |check_file | language
+                | data/iris_sp_chars.csv | scenario_re14/reify.py | {"name": "my_sóurcè_sp_name"}|../check_files/reify_source_sp.py | python
+        """
+        print self.test_scenario14.__doc__
+        examples = [
+            ['data/iris_sp_chars.csv', 'scenario_re14/reify.py', {"name": "my_sóurcè_sp_name"}, 'check_files/reify_source_sp.py', 'python']]
+
+        for example in examples:
+            print "\nTesting with:\n", example
+            test_reify.create_source(example[0], output=example[1],
+                                     args=example[2])
+            test_reify.i_create_output(self, example[1], example[4],
+                                       add_fields=True)
+            test_reify.i_check_output_file(self, output=example[1],
+                                           check_file=example[3])

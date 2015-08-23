@@ -29,7 +29,8 @@ from bigmler.tests.common_steps import check_debug
 
 
 #@step(r'I create a reify output for the resource in "(.*)" for "(.*)')
-def i_create_output(step, output=None, language=None, resource_type='source'):
+def i_create_output(step, output=None, language=None, resource_type='source',
+                    add_fields=False):
     if output is None and language is None:
         assert False
     world.directory = os.path.dirname(output)
@@ -38,6 +39,8 @@ def i_create_output(step, output=None, language=None, resource_type='source'):
     try:
         command = (u"bigmler reify --id " + resource_id +
                    u" --store --output " + output)
+        if add_fields:
+            command += u' --add-fields'
         command = check_debug(command)
         if not PYTHON3:
             command.encode(SYSTEM_ENCODING)
