@@ -38,11 +38,30 @@ See :ref:`bigmler-cluster`.
 Used to generate anomaly detectors and anomaly scores.
 See :ref:`bigmler-anomaly`.
 
+``bigmler sample``:
+
+
+Used to generate samples of data from your existing datasets.
+See :ref:`bigmler-sample`.
+
 ``bigmler delete``:
 
 
 Used to delete the remotely created resources. See
 :ref:`bigmler-delete`.
+
+``bigmler reify``:
+
+
+Used to generate scripts to reproduce the existing resources in BigML. See
+:ref:`bigmler-reify`.
+
+``bigmler report``:
+
+
+Used to generate reports for the analyze subcommand showing the ROC curve and
+ evaluation metrics of cross-validations. See
+:ref:`bigmler-report`.
 
 
 Quick Start
@@ -1740,6 +1759,132 @@ options can be found in the `Samples subcommand Options <#samples-option>`_
 section.
 
 
+Reify subcommand
+-----------------
+
+This subcommand extracts the information in the existing resources to determine
+the arguments that were used when they were created,
+and generates scripts that could be used to reproduce them. Currently, the
+language used in the scripts will be ``Python``. The usual starting
+point for BigML resources is a ``source`` created from inline, local or remote
+data. Thus, the script keeps analyzing the chain of calls that led to a
+certain resource until the root ``source`` is found.
+
+The simplest example would be:
+
+
+.. code-block:: bash
+
+    bigmler reify --id source/55d77ba60d052e23430027bb
+
+that will output:
+
+
+.. code-block:: python
+
+
+    """Python code to reify source/55d77ba60d052e23430027bb
+
+    """
+
+    from bigml.api import BigML
+    api = BigML()
+
+    source1 = api.create_source("iris.csv", {"name": "my source"})
+    api.ok(source1)
+
+According to this output, the source was created from a file named ``iris.csv``
+and was assigned a ``name``. This script will be shown in your console and
+also stored in the file ``reify.py`` on the command output directory
+(you can specify the name and location of the file using the ``--output``
+option).
+
+When creating sources from data, field types are inferred from the contents
+of the first lines in the uploaded file. Sometimes, these field types must be
+adapted and the ``source`` fields attributes are updated. You can also
+change other fields attributes, like their name, label or description.
+In order to make sure
+that the right fields information is reproduced, add the ``--add-fields`` flag:
+
+.. code-block:: bash
+
+    bigmler reify --id source/55d77ba60d052e23430027bb --add-fields \
+                  --output my_dir/reify_source.py
+
+
+
+.. code-block:: python
+
+    """Python code to reify source/55d77ba60d052e23430027bb
+
+    """
+
+    from bigml.api import BigML
+    api = BigML()
+
+    source1 = api.create_source("iris.csv")
+    api.ok(source1)
+
+    source1 = api.update_source(source1, \
+        {'fields': {u'000004': {'optype': u'categorical', 'name': u'species'},
+                    u'000002': {'optype': u'numeric', 'name': u'petal length'},
+                    u'000003': {'optype': u'numeric', 'name': u'petal width'},
+                    u'000000': {'optype': u'numeric', 'name': u'sepal length'},
+                    u'000001': {'optype': u'numeric', 'name': u'sepal width'}}
+        }
+    )
+    api.ok(source1)
+
+
+Other resources will have more complex workflows and more user-given
+attributes. Let's see for instance the
+script to generate an evaluation from a train/test split of a source that
+was created using the
+``bigmler --train data/iris.csv --evaluate`` command:
+
+.. code-block:: bash
+
+    bigmler reify --id evaluation/55d919850d052e234b000833
+
+
+.. code-block:: python
+
+
+    """Python code to reify evaluation/55d919850d052e234b000833
+
+    """
+
+    from bigml.api import BigML
+    api = BigML()
+
+    source1 = api.create_source("iris.csv", {'category': 12,
+        'description': u'Created using BigMLer',
+        'name': u'BigMLer_SunAug2315_025314',
+        'tags': [u'BigMLer', u'BigMLer_SunAug2315_025314']})
+    api.ok(source1)
+
+    dataset1 = api.create_dataset(source1,
+        {'name': u'BigMLer_SunAug2315_025314',
+         'tags': [u'BigMLer', u'BigMLer_SunAug2315_025314']})
+    api.ok(dataset1)
+
+    model1 = api.create_model(dataset1,
+        {'seed': u'BigML, Machine Learning made easy',
+         'sample_rate': 0.8, 'name': u'BigMLer_SunAug2315_025314'})
+    api.ok(model1)
+
+    evaluation1 = api.create_evaluation(model1, dataset1,
+        {'seed': u'BigML, Machine Learning made easy', 'sample_rate': 0.8,
+         'out_of_bag': True, 'name': u'BigMLer_SunAug2315_025314'})
+    api.ok(evaluation1)
+
+As you can see, BigMLer has added a default ``category``, ``name``,
+``description``, ``tags``, has built the model on 80% of the data
+and used the ``out_of_bag`` attribute for the
+evaluation to use the remaining part of the dataset test data.
+
+
+
 .. _bigmler-delete:
 
 Delete subcommand
@@ -2877,6 +3022,20 @@ Samples Subcommand Options
 ``--unique``                                  Repeated rows are removed from
                                               the sample
 ============================================= =================================
+
+
+Reify Subcommand Options
+------------------------
+
+===================================== =========================================
+``--id`` *RESOURCE_ID*                ID for the resource to be reified
+``--language`` *SCRIPTING_LANG*       Language to be used for the script.
+                                      Currently only Python is available
+``--output`` *PATH*                   Path to the file where the script will
+                                      be stored
+``--add-fields``                      Causes the fields information to be
+                                      added to the source arguments
+===================================== =========================================
 
 
 Delete Subcommand Options

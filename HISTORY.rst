@@ -3,6 +3,11 @@
 History
 -------
 
+3.2.0 (2015-08-23)
+~~~~~~~~~~~~~~~~~~
+
+- Adding bigmler reify subcommand to script the resource creation.
+
 3.1.1 (2015-08-16)
 ~~~~~~~~~~~~~~~~~~
 
