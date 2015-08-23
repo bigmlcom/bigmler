@@ -31,8 +31,7 @@ from bigmler.reify.reify_defaults import COMMON_DEFAULTS, DEFAULTS
 
 DEFAULT_UPDATABLE = ["name", "label", "description"]
 
-SOURCE_UPDATABLE = ["name", "label", "description",
-                    "optype", "locale" , "missing_tokens"]
+SOURCE_UPDATABLE = ["name", "label", "description", "optype"]
 
 ORIGINS = {
     "source": [["file_name"]],
