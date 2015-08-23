@@ -60,6 +60,9 @@ def i_check_output_file(step, output=None, check_file=None):
         output_file = os.path.join(world.directory, "reify.py")
         with open(check_file, open_mode("r")) as check_file:
             check_contents = check_file.read().strip("\n")
+        # remove unicode mark for strings if Python3
+        if PYTHON3:
+            check_contents = check_contents.replace(" u'", " '")
         with open(output_file, open_mode("r")) as output_file:
             output_file_contents = output_file.read()
         #strip comments at the beginning of the file
