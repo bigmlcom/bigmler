@@ -20,9 +20,12 @@
 
 from __future__ import absolute_import
 
+import pprint
 
 from bigml.resourcehandler import RENAMED_RESOURCES
 from bigml.resourcehandler import get_resource_type
+
+INDENT = 4 * " "
 
 
 class RESTCall(object):
@@ -104,9 +107,13 @@ class RESTCall(object):
                         in self.origins]
         arguments = ", ".join(origin_names)
         if self.input_data:
-            arguments = "%s, %s" % (arguments, repr(self.input_data))
+            arguments = "%s, \\\n%s%s" % ( \
+                arguments, INDENT,
+                pprint.pformat(self.input_data).replace("\n", "\n%s" % INDENT))
         if self.args:
-            arguments = "%s, %s" % (arguments, repr(self.args))
+            arguments = "%s, \\\n%s%s" % (arguments, \
+                INDENT, \
+                pprint.pformat(self.args).replace("\n", "\n%s" % INDENT))
         out = "%s = api.%s_%s(%s)\napi.ok(%s)\n\n" % (
             resource_name,
             self.action,

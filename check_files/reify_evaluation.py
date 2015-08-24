@@ -10,5 +10,6 @@ api.ok(dataset1)
 model1 = api.create_model(dataset1)
 api.ok(model1)
 
-evaluation1 = api.create_evaluation(model1, dataset1, {'name': u'my_evaluation_name'})
+evaluation1 = api.create_evaluation(model1, dataset1, \
+    {'name': u'my_evaluation_name'})
 api.ok(evaluation1)

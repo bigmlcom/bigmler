@@ -10,5 +10,11 @@ api.ok(dataset1)
 anomaly1 = api.create_anomaly(dataset1)
 api.ok(anomaly1)
 
-anomalyscore1 = api.create_anomaly_score(anomaly1, {u'sepal width': 1, u'petal width': 0.5, u'petal length': 0.5, u'sepal length': 1, u'species': u'Iris-setosa'}, {'name': u'my_anomaly_score_name'})
+anomalyscore1 = api.create_anomaly_score(anomaly1, \
+    {u'petal length': 0.5,
+     u'petal width': 0.5,
+     u'sepal length': 1,
+     u'sepal width': 1,
+     u'species': u'Iris-setosa'}, \
+    {'name': u'my_anomaly_score_name'})
 api.ok(anomalyscore1)

@@ -10,5 +10,11 @@ api.ok(dataset1)
 cluster1 = api.create_cluster(dataset1)
 api.ok(cluster1)
 
-centroid1 = api.create_centroid(cluster1, {u'sepal width': 1, u'petal width': 0.5, u'petal length': 0.5, u'sepal length': 1, u'species': u'Iris-setosa'}, {'name': u'my_centroid_name'})
+centroid1 = api.create_centroid(cluster1, \
+    {u'petal length': 0.5,
+     u'petal width': 0.5,
+     u'sepal length': 1,
+     u'sepal width': 1,
+     u'species': u'Iris-setosa'}, \
+    {'name': u'my_centroid_name'})
 api.ok(centroid1)

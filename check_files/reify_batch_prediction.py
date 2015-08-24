@@ -10,5 +10,6 @@ api.ok(dataset1)
 model1 = api.create_model(dataset1)
 api.ok(model1)
 
-batchprediction1 = api.create_batch_prediction(model1, dataset1, {'name': u'my_batch_prediction_name'})
+batchprediction1 = api.create_batch_prediction(model1, dataset1, \
+    {'name': u'my_batch_prediction_name'})
 api.ok(batchprediction1)
