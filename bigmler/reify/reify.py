@@ -21,8 +21,12 @@ from __future__ import absolute_import
 
 import sys
 
-from bigmler.reify.restchain import RESTChain
 from bigml.resourcehandler import get_resource_id
+
+from bigmler.checkpoint import file_number_of_lines
+from bigmler.utils import PYTHON3
+from bigmler.reify.restchain import RESTChain
+
 
 def reify_resources(args, api):
     """ Extracts the properties of the created resources and generates
@@ -36,6 +40,10 @@ def reify_resources(args, api):
                  % args.resource_id)
     api_calls = RESTChain(api, resource_id, args.add_fields)
     output = api_calls.reify("python")
-    with open(args.output, "w") as reify_file:
-        reify_file.write(output)
+    if PYTHON3:
+        with open(args.output, "w", encoding="utf-8") as reify_file:
+            reify_file.write(output)
+    else:
+        with open(args.output, "w") as reify_file:
+            reify_file.write(output.encode("utf-8"))
     sys.stdout.write(output)
