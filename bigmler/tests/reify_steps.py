@@ -28,6 +28,23 @@ from bigml.api import check_resource
 from bigmler.tests.common_steps import check_debug
 
 
+def python3_contents(filename, prior_contents):
+    """Check for a file that has alternative contents for Python3 and return
+       its contents
+
+    """
+    directory = os.path.dirname(filename)
+    basename = os.path.basename(filename)
+    basename_name, basename_ext = basename.split(".")
+    filename = os.path.join(directory, "%s_py3.%s" % ( \
+        basename_name, basename_ext))
+    try:
+        with open(filename, open_mode("r")) as file_handler:
+            return file_handler.read()
+    except IOError:
+        return prior_contents
+
+
 #@step(r'I create a reify output for the resource in "(.*)" for "(.*)')
 def i_create_output(step, output=None, language=None, resource_type='source',
                     add_fields=False):
@@ -75,8 +92,14 @@ def i_check_output_file(step, output=None, check_file=None):
         if check_contents == output_file_contents:
             assert True
         else:
-            assert False, ("File contents:\n%s\nExpected contents:\n%s" %
-                           (output_file_contents, check_contents))
+            if PYTHON3:
+                # look for an alternative in PYTHON3
+                check_contents = python3_contents(check_file, check_contents)
+            if check_contents == output_file_contents:
+                assert True
+            else:
+                assert False, ("File contents:\n%s\nExpected contents:\n%s" %
+                               (output_file_contents, check_contents))
     except Exception, exc:
         assert False, str(exc)
 
