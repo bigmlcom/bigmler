@@ -40,7 +40,7 @@ def python3_contents(filename, prior_contents):
         basename_name, basename_ext))
     try:
         with open(filename, open_mode("r")) as file_handler:
-            return file_handler.read()
+            return file_handler.read().replace("\r\n", "\n")
     except IOError:
         return prior_contents
 
