@@ -28,7 +28,7 @@ from bigmler.utils import PYTHON3
 from bigmler.reify.restchain import RESTChain
 
 
-def reify_resources(args, api):
+def reify_resources(args, api, logger):
     """ Extracts the properties of the created resources and generates
         code to rebuild them
 
@@ -38,7 +38,9 @@ def reify_resources(args, api):
     if resource_id is None:
         sys.exit("Failed to match a valid resource ID. Please, check: %s"
                  % args.resource_id)
-    api_calls = RESTChain(api, resource_id, args.add_fields)
+
+    api_calls = RESTChain(api, resource_id, args.add_fields,
+                          logger, args.output_dir)
     output = api_calls.reify("python")
     if PYTHON3:
         with open(args.output, "w", encoding="utf-8") as reify_file:
@@ -46,4 +48,3 @@ def reify_resources(args, api):
     else:
         with open(args.output, "w") as reify_file:
             reify_file.write(output.encode("utf-8"))
-    sys.stdout.write(output)

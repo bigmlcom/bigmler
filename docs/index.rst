@@ -1794,9 +1794,9 @@ that will output:
     api.ok(source1)
 
 According to this output, the source was created from a file named ``iris.csv``
-and was assigned a ``name``. This script will be shown in your console and
-also stored in the file ``reify.py`` on the command output directory
-(you can specify the name and location of the file using the ``--output``
+and was assigned a ``name``. This script will be stored in the command output
+directory and named `reify.py`` (you can specify a different name and location
+using the ``--output``
 option).
 
 When creating sources from data, field types are inferred from the contents

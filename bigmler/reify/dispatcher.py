@@ -83,8 +83,24 @@ def reify_dispatcher(args=sys.argv[1:]):
     if "--clear-logs" in args:
         clear_log_files(LOG_FILES)
 
+    def logger(message):
+        """Partial to log messages according to args.verbosity
+
+        """
+        u.log_message(u.dated(message), \
+            log_file=session_file, console=command_args.verbosity)
+
     # Creates the corresponding api instance
     api = a.get_api_instance(command_args, u.check_dir(session_file))
-
-    reify_resources(command_args, api)
+    message = "Starting reification for %s\n\n" % command_args.resource_id
+    u.log_message(message, \
+        log_file=session_file, console=command_args.verbosity)
+    reify_resources(command_args, api, logger)
+    message = "\nReification complete. See the results in %s\n\n" % \
+        command_args.output
+    u.log_message(message, \
+        log_file=session_file, console=command_args.verbosity)
     u.log_message("_" * 80 + "\n", log_file=session_file)
+
+    u.print_generated_files(command_args.output_dir, log_file=session_file,
+                            verbosity=command_args.verbosity)

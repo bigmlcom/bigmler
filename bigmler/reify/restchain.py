@@ -23,11 +23,13 @@ from __future__ import absolute_import
 
 import sys
 import math
+import os
 
 import bigmler.reify.restutils as u
 
 from bigml.resourcehandler import get_resource_id, get_resource_type
 from bigml.fields import Fields
+from bigml.basemodel import retrieve_resource
 
 from bigmler.reify.reify_defaults import COMMON_DEFAULTS, DEFAULTS
 
@@ -46,16 +48,29 @@ class RESTChain(object):
     """
 
 
-    def __init__(self, api, resource_id, add_fields):
+    def __init__(self, api, resource_id, add_fields,
+                 logger=None, storage=None):
         """Constructor: empty list of objects and REST calls
 
         """
 
+        def silent(message):
+            """No logging
+
+            """
+            pass
+
         self.calls = {}
         self.objects = [resource_id]
         self.api = api
+        self.delete = not self.api.storage
+        if self.delete:
+            self.api.storage = storage or os.getcwd()
         self.add_fields = add_fields
+        self.logger = logger or silent
         self.reify_resource(resource_id)
+        if self.delete:
+            self.api.storage = None
 
     def get_resource(self, resource_id):
         """Auxiliar method to retrieve resources. The query string ensures
@@ -66,12 +81,25 @@ class RESTChain(object):
                 isinstance(resource_id, list)):
             resource_id = resource_id[0]
         try:
-            return self.api.check_resource(
-                resource_id, query_string=GET_QS).get('object')
+            resource = retrieve_resource(self.api, resource_id,
+                                      query_string=GET_QS).get('object')
+            return resource
         except ValueError:
             sys.exit("We could not reify the resource. Failed to find"
                      " information for %s in the"
                      " creation chain." % resource_id)
+
+    def delete_stored_resource(self, resource_id):
+        """Deletes the copy of the resource stored to fasten the analysis
+
+        """
+        if self.api.storage is not None:
+            try:
+                stored_resource = "%s%s%s" % (self.api.storage, os.sep,
+                                              resource_id.replace("/", "_"))
+                os.remove(stored_resource)
+            except IOError:
+                pass
 
     def add(self, resource_id, calls):
         """Extend the list of calls and objects
@@ -86,6 +114,8 @@ class RESTChain(object):
                 for origin in origins:
                     if not origin in self.calls:
                         if not origin in self.objects:
+                            message = "New origin found: %s\n" % origin
+                            self.logger(message)
                             self.objects.append(origin)
                         self.reify_resource(origin)
 
@@ -109,11 +139,16 @@ class RESTChain(object):
         """
         # first check if this is a valid id
         resource_id = get_resource_id(resource_id)
+
         if resource_id is not None:
             resource_type = get_resource_type(resource_id)
 
             reify_handler = getattr(self, 'reify_%s' % resource_type)
+            message = "Analyzing %s.\n" % resource_id
+            self.logger(message)
             reify_handler(resource_id)
+            if self.delete:
+                self.delete_stored_resource(resource_id)
 
     def reify_source(self, resource_id):
         """Extracts the REST API arguments from the source JSON structure
