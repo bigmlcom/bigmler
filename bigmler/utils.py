@@ -278,6 +278,8 @@ def read_local_resource(path, csv_properties=None):
                     'object': resource,
                     'error': None,
                     'code': bigml.api.HTTP_OK}
+    # TODO: change this line to encompass 4.2.0 new structure
+    # (+ objective_column)
     fields, resource_locale, missing_tokens = get_fields_structure(resource)
     if missing_tokens:
         csv_properties['missing_tokens'] = missing_tokens
