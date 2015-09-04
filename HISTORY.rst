@@ -3,6 +3,11 @@
 History
 -------
 
+3.2.1 (2015-09-05)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug in reify subcommand for unordered reifications.
+
 3.2.0 (2015-08-23)
 ~~~~~~~~~~~~~~~~~~
 

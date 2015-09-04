@@ -419,7 +419,8 @@ class TestReify(object):
             print "\nTesting with:\n", example
             test_reify.create_ensemble(example[0], output=example[1],
                                        args=example[2])
-            test_reify.i_create_output(self, example[1], example[4], resource_type='ensemble')
+            test_reify.i_create_output(self, example[1], example[4],
+                                       resource_type='ensemble')
             test_reify.i_check_output_file(self, output=example[1],
                                            check_file=example[3])
 
@@ -445,5 +446,34 @@ class TestReify(object):
                                      args=example[2])
             test_reify.i_create_output(self, example[1], example[4],
                                        add_fields=True)
+            test_reify.i_check_output_file(self, output=example[1],
+                                           check_file=example[3])
+
+    def test_scenario15(self):
+        """
+            Scenario: Successfully building an evaluation with train/tests split reify output in python
+                Given I create a BigML evaluation with data "<data>" and train/test split and params "<params>"
+                And I check that the source has been created
+                And I check that the dataset has been created
+                And I check that the model has been created
+                And I check that the evaluation has been created
+                Then I create a reify output in "<output>" for "<language>"
+                And the "<output>" file is like "<check_file>"
+
+                Examples:
+                | data | output | params |check_file | language
+                | data/iris.csv | scenario_re15/reify.py | {"name": "my_evaluation_name"}|../check_files/reify_evaluation_split.py | python
+        """
+        print self.test_scenario12.__doc__
+        examples = [
+            ['data/iris.csv', 'scenario_re15/reify.py', {"name": "my_evaluation_name"}, 'check_files/reify_evaluation_split.py', 'python']]
+
+        for example in examples:
+            print "\nTesting with:\n", example
+            test_reify.create_evaluation_split(example[0],
+                                               output=example[1],
+                                               args=example[2])
+            test_reify.i_create_output(self, example[1], example[4],
+                                       resource_type='evaluation')
             test_reify.i_check_output_file(self, output=example[1],
                                            check_file=example[3])
