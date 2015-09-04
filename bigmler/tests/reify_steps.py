@@ -313,3 +313,28 @@ def create_ensemble(filename, output=None, args=None):
     world.ensemble = world.api.create_ensemble(world.dataset, args)
     world.api.ok(world.ensemble)
     world.ensembles.append(world.ensemble['resource'])
+
+#@step(r'I create a BigML evaluation with data "(.*)" split training/test and params "(.*)"')
+def create_evaluation_split(filename, output=None, args=None):
+    source = world.api.create_source(res_filename(filename))
+    world.source = source
+    world.directory = os.path.dirname(output)
+    world.output = output
+    world.api.ok(world.source)
+    world.sources.append(source['resource'])
+    world.dataset = world.api.create_dataset(source)
+    world.api.ok(world.dataset)
+    world.datasets.append(world.dataset['resource'])
+    world.dataset_train = world.api.create_dataset(world.dataset, {'sample_rate': 0.7})
+    world.api.ok(world.dataset_train)
+    world.datasets.append(world.dataset_train['resource'])
+    world.dataset_test = world.api.create_dataset(world.dataset, {'sample_rate': 0.7, 'out_of_bag': True})
+    world.api.ok(world.dataset_test)
+    world.datasets.append(world.dataset_test['resource'])
+    world.model = world.api.create_model(world.dataset_train)
+    world.api.ok(world.model)
+    world.models.append(world.model['resource'])
+    world.evaluation = world.api.create_evaluation(world.model, world.dataset_test, args)
+    world.api.ok(world.evaluation)
+    world.evaluations.append(world.evaluation['resource'])
+

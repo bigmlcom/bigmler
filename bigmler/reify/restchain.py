@@ -40,6 +40,17 @@ PREFIXES = {
 }
 
 
+def uniquify(resource_ids):
+    """Ensure the list of objects has unique resource ids maintaining the
+       priority order found by reify
+
+    """
+    unique_objects = []
+    for resource_id in reversed(resource_ids):
+        if not resource_id in unique_objects:
+            unique_objects.append(resource_id)
+    return unique_objects
+
 
 class RESTChain(object):
 
@@ -69,6 +80,7 @@ class RESTChain(object):
         self.add_fields = add_fields
         self.logger = logger or silent
         self.reify_resource(resource_id)
+        self.objects = uniquify(self.objects)
         if self.delete:
             self.api.storage = None
 
@@ -112,22 +124,31 @@ class RESTChain(object):
                 if isinstance(origins, basestring):
                     origins = [origins]
                 for origin in origins:
+                    if not origin in self.objects:
+                        message = "New origin found for %s: %s\n" % \
+                            (resource_id, origin)
+                        self.logger(message)
+                    self.objects.append(origin)
                     if not origin in self.calls:
-                        if not origin in self.objects:
-                            message = "New origin found: %s\n" % origin
-                            self.logger(message)
-                            self.objects.append(origin)
                         self.reify_resource(origin)
+                    else:
+                        new_origins = []
+                        calls = self.calls[origin]
+                        for call in calls:
+                            # only create calls will introduce new origins
+                            if call.action == "create":
+                                new_origins.extend(call.origins)
+                        self.objects.extend(new_origins)
 
     def reify(self, language=None):
         """Prints the chain of commands in the user-given language
 
         """
-        prefix = PREFIXES.get(language, "") % self.objects[0]
+        prefix = PREFIXES.get(language, "") % self.objects[-1]
         out = prefix
         counts = {}
         alias = {}
-        for resource_id in reversed(self.objects):
+        for resource_id in self.objects:
             for call in self.calls.get(resource_id, []):
                 u.get_resource_alias(resource_id, counts, alias)
                 out += call.reify(language, alias=alias)
