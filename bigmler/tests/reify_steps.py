@@ -83,7 +83,7 @@ def i_check_output_file(step, output=None, check_file=None):
         # remove unicode mark for strings if Python3
         if PYTHON3:
             check_contents = check_contents.replace( \
-                " u'", " '").replace("{u'", "{'")
+                " u'", " '").replace("{u'", "{'").replace(' u"', ' "')
         with open(output_file, open_mode("r")) as output_file:
             output_file_contents = output_file.read()
         #strip comments at the beginning of the file
