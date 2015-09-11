@@ -1410,7 +1410,7 @@ def create_clusters(datasets, cluster_ids, cluster_args,
                     sys.exit("Failed to get a finished cluster: %s" %
                              str(exception))
                 clusters[0] = cluster
-            message = dated("Cluster created: %s.\n" %
+            message = dated("Cluster created: %s\n" %
                             get_url(cluster))
             log_message(message, log_file=session_file,
                         console=args.verbosity)
