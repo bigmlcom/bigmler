@@ -885,6 +885,8 @@ def set_ensemble_args(args, name=None,
         ensemble_args.update(weight_field=weight_field)
     if args.objective_weights:
         ensemble_args.update(objective_weights=args.objective_weights_json)
+    if args.random_candidates:
+        ensemble_args.update(random_candidates=args.random_candidates)
 
     update_attributes(ensemble_args, args.json_args.get('model'))
     ensemble_args.update(sample_rate=args.sample_rate,

@@ -3,6 +3,12 @@
 History
 -------
 
+3.2.0 (2015-09-14)
+~~~~~~~~~~~~~~~~~~
+
+- Adding new bigmler analyze option, --random-fields to analyze performace of
+  random forests chaging the number of random candidates.
+
 3.2.1 (2015-09-05)
 ~~~~~~~~~~~~~~~~~~
 

@@ -228,7 +228,7 @@ def common_teardown_module():
     """
     if os.path.exists('./tmp'):
         shutil.rmtree('./tmp')
-
+    """
     world.delete_resources()
     world.count_resources('final', changed=True)
 
@@ -237,7 +237,7 @@ def common_teardown_module():
             shutil.rmtree(folder)
         except:
             pass
-
+    """
     world.check_init_equals_final()
 
 

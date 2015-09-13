@@ -228,18 +228,11 @@ def evaluations_report(args):
             kfold_evaluation['name'] = directory.replace('kfold', '#')
             evaluation = kfold_evaluation
             command = get_command_line(os.path.join(path, directory))
-            model_fields = parse_model_fields(command)
-            nodes = parse_nodes(command)
-            if model_fields:
-                evaluation_json = {"model_fields": model_fields,
-                                   "directory": directory,
-                                   "time": os.path.getmtime(file_name)}
-                kfold_evaluation['model_fields'] = model_fields
-            elif nodes:
-                evaluation_json = {"nodes": nodes,
-                                   "directory": directory,
-                                   "time": os.path.getmtime(file_name)}
-                kfold_evaluation['nodes'] = nodes
+            feature, value = parse_test_feature(command)
+            evaluation_json = {feature: value,
+                               "directory": directory,
+                               "time": os.path.getmtime(file_name)}
+            kfold_evaluation[feature] = value
             evaluation = evaluation.get(MODEL_KEY, {})
 
             # read the applicable metrics and add the kfold number info
@@ -248,8 +241,10 @@ def evaluations_report(args):
                 new_eval["measure"] = option
                 if directory.startswith("node_th"):
                     new_eval["kfold"] = int(directory.replace("node_th", ""))
-                else:
+                elif directory.startswith("kfold"):
                     new_eval["kfold"] = int(directory.replace("kfold", ""))
+                elif directory.startswith("random"):
+                    new_eval["kfold"] = int(directory.replace("random", ""))
                 if option in evaluation:
                     new_eval["value"] = evaluation[option]
                     metrics.append(new_eval)
@@ -315,32 +310,32 @@ def get_command_line(path):
         sys.exit("Not enough information to build the report. Some files may"
                  " have been deleted.")
 
-
-def parse_model_fields(command):
-    """Parse the list of model fields from the command line text
-
+def parse_test_feature(command):
+    """Parse the evolving feature from the command line text:
+        - model_fields: list of model fields
+        - nodes: number of nodes
+        -
     """
-
+    # try to find model_fields
     pattern = re.compile(r'--model-fields (.+?)\s--')
     model_fields = pattern.findall(command)
     model_fields = [] if not model_fields else model_fields[0]
-
-    if model_fields and model_fields.startswith('"'):
-        model_fields = model_fields[1:]
-    if model_fields and model_fields.endswith('"'):
-        model_fields = model_fields[:-1]
-    return model_fields
-
-
-def parse_nodes(command):
-    """Parse the node threshold number from the command line text
-
-    """
-
+    if model_fields:
+        if model_fields.startswith('"'):
+            model_fields = model_fields[1:]
+        if model_fields.endswith('"'):
+            model_fields = model_fields[:-1]
+            return ("model_fields", model_fields)
+    # try to find node_threshold
     pattern = re.compile(r'--node-threshold (\d+?)\s--')
     nodes = pattern.findall(command)
-    nodes = None if not nodes else nodes[0]
-    return nodes
+    if nodes:
+        return ("nodes", nodes[0])
+    # try to find random_candidates
+    pattern = re.compile(r'--random-candidates (\d+?)\s--')
+    random_candidates = pattern.findall(command)
+    if random_candidates:
+        return ("random_candidates", random_candidates[0])
 
 
 REPORTS = {'gazibit': add_gazibit_links}

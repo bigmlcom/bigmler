@@ -417,6 +417,7 @@ var processEvaluation = function(settings, evaluation_id, evaluation)  {
       "resource": evaluation.name,
       "fields": evaluation.model_fields,
       "nodes": evaluation.nodes,
+      "random_candidates": evaluation.random_candidates,
       "tpr": truePositiveRate,
       "fpr": falsePositiveRate,
       "instances": settings.maxInstances,
@@ -577,12 +578,14 @@ loadEvaluations({
             .on('mouseover', function(evaluation) {
 
                   d3.select("body").style("cursor", "pointer");
-                  console.log(evaluation);
                   var configuration;
-                  if (typeof evaluation.nodes === 'undefined') {
-                    configuration = ", fields: " + evaluation.fields;
-                  } else {
+                  if (typeof evaluation.nodes !== 'undefined') {
                     configuration = ", node threshold: " + evaluation.nodes;
+                  } else if (typeof evaluation.fields !== 'undefined'){
+                    configuration = ", fields: " + evaluation.fields;
+                  } else if (typeof evaluation.random_candidates !== 'undefined'){
+                    configuration = (", random candidates: " +
+                                     evaluation.random_candidates);
                   }
                   d3.select('svg #evaluationLabel')
                     .text(evaluation.resource + configuration +
@@ -662,6 +665,19 @@ d3.select('svg #metricsTitle')
 var tooltip = d3.select("#tooltip")
     .style("opacity", 0);
 
+function buildTitle(data) {
+    if (typeof data[0].nodes !== 'undefined') {
+        return "Node threshold: models' perfomance";
+    }
+    if (typeof data[0].fields !== 'undefined') {
+        return "Feature selection: models' perfomance";
+    }
+    if (typeof data[0].random_candidates !== 'undefined') {
+       return "Radom candidates: models' perfomance";
+    }
+}
+
+
 function updateData() {
     d3.json("metrics.json", function(error, data) {
 
@@ -669,10 +685,7 @@ function updateData() {
         var optMeasures = {};
         var foundMeasures = 0;
         var kfolds = 0, topRange, bottomRange, kfolds, title;
-        console.log(data[0]);
-        title = ((typeof data[0].nodes === 'undefined') ?
-            "Feature selection: models' perfomance" :
-            "Node threshold: models' perfomance");
+        title = buildTitle(data)
         $(".site-title").html(title);
         for (var i = 0; i < measuresLen; i++) {
             var measure = MEASURES[i];
@@ -779,11 +792,17 @@ function updateData() {
                          "<br/><br/> model_fields: <br/>" +
                          d.model_fields.replace(/,/g, ", ") +
                          "</b><br/><br/>folder: " + d.directory;
-              } else {
+              } else if (typeof d.nodes !== 'undefined') {
                   str += "<b>" + d.measure.replace(/_/g, " ") + ": " +
                          d.value + suffix +
                          "<br/><br/> node threshold: <br/>" +
                          d.nodes +
+                         "</b><br/><br/>folder: " + d.directory;
+              } else {
+                  str += "<b>" + d.measure.replace(/_/g, " ") + ": " +
+                         d.value + suffix +
+                         "<br/><br/> random candidates: <br/>" +
+                         d.random_candidates +
                          "</b><br/><br/>folder: " + d.directory;
               }
               tooltip.transition()

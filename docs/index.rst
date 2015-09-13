@@ -1438,6 +1438,32 @@ the --staleness option) or the node threshold reaches the ``--max-nodes``
 limit, the process ends and shows the node threshold that
 lead to the best score.
 
+.. code-block:: bash
+
+    bigmler analyze --dataset dataset/5357eb2637203f1668000004 \
+                    --nodes --min-nodes 10 \
+                    --max-nodes 200 --nodes-step 50
+
+
+When working with random forest, you can also change the number of
+``random_candidates`` or number of fields chosen at random when the models
+in the forest are built. Using ``bigmler analyze --random-fields`` the number
+of ``random_candidates`` will range from 1 to the number of fields in the
+origin dataset, and BigMLer will cross-validate the random forests to determine
+which ``random_candidates`` number gives the best performance.
+
+.. code-block:: bash
+
+    bigmler analyze --dataset dataset/5357eb2637203f1668000004 \
+                    --random-fields
+
+Please note that, in general, the exact choice of fields selected as random
+candidates might be more
+important than their actual number. However, in some marginal cases (e.g.
+datasets with a high number noise features) the number of random candidates
+can impact tree performance significantly.
+
+
 .. _bigmler-report:
 
 Report subcommand
@@ -2331,6 +2357,9 @@ permanently stored in your system, use
 
     setx BIGML_USERNAME myusername
     setx BIGML_API_KEY ae579e7e53fb9abd646a6ff8aa99d4afe83ac291
+
+Remember that ``setx`` will not change the environment variables of your actual
+console, so you will need to open a new one to start using them.
 
 BigML Development Mode
 ======================
