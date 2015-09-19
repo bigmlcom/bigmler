@@ -102,6 +102,9 @@ CANDIDATES_LOG = u"random_candidate_sets.csv"
 #name max length
 NAME_MAX_LENGTH = 127
 
+#default number of models for --random-fields random forests
+DEFAULT_NUMBER_OF_MODELS = 10
+
 subcommand_list = []
 subcommand_file = None
 session_file = None
@@ -254,10 +257,33 @@ def create_kfold_datasets_file(args, api, common_options, resume=False):
     u.log_message(message, log_file=session_file, console=args.verbosity)
     if args.output_dir is None:
         args.output_dir = a.NOW
-    # retrieve dataset
-    dataset_id = bigml.api.get_dataset_id(args.dataset)
+
+    csv_properties = {}
+    fields = None
+    dataset = None
+    datasets = []
+    if args.dataset_file:
+        # dataset is retrieved from the contents of the given local JSON file
+        model_dataset, csv_properties, fields = u.read_local_resource(
+            args.dataset_file,
+            csv_properties=csv_properties)
+        if not args.datasets:
+            datasets = [model_dataset]
+            dataset = model_dataset
+        else:
+            datasets = u.read_datasets(args.datasets)
+        dataset_id = dataset['resource']
+    elif args.dataset:
+        dataset_id = bigml.api.get_dataset_id(args.dataset)
+        datasets = [dataset_id]
+    elif args.dataset_ids:
+        datasets = args.dataset_ids
+        dataset_id = datasets[0]
+
     if dataset_id:
-        dataset = api.check_resource(dataset_id, query_string=ALL_FIELDS_QS)
+        if not dataset:
+            dataset = api.check_resource(dataset_id,
+                                         query_string=ALL_FIELDS_QS)
         try:
             args.objective_field = int(args.objective_field)
         except (TypeError, ValueError):
@@ -821,6 +847,8 @@ def create_candidates_analysis(args, api, common_options, resume=False):
     datasets_file, objective_name, resume = create_kfold_datasets_file(
         args, api, common_options, resume=resume)
     args.objective_field = objective_name
+    if args.number_of_models == 1:
+        args.number_of_models = DEFAULT_NUMBER_OF_MODELS
     message = ('Creating the random candidates set..........\n')
     u.log_message(message, log_file=session_file,
                   console=args.verbosity)

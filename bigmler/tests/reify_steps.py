@@ -89,6 +89,29 @@ def i_check_output_file(step, output=None, check_file=None):
         #strip comments at the beginning of the file
         output_file_contents = re.sub(r'""".*"""', '', output_file_contents,
                                       flags=re.S).strip("\n")
+
+        #strip internally added project id information
+        prefix = "" if PYTHON3 else "u"
+        p_str = r',\s\\\n    \{\'project\':\s%s\'project/[a-f0-9]{24}\'\}\)' \
+            % prefix
+        output_file_contents = re.sub(p_str,
+                                      ')', output_file_contents,
+                                      flags=re.S).strip("\n")
+        p_str = r',\s\\\n    \s\'project\':\s%s\'project/[a-f0-9]{24}\'\}\)' \
+            % prefix
+        output_file_contents = re.sub(p_str,
+                                      ')', output_file_contents,
+                                      flags=re.S).strip("\n")
+        p_str = r',\n    \s\'project\':\s%s\'project/[a-f0-9]{24}\'\}\)' \
+            % prefix
+        output_file_contents = re.sub(p_str,
+                                      '})', output_file_contents,
+                                      flags=re.S).strip("\n")
+        p_str = r',\s\'project\':\s%s\'project/[a-f0-9]{24}\'' % prefix
+        output_file_contents = re.sub(p_str,
+                                      '', output_file_contents,
+                                      flags=re.S).strip("\n")
+        print output_file_contents
         if check_contents == output_file_contents:
             assert True
         else:
@@ -106,6 +129,7 @@ def i_check_output_file(step, output=None, check_file=None):
 
 #@step(r'I create a BigML source with data "(.*)" and params "(.*)"')
 def create_source(filename, output=None, args=None):
+    args.update({"project": world.project_id})
     source = world.api.create_source(res_filename(filename), args)
     world.source = source
     world.directory = os.path.dirname(output)
@@ -116,7 +140,7 @@ def create_source(filename, output=None, args=None):
 
 #@step(r'I create a BigML dataset from a source with data "(.*)" and params "(.*)"')
 def create_dataset(filename, output=None, args=None):
-    source = world.api.create_source(res_filename(filename))
+    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
     world.source = source
     world.directory = os.path.dirname(output)
     world.output = output
@@ -129,7 +153,7 @@ def create_dataset(filename, output=None, args=None):
 
 #@step(r'I create a BigML model from a dataset with data "(.*)" and params "(.*)"')
 def create_model(filename, output=None, args=None):
-    source = world.api.create_source(res_filename(filename))
+    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
     world.source = source
     world.directory = os.path.dirname(output)
     world.output = output
@@ -144,7 +168,7 @@ def create_model(filename, output=None, args=None):
 
 #@step(r'I create a BigML prediction for (.*) from a model with data "(.*)" and params "(.*)"')
 def create_prediction(filename, input_data= None, output=None, args=None):
-    source = world.api.create_source(res_filename(filename))
+    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
     world.source = source
     world.directory = os.path.dirname(output)
     world.output = output
@@ -162,7 +186,7 @@ def create_prediction(filename, input_data= None, output=None, args=None):
 
 #@step(r'I create a BigML cluster from a dataset with data "(.*)" and params "(.*)"')
 def create_cluster(filename, output=None, args=None):
-    source = world.api.create_source(res_filename(filename))
+    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
     world.source = source
     world.directory = os.path.dirname(output)
     world.output = output
@@ -177,7 +201,7 @@ def create_cluster(filename, output=None, args=None):
 
 #@step(r'I create a BigML anomaly from a dataset with data "(.*)" and params "(.*)"')
 def create_anomaly(filename, output=None, args=None):
-    source = world.api.create_source(res_filename(filename))
+    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
     world.source = source
     world.directory = os.path.dirname(output)
     world.output = output
@@ -192,7 +216,7 @@ def create_anomaly(filename, output=None, args=None):
 
 #@step(r'I create a BigML centroid for (.*) from a cluster with data "(.*)" and params "(.*)"')
 def create_centroid(filename, input_data=None, output=None, args=None):
-    source = world.api.create_source(res_filename(filename))
+    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
     world.source = source
     world.directory = os.path.dirname(output)
     world.output = output
@@ -210,7 +234,7 @@ def create_centroid(filename, input_data=None, output=None, args=None):
 
 #@step(r'I create a BigML anomaly score for (.*) from an anomaly detector with data "(.*)" and params "(.*)"')
 def create_anomaly_score(filename, input_data=None, output=None, args=None):
-    source = world.api.create_source(res_filename(filename))
+    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
     world.source = source
     world.directory = os.path.dirname(output)
     world.output = output
@@ -246,7 +270,7 @@ def create_batch_prediction(filename, output=None, args=None):
 
 #@step(r'I create a BigML batch centroid from a cluster with data "(.*)" and params "(.*)"')
 def create_batch_centroid(filename, output=None, args=None):
-    source = world.api.create_source(res_filename(filename))
+    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
     world.source = source
     world.directory = os.path.dirname(output)
     world.output = output
@@ -264,7 +288,7 @@ def create_batch_centroid(filename, output=None, args=None):
 
 #@step(r'I create a BigML batch anomaly score from an anomaly detector with data "(.*)" and params "(.*)"')
 def create_batch_anomaly_score(filename, output=None, args=None):
-    source = world.api.create_source(res_filename(filename))
+    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
     world.source = source
     world.directory = os.path.dirname(output)
     world.output = output
@@ -282,7 +306,7 @@ def create_batch_anomaly_score(filename, output=None, args=None):
 
 #@step(r'I create a BigML evaluation with data "(.*)" and params "(.*)"')
 def create_evaluation(filename, output=None, args=None):
-    source = world.api.create_source(res_filename(filename))
+    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
     world.source = source
     world.directory = os.path.dirname(output)
     world.output = output
@@ -301,7 +325,7 @@ def create_evaluation(filename, output=None, args=None):
 
 #@step(r'I create a BigML ensemble from a dataset with data "(.*)" and params "(.*)"')
 def create_ensemble(filename, output=None, args=None):
-    source = world.api.create_source(res_filename(filename))
+    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
     world.source = source
     world.directory = os.path.dirname(output)
     world.output = output
@@ -316,7 +340,7 @@ def create_ensemble(filename, output=None, args=None):
 
 #@step(r'I create a BigML evaluation with data "(.*)" split training/test and params "(.*)"')
 def create_evaluation_split(filename, output=None, args=None):
-    source = world.api.create_source(res_filename(filename))
+    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
     world.source = source
     world.directory = os.path.dirname(output)
     world.output = output
@@ -337,4 +361,3 @@ def create_evaluation_split(filename, output=None, args=None):
     world.evaluation = world.api.create_evaluation(world.model, world.dataset_test, args)
     world.api.ok(world.evaluation)
     world.evaluations.append(world.evaluation['resource'])
-

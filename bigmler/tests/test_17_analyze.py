@@ -300,7 +300,7 @@ class TestAnalyze(object):
                 |data |output_dir  |new_fields | field | model_fields| min_nodes | max_nodes | nodes_step | kfold | metric   | node_threshold   | metric_value |
                 |../data/iris.csv | ./scenario_a_10 |../data/new_fields.json| outlier? |petal length,outlier?,species| 3         | 14        | 2         |2     | precision  | 9                | 94.71%         |
         """
-        print self.test_scenario1.__doc__
+        print self.test_scenario8.__doc__
         examples = [
             ['data/iris.csv', 'scenario_a_10', 'data/new_fields2.json', u'outlier?', u'outlier?,species', '3', '14', '2', '2', 'precision', '5', '98.21%']]
         for example in examples:
@@ -316,3 +316,33 @@ class TestAnalyze(object):
             test_pred.i_check_create_kfold_models(self, example[8])
             test_pred.i_check_create_all_kfold_cross_validations(self, example[8])
             test_pred.i_check_node_threshold(self, example[10], example[9], example[11])
+
+    def test_scenario9(self):
+        """
+            Scenario: Successfully building random fields analysis from dataset:
+                Given I create BigML dataset uploading train "<data>" file in "<output>"
+                And I check that the source has been created
+                And I check that the dataset has been created
+                And I create BigML random fields analysis with <kfold>-cross-validation improving "<metric>"
+                And I check that the <kfold>-datasets have been created
+                And I check that the <kfold>-random trees have been created
+                And I check that all the <kfold>-fold cross-validations have been created
+                Then the best random candidates number is "<random_candidates>", with "<metric>" of <metric_value>
+
+                Examples:
+                | data                | output                  | kfold | metric   | random_candidates | metric_value |
+                | ../data/iris.csv | ./scenario_a_11/evaluation |2     | precision  | 4               | 96.09%         |
+        """
+        print self.test_scenario9.__doc__
+        examples = [
+            ['data/iris.csv', 'scenario_a_11/evaluation', '2', 'precision', '4', '96.09%']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            test_pred.i_create_dataset(self, data=example[0], output=example[1])
+            test_pred.i_check_create_source(self)
+            test_pred.i_check_create_dataset(self)
+            test_pred.i_create_random_analysis(self, k_fold=example[2], metric=example[3])
+            test_pred.i_check_create_kfold_datasets(self, example[2])
+            test_pred.i_check_create_kfold_random_forest(self, example[2])
+            test_pred.i_check_create_all_kfold_cross_validations(self, example[2])
+            test_pred.i_check_random_candidates(self, example[4], example[3], example[5])

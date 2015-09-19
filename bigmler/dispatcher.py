@@ -459,7 +459,8 @@ def compute_output(api, args):
 
     # We update the model's public state if needed
     if model:
-        if isinstance(model, basestring):
+        if (isinstance(model, basestring) or
+                bigml.api.get_status(model)['code'] != bigml.api.FINISHED):
             if not args.evaluate and not a.has_train(args):
                 query_string = MINIMUM_MODEL
             elif not args.test_header:
@@ -468,6 +469,7 @@ def compute_output(api, args):
                 query_string = "%s;%s" % (r.ALL_FIELDS_QS, r.FIELDS_QS)
             model = u.check_resource(model, api.get_model,
                                      query_string=query_string)
+            models[0] = model
         if (args.black_box or args.white_box or
                 (args.shared_flag and r.shared_changed(args.shared, model))):
             model_args = {}

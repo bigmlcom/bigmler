@@ -19,23 +19,35 @@ from __future__ import absolute_import
 import os
 
 from bigmler.tests.world import world
+from bigmler.utils import SYSTEM_ENCODING, PYTHON3
 
 from bigml.api import HTTP_OK, HTTP_UNAUTHORIZED
 
-def check_debug(command):
+def check_debug(command, project=True):
     """Adds verbosity level and command print.
 
     """
+    non_project_commands = ["--project", "bigmler reify", "bigmler analyze",
+                            "bigmler delete", "bigmler report",
+                            "bigmler delete"]
+    # adding project id as source creation parameter
+    if (project and
+        all([command.find(string) < 0 for string in non_project_commands])):
+        command = u"%s --project-id %s" % (command, world.project_id)
     debug = os.environ.get('BIGMLER_DEBUG', False)
     verbosity = 0
     extend_cmd = ''
     if debug == '1':
         verbosity = 1
     elif debug == '2':
-        extend_cmd = ' --debug'
-    command = "%s --verbosity %s%s" % (command, verbosity, extend_cmd)
+        extend_cmd = u' --debug'
+    if command.find("bigmler report") < 0:
+        command = u"%s --verbosity %s%s" % (command, verbosity, extend_cmd)
     if debug:
         print command
+    if not PYTHON3:
+        command = command.encode(SYSTEM_ENCODING)
+    print command
     return command
 
 
@@ -72,6 +84,8 @@ def check_init_equals_final():
 
 #@step(r'I want to use api in DEV mode')
 def i_want_api_dev_mode(step):
+    world.api.delete_project(world.project_id)
+    world.project_id = None
     world.api = world.api_dev_mode
-    # Update counters of resources for DEV mode
-    world.count_resources('init')
+    world.project_id = world.api.create_project( \
+        {"name": world.test_project_name})['resource']

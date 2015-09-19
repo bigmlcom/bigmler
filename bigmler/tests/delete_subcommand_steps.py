@@ -36,7 +36,8 @@ def i_create_source_from_file(step, data=None, output_dir=None):
     command = ("bigmler --train " + res_filename(data) + " --store --output-dir " +
                output_dir +
                " --no-dataset --no-model --store")
-    shell_execute(command, os.path.join(output_dir, "p.csv"), test=None)
+    shell_execute(command, os.path.join(output_dir, "p.csv"), test=None,
+                  project=False)
 
 
 def i_check_source_exists_by_id(step, source_id):
@@ -262,6 +263,11 @@ def i_delete_resources_from_dir(step):
     command = ("bigmler delete --from-dir " + world.directory +
                " --output-dir " + world.directory)
     shell_execute(command, os.path.join(world.directory, "p.csv"), test=None)
+
+
+#@step(r'I store the number of existing resources$')
+def i_store_the_number_of_resources(step):
+    store_init_resources()
 
 
 #@step(r'the number of resources has not changed$')

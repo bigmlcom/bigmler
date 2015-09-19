@@ -26,6 +26,7 @@ import os
 import shutil
 import time
 import pkg_resources
+import datetime
 
 from bigml.api import BigML
 from bigml.api import HTTP_OK, HTTP_NO_CONTENT, HTTP_UNAUTHORIZED
@@ -100,6 +101,9 @@ class World(object):
         self.fields_properties_dict = {}
         self.counters = {}
         self.folders = []
+        self.test_project_name = "Test: python bindings %s" % \
+            datetime.datetime.now()
+        self.project_id = None
         self.print_connection_info()
 
     def print_connection_info(self):
@@ -126,7 +130,6 @@ class World(object):
         """Counts the existing resources and stores it keyed by time_tag.
            If changed is set to True, only resources that are logged as
            changed are listed.
-
         """
         print "Counting resources (%s)." % time_tag
         for resource_type in RESOURCE_TYPES:
@@ -193,7 +196,6 @@ class World(object):
 
     def check_init_equals_final(self):
         """ Checks if the counters in init and final timestap are unchanged
-
         """
         for resource_type in RESOURCE_TYPES:
             resource_type = plural(resource_type)
@@ -218,7 +220,9 @@ def common_setup_module():
 
     """
     world.reset_api()
-    world.count_resources('init')
+    if world.project_id is None:
+        world.project_id = world.api.create_project( \
+            {"name": world.test_project_name})['resource']
     world.clear()
 
 
@@ -228,17 +232,21 @@ def common_teardown_module():
     """
     if os.path.exists('./tmp'):
         shutil.rmtree('./tmp')
-    """
     world.delete_resources()
-    world.count_resources('final', changed=True)
-
+    project_stats = world.api.get_project( \
+        world.project_id)['object']['stats']
+    for resource_type, value in project_stats.items():
+        if value['count'] != 0:
+            # assert False, ("Increment in %s: %s" % (resource_type, value))
+            print "WARNING: Increment in %s: %s" % (resource_type, value)
+    world.api.delete_project(world.project_id)
+    world.project_id = None
     for folder in world.folders:
         try:
             shutil.rmtree(folder)
         except:
             pass
-    """
-    world.check_init_equals_final()
+
 
 
 def teardown_class():

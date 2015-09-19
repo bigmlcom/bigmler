@@ -34,11 +34,11 @@ def i_create_dataset(step, data=None, output_dir=None):
         assert False
     world.directory = output_dir
     world.folders.append(world.directory)
+
     try:
         command = (u"bigmler --train " + res_filename(data) +
                    u" --no-model --store --output-dir " + output_dir)
-        if not PYTHON3:
-            command = command.encode(SYSTEM_ENCODING)
+
         command = check_debug(command)
         retcode = check_call(command, shell=True)
         if retcode < 0:
@@ -60,8 +60,6 @@ def i_create_dataset_from_source(step, output_dir=None):
 
         command = ((u"bigmler --source %s" % world.source['resource']) +
                    u" --no-model --store --output-dir " + output_dir)
-        if not PYTHON3:
-            command = command.encode(SYSTEM_ENCODING)
         command = check_debug(command)
         retcode = check_call(command, shell=True)
         if retcode < 0:
@@ -91,8 +89,6 @@ def i_create_filtered_dataset_from_dataset(step, filter_exp=None, output_dir=Non
         command = ((u"bigmler --dataset %s" % world.dataset['resource']) +
                    u" --no-model --store --output-dir " + output_dir +
                    u" --lisp-filter " + output_dir + "/filter.lisp")
-        if not PYTHON3:
-            command = command.encode(SYSTEM_ENCODING)
         command = check_debug(command)
         retcode = check_call(command, shell=True)
         if retcode < 0:

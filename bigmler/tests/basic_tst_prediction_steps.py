@@ -25,7 +25,7 @@ from bigml.io import UnicodeReader
 from bigmler.processing.models import MONTECARLO_FACTOR
 from bigmler.checkpoint import file_number_of_lines
 from bigmler.utils import storage_file_name, open_mode, decode2
-from bigmler.utils import SYSTEM_ENCODING, PYTHON3
+from bigmler.utils import PYTHON3
 from bigmler.tests.ml_tst_prediction_steps import i_create_all_ml_resources
 from bigmler.tests.ml_tst_prediction_steps import i_create_all_ml_resources_and_ensembles
 from bigmler.tests.ml_tst_evaluation_steps import i_create_all_ml_resources_for_evaluation
@@ -38,11 +38,11 @@ from bigmler.tests.common_steps import check_debug
 from bigmler.reports import REPORTS_DIR
 
 
-def shell_execute(command, output, test=None, options=None, test_rows=None):
+def shell_execute(command, output, test=None, options=None, test_rows=None, project=True):
     """Excute bigmler command in shell
 
     """
-    command = check_debug(command)
+    command = check_debug(command, project=project)
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
@@ -105,8 +105,13 @@ def i_create_source_with_locale(step, data=None, locale=None, field_attributes=N
         assert False
     field_attributes = res_filename(field_attributes)
     types = res_filename(types)
+    command = ("bigmler --train " + res_filename(data) + " --locale " +
+               locale + " --field-attributes " + field_attributes +
+               " --types " + types + " --output " + output +
+               " --no-dataset --no-model --store")
+    command = check_debug(command)
     try:
-        retcode = check_call("bigmler --train " + res_filename(data) + " --locale " + locale + " --field-attributes " + field_attributes + " --types " + types + " --output " + output + " --no-dataset --no-model --store", shell=True)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -137,6 +142,7 @@ def i_create_kfold_cross_validation_objective(step, k_folds=None, objective=None
                              " --output " + world.directory +
                              " --optimize " + metric +
                              " --objective " + objective)
+    command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)
         if retcode < 0:
@@ -336,8 +342,6 @@ def i_create_resources_from_dataset_objective_model(step, objective=None, fields
     command = (u"bigmler --dataset " + world.dataset['resource'] +
                u" --objective " + objective + u" --model-fields " +
                fields + u" --test " + test + u" --store --output " + output)
-    if not PYTHON3:
-        command = command.encode(SYSTEM_ENCODING)
     shell_execute(command, output, test=test)
 
 
@@ -1079,8 +1083,10 @@ def i_check_source_label(step, field_id, field_label):
 def i_create_all_resources_to_evaluate(step, data=None, output=None):
     if data is None or output is None:
         assert False
+    command = "bigmler --evaluate --train " + res_filename(data) + " --store --output " + output
+    command = check_debug(command)
     try:
-        retcode = check_call("bigmler --evaluate --train " + res_filename(data) + " --store --output " + output, shell=True)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -1097,10 +1103,12 @@ def i_create_all_resources_to_evaluate_and_report(
     step, data=None, output=None):
     if data is None or output is None:
         assert False
+    command = ("bigmler --evaluate --shared --report gazibit" +
+               " --train " + res_filename(data) +
+               " --store --no-upload --output " + output)
+    command = check_debug(command)
     try:
-        retcode = check_call("bigmler --evaluate --shared --report gazibit" +
-                             " --train " + res_filename(data) +
-                             " --store --no-upload --output " + output, shell=True)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -1116,8 +1124,11 @@ def i_create_all_resources_to_evaluate_and_report(
 def i_create_all_resources_to_evaluate_and_share(step, data=None, output=None):
     if data is None or output is None:
         assert False
+    command = ("bigmler --evaluate --shared --train " + res_filename(data) +
+               " --store --output " + output)
+    command = check_debug(command)
     try:
-        retcode = check_call("bigmler --evaluate --shared --train " + res_filename(data) + " --store --output " + output, shell=True)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -1133,11 +1144,12 @@ def i_create_all_resources_to_evaluate_and_share(step, data=None, output=None):
 def i_create_dataset_with_attributes(step, data=None, attributes=None, output=None):
     if data is None or output is None or attributes is None:
         assert False
+    command = ("bigmler --train " + res_filename(data) +
+               " --source-attributes " + res_filename(attributes) +
+               " --no-model --store --output " + output)
+    command = check_debug(command)
     try:
-        retcode = check_call("bigmler --train " + res_filename(data) +
-                             " --source-attributes " + res_filename(attributes) +
-                             " --no-model --store --output " + output,
-                             shell=True)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -1153,8 +1165,11 @@ def i_create_dataset_with_attributes(step, data=None, attributes=None, output=No
 def i_create_dataset(step, data=None, output=None):
     if data is None or output is None:
         assert False
+    command = ("bigmler --train " + res_filename(data) +
+               " --no-model --store --output " + output)
+    command = check_debug(command)
     try:
-        retcode = check_call("bigmler --train " + res_filename(data) + " --no-model --store --output " + output, shell=True)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -1170,12 +1185,13 @@ def i_create_dataset(step, data=None, output=None):
 def i_create_kfold_cross_validation(step, k_folds=None):
     if k_folds is None:
         assert False
+    command = ("bigmler analyze --dataset " +
+               world.dataset['resource'] +
+               " --cross-validation --k-folds " + k_folds +
+               " --output " + world.directory)
+    command = check_debug(command)
     try:
-        retcode = check_call("bigmler analyze --dataset " +
-                             world.dataset['resource'] +
-                             " --cross-validation --k-folds " + k_folds +
-                             " --output " + world.directory,
-                             shell=True)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -1190,16 +1206,17 @@ def i_create_kfold_cross_validation(step, k_folds=None):
 def i_create_nodes_analysis(step, min_nodes=None, max_nodes=None, nodes_step=None, k_fold=None, metric=None):
     if min_nodes is None or max_nodes is None or nodes_step is None or k_fold is None or metric is None:
         assert False
+    command = ("bigmler analyze --dataset " +
+               world.dataset['resource'] +
+               " --nodes --min-nodes " + min_nodes +
+               " --max-nodes " + max_nodes +
+               " --nodes-step " + nodes_step +
+               " --k-folds " + k_fold +
+               " --output " + world.directory +
+               " --optimize " + metric)
+    command = check_debug(command)
     try:
-        retcode = check_call("bigmler analyze --dataset " +
-                             world.dataset['resource'] +
-                             " --nodes --min-nodes " + min_nodes +
-                             " --max-nodes " + max_nodes +
-                             " --nodes-step " + nodes_step +
-                             " --k-folds " + k_fold +
-                             " --output " + world.directory +
-                             " --optimize " + metric,
-                             shell=True)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -1214,15 +1231,16 @@ def i_create_nodes_analysis(step, min_nodes=None, max_nodes=None, nodes_step=Non
 def i_create_kfold_cross_validation_separator_metric_no_fields(step, k_folds=None, features=None, args_separator=None, metric=None):
     if k_folds is None or metric is None or features is None or args_separator is None:
         assert False
+    command = ("bigmler analyze --dataset " +
+               world.dataset['resource'] +
+               " --features --k-folds " + k_folds +
+               " --output " + world.directory +
+               " --exclude-features \"" + features + "\"" +
+               " --args-separator " + args_separator +
+               " --optimize " + metric)
+    command = check_debug(command)
     try:
-        retcode = check_call("bigmler analyze --dataset " +
-                             world.dataset['resource'] +
-                             " --features --k-folds " + k_folds +
-                             " --output " + world.directory +
-                             " --exclude-features \"" + features + "\"" +
-                             " --args-separator " + args_separator +
-                             " --optimize " + metric,
-                             shell=True)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -1237,13 +1255,14 @@ def i_create_kfold_cross_validation_separator_metric_no_fields(step, k_folds=Non
 def i_create_kfold_cross_validation_in_dev(step, k_folds=None, metric=None):
     if k_folds is None or metric is None:
         assert False
+    command = ("bigmler analyze --dataset " +
+               world.dataset['resource'] +
+               " --features --dev --k-folds " + k_folds +
+               " --output " + world.directory +
+               " --optimize " + metric)
+    command = check_debug(command)
     try:
-        retcode = check_call("bigmler analyze --dataset " +
-                             world.dataset['resource'] +
-                             " --features --dev --k-folds " + k_folds +
-                             " --output " + world.directory +
-                             " --optimize " + metric,
-                             shell=True)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -1257,14 +1276,15 @@ def i_create_kfold_cross_validation_in_dev(step, k_folds=None, metric=None):
 def i_create_kfold_cross_validation_metric_category(step, k_folds=None, metric=None, category=None):
     if k_folds is None or metric is None or category is None:
         assert False
+    command = ("bigmler analyze --dataset " +
+               world.dataset['resource'] +
+               " --features --k-folds " + k_folds +
+               " --output " + world.directory +
+               " --optimize " + metric +
+               " --optimize-category " + category)
+    command = check_debug(command)
     try:
-        retcode = check_call("bigmler analyze --dataset " +
-                             world.dataset['resource'] +
-                             " --features --k-folds " + k_folds +
-                             " --output " + world.directory +
-                             " --optimize " + metric +
-                             " --optimize-category " + category,
-                             shell=True)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -1279,13 +1299,14 @@ def i_create_kfold_cross_validation_metric_category(step, k_folds=None, metric=N
 def i_create_kfold_cross_validation_metric(step, k_folds=None, metric=None):
     if k_folds is None or metric is None:
         assert False
+    command = ("bigmler analyze --dataset " +
+               world.dataset['resource'] +
+               " --features --k-folds " + k_folds +
+               " --output " + world.directory +
+               " --optimize " + metric)
+    command = check_debug(command)
     try:
-        retcode = check_call("bigmler analyze --dataset " +
-                             world.dataset['resource'] +
-                             " --features --k-folds " + k_folds +
-                             " --output " + world.directory +
-                             " --optimize " + metric,
-                             shell=True)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -1298,10 +1319,11 @@ def i_create_kfold_cross_validation_metric(step, k_folds=None, metric=None):
 
 #@step(r'I generate a report from the output directory$')
 def i_generate_report(step):
+    command = ("bigmler report --no-server --from-dir " +
+               world.directory)
+    command = check_debug(command)
     try:
-        retcode = check_call("bigmler report --no-server --from-dir " +
-                             world.directory,
-                             shell=True)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -1413,4 +1435,68 @@ def i_create_dev_dataset(step, data=None, output=None):
             world.output = output
             assert True
     except OSError as e:
+        assert False
+
+
+#@step(r'I create BigML random fields analysis with (\d*)-cross-validation improving "(.*)"')
+def i_create_random_analysis(step, k_fold=None, metric=None):
+    if k_fold is None or metric is None:
+        assert False
+    try:
+        retcode = check_call("bigmler analyze --dataset " +
+                             world.dataset['resource'] +
+                             " --random-fields --number_of_models 2" +
+                             " --k-folds " + k_fold +
+                             " --output " + world.directory +
+                             " --optimize " + metric,
+                             shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.output = os.path.join(world.directory, "test", "random1",
+                                        "evaluation")
+            assert True
+    except OSError as e:
+        assert False
+
+#@step(r'I check that the (\d*)-random forests have been created')
+def i_check_create_kfold_random_forest(step, kfolds):
+    directory = os.path.dirname(os.path.dirname(world.output))
+
+    directories = [os.path.join(directory, folder)
+                   for folder in os.listdir(directory) if
+                   os.path.isdir(os.path.join(directory, folder))]
+    for directory in directories:
+        ensembles_file = os.path.join(directory, "ensembles")
+        try:
+            with open(ensembles_file, "r") as ensembles_file:
+                ensembles_list = map(str.strip, ensembles_file.readlines())
+
+            world.ensembles.extend(ensembles_list)
+            world.ensemble = ensembles_list[-1]
+            if int(kfolds) == len(ensembles_list):
+                assert True
+            else:
+                assert False
+        except Exception, exc:
+            assert False, str(exc)
+
+
+#@step(r'the best random candidates number is "(.*)", with "(.*)" of (.*)')
+def i_check_random_candidates(step, random_candidates, metric, metric_value):
+    if random_candidates is None or metric is None or metric_value is None:
+        assert False
+    sessions_file = os.path.join(world.directory, "bigmler_sessions")
+    try:
+        with open(sessions_file, open_mode("r")) as sessions_file:
+            content = sessions_file.read()
+            if not PYTHON3:
+                content = decode2(content)
+        text = "The best random candidates number is: %s \n%s = %s" % (
+            random_candidates, metric.capitalize(), metric_value)
+        if content.find(text) > -1:
+            assert True
+        else:
+            assert False
+    except:
         assert False

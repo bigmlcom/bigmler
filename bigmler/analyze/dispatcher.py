@@ -94,7 +94,8 @@ def analyze_dispatcher(args=sys.argv[1:]):
     if sum([int(bool(flag)) for flag in incompatible_flags]) > 1:
         sys.exit("The following flags cannot be used together:\n    --features"
                  "\n    --cross-validation\n    --nodes\n    --random-fields")
-    if command_args.dataset is None:
+    if (command_args.dataset is None and command_args.datasets is None and
+            command_args.dataset_file is None):
         sys.exit("The analyze command needs an existing dataset ID. Please, "
                  "use the --dataset flag.")
     if not any(incompatible_flags):
