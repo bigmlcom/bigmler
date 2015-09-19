@@ -26,13 +26,18 @@ from bigmler.tests.world import world, res_filename
 from subprocess import check_call
 from bigml.api import check_resource
 
+from bigmler.tests.common_steps import check_debug
+
 
 #@step(r'I create BigML resources using source to evaluate and log evaluation in "(.*)"')
 def given_i_create_bigml_resources_using_source_to_evaluate(step, output=None):
     if output is None:
         assert False
+    command = ("bigmler --evaluate --source " + world.source['resource'] +
+               " --output " + output)
+    command = check_debug(command)
     try:
-        retcode = check_call("bigmler --evaluate --source " + world.source['resource'] + " --output " + output, shell=True)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -57,8 +62,11 @@ def read_id_from_file(path):
 def given_i_create_bigml_resources_using_dataset_to_evaluate(step, output=None):
     if output is None:
         assert False
+    command = ("bigmler --evaluate --dataset " + world.dataset['resource'] +
+               " --output " + output)
+    command = check_debug(command)
     try:
-        retcode = check_call("bigmler --evaluate --dataset " + world.dataset['resource'] + " --output " + output, shell=True)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -74,11 +82,13 @@ def given_i_create_bigml_resources_using_dataset_to_evaluate(step, output=None):
 def i_create_all_resources_to_evaluate_with_model_and_map(step, data=None, fields_map=None, output=None):
     if data is None or fields_map is None or output is None:
         assert False
+    command = ("bigmler --evaluate --test " + res_filename(data) +
+               " --model " +
+               world.model['resource'] + " --output " + output +
+               " --fields-map " + res_filename(fields_map))
+    command = check_debug(command)
     try:
-        retcode = check_call("bigmler --evaluate --test " + res_filename(data) + " --model " +
-                       world.model['resource'] + " --output " + output +
-                       " --fields-map " + res_filename(fields_map),
-                       shell=True)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -94,10 +104,11 @@ def i_create_all_resources_to_evaluate_with_model_and_map(step, data=None, field
 def i_create_all_resources_to_evaluate_with_model(step, data=None, output=None):
     if data is None or output is None:
         assert False
+    command = ("bigmler --evaluate --test " + res_filename(data) + " --model " +
+               world.model['resource'] + " --output " + output)
+    command = check_debug(command)
     try:
-        retcode = check_call("bigmler --evaluate --test " + res_filename(data) + " --model " +
-                       world.model['resource'] + " --output " + output,
-                       shell=True)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -113,11 +124,12 @@ def i_create_all_resources_to_evaluate_with_model(step, data=None, output=None):
 def given_i_create_bigml_resources_using_dataset_to_evaluate_with_model(step, output=None):
     if output is None:
         assert False
+    command = ("bigmler --evaluate --dataset " +
+               world.dataset['resource']  + " --model " +
+               world.model['resource'] + " --output " + output)
+    command = check_debug(command)
     try:
-        retcode = check_call("bigmler --evaluate --dataset " +
-                       world.dataset['resource']  + " --model " +
-                       world.model['resource'] + " --output " + output,
-                       shell=True)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -133,8 +145,11 @@ def given_i_create_bigml_resources_using_dataset_to_evaluate_with_model(step, ou
 def i_create_with_split_to_evaluate(step, data=None, split=None, output=None):
     if data is None or split is None or output is None:
         assert False
+    command = ("bigmler --evaluate --train " + res_filename(data) +
+               " --test-split " + split +  " --output " + output)
+    command = check_debug(command)
     try:
-        retcode = check_call("bigmler --evaluate --train " + res_filename(data) + " --test-split " + split +  " --output " + output, shell=True)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -151,14 +166,17 @@ def i_create_proportional_to_evaluate(step, test=None):
     if test is None:
         assert False
     test = res_filename(test)
+
     try:
         output_dir = world.directory + "_eval/"
         output = output_dir + os.path.basename(world.output)
-        retcode = check_call("bigmler --evaluate --model " +
-                             world.model['resource'] +
-                             " --test " + test +
-                             " --missing-strategy proportional --output " +
-                             output, shell=True)
+        command = ("bigmler --evaluate --model " +
+                   world.model['resource'] +
+                   " --test " + test +
+                   " --missing-strategy proportional --output " +
+                   output)
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -221,11 +239,13 @@ def i_check_evaluation_key(step, key=None, value=None):
 def i_create_with_split_to_evaluate_ensemble(step, data=None, number_of_models=None, split=None, output=None):
     if data is None or split is None or output is None:
         assert False
+    command = ("bigmler --evaluate --train " + res_filename(data) +
+               " --test-split " + split +
+               " --number-of-models " + number_of_models +
+               " --output " + output)
+    command = check_debug(command)
     try:
-        retcode = check_call("bigmler --evaluate --train " + res_filename(data) +
-                             " --test-split " + split +
-                             " --number-of-models " + number_of_models +
-                             " --output " + output, shell=True)
+        retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
         else:
@@ -245,10 +265,11 @@ def i_evaluate_ensemble_with_dataset(step, ensemble_dir=None, dataset_dir=None, 
     world.folders.append(world.directory)
     ensemble_id = read_id_from_file(os.path.join(ensemble_dir, "ensembles"))
     dataset_id = read_id_from_file(os.path.join(dataset_dir, "dataset_test"))
+    command = ("bigmler --dataset " + dataset_id +
+               " --ensemble " + ensemble_id + " --store" +
+               " --output " + output + " --evaluate")
+    command = check_debug(command)
     try:
-        command = ("bigmler --dataset " + dataset_id +
-                   " --ensemble " + ensemble_id + " --store" +
-                   " --output " + output + " --evaluate")
         retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False

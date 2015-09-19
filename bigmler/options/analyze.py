@@ -135,7 +135,7 @@ def get_analyze_options(defaults=None):
             "type": int,
             "default": defaults.get('min_nodes', None),
             "help": ("Minimum number of nodes to start the"
-                     "node threshold analysis.")},
+                     " node threshold analysis.")},
 
         # Max_nodes: Maximum number of nodes to end the node threshold analysis
         '--max-nodes': {
@@ -145,7 +145,7 @@ def get_analyze_options(defaults=None):
             "default": defaults.get('max_nodes',
                                     BIGML_MAX_NODES),
             "help": ("Maximum number of nodes to end the"
-                     "node threshold analysis.")},
+                     " node threshold analysis.")},
 
         # Nodes: Set on node threshold analysis.
         '--nodes': {
@@ -173,6 +173,13 @@ def get_analyze_options(defaults=None):
                                     None),
             "help": ("List of comma-separated field names to"
                      " be excluded from the features"
-                     " analysis.")}}
+                     " analysis.")},
+
+        # random candidates: Set on random candidates analysis.
+        '--random-fields': {
+            "action": 'store_true',
+            "dest": 'random_fields',
+            "default": defaults.get('random_fields', False),
+            "help": "Random candidates analysis for ensembles."}}
 
     return options

@@ -134,7 +134,9 @@ under the License.""" % version
         '--randomize': main_options['--randomize'],
         '--no-csv': main_options['--no-csv'],
         '--no-no-csv': main_options['--no-no-csv'],
-        '--to-dataset': main_options['--to-dataset']})
+        '--to-dataset': main_options['--to-dataset'],
+        '--datasets': main_options['--datasets'],
+        '--dataset-file': main_options['--dataset-file']})
 
     defaults = general_defaults["BigMLer cluster"]
     subcommand_options["cluster"] = get_cluster_options(defaults=defaults)

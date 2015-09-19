@@ -30,7 +30,8 @@ import bigmler.utils as u
 
 from bigmler.analyze.k_fold_cv import (create_kfold_cv,
                                        create_features_analysis,
-                                       create_nodes_analysis)
+                                       create_nodes_analysis,
+                                       create_candidates_analysis)
 from bigmler.dispatcher import (SESSIONS_LOG, command_handling,
                                 clear_log_files)
 from bigmler.command import get_stored_command
@@ -89,10 +90,17 @@ def analyze_dispatcher(args=sys.argv[1:]):
     if command_args.maximize is not None and command_args.optimize is None:
         command_args.optimize = command_args.maximize
     incompatible_flags = [command_args.cv, command_args.features,
-                          command_args.nodes]
+                          command_args.nodes, command_args.random_fields]
     if sum([int(bool(flag)) for flag in incompatible_flags]) > 1:
         sys.exit("The following flags cannot be used together:\n    --features"
-                 "\n    --cross-validation\n    --nodes")
+                 "\n    --cross-validation\n    --nodes\n    --random-fields")
+    if (command_args.dataset is None and command_args.datasets is None and
+            command_args.dataset_file is None):
+        sys.exit("The analyze command needs an existing dataset ID. Please, "
+                 "use the --dataset flag.")
+    if not any(incompatible_flags):
+        sys.exit("You need to specify the type of analysis: features, node "
+                 "threshold, cross validation or random fields.")
     # k-fold cross-validation
     if command_args.cv and command_args.dataset is not None:
         create_kfold_cv(command_args, api, command.common_options,
@@ -107,8 +115,14 @@ def analyze_dispatcher(args=sys.argv[1:]):
     elif command_args.nodes:
         create_nodes_analysis(command_args, api, command.common_options,
                               resume=resume)
+
+    # random fields analysis
+    elif command_args.random_fields:
+        create_candidates_analysis(command_args, api, command.common_options,
+                                   resume=resume)
     else:
         sys.exit("You must choose one of the available analysis: --features,"
-                 " --nodes or --cross-validation. Add your prefered option to"
+                 " --nodes, --random-fields or --cross-validation. Add"
+                 " your prefered option to"
                  " the command line or type\n    bigmler analyze --help\n"
                  " to see all the available options.")

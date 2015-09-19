@@ -150,7 +150,8 @@ FLAGS = {
         {'flag': 'project_id', 'type': 'string'},
         {'flag': 'no_csv', 'type': 'boolean'},
         {'flag': 'to_dataset', 'type': 'boolean'},
-        {'flag': 'median', 'type': 'boolean'}],
+        {'flag': 'median', 'type': 'boolean'},
+        {'flag': 'random_candidates', 'type': 'int'}],
     'BigMLer analyze': [
         {'flag': 'k-fold', 'type': 'integer'},
         {'flag': 'cv', 'type': 'boolean'},
@@ -161,6 +162,7 @@ FLAGS = {
         {'flag': 'max_nodes', 'type': 'integer'},
         {'flag': 'min_nodes', 'type': 'integer'},
         {'flag': 'nodes_step', 'type': 'integer'},
+        {'flag': 'random_fields', 'type': 'boolean'},
         {'flag': 'exclude_features', 'type': 'string'},
         {'flag': 'optimize_category', 'type': 'string'}],
     'BigMLer cluster': [

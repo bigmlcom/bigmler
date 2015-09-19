@@ -455,6 +455,16 @@ def get_main_options(defaults=None, constants=None):
             'help': ("Accept missing values as valid in some branches of the"
                      "tree.")},
 
+        # Random candidates: Number of fields to be selected at random in
+        # ensembles construction
+        '--random-candidates': {
+            'action': 'store',
+            'dest': 'random_candidates',
+            'default': defaults.get('random_candidates', 0),
+            'type': int,
+            'help': ("Number of fields selected at random in ensembles'"
+                    " construction.")},
+
         # Disables reports upload.
         '--no-upload': {
             'action': 'store_false',
