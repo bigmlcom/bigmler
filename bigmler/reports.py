@@ -314,7 +314,7 @@ def parse_test_feature(command):
     """Parse the evolving feature from the command line text:
         - model_fields: list of model fields
         - nodes: number of nodes
-        -
+        - random_candidates: number of random candidates for random forests
     """
     # try to find model_fields
     pattern = re.compile(r'--model-fields (.+?)\s--')
