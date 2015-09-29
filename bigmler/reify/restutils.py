@@ -175,7 +175,7 @@ def non_inherited_opts(resource, referrer, opts, call="create"):
     for attribute, default_value in COMMON_DEFAULTS[call].items():
         opts[call].update(
             inherit_setting(
-                referrer, resource, attribute, default_value[0]))
+                referrer, resource, attribute, default_value))
 
 
 def non_default_opts(resource, opts, call="create"):
@@ -272,7 +272,12 @@ def inherit_setting(relative, child, key, default):
     """Returns setting only in case it was not inherited from ancestors
 
     """
-    if not child.get(key, default) in [default, relative.get(key, default)]:
+
+    if isinstance(default, list):
+        default.append(relative.get(key, default[0]))
+    else:
+        default = [default, relative.get(key, default)]
+    if not child.get(key, default) in default:
         return {key: child.get(key)}
     else:
         return {}

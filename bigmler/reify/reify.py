@@ -42,7 +42,7 @@ def reify_resources(args, api, logger):
 
     api_calls = RESTChain(api, resource_id, args.add_fields,
                           logger, args.output_dir)
-    output = api_calls.reify("python")
+    output = api_calls.reify(args.language)
     if PYTHON3:
         with open(args.output, "w", encoding="utf-8") as reify_file:
             reify_file.write(output)

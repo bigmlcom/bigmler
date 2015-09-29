@@ -21,6 +21,8 @@
 from __future__ import absolute_import
 
 import pprint
+import json
+import bigml.api
 
 from bigml.constants import RENAMED_RESOURCES
 from bigml.resourcehandler import get_resource_type
@@ -42,12 +44,40 @@ def sort_lists(dict_structure):
     return dict_structure
 
 
+def resource_alias(resource_id, alias):
+    """Returns the alias if found
+
+    """
+    if isinstance(resource_id, basestring):
+        return alias.get(resource_id, '"%s"' % resource_id)
+    elif isinstance(resource_id, list):
+        alias_names = []
+        for resource_id_id in resource_id:
+            alias_names.append(
+                alias.get(resource_id_id, '"%s"' % resource_id_id))
+        return repr(alias_names)
+
+
+def to_whizzml(args):
+    """Transforming dict syntax to whizzml argument syntax
+
+    """
+    whizzml_args = []
+    if isinstance(args, list):
+        return "[%s]" % " ".join([to_whizzml(arg) for arg in args])
+    if isinstance(args, dict):
+        for arg, value in args.items():
+            whizzml_args.append("%s %s" % (json.dumps(arg), to_whizzml(value)))
+        return  "{%s}" % " ".join(whizzml_args)
+    return json.dumps(args)
+
+
 class RESTCall(object):
     """Object to store the REST call definition
 
     """
     def __init__(self, action, origins=None, args=None,
-                 resource_id=None, resource_type=None, suffix=None):
+                 resource_id=None, resource_type=None, suffix=None, name=None):
         """Constructor for the REST call definition
 
             resource_id: ID for the generated resource
@@ -67,7 +97,11 @@ class RESTCall(object):
         self.resource_id = resource_id
         self.resource_type = resource_type
         self.suffix = suffix
-
+        if resource_id and not resource_type:
+            self.resource_type = bigml.api.get_resource_type(self.resource_id)
+        else:
+            self.resource_type = resource_type
+        self.name = name
 
     def reify(self, language=None, alias=None):
         """REST call command line
@@ -101,24 +135,11 @@ class RESTCall(object):
 
         """
 
-        def resource_alias(resource_id):
-            """Returns the alias if found
-
-            """
-            if isinstance(resource_id, basestring):
-                return alias.get(resource_id, '"%s"' % resource_id)
-            elif isinstance(resource_id, list):
-                alias_names = []
-                for resource_id_id in resource_id:
-                    alias_names.append(
-                        alias.get(resource_id_id, '"%s"' % resource_id_id))
-                return repr(alias_names)
-
         resource_type = get_resource_type(self.resource_id)
-        resource_name = resource_alias(self.resource_id)
+        resource_name = resource_alias(self.resource_id, alias)
         resource_method_suffix = RENAMED_RESOURCES.get(
             resource_type, resource_type)
-        origin_names = [resource_alias(resource_id) for resource_id
+        origin_names = [resource_alias(resource_id, alias) for resource_id
                         in self.origins]
 
         arguments = ", ".join(origin_names)
@@ -141,3 +162,116 @@ class RESTCall(object):
             arguments,
             resource_name)
         return out
+
+    def reify_whizzml(self, alias=None):
+        """ Whizzml command for the REST call
+
+        """
+        name = self.name if self.name else resource_alias( \
+            self.resource_id, alias)
+        args = self.origin_attributes()
+        arguments = to_whizzml(args)
+        for resource_id, name in alias.items():
+            arguments = arguments.replace('"%s"' % resource_id, name)
+
+        command = "(%s-and-wait-%s %s)" % ( \
+            self.action, self.resource_type, arguments)
+        return command
+
+    def origin_attributes(self):
+        """ Add as arguments the origin attributes
+
+        """
+        args = {}
+        args.update(self.args)
+        origin_types = []
+        if isinstance(self.origins, basestring):
+            origin_types.append(bigml.api.get_resource_type(self.origins))
+        else:
+            for origin in self.origins:
+                origin_types.append(bigml.api.get_resource_type(origin))
+
+        if self.resource_type == "source":
+            args.update({"remote": self.origins[0]})
+            return args
+        if self.resource_type == "dataset" and origin_types[0] == "source":
+            args.update({"source": self.origins[0]})
+            return args
+        if self.resource_type == "dataset" and origin_types[0] == "cluster":
+            args.update({"cluster": self.origins[0]})
+            return args
+        if (self.resource_type == "dataset" and len(origin_types) < 2 and
+                origin_types[0] == "dataset"):
+            args.update({"origin_dataset": self.origins[0]})
+            return args
+        if self.resource_type == "dataset":
+            args.update({"origin_datasets": self.origins})
+            return args
+        if self.resource_type == "model" and origin_types[0] == "cluster":
+            args.update({"cluster": self.origins[0]})
+            return args
+        if (self.resource_type == "model" and len(origin_types) < 2 and
+                origin_types[0] == "dataset"):
+            args.update({"dataset": self.origins[0]})
+            return args
+        if self.resource_type == "model":
+            args.update({"datasets": self.origins})
+            return args
+        if (self.resource_type == "ensemble" and len(origin_types) < 2 and
+                origin_types[0] == "dataset"):
+            args.update({"dataset": self.origins[0]})
+            return args
+        if self.resource_type == "ensemble":
+            args.update({"datasets": self.origins})
+            return args
+        if (self.resource_type == "cluster" and len(origin_types) < 2 and
+                origin_types[0] == "dataset"):
+            args.update({"dataset": self.origins[0]})
+            return args
+        if self.resource_type == "cluster":
+            args.update({"datasets": self.origins})
+            return args
+        if (self.resource_type == "anomaly" and len(origin_types) < 2 and
+                origin_types[0] == "dataset"):
+            args.update({"dataset": self.origins[0]})
+            return args
+        if self.resource_type == "anomaly":
+            args.update({"datasets": self.origins})
+            return args
+        if self.resource_type == "evaluation":
+            args.update({origin_types[0]: self.origins[0],
+                         "dataset": self.origins[1]})
+            return args
+        if (self.resource_type == "correlation" and len(origin_types) < 2 and
+                origin_types[0] == "dataset"):
+            args.update({"dataset": self.origins[0]})
+            return args
+        if (self.resource_type == "statisticaltest" and
+                len(origin_types) < 2 and
+                origin_types[0] == "dataset"):
+            args.update({"dataset": self.origins[0]})
+            return args
+        if self.resource_type == "batchprediction":
+            args.update({origin_types[0]: self.origins[0],
+                         "dataset": self.origins[1]})
+            return args
+        if self.resource_type == "batchcentroid":
+            args.update({origin_types[0]: self.origins[0],
+                         "dataset": self.origins[1]})
+            return args
+        if self.resource_type == "batchanomalyscore":
+            args.update({origin_types[0]: self.origins[0],
+                         "dataset": self.origins[1]})
+            return args
+        if self.resource_type == "prediction":
+            args.update({origin_types[0]: self.origins[0],
+                         "input_data": self.input_data})
+            return args
+        if self.resource_type == "centroid":
+            args.update({origin_types[0]: self.origins[0],
+                         "input_data": self.input_data})
+            return args
+        if self.resource_type == "anomalyscore":
+            args.update({origin_types[0]: self.origins[0],
+                         "input_data": self.input_data})
+            return args

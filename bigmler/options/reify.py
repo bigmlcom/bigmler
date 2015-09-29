@@ -38,7 +38,7 @@ def get_reify_options(defaults=None):
         '--language': {
             'dest': 'language',
             'default': defaults.get('language', 'python'),
-            'choices': ["python"],
+            'choices': ["python", "whizzml"],
             'help': ("Language for the resource to be reified in.")},
 
         # Name of the file to output the code.
