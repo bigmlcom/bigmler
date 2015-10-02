@@ -406,3 +406,44 @@ def are_logistic_regressions_created(path, number_of_logistic_regressions):
             logistic_ids
     except IOError:
         return False, logistic_ids
+
+
+def are_scripts_created(path, number_of_scripts):
+    """Checks existence and reads the scripts ids from the scripts file in the
+       path directory
+
+    """
+    sample_ids = []
+    try:
+        with open("%s%sscripts" % (path, os.sep)) as scripts_file:
+            for line in scripts_file:
+                sample = line.strip()
+                try:
+                    script_id = bigml.api.get_script_id(script)
+                    script_ids.append(script_id)
+                except ValueError:
+                    return False, script_ids
+        if len(script_ids) == number_of_scripts:
+            return True, script_ids
+        else:
+            return False, script_ids
+    except IOError:
+        return False, script_ids
+
+
+def is_execution_created(path):
+    """Checks existence and reads the execution id from the execution file in
+        the path directory
+
+    """
+    execution_id = None
+    try:
+        with open("%s%sexecution" % (path, os.sep)) as execution_file:
+            execution_id = execution_file.readline().strip()
+            try:
+                execution_id = bigml.api.get_execution_id(execution_id)
+                return True, execution_id
+            except ValueError:
+                return False, None
+    except IOError:
+        return False, None

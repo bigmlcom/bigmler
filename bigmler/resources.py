@@ -1273,19 +1273,22 @@ def save_evaluation(evaluation, output, api=None):
     """
     if api is None:
         api = bigml.api.BigML()
-    open_mode = 'wt' if PYTHON3 else 'wb'
-    evaluation_json = open(output + '.json', open_mode)
     evaluation = evaluation.get('object', evaluation).get('result', evaluation)
-    message = json.dumps(evaluation)
+    save_txt_and_json(evaluation)
+
+
+def save_txt_and_json(object_dict, output, api=None):
+    """Saves in txt and JSON format the contents of a dict object
+
+    """
+    open_mode = 'wt' if PYTHON3 else 'wb'
+    message = json.dumps(object_dict)
     if not PYTHON3:
         message = utf8(message)
-    evaluation_json.write(message)
-    evaluation_json.flush()
-    evaluation_json.close()
-    evaluation_txt = open(output + '.txt', open_mode)
-    api.pprint(evaluation, evaluation_txt)
-    evaluation_txt.flush()
-    evaluation_txt.close()
+    with open(output + '.json', open_mode) as dict_json:
+        dict_json.write(message)
+    with open(output + '.txt', open_mode) as dict_txt:
+        api.pprint(object_dict, dict_txt)
 
 
 def set_batch_prediction_args(args, fields=None,
@@ -2181,6 +2184,7 @@ def get_associations(association_ids, args, api=None, session_file=None):
     """
     if api is None:
         api = bigml.api.BigML()
+
     association_id = ""
     associations = association_ids
     association_id = association_ids[0]
@@ -2221,6 +2225,7 @@ def update_association(association, association_args, args,
     """
     if api is None:
         api = bigml.api.BigML()
+
     message = dated("Updating association. %s\n" %
                     get_url(association))
     log_message(message, log_file=session_file,
@@ -2238,6 +2243,138 @@ def update_association(association, association_args, args,
             report(args.reports, path, association)
 
     return association
+
+
+def set_script_args(args, name=None):
+    """Returns a script arguments dict
+
+    """
+
+    if name is None:
+        name = args.name
+    script_args = {
+        "name": name,
+        "description": args.description_,
+        "category": args.category,
+        "tags": args.tag}
+    if args.project_id is not None:
+        script_args.update({"project": args.project_id})
+    if args.imports is not None:
+        script_args.update({"imports": args.imports_})
+    if args.parameters is not None:
+        script_args.update({"parameters": args.parameters_})
+    update_attributes(script_args, args.json_args.get('script'))
+    return script_args
+
+
+def create_script(source_code, script_args, args, api=None, path=None,
+                  session_file=None, log=None):
+    """Creates remote script
+
+    """
+
+    if api is None:
+        api = bigml.api.BigML()
+    message = dated("Creating script.\n")
+    log_message(message, log_file=session_file, console=args.verbosity)
+    script = api.create_script(source_code, script_args)
+    log_created_resources("scripts", path,
+                          bigml.api.get_script_id(script), mode='a')
+    script_id = check_resource_error(script, "Failed to create script: ")
+    try:
+        script = check_resource(script, api.get_script)
+    except ValueError, exception:
+        sys.exit("Failed to get a compiled script: %s" % str(exception))
+    message = dated("Script created: %s\n" % get_url(script))
+    log_message(message, log_file=session_file, console=args.verbosity)
+    log_message("%s\n" % script_id, log_file=log)
+    return script
+
+
+def get_script(script, api=None, verbosity=True,
+               session_file=None):
+    """Retrieves the script in its actual state
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+    if (isinstance(script, basestring) or
+            bigml.api.get_status(script)['code'] != bigml.api.FINISHED):
+        message = dated("Retrieving script. %s\n" %
+                        get_url(script))
+        log_message(message, log_file=session_file,
+                    console=verbosity)
+        try:
+            script = check_resource(script, api.get_script)
+        except ValueError, exception:
+            sys.exit("Failed to get a compiled script: %s" % str(exception))
+    return script
+
+
+def set_execution_args(args, name=None):
+    """Returns an execution arguments dict
+
+    """
+
+    if name is None:
+        name = args.name
+    execution_args = {
+        "name": name,
+        "description": args.description_,
+        "category": args.category,
+        "tags": args.tag}
+    if args.project_id is not None:
+        execution_args.update({"project": args.project_id})
+    if args.arguments is not None:
+        execution_args.update({"arguments": args.arguments_})
+    if args.creation_defaults is not None:
+        execution_args.update({"creation_defaults": args.creation_defaults_})
+    update_attributes(execution_args, args.json_args.get('execution'))
+    return execution_args
+
+
+def create_execution(execution_args, args, api=None, path=None,
+                  session_file=None, log=None):
+    """Creates remote execution
+
+    """
+    message = dated("Creating execution.\n")
+    log_message(message, log_file=session_file, console=args.verbosity)
+    scripts = args.script_ids if args.script_ids else args.script
+    execution = api.create_execution(scripts, execution_args)
+    log_created_resources("execution", path,
+                          bigml.api.get_execution_id(execution), mode='a')
+    execution_id = check_resource_error(execution,
+                                        "Failed to create execution: ")
+    try:
+        execution = check_resource(execution, api.get_execution)
+    except ValueError, exception:
+        sys.exit("Failed to get a finished execution: %s" % str(exception))
+    message = dated("Execution created: %s\n" % get_url(execution))
+    log_message(message, log_file=session_file, console=args.verbosity)
+    log_message("%s\n" % execution_id, log_file=log)
+    return execution
+
+
+def get_execution(execution, api=None, verbosity=True,
+                  session_file=None):
+    """Retrieves the execution in its actual state
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+
+    if (isinstance(execution, basestring) or
+            bigml.api.get_status(execution)['code'] != bigml.api.FINISHED):
+        message = dated("Retrieving execution. %s\n" %
+                        get_url(execution))
+        log_message(message, log_file=session_file,
+                    console=verbosity)
+        try:
+            execution = check_resource(execution, api.get_execution)
+        except ValueError, exception:
+            sys.exit("Failed to get a finished execution: %s" % str(exception))
+    return execution
 
 
 def set_logistic_regression_args(args, name=None, fields=None,
@@ -2360,6 +2497,7 @@ def get_logistic_regressions(logistic_regression_ids,
     """
     if api is None:
         api = bigml.api.BigML()
+
     logistic_regression_id = ""
     logistic_regressions = logistic_regression_ids
     logistic_regression_id = logistic_regression_ids[0]
@@ -2403,6 +2541,7 @@ def update_logistic_regression(logistic_regression, logistic_regression_args,
     """
     if api is None:
         api = bigml.api.BigML()
+
     message = dated("Updating logistic regression. %s\n" %
                     get_url(logistic_regression))
     log_message(message, log_file=session_file,

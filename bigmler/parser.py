@@ -41,7 +41,9 @@ from bigmler.options.logisticregression import get_logistic_regression_options
 
 SUBCOMMANDS = ["main", "analyze", "cluster", "anomaly", "sample",
                "delete", "report", "reify", "project", "association",
-               "logistic-regression"]
+               "logistic-regression", "execute"]
+
+
 MAIN = SUBCOMMANDS[0]
 
 
@@ -283,6 +285,19 @@ under the License.""" % version
         '--no-batch': main_options['--no-batch'],
         '--no-csv': main_options['--no-csv'],
         '--no-no-csv': main_options['--no-no-csv']})
+
+    defaults = general_defaults["BigMLer execute"]
+    subcommand_options["execute"] = get_execute_options(defaults=defaults)
+    execute_common_options = {}
+    for option in common_options:
+        execute_common_options.update({option: common_options[option]})
+    subcommand_options["execute"].update(execute_common_options)
+    subcommand_options["execute"].update(
+        {'--project': source_options['--project'],
+         '--project-id': source_options['--project-id'],
+        '--script-tag': delete_options['--script-tag'],
+        '--library-tag': delete_options['--library-tag'],
+        '--execution-tag': delete_options['--execution-tag']})
 
     for subcommand in SUBCOMMANDS:
         subparser = subparsers.add_parser(subcommand)

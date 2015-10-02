@@ -112,6 +112,27 @@ def get_delete_options(defaults=None):
             'help': ("Select batch anomaly score tagged with tag to"
                      " be deleted.")},
 
+        # Scripts selected by tag to be deleted.
+        '--script-tag': {
+            'dest': 'script_tag',
+            'default': defaults.get('script_tag', None),
+            'help': ("Select script tagged with tag to"
+                     " be deleted.")},
+
+        # Libraries selected by tag to be deleted.
+        '--library-tag': {
+            'dest': 'library_tag',
+            'default': defaults.get('library_tag', None),
+            'help': ("Select libraries tagged with tag to"
+                     " be deleted.")},
+
+        # Execution selected by tag to be deleted.
+        '--execution-tag': {
+            'dest': 'execution_tag',
+            'default': defaults.get('execution_tag', None),
+            'help': ("Select execution tagged with tag to"
+                     " be deleted.")},
+
         # Resources selected by tag to be deleted.
         '--all-tag': {
             'dest': 'all_tag',

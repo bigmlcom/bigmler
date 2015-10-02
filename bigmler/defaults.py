@@ -244,6 +244,16 @@ FLAGS = {
         {'flag': 'eps', 'type': 'float'},
         {'flag': 'missing_numerics', 'type': 'boolean'},
         {'flag': 'normalize', 'type': 'boolean'}]}
+    'BigMLer execute': [
+        {'flag': 'script', 'type': 'string'},
+        {'flag': 'library', 'type': 'string'},
+        {'flag': 'execution', 'type': 'string'},
+        {'flag': 'code_file', 'type': 'string'},
+        {'flag': 'output', 'type': 'string'},
+        {'flag': 'imports', 'type': 'string'},
+        {'flag': 'parameters', 'type': 'string'},
+        {'flag': 'creation_defaults', 'type': 'string'},
+        {'flag': 'arguments', 'type': 'string'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):

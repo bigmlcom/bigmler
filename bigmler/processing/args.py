@@ -47,8 +47,9 @@ MISSING_STRATEGIES = {'last': LAST_PREDICTION, 'proportional': PROPORTIONAL}
 DEFAULT_DESCRIPTION = "Created using BigMLer"
 RESOURCE_TYPES = ["source", "dataset", "model", "ensemble", "batch_prediction",
                   "cluster", "centroid", "batch_centroid", "anomaly",
-                  "anomaly_score", "batch_anomaly_score", "association",
-                  "logistic_regression", "project"]
+                  "anomaly_score", "batch_anomaly_score", "project", "sample",
+                  "association", "logistic_regression", "script",
+                  "library", "execution"]
 
 
 def has_test(args):
@@ -390,6 +391,47 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
+    # Parses imports for scripts and libraries.
+    try:
+        if command_args.imports:
+            imports_arg = [
+                field.strip() for field in command_args.imports.split(
+                    command_args.args_separator)]
+            command_args.imports_ = imports_arg
+        else:
+            command_args.imports_ = []
+    except AttributeError:
+        pass
+
+    # Parses parameters for scripts.
+    try:
+        if command_args.parameters:
+            command_args.parameters_ = u.read_json(command_args.parameters)
+        else:
+            command_args.parameters_ = []
+    except AttributeError:
+        pass
+
+    # Parses creation_defaults for executions.
+    try:
+        if command_args.creation_defaults:
+            command_args.creation_defaults_ = u.read_json(
+                command_args.creation_defaults)
+        else:
+            command_args.creation_defaults_ = {}
+    except AttributeError:
+        pass
+
+    # Parses arguments for executions.
+    try:
+        if command_args.arguments:
+            command_args.arguments_ = u.read_json(
+                command_args.arguments)
+        else:
+            command_args.arguments_ = []
+    except AttributeError:
+        pass
+
     model_ids = []
     try:
         # Parses model/ids if provided.
@@ -625,35 +667,74 @@ def transform_args(command_args, flags, api, user_defaults):
     attribute_args(command_args)
 
     # Parses dataset generators in json format if provided
-    if command_args.new_fields:
-        json_generators = u.read_json(command_args.new_fields)
-        command_args.dataset_json_generators = json_generators
-    else:
-        command_args.dataset_json_generators = {}
+    try:
+        if command_args.new_fields:
+            json_generators = u.read_json(command_args.new_fields)
+            command_args.dataset_json_generators = json_generators
+        else:
+            command_args.dataset_json_generators = {}
+    except AttributeError:
+        pass
 
     # Parses multi-dataset attributes in json such as field maps
-    if command_args.multi_dataset_attributes:
-        multi_dataset_json = u.read_json(command_args.multi_dataset_attributes)
-        command_args.multi_dataset_json = multi_dataset_json
-    else:
-        command_args.multi_dataset_json = {}
+    try:
+        if command_args.multi_dataset_attributes:
+            multi_dataset_json = u.read_json(command_args.multi_dataset_attributes)
+            command_args.multi_dataset_json = multi_dataset_json
+        else:
+            command_args.multi_dataset_json = {}
+    except AttributeError:
+        pass
 
     transform_dataset_options(command_args, api)
 
+    script_ids = None
+    command_args.script_ids = []
+    # Parses script/id if provided.
+    try:
+        if command_args.scripts:
+            script_ids = u.read_resources(command_args.scripts)
+            if len(script_ids) == 1:
+                command_args.script = script_ids[0]
+            command_args.script_ids = script_ids
+    except AttributeError:
+        pass
+
+    # Retrieve script/ids if provided.
+    try:
+        if command_args.script_tag:
+            script_ids = script_ids.extend(
+                u.list_ids(api.list_scripts,
+                           "tags__in=%s" % command_args.script_tag))
+            if len(script_ids) == 1:
+                command_args.script = script_ids[0]
+            command_args.script_ids = script_ids
+    except AttributeError:
+        pass
+
     # Reads a json filter if provided.
-    if command_args.json_filter:
-        json_filter = u.read_json_filter(command_args.json_filter)
-        command_args.json_filter = json_filter
+    try:
+        if command_args.json_filter:
+            json_filter = u.read_json_filter(command_args.json_filter)
+            command_args.json_filter = json_filter
+    except AttributeError:
+        pass
 
     # Reads a lisp filter if provided.
-    if command_args.lisp_filter:
-        lisp_filter = u.read_lisp_filter(command_args.lisp_filter)
-        command_args.lisp_filter = lisp_filter
+    try:
+        if command_args.lisp_filter:
+            lisp_filter = u.read_lisp_filter(command_args.lisp_filter)
+            command_args.lisp_filter = lisp_filter
+    except AttributeError:
+        pass
 
-    # Adds default tags unless it is requested not to do so.
-    if command_args.no_tag:
-        command_args.tag.append('BigMLer')
-        command_args.tag.append('BigMLer_%s' % NOW)
+    # Adds default tags unless that it is requested not to do so.
+    try:
+        if command_args.no_tag:
+            command_args.tag.append('BigMLer')
+            command_args.tag.append('BigMLer_%s' % NOW)
+    except AttributeError:
+        pass
 
     # Checks combined votes method
     try:

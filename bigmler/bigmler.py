@@ -54,9 +54,16 @@ from bigmler.anomaly.dispatcher import anomaly_dispatcher
 from bigmler.delete.dispatcher import delete_dispatcher
 from bigmler.report.dispatcher import report_dispatcher
 from bigmler.reify.dispatcher import reify_dispatcher
+<<<<<<< HEAD
 from bigmler.project.dispatcher import project_dispatcher
 from bigmler.association.dispatcher import association_dispatcher
+<<<<<<< HEAD
 from bigmler.logisticregression.dispatcher import logistic_regression_dispatcher
+=======
+=======
+from bigmler.execute.dispatcher import execute_dispatcher
+>>>>>>> First working verision of bigmler execute
+>>>>>>> First working verision of bigmler execute
 from bigmler.parser import SUBCOMMANDS
 from bigmler.utils import SYSTEM_ENCODING
 
@@ -105,6 +112,8 @@ def main(args=sys.argv[1:]):
             report_dispatcher(args=new_args)
         elif new_args[0] == "reify":
             reify_dispatcher(args=new_args)
+        elif new_args[0] == "execute":
+            execute_dispatcher(args=new_args)
         elif new_args[0] == "delete":
             delete_dispatcher(args=new_args)
         elif new_args[0] == "project":
@@ -124,6 +133,7 @@ def main(args=sys.argv[1:]):
                  "\n\nbigmler project --help\n\n"
                  "\n\nbigmler association --help\n\n"
                  "\n\nbigmler logistic-regression --help\n\n"
+                 "\n\nbigmler execute --help\n\n"
                  "\n\nbigmler delete --help\n\n"
                  " for a list of options")
 
