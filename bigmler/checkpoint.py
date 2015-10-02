@@ -447,3 +447,21 @@ def is_execution_created(path):
                 return False, None
     except IOError:
         return False, None
+
+
+def is_library_created(path):
+    """Checks existence and reads the library id from the library file in
+        the path directory
+
+    """
+    library_id = None
+    try:
+        with open("%s%slibrary" % (path, os.sep)) as library_file:
+            library_id = library_file.readline().strip()
+            try:
+                library_id = bigml.api.get_library_id(library_id)
+                return True, library_id
+            except ValueError:
+                return False, None
+    except IOError:
+        return False, None

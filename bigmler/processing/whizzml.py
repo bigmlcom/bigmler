@@ -48,8 +48,12 @@ def script_processing(api, args,
         if not resume:
             args.resume = resume
             if args.code_file:
-                with open(args.code_file) as code_file:
-                    source_code = code_file.read()
+                try:
+                    with open(args.code_file) as code_file:
+                        source_code = code_file.read()
+                except IOError:
+                    sys.exit("Failed to find the source code file: %s" %
+                             args.code_file)
             else:
                 source_code = args.code
             # Check if there's a created project for it
@@ -106,3 +110,38 @@ def execution_processing(api, args,
         execution = bigml.api.get_execution_id(args.execution)
 
     return execution
+
+def library_processing(api, args,
+                       session_file=None, path=None, log=None):
+    """Creating or retrieving a library
+
+    """
+    library = None
+    resume = args.resume
+    if args.code_file or args.code:
+        # If resuming, try to extract args.library form log files
+
+        if resume:
+            message = u.dated("Library not found. Resuming.\n")
+            resume, library = c.checkpoint(
+                c.is_library_created, path, debug=args.debug, message=message,
+                log_file=session_file, console=args.verbosity)
+
+        if not resume:
+            args.resume = resume
+            if args.code_file:
+                try:
+                    with open(args.code_file) as code_file:
+                        source_code = code_file.read()
+                except IOError:
+                    sys.exit("Failed to find the source code file: %s" %
+                             args.code_file)
+            else:
+                source_code = args.code
+            # Check if there's a created project for it
+            args.project_id = pp.project_processing(
+                api, args, resume, session_file=session_file,
+                path=path, log=log)
+            library_args = r.set_library_args(args)
+            library = r.create_library(source_code, library_args, args, api,
+                                       path, session_file, log)

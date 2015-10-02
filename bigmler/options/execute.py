@@ -149,7 +149,28 @@ def get_execute_options(defaults=None):
             'action': 'store',
             'dest': 'arguments',
             'default': defaults.get('arguments', None),
-            'help': "Arguments for the script execution."}
+            'help': "Arguments for the script execution."},
+
+        # Don't execute the script. Compile only.
+        '--no-execute': {
+            "action": 'store_true',
+            "dest": 'no_execute',
+            "default": defaults.get('no_execute', False),
+            "help": "Don't execute the script. Compile only.'"},
+
+        # Execute the script. (opposed to --no-execute).
+        '--execute': {
+            "action": 'store_false',
+            "dest": 'no_execute',
+            "default": defaults.get('no_execute', False),
+            "help": "Execute the script. (Opposed to --no-execute)."},
+
+        # Create a library instead of a script.
+        '--to-library': {
+            "action": 'store_true',
+            "dest": 'to_library',
+            "default": defaults.get('to_library', False),
+            "help": "Compile the code as a library."}
     }
 
     return options

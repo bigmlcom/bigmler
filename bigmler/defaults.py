@@ -253,7 +253,8 @@ FLAGS = {
         {'flag': 'imports', 'type': 'string'},
         {'flag': 'parameters', 'type': 'string'},
         {'flag': 'creation_defaults', 'type': 'string'},
-        {'flag': 'arguments', 'type': 'string'}]}
+        {'flag': 'arguments', 'type': 'string'},
+        {'flag': 'no_execute', 'type': 'boolean'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):

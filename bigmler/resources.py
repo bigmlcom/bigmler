@@ -2377,6 +2377,7 @@ def get_execution(execution, api=None, verbosity=True,
     return execution
 
 
+
 def set_logistic_regression_args(args, name=None, fields=None,
                                  objective_id=None,
                                  logistic_regression_fields=None):
@@ -2562,3 +2563,48 @@ def update_logistic_regression(logistic_regression, logistic_regression_args,
             report(args.reports, path, logistic_regression)
 
     return logistic_regression
+
+
+
+def set_library_args(args, name=None):
+    """Returns a library arguments dict
+
+    """
+
+    if name is None:
+        name = args.name
+    library_args = {
+        "name": name,
+        "description": args.description_,
+        "category": args.category,
+        "tags": args.tag}
+    if args.project_id is not None:
+        library_args.update({"project": args.project_id})
+    if args.imports is not None:
+        library_args.update({"imports": args.imports_})
+    update_attributes(library_args, args.json_args.get('library'))
+    return library_args
+
+
+def create_library(source_code, library_args, args, api=None, path=None,
+                   session_file=None, log=None):
+    """Creates remote library
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+
+    message = dated("Creating library.\n")
+    log_message(message, log_file=session_file, console=args.verbosity)
+    library = api.create_library(source_code, library_args)
+    log_created_resources("library", path,
+                          bigml.api.get_library_id(library), mode='a')
+    library_id = check_resource_error(library, "Failed to create library: ")
+    try:
+        library = check_resource(library, api.get_library)
+    except ValueError, exception:
+        sys.exit("Failed to get a compiled library: %s" % str(exception))
+    message = dated("Library created: %s\n" % get_url(library))
+    log_message(message, log_file=session_file, console=args.verbosity)
+    log_message("%s\n" % library_id, log_file=log)
+    return library
