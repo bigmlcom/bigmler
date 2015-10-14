@@ -1274,7 +1274,7 @@ def save_evaluation(evaluation, output, api=None):
     if api is None:
         api = bigml.api.BigML()
     evaluation = evaluation.get('object', evaluation).get('result', evaluation)
-    save_txt_and_json(evaluation)
+    save_txt_and_json(evaluation, output, api=api)
 
 
 def save_txt_and_json(object_dict, output, api=None):
