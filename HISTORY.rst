@@ -3,6 +3,12 @@
 History
 -------
 
+3.3.1 (2015-10-14)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug: improving datasets download handling to cope with transmission
+  errors.
+
 3.3.0 (2015-09-14)
 ~~~~~~~~~~~~~~~~~~
 

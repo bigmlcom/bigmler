@@ -289,6 +289,8 @@ def compute_output(api, args):
             labels = all_labels
     else:
         all_labels = labels
+    if args.objective_field:
+        csv_properties.update({'objective_field': args.objective_field})
     if args.source_file:
         # source is retrieved from the contents of the given local JSON file
         source, csv_properties, fields = u.read_local_resource(

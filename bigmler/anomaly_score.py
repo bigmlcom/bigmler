@@ -182,7 +182,11 @@ def remote_anomaly_score(anomaly, test_dataset, batch_anomaly_score_args, args,
             anomaly_id, test_dataset, batch_anomaly_score_args,
             args, api, session_file=session_file, path=path, log=log)
     if not args.no_csv:
-        api.download_batch_anomaly_score(batch_anomaly_score, prediction_file)
+        file_name = api.download_batch_anomaly_score(batch_anomaly_score,
+                                                     prediction_file)
+        if file_name is None:
+            sys.exit("Failed downloading CSV.")
+
     if args.to_dataset:
         batch_anomaly_score = bigml.api.check_resource(batch_anomaly_score,
                                                        api=api)

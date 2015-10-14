@@ -180,7 +180,10 @@ def remote_centroid(cluster, test_dataset, batch_centroid_args, args,
             cluster_id, test_dataset, batch_centroid_args,
             args, api, session_file=session_file, path=path, log=log)
     if not args.no_csv:
-        api.download_batch_centroid(batch_centroid, prediction_file)
+        file_name = api.download_batch_centroid(batch_centroid,
+                                                prediction_file)
+        if file_name is None:
+            sys.exit("Failed downloading CSV.")
     if args.to_dataset:
         batch_centroid = bigml.api.check_resource(batch_centroid, api=api)
         new_dataset = bigml.api.get_dataset_id(

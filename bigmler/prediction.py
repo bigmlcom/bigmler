@@ -696,7 +696,10 @@ def remote_predict(model, test_dataset, batch_prediction_args, args,
             model_or_ensemble, test_dataset, batch_prediction_args,
             args, api, session_file=session_file, path=path, log=log)
     if not args.no_csv:
-        api.download_batch_prediction(batch_prediction, prediction_file)
+        file_name = api.download_batch_prediction(batch_prediction,
+                                                  prediction_file)
+        if file_name is None:
+            sys.exit("Failed downloading CSV.")
     if args.to_dataset:
         batch_prediction = bigml.api.check_resource(batch_prediction, api=api)
         new_dataset = bigml.api.get_dataset_id(

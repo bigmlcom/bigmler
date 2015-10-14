@@ -140,7 +140,8 @@ def compute_output(api, args):
         log = args.log_file
         # If --clear_logs the log files are cleared
         clear_log_files([log])
-
+    if args.objective_field:
+        csv_properties.update({'objective_field': args.objective_field})
     # basic pre-model step: creating or retrieving the source related info
     source, resume, csv_properties, fields = pms.get_source_info(
         api, args, resume, csv_properties, session_file, path, log)

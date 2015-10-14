@@ -402,5 +402,7 @@ def export_dataset(dataset, api, args, resume,
                       console=args.verbosity)
 
     if not resume:
-        api.download_dataset(dataset, filename=filename)
+        file_name = api.download_dataset(dataset, filename=filename)
+        if file_name is None:
+            sys.exit("Failed downloading CSV.")
     return resume
