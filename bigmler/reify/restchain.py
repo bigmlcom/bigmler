@@ -342,6 +342,10 @@ class RESTChain(object):
         # name, exclude automatic naming alternatives
         autonames = [u'']
         autonames.append(
+            u"%s\'s model" % grandparent.get('name', ''))
+        autonames.append(
+            u"%s\' model" % grandparent.get('name', ''))
+        autonames.append(
             u"%s model" % grandparent.get('name', ''))
         autonames.append(
             u"Cluster %s - %s" % (int(child.get('centroid', "0"), base=16),
@@ -392,8 +396,15 @@ class RESTChain(object):
             opts['create'].update({"k": child['k']})
 
         # name, exclude automatic naming alternatives
+        autonames = [u'']
+        autonames.append(
+            u'%s\'s cluster' % parent.get('name', ''))
+        autonames.append(
+            u'%s\' cluster' % parent.get('name', ''))
+        autonames.append(
+            u'%s\ cluster' % parent.get('name', ''))
         u.non_automatic_name( \
-            child, opts, autoname=u'%s cluster' % parent.get('name', ''))
+            child, opts, autonames=autonames)
 
         calls = u.build_calls(resource_id, [parent_id], opts)
         self.add(resource_id, calls)
@@ -413,9 +424,16 @@ class RESTChain(object):
         u.common_model_opts(child, parent, opts)
 
         # name, exclude automatic naming alternatives
+        autonames = [u'']
+        autonames.append(
+            u'%s\'s anomaly detector' % parent.get('name', ''))
+        autonames.append(
+            u'%s\' anomaly detector' % parent.get('name', ''))
+        autonames.append(
+            u'%s\ anomaly detector' % parent.get('name', ''))
         u.non_automatic_name(
             child, opts,
-            autoname=u'%s anomaly detector' % parent.get('name', ''))
+            autonames=autonames)
 
         calls = u.build_calls(resource_id, [parent_id], opts)
         self.add(resource_id, calls)

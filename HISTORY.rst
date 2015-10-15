@@ -3,11 +3,14 @@
 History
 -------
 
-3.3.1 (2015-10-14)
+3.3.1 (2015-10-15)
 ~~~~~~~~~~~~~~~~~~
 
 - Fixing bug: improving datasets download handling to cope with transmission
   errors.
+- Fixing bug: solving failure when using the first column of a dataset as
+  objective field in models and ensembles.
+
 
 3.3.0 (2015-09-14)
 ~~~~~~~~~~~~~~~~~~
