@@ -234,10 +234,12 @@ class RESTChain(object):
 
         # as two-steps result from a cluster or batch prediction, centroid
         # or anomaly score
+        grandparent = parent
         if origin in ['origin_batch_resource', 'cluster']:
             if origin == "cluster":
                 opts['create'].update({"centroid": child['centroid']})
             grandparents = u.get_origin_info(parent)
+            # batch resources have two parents, choose the dataset
             if origin == "origin_batch_resource" and \
                     isinstance(grandparents, list):
                 for gp_origin, grandparent in grandparents:
@@ -246,8 +248,6 @@ class RESTChain(object):
             else:
                 _, grandparent = grandparents
             grandparent = self.get_resource(grandparent)
-        else:
-            grandparent = parent
 
         # options common to all model types
         call = "update" if origin == "origin_batch_resource" else "create"
