@@ -361,3 +361,27 @@ def create_evaluation_split(filename, output=None, args=None):
     world.evaluation = world.api.create_evaluation(world.model, world.dataset_test, args)
     world.api.ok(world.evaluation)
     world.evaluations.append(world.evaluation['resource'])
+
+#@step(r'I create a BigML dataset from a batch prediction from a model with data "(.*)" and params "(.*)"')
+def create_dataset_from_batch_prediction(filename, output=None, args=None):
+    source = world.api.create_source(res_filename(filename))
+    world.source = source
+    world.directory = os.path.dirname(output)
+    world.output = output
+    world.api.ok(world.source)
+    world.sources.append(source['resource'])
+    world.dataset = world.api.create_dataset(source)
+    world.api.ok(world.dataset)
+    world.datasets.append(world.dataset['resource'])
+    world.model = world.api.create_model(world.dataset)
+    world.api.ok(world.model)
+    world.models.append(world.model['resource'])
+    world.batch_prediction = world.api.create_batch_prediction(world.model, world.dataset, {"output_dataset": True})
+    world.api.ok(world.batch_prediction)
+    world.batch_predictions.append(world.batch_prediction['resource'])
+    world.batch_prediction_dataset = world.api.get_dataset(
+        world.batch_prediction['object']['output_dataset_resource'])
+    world.api.ok(world.batch_prediction_dataset)
+    world.batch_prediction_dataset = world.api.update_dataset(world.batch_prediction_dataset, args)
+    world.api.ok(world.batch_prediction_dataset)
+    world.datasets.append(world.batch_prediction_dataset)

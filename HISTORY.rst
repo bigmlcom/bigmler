@@ -3,6 +3,12 @@
 History
 -------
 
+3.3.2 (2015-10-31)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug: bigmler reify failed for dataset generated from batch
+  predictions, batch centroids or batch anomaly scores.
+
 3.3.1 (2015-10-15)
 ~~~~~~~~~~~~~~~~~~
 

@@ -33,11 +33,11 @@ class RESTCall(object):
 
     """
     def __init__(self, action, origins=None, args=None,
-                 resource_id=None, resource_type=None):
+                 resource_id=None, resource_type=None, suffix=None):
         """Constructor for the REST call definition
 
             resource_id: ID for the generated resource
-            action: ["create" | "update"]
+            action: ["create" | "update" | "get"]
             origins: list of resouce IDs for the origin resources
             args: dict for the rest of arguments
 
@@ -52,6 +52,7 @@ class RESTCall(object):
         self.input_data = input_data
         self.resource_id = resource_id
         self.resource_type = resource_type
+        self.suffix = suffix
 
 
     def reify(self, language=None, alias=None):
@@ -105,7 +106,10 @@ class RESTCall(object):
             resource_type, resource_type)
         origin_names = [resource_alias(resource_id) for resource_id
                         in self.origins]
+
         arguments = ", ".join(origin_names)
+        if self.suffix:
+            arguments = "%s%s" % (arguments, self.suffix)
         if self.input_data:
             arguments = "%s, \\\n%s%s" % ( \
                 arguments, INDENT,

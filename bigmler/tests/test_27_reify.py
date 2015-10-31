@@ -464,7 +464,7 @@ class TestReify(object):
                 | data | output | params |check_file | language
                 | data/iris.csv | scenario_re15/reify.py | {"name": "my_evaluation_name"}|../check_files/reify_evaluation_split.py | python
         """
-        print self.test_scenario12.__doc__
+        print self.test_scenario15.__doc__
         examples = [
             ['data/iris.csv', 'scenario_re15/reify.py', {"name": "my_evaluation_name"}, 'check_files/reify_evaluation_split.py', 'python']]
 
@@ -475,5 +475,37 @@ class TestReify(object):
                                                args=example[2])
             test_reify.i_create_output(self, example[1], example[4],
                                        resource_type='evaluation')
+            test_reify.i_check_output_file(self, output=example[1],
+                                           check_file=example[3])
+
+
+    def test_scenario16(self):
+        """
+            Scenario: Successfully building a dataset reify output in python when built from a batch prediction
+                Given I create a BigML dataset from a batch prediction from a model with data "<data>" and params "<params>"
+                And I check that the source has been created
+                And I check that the dataset has been created
+                And I check that the model has been created
+                And I check that the batch prediction has been created
+                And I check that the batch prediction dataset has been created
+                Then I create a reify output in "<output>" for "<language>"
+                And the "<output>" file is like "<check_file>"
+
+                Examples:
+                | data | output | params |check_file | language
+                | data/iris.csv | scenario_re9/reify.py | {"name": "my_dataset_from_batch_prediction_name"}|../check_files/reify_batch_prediction_dataset.py | python
+        """
+        print self.test_scenario16.__doc__
+        examples = [
+            ['data/iris.csv', 'scenario_re16/reify.py', {"name": "my_dataset_from_batch_prediction_name"}, 'check_files/reify_batch_prediction_dataset.py', 'python']]
+
+        for example in examples:
+            print "\nTesting with:\n", example
+            test_reify.create_dataset_from_batch_prediction(example[0],
+                                                            output=example[1],
+                                                            args=example[2])
+            test_reify.i_create_output(
+                self, example[1], example[4],
+                resource_type='batch_prediction_dataset')
             test_reify.i_check_output_file(self, output=example[1],
                                            check_file=example[3])

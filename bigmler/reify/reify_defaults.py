@@ -24,6 +24,11 @@ COMMON_DEFAULTS = {
         'category': [0],
         'description': [None, ""],
         'tags': [[]]
+    },
+    'update': {
+        'category': [0],
+        'description': [None, ""],
+        'tags': [[]]
     }
 }
 

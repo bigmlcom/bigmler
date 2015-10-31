@@ -232,6 +232,7 @@ def common_teardown_module():
     """
     if os.path.exists('./tmp'):
         shutil.rmtree('./tmp')
+
     world.delete_resources()
     project_stats = world.api.get_project( \
         world.project_id)['object']['stats']
@@ -246,7 +247,6 @@ def common_teardown_module():
             shutil.rmtree(folder)
         except:
             pass
-
 
 
 def teardown_class():

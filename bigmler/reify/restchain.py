@@ -94,7 +94,7 @@ class RESTChain(object):
             resource_id = resource_id[0]
         try:
             resource = retrieve_resource(self.api, resource_id,
-                                      query_string=GET_QS).get('object')
+                                         query_string=GET_QS).get('object')
             return resource
         except ValueError:
             sys.exit("We could not reify the resource. Failed to find"
@@ -119,26 +119,33 @@ class RESTChain(object):
         """
         if not resource_id in self.calls:
             self.calls[resource_id] = calls
+        new_origins = []
         for call in calls:
             for origins in call.origins:
                 if isinstance(origins, basestring):
                     origins = [origins]
+
                 for origin in origins:
                     if not origin in self.objects:
                         message = "New origin found for %s: %s\n" % \
                             (resource_id, origin)
                         self.logger(message)
                     self.objects.append(origin)
-                    if not origin in self.calls:
-                        self.reify_resource(origin)
-                    else:
-                        new_origins = []
+                    if origin in self.calls:
+                        old_origins = []
                         calls = self.calls[origin]
                         for call in calls:
                             # only create calls will introduce new origins
-                            if call.action == "create":
-                                new_origins.extend(call.origins)
-                        self.objects.extend(new_origins)
+                            if call.action == "create" or (call.action == "get"
+                                    and call.suffix == "['object']['output_"
+                                                       "dataset_resource']"):
+                                old_origins.extend(call.origins)
+                        self.objects.extend(old_origins)
+                    else:
+                        new_origins.append(origin)
+        for origin in new_origins:
+            self.reify_resource(origin)
+
 
     def reify(self, language=None):
         """Prints the chain of commands in the user-given language
@@ -223,20 +230,28 @@ class RESTChain(object):
         origin, parent_id = u.get_origin_info(child)
         parent = self.get_resource(parent_id)
 
-        opts = {"create": {}, "update": {}}
+        opts = {"create": {}, "update": {}, "get": {}}
 
         # as two-steps result from a cluster or batch prediction, centroid
         # or anomaly score
         if origin in ['origin_batch_resource', 'cluster']:
             if origin == "cluster":
                 opts['create'].update({"centroid": child['centroid']})
-            _, grandparent = u.get_origin_info(parent)
+            grandparents = u.get_origin_info(parent)
+            if origin == "origin_batch_resource" and \
+                    isinstance(grandparents, list):
+                for gp_origin, grandparent in grandparents:
+                    if gp_origin == "dataset":
+                        break
+            else:
+                _, grandparent = grandparents
             grandparent = self.get_resource(grandparent)
         else:
             grandparent = parent
 
         # options common to all model types
-        u.common_dataset_opts(child, grandparent, opts)
+        call = "update" if origin == "origin_batch_resource" else "create"
+        u.common_dataset_opts(child, grandparent, opts, call=call)
 
         # update options
         dataset_defaults = DEFAULTS["dataset"].get("update", {})
@@ -276,24 +291,32 @@ class RESTChain(object):
             'column_number']
         if objective_column != max_column:
             opts['create'].update({"objective_field": {"id": objective_id}})
+        if origin != "origin_batch_resource":
+            # resize
+            if (child['size'] != grandparent['size'] and
+                    get_resource_type(parent) == 'source'):
+                opts['create'].update({"size": child['size']})
 
-        # resize
-        if (child['size'] != grandparent['size'] and
-                get_resource_type(parent) == 'source'):
-            opts['create'].update({"size": child['size']})
+            # generated fields
+            if child.get('new_fields', None):
+                new_fields = child['new_fields']
+                for new_field in new_fields:
+                    new_field['field'] = new_field['generator']
+                    del new_field['generator']
 
-        # generated fields
-        if child.get('new_fields', None):
-            new_fields = child['new_fields']
-            for new_field in new_fields:
-                new_field['field'] = new_field['generator']
-                del new_field['generator']
+                opts['create'].update({"new_fields": new_fields})
 
-            opts['create'].update({"new_fields": new_fields})
+            u.range_opts(child, grandparent, opts)
 
-        u.range_opts(child, grandparent, opts)
-
-        calls = u.build_calls(resource_id, [parent_id], opts)
+        # for batch_predictions, batch_clusters, batch_anomalies generated
+        # datasets, attributes cannot be set at creation time, so we
+        # must update the resource instead
+        suffix = None
+        if origin == "origin_batch_resource" and opts['create']:
+            opts["update"].update(opts["create"])
+            opts["create"] = {}
+            suffix = "['object']['output_dataset_resource']"
+        calls = u.build_calls(resource_id, [parent_id], opts, suffix=suffix)
         self.add(resource_id, calls)
 
     def reify_model(self, resource_id):

@@ -200,11 +200,11 @@ def common_dataset_opts(resource, referrer, opts, call="create"):
     fields_attributes = get_fields_changes(resource, referrer=referrer)
     if fields_attributes:
         opts[call].update({"fields": fields_attributes})
-
-    # input fields
-    input_fields = get_input_fields(resource, referrer=referrer)
-    if input_fields:
-        opts[call].update({'input_fields': input_fields})
+    if call=="create":
+        # input fields
+        input_fields = get_input_fields(resource, referrer=referrer)
+        if input_fields:
+            opts[call].update({'input_fields': input_fields})
 
 
 def range_opts(resource, referrer, opts, call="create"):
@@ -290,7 +290,7 @@ def default_setting(child, key, *defaults):
         return {}
 
 
-def non_automatic_name(resource, opts, autonames=None, autoname=None):
+def non_automatic_name(resource, opts, autonames=None, autoname=None, call="create"):
     """Checks whether the name of the resource is in the list of automated
        names and includes it in the name argument otherwise.
 
@@ -300,18 +300,24 @@ def non_automatic_name(resource, opts, autonames=None, autoname=None):
     if autoname is not None:
         autonames.append(autoname)
     if not resource.get('name', '') in autonames:
-        opts['create'].update({"name": resource.get('name', '')})
+        opts[call].update({"name": resource.get('name', '')})
 
 
-def build_calls(resource_id, origin_ids, opts):
-    """Builds the REST API call objects for to obtain the resource
+def build_calls(resource_id, origin_ids, opts, suffix=None):
+    """Builds the REST API call objects to obtain the resource
 
     """
     calls = []
-    calls.append(
-        RESTCall("create",
-                 origins=origin_ids,
-                 args=opts["create"], resource_id=resource_id))
+    if not suffix:
+        calls.append(
+            RESTCall("create",
+                     origins=origin_ids,
+                     args=opts["create"], resource_id=resource_id))
+    if (not opts["create"] and opts["update"]) or opts.get("get"):
+        calls.append(
+            RESTCall("get",
+                     origins=origin_ids,
+                     args=opts["get"], resource_id=resource_id, suffix=suffix))
     if opts["update"]:
         calls.append(
             RESTCall("update", args=opts["update"],
