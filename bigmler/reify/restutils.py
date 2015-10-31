@@ -200,7 +200,7 @@ def common_dataset_opts(resource, referrer, opts, call="create"):
     fields_attributes = get_fields_changes(resource, referrer=referrer)
     if fields_attributes:
         opts[call].update({"fields": fields_attributes})
-    if call=="create":
+    if call == "create":
         # input fields
         input_fields = get_input_fields(resource, referrer=referrer)
         if input_fields:
