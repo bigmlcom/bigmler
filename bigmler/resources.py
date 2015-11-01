@@ -688,7 +688,7 @@ def create_models(datasets, model_ids, model_args,
                         sys.exit("Failed to get a finished model: %s" %
                                  str(exception))
                     models[0] = model
-                message = dated("Model created: %s.\n" %
+                message = dated("Model created: %s\n" %
                                 get_url(model))
                 log_message(message, log_file=session_file,
                             console=args.verbosity)
@@ -950,7 +950,7 @@ def create_ensembles(datasets, ensemble_ids, ensemble_args, args,
                                   mode='a')
         models, model_ids = retrieve_ensembles_models(ensembles, api, path)
         if number_of_ensembles < 2 and args.verbosity:
-            message = dated("Ensemble created: %s.\n" %
+            message = dated("Ensemble created: %s\n" %
                             get_url(ensemble))
             log_message(message, log_file=session_file,
                         console=args.verbosity)
@@ -1173,7 +1173,7 @@ def create_evaluations(model_or_ensemble_ids, datasets, evaluation_args,
                 sys.exit("Failed to get a finished evaluation: %s" %
                          str(exception))
             evaluations[0] = evaluation
-        message = dated("Evaluation created: %s.\n" %
+        message = dated("Evaluation created: %s\n" %
                         get_url(evaluation))
         log_message(message, log_file=session_file,
                     console=args.verbosity)
@@ -1690,7 +1690,7 @@ def create_anomalies(datasets, anomaly_ids, anomaly_args,
                     sys.exit("Failed to get a finished anomaly: %s" %
                              str(exception))
                 anomalies[0] = anomaly
-            message = dated("Anomaly created: %s.\n" %
+            message = dated("Anomaly created: %s\n" %
                             get_url(anomaly))
             log_message(message, log_file=session_file,
                         console=args.verbosity)
@@ -1913,7 +1913,7 @@ def create_samples(datasets, sample_ids, sample_args,
                     sys.exit("Failed to get a finished sample: %s" %
                              str(exception))
                 samples[0] = sample
-            message = dated("Sample created: %s.\n" %
+            message = dated("Sample created: %s\n" %
                             get_url(sample))
             log_message(message, log_file=session_file,
                         console=args.verbosity)
