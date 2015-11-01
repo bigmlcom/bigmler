@@ -422,8 +422,8 @@ History
 
 - Bug fixing: resume from multi-label processing from dataset was not working.
 - Bug fixing: max parallel resource creation check did not check that all the
-              older tasks ended, only the last of the slot. This caused
-              more tasks than permitted to be sent in parallel.
+  older tasks ended, only the last of the slot. This caused
+  more tasks than permitted to be sent in parallel.
 - Improving multi-label training data uploads by zipping the extended file and
   transforming booleans from True/False to 1/0.
 

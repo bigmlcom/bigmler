@@ -45,7 +45,7 @@ def parser_add_options(parser, options):
     """Adds the options to the sucommand parser
 
     """
-    for option, properties in options.items():
+    for option, properties in sorted(options.items(), key=lambda x: x[0]):
         parser.add_argument(option, **properties)
 
 
