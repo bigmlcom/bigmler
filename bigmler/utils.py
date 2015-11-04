@@ -293,12 +293,12 @@ def read_local_resource(path, csv_properties=None):
     return resource, csv_properties, fields
 
 
-def list_ids(api_function, query_string):
+def list_ids(api_function, query_string, status_code=bigml.api.FINISHED):
     """Lists BigML resources filtered by `query_string`.
 
     """
     q_s = 'status.code=%s;limit=%s;%s' % (
-        bigml.api.FINISHED, PAGE_LENGTH, query_string)
+        status_code, PAGE_LENGTH, query_string)
     resources = api_function(q_s)
     ids = [obj['resource'] for obj in (resources['objects'] or [])]
     while (resources['objects'] and
@@ -306,7 +306,7 @@ def list_ids(api_function, query_string):
                                                 resources['meta']['limit']))):
         offset = resources['meta']['offset'] + PAGE_LENGTH
         q_s = 'status.code=%s;offset=%s;limit=%s;%s' % (
-            bigml.api.FINISHED, offset, PAGE_LENGTH, query_string)
+            status_code, offset, PAGE_LENGTH, query_string)
         resources = api_function(q_s)
         if resources['objects']:
             ids.extend([obj['resource'] for obj in resources['objects']])

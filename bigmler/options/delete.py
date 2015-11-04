@@ -191,6 +191,18 @@ def get_delete_options(defaults=None):
             'dest': 'project_tag',
             'default': defaults.get('project_tag', None),
             'help': "Retrieve projects that were tagged with tag."},
+
+
+        # Filter the resources to be deleted by its status (finished if
+        # not set)
+        '--status': {
+            'action': 'store',
+            'default': defaults.get('status', "finished"),
+            'choices': ["finished", "faulty", "waiting", "queued", "started",
+                        "in progress", "summarized", "uploading", "unknown",
+                        "runnable"],
+            'help': ("Filter the resources to be deleted by its status "
+                     "(finished if not set).")}
         }
 
     return options
