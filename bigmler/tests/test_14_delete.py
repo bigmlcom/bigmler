@@ -312,3 +312,37 @@ class TestDelete(object):
             test_delete.i_check_source_does_not_exist(self, source_id=world.source_reference)
             test_delete.i_check_dataset_does_not_exist(self, dataset_id=world.dataset)
             test_delete.i_check_source_exists_by_id(self, source_id=world.source_lower)
+
+    def test_scenario10(self):
+        """
+            Scenario: Sucessfully deleting a source in a time range and with a tag:
+                Given I create a BigML source from file "<data>" storing results in "<output_dir>"
+                And I check that the source has been created
+                And I store the source id as lower
+                And I create a BigML source from file "<data>" with tag "<tag1>" storing results in "<output_dir>"
+                And I check that the source exists
+                And I store the source id as reference
+                And I create a BigML source from file "<data2>" with tag "<tag2>" storing results in "<output_dir2>"
+                And I check that the failed source exists
+                And I delete the source using --newer-than and --source-tag "<tag1>" and --status faulty storing results in "<output_dir3>"
+                Then I check that the reference source doesn't exist
+                And I check that the upper source exists
+
+                Examples:
+                | data               | output_dir       | data2      | tag1    | tag2 | output_dir2       | output_dir3
+                | ../data/iris.csv   | ./scenario_del_8 | ../data/faulty.csv |my_tag1 | my_tag2 | ./scenario_del_8_2 | ./scenario_del_8_3
+        """
+        print self.test_scenario10.__doc__
+        examples = [
+            ['data/iris.csv', 'scenario_del_10', 'my_tag1', 'my_tag2', 'scenario_del_10_2', 'scenario_del_10_3', 'data/faulty.csv']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            test_delete.i_create_source_from_file(self, data=example[0], output_dir=example[1])
+            test_pred.i_check_create_source(self)
+            test_delete.i_store_source_id_as_bound(self, which='lower')
+            test_delete.i_create_faulty_source_from_file_with_tag(self, data=example[6], tag=example[2], output_dir=example[4])
+            test_delete.i_check_faulty_source_exists(self)
+            test_delete.i_store_source_id_as_bound(self, which='reference')
+            test_delete.i_delete_source_newer_faulty_and_tag(self, tag=example[2], output_dir=example[1])
+            test_delete.i_check_source_does_not_exist(self, source_id=world.source_reference)
+            test_delete.i_check_source_exists_by_id(self, source_id=world.source_lower)
