@@ -61,6 +61,23 @@ def i_check_source_exists(step):
     except Exception, exc:
         assert False, str(exc)
 
+#@step(r'I check that the failed source exists$')
+def i_check_faulty_source_exists(step):
+    source_file = "%s%ssource" % (world.directory, os.sep)
+    try:
+        source_file = open(source_file, "r")
+        source_id = source_file.readline().strip()
+        source = world.api.get_source(source_id)
+        if (source['code'] != HTTP_NOT_FOUND):
+            assert True
+            world.source = source
+        else:
+            assert False
+            source_file.close()
+        assert True
+    except Exception, exc:
+        assert False, str(exc)
+
 
 #@step(r'I check that the source doesn\'t exist$')
 def i_check_source_does_not_exist(step, source_id=None):
@@ -107,6 +124,15 @@ def i_delete_source_by_file(step, output_dir=None):
         assert False
     command = ("bigmler delete --from-file %s%ssource " % (output_dir, os.sep) +
                " --output-dir " + output_dir)
+    shell_execute(command, os.path.join(output_dir, "p.csv"), test=None)
+
+
+#@step(r'I delete the source by id using --from-file and --status faulty and the source file storing results in "(.*)"$')
+def i_delete_source_faulty_by_file(step, output_dir=None):
+    if output_dir is None:
+        assert False
+    command = ("bigmler delete --from-file %s%ssource " % (output_dir, os.sep) +
+               " --status faulty --output-dir " + output_dir)
     shell_execute(command, os.path.join(output_dir, "p.csv"), test=None)
 
 
@@ -170,6 +196,18 @@ def i_create_source_from_file_with_tag(step, data=None, tag=None, output_dir=Non
                " --no-dataset --no-model --store")
     shell_execute(command, os.path.join(output_dir, "p.csv"), test=None)
 
+#@step(r'I create a BigML source from file "(.*)" with tag "(.*)" storing results in "(.*)"')
+def i_create_faulty_source_from_file_with_tag(step, data=None, tag=None, output_dir=None):
+    if data is None or output_dir is None or tag is None:
+        assert False
+    command = ("bigmler --train " + res_filename(data) + " --store --output-dir " +
+               output_dir + " --tag " + tag +
+               " --no-dataset --no-model --store")
+    try:
+        shell_execute(command, os.path.join(output_dir, "p.csv"), test=None)
+    except:
+        pass
+
 
 #@step(r'I delete the source using --newer-than and --source-tag "(.*)" storing results in "(.*)"$')
 def i_delete_source_newer_and_tag(step, tag=None, output_dir=None):
@@ -180,6 +218,16 @@ def i_delete_source_newer_and_tag(step, tag=None, output_dir=None):
                " --output-dir " + output_dir)
     shell_execute(command, os.path.join(output_dir, "p.csv"), test=None)
 
+
+
+#@step(r'I delete the source using --newer-than and --status faulty and --source-tag "(.*)" storing results in "(.*)"$')
+def i_delete_source_newer_faulty_and_tag(step, tag=None, output_dir=None):
+    if output_dir is None or tag is None:
+        assert False
+    command = ("bigmler delete --newer-than " + world.source_lower +
+               " --source-tag " + tag +
+               " --status faulty --output-dir " + output_dir)
+    shell_execute(command, os.path.join(output_dir, "p.csv"), test=None)
 
 #@step(r'I check that the upper source exists$')
 def i_check_upper_source_exists(step):

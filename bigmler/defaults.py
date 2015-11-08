@@ -151,7 +151,8 @@ FLAGS = {
         {'flag': 'no_csv', 'type': 'boolean'},
         {'flag': 'to_dataset', 'type': 'boolean'},
         {'flag': 'median', 'type': 'boolean'},
-        {'flag': 'random_candidates', 'type': 'int'}],
+        {'flag': 'random_candidates', 'type': 'int'},
+        {'flag': 'status', 'type': 'string'}],
     'BigMLer analyze': [
         {'flag': 'k-fold', 'type': 'integer'},
         {'flag': 'cv', 'type': 'boolean'},

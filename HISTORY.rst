@@ -3,6 +3,15 @@
 History
 -------
 
+3.3.3 (2015-11-04)
+~~~~~~~~~~~~~~~~~~
+
+- Adding --status option to bigmler delete. Selects the resources to delete
+  according to its status (finished if not set). You can check the available
+  status in the
+  `developers documentation
+  <https://bigml.com/developers/status_codes#sc_resource_status_code_summary>`_.
+
 3.3.2 (2015-10-31)
 ~~~~~~~~~~~~~~~~~~
 

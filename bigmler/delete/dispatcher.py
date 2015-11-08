@@ -44,6 +44,19 @@ RESOURCES_LOG_FILES = set(['source', 'dataset', 'dataset_train',
                            'ensembles', 'evaluations',
                            'clusters', 'batch_prediction', 'batch_centroid',
                            'anomalies', 'batch_anomaly_score', 'sample'])
+STATUS_CODES = {
+    "finished": bigml.api.FINISHED,
+    "faulty": bigml.api.FAULTY,
+    "waiting": bigml.api.WAITING,
+    "queued": bigml.api.QUEUED,
+    "started": bigml.api.STARTED,
+    "in progress": bigml.api.IN_PROGRESS,
+    "summarized": bigml.api.SUMMARIZED,
+    "uploading": bigml.api.UPLOADING,
+    "unknown": bigml.api.UNKNOWN,
+    "runnable": bigml.api.RUNNABLE
+}
+
 
 def retrieve_resources(directory):
     """Searches recusively the user-given directory for resource log files
@@ -102,8 +115,10 @@ def get_delete_list(args, api, query_list):
             if type_query_list and filter_linked:
                 type_query_list.append(filter_linked)
             if type_query_list:
+                status_code = STATUS_CODES[args.status]
                 delete_list.extend(u.list_ids(api_call,
-                                              ";".join(type_query_list)))
+                                              ";".join(type_query_list),
+                                              status_code=status_code))
     return delete_list
 
 

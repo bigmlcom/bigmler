@@ -2058,6 +2058,15 @@ that contain the tag ``my_source`` and were created after the one given as
 to console, and the complete list can be found in the ``bigmler_sessions``
 file.
 
+By default, only finished resources are selected to be deleted. If you want
+to delete other resources, you can select them by choosing their status:
+
+.. code-block:: bash
+
+    bigmler delete --older-than 2 --status failed
+
+would remove all failed resources created more than two days ago.
+
 Additional Features
 ===================
 
@@ -3141,6 +3150,11 @@ Delete Subcommand Options
                                       batch_prediction,
                                       cluster, centroid, batch_centroid
 ``--dry-run``                         Delete simulation. No removal.
+``--status``                          Status codes used in the filter to
+                                      retrieved the resources to be delete. The
+                                      possible values are: finished, faulty,
+                                      waiting, queued, started, in progress,
+                                      summarized, uploading, unknown, runnable
 ===================================== =========================================
 
 Prior Versions Compatibility Issues
