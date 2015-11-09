@@ -20,6 +20,7 @@ import os
 import time
 import csv
 import json
+from nose.tools import assert_equal, assert_not_equal, ok_
 from bigmler.tests.world import world, res_filename
 from subprocess import check_call, CalledProcessError
 from bigml.api import check_resource, HTTP_NOT_FOUND
@@ -31,8 +32,7 @@ from bigmler.tests.basic_tst_prediction_steps import shell_execute
 
 #@step(r'I create a BigML source from file "(.*)" storing results in "(.*)"')
 def i_create_source_from_file(step, data=None, output_dir=None):
-    if data is None or output_dir is None:
-        assert False
+    ok_(data is not None and output_dir is not None)
     command = ("bigmler --train " + res_filename(data) + " --store --output-dir " +
                output_dir +
                " --no-dataset --no-model --store")
@@ -43,40 +43,28 @@ def i_create_source_from_file(step, data=None, output_dir=None):
 def i_check_source_exists_by_id(step, source_id):
     source = check_resource(source_id,
                             world.api.get_source)
-    if (source['code'] != HTTP_NOT_FOUND):
-        assert True
-        world.source = source
-    else:
-        assert False
+    assert_not_equal(source['code'], HTTP_NOT_FOUND)
+    world.source = source
+
 
 #@step(r'I check that the source exists$')
 def i_check_source_exists(step):
     source_file = "%s%ssource" % (world.directory, os.sep)
-    try:
-        source_file = open(source_file, "r")
-        source_id = source_file.readline().strip()
-        i_check_source_exists_by_id(step, source_id)
-        source_file.close()
-        assert True
-    except Exception, exc:
-        assert False, str(exc)
+    source_file = open(source_file, "r")
+    source_id = source_file.readline().strip()
+    source_file.close()
+    i_check_source_exists_by_id(step, source_id)
+
 
 #@step(r'I check that the failed source exists$')
 def i_check_faulty_source_exists(step):
     source_file = "%s%ssource" % (world.directory, os.sep)
-    try:
-        source_file = open(source_file, "r")
-        source_id = source_file.readline().strip()
-        source = world.api.get_source(source_id)
-        if (source['code'] != HTTP_NOT_FOUND):
-            assert True
-            world.source = source
-        else:
-            assert False
-            source_file.close()
-        assert True
-    except Exception, exc:
-        assert False, str(exc)
+    source_file = open(source_file, "r")
+    source_id = source_file.readline().strip()
+    source_file.close()
+    source = world.api.get_source(source_id)
+    assert_not_equal(source['code'], HTTP_NOT_FOUND)
+    world.source = source
 
 
 #@step(r'I check that the source doesn\'t exist$')
@@ -84,10 +72,7 @@ def i_check_source_does_not_exist(step, source_id=None):
     if source_id is None:
         source_id = world.source['resource']
     source = world.api.get_source(source_id)
-    if (source['code'] == HTTP_NOT_FOUND):
-        assert True
-    else:
-        assert False
+    assert_equal(source['code'], HTTP_NOT_FOUND)
 
 
 #@step(r'I delete the source by id using --ids storing results in "(.*)"$')
@@ -129,8 +114,7 @@ def i_delete_source_by_file(step, output_dir=None):
 
 #@step(r'I delete the source by id using --from-file and --status faulty and the source file storing results in "(.*)"$')
 def i_delete_source_faulty_by_file(step, output_dir=None):
-    if output_dir is None:
-        assert False
+    ok_(output_dir is not None)
     command = ("bigmler delete --from-file %s%ssource " % (output_dir, os.sep) +
                " --status faulty --output-dir " + output_dir)
     shell_execute(command, os.path.join(output_dir, "p.csv"), test=None)
@@ -138,8 +122,7 @@ def i_delete_source_faulty_by_file(step, output_dir=None):
 
 #@step(r'I delete the source by id using --from-file, the source file and --resource-types "(.*)" storing results in "(.*)"$')
 def i_delete_source_by_file_filtered(step, resource_types=None, output_dir=None):
-    if output_dir is None or resource_types is None:
-        assert False
+    ok_(output_dir is not None and resource_types is not None)
     command = ("bigmler delete --from-file %s%ssource " % (output_dir, os.sep) +
                " --output-dir " + output_dir +
                " --resource-types " + resource_types)
@@ -158,8 +141,7 @@ def i_store_source_id_as_bound(step, which=None):
 
 #@step(r'I delete the source using --older-than and --newer-than storing results in "(.*)"$')
 def i_delete_source_older_newer(step, output_dir=None):
-    if output_dir is None:
-        assert False
+    ok_(output_dir is not None)
     command = ("bigmler delete --older-than " + world.source_upper +
                " --newer-than " + world.source_lower +
                " --output-dir " + output_dir)
@@ -173,8 +155,7 @@ def i_check_reference_source_does_not_exist(step):
 
 #@step(r'I delete the source using --older-than and --newer-than with resource_types "(.*)" storing results in "(.*)"$')
 def i_delete_source_older_newer_with_resource_types(step, resource_types=None, output_dir=None):
-    if output_dir is None or resource_types is None:
-        assert False
+    ok_(output_dir is not None and resource_types is not None)
     command = ("bigmler delete --older-than " + world.source_upper +
                " --newer-than " + world.source_lower +
                " --resource-types " + resource_types +
@@ -189,8 +170,7 @@ def i_check_reference_source_exists(step):
 
 #@step(r'I create a BigML source from file "(.*)" with tag "(.*)" storing results in "(.*)"')
 def i_create_source_from_file_with_tag(step, data=None, tag=None, output_dir=None):
-    if data is None or output_dir is None or tag is None:
-        assert False
+    ok_(data is not None and output_dir is not None and tag is not None)
     command = ("bigmler --train " + res_filename(data) + " --store --output-dir " +
                output_dir + " --tag " + tag +
                " --no-dataset --no-model --store")
@@ -198,8 +178,7 @@ def i_create_source_from_file_with_tag(step, data=None, tag=None, output_dir=Non
 
 #@step(r'I create a BigML source from file "(.*)" with tag "(.*)" storing results in "(.*)"')
 def i_create_faulty_source_from_file_with_tag(step, data=None, tag=None, output_dir=None):
-    if data is None or output_dir is None or tag is None:
-        assert False
+    ok_(data is not None and output_dir is not None and tag is not None)
     command = ("bigmler --train " + res_filename(data) + " --store --output-dir " +
                output_dir + " --tag " + tag +
                " --no-dataset --no-model --store")
@@ -211,8 +190,7 @@ def i_create_faulty_source_from_file_with_tag(step, data=None, tag=None, output_
 
 #@step(r'I delete the source using --newer-than and --source-tag "(.*)" storing results in "(.*)"$')
 def i_delete_source_newer_and_tag(step, tag=None, output_dir=None):
-    if output_dir is None or tag is None:
-        assert False
+    ok_(output_dir is not None and tag is not None)
     command = ("bigmler delete --newer-than " + world.source_lower +
                " --source-tag " + tag +
                " --output-dir " + output_dir)
@@ -222,8 +200,7 @@ def i_delete_source_newer_and_tag(step, tag=None, output_dir=None):
 
 #@step(r'I delete the source using --newer-than and --status faulty and --source-tag "(.*)" storing results in "(.*)"$')
 def i_delete_source_newer_faulty_and_tag(step, tag=None, output_dir=None):
-    if output_dir is None or tag is None:
-        assert False
+    ok_(output_dir is not None and tag is not None)
     command = ("bigmler delete --newer-than " + world.source_lower +
                " --source-tag " + tag +
                " --status faulty --output-dir " + output_dir)
@@ -236,8 +213,7 @@ def i_check_upper_source_exists(step):
 
 #@step(r'I create a BigML dataset from the source with tag "(.*)" storing results in "(.*)"')
 def i_create_dataset_from_source_with_tag(step, tag=None, output_dir=None):
-    if tag is None or output_dir is None:
-        assert False
+    ok_(tag is not None and output_dir is not None)
     command = ("bigmler --source " + world.source['resource'] +
                " --tag " + tag +
                " --store --output-dir " + output_dir +
@@ -248,24 +224,17 @@ def i_create_dataset_from_source_with_tag(step, tag=None, output_dir=None):
 def i_check_dataset_exists_by_id(step, dataset_id):
     dataset = check_resource(dataset_id,
                              world.api.get_dataset)
-    if (dataset['code'] != HTTP_NOT_FOUND):
-        assert True
-        world.dataset = dataset
-    else:
-        assert False
+    assert_not_equal(dataset['code'], HTTP_NOT_FOUND)
+    world.dataset = dataset
 
 
 #@step(r'I check that the dataset exists$')
 def i_check_dataset_exists(step):
     dataset_file = "%s%sdataset" % (world.directory, os.sep)
-    try:
-        dataset_file = open(dataset_file, "r")
-        dataset_id = dataset_file.readline().strip()
-        i_check_dataset_exists_by_id(step, dataset_id)
-        dataset_file.close()
-        assert True
-    except Exception, exc:
-        assert False, str(exc)
+    dataset_file = open(dataset_file, "r")
+    dataset_id = dataset_file.readline().strip()
+    dataset_file.close()
+    i_check_dataset_exists_by_id(step, dataset_id)
 
 
 #@step(r'I check that the dataset doesn\'t exist$')
@@ -273,16 +242,12 @@ def i_check_dataset_does_not_exist(step, dataset_id=None):
     if dataset_id is None:
         dataset_id = world.dataset['resource']
     dataset = world.api.get_dataset(dataset_id)
-    if (dataset['code'] == HTTP_NOT_FOUND):
-        assert True
-    else:
-        assert False
+    assert_equal(dataset['code'], HTTP_NOT_FOUND)
 
 
 #@step(r'I delete the resources using --newer-than and --all-tag "(.*)" storing results in "(.*)"$')
 def i_delete_resources_newer_and_tag(step, tag=None, output_dir=None):
-    if output_dir is None or tag is None:
-        assert False
+    ok_(output_dir is not None and tag is not None)
     command = ("bigmler delete --newer-than " + world.source_lower +
                " --all-tag " + tag +
                " --output-dir " + output_dir)
@@ -291,8 +256,7 @@ def i_delete_resources_newer_and_tag(step, tag=None, output_dir=None):
 
 #@step(r'I create BigML resources uploading train "(.*)" storing results in "(.*)"$')
 def i_create_all_resources_in_output_dir(step, data=None, output_dir=None):
-    if output_dir is None or data is None:
-        assert False
+    ok_(output_dir is not None and data is not None)
     command = ("bigmler --train " + res_filename(data) +
                " --output-dir " + output_dir)
     shell_execute(command, os.path.join(output_dir, "p.csv"), test=None)
