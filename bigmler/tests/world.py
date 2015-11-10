@@ -242,11 +242,13 @@ def common_teardown_module():
             print "WARNING: Increment in %s: %s" % (resource_type, value)
     world.api.delete_project(world.project_id)
     world.project_id = None
+
     for folder in world.folders:
         try:
             shutil.rmtree(folder)
         except:
             pass
+
 
 
 def teardown_class():

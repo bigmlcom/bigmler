@@ -20,6 +20,8 @@ import os
 import time
 import csv
 import json
+
+from nose.tools import assert_equal, assert_not_equal, ok_
 from bigmler.tests.world import world, res_filename
 from subprocess import check_call, CalledProcessError
 from bigml.api import check_resource
@@ -43,13 +45,13 @@ def shell_execute(command, output, test=None, options=None,
         else:
             if test is not None:
                 world.test_lines = file_number_of_lines(test)
-                if options is None or options.find('--prediction-header') == -1:
+                if options is None or \
+                         options.find('--prediction-header') == -1:
                     # test file has headers in it, so first line must be ignored
                     world.test_lines -= 1
             if test_split is not None:
                 data_lines = file_number_of_lines(data) - 1
                 world.test_lines = int(data_lines * float(test_split))
-
             world.output = output
             assert True
     except (OSError, CalledProcessError, IOError) as exc:
@@ -58,8 +60,7 @@ def shell_execute(command, output, test=None, options=None,
 
 #@step(r'I create BigML resources uploading train "(.*?)" file to create centroids for "(.*?)" and log predictions in "([^"]*)"$')
 def i_create_all_cluster_resources(step, data=None, test=None, output=None):
-    if data is None or test is None or output is None:
-        assert False
+    ok_(data is not None and test is not None and output is not None)
     test = res_filename(test)
     command = ("bigmler cluster --train " + res_filename(data) + " --test " + test +
                " --k 8" +
@@ -84,8 +85,6 @@ def i_check_create_cluster(step):
 
 #@step(r'I check that the centroids are ready')
 def i_check_create_centroids(step):
-
-    previous_lines = -1
     predictions_lines = 0
     try:
         predictions_file = world.output
@@ -93,6 +92,8 @@ def i_check_create_centroids(step):
         predictions_lines = 0
         for line in predictions_file:
             predictions_lines += 1
+        if world.test_no_header:
+            world.test_lines += 1
         if predictions_lines == world.test_lines:
             assert True
         else:
@@ -124,8 +125,7 @@ def i_check_centroids(step, check_file):
 
 #@step(r'I create BigML resources using dataset to find centroids for "(.*)" and log predictions in "(.*)"')
 def i_create_cluster_resources_from_dataset(step, test=None, output=None):
-    if test is None or output is None:
-        assert False
+    ok_(test is not None and output is not None)
     test = res_filename(test)
     command = ("bigmler cluster --dataset " +
                world.dataset['resource'] + " --test " + test +  " --k 8" +
@@ -135,8 +135,7 @@ def i_create_cluster_resources_from_dataset(step, test=None, output=None):
 
 #@step(r'I create BigML resources using source to find centroids for "(.*)" and log predictions in "(.*)"')
 def i_create_cluster_resources_from_source(step, test=None, output=None):
-    if test is None or output is None:
-        assert False
+    ok_(test is not None and output is not None)
     test = res_filename(test)
     command = ("bigmler cluster --source " +
                world.source['resource'] + " --test " + test + " --k 8" +
@@ -146,8 +145,7 @@ def i_create_cluster_resources_from_source(step, test=None, output=None):
 
 #@step(r'I create BigML resources using local cluster in "(.*)" to find centroids for "(.*)" and log predictions in "(.*)"')
 def i_create_cluster_resources_from_local_cluster(step, directory=None, test=None, output=None):
-    if test is None or output is None or directory is None:
-        assert False
+    ok_(test is not None and output is not None and directory is not None)
     test = res_filename(test)
     with open(os.path.join(directory, "clusters")) as handler:
         cluster_id = handler.readline().strip()
@@ -160,8 +158,7 @@ def i_create_cluster_resources_from_local_cluster(step, directory=None, test=Non
 
 #@step(r'I create BigML resources using cluster to find centroids for "(.*)" and log predictions in "(.*)"')
 def i_create_cluster_resources_from_cluster(step, test=None, output=None):
-    if test is None or output is None:
-        assert False
+    ok_(test is not None and output is not None)
     test = res_filename(test)
     command = ("bigmler cluster --cluster " +
                world.cluster['resource'] + " --test " + test + " --k 8" +
@@ -171,8 +168,7 @@ def i_create_cluster_resources_from_cluster(step, test=None, output=None):
 
 #@step(r'I create BigML resources using clusters in file "(.*)" to find centroids for "(.*)" and log predictions in "(.*)"')
 def i_create_cluster_resources_from_clusters_file(step, clusters_file=None, test=None, output=None):
-    if test is None or output is None or clusters_file is None:
-        assert False
+    ok_(test is not None and output is not None and clusters_file is not None)
     test = res_filename(test)
     command = ("bigmler cluster --clusters " +
                clusters_file + " --test " + test +
@@ -182,8 +178,7 @@ def i_create_cluster_resources_from_clusters_file(step, clusters_file=None, test
 
 #@step(r'I create BigML resources uploading train "(.*?)" file to find centroids for "(.*?)" remotely to dataset with no CSV and log resources in "([^"]*)"$')
 def i_create_all_cluster_resources_to_dataset(step, data=None, test=None, output_dir=None):
-    if data is None or test is None or output_dir is None:
-        assert False
+    ok_(data is not None and test is not None and output_dir is not None)
     test = res_filename(test)
     command = ("bigmler cluster --remote --train " + res_filename(data) +
                " --test " + test + " --k 8" +
@@ -194,8 +189,7 @@ def i_create_all_cluster_resources_to_dataset(step, data=None, test=None, output
 
 #@step(r'I create BigML resources uploading train "(.*?)" file to find centroids for "(.*?)" remotely with mapping file "(.*)" and log predictions in "([^"]*)"$')
 def i_create_all_cluster_resources_with_mapping(step, data=None, test=None, fields_map=None, output=None):
-    if data is None or test is None or output is None or fields_map is None:
-        assert False
+    ok_(data is not None and test is not None and output is not None and fields_map is not None)
     test = res_filename(test)
     command = ("bigmler cluster --remote --train " + res_filename(data) +
                " --test " + test + " --k 8" +
@@ -204,10 +198,21 @@ def i_create_all_cluster_resources_with_mapping(step, data=None, test=None, fiel
     shell_execute(command, output, test=test)
 
 
+#@step(r'I create BigML resources uploading train "(.*?)" file to find centroids for "(.*?)" remotely with predictions fields "(.*)" and log predictions in "([^"]*)"$')
+def i_create_all_cluster_resources_with_prediction_fields(step, data=None, test=None, prediction_fields=None, output=None):
+    ok_(data is not None and test is not None and output is not None and prediction_fields is not None)
+    test = res_filename(test)
+    command = ("bigmler cluster --remote --train " + res_filename(data) +
+               " --test " + test + " --k 8" +
+               " --prediction-fields \"" + prediction_fields +
+               "\" --prediction-info full --prediction-header --store " +
+               "--output " + output)
+    shell_execute(command, output, test=test, options='--prediction-header')
+
+
 #@step(r'I generate datasets for "(.*?)" centroids and log predictions in "(.*?)"$')
 def i_create_datasets_from_cluster(step, centroids=None, output=None):
-    if centroids is None or output is None:
-        assert False
+    ok_(centroids is not None and output is not None)
     command = ("bigmler cluster --cluster " + world.cluster['resource'] +
                " --cluster-datasets \"" + centroids +
                "\" --store --output " + output)
@@ -250,8 +255,7 @@ def i_check_cluster_models(step, models_number=None):
 
 #@step(r'I generate models for "(.*?)" centroids and log results in "(.*?)"$')
 def i_create_models_from_cluster(step, centroids=None, output=None):
-    if centroids is None or output is None:
-        assert False
+    ok_(centroids is not None and output is not None)
     command = ("bigmler cluster --dataset " + world.dataset['resource'] +
                " --cluster-models \"" + centroids +
                "\" --k 4 --store --output " + output)

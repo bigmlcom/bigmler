@@ -30,6 +30,7 @@ import bigmler.tests.basic_tst_prediction_steps as test_pred
 import bigmler.tests.basic_batch_tst_prediction_steps as batch_pred
 import bigmler.tests.basic_cluster_prediction_steps as test_cluster
 import bigmler.tests.basic_anomaly_prediction_steps as test_anomaly
+from bigmler.tests.world import world, res_filename
 
 
 def setup_module():
@@ -123,3 +124,40 @@ class TestBatchCentroids(object):
             batch_pred.i_check_create_batch_centroid(self)
             batch_pred.i_check_create_batch_centroids_dataset(self)
             test_anomaly.i_check_no_local_CSV(self)
+
+
+    def test_scenario3(self):
+        """
+            Scenario: Successfully building remote test centroid predictions from scratch with prediction fields:
+                Given I create BigML resources uploading train "<data>" file to find centroids for "<test>" remotely with prediction fields "<prediction_fields>" and log resources in "<output>"
+                And I check that the source has been created
+                And I check that the dataset has been created
+                And I check that the cluster has been created
+                And I check that the source has been created from the test file
+                And I check that the dataset has been created from the test file
+                And I check that the batch centroid prediction has been created
+                And I check that the centroids are ready
+                Then the local centroids file is like "<predictions_file>"
+
+                Examples:
+                | data               | test                    |  prediction_fields | output     | predictions_file
+                | ../data/grades.csv | ../data/test_grades.csv |  Assignment       |./scenario_cb_3_r/centroids.csv | ./check_files/centroids_grades_field.csv |
+
+        """
+        print self.test_scenario3.__doc__
+        examples = [
+            ['data/grades.csv', 'data/grades.csv', 'Assignment',
+             './scenario_cb_3_r/centroids.csv', "./check_files/centroids_grades_field.csv"]]
+        for example in examples:
+            print "\nTesting with:\n", example
+            test_cluster.i_create_all_cluster_resources_with_prediction_fields(
+                self, data=example[0], test=example[1],
+                prediction_fields=example[2], output=example[3])
+            test_pred.i_check_create_source(self)
+            test_pred.i_check_create_dataset(self, suffix=None)
+            test_pred.i_check_create_cluster(self)
+            test_pred.i_check_create_test_source(self)
+            test_pred.i_check_create_test_dataset(self)
+            batch_pred.i_check_create_batch_centroid(self)
+            test_cluster.i_check_create_centroids(self)
+            test_pred.i_check_predictions(self, example[4])

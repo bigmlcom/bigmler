@@ -63,6 +63,7 @@ def i_check_create_test_dataset(step):
                                       world.api.get_dataset)
         world.datasets.append(test_dataset['resource'])
         world.test_lines = test_dataset['object']['rows']
+        world.test_no_header = True
         world.test_dataset = test_dataset
         test_dataset_file.close()
         assert True
