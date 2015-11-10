@@ -30,7 +30,6 @@ import bigmler.tests.basic_tst_prediction_steps as test_pred
 import bigmler.tests.basic_batch_tst_prediction_steps as batch_pred
 import bigmler.tests.basic_cluster_prediction_steps as test_cluster
 import bigmler.tests.basic_anomaly_prediction_steps as test_anomaly
-from bigmler.tests.world import world, res_filename
 
 
 def setup_module():

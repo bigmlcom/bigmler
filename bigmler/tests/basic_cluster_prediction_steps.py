@@ -45,10 +45,11 @@ def shell_execute(command, output, test=None, options=None,
         else:
             if test is not None:
                 world.test_lines = file_number_of_lines(test)
-                if options is None or \
-                         options.find('--prediction-header') == -1:
-                    # test file has headers in it, so first line must be ignored
-                    world.test_lines -= 1
+                world.test_lines -= 1
+                # prediction file has headers in it,
+                # so first line must be ignored
+                world.prediction_header = options is not None and \
+                    options.find('--prediction-header') > -1
             if test_split is not None:
                 data_lines = file_number_of_lines(data) - 1
                 world.test_lines = int(data_lines * float(test_split))
@@ -85,22 +86,17 @@ def i_check_create_cluster(step):
 
 #@step(r'I check that the centroids are ready')
 def i_check_create_centroids(step):
+    predictions_file = world.output
+    predictions_file = open(predictions_file, "r")
     predictions_lines = 0
-    try:
-        predictions_file = world.output
-        predictions_file = open(predictions_file, "r")
-        predictions_lines = 0
-        for line in predictions_file:
-            predictions_lines += 1
-        if world.test_no_header:
-            world.test_lines += 1
-        if predictions_lines == world.test_lines:
-            assert True
-        else:
-            assert False, "predictions lines: %s, test lines: %s" % (predictions_lines, world.test_lines)
-        predictions_file.close()
-    except Exception, exc:
-        assert False, str(exc)
+    for line in predictions_file:
+        predictions_lines += 1
+    predictions_file.close()
+    if world.prediction_header:
+        predictions_lines -= 1
+    assert_equal(predictions_lines, world.test_lines,
+                 msg="predictions lines: %s, test lines: %s" % \
+                 (predictions_lines, world.test_lines))
 
 
 #@step(r'the local centroids file is like "(.*)"')
