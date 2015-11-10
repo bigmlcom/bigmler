@@ -3,6 +3,11 @@
 History
 -------
 
+3.3.4 (2015-11-10)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug: bigmler cluster did not use the --prediction-fields option.
+
 3.3.3 (2015-11-04)
 ~~~~~~~~~~~~~~~~~~
 

@@ -1469,6 +1469,19 @@ def set_batch_centroid_args(args, fields=None,
 
     if args.prediction_info == FULL_FORMAT:
         batch_centroid_args.update(all_fields=True)
+    if args.prediction_fields:
+        batch_centroid_args.update(all_fields=False)
+        prediction_fields = []
+        for field in args.prediction_fields.split(args.args_separator):
+            field = field.strip()
+            if not field in dataset_fields.fields:
+                try:
+                    field = dataset_fields.field_id(field)
+                except ValueError, exc:
+                    sys.exit(exc)
+            prediction_fields.append(field)
+        batch_centroid_args.update(output_fields=prediction_fields)
+
 
     update_attributes(batch_centroid_args,
                       args.json_args.get('batch_centroid'))
