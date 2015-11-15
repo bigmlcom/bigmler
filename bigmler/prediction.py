@@ -467,8 +467,7 @@ def local_batch_predict(models, test_reader, prediction_file, api, args,
         """
         pct = 100 - ((total - current) * 100) / (total)
         console_log("Predicted on %s out of %s models [%s%%]" % (
-            #localize(current), localize(total), pct), reset=True)
-            localize(current), localize(total), pct))
+            localize(current), localize(total), pct), reset=True)
 
     max_models = args.max_batch_models
     if labels is None:

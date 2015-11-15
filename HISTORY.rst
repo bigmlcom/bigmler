@@ -3,6 +3,11 @@
 History
 -------
 
+3.3.5 (2015-11-15)
+~~~~~~~~~~~~~~~~~~
+
+- Upgrading the underlying bindings version.
+
 3.3.4 (2015-11-10)
 ~~~~~~~~~~~~~~~~~~
 
