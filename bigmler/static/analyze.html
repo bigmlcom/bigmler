@@ -669,7 +669,7 @@ function buildTitle(data) {
     if (typeof data[0].nodes !== 'undefined') {
         return "Node threshold: models' perfomance";
     }
-    if (typeof data[0].fields !== 'undefined') {
+    if (typeof data[0]['model_fields'] !== 'undefined') {
         return "Feature selection: models' perfomance";
     }
     if (typeof data[0].random_candidates !== 'undefined') {

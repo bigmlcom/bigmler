@@ -325,7 +325,7 @@ def parse_test_feature(command):
             model_fields = model_fields[1:]
         if model_fields.endswith('"'):
             model_fields = model_fields[:-1]
-            return ("model_fields", model_fields)
+        return ("model_fields", model_fields)
     # try to find node_threshold
     pattern = re.compile(r'--node-threshold (\d+?)\s--')
     nodes = pattern.findall(command)
