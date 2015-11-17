@@ -134,6 +134,15 @@ def get_cluster_options(defaults=None):
             'default': defaults.get('cluster_models', None),
             'help': ("Comma-separated list of centroid names. The"
                      " related models will be generated. All models "
-                     "will be generated if empty.")}}
+                     "will be generated if empty.")},
+
+        # Comma separated list of summary fields
+        '--summary-fields': {
+            'action': 'store',
+            'dest': 'summary_fields',
+            'default': defaults.get('summary_fields', None),
+            'help': ("Comma-separated list of summary fields, that will be"
+                     " included in the generated datasets but not used in"
+                     " clustering.")}}
 
     return options

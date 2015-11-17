@@ -1355,6 +1355,8 @@ def set_cluster_args(args, name=None, fields=None,
     if cluster_fields and fields is not None:
         input_fields = configure_input_fields(fields, cluster_fields)
         cluster_args.update(input_fields=input_fields)
+    if args.summary_fields is not None:
+        cluster_args.update({"summary_fields": args.summary_fields_})
 
     update_attributes(cluster_args, args.json_args.get('cluster'))
 

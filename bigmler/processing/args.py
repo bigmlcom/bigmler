@@ -453,6 +453,19 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
+    # Parses summary_fields to exclude from the clustering algorithm
+    try:
+        if command_args.summary_fields:
+            summary_fields_arg = [
+                field.strip() for field in
+                command_args.summary_fields.split(
+                    command_args.args_separator)]
+            command_args.summary_fields_ = summary_fields_arg
+        else:
+            command_args.summary_fields_ = []
+    except AttributeError:
+        pass
+
     anomaly_ids = []
     try:
         # Parses anomaly/ids if provided.
