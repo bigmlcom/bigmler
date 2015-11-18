@@ -114,6 +114,7 @@ under the License.""" % version
     # we add the options that should be transmitted to bigmler main subcommands
     # in analyze
     subcommand_options["analyze"].update({
+        '--dataset': dataset_options['--dataset'],
         '--objective': main_options['--objective'],
         '--max-parallel-models': main_options['--max-parallel-models'],
         '--max-parallel-evaluations': main_options[
@@ -136,7 +137,8 @@ under the License.""" % version
         '--no-no-csv': main_options['--no-no-csv'],
         '--to-dataset': main_options['--to-dataset'],
         '--datasets': main_options['--datasets'],
-        '--dataset-file': main_options['--dataset-file']})
+        '--dataset-file': main_options['--dataset-file'],
+        '--dataset-tag': delete_options['--dataset-tag']})
 
     defaults = general_defaults["BigMLer cluster"]
     subcommand_options["cluster"] = get_cluster_options(defaults=defaults)

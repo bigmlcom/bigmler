@@ -86,6 +86,11 @@ def analyze_dispatcher(args=sys.argv[1:]):
     # create api instance form args
     api = a.get_api_instance(command_args,
                              u.check_dir(session_file))
+
+    # Creates the corresponding api instance
+    api = a.get_api_instance(command_args, u.check_dir(session_file))
+    a.transform_dataset_options(command_args, api)
+
     # --maximize flag will be deprecated. Use --optimize flag.
     if command_args.maximize is not None and command_args.optimize is None:
         command_args.optimize = command_args.maximize

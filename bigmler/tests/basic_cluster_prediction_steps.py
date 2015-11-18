@@ -206,6 +206,16 @@ def i_create_all_cluster_resources_with_prediction_fields(step, data=None, test=
     shell_execute(command, output, test=test, options='--prediction-header')
 
 
+
+#@step(r'I create BigML cluster using dataset and summary_fields "(.*)" and log resources in "(.*)"')
+def i_create_cluster_from_dataset_with_summary_fields(step, summary_fields=None, output_dir=None):
+    ok_(summary_fields is not None and output_dir is not None)
+    command = ("bigmler cluster --dataset " +
+               world.dataset['resource'] + " --summary-fields " +
+               summary_fields + " --k 8" +
+               " --store --output-dir " + output_dir)
+    shell_execute(command, "%s/x.csv" % output_dir)
+
 #@step(r'I generate datasets for "(.*?)" centroids and log predictions in "(.*?)"$')
 def i_create_datasets_from_cluster(step, centroids=None, output=None):
     ok_(centroids is not None and output is not None)
@@ -256,3 +266,10 @@ def i_create_models_from_cluster(step, centroids=None, output=None):
                " --cluster-models \"" + centroids +
                "\" --k 4 --store --output " + output)
     shell_execute(command, output, test=None)
+
+
+#@step(r'I check that the cluster has summary fields "(.*)"$')
+def i_check_cluster_has_summary_fields(step, summary_fields=None):
+
+    assert_equal(world.cluster['object']['summary_fields'],
+                 summary_fields.split(","))

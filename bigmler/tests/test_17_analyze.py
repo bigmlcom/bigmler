@@ -193,19 +193,19 @@ class TestAnalyze(object):
 
     def test_scenario5(self):
         """
-            Scenario: Successfully building nodes threshold analysis from dataset:
+            Scenario: Successfully building nodes threshold analysis from dataset file:
                 Given I create BigML dataset uploading train "<data>" file in "<output>"
                 And I check that the source has been created
                 And I check that the dataset has been created
-                And I create BigML nodes analysis from <min_nodes> to <max_nodes> by <nodes_step> with <kfold>-cross-validation improving "<metric>"
+                And I create BigML nodes analysis from dataset file from <min_nodes> to <max_nodes> by <nodes_step> with <kfold>-cross-validation improving "<metric>"
                 And I check that the <kfold>-datasets have been created
                 And I check that the <kfold>-models have been created
                 And I check that all the <kfold>-fold cross-validations have been created
                 Then the best node threshold is "<node_threshold>", with "<metric>" of <metric_value>
 
                 Examples:
-                | data                | output                  | min_nodes | max_nodes | nodes_step | kfold | metric   | node_threshold   | metric_value |
-                | ../data/iris.csv | ./scenario_a_4/evaluation | 3         | 14        | 2         |2     | precision  | 9                | 94.71%         |
+                | data                | output                  | min_nodes | max_nodes | nodes_step | kfold | metric   | node_threshold   | metric_value
+                | ../data/iris.csv | ./scenario_a_4/evaluation | 3         | 14        | 2         |2     | precision  | 9                | 94.71%
         """
         print self.test_scenario5.__doc__
         examples = [

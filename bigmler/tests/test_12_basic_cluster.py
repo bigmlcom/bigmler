@@ -247,3 +247,26 @@ class TestCluster(object):
             test_cluster.i_create_models_from_cluster(self, centroids=example[2], output=example[3])
             test_cluster.i_check_create_cluster(self)
             test_cluster.i_check_cluster_models(self, models_number=example[4])
+
+    def test_scenario9(self):
+        """
+            Scenario: Successfully building test predictions from dataset with summary fields
+                Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
+                And I create BigML cluster using dataset and summary fields "<summary_fields>" and log resources in "<output_dir>"
+                And I check that the cluster has been created
+                Then the cluster has summary fields "<summary_fields>"
+
+                Examples:
+                |scenario    | kwargs                                                  | output-dir                        |summary_fields           |
+                | scenario_c_1| {"data": "../data/diabetes.csv", "output": "./scenario_c_1/centroids.csv", "test": "../data/diabetes.csv"}   | scenario_c_9/   | diabetes,age
+
+        """
+        print self.test_scenario9.__doc__
+        examples = [
+            ['scenario_c_1', '{"data": "data/diabetes.csv", "output": "scenario_c_1/centroids.csv", "test": "data/diabetes.csv"}', 'scenario_c_9', '000008,000007']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
+            test_cluster.i_create_cluster_from_dataset_with_summary_fields(self, summary_fields=example[3], output_dir=example[2])
+            test_pred.i_check_create_cluster(self)
+            test_cluster.i_check_cluster_has_summary_fields(self, example[3])

@@ -563,27 +563,7 @@ def transform_args(command_args, flags, api, user_defaults):
     else:
         command_args.multi_dataset_json = {}
 
-    dataset_ids = None
-    command_args.dataset_ids = []
-    # Parses dataset/id if provided.
-    if command_args.datasets:
-        dataset_ids = u.read_datasets(command_args.datasets)
-        if len(dataset_ids) == 1:
-            command_args.dataset = dataset_ids[0]
-        command_args.dataset_ids = dataset_ids
-
-    # Reading test dataset ids is delayed till the very moment of use to ensure
-    # that the newly generated resources files can be used there too
-    command_args.test_dataset_ids = []
-
-    # Retrieve dataset/ids if provided.
-    if command_args.dataset_tag:
-        dataset_ids = dataset_ids.extend(
-            u.list_ids(api.list_datasets,
-                       "tags__in=%s" % command_args.dataset_tag))
-        if len(dataset_ids) == 1:
-            command_args.dataset = dataset_ids[0]
-        command_args.dataset_ids = dataset_ids
+    transform_dataset_options(command_args, api)
 
     # Reads a json filter if provided.
     if command_args.json_filter:
@@ -710,3 +690,29 @@ def transform_args(command_args, flags, api, user_defaults):
          command_args.test_datasets) or
         (hasattr(command_args, 'test_dataset_tag') and
          command_args.test_dataset_tag))
+
+def transform_dataset_options(command_args, api):
+    """Retrieves the dataset ids from the different input options
+
+    """
+    dataset_ids = None
+    command_args.dataset_ids = []
+    # Parses dataset/id if provided.
+    if command_args.datasets:
+        dataset_ids = u.read_datasets(command_args.datasets)
+        if len(dataset_ids) == 1:
+            command_args.dataset = dataset_ids[0]
+        command_args.dataset_ids = dataset_ids
+
+    # Reading test dataset ids is delayed till the very moment of use to ensure
+    # that the newly generated resources files can be used there too
+    command_args.test_dataset_ids = []
+
+    # Retrieve dataset/ids if provided.
+    if command_args.dataset_tag:
+        dataset_ids = dataset_ids.extend(
+            u.list_ids(api.list_datasets,
+                       "tags__in=%s" % command_args.dataset_tag))
+        if len(dataset_ids) == 1:
+            command_args.dataset = dataset_ids[0]
+        command_args.dataset_ids = dataset_ids

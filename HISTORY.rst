@@ -3,6 +3,12 @@
 History
 -------
 
+3.3.7 (2015-11-18)
+~~~~~~~~~~~~~~~~~~
+
+- Adding --datasets as option for bigmler analyze.
+- Adding --summary-fields as option for bigmler analyze.
+
 3.3.6 (2015-11-16)
 ~~~~~~~~~~~~~~~~~~
 

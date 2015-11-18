@@ -36,6 +36,7 @@ from bigmler.tests.basic_anomaly_prediction_steps import i_create_all_anomaly_re
 from bigmler.tests.ml_tst_prediction_steps import i_create_all_mlm_resources
 from bigmler.tests.common_steps import check_debug
 from bigmler.reports import REPORTS_DIR
+from nose.tools import ok_, assert_equal, assert_not_equal
 
 
 def shell_execute(command, output, test=None, options=None, test_rows=None, project=True):
@@ -68,8 +69,8 @@ def shell_execute(command, output, test=None, options=None, test_rows=None, proj
 
 #@step(r'I create BigML resources from "(.*)" using ensemble of (.*) models to test "(.*)" using median and log predictions in "(.*)"')
 def i_create_resources_from_ensemble_using_median(step, data=None, number_of_models=None, test=None, output=None):
-    if data is None or test is None or output is None or number_of_models is None:
-        assert False
+    ok_(data is not None and test is not None and output is not None and \
+        number_of_models is not None)
     data = res_filename(data)
     test = res_filename(test)
     command = ("bigmler --train " + data + " --test " + test +
@@ -81,8 +82,7 @@ def i_create_resources_from_ensemble_using_median(step, data=None, number_of_mod
 
 #@step(r'I create BigML resources uploading train "(.*?)" file using the median to test "(.*?)" and log predictions in "([^"]*)"$')
 def i_create_all_resources_with_median(step, data=None, test=None, output=None):
-    if data is None or test is None or output is None:
-        assert False
+    ok_(data is not None and test is not None and output is not None)
     test = res_filename(test)
     command = ("bigmler --train " + res_filename(data) + " --test " + test +
                " --store --output " + output + " --median --max-batch-models 1 --no-fast")
@@ -91,8 +91,7 @@ def i_create_all_resources_with_median(step, data=None, test=None, output=None):
 
 #@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" remotely to a dataset with no CSV output and log resources in "([^"]*)"$')
 def i_create_all_resources_batch_to_dataset(step, data=None, test=None, output_dir=None):
-    if data is None or test is None or output_dir is None:
-        assert False
+    ok_(data is not None and test is not None and output_dir is not None)
     test = res_filename(test)
     command = ("bigmler --train " + res_filename(data) + " --test " + test +
                " --store --no-csv --to-dataset --output-dir " + output_dir + " --remote")
@@ -101,8 +100,8 @@ def i_create_all_resources_batch_to_dataset(step, data=None, test=None, output_d
 
 #@step(r'I create a BigML source from file "([^"]*)" with locale "([^"]*)", field attributes "([^"]*)" and types file "([^"]*)" storing results in "(.*)"$')
 def i_create_source_with_locale(step, data=None, locale=None, field_attributes=None, types=None, output=None):
-    if data is None or locale is None or output is None or types is None or field_attributes is None:
-        assert False
+    ok_(data is not None and locale is not None and output is not None and \
+        types is not None and field_attributes is not None)
     field_attributes = res_filename(field_attributes)
     types = res_filename(types)
     command = ("bigmler --train " + res_filename(data) + " --locale " +
@@ -125,8 +124,7 @@ def i_create_source_with_locale(step, data=None, locale=None, field_attributes=N
 
 #@step(r'I create BigML resources uploading train "(.*?)" file to create model and log in "([^"]*)"$')
 def i_create_all_resources_to_model(step, data=None, output=None):
-    if data is None or output is None:
-        assert False
+    ok_(data is not None and output is not None)
     command = ("bigmler --train " + res_filename(data) +
                " --store --output " + output + " --max-batch-models 1")
     shell_execute(command, output, test=None)
@@ -134,8 +132,7 @@ def i_create_all_resources_to_model(step, data=None, output=None):
 
 #@step(r'I create BigML feature selection (\d*)-fold cross-validations for "(.*)" improving "(.*)"$')
 def i_create_kfold_cross_validation_objective(step, k_folds=None, objective=None, metric=None):
-    if k_folds is None or metric is None or objective is None:
-        assert False
+    ok_(k_folds is not None and metric is not None and objective is not None)
     command = ("bigmler analyze --dataset " +
                              world.dataset['resource'] +
                              " --features --k-folds " + k_folds +
@@ -157,8 +154,7 @@ def i_create_kfold_cross_validation_objective(step, k_folds=None, objective=None
 
 #@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" with proportional missing strategy and log predictions in "([^"]*)"$')
 def i_create_all_resources_proportional(step, data=None, test=None, output=None):
-    if data is None or test is None or output is None:
-        assert False
+    ok_(data is not None and test is not None and output is not None)
     test = res_filename(test)
     command = ("bigmler --train " + res_filename(data) + " --test " + test +
                " --missing-strategy proportional" +
@@ -168,8 +164,7 @@ def i_create_all_resources_proportional(step, data=None, test=None, output=None)
 
 #@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" with a missing-splits model and log predictions in "([^"]*)"$')
 def i_create_all_resources_missing_splits(step, data=None, test=None, output=None):
-    if data is None or test is None or output is None:
-        assert False
+    ok_(data is not None and test is not None and output is not None)
     test = res_filename(test)
     command = ("bigmler --train " + res_filename(data) + " --test " + test +
                " --missing-splits" +
@@ -179,8 +174,7 @@ def i_create_all_resources_missing_splits(step, data=None, test=None, output=Non
 
 #@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" remotely with proportional missing strategy and log predictions in "([^"]*)"$')
 def i_create_all_resources_remote_proportional(step, data=None, test=None, output=None):
-    if data is None or test is None or output is None:
-        assert False
+    ok_(data is not None and test is not None and output is not None)
     test = res_filename(test)
     command = ("bigmler --train " + res_filename(data) + " --test " + test +
                " --missing-strategy proportional --remote" +
@@ -190,8 +184,7 @@ def i_create_all_resources_remote_proportional(step, data=None, test=None, outpu
 
 #@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" remotely with a missing-splits model and log predictions in "([^"]*)"$')
 def i_create_all_resources_remote_missing_splits(step, data=None, test=None, output=None):
-    if data is None or test is None or output is None:
-        assert False
+    ok_(data is not None and test is not None and output is not None)
     test = res_filename(test)
     command = ("bigmler --train " + res_filename(data) + " --test " + test +
                " --missing-splits --remote" +
@@ -201,8 +194,8 @@ def i_create_all_resources_remote_missing_splits(step, data=None, test=None, out
 
 #@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" and log predictions in "(.*?)" with "(.*?)" as test field separator$')
 def i_create_all_resources_with_separator(step, data=None, test=None, output=None, separator=None):
-    if data is None or test is None or separator is None or output is None:
-        assert False
+    ok_(data is not None and test is not None and separator is not None and \
+        output is not None)
     test = res_filename(test)
     command = ("bigmler --train " + res_filename(data) + " --test " + test +
                " --test-separator " + separator + " --store --output " +
@@ -211,8 +204,7 @@ def i_create_all_resources_with_separator(step, data=None, test=None, output=Non
 
 #@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" remotely with mapping file "(.*?)" and log predictions in "([^"]*)"$')
 def i_create_all_resources_batch_map(step, data=None, test=None, fields_map=None, output=None):
-    if data is None or test is None or output is None or fields_map is None:
-        assert False
+    ok_(data is not None and test is not None and output is not None and fields_map is not None)
     test = res_filename(test)
     command = ("bigmler --train " + res_filename(data) + " --test " + test + " --fields-map "
                + res_filename(fields_map) + " --store --output " + output + " --remote")
@@ -221,8 +213,7 @@ def i_create_all_resources_batch_map(step, data=None, test=None, fields_map=None
 
 #@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" remotely and log predictions in "([^"]*)"$')
 def i_create_all_resources_batch(step, data=None, test=None, output=None):
-    if data is None or test is None or output is None:
-        assert False
+    ok_(data is not None and test is not None and output is not None)
     test = res_filename(test)
     command = ("bigmler --train " + res_filename(data) + " --test " + test +
                " --store --output " + output + " --remote")
@@ -231,8 +222,7 @@ def i_create_all_resources_batch(step, data=None, test=None, output=None):
 
 #@step(r'I create BigML resources uploading train "(.*?)" file with no headers to test "(.*?)" with no headers and log predictions in "([^"]*)"$')
 def i_create_all_resources_with_no_headers(step, data=None, test=None, output=None):
-    if data is None or test is None or output is None:
-        assert False
+    ok_(data is not None and test is not None and output is not None)
     test = res_filename(test)
     command = ("bigmler --train " + res_filename(data) + " --test " + test +
                " --store --output " + output + " --max-batch-models 1 --no-fast --no-train-header --no-test-header")
@@ -241,8 +231,7 @@ def i_create_all_resources_with_no_headers(step, data=None, test=None, output=No
 
 #@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" and log predictions in "([^"]*)"$')
 def i_create_all_resources(step, data=None, test=None, output=None):
-    if data is None or test is None or output is None:
-        assert False
+    ok_(data is not None and test is not None and output is not None)
     test = res_filename(test)
     command = ("bigmler --train " + res_filename(data) + " --test " + test +
                " --store --output " + output + " --max-batch-models 1 --no-fast")
@@ -251,8 +240,7 @@ def i_create_all_resources(step, data=None, test=None, output=None):
 
 #@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" and log predictions in "(.*?)" with prediction options "(.*?)"')
 def i_create_all_resources_with_options(step, data=None, test=None, output=None, options=''):
-    if data is None or test is None or output is None:
-        assert False
+    ok_(data is not None and test is not None and output is not None)
     test = res_filename(test)
     command = ("bigmler --train " + res_filename(data) + " --test " + test +
                " --store --output " + output + " --max-batch-models 1 " +
@@ -262,8 +250,7 @@ def i_create_all_resources_with_options(step, data=None, test=None, output=None,
 
 #@step(r'I create BigML (multi-label\s)?resources using source with objective "(.*)" and model fields "(.*)" to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_source_with_objective(step, multi_label=None, objective=None, model_fields=None, test=None, output=None):
-    if test is None or output is None:
-        assert False
+    ok_(test is not None and output is not None)
     test = res_filename(test)
     multi_label = "" if multi_label is None else " --multi-label "
     command = ("bigmler "+ multi_label +"--source " + world.source['resource']
@@ -274,7 +261,7 @@ def i_create_resources_from_source_with_objective(step, multi_label=None, object
 
 #@step(r'I create BigML (multi-label\s)?resources using source to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_source(step, multi_label=None, test=None, output=None):
-    if test is None or output is None:
+    ok_(test is not None and output is not None)
         assert False
     test = res_filename(test)
     multi_label = "" if multi_label is None else " --multi-label "
@@ -285,8 +272,7 @@ def i_create_resources_from_source(step, multi_label=None, test=None, output=Non
 
 #@step(r'I create BigML resources using source to test the previous test source remotely and log predictions in "(.*)"')
 def i_create_resources_from_source_batch(step, output=None):
-    if output is None:
-        assert False
+    ok_(output is not None)
     command = ("bigmler --source " + world.source['resource']
                + " --test-source " + world.test_source['resource']
                + " --store --remote --output " + output)
@@ -294,8 +280,7 @@ def i_create_resources_from_source_batch(step, output=None):
 
 #@step(r'I create BigML (multi-label\s)?resources using dataset with objective "(.*)" and model fields "(.*)" to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_dataset_with_objective(step, multi_label=None, objective=None, model_fields=None, test=None, output=None):
-    if test is None or output is None:
-        assert False
+    ok_(test is not None and output is not None)
     test = res_filename(test)
     multi_label = "" if multi_label is None else " --multi-label "
     command = ("bigmler "+ multi_label +"--dataset " + world.dataset['resource']
@@ -306,8 +291,7 @@ def i_create_resources_from_dataset_with_objective(step, multi_label=None, objec
 
 #@step(r'I create BigML (multi-label\s)?resources using dataset to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_dataset(step, multi_label=None, test=None, output=None):
-    if test is None or output is None:
-        assert False
+    ok_(test is not None and output is not None)
     multi_label = "" if multi_label is None else " --multi-label "
     test = res_filename(test)
     command = ("bigmler "+ multi_label +"--dataset " +
@@ -317,8 +301,7 @@ def i_create_resources_from_dataset(step, multi_label=None, test=None, output=No
 
 #@step(r'I create BigML resources using a model to test the previous test dataset remotely with prediction headers and fields "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_model_batch(step, fields=None, output=None):
-    if output is None or fields is None:
-        assert False
+    ok_(output is not None and fields is not None)
     command = ("bigmler --model " + world.model['resource'] + " --test-dataset " +
                world.test_dataset['resource'] + " --store --remote " +
                "--prediction-header --prediction-info full " +
@@ -327,8 +310,7 @@ def i_create_resources_from_model_batch(step, fields=None, output=None):
 
 #@step(r'I create BigML resources using dataset to test the previous test dataset remotely and log predictions in "(.*)"')
 def i_create_resources_from_dataset_batch(step, output=None):
-    if output is None:
-        assert False
+    ok_(output is not None)
     command = ("bigmler --dataset " + world.dataset['resource'] + " --test-dataset " +
                world.test_dataset['resource'] + " --store --remote --output " + output)
     shell_execute(command, output, test_rows=world.test_dataset['object']['rows'])
@@ -336,8 +318,8 @@ def i_create_resources_from_dataset_batch(step, output=None):
 
 #@step(r'I create BigML resources using dataset, objective field (.*) and model fields (.*) to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_dataset_objective_model(step, objective=None, fields=None, test=None, output=None):
-    if objective is None or fields is None or test is None or output is None:
-        assert False
+    ok_(objective is not None and fields is not None and test is not None \
+        and output is not None)
     test = res_filename(test)
     command = (u"bigmler --dataset " + world.dataset['resource'] +
                u" --objective " + objective + u" --model-fields " +
@@ -347,8 +329,7 @@ def i_create_resources_from_dataset_objective_model(step, objective=None, fields
 
 #@step(r'I create BigML resources using local model in "(.*)" to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_local_model(step, directory=None, test=None, output=None):
-    if test is None or output is None or directory is None:
-        assert False
+    ok_(test is not None and output is not None and directory is not None)
     test = res_filename(test)
     with open(os.path.join(directory, "models")) as model_file:
         model_id = model_file.read().strip()
@@ -361,8 +342,7 @@ def i_create_resources_from_local_model(step, directory=None, test=None, output=
 
 #@step(r'I create BigML resources using model to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_model(step, test=None, output=None):
-    if test is None or output is None:
-        assert False
+    ok_(test is not None and output is not None)
     test = res_filename(test)
     command = ("bigmler --model " + world.model['resource'] + " --test " +
                test + " --store --output " + output + " --max-batch-models 1")
@@ -370,8 +350,7 @@ def i_create_resources_from_model(step, test=None, output=None):
 
 #@step(r'I create BigML resources using the previous ensemble with different thresholds to test "(.*)" and log predictions in "(.*)" and "(.*)"')
 def i_create_resources_from_ensemble_with_threshold(step, test=None, output2=None, output3=None):
-    if test is None or output2 is None or output3 is None:
-        assert False
+    ok_(test is not None and output2 is not None and output3 is not None)
     try:
         test = res_filename(test)
         command = ("bigmler --ensemble " + world.ensemble['resource'] +
@@ -399,8 +378,8 @@ def i_create_resources_from_ensemble_with_threshold(step, test=None, output2=Non
 
 #@step(r'I create BigML resources using local ensemble of (.*) models in "(.*)" to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_local_ensemble(step, number_of_models=None, directory=None, test=None, output=None):
-    if number_of_models is None or test is None or output is None or directory is None:
-        assert False
+    ok_(number_of_models is not None and test is not None and \
+        output is not None and directory is not None)
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     with open(os.path.join(directory, "ensembles")) as ensemble_file:
@@ -434,8 +413,8 @@ def i_create_resources_from_ensemble(step, number_of_models=None, test=None, out
     i_create_resources_from_ensemble_generic(step, number_of_models, " --no-fast --no-replacement", test, output)
 
 def i_create_resources_from_ensemble_generic(step, number_of_models=None, no_replacement="", test=None, output=None):
-    if number_of_models is None or test is None or output is None:
-        assert False
+    ok_(number_of_models is not None and test is not None and \
+        output is not None)
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
@@ -461,9 +440,8 @@ def i_create_resources_from_ensemble_generic(step, number_of_models=None, no_rep
 
 #@step(r'I create BigML (multi-label\s)?resources using models in file "(.*)" with objective "(.*)" to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_models_file_with_objective(step, multi_label=None, models_file=None, objective=None, test=None, output=None):
-    if (models_file is None or test is None or output is None
-            or objective is None):
-        assert False
+    ok_(models_file is not None and test is not None and output is not None
+        and objective is not None)
     test = res_filename(test)
     multi_label = "" if multi_label is None else " --multi-label "
     command = ("bigmler "+ multi_label +"--models " + models_file + " --test "
@@ -473,8 +451,7 @@ def i_create_resources_from_models_file_with_objective(step, multi_label=None, m
 
 #@step(r'I create BigML (multi-label\s)?resources using models in file "([^"]*)" to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_models_file(step, multi_label=None, models_file=None, test=None, output=None):
-    if models_file is None or test is None or output is None:
-        assert False
+    ok_(models_file is not None and test is not None and output is not None)
     test = res_filename(test)
     multi_label = "" if multi_label is None else " --multi-label "
     command = ("bigmler "+ multi_label +"--models " + models_file + " --test "
@@ -484,8 +461,7 @@ def i_create_resources_from_models_file(step, multi_label=None, models_file=None
 
 #@step(r'I create BigML resources using dataset in file "(.*)" to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_dataset_file(step, dataset_file=None, test=None, output=None):
-    if dataset_file is None or test is None or output is None:
-        assert False
+    ok_(dataset_file is not None and test is not None and output is not None)
     test = res_filename(test)
     command = ("bigmler --datasets " + dataset_file + " --test " + test +
                " --store --output " + output)
@@ -494,8 +470,7 @@ def i_create_resources_from_dataset_file(step, dataset_file=None, test=None, out
 
 #@step(r'I create a BigML cross-validation with rate (0\.\d+) using the dataset in file "(.*)" and log results in "(.*)"')
 def i_create_cross_validation_from_dataset(step, rate=None, dataset_file=None, output=None):
-    if rate is None or output is None or dataset_file is None:
-        assert False
+    ok_(rate is not None and output is not None and dataset_file is not None)
     with open(dataset_file, "r") as handler:
         dataset_id = handler.readline().strip()
     world.directory = os.path.dirname(output)
@@ -519,8 +494,8 @@ def i_create_cross_validation_from_dataset(step, rate=None, dataset_file=None, o
 
 #@step(r'I combine BigML predictions files in "(.*)" and "(.*)" into "(.*)"')
 def i_find_predictions_files(step, directory1=None, directory2=None, output=None):
-    if directory1 is None or directory2 is None or output is None:
-        assert False
+    ok_(directory1 is not None and directory2 is not None and \
+        output is not None)
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
@@ -540,8 +515,8 @@ def i_find_predictions_files(step, directory1=None, directory2=None, output=None
 
 #@step(r'I combine BigML predictions files in "(.*)" and "(.*)" into "(.*)" with method "(.*)"')
 def i_find_predictions_files_with_method(step, directory1=None, directory2=None, output=None, method=None):
-    if directory1 is None or directory2 is None or output is None or method is None:
-        assert False
+    ok_(directory1 is not None and directory2 is not None and \
+        output is not None and method is not None)
     world.directory = os.path.dirname(output)
     world.folders.append(world.directory)
     try:
@@ -558,10 +533,10 @@ def i_find_predictions_files_with_method(step, directory1=None, directory2=None,
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
+
 #@step(r'I create a BigML balanced model from "(.*)" and store logs in "(.*)"')
 def i_create_balanced_model(step, data=None, output_dir=None):
-    if data is None or output_dir is None:
-        assert False
+    ok_(data is not None and output_dir is not None)
     world.directory = output_dir
     world.folders.append(world.directory)
     try:
@@ -578,8 +553,7 @@ def i_create_balanced_model(step, data=None, output_dir=None):
 
 #@step(r'I create a BigML field weighted model from "(.*)" using field "(.*)" as weight and store logs in "(.*)"')
 def i_create_weighted_field_model(step, data=None, field=None, output_dir=None):
-    if data is None or field is None or output_dir is None:
-        assert False
+    ok_(data is not None and field is not None and output_dir is not None)
     world.directory = output_dir
     world.folders.append(world.directory)
     try:
@@ -597,8 +571,7 @@ def i_create_weighted_field_model(step, data=None, field=None, output_dir=None):
 
 #@step(r'I create a BigML objective weighted model from "(.*)" using the objective weights in file "(.*)" and store logs in "(.*)"')
 def i_create_objective_weighted_model(step, data=None, path=None, output_dir=None):
-    if data is None or path is None or output_dir is None:
-        assert False
+    ok_(data is not None and path is not None and output_dir is not None)
     world.directory = output_dir
     world.folders.append(world.directory)
     try:
@@ -858,8 +831,8 @@ def i_check_create_kfold_datasets(step, kfolds):
 
 #@step(r'the best feature selection is "(.*)", with "(.*)" of (.*)')
 def i_check_feature_selection(step, selection, metric, metric_value):
-    if selection is None or metric is None or metric_value is None:
-        assert False
+    ok_(selection is not None and metric is not None and \
+        metric_value is not None)
     sessions_file = os.path.join(world.directory, "bigmler_sessions")
     try:
         with open(sessions_file, open_mode("r")) as sessions_file:
@@ -878,8 +851,8 @@ def i_check_feature_selection(step, selection, metric, metric_value):
 
 #@step(r'the best node threshold is "(.*)", with "(.*)" of (.*)')
 def i_check_node_threshold(step, node_threshold, metric, metric_value):
-    if node_threshold is None or metric is None or metric_value is None:
-        assert False
+    ok_(node_threshold is not None and metric is not None and \
+        metric_value is not None)
     sessions_file = os.path.join(world.directory, "bigmler_sessions")
     try:
         with open(sessions_file, open_mode("r")) as sessions_file:
@@ -1081,8 +1054,7 @@ def i_check_source_label(step, field_id, field_label):
 
 #@step(r'I create BigML resources uploading train "(.*)" file to evaluate and log evaluation in "(.*)"')
 def i_create_all_resources_to_evaluate(step, data=None, output=None):
-    if data is None or output is None:
-        assert False
+    ok_(data is not None and output is not None)
     command = "bigmler --evaluate --train " + res_filename(data) + " --store --output " + output
     command = check_debug(command)
     try:
@@ -1101,8 +1073,7 @@ def i_create_all_resources_to_evaluate(step, data=None, output=None):
 #@step(r'I create BigML resources and share them uploading train "(.*)" file to evaluate and log evaluation and reports in "(.*)"')
 def i_create_all_resources_to_evaluate_and_report(
     step, data=None, output=None):
-    if data is None or output is None:
-        assert False
+    ok_(data is not None and output is not None)
     command = ("bigmler --evaluate --shared --report gazibit" +
                " --train " + res_filename(data) +
                " --store --no-upload --output " + output)
@@ -1122,8 +1093,7 @@ def i_create_all_resources_to_evaluate_and_report(
 
 #@step(r'I create BigML resources and share them uploading train "(.*)" file to evaluate and log evaluation in "(.*)"')
 def i_create_all_resources_to_evaluate_and_share(step, data=None, output=None):
-    if data is None or output is None:
-        assert False
+    ok_(data is not None and output is not None)
     command = ("bigmler --evaluate --shared --train " + res_filename(data) +
                " --store --output " + output)
     command = check_debug(command)
@@ -1142,8 +1112,7 @@ def i_create_all_resources_to_evaluate_and_share(step, data=None, output=None):
 
 #@step(r'I create BigML dataset uploading train "(.*)" file with attributes "(.*)" in "(.*)"')
 def i_create_dataset_with_attributes(step, data=None, attributes=None, output=None):
-    if data is None or output is None or attributes is None:
-        assert False
+    ok_(data is not None and output is not None and attributes is not None)
     command = ("bigmler --train " + res_filename(data) +
                " --source-attributes " + res_filename(attributes) +
                " --no-model --store --output " + output)
@@ -1163,8 +1132,7 @@ def i_create_dataset_with_attributes(step, data=None, attributes=None, output=No
 
 #@step(r'I create BigML dataset uploading train "(.*)" file in "(.*)"')
 def i_create_dataset(step, data=None, output=None):
-    if data is None or output is None:
-        assert False
+    ok_(data is not None and output is not None)
     command = ("bigmler --train " + res_filename(data) +
                " --no-model --store --output " + output)
     command = check_debug(command)
@@ -1183,8 +1151,7 @@ def i_create_dataset(step, data=None, output=None):
 
 #@step(r'I create BigML (\d*)-fold cross-validation')
 def i_create_kfold_cross_validation(step, k_folds=None):
-    if k_folds is None:
-        assert False
+    ok_(k_folds is None)
     command = ("bigmler analyze --dataset " +
                world.dataset['resource'] +
                " --cross-validation --k-folds " + k_folds +
@@ -1202,12 +1169,13 @@ def i_create_kfold_cross_validation(step, k_folds=None):
         assert False
 
 
-#@step(r'I create BigML nodes analysis from (\d*) to (\d*) by (\d*) with (\d*)-cross-validation improving "(.*)"')
-def i_create_nodes_analysis(step, min_nodes=None, max_nodes=None, nodes_step=None, k_fold=None, metric=None):
-    if min_nodes is None or max_nodes is None or nodes_step is None or k_fold is None or metric is None:
-        assert False
-    command = ("bigmler analyze --dataset " +
-               world.dataset['resource'] +
+#@step(r'I create BigML nodes analysis from datasets file from (\d*) to (\d*) by (\d*) with (\d*)-cross-validation improving "(.*)"')
+def i_create_nodes_analysis(step, min_nodes=None, max_nodes=None,
+                            nodes_step=None, k_fold=None, metric=None):
+    ok_(dataset_dir is not None and max_nodes is not None and \
+        nodes_step is not None and k_fold is not None and \
+        metric is not None)
+    command = ("bigmler analyze --datasets %s/dataset" % world.directory +
                " --nodes --min-nodes " + min_nodes +
                " --max-nodes " + max_nodes +
                " --nodes-step " + nodes_step +
@@ -1229,8 +1197,8 @@ def i_create_nodes_analysis(step, min_nodes=None, max_nodes=None, nodes_step=Non
 
 #@step(r'I create BigML feature selection (\d*)-fold cross-validations excluding "(.*)" with separator "(.*)" improving "(.*)"')
 def i_create_kfold_cross_validation_separator_metric_no_fields(step, k_folds=None, features=None, args_separator=None, metric=None):
-    if k_folds is None or metric is None or features is None or args_separator is None:
-        assert False
+    ok_(k_folds is not None and metric is not None and features is not None \
+        and args_separator is not None)
     command = ("bigmler analyze --dataset " +
                world.dataset['resource'] +
                " --features --k-folds " + k_folds +
@@ -1253,8 +1221,7 @@ def i_create_kfold_cross_validation_separator_metric_no_fields(step, k_folds=Non
 
 #@step(r'I create BigML feature selection (\d*)-fold cross-validations improving "(.*)" in dev mode$')
 def i_create_kfold_cross_validation_in_dev(step, k_folds=None, metric=None):
-    if k_folds is None or metric is None:
-        assert False
+    ok_(k_folds is not None and metric is not None)
     command = ("bigmler analyze --dataset " +
                world.dataset['resource'] +
                " --features --dev --k-folds " + k_folds +
@@ -1274,8 +1241,7 @@ def i_create_kfold_cross_validation_in_dev(step, k_folds=None, metric=None):
 
 #@step(r'I create BigML feature selection (\d*)-fold cross-validations improving "(.*)" for category "(.*)"$')
 def i_create_kfold_cross_validation_metric_category(step, k_folds=None, metric=None, category=None):
-    if k_folds is None or metric is None or category is None:
-        assert False
+    ok_(k_folds is not None and metric is not None and category is not None)
     command = ("bigmler analyze --dataset " +
                world.dataset['resource'] +
                " --features --k-folds " + k_folds +
@@ -1297,8 +1263,7 @@ def i_create_kfold_cross_validation_metric_category(step, k_folds=None, metric=N
 
 #@step(r'I create BigML feature selection (\d*)-fold cross-validations improving "(.*)"$')
 def i_create_kfold_cross_validation_metric(step, k_folds=None, metric=None):
-    if k_folds is None or metric is None:
-        assert False
+    ok_(k_folds is not None and metric is not None)
     command = ("bigmler analyze --dataset " +
                world.dataset['resource'] +
                " --features --k-folds " + k_folds +
@@ -1423,8 +1388,7 @@ def i_have_previous_scenario_or_reproduce_it(step, scenario, kwargs):
 
 #@step(r'I create BigML dataset in dev mode uploading train "(.*)" file in "(.*)"')
 def i_create_dev_dataset(step, data=None, output=None):
-    if data is None or output is None:
-        assert False
+    ok_(data is not None and output is not None)
     try:
         retcode = check_call("bigmler --train " + res_filename(data) + " --no-model --store --dev --output " + output, shell=True)
         if retcode < 0:
@@ -1440,8 +1404,7 @@ def i_create_dev_dataset(step, data=None, output=None):
 
 #@step(r'I create BigML random fields analysis with (\d*)-cross-validation improving "(.*)"')
 def i_create_random_analysis(step, k_fold=None, metric=None):
-    if k_fold is None or metric is None:
-        assert False
+    ok_(k_fold is not None and metric is not None)
     try:
         retcode = check_call("bigmler analyze --dataset " +
                              world.dataset['resource'] +
@@ -1484,8 +1447,8 @@ def i_check_create_kfold_random_forest(step, kfolds):
 
 #@step(r'the best random candidates number is "(.*)", with "(.*)" of (.*)')
 def i_check_random_candidates(step, random_candidates, metric, metric_value):
-    if random_candidates is None or metric is None or metric_value is None:
-        assert False
+    ok_(random_candidates is not None and metric is not None and \
+        metric_value is not None)
     sessions_file = os.path.join(world.directory, "bigmler_sessions")
     try:
         with open(sessions_file, open_mode("r")) as sessions_file:

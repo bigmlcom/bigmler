@@ -69,13 +69,6 @@ def get_analyze_options(defaults=None):
                      " override it if both"
                      " are set.")},
 
-        # If a BigML dataset is provided, the script won't create a new one
-        '--dataset': {
-            "action": 'store',
-            "dest": 'dataset',
-            "default": defaults.get('dataset', None),
-            "help": "BigML dataset Id."},
-
         # Staleness to stop --features analysis
         '--staleness': {
             "action": 'store',
