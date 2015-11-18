@@ -262,7 +262,6 @@ def i_create_resources_from_source_with_objective(step, multi_label=None, object
 #@step(r'I create BigML (multi-label\s)?resources using source to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_source(step, multi_label=None, test=None, output=None):
     ok_(test is not None and output is not None)
-        assert False
     test = res_filename(test)
     multi_label = "" if multi_label is None else " --multi-label "
     command = ("bigmler "+ multi_label +"--source " + world.source['resource']
@@ -1151,7 +1150,7 @@ def i_create_dataset(step, data=None, output=None):
 
 #@step(r'I create BigML (\d*)-fold cross-validation')
 def i_create_kfold_cross_validation(step, k_folds=None):
-    ok_(k_folds is None)
+    ok_(k_folds is not None)
     command = ("bigmler analyze --dataset " +
                world.dataset['resource'] +
                " --cross-validation --k-folds " + k_folds +
@@ -1169,10 +1168,38 @@ def i_create_kfold_cross_validation(step, k_folds=None):
         assert False
 
 
-#@step(r'I create BigML nodes analysis from datasets file from (\d*) to (\d*) by (\d*) with (\d*)-cross-validation improving "(.*)"')
+#@step(r'I create BigML nodes analysis from (\d*) to (\d*) by (\d*) with (\d*)-cross-validation improving "(.*)"')
 def i_create_nodes_analysis(step, min_nodes=None, max_nodes=None,
                             nodes_step=None, k_fold=None, metric=None):
-    ok_(dataset_dir is not None and max_nodes is not None and \
+    ok_(max_nodes is not None and \
+        nodes_step is not None and k_fold is not None and \
+        metric is not None)
+    command = ("bigmler analyze --dataset " + world.dataset['resource'] +
+               " --nodes --min-nodes " + min_nodes +
+               " --max-nodes " + max_nodes +
+               " --nodes-step " + nodes_step +
+               " --k-folds " + k_fold +
+               " --output " + world.directory +
+               " --optimize " + metric)
+    command = check_debug(command)
+    try:
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.output = os.path.join(world.directory, "test", "kfold1",
+                                        "evaluation")
+            assert True
+    except OSError as e:
+        assert False
+
+
+
+#@step(r'I create BigML nodes analysis from datasets file from (\d*) to (\d*) by (\d*) with (\d*)-cross-validation improving "(.*)"')
+def i_create_nodes_analysis_from_dataset_file(
+    step, min_nodes=None, max_nodes=None,
+    nodes_step=None, k_fold=None, metric=None):
+    ok_(max_nodes is not None and \
         nodes_step is not None and k_fold is not None and \
         metric is not None)
     command = ("bigmler analyze --datasets %s/dataset" % world.directory +

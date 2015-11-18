@@ -215,7 +215,9 @@ class TestAnalyze(object):
             test_pred.i_create_dataset(self, data=example[0], output=example[1])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self)
-            test_pred.i_create_nodes_analysis(self, min_nodes=example[2], max_nodes=example[3], nodes_step=example[4], k_fold=example[5], metric=example[6])
+            test_pred.i_create_nodes_analysis_from_dataset_file(
+                self, min_nodes=example[2], max_nodes=example[3],
+                nodes_step=example[4], k_fold=example[5], metric=example[6])
             test_pred.i_check_create_kfold_datasets(self, example[5])
             test_pred.i_check_create_kfold_models(self, example[5])
             test_pred.i_check_create_all_kfold_cross_validations(self, example[5])
