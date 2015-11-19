@@ -1184,12 +1184,9 @@ def i_create_nodes_analysis(step, min_nodes=None, max_nodes=None,
     command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.output = os.path.join(world.directory, "test", "kfold1",
-                                        "evaluation")
-            assert True
+        ok_(retcode == 0)
+        world.output = os.path.join(world.directory, "test", "kfold1",
+                                    "evaluation")
     except OSError as e:
         assert False
 
@@ -1212,18 +1209,16 @@ def i_create_nodes_analysis_from_dataset_file(
     command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.output = os.path.join(world.directory, "test", "kfold1",
-                                        "evaluation")
-            assert True
+        ok_(retcode == 0)
+        world.output = os.path.join(world.directory, "test", "kfold1",
+                                    "evaluation")
     except OSError as e:
         assert False
 
 
 #@step(r'I create BigML feature selection (\d*)-fold cross-validations excluding "(.*)" with separator "(.*)" improving "(.*)"')
-def i_create_kfold_cross_validation_separator_metric_no_fields(step, k_folds=None, features=None, args_separator=None, metric=None):
+def i_create_kfold_cross_validation_separator_metric_no_fields(
+    step, k_folds=None, features=None, args_separator=None, metric=None):
     ok_(k_folds is not None and metric is not None and features is not None \
         and args_separator is not None)
     command = ("bigmler analyze --dataset " +

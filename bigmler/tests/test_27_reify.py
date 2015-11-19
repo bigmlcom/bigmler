@@ -558,7 +558,7 @@ class TestReify(object):
                 | data | output | params |check_file | language
                 | data/iris.csv | scenario_re18/reify.py | {"name": "my_dataset_from_batch_anomaly_score_name"}|../check_files/reify_batch_anomaly_score_dataset.py | python
         """
-        print self.test_scenario17.__doc__
+        print self.test_scenario18.__doc__
         examples = [
             ['data/iris.csv', 'scenario_re18/reify.py', {"name": "my_dataset_from_batch_anomaly_score_name"}, 'check_files/reify_batch_anomaly_score_dataset.py', 'python']]
 

@@ -2941,6 +2941,9 @@ Cluster Specific Subcommand Options
                                           If no CENTROID_NAMES argument is
                                           provided
                                           all models are generated
+``--summary-fields`` *SUMMARY_FIELDS*     Comma-separated list of fields to
+                                          be kept for reference but not used
+                                          in the cluster bulding process
 ========================================= =====================================
 
 
