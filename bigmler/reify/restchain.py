@@ -146,7 +146,6 @@ class RESTChain(object):
         for origin in new_origins:
             self.reify_resource(origin)
 
-
     def reify(self, language=None):
         """Prints the chain of commands in the user-given language
 
@@ -255,12 +254,11 @@ class RESTChain(object):
 
         # update options
         dataset_defaults = DEFAULTS["dataset"].get("update", {})
-        dataset_defaults.update(COMMON_DEFAULTS.get("update", {}))
+        #dataset_defaults.update(COMMON_DEFAULTS.get("update", {}))
 
         for attribute, default_value in dataset_defaults.items():
             opts["update"].update(
                 u.default_setting(child, attribute, *default_value))
-
         # name, exclude automatic naming alternatives
         autonames = [u'']
         suffixes = [u"filtered", u"sampled", u"dataset", u"extended",
@@ -284,8 +282,12 @@ class RESTChain(object):
             {'resource': child['resource'], 'object': child})
         objective_id = child['objective_field']['id']
         preferred_fields = resource_fields.preferred_fields()
+        # if there's no preferred fields, use the fields structure
+        if len(preferred_fields.keys()) == 0:
+            preferred_fields = resource_fields.fields
         max_column = sorted([field['column_number']
-                             for _, field in preferred_fields.items()],
+                             for _, field in preferred_fields.items()
+                             if field['optype'] != "text"],
                             reverse=True)[0]
         objective_column = resource_fields.fields[objective_id][ \
             'column_number']

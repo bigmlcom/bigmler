@@ -3,6 +3,14 @@
 History
 -------
 
+3.3.8 (2015-11-24)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug: simplifying bigmler reify output for datasets created from
+  batch resources.
+- Allowing column numbers as keys for fields structures in
+  --source-attributes, --dataset-attributes, etc
+
 3.3.7 (2015-11-18)
 ~~~~~~~~~~~~~~~~~~
 

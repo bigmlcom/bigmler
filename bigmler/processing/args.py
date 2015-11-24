@@ -575,7 +575,7 @@ def transform_args(command_args, flags, api, user_defaults):
         lisp_filter = u.read_lisp_filter(command_args.lisp_filter)
         command_args.lisp_filter = lisp_filter
 
-    # Adds default tags unless that it is requested not to do so.
+    # Adds default tags unless it is requested not to do so.
     if command_args.no_tag:
         command_args.tag.append('BigMLer')
         command_args.tag.append('BigMLer_%s' % NOW)

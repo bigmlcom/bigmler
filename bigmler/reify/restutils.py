@@ -192,10 +192,8 @@ def common_dataset_opts(resource, referrer, opts, call="create"):
     """
     # not inherited create options
     non_inherited_opts(resource, referrer, opts, call=call)
-
     # non-default create options
     non_default_opts(resource, opts, call=call)
-
     # changes in fields structure
     fields_attributes = get_fields_changes(resource, referrer=referrer)
     if fields_attributes:
@@ -270,7 +268,6 @@ def inherit_setting(relative, child, key, default):
     """Returns setting only in case it was not inherited from ancestors
 
     """
-
     if not child.get(key, default) in [default, relative.get(key, default)]:
         return {key: child.get(key)}
     else:
@@ -290,7 +287,8 @@ def default_setting(child, key, *defaults):
         return {}
 
 
-def non_automatic_name(resource, opts, autonames=None, autoname=None, call="create"):
+def non_automatic_name(resource, opts, autonames=None, autoname=None,
+                       call="create"):
     """Checks whether the name of the resource is in the list of automated
        names and includes it in the name argument otherwise.
 

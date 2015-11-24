@@ -97,10 +97,13 @@ class TestDatasetAdvanced(object):
                 Examples:
                 |data |output_dir  |new_fields | property | field_id | value | type
                 |../data/iris.csv | ./scenario_d_2 |../data/attributes.json| preferred | 000001 | false | boolean
+                |../data/iris.csv | ./scenario_d_2_b |../data/attributes_col.json| preferred | 000001 | false | boolean
         """
         print self.test_scenario2.__doc__
         examples = [
-            ['data/iris.csv', 'scenario_d_2', 'data/attributes.json', 'preferred', '000001', 'false', 'boolean']]
+            ['data/iris.csv', 'scenario_d_2', 'data/attributes.json', 'preferred', '000001', 'false', 'boolean'],
+            ['data/iris.csv', 'scenario_d_2_b', 'data/attributes_col.json', 'preferred', '000001', 'false', 'boolean']
+        ]
         for example in examples:
             print "\nTesting with:\n", example
             dataset_adv.i_create_dataset(self, data=example[0], output_dir=example[1])

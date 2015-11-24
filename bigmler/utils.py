@@ -676,6 +676,7 @@ def encode2(value, encoding=FILE_ENCODING):
         return value.encode(encoding)
     return value
 
+
 def decode2(value, encoding=FILE_ENCODING):
     """Conditional decoding only for Python2
 
@@ -683,3 +684,26 @@ def decode2(value, encoding=FILE_ENCODING):
     if isinstance(value, basestring) and not PYTHON3:
         return value.decode(encoding)
     return value
+
+
+def transform_fields_keys(json_attributes, fields):
+    """Transforms the fields structure keys if they are expressed in columns
+       to the corresponding IDs
+
+    """
+    fields_structure = {}
+    if fields is None:
+        return json_attributes
+    if "fields" in json_attributes.keys():
+        old_keys = json_attributes["fields"].keys()
+        for old_key in old_keys:
+            try:
+                if not old_key in fields.fields:
+                    key = fields.field_id(int(old_key))
+                else:
+                    key = old_key
+            except ValueError:
+                key = old_key
+            fields_structure[key] = json_attributes["fields"][old_key]
+        json_attributes["fields"] = fields_structure
+    return json_attributes
