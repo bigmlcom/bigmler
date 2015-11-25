@@ -254,7 +254,6 @@ class RESTChain(object):
 
         # update options
         dataset_defaults = DEFAULTS["dataset"].get("update", {})
-        #dataset_defaults.update(COMMON_DEFAULTS.get("update", {}))
 
         for attribute, default_value in dataset_defaults.items():
             opts["update"].update(
