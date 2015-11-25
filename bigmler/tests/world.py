@@ -250,7 +250,6 @@ def common_teardown_module():
             pass
 
 
-
 def teardown_class():
     """Operations to be performed after each class
 
