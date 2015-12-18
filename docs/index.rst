@@ -645,6 +645,33 @@ where ``types.txt`` would be
     3, 'numeric'
     4, 'categorical'
 
+
+In order to update
+source options, you can use the ``--source-attributes`` option pointing
+to a file path that contains the configuration settings to be modified
+in JSON format
+
+.. code-block:: bash
+
+    bigmler --source source/52b8a12037203f48bc00000a \
+            --source-attributes my_dir/attributes.json --no-dataset
+
+Let's say this source has a text field with id ``000001``. The
+``attributes.json`` to change its text parsing mode to full field contents
+would read
+
+.. code-block:: bash
+
+    {"fields": {"000001": {"term_analysis": {"token_mode": "full_terms_only"}}}}
+
+you can also reference the fields by its column number in this JSON structures.
+If the field to be modified is in the second column (column index starts at 0)
+then the contents of the ``attributes.json`` file could be as well
+
+.. code-block:: bash
+
+    {"fields": {"1": {"term_analysis": {"token_mode": "full_terms_only"}}}}
+
 You can specify the fields that you want to include in the dataset by naming
 them explicitly
 
@@ -737,25 +764,8 @@ Advanced Dataset management
 As you can find in the BigML's API documentation on
 `datasets <https://bigml.com/developers/datasets>`_ besides the basic name,
 label and description that we discussed in previous sections, there are many
-more configurable options in a dataset resource. In order to set or update
-dataset options, you can use the ``--dataset-attributes`` option pointing
-to a file path that contains the configuration settings in JSON format
-
-.. code-block:: bash
-
-    bigmler --dataset dataset/52b8a12037203f48bc00000a \
-            --dataset-attributes my_dir/attributes.json
-
-Let's say this dataset has a text field with id ``000001``. The
-``attributes.json`` to change its text parsing mode to full field contents
-would read
-
-.. code-block:: bash
-
-    {"fields": {"000001": {"term_analysis": {"token_mode": "full_terms_only"}}}}
-
-There are other kinds of updatable options in the dataset besides controlling
-its fields features. As an example, to publish a dataset in the
+more configurable options in a dataset resource.
+As an example, to publish a dataset in the
 gallery and set its price you could use
 
 .. code-block:: bash
