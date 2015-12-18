@@ -20,6 +20,8 @@
 from __future__ import absolute_import
 
 import sys
+import os
+import stat
 
 from bigml.resourcehandler import get_resource_id
 
@@ -48,3 +50,6 @@ def reify_resources(args, api, logger):
     else:
         with open(args.output, "w") as reify_file:
             reify_file.write(output.encode("utf-8"))
+
+    st = os.stat(args.output)
+    os.chmod(args.output, st.st_mode | stat.S_IEXEC)

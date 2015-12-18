@@ -139,13 +139,14 @@ def get_input_fields(resource, referrer=None):
         input_fields = sorted(input_fields)
         referrer_type = get_resource_type(referrer)
         if referrer_type == 'dataset':
-            referrer_fields = referrer_fields.preferred_fields()
-            referrer_fields = sorted([field['name']
-                                      for _, field in referrer_fields.items()])
+            referrer_fields = Fields(referrer_fields.preferred_fields())
+            referrer_fields_names = sorted( \
+                [field['name'] for _, field in referrer_fields.fields.items()])
         else:
-            referrer_fields = sorted(referrer_fields.fields_by_name.keys())
+            referrer_fields_names = sorted( \
+                referrer_fields.fields_by_name.keys())
         # check referrer input fields to see if they are equal
-        referrer_input_fields.append(referrer_fields)
+        referrer_input_fields.append(referrer_fields_names)
         # check whether the resource has an objective field not included in
         # the input fields list
         resource_type = get_resource_type(resource)
@@ -157,11 +158,12 @@ def get_input_fields(resource, referrer=None):
                 pass
             referrer_objective = resource_fields.field_name(
                 objective_id)
-            referrer_input_fields.append([name for name in referrer_fields
+            referrer_input_fields.append([name for name in
+                                          referrer_fields_names
                                           if name != referrer_objective])
         if input_fields in referrer_input_fields:
             return []
-    return input_fields_ids
+    return referrer_fields.fields.keys()
 
 
 def non_inherited_opts(resource, referrer, opts, call="create"):
