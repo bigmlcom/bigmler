@@ -20,6 +20,8 @@ import os
 import time
 import re
 
+from nose.tools import eq_
+
 from bigmler.tests.world import world, res_filename
 from subprocess import check_call, CalledProcessError
 from bigmler.checkpoint import file_number_of_lines
@@ -27,6 +29,8 @@ from bigmler.utils import SYSTEM_ENCODING, PYTHON3, open_mode
 from bigml.api import check_resource
 from bigmler.tests.common_steps import check_debug
 
+
+INDENT = ' ' * 4
 
 def python3_contents(filename, prior_contents):
     """Check for a file that has alternative contents for Python3 and return
@@ -80,6 +84,11 @@ def i_check_output_file(step, output=None, check_file=None):
         output_file = os.path.join(world.directory, "reify.py")
         with open(check_file, open_mode("r")) as check_file_handler:
             check_contents = check_file_handler.read().strip("\n")
+            check_contents_lines = check_contents.split("\n")
+            for index, line in enumerate(check_contents_lines):
+                if line:
+                    check_contents_lines[index] = INDENT + line
+            check_contents = "\n".join(check_contents_lines)
         # remove unicode mark for strings if Python3
         if PYTHON3:
             check_contents = check_contents.replace( \
@@ -87,23 +96,26 @@ def i_check_output_file(step, output=None, check_file=None):
         with open(output_file, open_mode("r")) as output_file:
             output_file_contents = output_file.read()
         #strip comments at the beginning of the file
-        output_file_contents = re.sub(r'""".*"""', '', output_file_contents,
+        output_file_contents = re.sub(r'#!.*def\smain\(\):\n', '',
+                                      output_file_contents,
                                       flags=re.S).strip("\n")
+        output_file_contents = output_file_contents.replace( \
+            '\n\nif __name__ == "__main__":\n    main()', '')
 
         #strip internally added project id information
         prefix = "" if PYTHON3 else "u"
-        p_str = r',\s\\\n    \{\'project\':\s%s\'project/[a-f0-9]{24}\'\}\)' \
-            % prefix
+        p_str = r',\s\\\n%s\{\'project\':\s%s\'project/[a-f0-9]{24}\'\}\)' \
+            % (INDENT * 2, prefix)
         output_file_contents = re.sub(p_str,
                                       ')', output_file_contents,
                                       flags=re.S).strip("\n")
-        p_str = r',\s\\\n    \s\'project\':\s%s\'project/[a-f0-9]{24}\'\}\)' \
-            % prefix
+        p_str = r',\s\\\n%s\s\'project\':\s%s\'project/[a-f0-9]{24}\'\}\)' \
+            % (INDENT * 2, prefix)
         output_file_contents = re.sub(p_str,
                                       ')', output_file_contents,
                                       flags=re.S).strip("\n")
-        p_str = r',\n    \s\'project\':\s%s\'project/[a-f0-9]{24}\'\}\)' \
-            % prefix
+        p_str = r',\n%s\s\'project\':\s%s\'project/[a-f0-9]{24}\'\}\)' \
+            % (INDENT * 2, prefix)
         output_file_contents = re.sub(p_str,
                                       '})', output_file_contents,
                                       flags=re.S).strip("\n")
@@ -118,11 +130,7 @@ def i_check_output_file(step, output=None, check_file=None):
             if PYTHON3:
                 # look for an alternative in PYTHON3
                 check_contents = python3_contents(check_file, check_contents)
-            if check_contents == output_file_contents:
-                assert True
-            else:
-                assert False, ("File contents:\n%s\nExpected contents:\n%s" %
-                               (output_file_contents, check_contents))
+            eq_(check_contents, output_file_contents)
     except Exception, exc:
         assert False, str(exc)
 
@@ -150,6 +158,20 @@ def create_dataset(filename, output=None, args=None):
     world.api.ok(world.dataset)
     world.datasets.append(world.dataset['resource'])
 
+#@step(r'I create a BigML dataset from dataset with data "(.*)" and params "(.*)"')
+def create_dataset_from_dataset(filename, output=None, args=None):
+    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
+    world.source = source
+    world.directory = os.path.dirname(output)
+    world.output = output
+    world.api.ok(world.source)
+    world.sources.append(source['resource'])
+    world.dataset = world.api.create_dataset(source)
+    world.api.ok(world.dataset)
+    world.datasets.append(world.dataset['resource'])
+    world.dataset = world.api.create_dataset(world.dataset, args)
+    world.api.ok(world.dataset)
+    world.datasets.append(world.dataset['resource'])
 
 #@step(r'I create a BigML model from a dataset with data "(.*)" and params "(.*)"')
 def create_model(filename, output=None, args=None):

@@ -3,6 +3,12 @@
 History
 -------
 
+3.3.9 (2015-12-19)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug: wrong reify output for datasets created from another dataset.
+- Improving bigmler reify code style and making file executable.
+
 3.3.8 (2015-11-24)
 ~~~~~~~~~~~~~~~~~~
 

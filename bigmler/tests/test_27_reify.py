@@ -572,3 +572,32 @@ class TestReify(object):
                 resource_type='batch_anomaly_score_dataset')
             test_reify.i_check_output_file(self, output=example[1],
                                            check_file=example[3])
+
+
+    def test_scenario19(self):
+        """
+            Scenario: Successfully building a dataset reify output in python when built from another dataset
+                Given I create a BigML dataset from a dataset with data "<data>" and params "<params>"
+                And I check that the source has been created
+                And I check that the dataset has been created
+                And I check that the new dataset has been created
+                Then I create a reify output in "<output>" for "<language>"
+                And the "<output>" file is like "<check_file>"
+
+                Examples:
+                | data | output | params |check_file | language
+                | data/iris.csv | scenario_re19/reify.py | {"name": "my_dataset_from_dataset_name", 'all_but': [u'000001'], 'all_fields': False, 'input_fields': [u'000004', u'000002', u'000003', u'000000', u'000001'], 'new_fields': [{u'description': u'', 'field': u'2', u'label': u'', u'name': u'new'}], 'objective_field': {'id': u'100004'}}|../check_files/reify_dataset_dataset.py | python
+        """
+        print self.test_scenario19.__doc__
+        examples = [
+            ['data/iris.csv', 'scenario_re19/reify.py', {"name": "my_dataset_from_dataset_name", 'all_but': ['000001'], 'all_fields': False, 'input_fields': ['000004', '000002', '000003', '000000', '000001'], 'new_fields': [{'description': '', 'field': '2', 'label': '', 'name': 'new'}], 'objective_field': {'id': '100004'}}, 'check_files/reify_dataset_dataset.py', 'python']]
+
+        for example in examples:
+            print "\nTesting with:\n", example
+            test_reify.create_dataset_from_dataset(example[0],
+                                                   output=example[1],
+                                                   args=example[2])
+            test_reify.i_create_output(
+                self, example[1], example[4], resource_type='dataset')
+            test_reify.i_check_output_file(self, output=example[1],
+                                           check_file=example[3])
