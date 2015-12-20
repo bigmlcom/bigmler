@@ -28,6 +28,20 @@ from bigml.resourcehandler import get_resource_type
 INDENT = 4 * " "
 
 
+def sort_lists(dict_structure):
+    """Sorts the lists in a dict_structure
+
+    """
+    if dict_structure is not None and isinstance(dict_structure, dict):
+        for key, value in dict_structure.items():
+            if value is not None:
+                if isinstance(value, list):
+                    dict_structure[key] = sorted(value)
+                elif isinstance(value, dict):
+                    sort_lists(dict_structure[key])
+    return dict_structure
+
+
 class RESTCall(object):
     """Object to store the REST call definition
 
@@ -115,9 +129,11 @@ class RESTCall(object):
                 arguments, INDENT,
                 pprint.pformat(self.input_data).replace("\n", "\n%s" % INDENT))
         if self.args:
+            sort_lists(self.args)
             arguments = "%s, \\\n%s%s" % (arguments, \
                 INDENT, \
-                pprint.pformat(self.args).replace("\n", "\n%s" % INDENT))
+                pprint.pformat(self.args).replace( \
+                    "\n", "\n%s" % INDENT))
         out = "%s = api.%s_%s(%s)\napi.ok(%s)\n\n" % (
             resource_name,
             self.action,
