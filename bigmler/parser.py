@@ -35,9 +35,10 @@ from bigmler.options.anomaly import get_anomaly_options
 from bigmler.options.sample import get_sample_options
 from bigmler.options.report import get_report_options
 from bigmler.options.reify import get_reify_options
+from bigmler.options.project import get_project_options
 
 SUBCOMMANDS = ["main", "analyze", "cluster", "anomaly", "sample",
-               "delete", "report", "reify"]
+               "delete", "report", "reify", "project"]
 MAIN = SUBCOMMANDS[0]
 
 
@@ -219,6 +220,21 @@ under the License.""" % version
         option = '--%s' % option
         reify_common_options.update({option: common_options[option]})
     subcommand_options["reify"].update(reify_common_options)
+
+    subcommand_options["project"] = get_project_options(defaults=defaults)
+    subcommand_options["project"].update({
+        '--project': source_options['--project'],
+        '--project-id': source_options['--project-id'],
+        '--name': common_options['--name'],
+        '--description': common_options['--description'],
+        '--category': common_options['--category'],
+        '--tag': common_options['--tag'],
+        '--resources-file': main_options['--resources-log']})
+    project_common_options = {}
+    for option in reify_common_options_list:
+        option = '--%s' % option
+        project_common_options.update({option: common_options[option]})
+    subcommand_options["project"].update(project_common_options)
 
     for subcommand in SUBCOMMANDS:
         subparser = subparsers.add_parser(subcommand)

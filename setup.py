@@ -51,7 +51,7 @@ setuptools.setup(
     packages = ['bigmler', 'bigmler.processing', 'bigmler.analyze',
                 'bigmler.cluster', 'bigmler.anomaly', 'bigmler.report',
                 'bigmler.options', 'bigmler.delete', 'bigmler.sample',
-                'bigmler.tests', 'bigmler.reify'],
+                'bigmler.tests', 'bigmler.reify', 'bigmler.project'],
     install_requires = ['bigml>=4.3.1, <4.4.0'],
     package_data={'bigmler':['static/*.json', 'static/*.html']},
     classifiers=[

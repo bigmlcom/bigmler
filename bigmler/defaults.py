@@ -218,7 +218,9 @@ FLAGS = {
         {'flag': 'no_server', 'type': 'boolean'}],
     'BigMLer reify': [
         {'flag': 'language', 'type': 'string'},
-        {'flag': 'add_fields', 'type': 'boolean'}]}
+        {'flag': 'add_fields', 'type': 'boolean'}],
+    'BigMLer project': [
+        {'flag': 'project_attributes', 'type': 'string'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):

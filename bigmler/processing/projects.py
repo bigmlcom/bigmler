@@ -26,7 +26,7 @@ import bigmler.checkpoint as c
 
 
 def project_processing(api, args, resume,
-                       session_file=None, path=None, log=None):
+                       session_file=None, path=None, log=None, create=False):
     """Creating or retrieving a project from input arguments
 
     """
@@ -43,7 +43,7 @@ def project_processing(api, args, resume,
             resume, project_id = c.checkpoint(
                 c.is_project_created, path, debug=args.debug, message=message,
                 log_file=session_file, console=args.verbosity)
-        else:
+        elif not create:
             project_id = r.get_project_by_name(
                 args.project, api=api, verbosity=args.verbosity,
                 session_file=session_file)
@@ -54,6 +54,33 @@ def project_processing(api, args, resume,
     if project_id is None:
         project_args = r.set_project_args(args, name=args.project)
         project = r.create_project(
+            project_args, args, api, session_file, path, log)
+        project_id = project['resource']
+
+    return project_id
+
+def update_project(args, api, resume,
+                   session_file=None, path=None, log=None):
+    """Updating project attributes according to input arguments
+
+    """
+    # if no project info given by the user, we skip project processing and no
+    # project will be assigned
+    if args.project_id is None:
+        return None
+        # If resuming, try to extract args.project_id form log files
+
+    if resume:
+        message = u.dated("Project not found. Resuming.\n")
+        resume, project_id = c.checkpoint(
+            c.is_project_created, path, debug=args.debug, message=message,
+            log_file=session_file, console=args.verbosity)
+    elif args.project_id:
+        project_id = bigml.api.get_project_id(args.project_id)
+
+    if project_id is not None:
+        project_args = r.set_project_args(args, name=args.project)
+        project = r.update_project(
             project_args, args, api, session_file, path, log)
         project_id = project['resource']
 

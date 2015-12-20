@@ -47,7 +47,7 @@ MISSING_STRATEGIES = {'last': LAST_PREDICTION, 'proportional': PROPORTIONAL}
 DEFAULT_DESCRIPTION = "Created using BigMLer"
 RESOURCE_TYPES = ["source", "dataset", "model", "ensemble", "batch_prediction",
                   "cluster", "centroid", "batch_centroid", "anomaly",
-                  "anomaly_score", "batch_anomaly_score"]
+                  "anomaly_score", "batch_anomaly_score", "project"]
 
 
 def has_test(args):
@@ -533,8 +533,8 @@ def get_output_args(api, command_args, resume):
     return {"api": api, "args": command_args}
 
 
-def transform_args(command_args, flags, api, user_defaults):
-    """Transforms the formatted argument strings into structured arguments
+def attribute_args(command_args):
+    """Reads the attributes in JSON files
 
     """
     # Parses attributes in json format if provided
@@ -548,6 +548,13 @@ def transform_args(command_args, flags, api, user_defaults):
                 attributes_file)
         else:
             command_args.json_args[resource_type] = {}
+
+
+def transform_args(command_args, flags, api, user_defaults):
+    """Transforms the formatted argument strings into structured arguments
+
+    """
+    attribute_args(command_args)
 
     # Parses dataset generators in json format if provided
     if command_args.new_fields:

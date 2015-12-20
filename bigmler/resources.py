@@ -1831,7 +1831,6 @@ def set_project_args(args, name=None):
         "category": args.category,
         "tags": args.tag
     }
-
     return project_args
 
 
@@ -1856,8 +1855,29 @@ def create_project(project_args, args, api=None,
                     project['object']['name'])
     log_message(message, log_file=session_file, console=args.verbosity)
     log_message("%s\n" % project_id, log_file=log)
-    if args.reports:
-        report(args.reports, path, project)
+    try:
+        if args.reports:
+            report(args.reports, path, project)
+    except AttributeError:
+        pass
+    return project
+
+
+def update_project(project_args, args,
+                   api=None, session_file=None, path=None, log=None):
+    """Updates project properties
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+    message = dated("Updating project attributes.\n")
+    log_message(message, log_file=session_file,
+                console=args.verbosity)
+    project = api.update_project(args.project_id, project_args)
+    check_resource_error(project, "Failed to update project: %s"
+                         % project['resource'])
+    message = dated("Project \"%s\" has been updated.\n" %
+                    project['resource'])
     return project
 
 
