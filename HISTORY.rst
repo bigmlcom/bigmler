@@ -3,6 +3,11 @@
 History
 -------
 
+3.4.0 (2015-12-21)
+~~~~~~~~~~~~~~~~~~
+
+- Adding bigmler project subcommand for project creation and update.
+
 3.3.9 (2015-12-19)
 ~~~~~~~~~~~~~~~~~~
 

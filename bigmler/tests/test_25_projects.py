@@ -119,3 +119,27 @@ class TestProjects(object):
             delete.i_create_source_from_file(self, data=example[0], output_dir=example[1])
             test_pred.i_check_create_source(self)
             test_project.check_source_in_no_project(self)
+
+    def test_scenario4(self):
+        """
+            Scenario: Successfully creating and updating project:
+                Given I create a BigML project "<project>" and log results in "<output_dir>"
+                And I check that the project has been created
+                And I update the project params "<params>" to "<values>"
+                And I check that the project has been updated
+                Then the project params "<params>" are "<values>"
+
+                Examples:
+                | project         | output_dir       | params         | values
+                | My new project  | ./scenario_p_4   | name, category | my_project_name, 1
+        """
+        print self.test_scenario4.__doc__
+        examples = [
+            ['My new project', 'scenario_p_4', ['name', 'category'], ['my_project_name', 1]]]
+        for example in examples:
+            print "\nTesting with:\n", example
+            test_project.i_create_project(self, project=example[0], output_dir=example[1])
+            test_project.i_check_create_project(self)
+            test_project.i_update_project(self, params=example[2], values=example[3])
+            test_project.i_check_update_project(self)
+            test_project.check_params_values(self, params=example[2], values=example[3])

@@ -26,12 +26,12 @@ from bigmler.checkpoint import file_number_of_lines
 from bigmler.utils import SYSTEM_ENCODING, PYTHON3
 from bigml.api import check_resource
 from bigmler.tests.common_steps import check_debug
+from nose.tools import assert_equal, assert_not_equal, ok_
 
 
 #@step(r'I create a BigML source uploading train "(.*)" file and associate it to a new project named "(.*)" storing results in "(.*)"')
 def i_create_source_with_project(step, data=None, project=None, output_dir=None):
-    if data is None:
-        assert False
+    ok_(data is not None)
     world.directory = output_dir
     world.folders.append(world.directory)
     #Check if the project already exists
@@ -61,8 +61,7 @@ def i_create_source_with_project(step, data=None, project=None, output_dir=None)
 
 #@step(r'I create a BigML source uploading train "(.*)" file and associate it to the last created project id storing results in "(.*)"')
 def i_create_source_with_project_id(step, data=None, output_dir=None):
-    if data is None:
-        assert False
+    ok_(data is not None)
     world.directory = output_dir
     world.folders.append(world.directory)
     try:
@@ -85,12 +84,7 @@ def i_create_source_with_project_id(step, data=None, output_dir=None):
 
 #@step(r'the source is associated to the project')
 def check_source_in_project(step):
-    if world.project['resource'] == world.source['object']['project']:
-        assert True
-    else:
-        assert False, ("Project id is %s and source is associated to %s" % (
-                       world.project['resource'],
-                       world.source['object']['project']))
+    assert_equal(world.project['resource'], world.source['object']['project'])
 
 
 #@step(r'I check that the project has been created$')
@@ -110,8 +104,61 @@ def i_check_create_project(step):
 
 #@step(r'the source has no project association')
 def check_source_in_no_project(step):
-    if world.source['object']['project'] is None:
-        assert True
-    else:
-        assert False, ("Source is associated to %s" %
-                       world.source['object']['project'])
+    ok_(world.source['object']['project'] is None)
+
+#@step(r'I create a BigML project "(.*)" and log results in "(.*)"')
+def i_create_project(step, project=None, output_dir=None):
+    ok_(project is not None)
+    world.directory = output_dir
+    world.folders.append(world.directory)
+    try:
+        command = (u"bigmler project --name \"" + project +
+                   u"\" --store --output-dir " +
+                   output_dir)
+        if not PYTHON3:
+            command = command.encode(SYSTEM_ENCODING)
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.output = output_dir
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+#@step(r'I update the project params "(.*)" to "(.*)"')
+def i_update_project(step, params=None, values=None):
+    ok_(params is not None and values is not None)
+    try:
+        command = (u"bigmler project --project-id " +
+                   world.project['resource'] +
+                   u" --store --output-dir " +
+                   world.directory)
+        for index, param in enumerate(params):
+            value = values[index]
+            command += u" --%s %s" % (param, value)
+
+        if not PYTHON3:
+            command = command.encode(SYSTEM_ENCODING)
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+#@step(r'the project params "(.*)" are "(.*)"')
+def check_params_values(step, params=None, values=None):
+    for index, param in enumerate(params):
+        value = values[index]
+        assert_equal(world.project['object'][param], value)
+
+
+#@step(r'I check that the project has been updated$')
+def i_check_update_project(step):
+    project = check_resource(world.project['resource'],
+                             world.api.get_project)
+    world.project = project

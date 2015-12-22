@@ -94,12 +94,14 @@ def project_dispatcher(args=sys.argv[1:]):
     a.attribute_args(command_args)
 
 
+    if not command_args.project_id and command_args.name:
+        command_args.project = command_args.name
     if command_args.project:
         # create project
-        command_args.project_id = pp.project_processing(
+        project_id = pp.project_processing(
             api, command_args, command_args.resume, session_file=session_file,
             path=path, log=log, create=True)
-    if not command_args.project and command_args.project_id and (
+    if command_args.project_id and (
             command_args.project_attributes or
             command_args.name or command_args.tag or command_args.description
             or command_args.category):

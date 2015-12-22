@@ -461,6 +461,9 @@ Note: Once a ``source`` has been associated to a ``project``, all the resources
 derived from this ``source`` will be automatically associated to the same
 ``project``.
 
+You can also create projects or update their properties by using the `bigmler
+project <#bigmler-project>`_ subcommand.
+
 
 Using previous Sources, Datasets, and Models
 --------------------------------------------
@@ -2077,6 +2080,32 @@ to delete other resources, you can select them by choosing their status:
 
 would remove all failed resources created more than two days ago.
 
+
+.. _bigmler-project:
+
+Project subcommand
+------------------
+
+Projects are organizational resources and they are usually created at
+source-creation time in order to keep together in a separate repo all
+the resources derived from a source. However, you can also create a project
+or update its properties independently using the ``bigmler project``
+subcommand.
+
+.. code-block:: bash
+
+    bigmler project --name my_project
+
+will create a new project and name it. You can also add other attributes
+such as ``--tag``, ``--description`` or ``--category`` in the project
+creation call. You can also add or update any other attribute to
+the project using a JSON file with the ``--project-attributes`` option.
+
+.. code-block:: bash
+
+    bigmler project --project-id project/532db2b637203f3f1a000153 \
+                    --project-attributes my_attributes.json
+
 Additional Features
 ===================
 
@@ -3169,6 +3198,16 @@ Delete Subcommand Options
                                       waiting, queued, started, in progress,
                                       summarized, uploading, unknown, runnable
 ===================================== =========================================
+
+
+Project Specific Subcommand Options
+-----------------------------------
+
+===================================== =========================================
+``--project-attributes``              Path to a JSON file containing
+                                      attributes for the project
+===================================== =========================================
+
 
 Prior Versions Compatibility Issues
 -----------------------------------

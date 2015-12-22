@@ -145,12 +145,13 @@ def update_attributes(updatable_attributes, new_attributes, by_column=False,
             updatable_attributes.update(new_attributes)
 
 
-def update_json_args(resource_attributes, json_attributes, fields):
+def update_json_args(resource_attributes, json_attributes, fields=None):
     """Updating the resource attributes with the contents of a JSON file
 
     """
-    # transforms the fields structure changes if columns are used as keys
-    json_attributes = transform_fields_keys(json_attributes, fields)
+    if fields is not None:
+        # transforms the fields structure changes if columns are used as keys
+        json_attributes = transform_fields_keys(json_attributes, fields)
     update_attributes(resource_attributes, json_attributes)
 
 
@@ -1831,6 +1832,8 @@ def set_project_args(args, name=None):
         "category": args.category,
         "tags": args.tag
     }
+    if 'project' in args.json_args:
+        update_json_args(project_args, args.json_args.get('project'), None)
     return project_args
 
 
