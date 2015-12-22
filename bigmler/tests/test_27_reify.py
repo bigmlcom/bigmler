@@ -590,7 +590,7 @@ class TestReify(object):
         """
         print self.test_scenario19.__doc__
         examples = [
-            ['data/iris.csv', 'scenario_re19/reify.py', {"name": "my_dataset_from_dataset_name", 'all_but': ['000001'], 'all_fields': False, 'input_fields': ['000004', '000002', '000003', '000000', '000001'], 'new_fields': [{'description': '', 'field': '2', 'label': '', 'name': 'new'}], 'objective_field': {'id': '100004'}}, 'check_files/reify_dataset_dataset.py', 'python']]
+            ['data/iris.csv', 'scenario_re19/reify.py', {"name": "my_dataset_from_dataset_name", 'all_but': ['000001'], 'all_fields': False, 'input_fields': ['000000', '000001', '000002', '000003', '000004'], 'new_fields': [{'description': '', 'field': '2', 'label': '', 'name': 'new'}], 'objective_field': {'id': '100004'}}, 'check_files/reify_dataset_dataset.py', 'python']]
 
         for example in examples:
             print "\nTesting with:\n", example

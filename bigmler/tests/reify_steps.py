@@ -124,7 +124,6 @@ def i_check_output_file(step, output=None, check_file=None):
         output_file_contents = re.sub(p_str,
                                       '', output_file_contents,
                                       flags=re.S).strip("\n")
-        print output_file_contents
         if check_contents == output_file_contents:
             assert True
         else:
