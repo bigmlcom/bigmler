@@ -22,7 +22,7 @@ from __future__ import absolute_import
 
 import pprint
 
-from bigml.resourcehandler import RENAMED_RESOURCES
+from bigml.constants import RENAMED_RESOURCES
 from bigml.resourcehandler import get_resource_type
 
 INDENT = 4 * " "

@@ -26,20 +26,32 @@ from bigmler.processing.models import MONTECARLO_FACTOR
 from bigmler.checkpoint import file_number_of_lines
 from bigmler.utils import storage_file_name, open_mode, decode2
 from bigmler.utils import PYTHON3
-from bigmler.tests.ml_tst_prediction_steps import i_create_all_ml_resources
-from bigmler.tests.ml_tst_prediction_steps import i_create_all_ml_resources_and_ensembles
-from bigmler.tests.ml_tst_evaluation_steps import i_create_all_ml_resources_for_evaluation
-from bigmler.tests.max_categories_tst_prediction_steps import i_check_create_max_categories_datasets, i_create_all_mc_resources
-from bigmler.tests.basic_batch_tst_prediction_steps import i_check_create_test_source, i_check_create_test_dataset, i_check_create_batch_prediction
-from bigmler.tests.basic_cluster_prediction_steps import i_create_all_cluster_resources, i_check_create_cluster
-from bigmler.tests.basic_anomaly_prediction_steps import i_create_all_anomaly_resources, i_check_create_anomaly
-from bigmler.tests.ml_tst_prediction_steps import i_create_all_mlm_resources
+from bigmler.tests.ml_tst_prediction_steps import \
+    i_create_all_ml_resources
+from bigmler.tests.ml_tst_prediction_steps import \
+    i_create_all_ml_resources_and_ensembles
+from bigmler.tests.ml_tst_evaluation_steps import \
+    i_create_all_ml_resources_for_evaluation
+from bigmler.tests.max_categories_tst_prediction_steps import \
+    i_check_create_max_categories_datasets, i_create_all_mc_resources
+from bigmler.tests.basic_batch_tst_prediction_steps import \
+    i_check_create_test_source, i_check_create_test_dataset, \
+    i_check_create_batch_prediction
+from bigmler.tests.basic_cluster_prediction_steps import \
+    i_create_all_cluster_resources, i_check_create_cluster
+from bigmler.tests.basic_anomaly_prediction_steps import \
+    i_create_all_anomaly_resources, i_check_create_anomaly
+from bigmler.tests.ml_tst_prediction_steps import \
+    i_create_all_mlm_resources
+from bigmler.tests.basic_association_steps import \
+    i_create_association, i_check_create_association
 from bigmler.tests.common_steps import check_debug
 from bigmler.reports import REPORTS_DIR
 from nose.tools import ok_, assert_equal, assert_not_equal
 
 
-def shell_execute(command, output, test=None, options=None, test_rows=None, project=True):
+def shell_execute(command, output, test=None, options=None,
+                  test_rows=None, project=True):
     """Excute bigmler command in shell
 
     """
@@ -53,14 +65,17 @@ def shell_execute(command, output, test=None, options=None, test_rows=None, proj
         else:
             if test is not None:
                 world.test_lines = file_number_of_lines(test)
-                if options is None or options.find('--prediction-header') == -1:
+                if options is None or \
+                        options.find('--prediction-header') == -1:
                     # test file has headers in it, so first line must be ignored
                     world.test_lines -= 1
             elif test_rows is not None:
                 world.test_lines = test_rows
-                if options is not None and options.find('--prediction-header') > -1:
+                if options is not None and \
+                        options.find('--prediction-header') > -1:
                     world.test_lines += 1
-            elif options is not None and options.find('--prediction-header') > -1:
+            elif options is not None and \
+                    options.find('--prediction-header') > -1:
                 world.test_lines += 1
             world.output = output
             assert True
@@ -68,7 +83,8 @@ def shell_execute(command, output, test=None, options=None, test_rows=None, proj
         assert False, str(exc)
 
 #@step(r'I create BigML resources from "(.*)" using ensemble of (.*) models to test "(.*)" using median and log predictions in "(.*)"')
-def i_create_resources_from_ensemble_using_median(step, data=None, number_of_models=None, test=None, output=None):
+def i_create_resources_from_ensemble_using_median( \
+    step, data=None, number_of_models=None, test=None, output=None):
     ok_(data is not None and test is not None and output is not None and \
         number_of_models is not None)
     data = res_filename(data)
@@ -81,25 +97,31 @@ def i_create_resources_from_ensemble_using_median(step, data=None, number_of_mod
     shell_execute(command, output, test=test)
 
 #@step(r'I create BigML resources uploading train "(.*?)" file using the median to test "(.*?)" and log predictions in "([^"]*)"$')
-def i_create_all_resources_with_median(step, data=None, test=None, output=None):
+def i_create_all_resources_with_median(step, data=None,
+                                       test=None, output=None):
     ok_(data is not None and test is not None and output is not None)
     test = res_filename(test)
     command = ("bigmler --train " + res_filename(data) + " --test " + test +
-               " --store --output " + output + " --median --max-batch-models 1 --no-fast")
+               " --store --output " + output +
+               " --median --max-batch-models 1 --no-fast")
     shell_execute(command, output, test=test)
 
 
 #@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" remotely to a dataset with no CSV output and log resources in "([^"]*)"$')
-def i_create_all_resources_batch_to_dataset(step, data=None, test=None, output_dir=None):
+def i_create_all_resources_batch_to_dataset(step, data=None,
+                                            test=None, output_dir=None):
     ok_(data is not None and test is not None and output_dir is not None)
     test = res_filename(test)
     command = ("bigmler --train " + res_filename(data) + " --test " + test +
-               " --store --no-csv --to-dataset --output-dir " + output_dir + " --remote")
+               " --store --no-csv --to-dataset --output-dir " +
+               output_dir + " --remote")
     shell_execute(command, "%s/x.csv" % output_dir, test=test)
 
 
 #@step(r'I create a BigML source from file "([^"]*)" with locale "([^"]*)", field attributes "([^"]*)" and types file "([^"]*)" storing results in "(.*)"$')
-def i_create_source_with_locale(step, data=None, locale=None, field_attributes=None, types=None, output=None):
+def i_create_source_with_locale(step, data=None, locale=None,
+                                field_attributes=None, types=None,
+                                output=None):
     ok_(data is not None and locale is not None and output is not None and \
         types is not None and field_attributes is not None)
     field_attributes = res_filename(field_attributes)
@@ -131,7 +153,8 @@ def i_create_all_resources_to_model(step, data=None, output=None):
 
 
 #@step(r'I create BigML feature selection (\d*)-fold cross-validations for "(.*)" improving "(.*)"$')
-def i_create_kfold_cross_validation_objective(step, k_folds=None, objective=None, metric=None):
+def i_create_kfold_cross_validation_objective(step, k_folds=None,
+                                              objective=None, metric=None):
     ok_(k_folds is not None and metric is not None and objective is not None)
     command = ("bigmler analyze --dataset " +
                              world.dataset['resource'] +
@@ -153,7 +176,8 @@ def i_create_kfold_cross_validation_objective(step, k_folds=None, objective=None
 
 
 #@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" with proportional missing strategy and log predictions in "([^"]*)"$')
-def i_create_all_resources_proportional(step, data=None, test=None, output=None):
+def i_create_all_resources_proportional(step, data=None,
+                                        test=None, output=None):
     ok_(data is not None and test is not None and output is not None)
     test = res_filename(test)
     command = ("bigmler --train " + res_filename(data) + " --test " + test +
@@ -163,7 +187,8 @@ def i_create_all_resources_proportional(step, data=None, test=None, output=None)
 
 
 #@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" with a missing-splits model and log predictions in "([^"]*)"$')
-def i_create_all_resources_missing_splits(step, data=None, test=None, output=None):
+def i_create_all_resources_missing_splits(step, data=None,
+                                          test=None, output=None):
     ok_(data is not None and test is not None and output is not None)
     test = res_filename(test)
     command = ("bigmler --train " + res_filename(data) + " --test " + test +
@@ -173,7 +198,8 @@ def i_create_all_resources_missing_splits(step, data=None, test=None, output=Non
 
 
 #@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" remotely with proportional missing strategy and log predictions in "([^"]*)"$')
-def i_create_all_resources_remote_proportional(step, data=None, test=None, output=None):
+def i_create_all_resources_remote_proportional(step, data=None,
+                                               test=None, output=None):
     ok_(data is not None and test is not None and output is not None)
     test = res_filename(test)
     command = ("bigmler --train " + res_filename(data) + " --test " + test +
@@ -183,7 +209,8 @@ def i_create_all_resources_remote_proportional(step, data=None, test=None, outpu
 
 
 #@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" remotely with a missing-splits model and log predictions in "([^"]*)"$')
-def i_create_all_resources_remote_missing_splits(step, data=None, test=None, output=None):
+def i_create_all_resources_remote_missing_splits(step, data=None,
+                                                 test=None, output=None):
     ok_(data is not None and test is not None and output is not None)
     test = res_filename(test)
     command = ("bigmler --train " + res_filename(data) + " --test " + test +
@@ -193,7 +220,9 @@ def i_create_all_resources_remote_missing_splits(step, data=None, test=None, out
 
 
 #@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" and log predictions in "(.*?)" with "(.*?)" as test field separator$')
-def i_create_all_resources_with_separator(step, data=None, test=None, output=None, separator=None):
+def i_create_all_resources_with_separator(step, data=None,
+                                          test=None, output=None,
+                                          separator=None):
     ok_(data is not None and test is not None and separator is not None and \
         output is not None)
     test = res_filename(test)
@@ -1391,7 +1420,8 @@ def i_have_previous_scenario_or_reproduce_it(step, scenario, kwargs):
                  'scenario_r1': [(i_create_all_resources_batch, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_model, False), (i_check_create_test_source, False), (i_check_create_test_dataset, False), (i_check_create_batch_prediction, False)],
                  'scenario_mlm_1': [(i_create_all_mlm_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models, False)],
                 'scenario_c_1': [(i_create_all_cluster_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_cluster, False)],
-                'scenario_an_1': [(i_create_all_anomaly_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_anomaly, False)]}
+                'scenario_an_1': [(i_create_all_anomaly_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_anomaly, False)],
+                'scenario_ass_1': [(i_create_association, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_association, False)]}
     scenario_path = "%s/" % scenario
     if os.path.exists(scenario_path):
         retrieve_resources(scenario_path, step)

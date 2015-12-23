@@ -3,6 +3,11 @@
 History
 -------
 
+3.5.0 (2015-12-24)
+~~~~~~~~~~~~~~~~~~
+
+- Adding bigmler association subcommand to manage associations.
+
 3.4.0 (2015-12-21)
 ~~~~~~~~~~~~~~~~~~
 

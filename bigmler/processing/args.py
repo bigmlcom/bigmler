@@ -351,6 +351,20 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
+
+    # Parses association input fields if provided.
+    try:
+        if command_args.association_fields:
+            association_fields_arg = [
+                field.strip() for field in \
+                command_args.association_fields.split( \
+                command_args.args_separator)]
+            command_args.association_fields_ = association_fields_arg
+        else:
+            command_args.association_fields_ = []
+    except AttributeError:
+        pass
+
     # Parses anomaly input fields if provided.
     try:
         if command_args.anomaly_fields:
@@ -424,6 +438,26 @@ def get_output_args(api, command_args, resume):
                                       "tags__in=%s" %
                                       command_args.cluster_tag))
         command_args.cluster_ids_ = cluster_ids
+    except AttributeError:
+        pass
+
+    association_ids = []
+    try:
+        # Parses association/ids if provided.
+        if command_args.associations:
+            association_ids = u.read_resources(command_args.associations)
+        command_args.association_ids_ = association_ids
+    except AttributeError:
+        pass
+
+    # Retrieve cluster/ids if provided.
+    try:
+        if command_args.association_tag:
+            association_ids = (association_ids +
+                           u.list_ids(api.list_associations,
+                                      "tags__in=%s" %
+                                      command_args.association_tag))
+        command_args.association_ids_ = association_ids
     except AttributeError:
         pass
 

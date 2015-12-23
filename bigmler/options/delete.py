@@ -192,6 +192,11 @@ def get_delete_options(defaults=None):
             'default': defaults.get('project_tag', None),
             'help': "Retrieve projects that were tagged with tag."},
 
+        # Use it to retrieve associations that were tagged with tag.
+        '--association-tag': {
+            'dest': 'association_tag',
+            'default': defaults.get('association_tag', None),
+            'help': "Retrieve associations that were tagged with tag."},
 
         # Filter the resources to be deleted by its status (finished if
         # not set)

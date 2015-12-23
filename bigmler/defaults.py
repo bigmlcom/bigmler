@@ -220,7 +220,15 @@ FLAGS = {
         {'flag': 'language', 'type': 'string'},
         {'flag': 'add_fields', 'type': 'boolean'}],
     'BigMLer project': [
-        {'flag': 'project_attributes', 'type': 'string'}]}
+        {'flag': 'project_attributes', 'type': 'string'}],
+    'BigMLer association': [
+        {'flag': 'association_fields', 'type': 'string'},
+        {'flag': 'association', 'type': 'string'},
+        {'flag': 'association_file', 'type': 'string'},
+        {'flag': 'associations', 'type': 'string'},
+        {'flag': 'association_k', 'type': 'integer'},
+        {'flag': 'no_association', 'type': 'boolean'},
+        {'flag': 'association_attributes', 'type': 'string'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):

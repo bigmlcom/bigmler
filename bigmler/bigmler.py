@@ -55,6 +55,7 @@ from bigmler.delete.dispatcher import delete_dispatcher
 from bigmler.report.dispatcher import report_dispatcher
 from bigmler.reify.dispatcher import reify_dispatcher
 from bigmler.project.dispatcher import project_dispatcher
+from bigmler.association.dispatcher import association_dispatcher
 from bigmler.parser import SUBCOMMANDS
 from bigmler.utils import SYSTEM_ENCODING
 
@@ -107,6 +108,8 @@ def main(args=sys.argv[1:]):
             delete_dispatcher(args=new_args)
         elif new_args[0] == "project":
             project_dispatcher(args=new_args)
+        elif new_args[0] == "association":
+            association_dispatcher(args=new_args)
     else:
         sys.exit("BigMLer used with no arguments. Check:\nbigmler --help\n\nor"
                  "\n\nbigmler sample --help\n\n"
@@ -116,6 +119,7 @@ def main(args=sys.argv[1:]):
                  "\n\nbigmler report --help\n\n"
                  "\n\nbigmler reify --help\n\n"
                  "\n\nbigmler project --help\n\n"
+                 "\n\nbigmler association --help\n\n"
                  "\n\nbigmler delete --help\n\n"
                  " for a list of options")
 

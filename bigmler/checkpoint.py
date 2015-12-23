@@ -263,6 +263,28 @@ def is_batch_centroid_created(path):
     except IOError:
         return False, None
 
+def are_associations_created(path, number_of_associations):
+    """Checks existence and reads the association ids from the associations
+    file in the path directory
+
+    """
+    association_ids = []
+    try:
+        with open("%s%sassociations" % (path, os.sep)) as associations_file:
+            for line in associations_file:
+                association = line.strip()
+                try:
+                    association_id = bigml.api.get_association_id(association)
+                    association_ids.append(association_id)
+                except ValueError:
+                    return False, association_ids
+        if len(association_ids) == number_of_associations:
+            return True, association_ids
+        else:
+            return False, association_ids
+    except IOError:
+        return False, association_ids
+
 
 def are_clusters_created(path, number_of_clusters):
     """Checks existence and reads the cluster ids from the clusters file in the

@@ -49,7 +49,8 @@ RESOURCE_TYPES = [
     'anomalyscore',
     'batchanomalyscore',
     'project',
-    'sample']
+    'sample',
+    'association']
 IRREGULAR_PLURALS = {
     'anomaly': 'anomalies',
     'batchprediction': 'batch_predictions',

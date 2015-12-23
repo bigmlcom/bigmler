@@ -36,9 +36,10 @@ from bigmler.options.sample import get_sample_options
 from bigmler.options.report import get_report_options
 from bigmler.options.reify import get_reify_options
 from bigmler.options.project import get_project_options
+from bigmler.options.association import get_association_options
 
 SUBCOMMANDS = ["main", "analyze", "cluster", "anomaly", "sample",
-               "delete", "report", "reify", "project"]
+               "delete", "report", "reify", "project", "association"]
 MAIN = SUBCOMMANDS[0]
 
 
@@ -235,6 +236,24 @@ under the License.""" % version
         option = '--%s' % option
         project_common_options.update({option: common_options[option]})
     subcommand_options["project"].update(project_common_options)
+
+    defaults = general_defaults["BigMLer association"]
+    subcommand_options["association"] = get_association_options( \
+        defaults=defaults)
+    # general options
+    subcommand_options["association"].update(common_options)
+    subcommand_options["association"].update(source_options)
+    subcommand_options["association"].update(dataset_options)
+    subcommand_options["association"].update(test_options)
+    subcommand_options["association"].update({
+        '--source-tag': delete_options['--source-tag'],
+        '--dataset-tag': delete_options['--dataset-tag'],
+        '--association-tag': delete_options['--association-tag'],
+        '--reports': main_options['--reports'],
+        '--remote': main_options['--remote'],
+        '--no-batch': main_options['--no-batch'],
+        '--no-csv': main_options['--no-csv'],
+        '--no-no-csv': main_options['--no-no-csv']})
 
     for subcommand in SUBCOMMANDS:
         subparser = subparsers.add_parser(subcommand)
