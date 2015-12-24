@@ -320,9 +320,9 @@ def delete(api, delete_list):
     for resource_id in delete_list:
         resource_type = None
         try:
-            for resource_type, resource_re in bigml.api.RESOURCE_RE.items():
+            for resource_type in bigml.api.RESOURCE_RE.keys():
                 try:
-                    bigml.api.get_resource(resource_re, resource_id)
+                    bigml.api.get_resource(resource_type, resource_id)
                     break
                 except ValueError:
                     pass
