@@ -80,59 +80,56 @@ def i_check_output_file(step, output=None, check_file=None):
     if check_file is None or output is None:
         assert False
     check_file = res_filename(check_file)
-    try:
-        output_file = os.path.join(world.directory, "reify.py")
-        with open(check_file, open_mode("r")) as check_file_handler:
-            check_contents = check_file_handler.read().strip("\n")
-            check_contents_lines = check_contents.split("\n")
-            for index, line in enumerate(check_contents_lines):
-                if line:
-                    check_contents_lines[index] = INDENT + line
-            check_contents = "\n".join(check_contents_lines)
-        # remove unicode mark for strings if Python3
-        if PYTHON3:
-            check_contents = check_contents.replace( \
-                " u'", " '").replace("{u'", "{'").replace( \
-                ' u"', ' "').replace('u\\\'', '\\\'')
-        with open(output_file, open_mode("r")) as output_file:
-            output_file_contents = output_file.read()
-        #strip comments at the beginning of the file
-        output_file_contents = re.sub(r'#!.*def\smain\(\):\n', '',
-                                      output_file_contents,
-                                      flags=re.S).strip("\n")
-        output_file_contents = output_file_contents.replace( \
-            '\n\nif __name__ == "__main__":\n    main()', '')
+    output_file = os.path.join(world.directory, "reify.py")
+    with open(check_file, open_mode("r")) as check_file_handler:
+        check_contents = check_file_handler.read().strip("\n")
+        check_contents_lines = check_contents.split("\n")
+        for index, line in enumerate(check_contents_lines):
+            if line:
+                check_contents_lines[index] = INDENT + line
+        check_contents = "\n".join(check_contents_lines)
+    # remove unicode mark for strings if Python3
+    if PYTHON3:
+        check_contents = check_contents.replace( \
+            " u'", " '").replace("{u'", "{'").replace( \
+            ' u"', ' "').replace('u\\\'', '\\\'')
+    with open(output_file, open_mode("r")) as output_file:
+        output_file_contents = output_file.read()
+    #strip comments at the beginning of the file
+    output_file_contents = re.sub(r'#!.*def\smain\(\):\n', '',
+                                  output_file_contents,
+                                  flags=re.S).strip("\n")
+    output_file_contents = output_file_contents.replace( \
+        '\n\nif __name__ == "__main__":\n    main()', '')
 
-        #strip internally added project id information
-        prefix = "" if PYTHON3 else "u"
-        p_str = r',\s\\\n%s\{\'project\':\s%s\'project/[a-f0-9]{24}\'\}\)' \
-            % (INDENT * 2, prefix)
-        output_file_contents = re.sub(p_str,
-                                      ')', output_file_contents,
-                                      flags=re.S).strip("\n")
-        p_str = r',\s\\\n%s\s\'project\':\s%s\'project/[a-f0-9]{24}\'\}\)' \
-            % (INDENT * 2, prefix)
-        output_file_contents = re.sub(p_str,
-                                      ')', output_file_contents,
-                                      flags=re.S).strip("\n")
-        p_str = r',\n%s\s\'project\':\s%s\'project/[a-f0-9]{24}\'\}\)' \
-            % (INDENT * 2, prefix)
-        output_file_contents = re.sub(p_str,
-                                      '})', output_file_contents,
-                                      flags=re.S).strip("\n")
-        p_str = r',\s\'project\':\s%s\'project/[a-f0-9]{24}\'' % prefix
-        output_file_contents = re.sub(p_str,
-                                      '', output_file_contents,
-                                      flags=re.S).strip("\n")
-        if check_contents == output_file_contents:
-            assert True
-        else:
-            if PYTHON3:
-                # look for an alternative in PYTHON3
-                check_contents = python3_contents(check_file, check_contents)
-            eq_(check_contents, output_file_contents)
-    except Exception, exc:
-        assert False, str(exc)
+    #strip internally added project id information
+    prefix = "" if PYTHON3 else "u"
+    p_str = r',\s\\\n%s\{\'project\':\s%s\'project/[a-f0-9]{24}\'\}\)' \
+        % (INDENT * 2, prefix)
+    output_file_contents = re.sub(p_str,
+                                  ')', output_file_contents,
+                                  flags=re.S).strip("\n")
+    p_str = r',\s\\\n%s\s\'project\':\s%s\'project/[a-f0-9]{24}\'\}\)' \
+        % (INDENT * 2, prefix)
+    output_file_contents = re.sub(p_str,
+                                  ')', output_file_contents,
+                                  flags=re.S).strip("\n")
+    p_str = r',\n%s\s\'project\':\s%s\'project/[a-f0-9]{24}\'\}\)' \
+        % (INDENT * 2, prefix)
+    output_file_contents = re.sub(p_str,
+                                  '})', output_file_contents,
+                                  flags=re.S).strip("\n")
+    p_str = r',\s\'project\':\s%s\'project/[a-f0-9]{24}\'' % prefix
+    output_file_contents = re.sub(p_str,
+                                  '', output_file_contents,
+                                  flags=re.S).strip("\n")
+    if check_contents == output_file_contents:
+        assert True
+    else:
+        if PYTHON3:
+            # look for an alternative in PYTHON3
+            check_contents = python3_contents(check_file, check_contents)
+        eq_(check_contents, output_file_contents)
 
 
 #@step(r'I create a BigML source with data "(.*)" and params "(.*)"')

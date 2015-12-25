@@ -15,6 +15,5 @@ dataset2 = api.create_dataset(dataset1, \
      'new_fields': [{u'description': u'',
                      'field': u'2',
                      u'label': u'',
-                     u'name': u'new'}],
-     'objective_field': {'id': u'100004'}})
+                     u'name': u'new'}]})
 api.ok(dataset2)

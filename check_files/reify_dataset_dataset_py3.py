@@ -12,6 +12,5 @@
          'all_fields': False,
          'input_fields': ['000000', '000001', '000002', '000003', '000004'],
          'name': 'my_dataset_from_dataset_name',
-         'new_fields': [{'description': '', 'field': '2', 'label': '', 'name': 'new'}],
-         'objective_field': {'id': '100004'}})
+         'new_fields': [{'description': '', 'field': '2', 'label': '', 'name': 'new'}]})
     api.ok(dataset2)
