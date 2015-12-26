@@ -66,13 +66,13 @@ Used to generate reports for the analyze subcommand showing the ROC curve and
 ``bigmler project``:
 
 
-Used to generate and manage projects for organization purposes.See
+Used to generate and manage projects for organization purposes. See
 :ref:`bigmler-project`.
 
 ``bigmler association``:
 
 
-Used to generate association rules from your datasets.See
+Used to generate association rules from your datasets. See
 :ref:`bigmler-association`.
 
 Quick Start
