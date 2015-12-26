@@ -89,7 +89,7 @@ def get_fields_changes(resource, referrer=None,
         {'resource': resource['resource'], 'object': resource}).fields
     resource_type = get_resource_type(resource)
     # for sources, extract all the updatable attributes
-    if get_resource_type(resource) == 'source':
+    if resource_type == 'source':
         updatable_attrs = SOURCE_UPDATABLE
         for field_id in resource_fields.keys():
             field_opts = {}

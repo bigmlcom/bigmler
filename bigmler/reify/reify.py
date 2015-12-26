@@ -25,7 +25,6 @@ import stat
 
 from bigml.resourcehandler import get_resource_id
 
-from bigmler.checkpoint import file_number_of_lines
 from bigmler.utils import PYTHON3
 from bigmler.reify.restchain import RESTChain
 
@@ -51,5 +50,5 @@ def reify_resources(args, api, logger):
         with open(args.output, "w") as reify_file:
             reify_file.write(output.encode("utf-8"))
 
-    st = os.stat(args.output)
-    os.chmod(args.output, st.st_mode | stat.S_IEXEC)
+    sts = os.stat(args.output)
+    os.chmod(args.output, sts.st_mode | stat.S_IEXEC)

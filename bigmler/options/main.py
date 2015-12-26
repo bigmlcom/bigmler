@@ -463,7 +463,7 @@ def get_main_options(defaults=None, constants=None):
             'default': defaults.get('random_candidates', 0),
             'type': int,
             'help': ("Number of fields selected at random in ensembles'"
-                    " construction.")},
+                     " construction.")},
 
         # Disables reports upload.
         '--no-upload': {

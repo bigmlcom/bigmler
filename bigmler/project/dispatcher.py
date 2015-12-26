@@ -81,16 +81,9 @@ def project_dispatcher(args=sys.argv[1:]):
         clear_log_files([log])
 
 
-    def logger(message):
-        """Partial to log messages according to args.verbosity
-
-        """
-        u.log_message(u.dated(message), \
-            log_file=session_file, console=command_args.verbosity)
-
     # Creates the corresponding api instance
     api = a.get_api_instance(command_args, u.check_dir(session_file))
-    output_args = a.get_output_args(api, command_args, command_args.resume)
+    a.get_output_args(api, command_args, command_args.resume)
     a.attribute_args(command_args)
 
 
@@ -98,7 +91,7 @@ def project_dispatcher(args=sys.argv[1:]):
         command_args.project = command_args.name
     if command_args.project:
         # create project
-        project_id = pp.project_processing(
+        pp.project_processing(
             api, command_args, command_args.resume, session_file=session_file,
             path=path, log=log, create=True)
     if command_args.project_id and (
@@ -106,8 +99,8 @@ def project_dispatcher(args=sys.argv[1:]):
             command_args.name or command_args.tag or command_args.description
             or command_args.category):
         # update project's attributes
-        pp.update_project(command_args, api, command_args.resume,
-            session_file=session_file, path=path, log=log)
+        pp.update_project(command_args, api, command_args.resume, \
+            session_file=session_file)
 
     u.log_message("_" * 80 + "\n", log_file=session_file)
     u.print_generated_files(command_args.output_dir, log_file=session_file,

@@ -1867,7 +1867,7 @@ def create_project(project_args, args, api=None,
 
 
 def update_project(project_args, args,
-                   api=None, session_file=None, path=None, log=None):
+                   api=None, session_file=None):
     """Updates project properties
 
     """
@@ -1920,7 +1920,7 @@ def set_sample_args(args, name=None):
     }
 
     if 'sample' in args.json_args:
-        update_json_args(sample_args, args.json_args.get('sample'), fields)
+        update_json_args(sample_args, args.json_args.get('sample'))
     return sample_args
 
 

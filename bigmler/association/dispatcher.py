@@ -14,7 +14,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-"""BigMLer - cluster subcommand processing dispatching
+"""BigMLer - association subcommand processing dispatching
 
 """
 from __future__ import absolute_import
@@ -23,17 +23,14 @@ import sys
 import os
 import shutil
 
-import bigml.api
+
 import bigmler.utils as u
 import bigmler.resources as r
 import bigmler.pre_model_steps as pms
 import bigmler.processing.args as a
 import bigmler.processing.associations as pa
-import bigmler.processing.sources as ps
-import bigmler.processing.datasets as pd
 
 from bigmler.defaults import DEFAULTS_FILE
-from bigmler.centroid import centroid, remote_centroid
 from bigmler.reports import clear_reports, upload_reports
 from bigmler.command import get_stored_command
 from bigmler.dispatcher import (SESSIONS_LOG, command_handling,
@@ -90,7 +87,7 @@ def association_dispatcher(args=sys.argv[1:]):
     api = a.get_api_instance(command_args, u.check_dir(session_file))
 
     # Selects the action to perform
-    if (a.has_train(command_args) or a.has_test(command_args)):
+    if a.has_train(command_args) or a.has_test(command_args):
         output_args = a.get_output_args(api, command_args, resume)
         a.transform_args(command_args, command.flags, api,
                          command.user_defaults)

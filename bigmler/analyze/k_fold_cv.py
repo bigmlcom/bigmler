@@ -832,7 +832,7 @@ def default_candidates_limits(args, fields):
 
     """
     args.min_candidates = DEFAULT_MIN_CANDIDATES
-    args.max_candidates =  len(fields.preferred_fields().keys())
+    args.max_candidates = len(fields.preferred_fields().keys())
 
 
 def create_candidates_analysis(args, api, common_options, resume=False):
@@ -859,7 +859,7 @@ def create_candidates_analysis(args, api, common_options, resume=False):
     # showing the instruction to create the complete model with the
     # chosen random candidates number
     bigmler_command = (u'bigmler --dataset %s --number-of-models %s'
-                       u' --randomize --random-candidates %s') % (
+                       u' --randomize --random-candidates %s') % ( \
         args.dataset, args.number_of_models, random_candidates)
     message = (u'To create the final ensemble with the entire dataset using '
                u'the selected number of random candidates use:\n%s\n\n' %
@@ -900,7 +900,6 @@ def best_candidates_number(datasets_file, args, common_options,
         if penalty is None:
             penalty = DEFAULT_CANDIDATES_PENALTY
         best_score = - float('inf')
-        best_unchanged_count = 0
         metric = args.optimize
         score = best_score
         while random_candidates < max_candidates:
@@ -919,7 +918,6 @@ def best_candidates_number(datasets_file, args, common_options,
             if (score - EPSILON) > best_score:
                 best_candidates = random_candidates
                 best_score = score
-                best_unchanged_count = 0
                 message = 'New best random candidates number is: %s\n' % \
                     best_candidates
                 u.log_message(message, log_file=session_file,
@@ -933,8 +931,6 @@ def best_candidates_number(datasets_file, args, common_options,
                                                           score)
                 u.log_message(message, log_file=session_file,
                               console=args.verbosity)
-            else:
-                best_unchanged_count += 1
             random_candidates += DEFAULT_CANDIDATES_STEP
 
         message = ('The best random candidates number is: %s \n'

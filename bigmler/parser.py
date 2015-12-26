@@ -213,7 +213,8 @@ under the License.""" % version
 
     defaults = general_defaults["BigMLer reify"]
     subcommand_options["reify"] = get_reify_options(defaults=defaults)
-    reify_common_options_list = ['clear-logs', 'username', 'api-key','version',
+    reify_common_options_list = ['clear-logs', 'username', 'api-key',
+                                 'version',
                                  'dev', 'no-dev', 'output-dir', 'verbosity',
                                  'resume', 'stack-level', 'debug', 'store']
     reify_common_options = {}

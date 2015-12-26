@@ -144,7 +144,8 @@ class RESTChain(object):
                         calls = self.calls[origin]
                         for call in calls:
                             # only create calls will introduce new origins
-                            if call.action == "create" or (call.action == "get"
+                            if call.action == "create" or ( \
+                                    call.action == "get"
                                     and call.suffix == "['object']['output_"
                                                        "dataset_resource']"):
                                 old_origins.extend(call.origins)
@@ -375,7 +376,7 @@ class RESTChain(object):
                     {"objective_field": child.get('objective_field')})
 
         # the objective field name is automatically added to tags
-        objective_field_name = child.get('objective_field_name','')
+        objective_field_name = child.get('objective_field_name', '')
         if objective_field_name in child.get('tags'):
             child['tags'].remove(objective_field_name)
         # options common to all model types
@@ -439,12 +440,12 @@ class RESTChain(object):
 
         # name, exclude automatic naming alternatives
         autonames = [u'']
-        autonames.append(
+        autonames.append( \
             u'%s\'s cluster' % parent.get('name', ''))
-        autonames.append(
+        autonames.append( \
             u'%s\' cluster' % parent.get('name', ''))
-        autonames.append(
-            u'%s\ cluster' % parent.get('name', ''))
+        autonames.append( \
+            u'%s cluster' % parent.get('name', ''))
         u.non_automatic_name( \
             child, opts, autonames=autonames)
 
@@ -472,7 +473,7 @@ class RESTChain(object):
         autonames.append(
             u'%s\' anomaly detector' % parent.get('name', ''))
         autonames.append(
-            u'%s\ anomaly detector' % parent.get('name', ''))
+            u'%s anomaly detector' % parent.get('name', ''))
         u.non_automatic_name(
             child, opts,
             autonames=autonames)

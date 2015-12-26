@@ -52,7 +52,7 @@ def reify_dispatcher(args=sys.argv[1:]):
             args, command_args.debug, command_log=COMMAND_LOG,
             dirs_log=DIRS_LOG, sessions_log=SESSIONS_LOG)
         if command_args.output is None:
-            command_args.output = os.path.join(output_dir,
+            command_args.output = os.path.join(command_args.output_dir,
                                                DEFAULT_OUTPUT)
     else:
         if command_args.output_dir is None:

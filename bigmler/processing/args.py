@@ -454,9 +454,9 @@ def get_output_args(api, command_args, resume):
     try:
         if command_args.association_tag:
             association_ids = (association_ids +
-                           u.list_ids(api.list_associations,
-                                      "tags__in=%s" %
-                                      command_args.association_tag))
+                               u.list_ids(api.list_associations,
+                                          "tags__in=%s" %
+                                          command_args.association_tag))
         command_args.association_ids_ = association_ids
     except AttributeError:
         pass

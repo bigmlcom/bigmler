@@ -35,8 +35,8 @@ import bigmler.processing.datasets as pd
 import bigmler.processing.models as pm
 
 from bigml.model import Model
-#from bigml.ensemble import Ensemble
 from bigml.basemodel import retrieve_resource
+from bigml.fields import Fields
 
 from bigmler.evaluation import evaluate, cross_validate
 from bigmler.defaults import DEFAULTS_FILE
@@ -384,7 +384,7 @@ def compute_output(api, args):
             (args.lisp_filter or args.json_filter) and not has_source(args):
         if fields is None:
             if isinstance(dataset, basestring):
-                dataset = check_resource(dataset, api=api)
+                dataset = u.check_resource(dataset, api=api)
             fields = Fields(dataset, csv_properties)
         args.objective_id_ = get_objective_id(args, fields)
         args.objective_name_ = fields.field_name(args.objective_id_)
