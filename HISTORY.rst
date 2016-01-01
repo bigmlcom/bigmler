@@ -3,6 +3,12 @@
 History
 -------
 
+3.5.2 (2016-01-01)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug in bigmler reify subcommand for datasets generated from other
+  datasets comming from batch resources.
+
 3.5.1 (2015-12-26)
 ~~~~~~~~~~~~~~~~~~
 

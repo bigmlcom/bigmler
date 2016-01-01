@@ -36,7 +36,7 @@ SOURCE_UPDATABLE = ["name", "label", "description", "optype"]
 ORIGINS = {
     "source": [["file_name"]],
     "dataset": [[
-        "origin_batch_resource", "cluster", "ranges",
+        "new_fields", "origin_batch_resource", "cluster", "ranges",
         "origin_dataset", "source"]],
     "model": [["cluster", "datasets", "dataset"]],
     "ensemble": [["datasets", "dataset"]],
@@ -61,6 +61,8 @@ def get_origin_info(resource):
     found_origins = []
     for argument_origins in origins:
         for origin in argument_origins:
+            if origin == 'new_fields':
+                origin = 'origin_dataset'
             info = resource.get(origin)
             if info:
                 if origin == 'ranges':

@@ -311,6 +311,7 @@ class RESTChain(object):
             'column_number']
         if objective_column != max_column:
             opts['create'].update({"objective_field": {"id": objective_id}})
+
         if origin != "origin_batch_resource":
             # resize
             if (child['size'] != grandparent['size'] and

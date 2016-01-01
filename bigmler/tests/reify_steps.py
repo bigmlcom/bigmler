@@ -452,3 +452,29 @@ def create_dataset_from_batch_anomaly(filename, output=None, args=None):
     world.batch_anomaly_score_dataset = world.api.update_dataset(world.batch_anomaly_score_dataset, args)
     world.api.ok(world.batch_anomaly_score_dataset)
     world.datasets.append(world.batch_anomaly_score_dataset['resource'])
+
+
+#@step(r'I create a BigML dataset from a dataset from a batch centroid from a cluster with data "(.*)" and params "(.*)"')
+def create_dataset_from_dataset_from_batch_centroid(filename, output=None, args=None):
+    source = world.api.create_source(res_filename(filename))
+    world.source = source
+    world.directory = os.path.dirname(output)
+    world.output = output
+    world.api.ok(world.source)
+    world.sources.append(source['resource'])
+    world.dataset = world.api.create_dataset(source)
+    world.api.ok(world.dataset)
+    world.datasets.append(world.dataset['resource'])
+    world.cluster = world.api.create_cluster(world.dataset)
+    world.api.ok(world.cluster)
+    world.clusters.append(world.cluster['resource'])
+    world.batch_centroid = world.api.create_batch_centroid(world.cluster, world.dataset, {"output_dataset": True})
+    world.api.ok(world.batch_centroid)
+    world.batch_centroids.append(world.batch_centroid['resource'])
+    world.batch_centroid_dataset = world.api.get_dataset(
+        world.batch_centroid['object']['output_dataset_resource'])
+    world.api.ok(world.batch_centroid_dataset)
+    world.datasets.append(world.batch_centroid_dataset['resource'])
+    world.dataset = world.api.create_dataset(world.batch_centroid_dataset['resource'], args)
+    world.api.ok(world.dataset)
+    world.datasets.append(world.dataset['resource'])
