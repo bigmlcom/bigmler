@@ -60,7 +60,7 @@ Used to generate scripts to reproduce the existing resources in BigML. See
 
 
 Used to generate reports for the analyze subcommand showing the ROC curve and
- evaluation metrics of cross-validations. See
+evaluation metrics of cross-validations. See
 :ref:`bigmler-report`.
 
 ``bigmler project``:
