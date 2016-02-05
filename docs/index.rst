@@ -688,7 +688,7 @@ then the contents of the ``attributes.json`` file could be as well
 
 The ``source-attributes`` JSON can contain any of the updatable attributes
 described in the
-`developers section<https://bigml.com/developers/sources#sr_source_properties>`_
+`developers section <https://bigml.com/developers/sources#sr_source_properties>`_
 You can specify the fields that you want to include in the dataset by naming
 them explicitly
 
@@ -2783,35 +2783,35 @@ Data Configuration
                                           with attributes to be used as
                                           arguments (any of the updatable
                                           attributes described in the
-                                          `developers section<https://bigml.com/developers/sources#sr_source_properties>`_ )
+                                          `developers section <https://bigml.com/developers/sources#sr_source_properties>`_ )
                                           in create source calls
 ``--dataset-attributes`` *PATH*           Path to a file containing a JSON
                                           expression
                                           with attributes to be used as
                                           arguments (any of the updatable
                                           attributes described in the
-                                          `developers section<https://bigml.com/developers/datasets#ds_dataset_properties>`_ )
+                                          `developers section <https://bigml.com/developers/datasets#ds_dataset_properties>`_ )
                                           in create dataset calls
 ``--model-attributes`` *PATH*             Path to a file containing a JSON
                                           expression
                                           with attributes to be used as
                                           arguments (any of the updatable
                                           attributes described in the
-                                          `developers section<https://bigml.com/developers/models#md_model_properties>`_ )
+                                          `developers section <https://bigml.com/developers/models#md_model_properties>`_ )
                                           in create model calls
 ``--ensemble-attributes`` *PATH*          Path to a file containing a JSON
                                           expression
                                           with attributes to be used as
                                           arguments (any of the updatable
                                           attributes described in the
-                                          `developers section<https://bigml.com/developers/ensembles#es_ensemble_properties>`_ )
+                                          `developers section <https://bigml.com/developers/ensembles#es_ensemble_properties>`_ )
                                           in create ensemble calls
 ``--evaluation-attributes`` *PATH*        Path to a file containing a JSON
                                           expression
                                           with attributes to be used as
                                           arguments (any of the updatable
                                           attributes described in the
-                                          `developers section<https://bigml.com/developers/evaluations#ev_evaluation_properties>`_ )
+                                          `developers section <https://bigml.com/developers/evaluations#ev_evaluation_properties>`_ )
                                           in create evaluation calls
 ``--batch_prediction-attributes`` *PATH*  Path to a file containing a JSON
                                           expression
@@ -3097,7 +3097,7 @@ Cluster Specific Subcommand Options
 ``--cluster-attributes`` *PATH*           Path to a JSON file containing
                                           attributes (any of the updatable
                                           attributes described in the
-                                          `developers section<https://bigml.com/developers/clusters#cl_cluster_properties>`_ )
+                                          `developers section <https://bigml.com/developers/clusters#cl_cluster_properties>`_ )
                                           to
                                           be used in the cluster creation call
 ``--cluster-datasets`` *CENTROID_NAMES*   Comma-separated list of centroid
@@ -3115,13 +3115,13 @@ Cluster Specific Subcommand Options
 ``--centroid-attributes`` *PATH*          Path to a JSON file containing
                                           attributes (any of the updatable
                                           attributes described in the
-                                          `developers section<https://bigml.com/developers/centroids#ct_centroid_properties>`_ )
+                                          `developers section <https://bigml.com/developers/centroids#ct_centroid_properties>`_ )
                                           to be used in the centroid creation
                                           call
 ``--batch-centroid-attributes`` *PATH*    Path to a JSON file containing
                                           attributes (any of the updatable
                                           attributes described in the
-                                          `developers section<https://bigml.com/developers/batch_centroids#bc_batch_centroid_properties>`_ )
+                                          `developers section <https://bigml.com/developers/batch_centroids#bc_batch_centroid_properties>`_ )
                                           to be used in the batch centroid
                                           creation call
 ``--cluster-models`` *CENTROID_NAMES*     Comma-separated list of centroid
@@ -3158,7 +3158,7 @@ Anomaly Specific Subcommand Options
 ``--anomaly-attributes`` *PATH*               Path to a JSON file containing
                                               attributes (any of the updatable
                                               attributes described in the
-                                              `developers section<https://bigml.com/developers/anomalies#an_anomaly_detector_properties>`_ )
+                                              `developers section <https://bigml.com/developers/anomalies#an_anomaly_detector_properties>`_ )
                                               to
                                               be used in the anomaly creation
                                               call
@@ -3169,14 +3169,14 @@ Anomaly Specific Subcommand Options
 ``--anomaly-score-attributes`` *PATH*         Path to a JSON file containing
                                               attributes (any of the updatable
                                               attributes described in the
-                                              `developers section<https://bigml.com/developers/anomalyscores#as_anomaly_score_properties>`_ )
+                                              `developers section <https://bigml.com/developers/anomalyscores#as_anomaly_score_properties>`_ )
                                               to be used in the
                                               anomaly
                                               score creation call
 ``--batch-anomaly-score-attributes`` *PATH*   Path to a JSON file containing
                                               attributes (any of the updatable
                                               attributes described in the
-                                              `developers section<https://bigml.com/developers/batch_anomalyscores#ba_batch_anomaly_score_properties>`_ )
+                                              `developers section <https://bigml.com/developers/batch_anomalyscores#ba_batch_anomaly_score_properties>`_ )
                                               to
                                               be used in the batch anomaly
                                               score creation call
@@ -3209,7 +3209,7 @@ Samples Subcommand Options
 ``--sample-attributes`` *PATH*                Path to a JSON file containing
                                               attributes (any of the updatable
                                               attributes described in the
-                                              `developers section<https://bigml.com/developers/samples#sp_sample_properties>`_ )
+                                              `developers section <https://bigml.com/developers/samples#sp_sample_properties>`_ )
                                               to
                                               be used in the sample creation
                                               call
