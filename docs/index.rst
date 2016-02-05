@@ -3383,7 +3383,7 @@ Association Specific Subcommand Options
 ``--association-attributes``          Path to a JSON file containing
                                       attributes (any of the updatable
                                       attributes described in the
-                                      `developers section<https://bigml.com/developers/associations#ad_association_properties>`_ )
+                                      `developers section <https://bigml.com/developers/associations#ad_association_properties>`_ )
                                       for the association
 ``--max-k`` K                         Maximum number of rules to be found
 ``--search-strategy`` STRATEGY        Strategy used when searching for the
