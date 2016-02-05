@@ -2818,7 +2818,7 @@ Data Configuration
                                           with attributes to be used as
                                           arguments (any of the updatable
                                           attributes described in the
-                                          `developers section<https://bigml.com/developers/batch_predictions#bp_batch_prediction_properties>`_ )
+                                          `developers section <https://bigml.com/developers/batch_predictions#bp_batch_prediction_properties>`_ )
                                           in create batch prediction calls
 ``--json-filter`` *PATH*                  Path to a file containing a JSON
                                           expression
