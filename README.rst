@@ -86,7 +86,8 @@ script as follows
 
 .. code-block:: bash
 
-    bigmler --train data/iris.csv --username myusername --api_key ae579e7e53fb9abd646a6ff8aa99d4afe83ac291
+    bigmler --train data/iris.csv --username myusername \
+            --api-key ae579e7e53fb9abd646a6ff8aa99d4afe83ac291
 
 For a detailed description of authentication instructions on Windows see the
 `BigMLer on Windows <#bigmler-on-windows>`_ section.
