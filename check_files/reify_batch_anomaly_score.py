@@ -4,10 +4,12 @@ api = BigML()
 source1 = api.create_source("iris.csv")
 api.ok(source1)
 
-dataset1 = api.create_dataset(source1)
+dataset1 = api.create_dataset(source1, \
+    {'name': u'iris dataset'})
 api.ok(dataset1)
 
-anomaly1 = api.create_anomaly(dataset1)
+anomaly1 = api.create_anomaly(dataset1, \
+    {'name': u"iris dataset's anomaly detector"})
 api.ok(anomaly1)
 
 batchanomalyscore1 = api.create_batch_anomaly_score(anomaly1, dataset1, \

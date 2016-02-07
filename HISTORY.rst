@@ -3,6 +3,12 @@
 History
 -------
 
+3.5.3 (2016-02-07)
+~~~~~~~~~~~~~~~~~~
+
+- Adding links to docs and changing tests to adapt bigmler reify
+  to new automatically generated names for resources.
+
 3.5.2 (2016-01-01)
 ~~~~~~~~~~~~~~~~~~
 

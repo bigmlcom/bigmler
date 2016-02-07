@@ -315,7 +315,7 @@ def build_calls(resource_id, origin_ids, opts, suffix=None):
             RESTCall("create",
                      origins=origin_ids,
                      args=opts["create"], resource_id=resource_id))
-    if (not opts["create"] and opts["update"]) or opts.get("get"):
+    if (not opts["create"] and (opts["update"] or suffix)) or opts.get("get"):
         calls.append(
             RESTCall("get",
                      origins=origin_ids,

@@ -4,10 +4,12 @@ api = BigML()
 source1 = api.create_source("iris.csv")
 api.ok(source1)
 
-dataset1 = api.create_dataset(source1)
+dataset1 = api.create_dataset(source1, \
+    {'name': u'iris dataset'})
 api.ok(dataset1)
 
-model1 = api.create_model(dataset1)
+model1 = api.create_model(dataset1, \
+    {'name': u"iris dataset's model"})
 api.ok(model1)
 
 prediction1 = api.create_prediction(model1, \

@@ -279,20 +279,6 @@ class RESTChain(object):
                 u.default_setting(child, attribute, *default_value))
         # name, exclude automatic naming alternatives
         autonames = [u'']
-        suffixes = [u"filtered", u"sampled", u"dataset", u"extended",
-                    u"- batchprediction", u"- batchanomalyscore",
-                    u"- batchcentroid", u"- merged"]
-        autonames.extend([u'%s %s' % (grandparent.get('name', ''), suffix)
-                          for suffix in suffixes])
-        autonames.append(
-            u"%s's dataset" % '.'.join(parent['name'].split('.')[0:-1]))
-        autonames.append(
-            u"%s' dataset" % '.'.join(parent['name'].split('.')[0:-1]))
-        autonames.append(
-            u"Cluster %s - %s" % (int(child.get('centroid', "0"), base=16),
-                                  parent['name']))
-        autonames.append(
-            u"Dataset from %s model - segment" % parent['name'])
         u.non_automatic_name(child, opts, autonames=autonames)
 
         # objective field
@@ -333,7 +319,7 @@ class RESTChain(object):
         # datasets, attributes cannot be set at creation time, so we
         # must update the resource instead
         suffix = None
-        if origin == "origin_batch_resource" and opts['create']:
+        if origin == "origin_batch_resource":
             opts["update"].update(opts["create"])
             opts["create"] = {}
             suffix = "['object']['output_dataset_resource']"
@@ -385,16 +371,6 @@ class RESTChain(object):
 
         # name, exclude automatic naming alternatives
         autonames = [u'']
-        autonames.append(
-            u"%s\'s model" % grandparent.get('name', ''))
-        autonames.append(
-            u"%s\' model" % grandparent.get('name', ''))
-        autonames.append(
-            u"%s model" % grandparent.get('name', ''))
-        autonames.append(
-            u"Cluster %s - %s" % (int(child.get('centroid', "0"), base=16),
-                                  parent['name']))
-
         u.non_automatic_name(child, opts, autonames=autonames)
 
         if child.get('randomize') == True:
@@ -441,12 +417,6 @@ class RESTChain(object):
 
         # name, exclude automatic naming alternatives
         autonames = [u'']
-        autonames.append( \
-            u'%s\'s cluster' % parent.get('name', ''))
-        autonames.append( \
-            u'%s\' cluster' % parent.get('name', ''))
-        autonames.append( \
-            u'%s cluster' % parent.get('name', ''))
         u.non_automatic_name( \
             child, opts, autonames=autonames)
 
@@ -469,12 +439,6 @@ class RESTChain(object):
 
         # name, exclude automatic naming alternatives
         autonames = [u'']
-        autonames.append(
-            u'%s\'s anomaly detector' % parent.get('name', ''))
-        autonames.append(
-            u'%s\' anomaly detector' % parent.get('name', ''))
-        autonames.append(
-            u'%s anomaly detector' % parent.get('name', ''))
         u.non_automatic_name(
             child, opts,
             autonames=autonames)
@@ -506,8 +470,7 @@ class RESTChain(object):
 
         # name, exclude automatic naming alternatives
         u.non_automatic_name(
-            child, opts,
-            autoname=u'Prediction for %s' % child['objective_field_name'])
+            child, opts)
 
         calls = u.build_calls(resource_id, [parent['resource']], opts)
         self.add(resource_id, calls)
@@ -532,8 +495,7 @@ class RESTChain(object):
 
         # name, exclude automatic naming alternatives
         u.non_automatic_name(
-            child, opts,
-            autoname=u'Centroid for %s' % parent['name'])
+            child, opts)
         # non-default update options
         u.non_default_opts(child, opts, call="update")
 
@@ -558,8 +520,7 @@ class RESTChain(object):
 
         # name, exclude automatic naming alternatives
         u.non_automatic_name(
-            child, opts,
-            autoname=u'Score for %s' % parent['name'])
+            child, opts)
 
         calls = u.build_calls(resource_id, [parent['resource']], opts)
         self.add(resource_id, calls)
@@ -594,10 +555,7 @@ class RESTChain(object):
 
         # name, exclude automatic naming alternatives
         u.non_automatic_name(
-            child, opts,
-            autoname=u'Evaluation of %s with %s' % \
-                (parent1.get('name', ''),
-                 parent2.get('name', '')))
+            child, opts)
 
         # range in dataset
         if not child.get('range', []) in [[], [1, parent2.get('rows', None)]]:
@@ -633,10 +591,7 @@ class RESTChain(object):
 
         # name, exclude automatic naming alternatives
         u.non_automatic_name(
-            child, opts,
-            autoname=u'Batch Prediction of %s with %s' % \
-                (parent1.get('name', ''),
-                 parent2.get('name', '')))
+            child, opts)
 
         calls = u.build_calls(
             resource_id, [parent1['resource'], parent2['resource']], opts)
@@ -666,10 +621,7 @@ class RESTChain(object):
 
         # name, exclude automatic naming alternatives
         u.non_automatic_name(
-            child, opts,
-            autoname=u'Batch Centroid of %s with %s' % \
-                (parent1.get('name', ''),
-                 parent2.get('name', '')))
+            child, opts)
 
         calls = u.build_calls(
             resource_id, [parent1['resource'], parent2['resource']], opts)
@@ -695,10 +647,7 @@ class RESTChain(object):
 
         # name, exclude automatic naming alternatives
         u.non_automatic_name(
-            child, opts,
-            autoname=u'Batch Anomaly Score of %s with %s' % \
-                (parent1.get('name', ''),
-                 parent2.get('name', '')))
+            child, opts)
 
         calls = u.build_calls(
             resource_id, [parent1['resource'], parent2['resource']], opts)
