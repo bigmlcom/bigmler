@@ -32,7 +32,7 @@ from bigmler.tests.common_steps import check_debug
 
 INDENT = ' ' * 4
 
-def python3_contents(filename, prior_contents):
+def python3_contents(filename, prior_contents, alternative=""):
     """Check for a file that has alternative contents for Python3 and return
        its contents
 
@@ -40,8 +40,8 @@ def python3_contents(filename, prior_contents):
     directory = os.path.dirname(filename)
     basename = os.path.basename(filename)
     basename_name, basename_ext = basename.split(".")
-    filename = os.path.join(directory, "%s_py3.%s" % ( \
-        basename_name, basename_ext))
+    filename = os.path.join(directory, "%s_py3%s.%s" % ( \
+        basename_name, alternative, basename_ext))
     try:
         with open(filename, open_mode("r")) as file_handler:
             return file_handler.read().strip("\n")
@@ -129,6 +129,9 @@ def i_check_output_file(step, output=None, check_file=None):
         if PYTHON3:
             # look for an alternative in PYTHON3
             check_contents = python3_contents(check_file, check_contents)
+            if check_contents != output_file_contents:
+                check_contents = python3_contents(
+                    check_file, check_contents, alternative="_1")
         eq_(check_contents, output_file_contents)
 
 
