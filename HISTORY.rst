@@ -3,6 +3,12 @@
 History
 -------
 
+3.5.4 (2016-02-09)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug: wrong types had been added to default options in bigmler.ini
+- Updating copyright --version notice.
+
 3.5.3 (2016-02-07)
 ~~~~~~~~~~~~~~~~~~
 
