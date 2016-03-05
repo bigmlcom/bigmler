@@ -38,6 +38,7 @@ from bigmler.options.reify import get_reify_options
 from bigmler.options.project import get_project_options
 from bigmler.options.association import get_association_options
 from bigmler.options.logisticregression import get_logistic_regression_options
+from bigmler.options.execute import get_execute_options
 
 SUBCOMMANDS = ["main", "analyze", "cluster", "anomaly", "sample",
                "delete", "report", "reify", "project", "association",

@@ -851,24 +851,30 @@ def transform_dataset_options(command_args, api):
     """Retrieves the dataset ids from the different input options
 
     """
-    dataset_ids = None
-    command_args.dataset_ids = []
-    # Parses dataset/id if provided.
-    if command_args.datasets:
-        dataset_ids = u.read_datasets(command_args.datasets)
-        if len(dataset_ids) == 1:
-            command_args.dataset = dataset_ids[0]
-        command_args.dataset_ids = dataset_ids
+    try:
+        dataset_ids = None
+        command_args.dataset_ids = []
+        # Parses dataset/id if provided.
+        if command_args.datasets:
+            dataset_ids = u.read_datasets(command_args.datasets)
+            if len(dataset_ids) == 1:
+                command_args.dataset = dataset_ids[0]
+            command_args.dataset_ids = dataset_ids
+    except Exception:
+        pass
 
     # Reading test dataset ids is delayed till the very moment of use to ensure
     # that the newly generated resources files can be used there too
     command_args.test_dataset_ids = []
 
-    # Retrieve dataset/ids if provided.
-    if command_args.dataset_tag:
-        dataset_ids = dataset_ids.extend(
-            u.list_ids(api.list_datasets,
-                       "tags__in=%s" % command_args.dataset_tag))
-        if len(dataset_ids) == 1:
-            command_args.dataset = dataset_ids[0]
-        command_args.dataset_ids = dataset_ids
+    try:
+        # Retrieve dataset/ids if provided.
+        if command_args.dataset_tag:
+            dataset_ids = dataset_ids.extend(
+                u.list_ids(api.list_datasets,
+                           "tags__in=%s" % command_args.dataset_tag))
+            if len(dataset_ids) == 1:
+                command_args.dataset = dataset_ids[0]
+            command_args.dataset_ids = dataset_ids
+    except Exception:
+        pass

@@ -2262,7 +2262,7 @@ def set_script_args(args, name=None):
     if args.imports is not None:
         script_args.update({"imports": args.imports_})
     if args.parameters is not None:
-        script_args.update({"parameters": args.parameters_})
+        script_args.update(args.parameters_)
     update_attributes(script_args, args.json_args.get('script'))
     return script_args
 

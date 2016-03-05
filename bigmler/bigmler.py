@@ -54,16 +54,10 @@ from bigmler.anomaly.dispatcher import anomaly_dispatcher
 from bigmler.delete.dispatcher import delete_dispatcher
 from bigmler.report.dispatcher import report_dispatcher
 from bigmler.reify.dispatcher import reify_dispatcher
-<<<<<<< HEAD
 from bigmler.project.dispatcher import project_dispatcher
 from bigmler.association.dispatcher import association_dispatcher
-<<<<<<< HEAD
 from bigmler.logisticregression.dispatcher import logistic_regression_dispatcher
-=======
-=======
 from bigmler.execute.dispatcher import execute_dispatcher
->>>>>>> First working verision of bigmler execute
->>>>>>> First working verision of bigmler execute
 from bigmler.parser import SUBCOMMANDS
 from bigmler.utils import SYSTEM_ENCODING
 
