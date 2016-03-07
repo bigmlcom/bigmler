@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2014-2015 BigML
+# Copyright 2016 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -26,29 +26,7 @@ from bigmler.processing.models import MONTECARLO_FACTOR
 from bigmler.checkpoint import file_number_of_lines
 from bigmler.utils import storage_file_name, open_mode, decode2
 from bigmler.utils import PYTHON3
-from bigmler.tests.ml_tst_prediction_steps import \
-    i_create_all_ml_resources
-from bigmler.tests.ml_tst_prediction_steps import \
-    i_create_all_ml_resources_and_ensembles
-from bigmler.tests.ml_tst_evaluation_steps import \
-    i_create_all_ml_resources_for_evaluation
-from bigmler.tests.max_categories_tst_prediction_steps import \
-    i_check_create_max_categories_datasets, i_create_all_mc_resources
-from bigmler.tests.basic_batch_tst_prediction_steps import \
-    i_check_create_test_source, i_check_create_test_dataset, \
-    i_check_create_batch_prediction
-from bigmler.tests.basic_cluster_prediction_steps import \
-    i_create_all_cluster_resources, i_check_create_cluster
-from bigmler.tests.basic_anomaly_prediction_steps import \
-    i_create_all_anomaly_resources, i_check_create_anomaly
-from bigmler.tests.ml_tst_prediction_steps import \
-    i_create_all_mlm_resources
-from bigmler.tests.basic_association_steps import \
-    i_create_association, i_check_create_association
-from bigmler.tests.basic_logistic_r_steps import \
-    i_create_all_lr_resources, i_check_create_lr_model
 from bigmler.tests.common_steps import check_debug
-from bigmler.reports import REPORTS_DIR
 from nose.tools import ok_, assert_equal, assert_not_equal
 
 
@@ -251,21 +229,21 @@ def i_create_all_resources_batch(step, data=None, test=None, output=None):
     shell_execute(command, output, test=test)
 
 
-#@step(r'I create BigML resources uploading train "(.*?)" file with no headers to test "(.*?)" with no headers and log predictions in "([^"]*)"$')
-def i_create_all_resources_with_no_headers(step, data=None, test=None, output=None):
+#******@step(r'I create BigML resources uploading train "(.*?)" file with no headers to test "(.*?)" with no headers and log predictions in "([^"]*)"$')
+def i_create_all_lr_resources_with_no_headers(step, data=None, test=None, output=None):
     ok_(data is not None and test is not None and output is not None)
     test = res_filename(test)
-    command = ("bigmler --train " + res_filename(data) + " --test " + test +
-               " --store --output " + output + " --max-batch-models 1 --no-fast --no-train-header --no-test-header")
+    command = ("bigmler logistic-regression --train " + res_filename(data) + " --test " + test +
+               " --store --output " + output + " --no-train-header --no-test-header")
     shell_execute(command, output, test=test, options='--prediction-header')
 
 
-#@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" and log predictions in "([^"]*)"$')
-def i_create_all_resources(step, data=None, test=None, output=None):
+#******@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" and log predictions in "([^"]*)"$')
+def i_create_all_lr_resources(step, data=None, test=None, output=None):
     ok_(data is not None and test is not None and output is not None)
     test = res_filename(test)
-    command = ("bigmler --train " + res_filename(data) + " --test " + test +
-               " --store --output " + output + " --max-batch-models 1 --no-fast")
+    command = ("bigmler logistic-regression --train " + res_filename(data) + " --test " + test +
+               " --store --output " + output)
     shell_execute(command, output, test=test)
 
 
@@ -290,12 +268,12 @@ def i_create_resources_from_source_with_objective(step, multi_label=None, object
                + " --store --output " + output)
     shell_execute(command, output, test=test)
 
-#@step(r'I create BigML (multi-label\s)?resources using source to test "(.*)" and log predictions in "(.*)"')
-def i_create_resources_from_source(step, multi_label=None, test=None, output=None):
+#*******@step(r'I create BigML (multi-label\s)?resources using source to test "(.*)" and log predictions in "(.*)"')
+def i_create_lr_resources_from_source(step, multi_label=None, test=None, output=None):
     ok_(test is not None and output is not None)
     test = res_filename(test)
     multi_label = "" if multi_label is None else " --multi-label "
-    command = ("bigmler "+ multi_label +"--source " + world.source['resource']
+    command = ("bigmler logistic-regression "+ multi_label +"--source " + world.source['resource']
                + " --test " + test + " --store --output " + output)
     shell_execute(command, output, test=test)
 
@@ -319,12 +297,12 @@ def i_create_resources_from_dataset_with_objective(step, multi_label=None, objec
                + " --store --output " + output)
     shell_execute(command, output, test=test)
 
-#@step(r'I create BigML (multi-label\s)?resources using dataset to test "(.*)" and log predictions in "(.*)"')
-def i_create_resources_from_dataset(step, multi_label=None, test=None, output=None):
+#******@step(r'I create BigML (multi-label\s)?resources using dataset to test "(.*)" and log predictions in "(.*)"')
+def i_create_lr_resources_from_dataset(step, multi_label=None, test=None, output=None):
     ok_(test is not None and output is not None)
     multi_label = "" if multi_label is None else " --multi-label "
     test = res_filename(test)
-    command = ("bigmler "+ multi_label +"--dataset " +
+    command = ("bigmler logistic-regression "+ multi_label +"--dataset " +
                world.dataset['resource'] + " --test " + test +
                " --store --output " + output)
     shell_execute(command, output, test=test)
@@ -370,12 +348,12 @@ def i_create_resources_from_local_model(step, directory=None, test=None, output=
     shell_execute(command, output, test=test)
 
 
-#@step(r'I create BigML resources using model to test "(.*)" and log predictions in "(.*)"')
-def i_create_resources_from_model(step, test=None, output=None):
+#*******@step(r'I create BigML resources using model to test "(.*)" and log predictions in "(.*)"')
+def i_create_lr_resources_from_model(step, test=None, output=None):
     ok_(test is not None and output is not None)
     test = res_filename(test)
-    command = ("bigmler --model " + world.model['resource'] + " --test " +
-               test + " --store --output " + output + " --max-batch-models 1")
+    command = ("bigmler logistic-regression --logistic-regression " + world.logistic_regression['resource'] + " --test " +
+               test + " --store --output " + output)
     shell_execute(command, output, test=test)
 
 #@step(r'I create BigML resources using the previous ensemble with different thresholds to test "(.*)" and log predictions in "(.*)" and "(.*)"')
@@ -677,16 +655,16 @@ def i_check_create_dataset_shared(step):
     assert world.dataset['object']['shared']
 
 
-#@step(r'I check that the model has been created')
-def i_check_create_model(step):
-    model_file = "%s%smodels" % (world.directory, os.sep)
+#*******@step(r'I check that the logistic regression model has been created')
+def i_check_create_lr_model(step):
+    lr_file = "%s%slogistic_regressions" % (world.directory, os.sep)
     try:
-        model_file = open(model_file, "r")
-        model = check_resource(model_file.readline().strip(),
-                               world.api.get_model)
-        world.models.append(model['resource'])
-        world.model = model
-        model_file.close()
+        lr_file = open(lr_file, "r")
+        lr = check_resource(lr_file.readline().strip(),
+                            world.api.get_logistic_regression)
+        world.logistic_regressions.append(lr['resource'])
+        world.logistic_regression = lr
+        lr_file.close()
         assert True
     except Exception, exc:
         assert False, str(exc)
@@ -1423,8 +1401,7 @@ def i_have_previous_scenario_or_reproduce_it(step, scenario, kwargs):
                  'scenario_mlm_1': [(i_create_all_mlm_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_models, False)],
                 'scenario_c_1': [(i_create_all_cluster_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_cluster, False)],
                 'scenario_an_1': [(i_create_all_anomaly_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_anomaly, False)],
-                'scenario_ass_1': [(i_create_association, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_association, False)],
-                'scenario1_lr': [(i_create_all_lr_resources, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_lr_model, False)]}
+                'scenario_ass_1': [(i_create_association, True), (i_check_create_source, False), (i_check_create_dataset, False), (i_check_create_association, False)]}
     scenario_path = "%s/" % scenario
     if os.path.exists(scenario_path):
         retrieve_resources(scenario_path, step)

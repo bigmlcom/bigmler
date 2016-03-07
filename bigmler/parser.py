@@ -37,9 +37,11 @@ from bigmler.options.report import get_report_options
 from bigmler.options.reify import get_reify_options
 from bigmler.options.project import get_project_options
 from bigmler.options.association import get_association_options
+from bigmler.options.logisticregression import get_logistic_regression_options
 
 SUBCOMMANDS = ["main", "analyze", "cluster", "anomaly", "sample",
-               "delete", "report", "reify", "project", "association"]
+               "delete", "report", "reify", "project", "association",
+               "logistic-regression"]
 MAIN = SUBCOMMANDS[0]
 
 
@@ -181,7 +183,8 @@ under the License.""" % version
         '--dataset-tag': delete_options['--dataset-tag'],
         '--anomaly-tag': delete_options['--anomaly-tag'],
         '--anomaly-score-tag': delete_options['--anomaly-score-tag'],
-        '--batch-anomaly-score-tag': delete_options['--batch-anomaly-score-tag'],
+        '--batch-anomaly-score-tag': delete_options[
+            '--batch-anomaly-score-tag'],
         '--prediction-info': main_options['--prediction-info'],
         '--prediction-header': main_options['--prediction-header'],
         '--prediction-fields': main_options['--prediction-fields'],
@@ -250,6 +253,31 @@ under the License.""" % version
         '--source-tag': delete_options['--source-tag'],
         '--dataset-tag': delete_options['--dataset-tag'],
         '--association-tag': delete_options['--association-tag'],
+        '--reports': main_options['--reports'],
+        '--remote': main_options['--remote'],
+        '--no-batch': main_options['--no-batch'],
+        '--no-csv': main_options['--no-csv'],
+        '--no-no-csv': main_options['--no-no-csv']})
+
+    defaults = general_defaults["BigMLer logistic regression"]
+    subcommand_options["logistic-regression"] = \
+        get_logistic_regression_options( \
+        defaults=defaults)
+    # general options
+    subcommand_options["logistic-regression"].update(common_options)
+    subcommand_options["logistic-regression"].update(source_options)
+    subcommand_options["logistic-regression"].update(dataset_options)
+    subcommand_options["logistic-regression"].update(test_options)
+    subcommand_options["logistic-regression"].update({
+        '--source-tag': delete_options['--source-tag'],
+        '--dataset-tag': delete_options['--dataset-tag'],
+        '--logistic-regression-tag': delete_options[
+            '--logistic-regression-tag'],
+        '--objective': main_options['--objective'],
+        '--evaluate': main_options['--evaluate'],
+        '--prediction-info': main_options['--prediction-info'],
+        '--prediction-header': main_options['--prediction-header'],
+        '--prediction-fields': main_options['--prediction-fields'],
         '--reports': main_options['--reports'],
         '--remote': main_options['--remote'],
         '--no-batch': main_options['--no-batch'],

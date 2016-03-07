@@ -599,6 +599,8 @@ def best_first_search(datasets_file, api, args, common_options,
                 if (child not in [state for state, _, _ in open_list] and
                         child not in [state for state, _, _ in closed_list]):
                     try:
+                        # we need to keep names instead of IDs because
+                        # IDs can change for different datasets
                         input_fields = [fields.field_name(field_id)
                                         for (i, field_id)
                                         in enumerate(field_ids) if child[i]]

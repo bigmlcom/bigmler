@@ -2,7 +2,7 @@
 Student,0.70085
 Student,0.20654
 ,
-Adult,0.34237
+,
 ,
 Adult,0.43849
 ,
@@ -38,9 +38,9 @@ Student,0.34237
 Student,0.20654
 Student,0.70085
 ,
-,
+Adult,0.20654
 Student,0.20654
-Adult,0.34237
+,
 ,
 "Adult,Student","0.64566,0.5101"
 ,

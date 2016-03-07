@@ -153,11 +153,11 @@ class TestMLEvaluation(object):
 
             Examples:
             |scenario    | kwargs                                                  | models_file | number_of_labels                    | output                        |key          | value
-            | scenario_ml_e1| {"tag": "my_multilabel_e_1", "data": "../data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "./scenario_ml_e1/evaluation"}   | ./scenario_ml_e1/models | 7 | ./scenario_ml_e4/evaluation   | average_phi   | 0.8200
+            | scenario_ml_e1| {"tag": "my_multilabel_e_1", "data": "../data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "./scenario_ml_e1/evaluation"}   | ./scenario_ml_e1/models | 7 | ./scenario_ml_e4/evaluation   | average_phi   | 0.8180
         """
         print self.test_scenario4.__doc__
         examples = [
-            ['scenario_ml_e1', '{"tag": "my_multilabel_e_1", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_ml_e1/evaluation"}', 'scenario_ml_e1/models', '7', 'scenario_ml_e4/evaluation', 'average_phi', '0.8200']]
+            ['scenario_ml_e1', '{"tag": "my_multilabel_e_1", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_ml_e1/evaluation"}', 'scenario_ml_e1/models', '7', 'scenario_ml_e4/evaluation', 'average_phi', '0.8180']]
         for example in examples:
             print "\nTesting with:\n", example
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
@@ -177,12 +177,12 @@ class TestMLEvaluation(object):
 
                 Examples:
                 |scenario    | kwargs                                                  | tag | number_of_labels                    | output                        |key          | value
-                | scenario_ml_e1| {"tag": "my_multilabel_e_1", "data": "../data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "./scenario_ml_e1/evaluation"}   | my_multilabel_e_1 | 7 | ./scenario_ml_e5/evaluation   | average_phi   | 0.8200
+                | scenario_ml_e1| {"tag": "my_multilabel_e_1", "data": "../data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "./scenario_ml_e1/evaluation"}   | my_multilabel_e_1 | 7 | ./scenario_ml_e5/evaluation   | average_phi   | 0.8180
 
         """
         print self.test_scenario5.__doc__
         examples = [
-            ['scenario_ml_e1', '{"tag": "my_multilabel_e_1", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_ml_e1/evaluation"}', 'my_multilabel_e_1', '7', 'scenario_ml_e5/evaluation', 'average_phi', '0.8200']]
+            ['scenario_ml_e1', '{"tag": "my_multilabel_e_1", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_ml_e1/evaluation"}', 'my_multilabel_e_1', '7', 'scenario_ml_e5/evaluation', 'average_phi', '0.8180']]
         for example in examples:
             print "\nTesting with:\n", example
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])

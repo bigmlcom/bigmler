@@ -198,6 +198,12 @@ def get_delete_options(defaults=None):
             'default': defaults.get('association_tag', None),
             'help': "Retrieve associations that were tagged with tag."},
 
+        # Use it to retrieve logistic regression that were tagged with tag.
+        '--logistic-regression-tag': {
+            'dest': 'logistic_regression_tag',
+            'default': defaults.get('logistic_regression_tag', None),
+            'help': "Retrieve logistic regression that were tagged with tag."},
+
         # Filter the resources to be deleted by its status (finished if
         # not set)
         '--status': {

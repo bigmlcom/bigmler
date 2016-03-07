@@ -2207,3 +2207,187 @@ def update_association(association, association_args, args,
             report(args.reports, path, association)
 
     return association
+
+
+def set_logistic_regression_args(args, name=None, fields=None,
+                                 objective_id=None,
+                                 logistic_regression_fields=None):
+    """Return logistic regression arguments dict
+
+    """
+    if name is None:
+        name = args.name
+    if logistic_regression_fields is None:
+        logistic_regression_fields = args.logistic_regression_fields_
+    if objective_id is None:
+        objective_id = args.objective_id_
+
+    logistic_regression_args = {
+        "name": name,
+        "description": args.description_,
+        "category": args.category,
+        "tags": args.tag,
+        "seed": SEED if args.seed is None else args.seed
+    }
+
+    if objective_id is not None and fields is not None:
+        logistic_regression_args.update({"objective_field": objective_id})
+
+    if args.lr_c:
+        logistic_regression_args.update({"c": args.lr_c})
+    if args.bias:
+        logistic_regression_args.update({"bias": args.bias})
+    if args.eps:
+        logistic_regression_args.update({"eps": args.eps})
+    if args.normalize is not None:
+        logistic_regression_args.update({"normalize": args.normalize})
+    if args.missing_numerics is not None:
+        logistic_regression_args.update( \
+            {"missing_numerics": args.missing_numerics})
+    if 'logistic_regression' in args.json_args:
+        update_json_args(logistic_regression_args,
+                         args.json_args.get('logistic_regression'),
+                         fields)
+    return logistic_regression_args
+
+
+def create_logistic_regressions(datasets, logistic_regression_ids,
+                                logistic_regression_args,
+                                args, api=None, path=None,
+                                session_file=None, log=None):
+    """Create remote logistic regressions
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+
+    logistic_regressions = logistic_regression_ids[:]
+    existing_logistic_regressions = len(logistic_regressions)
+    logistic_regression_args_list = []
+    datasets = datasets[existing_logistic_regressions:]
+    # if resuming and all logistic regressions were created,
+    # there will be no datasets left
+    if datasets:
+        if isinstance(logistic_regression_args, list):
+            logistic_regression_args_list = logistic_regression_args
+
+        # Only one logistic regression per command, at present
+        number_of_logistic_regressions = 1
+        message = dated("Creating %s.\n" %
+                        plural("logistic regression",
+                               number_of_logistic_regressions))
+        log_message(message, log_file=session_file,
+                    console=args.verbosity)
+
+        query_string = FIELDS_QS
+        inprogress = []
+        for i in range(0, number_of_logistic_regressions):
+            wait_for_available_tasks(inprogress,
+                                     args.max_parallel_logistic_regressions,
+                                     api, "cluster")
+            if logistic_regression_args_list:
+                logistic_regression_args = logistic_regression_args_list[i]
+
+            logistic_regression = api.create_logistic_regression( \
+                datasets, logistic_regression_args, retries=None)
+            logistic_regression_id = check_resource_error( \
+                logistic_regression, "Failed to create logistic regression: ")
+            log_message("%s\n" % logistic_regression_id, log_file=log)
+            logistic_regression_ids.append(logistic_regression_id)
+            inprogress.append(logistic_regression_id)
+            logistic_regressions.append(logistic_regression)
+            log_created_resources("logistic_regressions",
+                                  path,
+                                  logistic_regression_id, mode='a')
+
+        if args.verbosity:
+            if bigml.api.get_status(logistic_regression)['code'] != \
+                    bigml.api.FINISHED:
+                try:
+                    logistic_regression = check_resource( \
+                        logistic_regression, api.get_logistic_regression,
+                        query_string=query_string)
+                except ValueError, exception:
+                    sys.exit("Failed to get a finished logistic regression:"
+                             " %s" %
+                             str(exception))
+                logistic_regressions[0] = logistic_regression
+            message = dated("Logistic regression created: %s\n" %
+                            get_url(logistic_regression))
+            log_message(message, log_file=session_file,
+                        console=args.verbosity)
+            if args.reports:
+                report(args.reports, path, logistic_regression)
+
+    return logistic_regressions, logistic_regression_ids
+
+
+def get_logistic_regressions(logistic_regression_ids,
+                             args, api=None, session_file=None):
+    """Retrieves remote logistic regression in its actual status
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+    logistic_regression_id = ""
+    logistic_regressions = logistic_regression_ids
+    logistic_regression_id = logistic_regression_ids[0]
+    message = dated("Retrieving %s. %s\n" %
+                    (plural("logstic regression", len(logistic_regression_ids)),
+                     get_url(logistic_regression_id)))
+    log_message(message, log_file=session_file, console=args.verbosity)
+    # only one logistic regression to predict at present
+    try:
+        query_string = FIELDS_QS
+        logistic_regression = check_resource(logistic_regression_ids[0],
+                                             api.get_logistic_regression,
+                                             query_string=query_string)
+    except ValueError, exception:
+        sys.exit("Failed to get a finished logistic regression: %s" % \
+            str(exception))
+    logistic_regressions[0] = logistic_regression
+
+    return logistic_regressions, logistic_regression_ids
+
+
+def set_publish_logistic_regression_args(args):
+    """Set args to publish logistic regression
+
+    """
+    public_logistic_regression = {}
+    if args.public_logistic_regression:
+        public_logistic_regression = {"private": False}
+        if args.model_price:
+            public_logistic_regression.update(price=args.model_price)
+        if args.cpp:
+            public_logistic_regression.update(credits_per_prediction=args.cpp)
+    return public_logistic_regression
+
+
+def update_logistic_regression(logistic_regression, logistic_regression_args,
+                               args, api=None, path=None, session_file=None):
+    """Updates logistic regression properties
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+    message = dated("Updating logistic regression. %s\n" %
+                    get_url(logistic_regression))
+    log_message(message, log_file=session_file,
+                console=args.verbosity)
+    logistic_regression = api.update_logistic_regression(logistic_regression, \
+        logistic_regression_args)
+    check_resource_error(logistic_regression,
+                         "Failed to update logistic regression: %s"
+                         % logistic_regression['resource'])
+    logistic_regression = check_resource(logistic_regression,
+                                         api.get_logistic_regression,
+                                         query_string=FIELDS_QS)
+    if is_shared(logistic_regression):
+        message = dated("Shared logistic regression link. %s\n" %
+                        get_url(logistic_regression, shared=True))
+        log_message(message, log_file=session_file, console=args.verbosity)
+        if args.reports:
+            report(args.reports, path, logistic_regression)
+
+    return logistic_regression

@@ -3,6 +3,12 @@
 History
 -------
 
+3.6.0 (2016-03-08)
+~~~~~~~~~~~~~~~~~~
+
+- Adding subcommand bigmler logistic-regression.
+- Changing tests to adapt to backend random numbers changes.
+
 3.5.4 (2016-02-09)
 ~~~~~~~~~~~~~~~~~~
 

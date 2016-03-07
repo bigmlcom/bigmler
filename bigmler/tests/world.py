@@ -50,18 +50,21 @@ RESOURCE_TYPES = [
     'batchanomalyscore',
     'project',
     'sample',
-    'association']
+    'association',
+    'logisticregression']
 IRREGULAR_PLURALS = {
     'anomaly': 'anomalies',
     'batchprediction': 'batch_predictions',
     'batchcentroid': 'batch_centroids',
     'anomalyscore': 'anomaly_scores',
-    'batchanomalyscore': 'batch_anomaly_scores'}
+    'batchanomalyscore': 'batch_anomaly_scores',
+    'logisticregression': 'logistic_regressions'}
 TRANSLATED_RESOURCES = {
     'batchprediction': 'batch_prediction',
     'batchcentroid': 'batch_centroid',
     'anomalyscore': 'anomaly_score',
-    'batchanomalyscore': 'batch_anomaly_score'}
+    'batchanomalyscore': 'batch_anomaly_score',
+    'logisticregression': 'logistic_regression'}
 
 
 def plural(resource_type):

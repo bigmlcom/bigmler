@@ -2,7 +2,7 @@ Pensioner,0.34237
 "Child,Student","0.78468,0.70085"
 "Child,Student","0.87127,0.20654"
 "Pensioner,Teenager","0.43849,0.67558"
-"Adult,Retired,Teenager,Worker","0.34237,0.20654,0.67558,0.43849"
+"Retired,Teenager,Worker","0.20654,0.67558,0.43849"
 Worker,0.43849
 "Adult,Pensioner","0.43849,0.20654"
 "Pensioner,Teenager","0.20654,0.80639"
@@ -38,9 +38,9 @@ Child,0.87127
 "Child,Student,Worker","0.20654,0.20654,0.43849"
 "Child,Student","0.87127,0.70085"
 Child,0.87127
-Child,0.80639
+"Adult,Child","0.20654,0.80639"
 "Child,Student","0.80639,0.20654"
-Adult,0.34237
+,
 "Pensioner,Teenager","0.20654,0.67558"
 "Adult,Student","0.64566,0.5101"
 "Child,Worker","0.80639,0.34237"

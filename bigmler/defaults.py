@@ -228,7 +228,19 @@ FLAGS = {
         {'flag': 'associations', 'type': 'string'},
         {'flag': 'association_k', 'type': 'int'},
         {'flag': 'no_association', 'type': 'boolean'},
-        {'flag': 'association_attributes', 'type': 'string'}]}
+        {'flag': 'association_attributes', 'type': 'string'}],
+    'BigMLer logistic regression': [
+        {'flag': 'logistic_fields', 'type': 'string'},
+        {'flag': 'logistic_regression', 'type': 'string'},
+        {'flag': 'logistic_regression_file', 'type': 'string'},
+        {'flag': 'logistic_regressions', 'type': 'string'},
+        {'flag': 'no_logistic_regression', 'type': 'boolean'},
+        {'flag': 'logistic_regression_attributes', 'type': 'string'},
+        {'flag': 'bias', 'type': 'float'},
+        {'flag': 'lr_c', 'type': 'float'},
+        {'flag': 'eps', 'type': 'float'},
+        {'flag': 'missing_numerics', 'type': 'boolean'},
+        {'flag': 'normalize', 'type': 'boolean'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):

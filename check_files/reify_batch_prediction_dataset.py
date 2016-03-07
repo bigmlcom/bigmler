@@ -22,5 +22,6 @@ api.ok(dataset2)
 
 dataset2 = api.update_dataset(dataset2, \
     {'fields': {u'000000': {'name': u'species'}},
-     'name': u'my_dataset_from_batch_prediction_name'})
+     'name': u'my_dataset_from_batch_prediction_name',
+     'tags': [u'species']})
 api.ok(dataset2)

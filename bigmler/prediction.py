@@ -50,7 +50,8 @@ OTHER = "***** other *****"
 
 
 def use_prediction_headers(prediction_headers, output, test_reader,
-                           fields, args, objective_field):
+                           fields, args, objective_field,
+                           quality="confidence"):
     """Uses header information from the test file in the prediction output
 
        If --prediction-header is set, adds a headers row to the prediction
@@ -61,6 +62,7 @@ def use_prediction_headers(prediction_headers, output, test_reader,
 
     """
     exclude = []
+
     try:
         if not objective_field in fields.fields:
             objective_field = fields.field_id(objective_field)
@@ -70,7 +72,7 @@ def use_prediction_headers(prediction_headers, output, test_reader,
     headers = [objective_name]
 
     if args.prediction_info in [NORMAL_FORMAT, FULL_FORMAT]:
-        headers.append("confidence")
+        headers.append(quality)
     if (args.prediction_info == FULL_FORMAT or
             args.prediction_fields is not None):
         # Try to retrieve headers from the test file

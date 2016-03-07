@@ -47,7 +47,8 @@ MISSING_STRATEGIES = {'last': LAST_PREDICTION, 'proportional': PROPORTIONAL}
 DEFAULT_DESCRIPTION = "Created using BigMLer"
 RESOURCE_TYPES = ["source", "dataset", "model", "ensemble", "batch_prediction",
                   "cluster", "centroid", "batch_centroid", "anomaly",
-                  "anomaly_score", "batch_anomaly_score", "project"]
+                  "anomaly_score", "batch_anomaly_score", "association",
+                  "logistic_regression", "project"]
 
 
 def has_test(args):
@@ -377,6 +378,18 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
+    # Parses logistic regression input fields if provided.
+    try:
+        if command_args.logistic_fields:
+            logistic_fields_arg = [
+                field.strip() for field in command_args.logistic_fields.split(
+                    command_args.args_separator)]
+            command_args.logistic_fields_ = logistic_fields_arg
+        else:
+            command_args.logistic_fields_ = []
+    except AttributeError:
+        pass
+
     model_ids = []
     try:
         # Parses model/ids if provided.
@@ -458,6 +471,27 @@ def get_output_args(api, command_args, resume):
                                           "tags__in=%s" %
                                           command_args.association_tag))
         command_args.association_ids_ = association_ids
+    except AttributeError:
+        pass
+
+    logistic_regression_ids = []
+    try:
+        # Parses logisticregression/ids if provided.
+        if command_args.logistic_regressions:
+            logistic_regression_ids = u.read_resources( \
+                command_args.logistic_regressions)
+        command_args.logistic_regression_ids_ = logistic_regression_ids
+    except AttributeError:
+        pass
+
+    # Retrieve logisticregression/ids if provided.
+    try:
+        if command_args.logistic_tag:
+            logistic_regression_ids = (logistic_ids +
+                           u.list_ids(api.list_logistic_regressions,
+                                      "tags__in=%s" %
+                                      command_args.logistic_tag))
+        command_args.logistic_regression_ids_ = logistic_regression_ids
     except AttributeError:
         pass
 

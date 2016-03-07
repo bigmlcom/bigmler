@@ -29,7 +29,6 @@ from bigmler.tests.world import (world, common_setup_module,
 import bigmler.tests.basic_tst_prediction_steps as test_pred
 
 
-
 def setup_module():
     """Setup for the module
 

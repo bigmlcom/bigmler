@@ -145,7 +145,7 @@ class TstReader(object):
                 headers = self.raw_headers
             else:
                 headers = [self.fields.fields_by_column_number[column] for
-                           column in self.fields.columns]
+                           column in self.fields.fields_columns]
             return dict(zip(headers, new_row))
         for index in self.exclude:
             del new_row[index]
