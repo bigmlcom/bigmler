@@ -29,7 +29,7 @@ Requirements
 
 Python 2.7 and 3 are currently supported by BigMLer.
 
-BigMLer requires `bigml 4.4.2 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 4.5.0 <https://github.com/bigmlcom/python>`_  or
 higher. Using proportional missing strategy will additionally request
 the use of the `numpy <http://www.numpy.org/>`_ and
 `scipy <http://www.scipy.org/>`_ libraries. They are not
