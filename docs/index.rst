@@ -75,6 +75,13 @@ Used to generate and manage projects for organization purposes. See
 Used to generate association rules from your datasets. See
 :ref:`bigmler-association`.
 
+``bigmler logistic-regression``:
+
+
+Used to generate logistic regression models and predictions. See
+:ref:`bigmler-logistic-regression`.
+
+
 Quick Start
 ===========
 
@@ -2236,6 +2243,14 @@ you can change the search strategy used to find them
 
 In this case, the ``confidence`` is used (the default value being
 ``leverage``).
+
+
+
+.. _bigmler-logistic-regression:
+
+Logistic-regression subcommand
+------------------------------
+
 
 
 Additional Features
