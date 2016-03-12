@@ -53,7 +53,7 @@ def logistic_regressions_processing(datasets, logistic_regressions, \
         number_of_logistic_regressions = 1
         if resume:
             resume, logistic_regression_ids = c.checkpoint( \
-                c.are_logistic_regression_created, path, \
+                c.are_logistic_regressions_created, path, \
                 number_of_logistic_regressions, debug=args.debug)
             if not resume:
                 message = u.dated("Found %s logistic regressions out of %s."
