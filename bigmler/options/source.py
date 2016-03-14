@@ -146,6 +146,25 @@ def get_source_options(defaults=None):
             'dest': 'project_id',
             'default': defaults.get('project_id', None),
             'help': ("Id of the project to be used in"
-                     "source creation.")}}
+                     "source creation.")},
+
+        # The path to a file containing the fields information available in
+        # the resource
+        '--export-fields': {
+            'action': 'store',
+            'dest': 'export_fields',
+            'default': defaults.get('export_fields', None),
+            'help': ("Path to a csv file describing the available field"
+                     " information. The first row is used as header.")},
+
+        # The path to a file containing field attributes that will be used
+        # to modify the fields structure.
+        '--import-fields': {
+            'action': 'store',
+            'dest': 'import_fields',
+            'default': defaults.get('import_fields', None),
+            'help': ("Path to a csv file describing field attributes."
+                     " The first row is used as header and rows are"
+                     " expected to comply the the --export-fields output.")}}
 
     return options

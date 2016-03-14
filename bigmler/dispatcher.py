@@ -312,7 +312,8 @@ def compute_output(api, args):
                                                   multi_label_data,
                                                   fields,
                                                   multi_label_fields)
-
+    if fields and args.export_fields:
+       fields.summary_csv(os.path.join(path, args.export_fields))
     if args.dataset_file:
         # dataset is retrieved from the contents of the given local JSON file
         model_dataset, csv_properties, fields = u.read_local_resource(
@@ -413,6 +414,8 @@ def compute_output(api, args):
                                            args.max_categories)
         other_label = get_metadata(dataset, 'other_label',
                                    other_label)
+    if fields and args.export_fields:
+       fields.summary_csv(os.path.join(path, args.export_fields))
     if args.model_file:
         # model is retrieved from the contents of the given local JSON file
         model, csv_properties, fields = u.read_local_resource(
@@ -487,7 +490,7 @@ def compute_output(api, args):
 
     # We get the fields of the model if we haven't got
     # them yet and need them
-    if model and not args.evaluate and args.test_set:
+    if model and not args.evaluate and (args.test_set or args.export_fields):
         # If more than one model, use the full field structure
         if (not single_model and not args.multi_label and
                 belongs_to_ensemble(model)):
@@ -516,6 +519,8 @@ def compute_output(api, args):
                                            args.max_categories)
         other_label = get_metadata(model, 'other_label',
                                    other_label)
+    if fields and args.export_fields:
+        fields.summary_csv(os.path.join(path, args.export_fields))
     # If predicting
     if (models and (a.has_test(args) or (test_dataset and args.remote))
             and not args.evaluate):

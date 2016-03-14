@@ -41,6 +41,10 @@ def get_source_info(api, args, resume,
             api, args, resume,
             csv_properties=csv_properties,
             session_file=session_file, path=path, log=log)
+
+    if fields and args.export_fields:
+       fields.summary_csv(os.path.join(path, args.export_fields))
+
     return source, resume, csv_properties, fields
 
 
@@ -98,5 +102,8 @@ def get_dataset_info(api, args, resume, source,
             dataset, api, args, resume, fields=fields,
             session_file=session_file, path=path, log=log)
         datasets[0] = dataset
+
+    if fields and args.export_fields:
+       fields.summary_csv(os.path.join(path, args.export_fields))
 
     return dataset, datasets, test_dataset, resume, csv_properties, fields

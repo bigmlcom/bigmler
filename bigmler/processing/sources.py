@@ -156,7 +156,7 @@ def source_processing(api, args, resume,
         fields = Fields(source['object']['fields'], **csv_properties)
 
         if (args.field_attributes_ or args.types_ or args.user_locale
-                or args.json_args.get('source')):
+                or args.json_args.get('source') or args.import_fields):
             # avoid updating project_id in source
             project_id, args.project_id = args.project_id, None
             source_args = r.set_source_args(args, fields=fields)

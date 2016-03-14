@@ -200,7 +200,7 @@ def compute_output(api, args):
 
     # We get the fields of the anomaly detector if we haven't got
     # them yet and need them
-    if anomaly and args.test_set:
+    if anomaly and (args.test_set or args.export_fields):
         fields = pa.get_anomaly_fields(anomaly, csv_properties, args)
 
     # If creating a top anomalies excluded/included dataset
@@ -260,6 +260,9 @@ def compute_output(api, args):
 
         else:
             anomaly_score(anomalies, fields, args, session_file=session_file)
+
+    if fields and args.export_fields:
+       fields.summary_csv(os.path.join(path, args.export_fields))
 
     u.print_generated_files(path, log_file=session_file,
                             verbosity=args.verbosity)

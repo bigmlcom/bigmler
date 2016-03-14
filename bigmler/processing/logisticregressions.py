@@ -83,7 +83,7 @@ def logistic_regressions_processing(datasets, logistic_regressions, \
         logistic_regressions = logistic_regression_ids[:]
 
     # If we are going to predict we must retrieve the logistic regressions
-    if logistic_regression_ids and args.test_set:
+    if logistic_regression_ids and (args.test_set or args.export_fields):
         logistic_regressions, logistic_regression_ids = \
             r.get_logistic_regressions(logistic_regressions, args, api, \
             session_file)
