@@ -26,6 +26,7 @@ from bigmler.checkpoint import file_number_of_lines
 from bigmler.utils import SYSTEM_ENCODING, PYTHON3
 from bigml.api import check_resource
 from bigmler.tests.common_steps import check_debug
+from nose.tools import ok_, eq_
 
 
 #@step(r'I create a BigML dataset from "(.*)" and store logs in "(.*)"')
@@ -265,3 +266,51 @@ def i_export_the_dataset(step, filename):
             assert True
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
+
+
+#@step(r'I create a BigML dataset from "(.*)" and a summary file "(.*)" for its fields and store logs in "(.*)"')
+def i_create_dataset_with_summary(step, data=None, summary_file=None, output_dir=None):
+    ok_(data is not None and output_dir is not None and summary_file is not None)
+    world.directory = output_dir
+    world.folders.append(world.directory)
+
+    try:
+        command = (u"bigmler --train " + res_filename(data) +
+                   u" --no-model --store --output-dir " + output_dir +
+                   u" --export-fields " + summary_file)
+
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.output = output_dir
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+
+#@step(r'I import fields attributes in file "(.*)" to dataset$')
+def i_import_fields(step, summary=None):
+    ok_(summary is not None)
+    try:
+        command = ("bigmler --dataset " + world.dataset['resource'] +
+                   " --import-fields " + res_filename(summary) +
+                   " --output-dir " + world.directory + " --no-model")
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+
+#@step(r'the field "(.*)" has "(.*)" equal to "(.*)"$')
+def field_attribute_value(step, field=None, attribute=None,
+                          attribute_value=None):
+    dataset = check_resource(world.dataset['resource'],
+                             world.api.get_dataset)
+    fields = dataset['object']['fields']
+    eq_(fields[field][attribute], attribute_value)

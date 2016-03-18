@@ -48,6 +48,9 @@ ADD_REMOVE_PREFIX = [ADD_PREFIX, REMOVE_PREFIX]
 BRIEF_FORMAT = 'brief'
 NORMAL_FORMAT = 'normal'
 FULL_FORMAT = 'full'
+VALID_FIELD_ATTRIBUTES = {
+    "source": ["name", "label", "description", "optype", "term_analysis"],
+    "dataset": ["name", "label", "description", "preferred", "term_analysis"]}
 
 
 def get_basic_seed(order):
@@ -206,6 +209,19 @@ def wait_for_available_tasks(inprogress, max_parallel, api,
         time.sleep(max_parallel * wait_step)
 
 
+def check_fields_struct(update_args, resource_type):
+    """In case the args to update have a `fields` attribute, it checks the
+    structure in this attribute and removes the attributes for each field
+    that will not be accepted by the API.
+    """
+    if "fields" in update_args:
+        fields_substr = update_args.get("fields")
+        for field_id, field in fields_substr.items():
+            for attribute, value in field.items():
+                if not attribute in VALID_FIELD_ATTRIBUTES.get(resource_type):
+                    del field[attribute]
+
+
 def set_source_args(args, name=None, multi_label_data=None,
                     data_set_header=None, fields=None):
     """Returns a source arguments dict
@@ -260,6 +276,10 @@ def set_source_args(args, name=None, multi_label_data=None,
             update_attributes(source_args,
                               {"fields": args.types_},
                               by_column=True, fields=fields)
+        if args.import_fields:
+            fields_struct = fields.new_fields_structure(args.import_fields)
+            check_fields_struct(fields_struct, "source")
+            update_attributes(source_args, fields_struct)
         if 'source' in args.json_args:
             update_json_args(source_args, args.json_args.get('source'), fields)
     return source_args
@@ -275,6 +295,7 @@ def create_source(data_set, source_args, args, api=None, path=None,
     suffix = "" if source_type is None else "%s " % source_type
     message = dated("Creating %ssource.\n" % suffix)
     log_message(message, log_file=session_file, console=args.verbosity)
+    check_fields_struct(source_args, "source")
     source = api.create_source(data_set, source_args,
                                progress_bar=args.progress_bar)
     if path is not None:
@@ -403,6 +424,10 @@ def set_dataset_args(args, fields, multi_label_data=None):
         dataset_args.update(
             user_metadata={'multi_label_data': multi_label_data})
 
+    if fields and args.import_fields:
+        fields_struct = fields.new_fields_structure(args.import_fields)
+        check_fields_struct(fields_struct, "dataset")
+        update_attributes(dataset_args, fields_struct)
     if 'dataset' in args.json_args:
         update_json_args(dataset_args, args.json_args.get('dataset'), fields)
 
@@ -440,6 +465,7 @@ def create_dataset(origin_resource, dataset_args, args, api=None,
         api = bigml.api.BigML()
     message = dated("Creating dataset.\n")
     log_message(message, log_file=session_file, console=args.verbosity)
+    check_fields_struct(dataset_args, "dataset")
     dataset = api.create_dataset(origin_resource, dataset_args, retries=None)
     suffix = "_" + dataset_type if dataset_type else ""
     log_created_resources("dataset%s" % suffix, path,
@@ -660,7 +686,8 @@ def create_models(datasets, model_ids, model_args,
             single_model = args.number_of_models == 1 and existing_models == 0
             # if there's more than one model the first one must contain
             # the entire field structure to be used as reference.
-            query_string = (FIELDS_QS if single_model and args.test_header
+            query_string = (FIELDS_QS if single_model and (args.test_header and
+                            not args.export_fields)
                             else ALL_FIELDS_QS)
             inprogress = []
             for i in range(0, args.number_of_models):
@@ -1459,7 +1486,8 @@ def get_clusters(cluster_ids, args, api=None, session_file=None):
     log_message(message, log_file=session_file, console=args.verbosity)
     # only one cluster to predict at present
     try:
-        query_string = FIELDS_QS
+        # we need the whole fields structure when exporting fields
+        query_string = FIELDS_QS if not args.export_fields else ALL_FIELDS_QS
         cluster = check_resource(cluster_ids[0], api.get_cluster,
                                  query_string=query_string)
     except ValueError, exception:
@@ -1753,7 +1781,8 @@ def get_anomalies(anomaly_ids, args, api=None, session_file=None):
     log_message(message, log_file=session_file, console=args.verbosity)
     # only one anomaly to predict at present
     try:
-        query_string = FIELDS_QS
+        # we need the whole fields structure when exporting fields
+        query_string = FIELDS_QS if not args.export_fields else ALL_FIELDS_QS
         anomaly = api.check_resource(anomaly_ids[0],
                                      query_string=query_string)
     except ValueError, exception:
@@ -2338,7 +2367,8 @@ def get_logistic_regressions(logistic_regression_ids,
     log_message(message, log_file=session_file, console=args.verbosity)
     # only one logistic regression to predict at present
     try:
-        query_string = FIELDS_QS
+        # we need the whole fields structure when exporting fields
+        query_string = FIELDS_QS if not args.export_fields else ALL_FIELDS_QS
         logistic_regression = check_resource(logistic_regression_ids[0],
                                              api.get_logistic_regression,
                                              query_string=query_string)

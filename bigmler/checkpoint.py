@@ -79,10 +79,7 @@ def are_datasets_created(path, number_of_datasets, suffix='parts'):
                     dataset_ids.append(dataset_id)
                 except ValueError:
                     return False, dataset_ids
-        if len(dataset_ids) == number_of_datasets:
-            return True, dataset_ids
-        else:
-            return False, dataset_ids
+        return len(dataset_ids) == number_of_datasets, dataset_ids
     except IOError:
         return False, dataset_ids
 
@@ -102,10 +99,7 @@ def are_models_created(path, number_of_models):
                     model_ids.append(model_id)
                 except ValueError:
                     return False, model_ids
-        if len(model_ids) == number_of_models:
-            return True, model_ids
-        else:
-            return False, model_ids
+        return len(model_ids) == number_of_models, model_ids
     except IOError:
         return False, model_ids
 
@@ -155,10 +149,7 @@ def are_evaluations_created(path, number_of_evaluations):
                     evaluation_ids.append(evaluation_id)
                 except ValueError:
                     return False, evaluation_ids
-        if len(evaluation_ids) == number_of_evaluations:
-            return True, evaluation_ids
-        else:
-            return False, evaluation_ids
+        return len(evaluation_ids) == number_of_evaluations, evaluation_ids
     except IOError:
         return False, evaluation_ids
 
@@ -178,10 +169,8 @@ def are_ensembles_created(path, number_of_ensembles):
                     ensemble_ids.append(ensemble_id)
                 except ValueError:
                     return False, ensemble_ids
-        if len(ensemble_ids) == number_of_ensembles:
-            return True, ensemble_ids
-        else:
-            return False, ensemble_ids
+
+        return len(ensemble_ids) == number_of_ensembles, ensemble_ids
     except IOError:
         return False, ensemble_ids
 
@@ -263,6 +252,7 @@ def is_batch_centroid_created(path):
     except IOError:
         return False, None
 
+
 def are_associations_created(path, number_of_associations):
     """Checks existence and reads the association ids from the associations
     file in the path directory
@@ -278,10 +268,7 @@ def are_associations_created(path, number_of_associations):
                     association_ids.append(association_id)
                 except ValueError:
                     return False, association_ids
-        if len(association_ids) == number_of_associations:
-            return True, association_ids
-        else:
-            return False, association_ids
+        return len(association_ids) == number_of_associations, association_ids
     except IOError:
         return False, association_ids
 
@@ -301,10 +288,7 @@ def are_clusters_created(path, number_of_clusters):
                     cluster_ids.append(cluster_id)
                 except ValueError:
                     return False, cluster_ids
-        if len(cluster_ids) == number_of_clusters:
-            return True, cluster_ids
-        else:
-            return False, cluster_ids
+        return len(cluster_ids) == number_of_clusters, cluster_ids
     except IOError:
         return False, cluster_ids
 
@@ -355,10 +339,7 @@ def are_anomalies_created(path, number_of_anomalies):
                     anomaly_ids.append(anomaly_id)
                 except ValueError:
                     return False, anomaly_ids
-        if len(anomaly_ids) == number_of_anomalies:
-            return True, anomaly_ids
-        else:
-            return False, anomaly_ids
+        return len(anomaly_ids) == number_of_anomalies, anomaly_ids
     except IOError:
         return False, anomaly_ids
 
@@ -398,9 +379,30 @@ def are_samples_created(path, number_of_samples):
                     sample_ids.append(sample_id)
                 except ValueError:
                     return False, sample_ids
-        if len(sample_ids) == number_of_samples:
-            return True, sample_ids
-        else:
-            return False, sample_ids
+        return len(sample_ids) == number_of_samples, sample_ids
     except IOError:
         return False, sample_ids
+
+
+def are_logistic_regressions_created(path, number_of_logistic_regressions):
+    """Checks existence and reads the logistic regression ids
+       from the logistic regressions file in the
+       path directory
+
+    """
+    logistic_ids = []
+    try:
+        with open("%s%slogistic_regressions" % (path, os.sep)) as \
+            logistics_file:
+            for line in logistics_file:
+                logistic = line.strip()
+                try:
+                    logistic_id = bigml.api.get_logistic_regression_id( \
+                        logistic)
+                    logistic_ids.append(logistic_id)
+                except ValueError:
+                    return False, logistic_ids
+        return len(logistic_ids) == number_of_logistic_regressions, \
+            logistic_ids
+    except IOError:
+        return False, logistic_ids

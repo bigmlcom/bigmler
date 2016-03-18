@@ -191,3 +191,51 @@ class TestDatasetAdvanced(object):
             dataset_adv.i_create_filtered_dataset_from_dataset(self, filter_exp=example[3], output_dir=example[1])
             test_pred.i_check_create_dataset(self, suffix='gen ')
             test_anomaly.i_check_dataset_lines_number(self, example[2])
+
+
+    def test_scenario6(self):
+        """
+            Scenario: Successfully exporting fields summary from a dataset
+                Given I create a BigML dataset from "<data>" and a summary file "<summary_file>" for its fields and store logs in "<output_dir>"
+                And I check that the source has been created
+                And I check that the dataset has been created
+                Then the expected field "<expected_file>" is like "<summary_file>"
+
+                Examples:
+                |data |output_dir | summary_file | expected_file
+                |../data/iris.csv | ./scenario_d_6 | fields_summary.csv | check_files/fields_summary.csv
+        """
+        print self.test_scenario6.__doc__
+        examples = [
+            ['data/iris.csv', 'scenario_d_6', 'fields_summary.csv', 'check_files/fields_summary.csv']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            dataset_adv.i_create_dataset_with_summary(self, data=example[0], summary_file=example[2], output_dir=example[1])
+            test_pred.i_check_create_source(self)
+            test_pred.i_check_create_dataset(self, suffix=None)
+            dataset_adv.i_files_equal(self, example[2], example[3])
+
+
+    def test_scenario7(self):
+        """
+            Scenario: Successfully importing fields summary to a dataset
+                Given I create a BigML dataset from "<data>" and store logs in "<output_dir>"
+                And I check that the source has been created
+                And I check that the dataset has been created
+                And I import fields attributes in file "<summary_file>" to dataset
+                Then the field "<field_id>" has "<attribute>" equal to "<attribute_value>"
+
+                Examples:
+                |data |output_dir | summary_file | field_id | attribute | attribute_value
+                |../data/iris.csv | ./scenario_d_7 | fields_summary_modified.csv |  000000 | name | sepal_length
+        """
+        print self.test_scenario7.__doc__
+        examples = [
+            ['data/iris.csv', 'scenario_d_7', 'data/fields_summary_modified.csv', '000000', 'name', 'sepal_length']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            dataset_adv.i_create_dataset(self, data=example[0], output_dir=example[1])
+            test_pred.i_check_create_source(self)
+            test_pred.i_check_create_dataset(self, suffix=None)
+            dataset_adv.i_import_fields(self, summary=example[2])
+            dataset_adv.field_attribute_value(self, field=example[3], attribute=example[4], attribute_value=example[5])

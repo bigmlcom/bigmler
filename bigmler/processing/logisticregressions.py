@@ -53,7 +53,7 @@ def logistic_regressions_processing(datasets, logistic_regressions, \
         number_of_logistic_regressions = 1
         if resume:
             resume, logistic_regression_ids = c.checkpoint( \
-                c.are_logistic_regression_created, path, \
+                c.are_logistic_regressions_created, path, \
                 number_of_logistic_regressions, debug=args.debug)
             if not resume:
                 message = u.dated("Found %s logistic regressions out of %s."
@@ -83,7 +83,7 @@ def logistic_regressions_processing(datasets, logistic_regressions, \
         logistic_regressions = logistic_regression_ids[:]
 
     # If we are going to predict we must retrieve the logistic regressions
-    if logistic_regression_ids and args.test_set:
+    if logistic_regression_ids and (args.test_set or args.export_fields):
         logistic_regressions, logistic_regression_ids = \
             r.get_logistic_regressions(logistic_regressions, args, api, \
             session_file)

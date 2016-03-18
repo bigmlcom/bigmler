@@ -95,7 +95,8 @@ def logistic_regression_dispatcher(args=sys.argv[1:]):
     api = a.get_api_instance(command_args, u.check_dir(session_file))
 
     # Selects the action to perform
-    if (a.has_train(command_args) or a.has_test(command_args)):
+    if (a.has_train(command_args) or a.has_test(command_args)
+            or command_args.export_fields):
         output_args = a.get_output_args(api, command_args, resume)
         a.transform_args(command_args, command.flags, api,
                          command.user_defaults)
@@ -183,10 +184,12 @@ def compute_output(api, args):
         if isinstance(logistic_regression, basestring):
             if not a.has_test(args):
                 query_string = MINIMUM_MODEL
+            elif args.export_fields:
+                query_string = r.ALL_FIELDS_QS
             else:
                 query_string = ''
             logistic_regression = u.check_resource(logistic_regression,
-                                                   api.logistic_regression,
+                                                   api.get_logistic_regression,
                                                    query_string=query_string)
         logistic_regressions[0] = logistic_regression
         if (args.public_logistic_regression or
@@ -208,9 +211,12 @@ def compute_output(api, args):
 
     # We get the fields of the logistic_regression if we haven't got
     # them yet and need them
-    if logistic_regression and args.test_set:
+    if logistic_regression and (args.test_set or args.export_fields):
         fields = plr.get_logistic_fields( \
             logistic_regression, csv_properties, args)
+
+    if fields and args.export_fields:
+       fields.summary_csv(os.path.join(path, args.export_fields))
 
     # If predicting
     if logistic_regressions and (a.has_test(args) or \

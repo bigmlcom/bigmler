@@ -131,6 +131,7 @@ def check_dataset_update(args, dataset):
 
     """
     return (args.dataset_attributes or
+            args.import_fields or
             (args.shared_flag and r.shared_changed(args.shared, dataset)) or
             (((hasattr(args, 'max_categories') and args.max_categories > 0) or
               (hasattr(args, 'multi_label') and args.multi_label)) and
@@ -204,6 +205,7 @@ def dataset_processing(source, api, args, resume,
         #  the flag --dataset_attributes is used
         #  the --multi-label flag is used and there's an --objective-field
         #  the --max-categories flag is used and there's an --objective-field
+        #  the --impor-fields flag is used
         if check_dataset_update(args, dataset):
             dataset_args = r.set_dataset_args(args, fields)
             if args.shared_flag and r.shared_changed(args.shared, dataset):
