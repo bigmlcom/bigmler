@@ -39,7 +39,7 @@ def needs_sample_fields(args):
 
     """
     return (args.sample_header or args.row_order_by or args.row_fields_ or
-            args.stat_fields_ or args.stat_field)
+            args.stat_fields_ or args.stat_field or args.export_fields)
 
 
 def samples_processing(datasets, samples, sample_ids,

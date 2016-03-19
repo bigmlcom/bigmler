@@ -91,7 +91,8 @@ def cluster_dispatcher(args=sys.argv[1:]):
 
     # Selects the action to perform
     if (a.has_train(command_args) or a.has_test(command_args)
-            or command_args.cluster_datasets is not None):
+            or command_args.cluster_datasets is not None
+            or command_args.export_fields is not None):
         output_args = a.get_output_args(api, command_args, resume)
         a.transform_args(command_args, command.flags, api,
                          command.user_defaults)
@@ -190,7 +191,11 @@ def compute_output(api, args):
 
     # We get the fields of the cluster if we haven't got
     # them yet and need them
-    if cluster and args.test_set:
+    if cluster and (args.test_set or args.export_fields):
+        if isinstance(cluster, dict):
+            cluster = cluster['resource']
+            cluster = u.check_resource(cluster, api.get_cluster,
+                                       query_string=r.ALL_FIELDS_QS)
         fields = pc.get_cluster_fields(cluster, csv_properties, args)
 
     # If predicting
@@ -271,6 +276,9 @@ def compute_output(api, args):
             r.create_model(cluster, model_args, args, api=api, path=path,
                            session_file=session_file, log=log,
                            model_type='cluster')
+
+    if fields and args.export_fields:
+       fields.summary_csv(os.path.join(path, args.export_fields))
 
     u.print_generated_files(path, log_file=session_file,
                             verbosity=args.verbosity)

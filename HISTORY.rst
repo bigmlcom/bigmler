@@ -3,6 +3,12 @@
 History
 -------
 
+3.6.1 (2016-03-14)
+~~~~~~~~~~~~~~~~~~
+
+- Adding the --export-fields and --import-fields to manage field summaries
+  and attribute changes in sources and datasets.
+
 3.6.0 (2016-03-08)
 ~~~~~~~~~~~~~~~~~~
 

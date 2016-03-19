@@ -626,9 +626,42 @@ What if your raw data isn't necessarily in the format that BigML expects? So we
 have good news: you can use a number of options to configure your sources,
 datasets, and models.
 
-Imagine that you want to alter BigML's default field names or the ones provided
+Most resources in BigML contain information about the fields used in the
+resource construction. Sources contain information about the name, label,
+description and type of the fields detected in the data you upload.
+In addition to that, datasets contain the information of the values that
+each field contains, whether they have missing values or errors and even
+if they are ``preferred`` fields or non-preferred (fields that are not expected
+to convey real information to the model, like user IDs or constant fields).
+This information is available in the "fields" attribute of each resource,
+but BigMLer can extract it and build a CSV file with a summary of it.
+
+.. code-block:: bash
+
+bigmler --source source/50a1f43deabcb404d3010079 \
+        --export-fields fields_summary.csv \
+        --output-dir summary
+
+By using this command, BigMLer will create a ``fields_summary.csv`` file
+in a ``summary`` output directory. The file will contain a headers row and
+the fields information available in the source, namely the field column,
+field ID, field name, field label and field description of each field. If you
+execute the same command on a dataset
+
+.. code-block:: bash
+
+bigmler --dataset dataset/50a1f43deabcb404d3010079 \
+        --export-fields fields_summary.csv \
+        --output-dir summary
+
+you will also see the number of missing values and errors found in each field
+and an excerpt of the values and errors.
+
+But then, imagine that you want to alter BigML's default field names
+or the ones provided
 by the training set header and capitalize them, even to add a label or a
-description to each field. You can use a text file with a change per line as
+description to each field. You can use several methods. Write a text file
+with a change per line as
 follows
 
 .. code-block:: bash
@@ -666,8 +699,33 @@ where ``types.txt`` would be
     3, 'numeric'
     4, 'categorical'
 
+Finally, the same summary file that could be built with the ``--export-fields``
+option can be used to modify the updatable information in sources
+and datasets. Just edit the CSV file with your favourite editor setting
+the new values for the fields and use:
 
-In order to update
+.. code-block:: bash
+
+    bigmler --source source/50a1f43deabcb404d3010079 \
+            --import-fields summary/fields_summary.csv
+
+to update the names, labels, descriptions or types of the fields with the ones
+in the ``summary/fields_summary.csv`` file.
+
+You could
+also use this option to change the ``preferred`` attributes for each
+of the fields. This transformation is made at the dataset level,
+so in the prior code it will be applied once a dataset is created from
+the referred source. You might as well act
+on an existing dataset:
+
+.. code-block:: bash
+
+    bigmler --dataset dataset/50a1f43deabcb404d3010079 \
+            --import-fields summary/fields_summary.csv
+
+
+In order to update more detailed
 source options, you can use the ``--source-attributes`` option pointing
 to a file path that contains the configuration settings to be modified
 in JSON format
@@ -2527,7 +2585,7 @@ Requirements
 
 Python 2.7 and 3 are currently supported by BigMLer.
 
-BigMLer requires `bigml 4.5.0 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 4.5.1 <https://github.com/bigmlcom/python>`_  or
 higher. Using proportional missing strategy will additionally request
 the use of the `numpy <http://www.numpy.org/>`_ and
 `scipy <http://www.scipy.org/>`_ libraries. They are not
