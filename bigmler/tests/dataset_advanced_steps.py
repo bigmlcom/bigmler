@@ -299,10 +299,7 @@ def i_import_fields(step, summary=None):
                    " --output-dir " + world.directory + " --no-model")
         command = check_debug(command)
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            assert True
+        ok_(retcode >= 0)
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 

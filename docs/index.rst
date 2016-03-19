@@ -631,7 +631,7 @@ resource construction. Sources contain information about the name, label,
 description and type of the fields detected in the data you upload.
 In addition to that, datasets contain the information of the values that
 each field contains, whether they have missing values or errors and even
-if they ``preferred`` fields or non-preferred (fields that are not expected
+if they are ``preferred`` fields or non-preferred (fields that are not expected
 to convey real information to the model, like user IDs or constant fields).
 This information is available in the "fields" attribute of each resource,
 but BigMLer can extract it and build a CSV file with a summary of it.
