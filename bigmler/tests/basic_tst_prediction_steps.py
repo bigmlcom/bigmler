@@ -49,7 +49,7 @@ from bigmler.tests.basic_logistic_r_steps import \
     i_create_all_lr_resources, i_check_create_lr_model
 from bigmler.tests.common_steps import check_debug
 from bigmler.reports import REPORTS_DIR
-from nose.tools import ok_, assert_equal, assert_not_equal
+from nose.tools import ok_, assert_equal, assert_not_equal, assert_almost_equal
 
 
 def shell_execute(command, output, test=None, options=None,
@@ -984,6 +984,7 @@ def i_check_predictions(step, check_file):
                     assert len(check_row) == len(row)
                     for index in range(len(row)):
                         dot = row[index].find(".")
+                        decimal_places = 1
                         if dot > 0 or (check_row[index].find(".") > 0
                                        and check_row[index].endswith(".0")):
                             try:
@@ -991,10 +992,9 @@ def i_check_predictions(step, check_file):
                                 row[index] = round(float(row[index]), decimal_places)
                                 check_row[index] = round(float(check_row[index]), decimal_places)
                             except ValueError:
-                                pass
-                        if check_row[index] != row[index]:
-                            print row, check_row
-                            assert False
+                                decimal_places = 1
+                        assert_almost_equal(check_row[index], row[index],
+                                            places=(decimal_places - 1))
     except Exception, exc:
         assert False, traceback.format_exc()
 
