@@ -27,7 +27,6 @@ import os
 import sys
 import json
 import re
-import csv
 
 import bigml
 
@@ -37,6 +36,7 @@ import bigmler.utils as u
 from copy import copy
 
 from bigml.fields import Fields
+from bigml.io import UnicodeWriter
 
 from bigmler.dispatcher import main_dispatcher
 from bigmler.options.analyze import ACCURACY, MINIMIZE_OPTIONS
@@ -104,6 +104,13 @@ NAME_MAX_LENGTH = 127
 
 #default number of models for --random-fields random forests
 DEFAULT_NUMBER_OF_MODELS = 10
+
+# CSV summary files headers
+FEATURES_HEADER = ["step", "state", "score", "metric_value", "best_score"]
+NODES_HEADER = ["step", "node_threshold", "score", "metric_value",
+                "best_score"]
+CANDIDATES_HEADER = ["step", "random_candidates", "score", "metric_value",
+                     "best_score"]
 
 subcommand_list = []
 subcommand_file = None
@@ -517,125 +524,128 @@ def best_first_search(datasets_file, api, args, common_options,
     loop_counter = 0
     features_file = os.path.normpath(os.path.join(args.output_dir,
                                                   FEATURES_LOG))
-    with open(features_file, u.open_mode("w")) as features_handler:
-        features_writer = csv.writer(features_handler, lineterminator="\n")
-        features_writer.writerow([
-            "step", "state", "score", "metric_value", "best_score"])
-        features_handler.flush()
-        if staleness is None:
-            staleness = DEFAULT_STALENESS
-        if penalty is None:
-            penalty = DEFAULT_PENALTY
-        # retrieving the first dataset in the file
+    features_writer = UnicodeWriter(features_file).open_writer()
+    features_header = FEATURES_HEADER
+    if staleness is None:
+        staleness = DEFAULT_STALENESS
+    if penalty is None:
+        penalty = DEFAULT_PENALTY
+    # retrieving the first dataset in the file
+    try:
+        with open(datasets_file, u.open_mode("r")) as datasets_handler:
+            dataset_id = datasets_handler.readline().strip()
+    except IOError, exc:
+        sys.exit("Could not read the generated datasets file: %s" %
+                 str(exc))
+    try:
+        stored_dataset = u.storage_file_name(args.output_dir, dataset_id)
+        with open(stored_dataset, u.open_mode("r")) as dataset_handler:
+            dataset = json.loads(dataset_handler.read())
+    except IOError:
+        dataset = api.check_resource(dataset_id,
+                                     query_string=ALL_FIELDS_QS)
+    # initial feature set
+    fields = Fields(dataset)
+    excluded_features = ([] if args.exclude_features is None else
+                         args.exclude_features.split(
+                             args.args_separator))
+    try:
+        excluded_ids = [fields.field_id(feature) for
+                        feature in excluded_features]
+        objective_id = fields.field_id(objective_name)
+    except ValueError, exc:
+        sys.exit(exc)
+    field_ids = [field_id for field_id in fields.preferred_fields()
+                 if field_id != objective_id and
+                 not field_id in excluded_ids]
+    # headers are extended with a column per field
+    fields_names = [fields.field_name(field_id) for field_id in field_ids]
+    features_header.extend(fields_names)
+    features_writer.writerow(features_header)
+    initial_state = [False for field_id in field_ids]
+    open_list = [(initial_state, - float('inf'), -float('inf'))]
+    closed_list = []
+    best_state, best_score, best_metric_value = open_list[0]
+    best_unchanged_count = 0
+    metric = args.optimize
+    while best_unchanged_count < staleness and open_list:
+        loop_counter += 1
+        features_set = find_max_state(open_list)
+        state, score, metric_value = features_set
+        if loop_counter > 1:
+            csv_results = [loop_counter - 1, [int(in_set) for in_set in state],
+                score, metric_value, best_score]
+            csv_results.extend([int(in_set) for in_set in state])
+            features_writer.writerow(csv_results)
         try:
-            with open(datasets_file, u.open_mode("r")) as datasets_handler:
-                dataset_id = datasets_handler.readline().strip()
-        except IOError, exc:
-            sys.exit("Could not read the generated datasets file: %s" %
-                     str(exc))
-        try:
-            stored_dataset = u.storage_file_name(args.output_dir, dataset_id)
-            with open(stored_dataset, u.open_mode("r")) as dataset_handler:
-                dataset = json.loads(dataset_handler.read())
-        except IOError:
-            dataset = api.check_resource(dataset_id,
-                                         query_string=ALL_FIELDS_QS)
-        # initial feature set
-        fields = Fields(dataset)
-        excluded_features = ([] if args.exclude_features is None else
-                             args.exclude_features.split(
-                                 args.args_separator))
-        try:
-            excluded_ids = [fields.field_id(feature) for
-                            feature in excluded_features]
-            objective_id = fields.field_id(objective_name)
+            state_fields = [fields.field_name(field_ids[index])
+                            for (index, in_set) in enumerate(state)
+                            if in_set]
         except ValueError, exc:
             sys.exit(exc)
-        field_ids = [field_id for field_id in fields.preferred_fields()
-                     if field_id != objective_id and
-                     not field_id in excluded_ids]
-        initial_state = [False for field_id in field_ids]
-        open_list = [(initial_state, - float('inf'), -float('inf'))]
-        closed_list = []
-        best_state, best_score, best_metric_value = open_list[0]
-        best_unchanged_count = 0
-        metric = args.optimize
-        while best_unchanged_count < staleness and open_list:
-            loop_counter += 1
-            features_set = find_max_state(open_list)
-            state, score, metric_value = features_set
-            features_writer.writerow([
-                loop_counter, [int(in_set) for in_set in state],
-                score, metric_value, best_score])
-            features_handler.flush()
-            try:
-                state_fields = [fields.field_name(field_ids[index])
-                                for (index, in_set) in enumerate(state)
-                                if in_set]
-            except ValueError, exc:
-                sys.exit(exc)
-            closed_list.append(features_set)
-            open_list.remove(features_set)
-            if (score - EPSILON) > best_score:
-                best_state, best_score, best_metric_value = features_set
-                best_unchanged_count = 0
-                if state_fields:
-                    message = 'New best state: %s\n' % (state_fields)
-                    u.log_message(message, log_file=session_file,
-                                  console=args.verbosity)
-                    if metric in PERCENT_EVAL_METRICS:
-                        message = '%s = %0.2f%% (score = %s)\n' % (
-                            metric.capitalize(), metric_value * 100, score)
-                    else:
-                        message = '%s = %f (score = %s)\n' % (
-                            metric.capitalize(), metric_value, score)
-                    u.log_message(message, log_file=session_file,
-                                  console=args.verbosity)
-            else:
-                best_unchanged_count += 1
-
-            children = expand_state(state)
-            for child in children:
-                if (child not in [state for state, _, _ in open_list] and
-                        child not in [state for state, _, _ in closed_list]):
-                    try:
-                        # we need to keep names instead of IDs because
-                        # IDs can change for different datasets
-                        input_fields = [fields.field_name(field_id)
-                                        for (i, field_id)
-                                        in enumerate(field_ids) if child[i]]
-                    except ValueError, exc:
-                        sys.exit(exc)
-                    # create models and evaluation with input_fields
-                    args.model_fields = args.args_separator.join(input_fields)
-                    counter += 1
-                    (score,
-                     metric_value,
-                     metric,
-                     resume) = kfold_evaluate(datasets_file,
-                                              args, counter, common_options,
-                                              penalty=penalty, resume=resume,
-                                              metric=metric)
-                    open_list.append((child, score, metric_value))
-        try:
-            best_features = [fields.field_name(field_ids[i]) for (i, score)
-                             in enumerate(best_state) if score]
-        except ValueError, exc:
-            sys.exit(exc)
-        message = (u'The best feature subset is: %s \n'
-                   % u", ".join(best_features))
-        u.log_message(message, log_file=session_file, console=1)
-        if metric in PERCENT_EVAL_METRICS:
-            message = (u'%s = %0.2f%%\n' % (metric.capitalize(),
-                                            (best_metric_value * 100)))
+        closed_list.append(features_set)
+        open_list.remove(features_set)
+        if (score - EPSILON) > best_score:
+            best_state, best_score, best_metric_value = features_set
+            best_unchanged_count = 0
+            if state_fields:
+                message = 'New best state: %s\n' % (state_fields)
+                u.log_message(message, log_file=session_file,
+                              console=args.verbosity)
+                if metric in PERCENT_EVAL_METRICS:
+                    message = '%s = %0.2f%% (score = %s)\n' % (
+                        metric.capitalize(), metric_value * 100, score)
+                else:
+                    message = '%s = %f (score = %s)\n' % (
+                        metric.capitalize(), metric_value, score)
+                u.log_message(message, log_file=session_file,
+                              console=args.verbosity)
         else:
-            message = (u'%s = %f\n' % (metric.capitalize(), best_metric_value))
-        u.log_message(message, log_file=session_file, console=1)
-        message = (u'Evaluated %d/%d feature subsets\n\n' %
-                   ((len(open_list) + len(closed_list) - 1),
-                    2 ** len(field_ids) - 1))
-        u.log_message(message, log_file=session_file, console=1)
-        return best_features
+            best_unchanged_count += 1
+
+        children = expand_state(state)
+        for child in children:
+            if (child not in [state for state, _, _ in open_list] and
+                    child not in [state for state, _, _ in closed_list]):
+                try:
+                    # we need to keep names instead of IDs because
+                    # IDs can change for different datasets
+                    input_fields = [fields.field_name(field_id)
+                                    for (i, field_id)
+                                    in enumerate(field_ids) if child[i]]
+                except ValueError, exc:
+                    sys.exit(exc)
+                # create models and evaluation with input_fields
+                args.model_fields = args.args_separator.join(input_fields)
+                counter += 1
+                (score,
+                 metric_value,
+                 metric,
+                 resume) = kfold_evaluate(datasets_file,
+                                          args, counter, common_options,
+                                          penalty=penalty, resume=resume,
+                                          metric=metric)
+                open_list.append((child, score, metric_value))
+    try:
+        best_features = [fields.field_name(field_ids[i]) for (i, score)
+                         in enumerate(best_state) if score]
+    except ValueError, exc:
+        sys.exit(exc)
+    message = (u'The best feature subset is: %s \n'
+               % u", ".join(best_features))
+    u.log_message(message, log_file=session_file, console=1)
+    if metric in PERCENT_EVAL_METRICS:
+        message = (u'%s = %0.2f%%\n' % (metric.capitalize(),
+                                        (best_metric_value * 100)))
+    else:
+        message = (u'%s = %f\n' % (metric.capitalize(), best_metric_value))
+    u.log_message(message, log_file=session_file, console=1)
+    message = (u'Evaluated %d/%d feature subsets\n\n' %
+               ((len(open_list) + len(closed_list) - 1),
+                2 ** len(field_ids) - 1))
+    u.log_message(message, log_file=session_file, console=1)
+    features_writer.close_writer()
+    return best_features
 
 
 def extract_evaluation_info(evaluation, category):
@@ -692,70 +702,67 @@ def best_node_threshold(datasets_file, args, common_options,
     loop_counter = 0
     nodes_file = os.path.normpath(os.path.join(args.output_dir,
                                                NODES_LOG))
-    with open(nodes_file, u.open_mode("w")) as nodes_handler:
-        nodes_writer = csv.writer(nodes_handler, lineterminator="\n")
+    nodes_writer = UnicodeWriter(nodes_file).open_writer()
+    nodes_writer.writerow(NODES_HEADER)
+    args.output_dir = os.path.normpath(os.path.join(args.output_dir,
+                                                    "node_th"))
+    max_nodes = args.max_nodes + 1
+
+    if args.min_nodes is None:
+        args.min_nodes = DEFAULT_MIN_NODES
+    if args.nodes_step is None:
+        args.nodes_step = DEFAULT_NODES_STEP
+    node_threshold = args.min_nodes
+    if staleness is None:
+        staleness = DEFAULT_STALENESS
+    if penalty is None:
+        penalty = DEFAULT_NODES_PENALTY
+    best_score = - float('inf')
+    best_unchanged_count = 0
+    metric = args.optimize
+    score = best_score
+    while best_unchanged_count < staleness and node_threshold < max_nodes:
+        loop_counter += 1
+        (score,
+         metric_value,
+         metric,
+         resume) = node_threshold_evaluate(datasets_file, args,
+                                           node_threshold, common_options,
+                                           penalty=penalty, resume=resume,
+                                           metric=metric)
         nodes_writer.writerow([
-            "step", "node_threshold", "score", "metric_value", "best_score"])
-        nodes_handler.flush()
-        args.output_dir = os.path.normpath(os.path.join(args.output_dir,
-                                                        "node_th"))
-        max_nodes = args.max_nodes + 1
-
-        if args.min_nodes is None:
-            args.min_nodes = DEFAULT_MIN_NODES
-        if args.nodes_step is None:
-            args.nodes_step = DEFAULT_NODES_STEP
-        node_threshold = args.min_nodes
-        if staleness is None:
-            staleness = DEFAULT_STALENESS
-        if penalty is None:
-            penalty = DEFAULT_NODES_PENALTY
-        best_score = - float('inf')
-        best_unchanged_count = 0
-        metric = args.optimize
-        score = best_score
-        while best_unchanged_count < staleness and node_threshold < max_nodes:
-            loop_counter += 1
-            (score,
-             metric_value,
-             metric,
-             resume) = node_threshold_evaluate(datasets_file, args,
-                                               node_threshold, common_options,
-                                               penalty=penalty, resume=resume,
-                                               metric=metric)
-            nodes_writer.writerow([
-                loop_counter, node_threshold, score, metric_value, best_score])
-            nodes_handler.flush()
-            if (score - EPSILON) > best_score:
-                best_threshold = node_threshold
-                best_score = score
-                best_unchanged_count = 0
-                message = 'New best node threshold: %s\n' % (best_threshold)
-                u.log_message(message, log_file=session_file,
-                              console=args.verbosity)
-                if metric in PERCENT_EVAL_METRICS:
-                    message = '%s = %0.2f%% (score = %s)\n' % (
-                        metric.capitalize(), metric_value * 100, score)
-                else:
-                    message = '%s = %f (score = %s)\n' % (metric.capitalize(),
-                                                          metric_value,
-                                                          score)
-                u.log_message(message, log_file=session_file,
-                              console=args.verbosity)
+            loop_counter - 1, node_threshold, score, metric_value, best_score])
+        if (score - EPSILON) > best_score:
+            best_threshold = node_threshold
+            best_score = score
+            best_unchanged_count = 0
+            message = 'New best node threshold: %s\n' % (best_threshold)
+            u.log_message(message, log_file=session_file,
+                          console=args.verbosity)
+            if metric in PERCENT_EVAL_METRICS:
+                message = '%s = %0.2f%% (score = %s)\n' % (
+                    metric.capitalize(), metric_value * 100, score)
             else:
-                best_unchanged_count += 1
-            node_threshold += args.nodes_step
-
-        message = ('The best node threshold is: %s \n'
-                   % best_threshold)
-        u.log_message(message, log_file=session_file, console=1)
-        if metric in PERCENT_EVAL_METRICS:
-            message = ('%s = %0.2f%%\n' % (metric.capitalize(),
-                                           (best_score * 100)))
+                message = '%s = %f (score = %s)\n' % (metric.capitalize(),
+                                                      metric_value,
+                                                      score)
+            u.log_message(message, log_file=session_file,
+                          console=args.verbosity)
         else:
-            message = ('%s = %f\n' % (metric.capitalize(), best_score))
-        u.log_message(message, log_file=session_file, console=1)
-        return best_threshold
+            best_unchanged_count += 1
+        node_threshold += args.nodes_step
+
+    message = ('The best node threshold is: %s \n'
+               % best_threshold)
+    u.log_message(message, log_file=session_file, console=1)
+    if metric in PERCENT_EVAL_METRICS:
+        message = ('%s = %0.2f%%\n' % (metric.capitalize(),
+                                       (best_score * 100)))
+    else:
+        message = ('%s = %f\n' % (metric.capitalize(), best_score))
+    u.log_message(message, log_file=session_file, console=1)
+    nodes_writer.close_writer()
+    return best_threshold
 
 
 def node_threshold_evaluate(datasets_file, args, node_threshold,
@@ -885,66 +892,62 @@ def best_candidates_number(datasets_file, args, common_options,
     loop_counter = 0
     candidates_file = os.path.normpath(os.path.join(args.output_dir,
                                                     CANDIDATES_LOG))
-    with open(candidates_file, u.open_mode("w")) as candidates_handler:
-        candidates_writer = csv.writer(candidates_handler, lineterminator="\n")
+    candidates_writer = UnicodeWriter(candidates_file).open_writer()
+    candidates_writer.writerow(CANDIDATES_HEADER)
+    args.output_dir = os.path.normpath(os.path.join(args.output_dir,
+                                                    "random"))
+    max_candidates = args.max_candidates + 1
+
+    if args.nodes_step is None:
+        args.nodes_step = DEFAULT_CANDIDATES_STEP
+    random_candidates = args.min_candidates
+
+    if penalty is None:
+        penalty = DEFAULT_CANDIDATES_PENALTY
+    best_score = - float('inf')
+    metric = args.optimize
+    score = best_score
+    while random_candidates < max_candidates:
+        loop_counter += 1
+        (score,
+         metric_value,
+         metric,
+         resume) = candidates_evaluate(datasets_file, args,
+                                       random_candidates, common_options,
+                                       penalty=penalty, resume=resume,
+                                       metric=metric)
         candidates_writer.writerow([
-            "step", "random_candidates", "score", "metric_value",
-            "best_score"])
-        candidates_handler.flush()
-        args.output_dir = os.path.normpath(os.path.join(args.output_dir,
-                                                        "random"))
-        max_candidates = args.max_candidates + 1
+            loop_counter, random_candidates, score, metric_value,
+            best_score])
+        if (score - EPSILON) > best_score:
+            best_candidates = random_candidates
+            best_score = score
+            message = 'New best random candidates number is: %s\n' % \
+                best_candidates
+            u.log_message(message, log_file=session_file,
+                          console=args.verbosity)
+            if metric in PERCENT_EVAL_METRICS:
+                message = '%s = %0.2f%% (score = %s)\n' % (
+                    metric.capitalize(), metric_value * 100, score)
+            else:
+                message = '%s = %f (score = %s)\n' % (metric.capitalize(),
+                                                      metric_value,
+                                                      score)
+            u.log_message(message, log_file=session_file,
+                          console=args.verbosity)
+        random_candidates += DEFAULT_CANDIDATES_STEP
 
-        if args.nodes_step is None:
-            args.nodes_step = DEFAULT_CANDIDATES_STEP
-        random_candidates = args.min_candidates
-
-        if penalty is None:
-            penalty = DEFAULT_CANDIDATES_PENALTY
-        best_score = - float('inf')
-        metric = args.optimize
-        score = best_score
-        while random_candidates < max_candidates:
-            loop_counter += 1
-            (score,
-             metric_value,
-             metric,
-             resume) = candidates_evaluate(datasets_file, args,
-                                           random_candidates, common_options,
-                                           penalty=penalty, resume=resume,
-                                           metric=metric)
-            candidates_writer.writerow([
-                loop_counter, random_candidates, score, metric_value,
-                best_score])
-            candidates_handler.flush()
-            if (score - EPSILON) > best_score:
-                best_candidates = random_candidates
-                best_score = score
-                message = 'New best random candidates number is: %s\n' % \
-                    best_candidates
-                u.log_message(message, log_file=session_file,
-                              console=args.verbosity)
-                if metric in PERCENT_EVAL_METRICS:
-                    message = '%s = %0.2f%% (score = %s)\n' % (
-                        metric.capitalize(), metric_value * 100, score)
-                else:
-                    message = '%s = %f (score = %s)\n' % (metric.capitalize(),
-                                                          metric_value,
-                                                          score)
-                u.log_message(message, log_file=session_file,
-                              console=args.verbosity)
-            random_candidates += DEFAULT_CANDIDATES_STEP
-
-        message = ('The best random candidates number is: %s \n'
-                   % best_candidates)
-        u.log_message(message, log_file=session_file, console=1)
-        if metric in PERCENT_EVAL_METRICS:
-            message = ('%s = %0.2f%%\n' % (metric.capitalize(),
-                                           (best_score * 100)))
-        else:
-            message = ('%s = %f\n' % (metric.capitalize(), best_score))
-        u.log_message(message, log_file=session_file, console=1)
-        return best_candidates
+    message = ('The best random candidates number is: %s \n'
+               % best_candidates)
+    u.log_message(message, log_file=session_file, console=1)
+    if metric in PERCENT_EVAL_METRICS:
+        message = ('%s = %0.2f%%\n' % (metric.capitalize(),
+                                       (best_score * 100)))
+    else:
+        message = ('%s = %f\n' % (metric.capitalize(), best_score))
+    u.log_message(message, log_file=session_file, console=1)
+    candidates_writer.close_writer()
+    return best_candidates
 
 
 def candidates_evaluate(datasets_file, args, random_candidates,

@@ -3,6 +3,12 @@
 History
 -------
 
+3.6.2 (2016-04-01)
+~~~~~~~~~~~~~~~~~~
+
+- Improving bigmler analyze --features CSV output to reflect the best fields
+  set found at each step.
+
 3.6.1 (2016-03-14)
 ~~~~~~~~~~~~~~~~~~
 
