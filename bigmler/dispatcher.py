@@ -573,6 +573,15 @@ def compute_output(api, args):
             test_fields = pd.get_fields_structure(test_dataset,
                                                   csv_properties)
 
+            if args.to_dataset and args.dataset_off:
+                model = api.check_resource(args.model_ids_[0],
+                                           query_string=r.ALL_FIELDS_QS)
+                model_fields = Fields(model)
+                objective_field_name = model_fields.field_name( \
+                    model_fields.objective_field)
+                if objective_field_name in test_fields.fields_by_name.keys():
+                    args.prediction_name = "%s (predicted)" % \
+                        objective_field_name
             batch_prediction_args = r.set_batch_prediction_args(
                 args, fields=fields,
                 dataset_fields=test_fields)

@@ -1314,6 +1314,8 @@ def set_batch_prediction_args(args, fields=None,
 
     if args.prediction_info == FULL_FORMAT:
         batch_prediction_args.update(all_fields=True)
+        if hasattr(args, 'prediction_name') and args.prediction_name:
+            batch_prediction_args.update(prediction_name=args.prediction_name)
     if args.prediction_fields:
         batch_prediction_args.update(all_fields=False)
         prediction_fields = []

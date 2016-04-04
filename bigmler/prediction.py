@@ -41,6 +41,8 @@ from bigmler.tst_reader import TstReader as TestReader
 from bigmler.resources import (FIELDS_QS, ALL_FIELDS_QS, BRIEF_FORMAT,
                                NORMAL_FORMAT, FULL_FORMAT)
 from bigmler.resources import create_batch_prediction
+from bigmler.utils import (log_created_resources, check_resource_error, dated,
+                           get_url, log_message)
 
 MAX_MODELS = 10
 AGGREGATION = -1
@@ -685,6 +687,9 @@ def remote_predict(model, test_dataset, batch_prediction_args, args,
 
     if args.ensemble is not None:
         model_or_ensemble = args.ensemble
+    elif args.dataset_off:
+        models = args.model_ids_
+        test_datasets = args.test_dataset_ids
     else:
         model_or_ensemble = bigml.api.get_model_id(model)
     # if resuming, try to extract dataset form log files
@@ -694,15 +699,22 @@ def remote_predict(model, test_dataset, batch_prediction_args, args,
             c.is_batch_prediction_created, path, debug=args.debug,
             message=message, log_file=session_file, console=args.verbosity)
     if not resume:
-        batch_prediction = create_batch_prediction(
-            model_or_ensemble, test_dataset, batch_prediction_args,
-            args, api, session_file=session_file, path=path, log=log)
-    if not args.no_csv:
+        if not args.dataset_off:
+            batch_prediction = create_batch_prediction(
+                model_or_ensemble, test_dataset, batch_prediction_args,
+                args, api, session_file=session_file, path=path, log=log)
+        else:
+            batch_predictions = []
+            for index in range(len(models)):
+                batch_predictions.append(create_batch_prediction(
+                models[index], test_datasets[index], batch_prediction_args,
+                args, api, session_file=session_file, path=path, log=log))
+    if not args.no_csv and not args.dataset_off:
         file_name = api.download_batch_prediction(batch_prediction,
                                                   prediction_file)
         if file_name is None:
             sys.exit("Failed downloading CSV.")
-    if args.to_dataset:
+    if args.to_dataset and not args.dataset_off:
         batch_prediction = bigml.api.check_resource(batch_prediction, api=api)
         new_dataset = bigml.api.get_dataset_id(
             batch_prediction['object']['output_dataset_resource'])
@@ -713,3 +725,36 @@ def remote_predict(model, test_dataset, batch_prediction_args, args,
                           console=args.verbosity)
             u.log_created_resources("batch_prediction_dataset",
                                     path, new_dataset, mode='a')
+    elif args.to_dataset and args.dataset_off:
+        predictions_datasets = []
+        for batch_prediction in batch_predictions:
+            batch_prediction = bigml.api.check_resource(batch_prediction,
+                                                        api=api)
+            new_dataset = bigml.api.get_dataset_id(
+                batch_prediction['object']['output_dataset_resource'])
+            if new_dataset is not None:
+                predictions_datasets.append(new_dataset)
+                message = u.dated("Batch prediction dataset created: %s\n"
+                                  % u.get_url(new_dataset))
+                u.log_message(message, log_file=session_file,
+                              console=args.verbosity)
+                u.log_created_resources("batch_prediction_dataset",
+                                        path, new_dataset, mode='a')
+        multi_dataset = api.create_dataset(predictions_datasets)
+        log_created_resources("dataset_pred", path,
+                              bigml.api.get_dataset_id(multi_dataset),
+                              mode='a')
+        dataset_id = check_resource_error(multi_dataset,
+                                          "Failed to create dataset: ")
+        try:
+            multi_dataset = api.check_resource(multi_dataset)
+        except ValueError, exception:
+            sys.exit("Failed to get a finished dataset: %s" % str(exception))
+        message = dated("Predictions dataset created: %s\n" %
+                        get_url(multi_dataset))
+        log_message(message, log_file=session_file, console=args.verbosity)
+        log_message("%s\n" % dataset_id, log_file=log)
+        if not args.no_csv:
+            file_name = api.download_dataset(dataset_id, prediction_file)
+            if file_name is None:
+                sys.exit("Failed downloading CSV.")

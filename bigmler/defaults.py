@@ -167,7 +167,8 @@ FLAGS = {
         {'flag': 'nodes_step', 'type': 'int'},
         {'flag': 'random_fields', 'type': 'boolean'},
         {'flag': 'exclude_features', 'type': 'string'},
-        {'flag': 'optimize_category', 'type': 'string'}],
+        {'flag': 'optimize_category', 'type': 'string'},
+        {'flag': 'predictions_csv', 'type': 'boolean'}],
     'BigMLer cluster': [
         {'flag': 'cluster_fields', 'type': 'string'},
         {'flag': 'cluster', 'type': 'string'},

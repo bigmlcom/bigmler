@@ -3,6 +3,14 @@
 History
 -------
 
+3.6.3 (2016-04-04)
+~~~~~~~~~~~~~~~~~~
+
+- Adding the --predictions-csv flag to bigmler analyze --features. It
+  creates a file which contains all the data tagged with the corresponding
+  k-fold and the prediction and confidence values for the best
+  score cross-validation.
+
 3.6.2 (2016-04-01)
 ~~~~~~~~~~~~~~~~~~
 

@@ -173,6 +173,15 @@ def get_analyze_options(defaults=None):
             "action": 'store_true',
             "dest": 'random_fields',
             "default": defaults.get('random_fields', False),
-            "help": "Random candidates analysis for ensembles."}}
+            "help": "Random candidates analysis for ensembles."},
+
+        # predictions-csv: Creates a batch prediction file with the kfold
+        # predictions.
+        '--predictions-csv': {
+            "action": 'store_true',
+            "dest": 'predictions_csv',
+            "default": defaults.get('predictions_csv', False),
+            "help": ("Creates a CSV file with the predictions of the"
+                     " optimized model.")}}
 
     return options

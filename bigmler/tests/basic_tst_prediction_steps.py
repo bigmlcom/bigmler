@@ -177,6 +177,28 @@ def i_create_kfold_cross_validation_objective(step, k_folds=None,
         assert False
 
 
+#@step(r'I create BigML feature selection (\d*)-fold cross-validation with options "(.*)"$')
+def i_create_kfold_cross_validation_options(step, k_folds=None,
+                                            options=None):
+    ok_(k_folds is not None and options is not None)
+    command = ("bigmler analyze --dataset " +
+                             world.dataset['resource'] +
+                             " --features --k-folds " + k_folds +
+                             " --output " + world.directory +
+                             options)
+    command = check_debug(command)
+    try:
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.output = os.path.join(world.directory, "test", "kfold1",
+                                        "evaluation")
+            assert True
+    except OSError as e:
+        assert False
+
+
 #@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" with proportional missing strategy and log predictions in "([^"]*)"$')
 def i_create_all_resources_proportional(step, data=None,
                                         test=None, output=None):
@@ -700,19 +722,17 @@ def i_check_create_kfold_models(step, kfolds):
                    for folder in os.listdir(directory) if
                    os.path.isdir(os.path.join(directory, folder))]
     for directory in directories:
-        model_file = os.path.join(directory, "models")
-        try:
-            with open(model_file, "r") as models_file:
-                models_list = map(str.strip, models_file.readlines())
+        if not directory.endswith("_pred"):
+            model_file = os.path.join(directory, "models")
+            try:
+                with open(model_file, "r") as models_file:
+                    models_list = map(str.strip, models_file.readlines())
 
-            world.models.extend(models_list)
-            world.model = models_list[-1]
-            if int(kfolds) == len(models_list):
-                assert True
-            else:
-                assert False
-        except Exception, exc:
-            assert False, str(exc)
+                world.models.extend(models_list)
+                world.model = models_list[-1]
+                assert_equal(int(kfolds), len(models_list))
+            except Exception, exc:
+                assert False, str(exc)
 
 
 #@step(r'I check that the model has been created and shared$')
@@ -832,7 +852,8 @@ def i_check_create_all_kfold_cross_validations(step, kfolds):
                    for folder in os.listdir(directory) if
                    os.path.isdir(os.path.join(directory, folder))]
     for directory in directories:
-        check_create_kfold_cross_validation(step, kfolds, directory)
+        if not directory.endswith("_pred"):
+            check_create_kfold_cross_validation(step, kfolds, directory)
 
 
 #@step(r'I check that the (\d*)-fold cross-validation has been created')
@@ -971,6 +992,12 @@ def i_check_create_predictions(step):
         assert False, str(exc)
 
 
+#@step(r'the predictions file "(.*)" is like "(.*)"')
+def i_check_predictions_file(step, predictions_file, check_file):
+    world.output = predictions_file
+    i_check_predictions(step, check_file)
+
+
 #@step(r'the local prediction file is like "(.*)"')
 def i_check_predictions(step, check_file):
     check_file = res_filename(check_file)
@@ -993,8 +1020,10 @@ def i_check_predictions(step, check_file):
                                 check_row[index] = round(float(check_row[index]), decimal_places)
                             except ValueError:
                                 decimal_places = 1
-                        assert_almost_equal(check_row[index], row[index],
-                                            places=(decimal_places - 1))
+                            assert_almost_equal(check_row[index], row[index],
+                                                places=(decimal_places - 1))
+                        else:
+                            assert_equal(check_row[index], row[index])
     except Exception, exc:
         assert False, traceback.format_exc()
 

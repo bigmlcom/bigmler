@@ -1555,6 +1555,31 @@ important than their actual number. However, in some marginal cases (e.g.
 datasets with a high number noise features) the number of random candidates
 can impact tree performance significantly.
 
+For any of these options (``--features``, ``--nodes`` and ``--random-fields``)
+you can add the ``--predictions-csv`` flag to the ``bigmler analyze``
+command. The results will the show a CSV file that stores the predictions
+obtained in the evaluations that gave the best score. The file contents include
+the data in your original dataset tagged by k-fold and the prediction and
+confidence obtained. This file will be placed in an internal folder of your
+chosen output directory.
+
+.. code-block:: bash
+
+
+    bigmler analyze --dataset dataset/5357eb2637203f1668000004 \
+                    --features --output-dir my_features --predictions-csv
+
+The output directory for this command is ``my_features`` and it will
+contain all the information about the resources generated when testing
+the different feature combinations
+organized in subfolders. The k-fold datasets'
+IDs will be stored in an inner ``test`` directory. The IDs of the resources
+created when testing each combination of features will be stored in
+``kfold1``, ``kfold2``, etc. folders inside the ``test`` directory.
+If the best-scoring prediction
+models are the ones in the ``kfold4`` folder, then the predictions CSV file
+will be stored in a new folder named ``kfold4_pred``.
+
 
 .. _bigmler-report:
 

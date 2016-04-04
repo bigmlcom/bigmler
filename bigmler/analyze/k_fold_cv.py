@@ -52,6 +52,12 @@ TEST_DATASET = "kfold_dataset-%s.json"
 NEW_FIELD = ('{"row_offset": %s, "row_step": %s,'
              ' "new_fields": [{"name": "%s", "field": "%s"}],'
              ' "objective_field": {"id": "%s"}}')
+"""
+bigmler --test-datasets test/dataset_gen --models test/kfold3/models
+ --dataset-off --remote --output-dir test/batchpredictions3
+ --prediction-info full --prediction-header --to-dataset
+"""
+
 
 COMMANDS = {"selection":
                 ("main --dataset %s --new-field %s --no-model --output-dir %s"
@@ -64,7 +70,12 @@ COMMANDS = {"selection":
                  " --dataset-off --evaluate"),
             "random_candidates":
                 ("main --datasets %s --random-candidates %s --output-dir %s"
-                 " --randomize --dataset-off --evaluate")}
+                 " --randomize --dataset-off --evaluate"),
+            "prediction":
+                ("main --test-datasets %s/dataset_gen"
+                 " --models %s/models"
+                 " --dataset-off --remote --output-dir %s_pred"
+                 " --prediction-info full --prediction-header --to-dataset")}
 
 DEFAULT_KFOLD_FIELD = "__kfold__"
 KFOLD_SUBDIR = "k_fold"
@@ -159,6 +170,33 @@ def different_command(next_command, command):
             return re.sub(pattern, "", next_command) == re.sub(pattern,
                                                                "", command)
         return False
+
+
+def create_prediction_dataset(base_path, folder, args, resume):
+    """Creates batch prediction datasets and a multidataset with the prediction
+    results for the best scoring model in the folder set by the argument
+
+    """
+    args.output_dir = os.path.join(base_path, "%s_pred" % folder)
+    output_dir = args.output_dir
+    folder = os.path.join(base_path, folder)
+    global subcommand_list
+    # creating the predictions CSV file
+    command = COMMANDS["prediction"] % (base_path, folder, folder)
+    command_args = command.split()
+    if resume:
+        next_command = subcommand_list.pop()
+        if different_command(next_command, command):
+            resume = False
+            u.sys_log_message(command, log_file=subcommand_file)
+            main_dispatcher(args=command_args)
+        elif not subcommand_list:
+            main_dispatcher(args=['main', '--resume'])
+            resume = False
+    else:
+        u.sys_log_message(command, log_file=subcommand_file)
+        main_dispatcher(args=command_args)
+    return resume
 
 
 def create_kfold_cv(args, api, common_options, resume=False):
@@ -493,13 +531,13 @@ def create_kfold_evaluations(datasets_file, args, common_options,
 
 def find_max_state(states_list):
 
-    max_state, max_score, max_metric_value = (
-        None, - float('inf'), - float('inf'))
-    for (state, score, metric_value) in states_list:
+    max_state, max_score, max_metric_value, max_counter = (
+        None, - float('inf'), - float('inf'), 0)
+    for (state, score, metric_value, counter) in states_list:
         if score > max_score or max_state is None and max_score == score:
-            max_state, max_score, max_metric_value = (
-                state, score, metric_value)
-    return max_state, max_score, max_metric_value
+            max_state, max_score, max_metric_value, max_counter = (
+                state, score, metric_value, counter)
+    return max_state, max_score, max_metric_value, max_counter
 
 
 def expand_state(parent):
@@ -563,15 +601,15 @@ def best_first_search(datasets_file, api, args, common_options,
     features_header.extend(fields_names)
     features_writer.writerow(features_header)
     initial_state = [False for field_id in field_ids]
-    open_list = [(initial_state, - float('inf'), -float('inf'))]
+    open_list = [(initial_state, - float('inf'), -float('inf'), 0)]
     closed_list = []
-    best_state, best_score, best_metric_value = open_list[0]
+    best_state, best_score, best_metric_value, best_counter = open_list[0]
     best_unchanged_count = 0
     metric = args.optimize
     while best_unchanged_count < staleness and open_list:
         loop_counter += 1
         features_set = find_max_state(open_list)
-        state, score, metric_value = features_set
+        state, score, metric_value, folder_counter = features_set
         if loop_counter > 1:
             csv_results = [loop_counter - 1, [int(in_set) for in_set in state],
                 score, metric_value, best_score]
@@ -586,7 +624,8 @@ def best_first_search(datasets_file, api, args, common_options,
         closed_list.append(features_set)
         open_list.remove(features_set)
         if (score - EPSILON) > best_score:
-            best_state, best_score, best_metric_value = features_set
+            best_state, best_score, best_metric_value, best_counter = \
+                features_set
             best_unchanged_count = 0
             if state_fields:
                 message = 'New best state: %s\n' % (state_fields)
@@ -605,8 +644,8 @@ def best_first_search(datasets_file, api, args, common_options,
 
         children = expand_state(state)
         for child in children:
-            if (child not in [state for state, _, _ in open_list] and
-                    child not in [state for state, _, _ in closed_list]):
+            if (child not in [state for state, _, _, _ in open_list] and
+                    child not in [state for state, _, _, _ in closed_list]):
                 try:
                     # we need to keep names instead of IDs because
                     # IDs can change for different datasets
@@ -625,7 +664,7 @@ def best_first_search(datasets_file, api, args, common_options,
                                           args, counter, common_options,
                                           penalty=penalty, resume=resume,
                                           metric=metric)
-                open_list.append((child, score, metric_value))
+                open_list.append((child, score, metric_value, counter))
     try:
         best_features = [fields.field_name(field_ids[i]) for (i, score)
                          in enumerate(best_state) if score]
@@ -640,6 +679,10 @@ def best_first_search(datasets_file, api, args, common_options,
     else:
         message = (u'%s = %f\n' % (metric.capitalize(), best_metric_value))
     u.log_message(message, log_file=session_file, console=1)
+    output_dir = os.path.normpath(u.check_dir(datasets_file))
+    if args.predictions_csv:
+        resume = create_prediction_dataset(output_dir, "kfold%s" % best_counter,
+                                           args, resume)
     message = (u'Evaluated %d/%d feature subsets\n\n' %
                ((len(open_list) + len(closed_list) - 1),
                 2 ** len(field_ids) - 1))
@@ -721,6 +764,7 @@ def best_node_threshold(datasets_file, args, common_options,
     best_unchanged_count = 0
     metric = args.optimize
     score = best_score
+    best_counter = 0
     while best_unchanged_count < staleness and node_threshold < max_nodes:
         loop_counter += 1
         (score,
@@ -736,6 +780,7 @@ def best_node_threshold(datasets_file, args, common_options,
             best_threshold = node_threshold
             best_score = score
             best_unchanged_count = 0
+            best_counter = loop_counter
             message = 'New best node threshold: %s\n' % (best_threshold)
             u.log_message(message, log_file=session_file,
                           console=args.verbosity)
@@ -751,7 +796,10 @@ def best_node_threshold(datasets_file, args, common_options,
         else:
             best_unchanged_count += 1
         node_threshold += args.nodes_step
-
+    if args.predictions_csv:
+        resume = create_prediction_dataset(output_dir,
+                                           "node_th%s" % best_counter,
+                                           args, resume)
     message = ('The best node threshold is: %s \n'
                % best_threshold)
     u.log_message(message, log_file=session_file, console=1)
@@ -907,6 +955,7 @@ def best_candidates_number(datasets_file, args, common_options,
     best_score = - float('inf')
     metric = args.optimize
     score = best_score
+    best_counter = 0
     while random_candidates < max_candidates:
         loop_counter += 1
         (score,
@@ -922,6 +971,7 @@ def best_candidates_number(datasets_file, args, common_options,
         if (score - EPSILON) > best_score:
             best_candidates = random_candidates
             best_score = score
+            best_counter = loop_counter
             message = 'New best random candidates number is: %s\n' % \
                 best_candidates
             u.log_message(message, log_file=session_file,
@@ -936,7 +986,10 @@ def best_candidates_number(datasets_file, args, common_options,
             u.log_message(message, log_file=session_file,
                           console=args.verbosity)
         random_candidates += DEFAULT_CANDIDATES_STEP
-
+    if args.predictions_csv:
+        resume = create_prediction_dataset(output_dir,
+                                           "random%s" % best_counter,
+                                           args, resume)
     message = ('The best random candidates number is: %s \n'
                % best_candidates)
     u.log_message(message, log_file=session_file, console=1)
