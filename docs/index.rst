@@ -1557,8 +1557,8 @@ can impact tree performance significantly.
 
 For any of these options (``--features``, ``--nodes`` and ``--random-fields``)
 you can add the ``--predictions-csv`` flag to the ``bigmler analyze``
-command. The results will the show a CSV file that stores the predictions
-obtained in the evaluations that gave the best score. The file contents include
+command. The results will then include a CSV file that stores the predictions
+obtained in the evaluations that gave the best score. The file content includes
 the data in your original dataset tagged by k-fold and the prediction and
 confidence obtained. This file will be placed in an internal folder of your
 chosen output directory.
