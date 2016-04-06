@@ -52,11 +52,6 @@ TEST_DATASET = "kfold_dataset-%s.json"
 NEW_FIELD = ('{"row_offset": %s, "row_step": %s,'
              ' "new_fields": [{"name": "%s", "field": "%s"}],'
              ' "objective_field": {"id": "%s"}}')
-"""
-bigmler --test-datasets test/dataset_gen --models test/kfold3/models
- --dataset-off --remote --output-dir test/batchpredictions3
- --prediction-info full --prediction-header --to-dataset
-"""
 
 
 COMMANDS = {"selection":
@@ -73,7 +68,7 @@ COMMANDS = {"selection":
                  " --randomize --dataset-off --evaluate"),
             "prediction":
                 ("main --test-datasets %s/dataset_gen"
-                 " --models %s/models"
+                 " --%s %s/%s"
                  " --dataset-off --remote --output-dir %s_pred"
                  " --prediction-info full --prediction-header --to-dataset")}
 
@@ -128,7 +123,6 @@ subcommand_file = None
 session_file = None
 
 
-
 def set_subcommand_file(output_dir):
     """Creates the subcommand file in the output_dir directory
 
@@ -180,9 +174,12 @@ def create_prediction_dataset(base_path, folder, args, resume):
     args.output_dir = os.path.join(base_path, "%s_pred" % folder)
     output_dir = args.output_dir
     folder = os.path.join(base_path, folder)
+    model_type = "ensembles" if hasattr(args, "number_of_models") and \
+        args.number_of_models > 1 else "models"
     global subcommand_list
     # creating the predictions CSV file
-    command = COMMANDS["prediction"] % (base_path, folder, folder)
+    command = COMMANDS["prediction"] % (base_path, model_type, folder,
+                                        model_type, folder)
     command_args = command.split()
     if resume:
         next_command = subcommand_list.pop()
@@ -245,6 +242,9 @@ def create_features_analysis(args, api, common_options, resume=False):
     # selected feature subset
     bigmler_command = u'bigmler --dataset %s --model-fields="%s"' % ( \
         args.dataset, ",".join(model_fields))
+    if args.number_of_models > 1:
+        bigmler_command = u"%s --number-of-models %s" % ( \
+            bigmler_command, args.number_of_models)
     message = (u'To create the final model with the entire dataset using '
                u'the selected feature subset use:\n%s\n\n' %
                bigmler_command)

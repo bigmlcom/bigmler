@@ -37,12 +37,17 @@ def ensemble_processing(datasets, api, args, resume,
     """
     ensembles = []
     ensemble_ids = []
+    models = []
+    model_ids = []
     number_of_ensembles = len(datasets)
 
     if resume:
         resume, ensemble_ids = c.checkpoint(
             c.are_ensembles_created, path, number_of_ensembles,
             debug=args.debug)
+        _, model_ids = c.checkpoint(c.are_models_created, path,
+            number_of_ensembles * args.number_of_models)
+        models = model_ids
         if not resume:
             message = u.dated("Found %s ensembles out of %s. Resuming.\n"
                               % (len(ensemble_ids),

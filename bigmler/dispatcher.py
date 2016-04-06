@@ -466,7 +466,8 @@ def compute_output(api, args):
     if model:
         if (isinstance(model, basestring) or
                 bigml.api.get_status(model)['code'] != bigml.api.FINISHED):
-            if not args.evaluate and not a.has_train(args):
+            if not args.evaluate and not a.has_train(args) and \
+                    not a.has_test(args) :
                 query_string = MINIMUM_MODEL
             elif not args.test_header:
                 query_string = r.ALL_FIELDS_QS
@@ -490,12 +491,14 @@ def compute_output(api, args):
 
     # We get the fields of the model if we haven't got
     # them yet and need them
-    if model and not args.evaluate and (args.test_set or args.export_fields):
+    if model and not args.evaluate and (a.has_test(args) or
+                                        args.export_fields):
         # If more than one model, use the full field structure
         if (not single_model and not args.multi_label and
                 belongs_to_ensemble(model)):
             if len(ensemble_ids) > 0:
                 ensemble_id = ensemble_ids[0]
+                args.ensemble_ids_ = ensemble_ids
             else:
                 ensemble_id = get_ensemble_id(model)
         fields = pm.get_model_fields(
@@ -574,7 +577,7 @@ def compute_output(api, args):
                                                   csv_properties)
 
             if args.to_dataset and args.dataset_off:
-                model = api.check_resource(args.model_ids_[0],
+                model = api.check_resource(model['resource'],
                                            query_string=r.ALL_FIELDS_QS)
                 model_fields = Fields(model)
                 objective_field_name = model_fields.field_name( \

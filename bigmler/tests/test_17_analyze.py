@@ -365,7 +365,8 @@ class TestAnalyze(object):
                 Examples:
                 | data              |output                    | kfold | options   | predictions_file | estimated_file
                 | ../data/iris.csv  |./scenario_a_12/evaluation | 2     | --exclude-features="petal length, sepal length" --predictions-csv| scenario_a_12/kfold2_pred/predictions.csv | check_files/analyze_predictions_iris.csv
-                | ../data/iris.csv |./scenario_a_13/evaluation | 2     | --exclude-features="species,petal length" --predictions.csv --objective 0| scenario_a_13/kfold2_pred/predictions.csv | check_files/analyze_predictions_iris_2.csv
+                | ../data/iris.csv |./scenario_a_13/evaluation | 2     | --exclude-features="species,petal length" --predictions.csv --objective 0| scenario_a_13/kfold6_pred/predictions.csv | check_files/analyze_predictions_iris_2.csv
+                | ../data/iris.csv |./scenario_a_14/evaluation | 2     | --exclude-features="species,petal length" --predictions.csv --number-of-models 2| scenario_a_14/kfold2_pred/predictions.csv | check_files/analyze_predictions_iris_2.csv
         """
         print self.test_scenario10.__doc__
         examples = [
@@ -379,5 +380,36 @@ class TestAnalyze(object):
             test_pred.i_create_kfold_cross_validation_options(self, k_folds=example[2], options=example[3])
             test_pred.i_check_create_kfold_datasets(self, example[2])
             test_pred.i_check_create_kfold_models(self, example[2])
+            test_pred.i_check_create_all_kfold_cross_validations(self, example[2])
+            test_pred.i_check_predictions_file(self, example[4], example[5])
+
+
+    def test_scenario11(self):
+        """
+            Scenario: Successfully building feature selection from dataset setting objective:
+                Given I create BigML dataset uploading train "<data>" file in "<output>"
+                And I check that the source has been created
+                And I check that the dataset has been created
+                And I create BigML feature selection <kfold>-fold cross-validation with options "<options>"
+                And I check that the <kfold>-datasets have been created
+                And I check that the <kfold>-ensembles have been created
+                And I check that all the <kfold>-fold cross-validations have been created
+                Then the predictions file "<predictions_file>" is like "<estimated_file>"
+
+                Examples:
+                | data              |output                    | kfold | options   | predictions_file | estimated_file
+                | ../data/iris.csv |./scenario_a_14/evaluation | 2     | --exclude-features="species,petal length" --predictions.csv --number-of-models 2| scenario_a_14/kfold2_pred/predictions.csv | check_files/analyze_predictions_iris_e.csv
+        """
+        print self.test_scenario11.__doc__
+        examples = [
+            ['data/iris.csv', 'scenario_a_14/evaluation', '2', ' --exclude-features="petal length,sepal length" --predictions-csv --number-of-models 2','scenario_a_14/test/kfold2_pred/predictions.csv', 'check_files/analyze_predictions_iris_e.csv']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            test_pred.i_create_dataset(self, data=example[0], output=example[1])
+            test_pred.i_check_create_source(self)
+            test_pred.i_check_create_dataset(self)
+            test_pred.i_create_kfold_cross_validation_options(self, k_folds=example[2], options=example[3])
+            test_pred.i_check_create_kfold_datasets(self, example[2])
+            test_pred.i_check_create_kfold_ensembles(self, example[2])
             test_pred.i_check_create_all_kfold_cross_validations(self, example[2])
             test_pred.i_check_predictions_file(self, example[4], example[5])

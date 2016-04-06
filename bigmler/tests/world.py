@@ -105,7 +105,7 @@ class World(object):
         self.fields_properties_dict = {}
         self.counters = {}
         self.folders = []
-        self.test_project_name = "Test: python bindings %s" % \
+        self.test_project_name = "Test: BigMLer %s" % \
             datetime.datetime.now()
         self.project_id = None
         self.print_connection_info()

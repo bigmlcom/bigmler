@@ -684,11 +684,13 @@ def remote_predict(model, test_dataset, batch_prediction_args, args,
 
        Predictions are computed remotely using the batch predictions call.
     """
-
-    if args.ensemble is not None:
+    if args.ensemble is not None and not args.dataset_off:
         model_or_ensemble = args.ensemble
     elif args.dataset_off:
-        models = args.model_ids_
+        if hasattr(args, "ensemble_ids_") and args.ensemble_ids_:
+            models = args.ensemble_ids_
+        else:
+            models = args.model_ids_
         test_datasets = args.test_dataset_ids
     else:
         model_or_ensemble = bigml.api.get_model_id(model)
@@ -705,7 +707,7 @@ def remote_predict(model, test_dataset, batch_prediction_args, args,
                 args, api, session_file=session_file, path=path, log=log)
         else:
             batch_predictions = []
-            for index in range(len(models)):
+            for index in range(len(test_datasets)):
                 batch_predictions.append(create_batch_prediction(
                 models[index], test_datasets[index], batch_prediction_args,
                 args, api, session_file=session_file, path=path, log=log))

@@ -735,6 +735,25 @@ def i_check_create_kfold_models(step, kfolds):
                 assert False, str(exc)
 
 
+#@step(r'I check that the (\d*)-ensembles have been created')
+def i_check_create_kfold_ensembles(step, kfolds):
+    directory = os.path.dirname(os.path.dirname(world.output))
+
+    directories = [os.path.join(directory, folder)
+                   for folder in os.listdir(directory) if
+                   os.path.isdir(os.path.join(directory, folder))]
+    for directory in directories:
+        if not directory.endswith("_pred"):
+            model_file = os.path.join(directory, "ensembles")
+            try:
+                with open(model_file, "r") as models_file:
+                    models_list = map(str.strip, models_file.readlines())
+                world.ensembles.extend(models_list)
+                world.ensemble = models_list[-1]
+                assert_equal(int(kfolds), len(models_list))
+            except Exception, exc:
+                assert False, str(exc)
+
 #@step(r'I check that the model has been created and shared$')
 def i_check_create_model_shared(step):
     i_check_create_model(step)

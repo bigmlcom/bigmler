@@ -3,6 +3,12 @@
 History
 -------
 
+3.6.4 (2016-04-08)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug: the --predictions-csv flag in the bigmler analyze command did
+  not work with ensembles (--number-of-models > 1)
+
 3.6.3 (2016-04-04)
 ~~~~~~~~~~~~~~~~~~
 
