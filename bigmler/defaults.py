@@ -243,7 +243,7 @@ FLAGS = {
         {'flag': 'lr_c', 'type': 'float'},
         {'flag': 'eps', 'type': 'float'},
         {'flag': 'missing_numerics', 'type': 'boolean'},
-        {'flag': 'normalize', 'type': 'boolean'}]}
+        {'flag': 'normalize', 'type': 'boolean'}],
     'BigMLer execute': [
         {'flag': 'script', 'type': 'string'},
         {'flag': 'library', 'type': 'string'},

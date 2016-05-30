@@ -3,6 +3,12 @@
 History
 -------
 
+3.7.0 (2016-04-08)
+~~~~~~~~~~~~~~~~~~
+
+- Adding the new execute subcommand, which can create scripts, executions
+  and libraries.
+
 3.6.4 (2016-04-08)
 ~~~~~~~~~~~~~~~~~~
 
