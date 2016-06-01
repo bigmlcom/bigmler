@@ -66,6 +66,26 @@ def i_create_all_execution_resources(step, code=None, output_dir=None):
     shell_execute(command, "%s/xx.txt" % output_dir)
 
 
+#@step(r'I create BigML library from code in file "(.*)" and log results in  "(.*)"$')
+def i_create_all_library_resources(step, code_file=None, output_dir=None):
+    ok_(code_file is not None and output_dir is not None)
+    command = ("bigmler execute --code-file " + res_filename(code_file) +
+               " --store --to-library --output-dir " + output_dir)
+    shell_execute(command, "%s/xx.txt" % output_dir)
+
+
+#@step(r'I create BigML execution resources from code in file "(.*)" with inputs "(.*)", outputs "(.*)" and inputs "(.*)" and log results in  "(.*)"$')
+def i_create_all_execution_with_io_resources(step, code_file=None, output_dir=None, inputs_dec=None, outputs_dec=None, inputs=None):
+    ok_(code_file is not None and output_dir is not None and
+        inputs_dec is not None and outputs_dec is not None and
+        inputs is not None)
+    command = ("bigmler execute --code-file " + res_filename(code_file) +
+               " --store --declare-inputs " + res_filename(inputs_dec) +
+               " --declare-outputs "+ res_filename(outputs_dec) +
+               " --inputs " + res_filename(inputs) + " --output-dir " + output_dir)
+    shell_execute(command, "%s/xx.txt" % output_dir)
+
+
 #@step(r'I check that the script has been created')
 def i_check_create_script(step):
     script_file = "%s%sscripts" % (world.directory, os.sep)
@@ -116,6 +136,21 @@ def i_check_result_is(step, check_file=None):
         del results["sources"]
         assert_equal(results, world.results)
         check_file.close()
+        assert True
+    except Exception, exc:
+        assert False, str(exc)
+
+
+#@step(r'I check that the library has been created')
+def i_check_create_library(step):
+    library_file = os.path.join(world.directory, "library")
+    try:
+        library_file = open(library_file, "r")
+        library = check_resource(library_file.readline().strip(),
+                                 world.api.get_library)
+        world.libraries.append(library['resource'])
+        world.library = library
+        library_file.close()
         assert True
     except Exception, exc:
         assert False, str(exc)

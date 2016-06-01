@@ -70,7 +70,6 @@ class TestExecute(object):
             | code      | output_dir       | result_file
             | (+ 1 1)   | scenario1_exe    | check_files/results_s1exe.json
 
-
         """
         print self.test_scenario01.__doc__
         examples = [
@@ -82,3 +81,49 @@ class TestExecute(object):
             execute.i_check_create_execution(self)
             execute.i_check_create_result(self)
             execute.i_check_result_is(self, example[2])
+
+
+    def test_scenario02(self):
+        """
+        Scenario: Successfully creating a library from file:
+            Given I create BigML library from code in file "<code_file>" and log results in  "<output_dir>"
+            Then I check that the library has been created
+
+            Examples:
+            | code_file         | output_dir
+            | code_lib.whizzml      | scenario2_exe
+
+        """
+        print self.test_scenario02.__doc__
+        examples = [
+            ['data/code_lib.whizzml', 'scenario2_exe']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            execute.i_create_all_library_resources(self, example[0], example[1])
+            execute.i_check_create_library(self)
+
+
+    def test_scenario03(self):
+        """
+        Scenario: Successfully creating an execution with input/outputs from a code file:
+            Given I create BigML execution resources from code in file "<code_file>" with inputs "<inputs_dec>", outputs "<outputs_dec>" and inputs "<inputs>" and log results in  "<output_dir>"
+            And I check that the script has been created
+            And I check that the execution has been created
+            And I check that the result is ready
+            Then the result file is like "<result_file>"
+
+            Examples:
+            | code_file      | output_dir       | inputs_dec           | outputs_dec           | inputs           | result_file
+            | code.whizzml   | scenario3_exe    | data/inputs_dec.json | data/outputs_dec.json | data/inputs.json | check_files/results_s3exe.json
+
+        """
+        print self.test_scenario03.__doc__
+        examples = [
+            ['data/code.whizzml', 'scenario3_exe', 'data/inputs_dec.json', 'data/outputs_dec.json', 'data/inputs.json', 'check_files/results_s3exe.json']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            execute.i_create_all_execution_with_io_resources(self, example[0], example[1], example[2], example[3], example[4])
+            execute.i_check_create_script(self)
+            execute.i_check_create_execution(self)
+            execute.i_check_create_result(self)
+            execute.i_check_result_is(self, example[5])
