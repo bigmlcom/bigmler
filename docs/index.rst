@@ -81,6 +81,12 @@ Used to generate association rules from your datasets. See
 Used to generate logistic regression models and predictions. See
 :ref:`bigmler-logistic-regression`.
 
+``bigmler execute``:
+
+
+Used to create WhizzML libraries or scripts and execute them. See
+:ref:`bigmler-execute`.
+
 
 Quick Start
 ===========
@@ -2027,6 +2033,160 @@ As you can see, BigMLer has added a default ``category``, ``name``,
 and used the ``out_of_bag`` attribute for the
 evaluation to use the remaining part of the dataset test data.
 
+
+
+.. _bigmler-execute:
+
+Execute subcommand
+------------------
+
+This subcommand creates and executes scripts in WhizzML (BigML's automation
+language). With WhizzML you can program any specific workflow that involves
+Machine Learning resources like datasets, models, etc. You just write a
+script using the directives in the
+`reference manual<https://static.bigml.com/pdf/BigML_WhizzML_Reference.pdf>`_
+and upload it to BigML, where it will be available as more resource in
+your dashboard. Scripts can also be shared and published in the gallery,
+so you can reuse other user's scripts and execute them. These operations
+can also be done using the `bigmler execute` subcommand.
+
+The simplest example is executing a basic code, like adding two numbers:
+
+.. code-block:: bash
+
+    bigmler execute --code "(+ 1 2)" --output-dir simple_exe
+
+With this command, bigmler will generate a script in BigML whose source code
+is the one given as a string in the ``--code`` option. The script ID will
+be stored in a file called ``scripts`` in the ``simple_text``
+directory. After that, the
+script will be executed, so a new resource called ``execution`` will be
+created in BigML, and the corresponding ID will be stored in the
+``execution`` file of the output directory.
+Similarly, the result of the execution will be stored
+in ``result.txt`` and
+``result.json`` (in human-readable format and JSON respectively) in the
+directory set in the ``--output-dir`` option. You can also use the code
+stored in a file with the ``--code-file`` option.
+
+Adding the ``--no-execute`` flag to the command will cause the process to
+stop right after the script creation. You can also compile your code as a
+library to be used in many scripts by setting the ``--to-library`` flag.
+
+.. code-block:: bash
+
+    bigmler execute --code-file my_library.whizzml --no-execute --to-library
+
+Existing scripts can be referenced for execution with the ``--script`` option
+
+.. code-block:: bash
+
+    bigmler execute --script script/50a2bb64035d0706db000643
+
+or the script ID can be read from a file:
+
+.. code-block:: bash
+
+    bigmler execute --scripts simple_exe/scripts
+
+However, the script we used as example is too simple. In general, scripts
+will have input parameters and output variables. The inputs define the script
+signature and must be declared in order to create the script. The outputs
+are optional and any variable in the script can be declared to be an output.
+Both inputs and outputs can be declared using the ``--declare-inputs`` and
+``--declare-outputs`` options. These options must contain the path
+to the JSON file where the information about the
+inputs and outputs (respectively) is stored.
+
+.. code-block:: bash
+
+    bigmler execute --code '(define addition (+ a b))' \
+                    --declare-inputs my_inputs_dec.json \
+                    --declare-outputs my_outputs_dec.json \
+                    --no-execute
+
+in this example, the ``my_inputs_dec.json`` file could contain
+
+.. code-block:: json
+
+    [{"name": "a",
+      "default": 0,
+      "type": "number"},
+     {"name": "b",
+      "default": 0
+      "type": "number",
+      "description": "second number to add"}]
+
+and ``my_outputs_dec.json``
+
+.. code-block:: json
+
+    [["addition"]]
+
+so that the value of the ``addition`` variable would be returned as
+output in the execution results.
+
+Once the script has been created and its inputs and outputs declared, to
+execute it you'll need to provide a value for each input. This can be
+done using ``--inputs``, that will also point to a JSON file where
+each input should have its corresponding value.
+
+
+.. code-block:: bash
+
+    bigmler execute --script script/50a2bb64035d0706db000643 \
+                    --inputs my_inputs.json
+
+where the ``my_inputs.json`` file would contain:
+
+.. code-block:: json
+
+    [["a", 1],
+     ["b", 2]]
+
+For more details about the syntax to declare inputs and outputs, please
+refer to the
+`Developers documentation<https://bigml.com/developers/scripts#ws_script_arguments>`_.
+
+
+You can also provide default configuration attributes
+for the resources generated in an execution. Add the
+``--creation-defaults`` option followed by the path
+to a JSON file that contains a dictionary whose keys are the resource types
+to which the configuration defaults apply and whose values are the
+configuration attributes set by default.
+
+.. code-block:: bash
+
+bigmler execute \
+       --code-file my_script.whizzml \
+       --creation-defaults defaults.json
+
+For instance, if ``my_script.whizzml`` creates an ensemble from a remote
+file:
+
+.. code-block:: bash
+
+    (define file "s3://bigml-public/csv/iris.csv")
+    (define source (create-and-wait-source {"remote" file}))
+    (define dataset (create-and wait-dataset {"source" source}))
+    (define ensemble (create-and-wait-ensemble {"dataset" dataset}))
+
+and ``my_create_defaults.json`` contains
+
+.. code-block:: json
+
+    {
+        "source": {
+        "project": "project/54d9553bf0a5ea5fc0000016"
+        },
+        "ensemble": {
+        "number_of_models": 100, "sample_rate": 0.9
+        }
+    }
+
+the source created by the script will be associated to the given project
+and the ensemble will have 100 models and a 0.9 sample rate.
 
 
 .. _bigmler-delete:

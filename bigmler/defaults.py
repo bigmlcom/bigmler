@@ -251,9 +251,12 @@ FLAGS = {
         {'flag': 'code_file', 'type': 'string'},
         {'flag': 'output', 'type': 'string'},
         {'flag': 'imports', 'type': 'string'},
-        {'flag': 'parameters', 'type': 'string'},
+        {'flag': 'inputs', 'type': 'string'},
+        {'flag': 'declare_inputs', 'type': 'string'},
+        {'flag': 'declare_outputs', 'type': 'string'},
+        {'flag': 'input_maps', 'type': 'string'},
+        {'flag': 'outputs', 'type': 'string'},
         {'flag': 'creation_defaults', 'type': 'string'},
-        {'flag': 'arguments', 'type': 'string'},
         {'flag': 'no_execute', 'type': 'boolean'}]}
 
 

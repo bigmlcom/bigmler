@@ -405,8 +405,8 @@ def get_output_args(api, command_args, resume):
 
     # Parses parameters for scripts.
     try:
-        if command_args.parameters:
-            command_args.parameters_ = u.read_json(command_args.parameters)
+        if command_args.declare_inputs:
+            command_args.parameters_ = u.read_json(command_args.declare_inputs)
         else:
             command_args.parameters_ = []
     except AttributeError:
@@ -424,11 +424,38 @@ def get_output_args(api, command_args, resume):
 
     # Parses arguments for executions.
     try:
-        if command_args.arguments:
-            command_args.arguments_ = u.read_json(
-                command_args.arguments)
+        if command_args.inputs:
+            command_args.arguments_ = u.read_json(command_args.inputs)
         else:
             command_args.arguments_ = []
+    except AttributeError:
+        pass
+
+    # Parses input maps for executions.
+    try:
+        if command_args.input_maps:
+            command_args.input_maps_ = u.read_json(command_args.input_maps)
+        else:
+            command_args.input_maps_ = []
+    except AttributeError:
+        pass
+
+    # Parses outputs for executions.
+    try:
+        if command_args.outputs:
+            command_args.outputs_ = u.read_json(command_args.outputs)
+        else:
+            command_args.outputs_ = []
+    except AttributeError:
+        pass
+
+    # Parses outputs for scripts.
+    try:
+        if command_args.declare_outputs:
+            command_args.declare_outputs_ = \
+                u.read_json(command_args.declare_outputs)
+        else:
+            command_args.declare_outputs_ = []
     except AttributeError:
         pass
 

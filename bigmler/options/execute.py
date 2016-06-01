@@ -127,13 +127,47 @@ def get_execute_options(defaults=None):
             'help': ("Comma-separated list of libraries IDs to be"
                      " included as imports in scripts or other libraries.")},
 
-        # Path to the JSON file with the description of the script parameters.
-        "--parameters": {
+        # Path to the JSON file with the values of the execution parms.
+        "--inputs": {
             'action': 'store',
-            'dest': 'parameters',
-            'default': defaults.get('parameters', None),
+            'dest': 'inputs',
+            'default': defaults.get('inputs', None),
             'help': ("Path to the JSON file with the description of "
-                     "the script parameters")},
+                     "the execution inputs")},
+
+        # Path to the JSON file with the description of the execution parms for
+        # a list of scripts
+        "--input-maps": {
+            'action': 'store',
+            'dest': 'input_maps',
+            'default': defaults.get('input_maps', None),
+            'help': ("Path to the JSON file with the description of "
+                     "the execution inputs for a list of scripts")},
+
+        # Path to the JSON file with the description of the input parms.
+        "--declare-inputs": {
+            'action': 'store',
+            'dest': 'declare_inputs',
+            'default': defaults.get('declare_inputs', None),
+            'help': ("Path to the JSON file with the description of "
+                     "the input parameters")},
+
+        # Path to the JSON file with the names of the output parameters.
+        "--outputs": {
+            'action': 'store',
+            'dest': 'outputs',
+            'default': defaults.get('outputs', None),
+            'help': ("Path to the JSON file with the names of the output"
+                     " parameters")},
+
+        # Path to the JSON file with the description of the script output
+        # parameters.
+        "--declare-outputs": {
+            'action': 'store',
+            'dest': 'declare_outputs',
+            'default': defaults.get('declare_outputs', None),
+            'help': ("Path to the JSON file with the description of "
+                     "the script outputs")},
 
         # Path to the JSON file with the creation defaults for
         # the script parameters.
@@ -141,15 +175,8 @@ def get_execute_options(defaults=None):
             'action': 'store',
             'dest': 'creation_defaults',
             'default': defaults.get('creation_defaults', None),
-            'help': ("Path to the JSON file with the creation defaults for "
-                     "the script parameters")},
-
-        # Arguments for the script execution.
-        "--arguments": {
-            'action': 'store',
-            'dest': 'arguments',
-            'default': defaults.get('arguments', None),
-            'help': "Arguments for the script execution."},
+            'help': ("Path to the JSON file with the default "
+                     "configurations for created resources.")},
 
         # Don't execute the script. Compile only.
         '--no-execute': {

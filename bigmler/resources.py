@@ -2261,8 +2261,10 @@ def set_script_args(args, name=None):
         script_args.update({"project": args.project_id})
     if args.imports is not None:
         script_args.update({"imports": args.imports_})
-    if args.parameters is not None:
-        script_args.update(args.parameters_)
+    if args.parameters_ is not None:
+        script_args.update({"inputs": args.parameters_})
+    if args.declare_outputs_:
+        script_args.update({"outputs": args.declare_outputs_})
     update_attributes(script_args, args.json_args.get('script'))
     return script_args
 
@@ -2325,10 +2327,14 @@ def set_execution_args(args, name=None):
         "tags": args.tag}
     if args.project_id is not None:
         execution_args.update({"project": args.project_id})
-    if args.arguments is not None:
-        execution_args.update({"arguments": args.arguments_})
+    if args.arguments_:
+        execution_args.update({"inputs": args.arguments_})
     if args.creation_defaults is not None:
         execution_args.update({"creation_defaults": args.creation_defaults_})
+    if args.outputs_:
+        execution_args.update({"outputs": args.outputs_})
+    if args.input_maps_:
+        execution_args.update({"input_maps_": args.input_maps_})
     update_attributes(execution_args, args.json_args.get('execution'))
     return execution_args
 
