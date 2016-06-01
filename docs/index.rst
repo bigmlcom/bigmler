@@ -644,9 +644,9 @@ but BigMLer can extract it and build a CSV file with a summary of it.
 
 .. code-block:: bash
 
-bigmler --source source/50a1f43deabcb404d3010079 \
-        --export-fields fields_summary.csv \
-        --output-dir summary
+    bigmler --source source/50a1f43deabcb404d3010079 \
+            --export-fields fields_summary.csv \
+            --output-dir summary
 
 By using this command, BigMLer will create a ``fields_summary.csv`` file
 in a ``summary`` output directory. The file will contain a headers row and
@@ -656,9 +656,9 @@ execute the same command on a dataset
 
 .. code-block:: bash
 
-bigmler --dataset dataset/50a1f43deabcb404d3010079 \
-        --export-fields fields_summary.csv \
-        --output-dir summary
+    bigmler --dataset dataset/50a1f43deabcb404d3010079 \
+            --export-fields fields_summary.csv \
+            --output-dir summary
 
 you will also see the number of missing values and errors found in each field
 and an excerpt of the values and errors.
@@ -2044,7 +2044,7 @@ This subcommand creates and executes scripts in WhizzML (BigML's automation
 language). With WhizzML you can program any specific workflow that involves
 Machine Learning resources like datasets, models, etc. You just write a
 script using the directives in the
-`reference manual<https://static.bigml.com/pdf/BigML_WhizzML_Reference.pdf>`_
+`reference manual <https://static.bigml.com/pdf/BigML_WhizzML_Reference.pdf>`_
 and upload it to BigML, where it will be available as more resource in
 your dashboard. Scripts can also be shared and published in the gallery,
 so you can reuse other user's scripts and execute them. These operations
@@ -2113,7 +2113,7 @@ in this example, the ``my_inputs_dec.json`` file could contain
       "default": 0,
       "type": "number"},
      {"name": "b",
-      "default": 0
+      "default": 0,
       "type": "number",
       "description": "second number to add"}]
 
@@ -2146,7 +2146,7 @@ where the ``my_inputs.json`` file would contain:
 
 For more details about the syntax to declare inputs and outputs, please
 refer to the
-`Developers documentation<https://bigml.com/developers/scripts#ws_script_arguments>`_.
+`Developers documentation <https://bigml.com/developers/scripts#ws_script_arguments>`_.
 
 
 You can also provide default configuration attributes
@@ -2158,9 +2158,9 @@ configuration attributes set by default.
 
 .. code-block:: bash
 
-bigmler execute \
-       --code-file my_script.whizzml \
-       --creation-defaults defaults.json
+    bigmler execute \
+           --code-file my_script.whizzml \
+           --creation-defaults defaults.json
 
 For instance, if ``my_script.whizzml`` creates an ensemble from a remote
 file:
