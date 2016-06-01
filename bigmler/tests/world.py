@@ -51,14 +51,18 @@ RESOURCE_TYPES = [
     'project',
     'sample',
     'association',
-    'logisticregression']
+    'logisticregression',
+    'script',
+    'library',
+    'execution']
 IRREGULAR_PLURALS = {
     'anomaly': 'anomalies',
     'batchprediction': 'batch_predictions',
     'batchcentroid': 'batch_centroids',
     'anomalyscore': 'anomaly_scores',
     'batchanomalyscore': 'batch_anomaly_scores',
-    'logisticregression': 'logistic_regressions'}
+    'logisticregression': 'logistic_regressions',
+    'library': 'libraries'}
 TRANSLATED_RESOURCES = {
     'batchprediction': 'batch_prediction',
     'batchcentroid': 'batch_centroid',

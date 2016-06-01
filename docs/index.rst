@@ -2064,8 +2064,8 @@ script will be executed, so a new resource called ``execution`` will be
 created in BigML, and the corresponding ID will be stored in the
 ``execution`` file of the output directory.
 Similarly, the result of the execution will be stored
-in ``result.txt`` and
-``result.json`` (in human-readable format and JSON respectively) in the
+in ``whizzml_results.txt`` and ``whizzml_results.json``
+(in human-readable format and JSON respectively) in the
 directory set in the ``--output-dir`` option. You can also use the code
 stored in a file with the ``--code-file`` option.
 
