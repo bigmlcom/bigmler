@@ -175,7 +175,7 @@ class RESTChain(object):
                     body += "(define %s " % new_alias
                 body += call.reify(language, alias=alias)
                 if language == "whizzml":
-                    body += ")"
+                    body += ")\n"
         if indentation:
             lines = body.split("\n")
             for index, line in enumerate(lines):
