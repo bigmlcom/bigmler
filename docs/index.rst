@@ -3657,6 +3657,84 @@ Reify Subcommand Options
 ===================================== =========================================
 
 
+Execute Subcommand Options
+--------------------------
+
+=============================================== ===============================
+``--code`` *SOURCE_CODE*                        WhizzML source code to be
+                                                executed
+``--code-file `` *PATH*                         Path to the file that contains
+                                                Whizzml source code
+``--creation-defaults`` *RESOURCE_DEFAULTS*     Path to the JSON file with the
+                                                default configurations
+                                                for created resources. Please,
+                                                see details in the
+                                                `API Developers documentation
+                                                <https://bigml.com/developers/executions#we_execution_arguments>`_
+``--declare-inputs`` *INPUTS_DECLARATION*       Path to the JSON file with the
+                                                description of the
+                                                input parameters. Please,
+                                                see details in the
+                                                `API Developers documentation
+                                                <https://bigml.com/developers/scripts#ws_script_arguments>`_
+``--declare-outputs`` *OUTPUTS_DECLARATION*     Path to the JSON file with the
+                                                description of the
+                                                script outputs. Please,
+                                                see details in the
+                                                `API Developers documentation
+                                                <https://bigml.com/developers/scripts#ws_script_arguments>`_
+``--execution`` *EXECUTION_ID*                  BigML execution ID
+``--execution-file`` *EXECUTION_FILE*           BigML execution JSON
+                                                structure file
+``--execution-tag`` *EXECUTION_TAG*             Select executions tagged with
+                                                EXECUTION_TAG
+``--executions`` *EXECUTIONS*                   Path to a file containing
+                                                execution/ids. Just one
+                                                execution per line (e.g.,
+                                                execution/50a20697035d0706da0004a4)
+``--imports`` *LIBRARIES*                       Comma-separated list of
+                                                libraries IDs to be included
+                                                as imports in scripts or
+                                                other libraries
+``--input-maps`` *INPUT_MAPS*                   Path to the JSON file with the
+                                                description of the execution
+                                                inputs for a list of scripts
+``--inputs`` *INPUTS*                           Path to the JSON file with the
+                                                description of the
+                                                execution inputs. Please,
+                                                see details in the
+                                                `API Developers documentation
+                                                <https://bigml.com/developers/executions#we_execution_arguments>`_
+``--libraries`` *LIBRARIES*                     Path to a file containing
+                                                libraries/ids. Just one
+                                                library per line (e.g.,
+                                                library/50a20697035d0706da0004a4)
+``--library`` *LIBRARY*                         BigML library Id.
+``--library-file`` *LIBRARY_FILE*               BigML library JSON structure
+                                                file.
+``--library-tag`` *LIBRARY_TAG*                 Select libraries tagged with
+                                                tag to be deleted
+``--outputs`` *OUTPUTS*                         Path to the JSON file with
+                                                the names of the output
+                                                parameters. Please,
+                                                see details in the
+                                                `API Developers documentation
+                                                <https://bigml.com/developers/executions#we_execution_arguments>`_
+``--script`` *SCRIPT*                           BigML script Id.
+``--script-file`` *SCRIPT_FILE*                 BigML script JSON structure
+                                                file.
+``--script-tag`` *SCRIPT_TAG*                   Select script tagged with tag
+                                                to be deleted
+``--scripts`` *SCRIPTS*                         Path to a file containing
+                                                script/ids. Just one script
+                                                per line
+                                                (e.g., script/50a20697035d0706da0004a4).
+``--to-library``                                Boolean that  causes the code
+                                                to be compiled and stored as
+                                                a library
+=============================================== ===============================
+
+
 Delete Subcommand Options
 -------------------------
 
