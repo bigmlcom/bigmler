@@ -2126,6 +2126,10 @@ and ``my_outputs_dec.json``
 so that the value of the ``addition`` variable would be returned as
 output in the execution results.
 
+Additionally, a script can import libraries. The list of libraries to be
+used as imports can be added to the command with the option ``--imports``
+followed by a comma-separated list of library IDs.
+
 Once the script has been created and its inputs and outputs declared, to
 execute it you'll need to provide a value for each input. This can be
 done using ``--inputs``, that will also point to a JSON file where
@@ -2158,9 +2162,8 @@ configuration attributes set by default.
 
 .. code-block:: bash
 
-    bigmler execute \
-           --code-file my_script.whizzml \
-           --creation-defaults defaults.json
+    bigmler execute --code-file my_script.whizzml \
+                    --creation-defaults defaults.json
 
 For instance, if ``my_script.whizzml`` creates an ensemble from a remote
 file:
