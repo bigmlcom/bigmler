@@ -26,8 +26,7 @@ dataset2 = api.update_dataset(dataset2, \
 api.ok(dataset2)
 
 dataset3 = api.create_dataset(dataset2, \
-    {'input_fields': [u'000000'],
-     'name': u'my_dataset_from_dataset_from_batch_centroid_name',
+    {'name': u'my_dataset_from_dataset_from_batch_centroid_name',
      'new_fields': [{'field': u'( integer ( replace ( field "cluster" ) "Cluster " "" ) )',
                      u'name': u'Cluster'}]})
 api.ok(dataset3)

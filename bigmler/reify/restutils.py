@@ -130,25 +130,10 @@ def get_input_fields(resource, referrer=None):
         referrer = {}
     input_fields_ids = resource.get('input_fields', [])
     if referrer:
-        referrer_input_fields = [[]]
-        # compare fields by name
-        resource_fields = Fields(
-            {'resource': resource['resource'], 'object': resource})
         referrer_fields = Fields(
             {'resource': referrer['resource'], 'object': referrer})
-        input_fields = [resource_fields.field_name(field_id) for field_id in
-                        input_fields_ids]
-        input_fields = sorted(input_fields)
-        referrer_type = get_resource_type(referrer)
-        if referrer_type == 'dataset':
-            referrer_fields = Fields(referrer_fields.preferred_fields())
-            referrer_fields_names = sorted( \
-                [field['name'] for _, field in referrer_fields.fields.items()])
-        else:
-            referrer_fields_names = sorted( \
-                referrer_fields.fields_by_name.keys())
-        # check referrer input fields to see if they are equal
-        referrer_input_fields.append(referrer_fields_names)
+        referrer_fields_ids = referrer_fields.fields.keys()
+        # case where objective field is not in input fields
         # check whether the resource has an objective field not included in
         # the input fields list
         resource_type = get_resource_type(resource)
@@ -158,14 +143,11 @@ def get_input_fields(resource, referrer=None):
                 objective_id = objective_id.get('id')
             except AttributeError:
                 pass
-            referrer_objective = resource_fields.field_name(
-                objective_id)
-            referrer_input_fields.append([name for name in
-                                          referrer_fields_names
-                                          if name != referrer_objective])
-        if input_fields in referrer_input_fields:
+            if objective_id not in input_fields_ids:
+                input_fields_ids.append(objective_id)
+        if input_fields_ids.sort() == referrer_fields_ids.sort():
             return []
-    return referrer_fields.fields.keys()
+    return input_fields_ids
 
 
 def non_inherited_opts(resource, referrer, opts, call="create"):
