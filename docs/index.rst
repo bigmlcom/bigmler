@@ -2045,12 +2045,12 @@ language). With WhizzML you can program any specific workflow that involves
 Machine Learning resources like datasets, models, etc. You just write a
 script using the directives in the
 `reference manual <https://static.bigml.com/pdf/BigML_WhizzML_Reference.pdf>`_
-and upload it to BigML, where it will be available as more resource in
+and upload it to BigML, where it will be available as one more resource in
 your dashboard. Scripts can also be shared and published in the gallery,
-so you can reuse other user's scripts and execute them. These operations
+so you can reuse other users' scripts and execute them. These operations
 can also be done using the `bigmler execute` subcommand.
 
-The simplest example is executing a basic code, like adding two numbers:
+The simplest example is executing some basic code, like adding two numbers:
 
 .. code-block:: bash
 
@@ -2075,7 +2075,7 @@ library to be used in many scripts by setting the ``--to-library`` flag.
 
 .. code-block:: bash
 
-    bigmler execute --code-file my_library.whizzml --no-execute --to-library
+    bigmler execute --code-file my_library.whizzml --to-library
 
 Existing scripts can be referenced for execution with the ``--script`` option
 
@@ -2089,7 +2089,8 @@ or the script ID can be read from a file:
 
     bigmler execute --scripts simple_exe/scripts
 
-However, the script we used as example is too simple. In general, scripts
+The script we used as an example is very simple and needs no additional
+parameter. But, in general, scripts
 will have input parameters and output variables. The inputs define the script
 signature and must be declared in order to create the script. The outputs
 are optional and any variable in the script can be declared to be an output.
@@ -2121,7 +2122,8 @@ and ``my_outputs_dec.json``
 
 .. code-block:: json
 
-    [["addition"]]
+    [{"name": "addition",
+      "type": "number"}]
 
 so that the value of the ``addition`` variable would be returned as
 output in the execution results.
@@ -2189,7 +2191,9 @@ and ``my_create_defaults.json`` contains
     }
 
 the source created by the script will be associated to the given project
-and the ensemble will have 100 models and a 0.9 sample rate.
+and the ensemble will have 100 models and a 0.9 sample rate unless the source
+code in your script explicitly specifies a different value, in which case
+it takes precedence over these defaults.
 
 
 .. _bigmler-delete:
