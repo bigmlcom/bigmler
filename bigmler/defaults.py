@@ -242,6 +242,7 @@ FLAGS = {
         {'flag': 'bias', 'type': 'float'},
         {'flag': 'lr_c', 'type': 'float'},
         {'flag': 'eps', 'type': 'float'},
+        {'flag': 'field_codings', 'type': 'string'},
         {'flag': 'missing_numerics', 'type': 'boolean'},
         {'flag': 'normalize', 'type': 'boolean'}],
     'BigMLer execute': [

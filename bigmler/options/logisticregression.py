@@ -93,6 +93,17 @@ def get_logistic_regression_options(defaults=None):
                      " the results from the current and last iterations is"
                      " less than eps, then the solver is finished.")},
 
+        # Field codings for categorical fields
+        '--field-codings': {
+            'action': 'store',
+            'dest': 'field_codings',
+            'default': defaults.get('field_codings', None),
+            'help': ("Path to a JSON file with coding schemes for"
+                     " categorical fields: dummy,"
+                     " contrast, or other. Its contents is a list of maps "
+                     " with field identifiers and a coding scheme for"
+                     " that field")},
+
         # No missing values for numeric predictors
         '--no-missing-numerics': {
             'action': 'store_false',

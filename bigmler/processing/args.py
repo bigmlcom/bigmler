@@ -391,6 +391,16 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
+    # Parses field_codings for logistic regressions
+    try:
+        if command_args.field_codings:
+            command_args.field_codings_ = u.read_json(
+                command_args.field_codings)
+        else:
+            command_args.field_codings_ = []
+    except AttributeError:
+        pass
+
     # Parses imports for scripts and libraries.
     try:
         if command_args.imports:

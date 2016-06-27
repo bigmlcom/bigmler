@@ -2419,6 +2419,9 @@ def set_logistic_regression_args(args, name=None, fields=None,
     if args.missing_numerics is not None:
         logistic_regression_args.update( \
             {"missing_numerics": args.missing_numerics})
+    if args.field_codings is not None:
+        logistic_regression_args.update(\
+            {"field_codings": args.field_codings_})
     if 'logistic_regression' in args.json_args:
         update_json_args(logistic_regression_args,
                          args.json_args.get('logistic_regression'),

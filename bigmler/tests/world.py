@@ -100,6 +100,7 @@ class World(object):
         self.API_KEY = None
         self.api = None
         self.api_dev_mode = None
+        self.debug = False
         self.source_lower = None
         self.source_upper = None
         self.source_reference = None
@@ -117,6 +118,10 @@ class World(object):
     def print_connection_info(self):
         self.USERNAME = os.environ.get('BIGML_USERNAME')
         self.API_KEY = os.environ.get('BIGML_API_KEY')
+        try:
+            self.debug = bool(os.environ.get('BIGML_DEBUG', 0))
+        except ValueError:
+            pass
         if self.USERNAME is None or self.API_KEY is None:
             assert False, ("Tests use the BIGML_USERNAME and BIGML_API_KEY"
                            " environment variables to authenticate the"
@@ -124,7 +129,7 @@ class World(object):
                            "set them before testing.")
         else:
             assert True
-        self.api = BigML(self.USERNAME, self.API_KEY)
+        self.api = BigML(self.USERNAME, self.API_KEY, debug=self.debug)
         print self.api.connection_info()
         output_dir = "./last_run"
         for _, subFolders, _ in os.walk("./"):
@@ -176,8 +181,9 @@ class World(object):
         """Reset the api connection values
 
         """
-        self.api = BigML(self.USERNAME, self.API_KEY)
-        self.api_dev_mode = BigML(self.USERNAME, self.API_KEY, dev_mode=True)
+        self.api = BigML(self.USERNAME, self.API_KEY, debug=self.debug)
+        self.api_dev_mode = BigML(self.USERNAME, self.API_KEY, dev_mode=True,
+                                  debug=self.debug)
 
     def delete_resources(self):
         """Deletes the created objects
@@ -241,21 +247,22 @@ def common_teardown_module():
     if os.path.exists('./tmp'):
         shutil.rmtree('./tmp')
 
-    world.delete_resources()
-    project_stats = world.api.get_project( \
-        world.project_id)['object']['stats']
-    for resource_type, value in project_stats.items():
-        if value['count'] != 0:
-            # assert False, ("Increment in %s: %s" % (resource_type, value))
-            print "WARNING: Increment in %s: %s" % (resource_type, value)
-    world.api.delete_project(world.project_id)
-    world.project_id = None
+    if not world.debug:
+        world.delete_resources()
+        project_stats = world.api.get_project( \
+            world.project_id)['object']['stats']
+        for resource_type, value in project_stats.items():
+            if value['count'] != 0:
+                # assert False, ("Increment in %s: %s" % (resource_type, value))
+                print "WARNING: Increment in %s: %s" % (resource_type, value)
+        world.api.delete_project(world.project_id)
+        world.project_id = None
 
-    for folder in world.folders:
-        try:
-            shutil.rmtree(folder)
-        except:
-            pass
+        for folder in world.folders:
+            try:
+                shutil.rmtree(folder)
+            except:
+                pass
 
 
 def teardown_class():

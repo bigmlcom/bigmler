@@ -3,7 +3,14 @@
 History
 -------
 
-3.7.0 (2016-04-08)
+3.7.1 (2016-06-27)
+~~~~~~~~~~~~~~~~~~
+
+- Adding new --field-codings option to bigmler logisitic-regression
+  subcommand.
+- Changing underlying bindings version
+
+3.7.0 (2016-06-03)
 ~~~~~~~~~~~~~~~~~~
 
 - Adding the new bigmler execute subcommand, which can create scripts,
