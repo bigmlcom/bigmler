@@ -86,6 +86,14 @@ def i_create_all_execution_with_io_resources(step, code_file=None, output_dir=No
     shell_execute(command, "%s/xx.txt" % output_dir)
 
 
+#@step(r'I create a BigML whizzml package from "(.*)" and log results in  "(.*)"$')
+def i_create_from_whizzml_package(step, package_dir=None, output_dir=None):
+    ok_(package_dir is not None and output_dir is not None)
+    command = ("bigmler whizzml --package-dir " + res_filename(package_dir) +
+               " --store --output-dir " + output_dir)
+    shell_execute(command, "%s/xx.txt" % output_dir)
+
+
 #@step(r'I check that the script has been created')
 def i_check_create_script(step):
     script_file = "%s%sscripts" % (world.directory, os.sep)
@@ -151,6 +159,22 @@ def i_check_create_library(step):
         world.libraries.append(library['resource'])
         world.library = library
         library_file.close()
+        assert True
+    except Exception, exc:
+        assert False, str(exc)
+
+
+#@step(r'I check that the package script in "(.*)" has been created')
+def i_check_create_package_script(step, package_dir=None):
+    print world.directory, package_dir
+    script_file = os.path.join(world.directory, package_dir, "scripts")
+    try:
+        script_file = open(script_file, "r")
+        script = check_resource(script_file.readline().strip(),
+                                world.api.get_script)
+        world.scripts.append(script['resource'])
+        world.script = script
+        script_file.close()
         assert True
     except Exception, exc:
         assert False, str(exc)

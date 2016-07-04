@@ -3,6 +3,12 @@
 History
 -------
 
+3.8.0 (2016-07-04)
+~~~~~~~~~~~~~~~~~~
+
+- Adding new bigmler whizzml subcommand to create scripts and libraries
+  from packages with metadata info.
+
 3.7.1 (2016-06-27)
 ~~~~~~~~~~~~~~~~~~
 

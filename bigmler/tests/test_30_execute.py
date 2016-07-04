@@ -127,3 +127,23 @@ class TestExecute(object):
             execute.i_check_create_execution(self)
             execute.i_check_create_result(self)
             execute.i_check_result_is(self, example[5])
+
+
+    def test_scenario04(self):
+        """
+        Scenario: Successfully creating an whizzml package from a metadata file:
+            Given I create a BigML whizzml package from "<package_dir>" and log results in  "<output_dir>"
+            Then I check that the script in "<package_dir>" has been created
+
+            Examples:
+            | package_dir       | output_dir       |
+            | data              | scenario4_pck    |
+
+        """
+        print self.test_scenario04.__doc__
+        examples = [
+            ['data', 'scenario4_pck']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            execute.i_create_from_whizzml_package(self, example[0], example[1])
+            execute.i_check_create_package_script(self, example[0])

@@ -30,6 +30,7 @@ from bigmler.options.test import get_test_options
 from bigmler.options.multilabel import get_multi_label_options
 from bigmler.options.main import get_main_options
 from bigmler.options.analyze import get_analyze_options
+from bigmler.options.whizzml import get_whizzml_options
 from bigmler.options.cluster import get_cluster_options
 from bigmler.options.anomaly import get_anomaly_options
 from bigmler.options.sample import get_sample_options
@@ -42,7 +43,7 @@ from bigmler.options.execute import get_execute_options
 
 SUBCOMMANDS = ["main", "analyze", "cluster", "anomaly", "sample",
                "delete", "report", "reify", "project", "association",
-               "logistic-regression", "execute"]
+               "logistic-regression", "execute", "whizzml"]
 
 
 MAIN = SUBCOMMANDS[0]
@@ -115,6 +116,9 @@ under the License.""" % version
 
     main_options = subcommand_options["main"]
 
+    defaults = general_defaults["BigMLer whizzml"]
+    subcommand_options["whizzml"] = get_whizzml_options(defaults=defaults)
+    subcommand_options["whizzml"].update(common_options)
     defaults = general_defaults["BigMLer analyze"]
     subcommand_options["analyze"] = get_analyze_options(defaults=defaults)
     subcommand_options["analyze"].update(common_options)

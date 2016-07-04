@@ -58,6 +58,7 @@ from bigmler.project.dispatcher import project_dispatcher
 from bigmler.association.dispatcher import association_dispatcher
 from bigmler.logisticregression.dispatcher import logistic_regression_dispatcher
 from bigmler.execute.dispatcher import execute_dispatcher
+from bigmler.whizzml.dispatcher import whizzml_dispatcher
 from bigmler.parser import SUBCOMMANDS
 from bigmler.utils import SYSTEM_ENCODING
 
@@ -116,6 +117,8 @@ def main(args=sys.argv[1:]):
             association_dispatcher(args=new_args)
         elif new_args[0] == "logistic-regression":
             logistic_regression_dispatcher(args=new_args)
+        elif new_args[0] == "whizzml":
+            whizzml_dispatcher(args=new_args)
     else:
         sys.exit("BigMLer used with no arguments. Check:\nbigmler --help\n\nor"
                  "\n\nbigmler sample --help\n\n"
@@ -128,6 +131,7 @@ def main(args=sys.argv[1:]):
                  "\n\nbigmler association --help\n\n"
                  "\n\nbigmler logistic-regression --help\n\n"
                  "\n\nbigmler execute --help\n\n"
+                 "\n\nbigmler whizzml --help\n\n"
                  "\n\nbigmler delete --help\n\n"
                  " for a list of options")
 

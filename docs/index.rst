@@ -88,6 +88,13 @@ Used to create WhizzML libraries or scripts and execute them. See
 :ref:`bigmler-execute`.
 
 
+``bigmler whizzml``:
+
+
+Used to create WhizzML packages of libraries or scripts based on the
+information of the ``metadata.json`` file in the package directory. See
+:ref:`bigmler-whizzml`
+
 Quick Start
 ===========
 
@@ -2194,6 +2201,98 @@ the source created by the script will be associated to the given project
 and the ensemble will have 100 models and a 0.9 sample rate unless the source
 code in your script explicitly specifies a different value, in which case
 it takes precedence over these defaults.
+
+
+.. _bigmler-execute:
+
+Whizzml subcommand
+------------------
+
+This subcommand creates packages of scripts and libraries in WhizzML
+(BigML's automation
+language) based on the information provided by a ``metadata.json``
+file. These operations
+can also be done indivually using the `bigmler execute` subcommand, but
+`bigmler whizzml` reads the components of the package, and for each
+component analyzes the corresponding ``metadata.json`` file to identify
+the kind of code (script or library) it contains and creates the corresponding
+resource in BigML. The ``metadata.json`` is expected to contain the
+name, kind, description, inputs and outputs needed to create the script.
+As an example,
+
+.. code-block:: json
+
+    {
+      "name": "Example of whizzml script",
+      "description": "Test example of a whizzml script that adds two numbers",
+      "kind": "script",
+      "source_code": "code.whizzml",
+      "inputs": [
+          {
+              "name": "a",
+              "type": "number",
+              "description": "First number"
+          },
+          {
+              "name": "b",
+              "type": "number",
+              "description": "Second number"
+          }
+      ],
+      "outputs": [
+          {
+              "name": "addition",
+              "type": "number",
+              "description": "Sum of the numbers"
+          }
+      ]
+    }
+
+
+describes a script whose code is to be found in the ``code.whizzml`` file.
+The script will have two inputs ``a`` and ``b`` and one output: ``addition``.
+
+In order to create this script, you can type the following command:
+
+.. code-block:: bash
+
+    bigmler whizzml --package-dir my_package --output-dir creation_log
+
+and bigmler will:
+
+- look for the ``metadata.json`` file located in the ``my_package``
+  directory.
+- parse the JSON, identify it defines a script and look for its code in the
+  ``code.whizzml`` file
+- create the corresponding BigML script resource, adding as arguments the ones
+  provided in ``inputs``, ``outputs``, ``name`` and ``description``.
+
+Packages can contain more than one script. In this case, a nested directory
+structure is expected. The ``metadata.json`` file for a package with many
+components should include the name of the directories where these components
+can be found:
+
+.. code-block:: json
+
+    {
+      "name": "Best k",
+      "description": "Library and scripts implementing Pham-Dimov-Nguyen k selection algorithm",
+      "kind": "package",
+      "components":[
+        "best-k-means",
+        "cluster",
+        "evaluation",
+        "batchcentroid"
+      ]
+    }
+
+
+In this example, each string in the ``components`` attributes list corresponds
+to one directory where a new script or library (with its corresponding
+``metadata.json`` descriptor) is stored. Then, using ``bigmler whizzml``
+for this composed package will create each of the component scripts or
+libraries. It will also handle dependencies, using the IDs of the created
+libraries as imports for the scripts when needed.
 
 
 .. _bigmler-delete:

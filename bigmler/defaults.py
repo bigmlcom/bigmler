@@ -258,7 +258,9 @@ FLAGS = {
         {'flag': 'input_maps', 'type': 'string'},
         {'flag': 'outputs', 'type': 'string'},
         {'flag': 'creation_defaults', 'type': 'string'},
-        {'flag': 'no_execute', 'type': 'boolean'}]}
+        {'flag': 'no_execute', 'type': 'boolean'}],
+    'BigMLer whizzml': [
+        {'flag': 'package_dir', 'type': 'string'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):
