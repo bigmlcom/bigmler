@@ -140,7 +140,7 @@ def create_package(args, api, common_options, resume=False):
     with open(metadata_file) as metadata_handler:
         metadata = json.load(metadata_handler)
     # recurse into components/directories, if any
-    if 'package' in metadata and 'components' in metadata:
+    if metadata.get("kind") == "package" and 'components' in metadata:
         components = metadata.get("components")
         for component in components:
             message = ('Inspecting component %s.........\n' % component)
@@ -184,6 +184,7 @@ def create_package(args, api, common_options, resume=False):
                 outputs_file = os.path.join(args.output_dir, "outputs.json")
                 with open(outputs_file, "w") as outputs_handler:
                     json.dump(metadata.get("outputs"), outputs_handler)
+                command_args.extend(["--declare-outputs", outputs_file])
             if "description" in metadata:
                 desc_file = os.path.join(args.output_dir, "description.txt")
                 with open(desc_file, "w") as desc_handler:

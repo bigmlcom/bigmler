@@ -2212,10 +2212,11 @@ This subcommand creates packages of scripts and libraries in WhizzML
 (BigML's automation
 language) based on the information provided by a ``metadata.json``
 file. These operations
-can also be done indivually using the `bigmler execute` subcommand, but
+can also be performed individually using the `bigmler execute` subcommand, but
 `bigmler whizzml` reads the components of the package, and for each
 component analyzes the corresponding ``metadata.json`` file to identify
-the kind of code (script or library) it contains and creates the corresponding
+the kind of code (script or library) that it contains and creates the
+corresponding
 resource in BigML. The ``metadata.json`` is expected to contain the
 name, kind, description, inputs and outputs needed to create the script.
 As an example,
@@ -2262,8 +2263,8 @@ and bigmler will:
 
 - look for the ``metadata.json`` file located in the ``my_package``
   directory.
-- parse the JSON, identify it defines a script and look for its code in the
-  ``code.whizzml`` file
+- parse the JSON, identify that it defines a script and look for its code in
+  the ``code.whizzml`` file
 - create the corresponding BigML script resource, adding as arguments the ones
   provided in ``inputs``, ``outputs``, ``name`` and ``description``.
 
@@ -2290,7 +2291,7 @@ can be found:
 In this example, each string in the ``components`` attributes list corresponds
 to one directory where a new script or library (with its corresponding
 ``metadata.json`` descriptor) is stored. Then, using ``bigmler whizzml``
-for this composed package will create each of the component scripts or
+for this composite package will create each of the component scripts or
 libraries. It will also handle dependencies, using the IDs of the created
 libraries as imports for the scripts when needed.
 
