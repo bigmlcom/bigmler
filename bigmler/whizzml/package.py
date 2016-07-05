@@ -148,6 +148,7 @@ def create_package(args, api, common_options, resume=False):
                           console=args.verbosity)
             args.package_dir = os.path.join(package_dir, component)
             create_package(args, api, common_options, resume=resume)
+            args.package_dir = package_dir
     else:
         # create libraries or scripts
         imports = []
@@ -158,7 +159,7 @@ def create_package(args, api, common_options, resume=False):
                 create_package(args, api, common_options, resume=resume)
                 imports.append(read_library_id(os.path.join( \
                     output_dir, os.path.basename(args.package_dir))))
-        args.package_dir = package_dir
+                args.package_dir = package_dir
         # read the metadata.json information
         message = ('Creating the %s.........\n' % metadata.get("kind"))
         u.log_message(message, log_file=session_file,
@@ -168,7 +169,7 @@ def create_package(args, api, common_options, resume=False):
                 metadata.get("source_code", "%s.whizzml" % \
                 metadata.get("kind")))
             args.output_dir = os.path.join(output_dir, \
-                os.path.basename(args.package_dir))
+                os.path.basename(package_dir))
             # creating command to create the resource
             command = COMMANDS[metadata.get("kind")] % (whizzml_code,
                                                         args.output_dir)
@@ -195,6 +196,7 @@ def create_package(args, api, common_options, resume=False):
             # adding imports, if any
             if imports:
                 command_args.extend(["--imports", ",".join(imports)])
+            command_args.extend(["--verbosity", str(args.verbosity)])
 
             if resume:
                 next_command = subcommand_list.pop()
@@ -208,3 +210,4 @@ def create_package(args, api, common_options, resume=False):
             else:
                 u.sys_log_message(command, log_file=subcommand_file)
                 execute_dispatcher(args=command_args)
+            args.output_dir = output_dir

@@ -3,6 +3,16 @@
 History
 -------
 
+3.8.1 (2016-07-06)
+~~~~~~~~~~~~~~~~~~
+
+- Adding types of deletable resources to bigmler delete. Adding option
+  --execution-only to avoid deleting the output resources of an
+  execution when the execution is deleted.
+- Fixing bug: directory structure in bigmler whizzml was wrong when components
+  were found in metadata.
+- Upgrading the underlying Python bindings version.
+
 3.8.0 (2016-07-04)
 ~~~~~~~~~~~~~~~~~~
 

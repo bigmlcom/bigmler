@@ -313,8 +313,9 @@ def list_ids(api_function, query_string, status_code=bigml.api.FINISHED):
     return ids
 
 
-def delete(api, delete_list):
-    """ Deletes the resources given in the list.
+def delete(api, delete_list, exe_outputs=True):
+    """ Deletes the resources given in the list. If the exe_outputs is set,
+        deleting an execution causes the deletion of any outpur resource.
 
     """
     for resource_id in delete_list:
@@ -326,7 +327,12 @@ def delete(api, delete_list):
                     break
                 except ValueError:
                     pass
-            api.deleters[resource_type](resource_id)
+            if resource_type == "execution" and exe_outputs:
+                query_string = "delete_all=true"
+                api.deleters[resource_type](resource_id,
+                                            query_string=query_string)
+            else:
+                api.deleters[resource_type](resource_id)
         except ValueError:
             console_log("Failed to delete resource %s" % resource_id)
 

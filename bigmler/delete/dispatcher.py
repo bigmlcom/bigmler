@@ -38,12 +38,14 @@ DIRS_LOG = u".bigmler_delete_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 ROWS_LIMIT = 15
 INDENT_IDS = 26
-RESOURCES_LOG_FILES = set(['source', 'dataset', 'dataset_train',
+RESOURCES_LOG_FILES = set(['project', 'source', 'dataset', 'dataset_train',
                            'dataset_test', 'dataset_gen', 'dataset_cluster',
                            'dataset_parts', 'dataset_multi', 'models',
                            'ensembles', 'evaluations',
                            'clusters', 'batch_prediction', 'batch_centroid',
-                           'anomalies', 'batch_anomaly_score', 'sample'])
+                           'anomalies', 'batch_anomaly_score', 'sample',
+                           'associations',
+                           'scripts', 'library', 'execution'])
 STATUS_CODES = {
     "finished": bigml.api.FINISHED,
     "faulty": bigml.api.FAULTY,
@@ -201,7 +203,11 @@ def filtered_selectors(args, api):
         ("batchanomalyscore", args.batch_anomaly_score_tag,
          api.list_batch_anomaly_scores, None),
         ("sample", args.sample_tag, api.list_samples, None),
-        ("project", args.project_tag, api.list_projects, None)]
+        ("project", args.project_tag, api.list_projects, None),
+        ("association", args.association_tag, api.list_associations, None),
+        ("script", args.script_tag, api.list_scripts, None),
+        ("library", args.library_tag, api.list_libraries, None),
+        ("execution", args.execution_tag, api.list_executions, None)]
 
     if args.all_tag is None and any([resource[1] is not None for resource in
                                      resource_selectors]):
@@ -301,12 +307,21 @@ def delete_resources(command_args, api):
     delete_list.extend(get_delete_list(command_args, api, time_qs_list))
 
     types_summary = resources_by_type(delete_list)
-    message = u.dated("Deleting %s objects.\n" % len(delete_list))
+    aprox = "*" if "project" in types_summary or \
+        ("execution" in types_summary and \
+        not command_args.execution_only) else ""
+    message = u.dated("Deleting %s objects%s.\n" % (len(delete_list), aprox))
     u.log_message(message, log_file=session_file,
                   console=command_args.verbosity)
     for resource_type, instances in types_summary.items():
         message = "%s%ss: %s\n" % (" " * INDENT_IDS, resource_type,
                                    instances)
+        u.log_message(message, log_file=session_file,
+                      console=command_args.verbosity)
+    if aprox != "":
+        message = ("* WARNING: Deleting a project or an execution will delete"
+                   " also its associated resources. Note that their IDs"
+                   " may not be listed in this report.\n")
         u.log_message(message, log_file=session_file,
                       console=command_args.verbosity)
     if len(delete_list) > ROWS_LIMIT:
@@ -329,6 +344,6 @@ def delete_resources(command_args, api):
     message = ("%s" % (" " * INDENT_IDS)) + message + "\n"
     u.log_message(message, log_file=session_file)
     if not command_args.dry_run:
-        u.delete(api, delete_list)
+        u.delete(api, delete_list, exe_outputs=not command_args.execution_only)
     u.print_generated_files(path, log_file=session_file,
                             verbosity=command_args.verbosity)
