@@ -3,6 +3,11 @@
 History
 -------
 
+3.8.2 (2016-09-13)
+~~~~~~~~~~~~~~~~~~
+
+- Changing the bias for Logistic Regressions to a boolean.
+
 3.8.1 (2016-07-06)
 ~~~~~~~~~~~~~~~~~~
 

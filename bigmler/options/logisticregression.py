@@ -68,11 +68,11 @@ def get_logistic_regression_options(defaults=None):
         '--bias': {
             "action": 'store',
             "dest": 'bias',
-            "default": defaults.get('bias', 1),
-            "type": float,
-            "help": ("Scale of the intercept term. Setting this to 0 will"
-                     " exclude the bias term from the solution. Must be"
-                     " greater than or equal to 0. ")},
+            "default": defaults.get('bias', True),
+            "type": bool,
+            "help": ("Use intercept term. Setting this to False will"
+                     " exclude the intercept term from the solution. Must be"
+                     " a boolean.")},
 
         # The strength of the regularization step. Must be greater than 0.
         '--c': {
