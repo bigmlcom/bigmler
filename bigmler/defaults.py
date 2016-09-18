@@ -155,7 +155,10 @@ FLAGS = {
         {'flag': 'status', 'type': 'string'},
         {'flag': 'export_fields', 'type': 'string'},
         {'flag': 'import_fields', 'type': 'string'},
-        {'flag': 'only_execution', 'type': 'boolean'}],
+        {'flag': 'only_execution', 'type': 'boolean'},
+        {'flag': 'ensemble_sample_seed', 'type': 'string'},
+        {'flag': 'ensemble_sample_rate', 'type': 'float'},
+        {'flag': 'ensemble_sample_replacement', 'type': 'boolean'}],
     'BigMLer analyze': [
         {'flag': 'k-fold', 'type': 'int'},
         {'flag': 'cv', 'type': 'boolean'},

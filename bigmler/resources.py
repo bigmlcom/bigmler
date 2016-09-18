@@ -892,6 +892,8 @@ def set_ensemble_args(args, name=None,
         "category": args.category,
         "tags": args.tag,
         "missing_splits": args.missing_splits,
+        "ensemble_sample": {"seed": SEED if args.ensemble_sample_seed is None
+                            else args.ensemble_sample_seed},
         "seed": SEED if args.seed is None else args.seed
     }
     if objective_id is not None and fields is not None:
@@ -903,9 +905,9 @@ def set_ensemble_args(args, name=None,
 
     if (args.evaluate and args.test_split == 0 and
             args.test_datasets is None and not args.dataset_off):
-        ensemble_args.update(seed=SEED)
-        if args.sample_rate == 1:
-            args.sample_rate = EVALUATE_SAMPLE_RATE
+        ensemble_args.update({"ensemble_sample": {"seed": SEED}})
+        if args.ensemble_sample_rate == 1:
+            args.ensemble_sample_rate = EVALUATE_SAMPLE_RATE
 
     if model_fields and fields is not None:
         input_fields = configure_input_fields(fields, model_fields)
@@ -929,10 +931,13 @@ def set_ensemble_args(args, name=None,
         ensemble_args.update(random_candidates=args.random_candidates)
 
     update_attributes(ensemble_args, args.json_args.get('model'))
-    ensemble_args.update(sample_rate=args.sample_rate,
+    ensemble_args.update(randomize=args.randomize,
                          replacement=args.replacement,
-                         randomize=args.randomize,
+                         sample_rate=args.sample_rate,
                          tlp=args.tlp)
+    ensemble_args["ensemble_sample"].update( \
+        {"rate": args.ensemble_sample_rate,
+         "replacement": args.ensemble_sample_replacement})
 
     if 'ensemble' in args.json_args:
         update_json_args(ensemble_args, args.json_args.get('ensemble'), fields)

@@ -82,7 +82,7 @@ def get_main_options(defaults=None, constants=None):
             'help': ("Number of models to create when using"
                      " ensembles.")},
 
-        # Replacement to use when using bagging.
+        # Replacement to use when sampling.
         '--replacement': {
             'action': 'store_true',
             'default': defaults.get('replacement', False),
@@ -464,6 +464,27 @@ def get_main_options(defaults=None, constants=None):
             'type': int,
             'help': ("Number of fields selected at random in ensembles'"
                      " construction.")},
+
+        # Ensemble seed. The value used in ensembles as seed
+        '--ensemble-sample-seed': {
+            'action': 'store',
+            'dest': 'ensemble_sample_seed',
+            'default': defaults.get('ensemble_sample_seed', None),
+            'help': "Value used as seed in ensembles."},
+
+        # Ensemble sampling to use when using bagging.
+        '--ensemble-sample-rate': {
+            'action': 'store',
+            'dest': 'ensemble_sample_rate',
+            'default': defaults.get('ensemble_sample_rate', 1.0),
+            'type': float,
+            'help': "Ensemble sampling rate for bagging."},
+
+        # Ensemble replacement to use when using bagging.
+        '--ensemble-sample-replacement': {
+            'action': 'store_true',
+            'default': defaults.get('ensemble_sample_replacement', False),
+            'help': "Use replacement when bagging."},
 
         # Disables reports upload.
         '--no-upload': {
