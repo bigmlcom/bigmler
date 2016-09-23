@@ -481,10 +481,11 @@ def get_main_options(defaults=None, constants=None):
             'help': "Ensemble sampling rate for bagging."},
 
         # Ensemble replacement to use when using bagging.
-        '--ensemble-sample-replacement': {
-            'action': 'store_true',
-            'default': defaults.get('ensemble_sample_replacement', False),
-            'help': "Use replacement when bagging."},
+        '--ensemble-sample-no-replacement': {
+            'action': 'store_false',
+            'dest': 'ensemble_sample_replacement',
+            'default': defaults.get('ensemble_sample_replacement', True),
+            'help': "Don't use replacement when bagging."},
 
         # Disables reports upload.
         '--no-upload': {
@@ -500,7 +501,7 @@ def get_main_options(defaults=None, constants=None):
             'default': defaults.get('remote', False),
             'help': "Compute predictions locally"},
 
-        # Deactivate replacement to use when using bagging.
+        # Deactivate replacement to use when using sampling.
         '--no-replacement': {
             'action': 'store_false',
             'dest': 'replacement',

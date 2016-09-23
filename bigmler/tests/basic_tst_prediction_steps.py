@@ -462,9 +462,12 @@ def i_create_resources_from_ensemble_with_replacement(step, number_of_models=Non
 
 #@step(r'I create BigML resources using ensemble of (.*) models to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_from_ensemble(step, number_of_models=None, test=None, output=None):
-    i_create_resources_from_ensemble_generic(step, number_of_models, " --no-fast --no-replacement", test, output)
+    i_create_resources_from_ensemble_generic(step, number_of_models, \
+        " --no-fast --ensemble-sample-no-replacement",
+        test, output)
 
-def i_create_resources_from_ensemble_generic(step, number_of_models=None, no_replacement="", test=None, output=None):
+def i_create_resources_from_ensemble_generic(step, number_of_models=None, \
+    no_replacement="", test=None, output=None):
     ok_(number_of_models is not None and test is not None and \
         output is not None)
     world.directory = os.path.dirname(output)
@@ -1052,12 +1055,9 @@ def i_check_predictions_with_different_thresholds(step, output2, output3):
     try:
         predictions_file = open(output2, "U").read()
         predictions_file_k = open(output3, "U").read()
-        if predictions_file != predictions_file_k:
-            assert True
-        else:
-            assert False
     except Exception, exc:
         assert False, str(exc)
+    assert_not_equal(predictions_file, predictions_file_k)
 
 
 #@step(r'the cross-validation json model info is like the one in "(.*)"')
@@ -1069,12 +1069,9 @@ def i_check_cross_validation(step, check_file):
             cv_content = json.loads(cv_handler.read())
         with open(check_file, "U") as check_handler:
             check_content = json.loads(check_handler.read())
-        if cv_content['model'] == check_content['model']:
-            assert True
-        else:
-            assert False, "content: %s, check: %s" % (cv_content, check_content)
     except Exception, exc:
         assert False, str(exc)
+    assert_equal(cv_content['model'], check_content['model'])
 
 
 #@step(r'I check that the stored source file exists')

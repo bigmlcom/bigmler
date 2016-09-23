@@ -3,10 +3,11 @@
 History
 -------
 
-3.8.2 (2016-09-13)
+3.8.2 (2016-09-23)
 ~~~~~~~~~~~~~~~~~~
 
 - Changing the bias for Logistic Regressions to a boolean.
+- Adding the new attributes to control ensemble's sampling.
 
 3.8.1 (2016-07-06)
 ~~~~~~~~~~~~~~~~~~

@@ -139,6 +139,11 @@ under the License.""" % version
         '--pruning': main_options['--pruning'],
         '--weight-field': main_options['--weight-field'],
         '--replacement': main_options['--replacement'],
+        '--ensemble-sample-no-replacement': main_options[ \
+            '--ensemble-sample-no-replacement'],
+        '--ensemble-sample-rate': main_options['--ensemble-sample-rate'],
+        '--seed': main_options['--seed'],
+        '--ensemble-sample-seed': main_options['--ensemble-sample-seed'],
         '--objective-weights': main_options['--objective-weights'],
         '--model-attributes': main_options['--model-attributes'],
         '--ensemble-attributes': main_options['--ensemble-attributes'],

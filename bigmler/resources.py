@@ -905,9 +905,9 @@ def set_ensemble_args(args, name=None,
 
     if (args.evaluate and args.test_split == 0 and
             args.test_datasets is None and not args.dataset_off):
-        ensemble_args.update({"ensemble_sample": {"seed": SEED}})
-        if args.ensemble_sample_rate == 1:
-            args.ensemble_sample_rate = EVALUATE_SAMPLE_RATE
+        ensemble_args.update({"seed": SEED})
+        if args.sample_rate == 1:
+            args.sample_rate = EVALUATE_SAMPLE_RATE
 
     if model_fields and fields is not None:
         input_fields = configure_input_fields(fields, model_fields)

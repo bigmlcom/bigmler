@@ -470,6 +470,14 @@ def add_model_options(command_args, args):
             command_args.append(str(args.sample_rate))
         if args.replacement:
             command_args.append("--replacement")
+        if not args.ensemble_sample_replacement:
+            command_args.append("--ensemble-sample-no-replacement")
+        if args.ensemble_sample_seed:
+            command_args.append("--ensemble-sample-seed")
+            command_args.append(args.ensemble_sample_seed)
+        if args.ensemble_sample_rate < 1:
+            command_args.append("--ensemble-sample-rate")
+            command_args.append(str(args.ensemble_sample_rate))
         if args.randomize:
             command_args.append("--randomize")
         if args.ensemble_attributes:

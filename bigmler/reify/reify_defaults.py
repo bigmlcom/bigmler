@@ -100,7 +100,9 @@ DEFAULTS = {
     "ensemble": {
         "create": {
             'number_of_models': [10],
-            'replacement': [True],
+            'replacement': [False],
+            'seed': [None],
+            'ensemble_seed': [None],
             'tlp': [1]
         }
     },

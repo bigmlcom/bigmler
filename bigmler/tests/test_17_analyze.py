@@ -402,7 +402,7 @@ class TestAnalyze(object):
         """
         print self.test_scenario11.__doc__
         examples = [
-            ['data/iris.csv', 'scenario_a_14/evaluation', '2', ' --exclude-features="petal length,sepal length" --predictions-csv --number-of-models 2','scenario_a_14/test/kfold2_pred/predictions.csv', 'check_files/analyze_predictions_iris_e.csv']]
+            ['data/iris.csv', 'scenario_a_14/evaluation', '2', ' --exclude-features="petal length,sepal length" --predictions-csv --number-of-models 2','scenario_a_14/test/kfold1_pred/predictions.csv', 'check_files/analyze_predictions_iris_e.csv']]
         for example in examples:
             print "\nTesting with:\n", example
             test_pred.i_create_dataset(self, data=example[0], output=example[1])

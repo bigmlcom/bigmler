@@ -798,19 +798,6 @@ def transform_args(command_args, flags, api, user_defaults):
     except AttributeError:
         pass
 
-    # Adds replacement=True if creating ensemble and nothing is specified
-    try:
-        if (command_args.number_of_models > 1 and
-                not command_args.replacement and
-                not '--no-replacement' in flags and
-                not 'replacement' in user_defaults and
-                not '--no-randomize' in flags and
-                not 'randomize' in user_defaults and
-                not '--sample-rate' in flags and
-                not 'sample_rate' in user_defaults):
-            command_args.replacement = True
-    except AttributeError:
-        pass
     try:
         # Old value for --prediction-info='full data' maps to 'full'
         if command_args.prediction_info == 'full data':
