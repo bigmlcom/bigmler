@@ -26,6 +26,11 @@ import gc
 import shutil
 
 import bigml.api
+
+from bigml.model import Model
+from bigml.basemodel import retrieve_resource
+from bigml.fields import Fields
+
 import bigmler.utils as u
 import bigmler.resources as r
 import bigmler.labels as l
@@ -33,10 +38,6 @@ import bigmler.processing.args as a
 import bigmler.processing.sources as ps
 import bigmler.processing.datasets as pd
 import bigmler.processing.models as pm
-
-from bigml.model import Model
-from bigml.basemodel import retrieve_resource
-from bigml.fields import Fields
 
 from bigmler.evaluation import evaluate, cross_validate
 from bigmler.defaults import DEFAULTS_FILE
@@ -313,7 +314,7 @@ def compute_output(api, args):
                                                   fields,
                                                   multi_label_fields)
     if fields and args.export_fields:
-       fields.summary_csv(os.path.join(path, args.export_fields))
+        fields.summary_csv(os.path.join(path, args.export_fields))
     if args.dataset_file:
         # dataset is retrieved from the contents of the given local JSON file
         model_dataset, csv_properties, fields = u.read_local_resource(
@@ -415,7 +416,7 @@ def compute_output(api, args):
         other_label = get_metadata(dataset, 'other_label',
                                    other_label)
     if fields and args.export_fields:
-       fields.summary_csv(os.path.join(path, args.export_fields))
+        fields.summary_csv(os.path.join(path, args.export_fields))
     if args.model_file:
         # model is retrieved from the contents of the given local JSON file
         model, csv_properties, fields = u.read_local_resource(
@@ -467,7 +468,7 @@ def compute_output(api, args):
         if (isinstance(model, basestring) or
                 bigml.api.get_status(model)['code'] != bigml.api.FINISHED):
             if not args.evaluate and not a.has_train(args) and \
-                    not a.has_test(args) :
+                    not a.has_test(args):
                 query_string = MINIMUM_MODEL
             elif not args.test_header:
                 query_string = r.ALL_FIELDS_QS

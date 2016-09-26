@@ -28,15 +28,15 @@ import sys
 import json
 import re
 
-import bigml
-
-import bigmler.processing.args as a
-import bigmler.utils as u
-
 from copy import copy
+
+import bigml
 
 from bigml.fields import Fields
 from bigml.io import UnicodeWriter
+
+import bigmler.processing.args as a
+import bigmler.utils as u
 
 from bigmler.dispatcher import main_dispatcher
 from bigmler.options.analyze import ACCURACY, MINIMIZE_OPTIONS
@@ -172,7 +172,6 @@ def create_prediction_dataset(base_path, folder, args, resume):
 
     """
     args.output_dir = os.path.join(base_path, "%s_pred" % folder)
-    output_dir = args.output_dir
     folder = os.path.join(base_path, folder)
     model_type = "ensembles" if hasattr(args, "number_of_models") and \
         args.number_of_models > 1 else "models"
@@ -617,9 +616,10 @@ def best_first_search(datasets_file, api, args, common_options,
     while best_unchanged_count < staleness and open_list:
         loop_counter += 1
         features_set = find_max_state(open_list)
-        state, score, metric_value, folder_counter = features_set
+        state, score, metric_value, _ = features_set
         if loop_counter > 1:
-            csv_results = [loop_counter - 1, [int(in_set) for in_set in state],
+            csv_results = [loop_counter - 1, \
+                [int(in_set) for in_set in state], \
                 score, metric_value, best_score]
             csv_results.extend([int(in_set) for in_set in state])
             features_writer.writerow(csv_results)

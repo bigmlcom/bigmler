@@ -18,10 +18,6 @@
 """Options for BigMLer analyze
 
 """
-from __future__ import absolute_import
-
-
-import os
 
 def get_whizzml_options(defaults=None):
     """Adding arguments for the whizzml subcommand

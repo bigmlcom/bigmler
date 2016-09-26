@@ -25,11 +25,11 @@ import sys
 import math
 import os
 
-import bigmler.reify.restutils as u
-
 from bigml.resourcehandler import get_resource_id, get_resource_type
 from bigml.fields import Fields
 from bigml.basemodel import retrieve_resource
+
+import bigmler.reify.restutils as u
 
 from bigmler.reify.reify_defaults import COMMON_DEFAULTS, DEFAULTS
 
@@ -103,7 +103,8 @@ class RESTChain(object):
             resource_id = resource_id[0]
         try:
             resource = retrieve_resource(self.api, resource_id,
-                                         query_string=GET_QS).get('object')
+                                         query_string=GET_QS,
+                                         no_check_fields=True).get('object')
             return resource
         except ValueError:
             sys.exit("We could not reify the resource. Failed to find"
@@ -379,7 +380,7 @@ class RESTChain(object):
         autonames = [u'']
         u.non_automatic_name(child, opts, autonames=autonames)
 
-        if child.get('randomize') == True:
+        if child.get('randomize') is True:
             default_random_candidates = int(
                 math.floor(math.sqrt(len(child['input_fields']))))
             opts['create'].update(

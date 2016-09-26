@@ -413,11 +413,11 @@ def are_scripts_created(path, number_of_scripts):
        path directory
 
     """
-    sample_ids = []
+    script_ids = []
     try:
         with open("%s%sscripts" % (path, os.sep)) as scripts_file:
             for line in scripts_file:
-                sample = line.strip()
+                script = line.strip()
                 try:
                     script_id = bigml.api.get_script_id(script)
                     script_ids.append(script_id)

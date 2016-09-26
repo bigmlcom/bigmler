@@ -24,11 +24,6 @@ import gc
 
 import bigml.api
 
-import bigmler.utils as u
-import bigmler.checkpoint as c
-
-
-
 from bigml.model import Model
 from bigml.multimodel import MultiModel, read_votes
 from bigml.ensemble import Ensemble
@@ -36,6 +31,9 @@ from bigml.util import localize, console_log, get_predictions_file_name
 from bigml.io import UnicodeWriter
 from bigml.multivote import (PLURALITY_CODE, THRESHOLD_CODE, MultiVote,
                              ws_confidence)
+
+import bigmler.utils as u
+import bigmler.checkpoint as c
 
 from bigmler.tst_reader import TstReader as TestReader
 from bigmler.resources import (FIELDS_QS, ALL_FIELDS_QS, BRIEF_FORMAT,
@@ -157,7 +155,7 @@ def prediction_to_row(prediction, prediction_info=NORMAL_FORMAT):
     prediction_class = prediction['objective_fields'][0]
     tree = prediction.get('prediction_path', prediction)
     row = [prediction['prediction'][prediction_class]]
-    if not prediction_info == BRIEF_FORMAT:
+    if prediction_info != BRIEF_FORMAT:
         row.append(prediction.get('confidence', tree.get('confidence', 0)))
         distribution = None
         if 'objective_summary' in tree:
@@ -338,8 +336,7 @@ def retrieve_models_split(models_split, api, query_string=FIELDS_QS,
     complete_models = []
     if models_order is None:
         models_order = []
-    for index in range(len(models_split)):
-        model = models_split[index]
+    for index, model in enumerate(models_split):
         if (isinstance(model, basestring) or
                 bigml.api.get_status(model)['code'] != bigml.api.FINISHED):
             try:
@@ -682,7 +679,7 @@ def remote_predict(model, test_dataset, batch_prediction_args, args,
                    path=None, log=None):
     """Computes a prediction for each entry in the `test_set`.
 
-       Predictions are computed remotely using the batch predictions call.
+    Predictions are computed remotely using the batch predictions call.
     """
     if args.ensemble is not None and not args.dataset_off:
         model_or_ensemble = args.ensemble
@@ -707,10 +704,10 @@ def remote_predict(model, test_dataset, batch_prediction_args, args,
                 args, api, session_file=session_file, path=path, log=log)
         else:
             batch_predictions = []
-            for index in range(len(test_datasets)):
-                batch_predictions.append(create_batch_prediction(
-                models[index], test_datasets[index], batch_prediction_args,
-                args, api, session_file=session_file, path=path, log=log))
+            for index, tests_dataset in enumerate(test_datasets):
+                batch_predictions.append(create_batch_prediction( \
+                    models[index], test_dataset, batch_prediction_args,
+                    args, api, session_file=session_file, path=path, log=log))
     if not args.no_csv and not args.dataset_off:
         file_name = api.download_batch_prediction(batch_prediction,
                                                   prediction_file)

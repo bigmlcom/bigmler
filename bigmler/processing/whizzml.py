@@ -20,7 +20,6 @@
 """
 from __future__ import absolute_import
 
-import os
 import sys
 
 import bigml.api
@@ -146,3 +145,4 @@ def library_processing(api, args,
             library_args = r.set_library_args(args)
             library = r.create_library(source_code, library_args, args, api,
                                        path, session_file, log)
+    return library

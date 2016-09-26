@@ -231,8 +231,8 @@ def add_matrices(matrix_a, matrix_b):
     """Add two n x n matrices
 
     """
-    return map(lambda i: map(lambda x, y: x + y, matrix_a[i], matrix_b[i]),
-               xrange(len(matrix_a)))
+    return [[x + y  for x, y in zip(matrix_a[i], matrix_b[i])]
+            for i in xrange(len(matrix_a))]
 
 
 def avg_class_statistics(total, component, number_of_evaluations):

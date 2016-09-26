@@ -22,11 +22,12 @@ from __future__ import absolute_import
 import copy
 
 import bigml.api
+
+from bigml.fields import Fields, DEFAULT_MISSING_TOKENS
+
 import bigmler.utils as u
 import bigmler.resources as r
 import bigmler.checkpoint as c
-
-from bigml.fields import Fields, DEFAULT_MISSING_TOKENS
 
 from bigmler.processing.ensembles import (ensemble_processing,
                                           ensemble_per_label)

@@ -305,9 +305,9 @@ under the License.""" % version
     subcommand_options["execute"].update(
         {'--project': source_options['--project'],
          '--project-id': source_options['--project-id'],
-        '--script-tag': delete_options['--script-tag'],
-        '--library-tag': delete_options['--library-tag'],
-        '--execution-tag': delete_options['--execution-tag']})
+         '--script-tag': delete_options['--script-tag'],
+         '--library-tag': delete_options['--library-tag'],
+         '--execution-tag': delete_options['--execution-tag']})
 
     for subcommand in SUBCOMMANDS:
         subparser = subparsers.add_parser(subcommand)

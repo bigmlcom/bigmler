@@ -281,7 +281,7 @@ def read_local_resource(path, csv_properties=None):
 
     fields, resource_locale, missing_tokens, \
     objective_column = get_fields_structure(resource)
-    if not 'objective_field' in csv_properties and \
+    if 'objective_field' not in csv_properties and \
             objective_column is not None:
         csv_properties['objective_field'] = objective_column
     if missing_tokens:
@@ -321,7 +321,7 @@ def delete(api, delete_list, exe_outputs=True):
     for resource_id in delete_list:
         resource_type = None
         try:
-            for resource_type in bigml.api.RESOURCE_RE.keys():
+            for resource_type in bigml.api.RESOURCE_RE:
                 try:
                     bigml.api.get_resource(resource_type, resource_id)
                     break

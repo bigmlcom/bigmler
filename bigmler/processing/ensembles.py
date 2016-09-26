@@ -45,7 +45,7 @@ def ensemble_processing(datasets, api, args, resume,
         resume, ensemble_ids = c.checkpoint(
             c.are_ensembles_created, path, number_of_ensembles,
             debug=args.debug)
-        _, model_ids = c.checkpoint(c.are_models_created, path,
+        _, model_ids = c.checkpoint(c.are_models_created, path, \
             number_of_ensembles * args.number_of_models)
         models = model_ids
         if not resume:

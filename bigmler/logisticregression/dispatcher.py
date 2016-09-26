@@ -36,6 +36,7 @@ from bigmler.defaults import DEFAULTS_FILE
 from bigmler.lrprediction import lr_prediction, remote_lr_prediction
 from bigmler.reports import clear_reports, upload_reports
 from bigmler.command import get_stored_command
+from bigmler.evaluation import evaluate
 from bigmler.dispatcher import (SESSIONS_LOG, command_handling,
                                 clear_log_files, get_test_dataset,
                                 get_objective_id)
@@ -216,7 +217,7 @@ def compute_output(api, args):
             logistic_regression, csv_properties, args)
 
     if fields and args.export_fields:
-       fields.summary_csv(os.path.join(path, args.export_fields))
+        fields.summary_csv(os.path.join(path, args.export_fields))
 
     # If predicting
     if logistic_regressions and (a.has_test(args) or \
@@ -276,11 +277,18 @@ def compute_output(api, args):
             args.test_dataset_ids = datasets
         if args.test_dataset_ids and args.dataset_off:
             # Evaluate the models with the corresponding test datasets.
+            test_dataset_id = bigml.api.get_dataset_id( \
+                args.test_dataset_ids[0])
+            test_dataset = api.check_resource(test_dataset_id)
+            csv_properties.update(objective_field=None,
+                                  objective_field_present=False)
+            test_fields = pd.get_fields_structure(test_dataset,
+                                                  csv_properties)
             resume = evaluate(logistic_regressions, args.test_dataset_ids, api,
                               args, resume,
-                              fields=fields, dataset_fields=dataset_fields,
+                              fields=fields, dataset_fields=test_fields,
                               session_file=session_file, path=path,
-                              log=log, labels=labels, all_labels=all_labels,
+                              log=log,
                               objective_field=args.objective_field)
 
     u.print_generated_files(path, log_file=session_file,

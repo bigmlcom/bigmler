@@ -142,7 +142,6 @@ def get_logistic_regression_options(defaults=None):
             'action': 'store_false',
             'dest': 'no_logistic_regression',
             'default': defaults.get('no_logistic_regression', False),
-            'help': "Create a logistic."}
+            'help': "Create a logistic."}}
 
-}
     return options

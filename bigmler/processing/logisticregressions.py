@@ -63,7 +63,7 @@ def logistic_regressions_processing(datasets, logistic_regressions, \
                 u.log_message(message, log_file=session_file,
                               console=args.verbosity)
 
-            logistic_regressions = logistic_regressions_ids
+            logistic_regressions = logistic_regression_ids
             number_of_logistic_regressions -= len(logistic_regression_ids)
 
         logistic_regression_args = r.set_logistic_regression_args( \

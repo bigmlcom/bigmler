@@ -24,10 +24,11 @@ import os
 import sys
 import tempfile
 import shutil
-import requests
 import json
 import re
 import copy
+
+import requests
 
 import bigml.api
 

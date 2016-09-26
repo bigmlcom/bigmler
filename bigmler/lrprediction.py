@@ -23,12 +23,11 @@ import sys
 
 import bigml.api
 
-import bigmler.utils as u
-import bigmler.checkpoint as c
-
-
 from bigml.logistic import LogisticRegression
 from bigml.io import UnicodeWriter
+
+import bigmler.utils as u
+import bigmler.checkpoint as c
 
 from bigmler.tst_reader import TstReader as TestReader
 from bigmler.resources import NORMAL_FORMAT, FULL_FORMAT
@@ -120,7 +119,8 @@ def remote_lr_prediction(logistic_regression, test_dataset,
        Predictions are computed remotely using the batch prediction call.
     """
 
-    prediction_id = bigml.api.get_logistic_regression_id(logistic_regression)
+    logistic_regression_id = bigml.api.get_logistic_regression_id( \
+        logistic_regression)
     # if resuming, try to extract dataset form log files
     if resume:
         message = u.dated("Batch prediction not found. Resuming.\n")

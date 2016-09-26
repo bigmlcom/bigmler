@@ -19,6 +19,8 @@
 """
 from __future__ import absolute_import
 
+import os
+
 import bigmler.processing.sources as ps
 import bigmler.processing.datasets as pd
 import bigmler.utils as u
@@ -43,7 +45,7 @@ def get_source_info(api, args, resume,
             session_file=session_file, path=path, log=log)
 
     if fields and args.export_fields:
-       fields.summary_csv(os.path.join(path, args.export_fields))
+        fields.summary_csv(os.path.join(path, args.export_fields))
 
     return source, resume, csv_properties, fields
 
@@ -104,6 +106,6 @@ def get_dataset_info(api, args, resume, source,
         datasets[0] = dataset
 
     if fields and args.export_fields:
-       fields.summary_csv(os.path.join(path, args.export_fields))
+        fields.summary_csv(os.path.join(path, args.export_fields))
 
     return dataset, datasets, test_dataset, resume, csv_properties, fields

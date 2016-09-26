@@ -27,16 +27,10 @@ import os
 import sys
 import json
 import re
-import hashlib
 
 import bigml
 
-import bigmler.processing.args as a
 import bigmler.utils as u
-
-from copy import copy
-
-from bigml.io import UnicodeWriter
 
 from bigmler.execute.dispatcher import execute_dispatcher
 
@@ -136,7 +130,7 @@ def create_package(args, api, common_options, resume=False):
     output_dir = args.output_dir
     metadata_file = os.path.join(package_dir, METADATA_FILE)
     metadata = None
-    created_resources = []
+
     with open(metadata_file) as metadata_handler:
         metadata = json.load(metadata_handler)
     # recurse into components/directories, if any

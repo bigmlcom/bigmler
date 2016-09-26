@@ -24,13 +24,14 @@ import csv
 from zipfile import ZipFile, ZIP_DEFLATED
 
 import bigml.api
+
+from bigml.fields import Fields
+from bigml.util import bigml_locale
+
 import bigmler.utils as u
 import bigmler.resources as r
 import bigmler.checkpoint as c
 import bigmler.processing.projects as pp
-
-from bigml.fields import Fields
-from bigml.util import bigml_locale
 
 from bigmler.train_reader import TrainReader
 

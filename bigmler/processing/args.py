@@ -542,7 +542,7 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
-    # Retrieve cluster/ids if provided.
+    # Retrieve association/ids if provided.
     try:
         if command_args.association_tag:
             association_ids = (association_ids +
@@ -566,10 +566,9 @@ def get_output_args(api, command_args, resume):
     # Retrieve logisticregression/ids if provided.
     try:
         if command_args.logistic_tag:
-            logistic_regression_ids = (logistic_ids +
-                           u.list_ids(api.list_logistic_regressions,
-                                      "tags__in=%s" %
-                                      command_args.logistic_tag))
+            logistic_regression_ids = (logistic_regression_ids + \
+                u.list_ids(api.list_logistic_regressions,
+                           "tags__in=%s" % command_args.logistic_tag))
         command_args.logistic_regression_ids_ = logistic_regression_ids
     except AttributeError:
         pass
@@ -776,7 +775,7 @@ def transform_args(command_args, flags, api, user_defaults):
     # Checks combined votes method
     try:
         if (command_args.method and command_args.method != COMBINATION_LABEL
-                and not (command_args.method in COMBINATION_WEIGHTS.keys())):
+                and not command_args.method in COMBINATION_WEIGHTS.keys()):
             command_args.method = 0
         else:
             combiner_methods = dict(
@@ -826,11 +825,7 @@ def transform_args(command_args, flags, api, user_defaults):
         pass
 
     # Sets shared_flag if --shared or --unshared has been used
-    if '--shared' in flags or '--unshared' in flags:
-        command_args.shared_flag = True
-    else:
-        command_args.shared_flag = False
-
+    command_args.shared_flag = '--shared' in flags or '--unshared' in flags
 
     # Set remote on if scoring a trainind dataset in bigmler anomaly
     try:

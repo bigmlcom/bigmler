@@ -28,13 +28,14 @@ except ImportError:
 
 import bigml.api
 
+from bigml.util import bigml_locale
+
 from bigmler.utils import (dated, get_url, log_message, plural, check_resource,
                            check_resource_error, log_created_resources,
                            decode2, transform_fields_keys,
                            is_shared, FILE_ENCODING, PYTHON3)
 from bigmler.labels import label_model_args, get_all_labels
 from bigmler.reports import report
-from bigml.util import bigml_locale
 
 
 EVALUATE_SAMPLE_RATE = 0.8
@@ -216,8 +217,9 @@ def check_fields_struct(update_args, resource_type):
     """
     if "fields" in update_args:
         fields_substr = update_args.get("fields")
-        for field_id, field in fields_substr.items():
-            for attribute, value in field.items():
+        for _, field in fields_substr.items():
+            attributes = field.keys()
+            for attribute in attributes:
                 if not attribute in VALID_FIELD_ATTRIBUTES.get(resource_type):
                     del field[attribute]
 
@@ -686,9 +688,8 @@ def create_models(datasets, model_ids, model_args,
             single_model = args.number_of_models == 1 and existing_models == 0
             # if there's more than one model the first one must contain
             # the entire field structure to be used as reference.
-            query_string = (FIELDS_QS if single_model and (args.test_header and
-                            not args.export_fields)
-                            else ALL_FIELDS_QS)
+            query_string = (FIELDS_QS if single_model and (args.test_header \
+                and not args.export_fields) else ALL_FIELDS_QS)
             inprogress = []
             for i in range(0, args.number_of_models):
                 wait_for_available_tasks(inprogress, args.max_parallel_models,
@@ -892,8 +893,8 @@ def set_ensemble_args(args, name=None,
         "category": args.category,
         "tags": args.tag,
         "missing_splits": args.missing_splits,
-        "ensemble_sample": {"seed": SEED if args.ensemble_sample_seed is None
-                            else args.ensemble_sample_seed},
+        "ensemble_sample": {"seed": SEED if args.ensemble_sample_seed is None \
+            else args.ensemble_sample_seed},
         "seed": SEED if args.seed is None else args.seed
     }
     if objective_id is not None and fields is not None:
@@ -1906,7 +1907,7 @@ def create_project(project_args, args, api=None,
 
 
 def update_project(project_args, args,
-                   api=None, session_file=None):
+                   api=None, session_file=None, log=None):
     """Updates project properties
 
     """
@@ -1920,6 +1921,8 @@ def update_project(project_args, args,
                          % project['resource'])
     message = dated("Project \"%s\" has been updated.\n" %
                     project['resource'])
+    log_message(message, log_file=session_file, console=args.verbosity)
+    log_message("%s\n" % args.project_id, log_file=log)
     return project
 
 
@@ -2345,7 +2348,7 @@ def set_execution_args(args, name=None):
 
 
 def create_execution(execution_args, args, api=None, path=None,
-                  session_file=None, log=None):
+                     session_file=None, log=None):
     """Creates remote execution
 
     """

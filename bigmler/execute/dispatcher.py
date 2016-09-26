@@ -21,10 +21,8 @@ from __future__ import absolute_import
 
 import sys
 import os
-import datetime
 import shutil
 
-import bigml.api
 import bigmler.utils as u
 import bigmler.processing.args as a
 import bigmler.processing.whizzml as pw
@@ -103,24 +101,24 @@ def execute_whizzml(args, api, session_file):
         clear_log_files([log])
     path = args.output_dir
     if args.to_library:
-        library = pw.library_processing(api, args,
-            session_file=session_file, path=path, log=log)
+        pw.library_processing( \
+            api, args, session_file=session_file, path=path, log=log)
     else:
         if args.script_file:
-            # script is retrieved from the contents of the given local JSON file
+            # script is retrieved from the contents of the given local file
             script, _, _ = u.read_local_resource(args.script_file)
             args.script = script['resource']
             args.script_ids = [args.script]
         elif args.code_file or args.code:
-            script, scripts = pw.script_processing(api, args,
-                session_file=session_file, path=path, log=log)
+            script, scripts = pw.script_processing( \
+                api, args, session_file=session_file, path=path, log=log)
             args.script = script['resource']
             args.script_ids = scripts
 
 
         if (args.script or args.scripts) and not args.no_execute:
-            execution = pw.execution_processing(api, args,
-                session_file=session_file, path=path, log=log)
+            execution = pw.execution_processing( \
+                api, args, session_file=session_file, path=path, log=log)
             execution = r.get_execution( \
                 execution, api, args.verbosity, session_file)
             r.save_txt_and_json(execution['object']['execution'],

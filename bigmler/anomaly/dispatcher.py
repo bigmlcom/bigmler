@@ -24,6 +24,9 @@ import os
 import shutil
 
 import bigml.api
+
+from bigml.anomaly import Anomaly
+
 import bigmler.utils as u
 import bigmler.resources as r
 import bigmler.pre_model_steps as pms
@@ -32,7 +35,6 @@ import bigmler.processing.anomalies as pa
 import bigmler.processing.sources as ps
 import bigmler.processing.datasets as pd
 
-from bigml.anomaly import Anomaly
 from bigmler.defaults import DEFAULTS_FILE
 from bigmler.anomaly_score import anomaly_score, remote_anomaly_score
 from bigmler.reports import clear_reports, upload_reports
@@ -262,7 +264,7 @@ def compute_output(api, args):
             anomaly_score(anomalies, fields, args, session_file=session_file)
 
     if fields and args.export_fields:
-       fields.summary_csv(os.path.join(path, args.export_fields))
+        fields.summary_csv(os.path.join(path, args.export_fields))
 
     u.print_generated_files(path, log_file=session_file,
                             verbosity=args.verbosity)

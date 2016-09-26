@@ -22,12 +22,12 @@ import sys
 
 import bigml.api
 
-import bigmler.utils as u
-import bigmler.checkpoint as c
-
-
 from bigml.anomaly import Anomaly
 from bigml.io import UnicodeWriter
+
+
+import bigmler.utils as u
+import bigmler.checkpoint as c
 
 from bigmler.tst_reader import TstReader as TestReader
 from bigmler.resources import NORMAL_FORMAT, FULL_FORMAT

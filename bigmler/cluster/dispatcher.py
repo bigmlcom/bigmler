@@ -278,7 +278,7 @@ def compute_output(api, args):
                            model_type='cluster')
 
     if fields and args.export_fields:
-       fields.summary_csv(os.path.join(path, args.export_fields))
+        fields.summary_csv(os.path.join(path, args.export_fields))
 
     u.print_generated_files(path, log_file=session_file,
                             verbosity=args.verbosity)

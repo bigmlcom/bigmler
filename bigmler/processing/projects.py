@@ -81,7 +81,7 @@ def update_project(args, api, resume,
     if project_id is not None:
         project_args = r.set_project_args(args, name=args.project)
         project = r.update_project(
-            project_args, args, api, session_file)
+            project_args, args, api, session_file, log)
         project_id = project['resource']
 
     return project_id

@@ -187,7 +187,7 @@ def compute_output(api, args):
         fields = psa.get_sample_fields(sample, csv_properties, args)
 
     if fields and args.export_fields:
-       fields.summary_csv(os.path.join(path, args.export_fields))
+        fields.summary_csv(os.path.join(path, args.export_fields))
 
     sample_file(samples[0], fields, args, api, path=path,
                 session_file=session_file)
