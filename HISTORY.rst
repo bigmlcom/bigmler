@@ -3,6 +3,12 @@
 History
 -------
 
+3.8.3 (2016-09-27)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug in logistic regression evaluation.
+- Refactoring and style changes.
+
 3.8.2 (2016-09-23)
 ~~~~~~~~~~~~~~~~~~
 
