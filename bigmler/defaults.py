@@ -244,6 +244,7 @@ FLAGS = {
         {'flag': 'no_logistic_regression', 'type': 'boolean'},
         {'flag': 'logistic_regression_attributes', 'type': 'string'},
         {'flag': 'bias', 'type': 'boolean'},
+        {'flag': 'balance_fields', 'type': 'boolean'},
         {'flag': 'lr_c', 'type': 'float'},
         {'flag': 'eps', 'type': 'float'},
         {'flag': 'field_codings', 'type': 'string'},

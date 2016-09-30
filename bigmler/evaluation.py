@@ -46,7 +46,7 @@ def evaluate(models_or_ensembles, datasets, api, args, resume,
         dataset_fields, api, args, resume,
         session_file=session_file, path=path, log=log,
         labels=labels, all_labels=all_labels, objective_field=objective_field)
-    if args.multi_label:
+    if hasattr(args, 'multi_label') and args.multi_label:
         file_labels = [slugify(name) for name in
                        u.objective_field_names(models_or_ensembles, api)]
     for index in range(0, len(evaluations)):
@@ -59,7 +59,7 @@ def evaluate(models_or_ensembles, datasets, api, args, resume,
                                              args, api=api, path=path,
                                              session_file=session_file)
         file_name = output
-        if args.multi_label:
+        if hasattr(args, 'multi_label') and args.multi_label:
             suffix = file_labels[index]
             file_name += "_%s" % suffix
             evaluation_files.append("%s.json" % file_name)
@@ -68,7 +68,8 @@ def evaluate(models_or_ensembles, datasets, api, args, resume,
             file_name += "_%s" % suffix
             evaluation_files.append("%s.json" % file_name)
         r.save_evaluation(evaluation, file_name, api)
-    if args.multi_label or args.test_datasets or args.dataset_off:
+    if (hasattr(args, 'multi_label') and args.multi_label) or \
+            args.test_datasets or args.dataset_off:
         mean_evaluation = average_evaluations(evaluation_files)
         r.save_evaluation(mean_evaluation, output, api)
     return resume
@@ -122,7 +123,7 @@ def evaluations_process(models_or_ensembles, datasets,
             u.log_message(message, log_file=session_file,
                           console=args.verbosity)
     if not resume:
-        if args.multi_label:
+        if hasattr(args, 'multi_label') and args.multi_label:
             evaluation_args = r.set_label_evaluation_args(
                 args, labels, all_labels,
                 number_of_evaluations, fields, dataset_fields,

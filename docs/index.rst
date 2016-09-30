@@ -552,7 +552,8 @@ BigMLer requests for remote predictions
 Evaluations
 -----------
 
-BigMLer can also help you to measure the performance of your models. The
+BigMLer can also help you to measure the performance of your supervised
+models (decision trees, ensembles and logistic regressions). The
 simplest way to build a model and evaluate it all at once is
 
 .. code-block:: bash
@@ -562,7 +563,21 @@ simplest way to build a model and evaluate it all at once is
 which will build the source, dataset and model objects for you using 80% of
 the data in your training file chosen at random. After that, the remaining 20%
 of the data will be run through the model to obtain
-the corresponding evaluation. You can use the same procedure with a previously
+the corresponding evaluation.
+
+The same is available for ensembles:
+
+.. code-block:: bash
+
+    bigmler --train data/iris.csv --number-of-models 10 --evaluate
+
+and for logistic regressions:
+
+.. code-block:: bash
+
+    bigmler logistic-regression --train data/iris.csv --evaluate
+
+You can use the same procedure with a previously
 existing source or dataset
 
 .. code-block:: bash
@@ -3730,7 +3745,20 @@ Logistic regression Subcommand Options
                                               that
                                               will be used in the logistic
                                               regression construction
-``--bias`` *BIAS*                             Scale of the intercept term
+``--normalize``                               Normalize feature vectors in
+                                              training and prediction inputs
+``--no-missing-numerics``                     Avoids the default behaviour,
+                                              which creates a new
+                                              coefficient for missings in
+                                              numeric fields. Missing rows are
+                                              discarded.
+``--no-bias``                                 Avoids default behaviour. The
+                                              logistic regression will have
+                                              no intercept term.
+``--no-balance-fields``                       Avoids default behaviour.
+                                              No automatic field balance.
+``--field-codings`` *FIELD_CODINGS*           Numeric encoding for categorical
+                                              fields (default one-hot encoding)
 ``--c`` *C*                                   Strength of the regularization
                                               step
 ``--eps`` *EPS*                               Stopping criteria for solver.

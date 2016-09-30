@@ -66,8 +66,10 @@ def shell_execute(command, output, test=None, options=None,
 def i_create_all_lr_resources_with_no_headers(step, data=None, test=None, output=None):
     ok_(data is not None and test is not None and output is not None)
     test = res_filename(test)
-    command = ("bigmler logistic-regression --train " + res_filename(data) + " --test " + test +
-               " --store --output " + output + " --no-train-header --no-test-header")
+    command = ("bigmler logistic-regression --train " + res_filename(data) +
+               " --test " + test +
+               " --store --no-balance-fields --no-bias --output " + output +
+               " --no-train-header --no-test-header")
     shell_execute(command, output, test=test, options='--prediction-header')
 
 
@@ -75,8 +77,9 @@ def i_create_all_lr_resources_with_no_headers(step, data=None, test=None, output
 def i_create_all_lr_resources(step, data=None, test=None, output=None):
     ok_(data is not None and test is not None and output is not None)
     test = res_filename(test)
-    command = ("bigmler logistic-regression --train " + res_filename(data) + " --test " + test +
-               " --store --output " + output)
+    command = ("bigmler logistic-regression --train " + res_filename(data) +
+               " --test " + test +
+               " --store --no-balance-fields --no-bias --output " + output)
     shell_execute(command, output, test=test)
 
 
@@ -85,8 +88,9 @@ def i_create_lr_resources_from_source(step, multi_label=None, test=None, output=
     ok_(test is not None and output is not None)
     test = res_filename(test)
     multi_label = "" if multi_label is None else " --multi-label "
-    command = ("bigmler logistic-regression "+ multi_label +"--source " + world.source['resource']
-               + " --test " + test + " --store --output " + output)
+    command = ("bigmler logistic-regression "+ multi_label +"--source " +
+               world.source['resource'] + " --test " + test +
+               " --store --no-bias --no-balance-fields --output " + output)
     shell_execute(command, output, test=test)
 
 
@@ -97,7 +101,7 @@ def i_create_lr_resources_from_dataset(step, multi_label=None, test=None, output
     test = res_filename(test)
     command = ("bigmler logistic-regression "+ multi_label +"--dataset " +
                world.dataset['resource'] + " --test " + test +
-               " --store --output " + output)
+               " --store --no-balance-fields --no-bias --output " + output)
     shell_execute(command, output, test=test)
 
 
@@ -105,8 +109,21 @@ def i_create_lr_resources_from_dataset(step, multi_label=None, test=None, output
 def i_create_lr_resources_from_model(step, test=None, output=None):
     ok_(test is not None and output is not None)
     test = res_filename(test)
-    command = ("bigmler logistic-regression --logistic-regression " + world.logistic_regression['resource'] + " --test " +
-               test + " --store --output " + output)
+    command = ("bigmler logistic-regression --logistic-regression " +
+               world.logistic_regression['resource'] + " --test " +
+               test + " --store --no-balance-fields --no-bias --output " +
+               output)
+    shell_execute(command, output, test=test)
+
+
+#@step(r'I create BigML resources using model to test "(.*)" as batch prediction and log predictions in "(.*)"')
+def i_create_lr_resources_from_model_remote(step, test=None, output=None):
+    ok_(test is not None and output is not None)
+    test = res_filename(test)
+    command = ("bigmler logistic-regression --logistic-regression " +
+               world.logistic_regression['resource'] + " --test " + test +
+               " --store --no-balance-fields --no-bias --remote --output " +
+               output)
     shell_execute(command, output, test=test)
 
 
@@ -123,3 +140,12 @@ def i_check_create_lr_model(step):
         assert True
     except Exception, exc:
         assert False, str(exc)
+
+
+#@step(r'I create BigML logistic regression resources uploading train "(.*)" file to evaluate and log evaluation in "([^"]*)"$')
+def i_create_all_lr_resources_to_evaluate(step, data=None, output=None):
+    ok_(data is not None and output is not None)
+    command = ("bigmler logistic-regression --train " + res_filename(data) +
+               " --evaluate" +
+               " --store --no-balance-fields --no-bias --output " + output)
+    shell_execute(command, output)

@@ -290,6 +290,20 @@ def compute_output(api, args):
                               session_file=session_file, path=path,
                               log=log,
                               objective_field=args.objective_field)
+        else:
+            dataset = datasets[0]
+            if args.test_split > 0 or args.has_test_datasets_:
+                dataset = test_dataset
+            dataset = u.check_resource(dataset, api=api,
+                                       query_string=r.ALL_FIELDS_QS)
+            dataset_fields = pd.get_fields_structure(dataset, None)
+            resume = evaluate(logistic_regressions, [dataset], api,
+                              args, resume,
+                              fields=fields, dataset_fields=dataset_fields,
+                              session_file=session_file, path=path,
+                              log=log,
+                              objective_field=args.objective_field)
+
 
     u.print_generated_files(path, log_file=session_file,
                             verbosity=args.verbosity)

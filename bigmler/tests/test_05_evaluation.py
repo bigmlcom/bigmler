@@ -27,6 +27,7 @@ from bigmler.tests.world import (world, common_setup_module,
 
 
 import bigmler.tests.basic_tst_prediction_steps as test_pred
+import bigmler.tests.basic_logistic_r_steps as lr_pred
 import bigmler.tests.evaluation_steps as evaluation
 
 
@@ -256,3 +257,30 @@ class TestEvaluation(object):
             evaluation.i_evaluate_ensemble_with_dataset(self, ensemble_dir=example[6], dataset_dir=example[6], output=example[7])
             test_pred.i_check_create_evaluation(self)
             evaluation.i_check_evaluation_key(self, key=example[4], value=example[5])
+
+
+    def test_scenario8(self):
+        """
+            Scenario: Successfully building evaluations for logistic regression from start:
+                Given I create BigML logistic regression resources uploading train "<data>" file to evaluate and log evaluation in "<output>"
+                And I check that the source has been created
+                And I check that the dataset has been created
+                And I check that the logistic regression has been created
+                And I check that the evaluation has been created
+                Then the evaluation file is like "<json_evaluation_file>"
+
+                Examples:
+                | data             | output                   | json_evaluation_file    |
+                | ../data/iris.csv | ./scenario_e8/evaluation | ./check_files/evaluation_iris_lr.json |
+        """
+        print self.test_scenario8.__doc__
+        examples = [
+            ['data/iris.csv', 'scenario_e8/evaluation', 'check_files/evaluation_iris_lr.json']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            lr_pred.i_create_all_lr_resources_to_evaluate(self, data=example[0], output=example[1])
+            test_pred.i_check_create_source(self)
+            test_pred.i_check_create_dataset(self, suffix=None)
+            lr_pred.i_check_create_lr_model(self)
+            test_pred.i_check_create_evaluation(self)
+            evaluation.then_the_evaluation_file_is_like(self, example[2])

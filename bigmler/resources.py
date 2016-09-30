@@ -1096,7 +1096,8 @@ def set_evaluation_args(args, fields=None,
         "tags": args.tag
     }
 
-    if args.number_of_models > 1 or args.ensemble:
+    if hasattr(args, 'method') and (args.number_of_models > 1
+                                    or args.ensemble):
         evaluation_args.update(combiner=args.method)
     if args.fields_map_ and fields is not None:
         if dataset_fields is None:
@@ -1104,7 +1105,7 @@ def set_evaluation_args(args, fields=None,
         evaluation_args.update({"fields_map": map_fields(args.fields_map_,
                                                          fields,
                                                          dataset_fields)})
-    if args.missing_strategy:
+    if hasattr(args, 'missing_strategy') and args.missing_strategy:
         evaluation_args.update(missing_strategy=args.missing_strategy)
     if 'evaluation' in args.json_args:
         update_json_args(
@@ -1113,8 +1114,7 @@ def set_evaluation_args(args, fields=None,
     # only the training set is provided, and cross_validation
     # [--dataset|--test] [--model|--models|--model-tag|--ensemble] --evaluate
     if ((args.dataset or args.test_set)
-            and (args.model or args.models or args.model_tag or
-                 (args.ensemble and args.number_of_models == 1))):
+            and args.has_supervised_):
         return evaluation_args
     # [--train|--dataset] --test-split --evaluate
     if args.test_split > 0 and (args.training_set or args.dataset):
@@ -1307,10 +1307,11 @@ def set_batch_prediction_args(args, fields=None,
         "description": args.description_,
         "tags": args.tag,
         "header": args.prediction_header,
-        "combiner": args.method,
         "output_dataset": args.to_dataset
     }
 
+    if hasattr(args, 'method') and args.method:
+        batch_prediction_args.update({"combiner": args.method})
     if args.fields_map_ and fields is not None:
         if dataset_fields is None:
             dataset_fields = fields
@@ -1337,7 +1338,7 @@ def set_batch_prediction_args(args, fields=None,
                     sys.exit(exc)
             prediction_fields.append(field)
         batch_prediction_args.update(output_fields=prediction_fields)
-    if args.missing_strategy:
+    if hasattr(args, 'missing_strategy') and args.missing_strategy:
         batch_prediction_args.update(missing_strategy=args.missing_strategy)
 
     if 'batch_prediction' in args.json_args:
@@ -2415,11 +2416,21 @@ def set_logistic_regression_args(args, name=None, fields=None,
 
     if objective_id is not None and fields is not None:
         logistic_regression_args.update({"objective_field": objective_id})
-
+    if ((args.evaluate and args.test_split == 0 and args.test_datasets is None)
+            or args.cross_validation_rate > 0):
+        logistic_regression_args.update(seed=SEED)
+        if args.cross_validation_rate > 0:
+            args.sample_rate = 1 - args.cross_validation_rate
+            args.replacement = False
+        elif (args.sample_rate == 1 and args.test_datasets is None
+              and not args.dataset_off):
+            args.sample_rate = EVALUATE_SAMPLE_RATE
+    logistic_regression_args.update({"sample_rate": args.sample_rate})
     if args.lr_c:
         logistic_regression_args.update({"c": args.lr_c})
-    if args.bias:
-        logistic_regression_args.update({"bias": args.bias})
+    logistic_regression_args.update({"bias": args.bias})
+    logistic_regression_args.update( \
+        {"balance_fields": args.balance_fields})
     if args.eps:
         logistic_regression_args.update({"eps": args.eps})
     if args.normalize is not None:
@@ -2470,11 +2481,24 @@ def create_logistic_regressions(datasets, logistic_regression_ids,
         for i in range(0, number_of_logistic_regressions):
             wait_for_available_tasks(inprogress,
                                      args.max_parallel_logistic_regressions,
-                                     api, "cluster")
+                                     api, "logisticregression")
             if logistic_regression_args_list:
                 logistic_regression_args = logistic_regression_args_list[i]
+            if args.cross_validation_rate > 0:
+                new_seed = get_basic_seed(i + existing_logistic_regressions)
+                logistic_regression_args.update(seed=new_seed)
 
-            logistic_regression = api.create_logistic_regression( \
+            if (args.test_datasets and args.evaluate):
+                dataset = datasets[i]
+                logistic_regression = api.create_logistic_regression( \
+                    dataset, logistic_regression_args, retries=None)
+            elif args.dataset_off and args.evaluate:
+                multi_dataset = args.test_dataset_ids[:]
+                del multi_dataset[i + existing_logistic_regressions]
+                logistic_regression = api.create_logistic_regression( \
+                    multi_dataset, logistic_regression_args, retries=None)
+            else:
+                logistic_regression = api.create_logistic_regression( \
                 datasets, logistic_regression_args, retries=None)
             logistic_regression_id = check_resource_error( \
                 logistic_regression, "Failed to create logistic regression: ")

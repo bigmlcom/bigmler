@@ -66,13 +66,19 @@ def get_logistic_regression_options(defaults=None):
 
         # bias term in the logistic regression.
         '--bias': {
-            "action": 'store',
+            "action": 'store_true',
             "dest": 'bias',
             "default": defaults.get('bias', True),
-            "type": bool,
-            "help": ("Use intercept term. Setting this to False will"
-                     " exclude the intercept term from the solution. Must be"
-                     " a boolean.")},
+            "help": ("Use intercept term. Will"
+                     " include an intercept term in the solution.")},
+
+        # Don't include a bias term in the logistic regression.
+        '--no-bias': {
+            "action": 'store_false',
+            "dest": 'bias',
+            "default": defaults.get('bias', True),
+            "help": ("Do not use intercept term. It will"
+                     " exclude the intercept term from the solution.")},
 
         # The strength of the regularization step. Must be greater than 0.
         '--c': {
@@ -121,6 +127,13 @@ def get_logistic_regression_options(defaults=None):
             'default': defaults.get('normalize', False),
             'help': ("Whether to normalize feature vectors in training"
                      " and predicting.")},
+
+        # Does not balance fields
+        '--no-balance-fields': {
+            'action': 'store_false',
+            'dest': 'balance_fields',
+            'default': defaults.get('balance_fields', True),
+            'help': "Do not balance fields."},
 
         # Does not create a logistic regression just a dataset.
         '--no-logistic-regression': {

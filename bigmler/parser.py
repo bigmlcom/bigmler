@@ -293,7 +293,16 @@ under the License.""" % version
         '--reports': main_options['--reports'],
         '--remote': main_options['--remote'],
         '--no-batch': main_options['--no-batch'],
+        '--to-dataset': main_options['--to-dataset'],
         '--no-csv': main_options['--no-csv'],
+        '--fields-map': main_options['--fields-map'],
+        '--dataset-off': main_options['--dataset-off'],
+        '--max-parallel-evaluations': main_options[
+            '--max-parallel-evaluations'],
+        '--cross-validation-rate': main_options[
+            '--cross-validation-rate'],
+        '--number-of-evaluations': main_options[
+            '--number-of-evaluations'],
         '--no-no-csv': main_options['--no-no-csv']})
 
     defaults = general_defaults["BigMLer execute"]

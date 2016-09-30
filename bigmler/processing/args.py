@@ -836,19 +836,26 @@ def transform_args(command_args, flags, api, user_defaults):
     except AttributeError:
         pass
 
-
-    command_args.has_models_ = (
+    command_args.has_supervised_ = (
         (hasattr(command_args, 'model') and command_args.model) or
         (hasattr(command_args, 'models') and command_args.models) or
         (hasattr(command_args, 'ensemble') and command_args.ensemble) or
         (hasattr(command_args, 'ensembles') and command_args.ensembles) or
+        (hasattr(command_args, 'model_tag') and command_args.model_tag) or
+        (hasattr(command_args, 'logistic_regression') and
+         command_args.logistic_regression) or
+        (hasattr(command_args, 'logistic_regressions') and
+         command_args.logistic_regressions) or
+        (hasattr(command_args, 'logistic_regression_tag') and
+         command_args.logistic_regression_tag) or
+        (hasattr(command_args, 'ensemble_tag')
+         and command_args.ensemble_tag))
+
+    command_args.has_models_ = (command_args.has_supervised_ or
         (hasattr(command_args, 'cluster') and command_args.cluster) or
         (hasattr(command_args, 'clusters') and command_args.clusters) or
-        (hasattr(command_args, 'model_tag') and command_args.model_tag) or
         (hasattr(command_args, 'anomaly') and command_args.anomaly) or
         (hasattr(command_args, 'anomalies') and command_args.anomalies) or
-        (hasattr(command_args, 'ensemble_tag')
-         and command_args.ensemble_tag) or
         (hasattr(command_args, 'cluster_tag') and command_args.cluster_tag) or
         (hasattr(command_args, 'anomaly_tag') and command_args.anomaly_tag))
 

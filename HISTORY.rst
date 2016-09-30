@@ -3,11 +3,13 @@
 History
 -------
 
-3.8.3 (2016-09-27)
+3.8.3 (2016-09-30)
 ~~~~~~~~~~~~~~~~~~
 
 - Fixing bug in logistic regression evaluation.
+- Adding --balance-fields flag to bigmler logistic-regression.
 - Refactoring and style changes.
+- Adding the logistic regression options to documentation.
 
 3.8.2 (2016-09-23)
 ~~~~~~~~~~~~~~~~~~
