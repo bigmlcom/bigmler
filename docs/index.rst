@@ -565,7 +565,7 @@ the data in your training file chosen at random. After that, the remaining 20%
 of the data will be run through the model to obtain
 the corresponding evaluation.
 
-The same is available for ensembles:
+The same procedure is available for ensembles:
 
 .. code-block:: bash
 
