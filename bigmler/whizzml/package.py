@@ -150,9 +150,15 @@ def create_package(args, api, common_options, resume=False):
             lib_imports = metadata.get("imports")
             for lib_import in lib_imports:
                 args.package_dir = os.path.join(package_dir, lib_import)
-                create_package(args, api, common_options, resume=resume)
-                imports.append(read_library_id(os.path.join( \
-                    output_dir, os.path.basename(args.package_dir))))
+                # try to read the library id, if it is already there
+                try:
+                    library_id = read_library_id(os.path.join( \
+                        output_dir, os.path.basename(args.package_dir)))
+                except IOError:
+                    create_package(args, api, common_options, resume=resume)
+                    library_id = read_library_id(os.path.join( \
+                        output_dir, os.path.basename(args.package_dir)))
+                imports.append(library_id)
                 args.package_dir = package_dir
         # read the metadata.json information
         message = ('Creating the %s.........\n' % metadata.get("kind"))
