@@ -22,6 +22,5 @@ dataset2 = api.get_dataset(batchanomalyscore1['object']['output_dataset_resource
 api.ok(dataset2)
 
 dataset2 = api.update_dataset(dataset2, \
-    {'fields': {u'000000': {'name': u'score'}},
-     'name': u'my_dataset_from_batch_anomaly_score_name'})
+    {'name': u'my_dataset_from_batch_anomaly_score_name'})
 api.ok(dataset2)

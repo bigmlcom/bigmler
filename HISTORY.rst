@@ -3,10 +3,11 @@
 History
 -------
 
-3.8.4 (2016-10-10)
+3.8.4 (2016-10-13)
 ~~~~~~~~~~~~~~~~~~
 
 - Fixing bug in bigmler package. Libraries where created more than once.
+- Fixing bug in bigmler analyze --features when adding batch prediction.
 
 3.8.3 (2016-09-30)
 ~~~~~~~~~~~~~~~~~~

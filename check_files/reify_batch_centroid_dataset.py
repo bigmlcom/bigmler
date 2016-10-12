@@ -21,6 +21,5 @@ dataset2 = api.get_dataset(batchcentroid1['object']['output_dataset_resource'])
 api.ok(dataset2)
 
 dataset2 = api.update_dataset(dataset2, \
-    {'fields': {u'000000': {'name': u'cluster'}},
-     'name': u'my_dataset_from_batch_centroid_name'})
+    {'name': u'my_dataset_from_batch_centroid_name'})
 api.ok(dataset2)

@@ -704,9 +704,9 @@ def remote_predict(model, test_dataset, batch_prediction_args, args,
                 args, api, session_file=session_file, path=path, log=log)
         else:
             batch_predictions = []
-            for index, tests_dataset in enumerate(test_datasets):
+            for index, test_dataset_n in enumerate(test_datasets):
                 batch_predictions.append(create_batch_prediction( \
-                    models[index], test_dataset, batch_prediction_args,
+                    models[index], test_dataset_n, batch_prediction_args,
                     args, api, session_file=session_file, path=path, log=log))
     if not args.no_csv and not args.dataset_off:
         file_name = api.download_batch_prediction(batch_prediction,

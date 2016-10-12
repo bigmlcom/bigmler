@@ -23,6 +23,5 @@
     api.ok(dataset2)
 
     dataset2 = api.update_dataset(dataset2, \
-        {'fields': {'000000': {'name': 'score'}},
-         'name': 'my_dataset_from_batch_anomaly_score_name'})
+        {'name': 'my_dataset_from_batch_anomaly_score_name'})
     api.ok(dataset2)
