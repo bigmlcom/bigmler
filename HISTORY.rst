@@ -8,6 +8,9 @@ History
 
 - Fixing bug in bigmler package. Libraries where created more than once.
 - Fixing bug in bigmler analyze --features when adding batch prediction.
+- Improving bigmler delete when deleting projects and executions. Deleting in
+  two steps: first the projects and executions and then the remaining
+  resources.
 
 3.8.3 (2016-09-30)
 ~~~~~~~~~~~~~~~~~~

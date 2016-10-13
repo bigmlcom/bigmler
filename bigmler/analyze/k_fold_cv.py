@@ -603,6 +603,7 @@ def best_first_search(datasets_file, api, args, common_options,
     field_ids = [field_id for field_id in fields.preferred_fields()
                  if field_id != objective_id and
                  not field_id in excluded_ids]
+    field_ids.sort()
     # headers are extended with a column per field
     fields_names = [fields.field_name(field_id) for field_id in field_ids]
     features_header.extend(fields_names)

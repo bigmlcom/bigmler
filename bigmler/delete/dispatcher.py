@@ -59,6 +59,8 @@ STATUS_CODES = {
     "runnable": bigml.api.RUNNABLE
 }
 
+GROUP_RESOURCES = ["project", "execution"]
+
 
 def retrieve_resources(directory):
     """Searches recusively the user-given directory for resource log files
@@ -149,19 +151,27 @@ def get_date(reference, api):
     return date
 
 
-def resources_by_type(resources_list):
+def resources_by_type(resources_list, bulk_deletion=False):
     """Sorts resources by type. Datasets are shifted to the bottom of the
        list to avoid problems deleting cluster-related datasets, if possible.
        Returns aggregations by type.
+       If bulk_deletion is set, then only projects or executions are kept
     """
     type_summary = {}
     resources_list.sort()
+    if bulk_deletion:
+        new_resources_list = []
     for resource in resources_list:
         resource_type = bigml.api.get_resource_type(resource)
-        if not resource_type in type_summary:
-            type_summary[resource_type] = 0
-        type_summary[resource_type] += 1
-    return type_summary
+        if not bulk_deletion or resource_type in GROUP_RESOURCES:
+            if not resource_type in type_summary:
+                type_summary[resource_type] = 0
+            type_summary[resource_type] += 1
+            if bulk_deletion:
+                new_resources_list.append(resource)
+    if bulk_deletion:
+        resources_list = new_resources_list
+    return type_summary, resources_list
 
 
 def filter_resource_types(delete_list, resource_types):
@@ -182,6 +192,8 @@ def filtered_selectors(args, api):
     """
 
     resource_selectors = [
+        ("project", args.project_tag, api.list_projects, None),
+        ("execution", args.execution_tag, api.list_executions, None),
         ("cluster", args.cluster_tag, api.list_clusters, None),
         ("source", args.source_tag, api.list_sources, None),
         ("dataset", args.dataset_tag, api.list_datasets,
@@ -203,11 +215,9 @@ def filtered_selectors(args, api):
         ("batchanomalyscore", args.batch_anomaly_score_tag,
          api.list_batch_anomaly_scores, None),
         ("sample", args.sample_tag, api.list_samples, None),
-        ("project", args.project_tag, api.list_projects, None),
         ("association", args.association_tag, api.list_associations, None),
         ("script", args.script_tag, api.list_scripts, None),
-        ("library", args.library_tag, api.list_libraries, None),
-        ("execution", args.execution_tag, api.list_executions, None)]
+        ("library", args.library_tag, api.list_libraries, None)]
 
     if args.all_tag is None and any([resource[1] is not None for resource in
                                      resource_selectors]):
@@ -306,10 +316,15 @@ def delete_resources(command_args, api):
     time_qs_list = time_interval_qs(command_args, api)
     delete_list.extend(get_delete_list(command_args, api, time_qs_list))
 
-    types_summary = resources_by_type(delete_list)
-    aprox = "*" if "project" in types_summary or \
-        ("execution" in types_summary and \
-        not command_args.execution_only) else ""
+    # if there are projects or executions, delete them first
+    bulk_deletion = not command_args.dry_run and \
+        any([resource_id.startswith("project/") or \
+        (not command_args.execution_only and \
+         resource_id.startswith("execution/")) for resource_id in delete_list])
+    aprox = "*" if bulk_deletion else ""
+    # if bulk_deletion, keep only the project and executions resources in
+    # the deletion list
+    types_summary, delete_list = resources_by_type(delete_list, bulk_deletion)
     message = u.dated("Deleting %s objects%s.\n" % (len(delete_list), aprox))
     u.log_message(message, log_file=session_file,
                   console=command_args.verbosity)
@@ -345,5 +360,9 @@ def delete_resources(command_args, api):
     u.log_message(message, log_file=session_file)
     if not command_args.dry_run:
         u.delete(api, delete_list, exe_outputs=not command_args.execution_only)
-    u.print_generated_files(path, log_file=session_file,
-                            verbosity=command_args.verbosity)
+    if bulk_deletion:
+        # if projects and executions have already been deleted, delete the rest
+        delete_resources(command_args, api)
+    else:
+         u.print_generated_files(path, log_file=session_file,
+                                verbosity=command_args.verbosity)
