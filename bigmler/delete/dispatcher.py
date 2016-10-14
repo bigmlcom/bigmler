@@ -270,10 +270,12 @@ def delete_dispatcher(args=sys.argv[1:]):
     u.log_message("_" * 80 + "\n", log_file=session_file)
 
 
-def delete_resources(command_args, api):
+def delete_resources(command_args, api, deleted_list=None):
     """Deletes the resources selected by the user given options
 
     """
+    if deleted_list is None:
+        deleted_list = []
     if command_args.output_dir is None:
         path = a.NOW
     else:
@@ -316,6 +318,8 @@ def delete_resources(command_args, api):
     time_qs_list = time_interval_qs(command_args, api)
     delete_list.extend(get_delete_list(command_args, api, time_qs_list))
 
+    delete_list = [resource_id for resource_id in delete_list \
+        if resource_id not in deleted_list]
     # if there are projects or executions, delete them first
     bulk_deletion = not command_args.dry_run and \
         any([resource_id.startswith("project/") or \
@@ -324,7 +328,8 @@ def delete_resources(command_args, api):
     aprox = "*" if bulk_deletion else ""
     # if bulk_deletion, keep only the project and executions resources in
     # the deletion list
-    types_summary, delete_list = resources_by_type(delete_list, bulk_deletion)
+    types_summary, delete_list = resources_by_type( \
+        delete_list, bulk_deletion)
     message = u.dated("Deleting %s objects%s.\n" % (len(delete_list), aprox))
     u.log_message(message, log_file=session_file,
                   console=command_args.verbosity)
@@ -362,7 +367,7 @@ def delete_resources(command_args, api):
         u.delete(api, delete_list, exe_outputs=not command_args.execution_only)
     if bulk_deletion:
         # if projects and executions have already been deleted, delete the rest
-        delete_resources(command_args, api)
+        delete_resources(command_args, api, deleted_list=delete_list)
     else:
          u.print_generated_files(path, log_file=session_file,
                                 verbosity=command_args.verbosity)
