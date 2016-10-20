@@ -596,3 +596,35 @@ class TestPrediction(object):
             test_pred.i_check_create_models_in_ensembles(self, in_ensemble=True)
             test_pred.i_check_create_predictions(self)
             test_pred.i_check_predictions(self, example[4])
+
+
+    def test_scenario21(self):
+        """
+            Scenario 1: Successfully building test predictions from ensemble
+                    And I create BigML resources from "<data>" using ensemble of <number_of_models> models to test "<test>" and log predictions in "<output>"
+                    And I check that the source has been created
+                    And I check that the dataset has been created
+                    And I check that the ensemble has been created
+                    And I check that the models in the ensembles have been created
+                    And I check that the predictions are ready
+                    Then the local prediction file is like "<predictions_file>"
+
+                    Examples:
+                    |data               | number_of_models | test                      | output                         | predictions_file                         |
+                    | ../data/grades.csv| 5                | ../data/test_grades.csv   | ./scenario21/predictions.csv   | ./check_files/predictions_grades_e.csv   |
+        """
+        print self.test_scenario21.__doc__
+        examples = [
+            ['data/grades.csv', '5', 'data/test_grades.csv', 'scenario21/predictions.csv', 'check_files/predictions_grades_e.csv']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            test_pred.i_create_resources_in_prod_from_ensemble( \
+                self, data=example[0], number_of_models=example[1],
+                test=example[2], output=example[3])
+            test_pred.i_check_create_source(self)
+            test_pred.i_check_create_dataset(self, suffix=None)
+            test_pred.i_check_create_ensemble(self)
+            test_pred.i_check_create_models_in_ensembles(self,
+                                                         in_ensemble=True)
+            test_pred.i_check_create_predictions(self)
+            test_pred.i_check_predictions(self, example[4])

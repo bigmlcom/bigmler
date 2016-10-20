@@ -3,6 +3,12 @@
 History
 -------
 
+3.8.5 (2016-10-20)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug in bigmler commands when using local predictions form development
+  mode resources.
+
 3.8.4 (2016-10-13)
 ~~~~~~~~~~~~~~~~~~
 

@@ -307,9 +307,10 @@ def local_predict(models, test_reader, output, args, options=None,
     kwargs = {"by_name": test_set_header, "with_confidence": True,
               "missing_strategy": args.missing_strategy}
     if single_model:
-        local_model = Model(models[0])
+        local_model = Model(models[0], api=args.api_)
     else:
-        local_model = Ensemble(models, max_models=args.max_batch_models)
+        local_model = Ensemble(models, max_models=args.max_batch_models,
+                               api=args.api_)
         kwargs.update({"method": args.method, "options": options,
                        "median": args.median})
     for input_data in test_reader:

@@ -75,7 +75,7 @@ def local_prediction(logistic_regressions, test_reader, output, args,
 
     """
     # Only one logistic_regression at present
-    local_logistic = LogisticRegression(logistic_regressions[0])
+    local_logistic = LogisticRegression(logistic_regressions[0], api=args.api_)
     test_set_header = test_reader.has_headers()
     for input_data in test_reader:
         input_data_dict = test_reader.dict(input_data, filtering=False)

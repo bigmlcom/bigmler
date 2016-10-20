@@ -98,6 +98,36 @@ def i_create_resources_from_ensemble_using_median( \
     world.number_of_models = int(number_of_models)
     shell_execute(command, output, test=test)
 
+#@step(r'I create BigML resources in DEV from "(.*)" using ensemble of (.*) models to test "(.*)" and log predictions in "(.*)"')
+def i_create_resources_in_dev_from_ensemble( \
+    step, data=None, number_of_models=None, test=None, output=None):
+    i_create_resources_in_mode_from_ensemble( \
+        step, data=data, number_of_models=number_of_models, test=test,
+        output=output, dev=True)
+
+
+#@step(r'I create BigML resources from "(.*)" using ensemble of (.*) models to test "(.*)" and log predictions in "(.*)"')
+def i_create_resources_in_prod_from_ensemble( \
+    step, data=None, number_of_models=None, test=None, output=None):
+    i_create_resources_in_mode_from_ensemble( \
+        step, data=data, number_of_models=number_of_models,
+        test=test, output=output)
+
+#@step(r'I create BigML resources from "(.*)" using ensemble of (.*) models to test "(.*)" and log predictions in "(.*)"')
+def i_create_resources_in_mode_from_ensemble( \
+    step, data=None, number_of_models=None, test=None, output=None, dev=False):
+    ok_(data is not None and test is not None and output is not None and \
+        number_of_models is not None)
+    data = res_filename(data)
+    test = res_filename(test)
+    dev_str = " --dev" if dev else ""
+    command = ("bigmler --train " + data + " --test " + test +
+               " --store --output " + output +
+               " --number-of-models " + number_of_models +
+               dev_str + " --max-batch-models 1 --no-fast")
+    world.number_of_models = int(number_of_models)
+    shell_execute(command, output, test=test)
+
 #@step(r'I create BigML resources uploading train "(.*?)" file using the median to test "(.*?)" and log predictions in "([^"]*)"$')
 def i_create_all_resources_with_median(step, data=None,
                                        test=None, output=None):

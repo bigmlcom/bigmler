@@ -236,7 +236,8 @@ def get_api_instance(command_args, storage_path):
     if command_args.store:
         api_command_args.update({'storage': storage_path})
 
-    return bigml.api.BigML(**api_command_args)
+    command_args.api_ = bigml.api.BigML(**api_command_args)
+    return command_args.api_
 
 
 def get_output_args(api, command_args, resume):

@@ -124,7 +124,7 @@ def local_anomaly_score(anomalies, test_reader, output, args,
 
     """
     # Only one anomaly detector at present
-    local_anomaly = Anomaly(anomalies[0])
+    local_anomaly = Anomaly(anomalies[0], api=args.api_)
     test_set_header = test_reader.has_headers()
     for input_data in test_reader:
         input_data_dict = test_reader.dict(input_data, filtering=False)
