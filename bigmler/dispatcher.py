@@ -433,7 +433,12 @@ def compute_output(api, args):
         model_ids = ensemble['object']['models'][:]
         ensemble_ids = [ensemble['resource']]
         models = model_ids[:]
-        model = retrieve_resource(bigml.api.BigML(storage='./storage'),
+        store_api = (args.api_ if args.store else
+                     bigml.api.BigML(username=args.username,
+                                     api_key=args.api_key,
+                                     dev_mode=args.dev_mode,
+                                     storage='./storage'))
+        model = retrieve_resource(store_api,
                                   models[0],
                                   query_string=r.ALL_FIELDS_QS)
         models[0] = model
