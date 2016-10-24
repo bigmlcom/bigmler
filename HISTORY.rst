@@ -3,6 +3,12 @@
 History
 -------
 
+3.8.6 (2016-10-25)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug in bigmler commands when using local files storing the model
+  info as input for local predictions.
+
 3.8.5 (2016-10-20)
 ~~~~~~~~~~~~~~~~~~
 

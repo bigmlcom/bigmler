@@ -2745,11 +2745,12 @@ Even for ensembles
 .. code-block:: bash
 
     bigmler --ensemble-file my_dir/ensemble_532db2b637203f3f1a00053b \
-            --test data/test_iris.csv --store
+            --test data/test_iris.csv
 
-where we added the ``--store`` flag to ensure that also the downloaded models
-that set up the ensemble are stored and used from the local repository.
-
+In this case, the models included in the ensemble are expected to be
+stored also in
+the same directory where the local file for the ensemble is. They are
+downloaded otherwise.
 
 Resuming Previous Commands
 --------------------------
