@@ -34,7 +34,7 @@ from bigml.tree import LAST_PREDICTION, PROPORTIONAL
 from bigmler.resources import ADD_REMOVE_PREFIX
 from bigmler.prediction import FULL_FORMAT, COMBINATION, COMBINATION_LABEL
 from bigmler.train_reader import AGGREGATES
-from bigmler.utils import PYTHON3
+from bigmler.utils import PYTHON3, check_dir
 
 if PYTHON3:
     from io import StringIO
@@ -51,6 +51,8 @@ RESOURCE_TYPES = ["source", "dataset", "model", "ensemble", "batch_prediction",
                   "association", "logistic_regression", "script",
                   "library", "execution"]
 
+STORED_MODELS = ["model_file", "ensemble_file", "logistic_file",
+                 "cluster_file", "anomaly_file"]
 
 def has_test(args):
     """Returns if some kind of test data is given in args.
@@ -237,6 +239,26 @@ def get_api_instance(command_args, storage_path):
         api_command_args.update({'storage': storage_path})
 
     command_args.api_ = bigml.api.BigML(**api_command_args)
+
+    # if locally stored models are used, local predicting objects should use
+    # this directory to look for the model information first. Otherwise,
+    # use the storage_path and if not set ./storage directory
+    retrieve_dir = None
+    for stored_model in STORED_MODELS:
+        if hasattr(command_args, stored_model) and \
+                getattr(command_args, stored_model) is not None:
+            retrieve_dir = check_dir(getattr(command_args, stored_model))
+            break
+    if retrieve_dir is None:
+        retrieve_dir = storage_path if command_args.store else './storage'
+
+    command_args.retrieve_api_ = bigml.api.BigML(**{ \
+        'username': command_args.username,
+        'api_key': command_args.api_key,
+        'dev_mode': command_args.dev_mode,
+        'debug': command_args.debug,
+        'storage': retrieve_dir})
+
     return command_args.api_
 
 
