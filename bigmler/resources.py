@@ -614,12 +614,11 @@ def set_model_args(args, name=None, objective_id=None, fields=None,
             user_metadata={'other_label': other_label,
                            'max_categories': args.max_categories})
 
+    model_args = update_sample_parameters_args(model_args, args)
+
     if 'model' in args.json_args:
         update_json_args(model_args, args.json_args.get('model'), fields)
 
-    model_args.update(sample_rate=args.sample_rate,
-                      replacement=args.replacement,
-                      randomize=args.randomize)
     return model_args
 
 
@@ -932,10 +931,10 @@ def set_ensemble_args(args, name=None,
         ensemble_args.update(random_candidates=args.random_candidates)
 
     update_attributes(ensemble_args, args.json_args.get('model'))
-    ensemble_args.update(randomize=args.randomize,
-                         replacement=args.replacement,
-                         sample_rate=args.sample_rate,
-                         tlp=args.tlp)
+
+    ensemble_args = update_sample_parameters_args(ensemble_args, args)
+
+    ensemble_args.update(tlp=args.tlp)
     ensemble_args["ensemble_sample"].update( \
         {"rate": args.ensemble_sample_rate,
          "replacement": args.ensemble_sample_replacement})
@@ -1416,6 +1415,8 @@ def set_cluster_args(args, name=None, fields=None,
     if args.summary_fields is not None:
         cluster_args.update({"summary_fields": args.summary_fields_})
 
+    cluster_args = update_sample_parameters_args(cluster_args, args)
+
     if 'cluster' in args.json_args:
         update_json_args(cluster_args, args.json_args.get('cluster'), fields)
 
@@ -1695,6 +1696,8 @@ def set_anomaly_args(args, name=None, fields=None, anomaly_fields=None):
         anomaly_args.update(top_n=args.top_n)
     if args.forest_size > 0:
         anomaly_args.update(forest_size=args.forest_size)
+
+    anomaly_args = update_sample_parameters_args(anomaly_args, args)
 
     if 'anomaly' in args.json_args:
         update_json_args(anomaly_args, args.json_args.get('anomaly'), fields)
@@ -2114,6 +2117,9 @@ def set_association_args(args, name=None, fields=None,
         association_args.update({"max_k": args.association_k})
     if args.search_strategy:
         association_args.update({"search_strategy": args.search_strategy})
+
+    association_args = update_sample_parameters_args(association_args, args)
+
     if 'association' in args.json_args:
         update_json_args(association_args,
                          args.json_args.get('association'), fields)
@@ -2441,6 +2447,10 @@ def set_logistic_regression_args(args, name=None, fields=None,
     if args.field_codings is not None:
         logistic_regression_args.update(\
             {"field_codings": args.field_codings_})
+
+    logistic_regression_args = update_sample_parameters_args( \
+        logistic_regression_args, args)
+
     if 'logistic_regression' in args.json_args:
         update_json_args(logistic_regression_args,
                          args.json_args.get('logistic_regression'),
@@ -2649,3 +2659,17 @@ def create_library(source_code, library_args, args, api=None, path=None,
     log_message(message, log_file=session_file, console=args.verbosity)
     log_message("%s\n" % library_id, log_file=log)
     return library
+
+def update_sample_parameters_args(resource_args, args):
+    """Updates the information related to the common sampling options
+
+    """
+    if args.sample_rate != 1:
+        resource_args.update({"sample_rate": args.sample_rate})
+        if hasattr(args, "out_of_bag") and args.out_of_bag:
+            resource_args.update({"out_of_bag": True})
+    if hasattr(args, "replacement") and args.replacement:
+        resource_args.update({"replacement": True})
+    if hasattr(args, "randomize") and args.randomize:
+        resource_args.update({"randomize": True})
+    return resource_args

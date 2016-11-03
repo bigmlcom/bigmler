@@ -290,6 +290,96 @@ def i_create_dataset_with_summary(step, data=None, summary_file=None, output_dir
         assert False, str(exc)
 
 
+#@step(r'I create a BigML cluster with params "(.*)" from dataset in "(.*)"')
+def i_create_cluster_with_params_from_dataset( \
+    step, cluster_params=None, output_dir=None):
+    ok_(output_dir is not None and cluster_params is not None)
+    world.directory = output_dir
+    world.folders.append(world.directory)
+    try:
+        command = (u"bigmler cluster --dataset " + world.dataset['resource'] +
+                   u" --store --output-dir " + output_dir +
+                   u" " + cluster_params)
+
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.output = output_dir
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+
+#@step(r'I create a BigML anomaly with params "(.*)" from dataset in "(.*)"')
+def i_create_anomaly_with_params_from_dataset( \
+    step, params=None, output_dir=None):
+    ok_(output_dir is not None and params is not None)
+    world.directory = output_dir
+    world.folders.append(world.directory)
+    try:
+        command = (u"bigmler anomaly --dataset " + world.dataset['resource'] +
+                   u" --store --output-dir " + output_dir +
+                   u" " + params)
+
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.output = output_dir
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+
+#@step(r'I create a BigML logistic with params "(.*)" from dataset in "(.*)"')
+def i_create_logistic_with_params_from_dataset( \
+    step, params=None, output_dir=None):
+    ok_(output_dir is not None and params is not None)
+    world.directory = output_dir
+    world.folders.append(world.directory)
+    try:
+        command = (u"bigmler logistic-regression --dataset " +
+                   world.dataset['resource'] +
+                   u" --store --output-dir " + output_dir +
+                   u" " + params)
+
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.output = output_dir
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+
+#@step(r'I create a BigML association with params "(.*)" from dataset in "(.*)"')
+def i_create_association_with_params_from_dataset( \
+    step, params=None, output_dir=None):
+    ok_(output_dir is not None and params is not None)
+    world.directory = output_dir
+    world.folders.append(world.directory)
+    try:
+        command = (u"bigmler association --dataset " +
+                   world.dataset['resource'] +
+                   u" --store --output-dir " + output_dir +
+                   u" " + params)
+
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.output = output_dir
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+
 #@step(r'I import fields attributes in file "(.*)" to dataset$')
 def i_import_fields(step, summary=None):
     ok_(summary is not None)
@@ -311,3 +401,31 @@ def field_attribute_value(step, field=None, attribute=None,
                              world.api.get_dataset)
     fields = dataset['object']['fields']
     eq_(fields[field][attribute], attribute_value)
+
+
+#@step(r'the cluster params are "(.*)"$')
+def i_check_cluster_params(step, params_json=None):
+    params_dict = json.loads(params_json)
+    for key, value in params_dict.items():
+        eq_(value, world.cluster['object'].get(key))
+
+
+#@step(r'the anomaly params are "(.*)"$')
+def i_check_anomaly_params(step, params_json=None):
+    params_dict = json.loads(params_json)
+    for key, value in params_dict.items():
+        eq_(value, world.anomaly['object'].get(key))
+
+
+#@step(r'the logistic params are "(.*)"$')
+def i_check_logistic_params(step, params_json=None):
+    params_dict = json.loads(params_json)
+    for key, value in params_dict.items():
+        eq_(value, world.logistic_regression['object'].get(key))
+
+
+#@step(r'the association params are "(.*)"$')
+def i_check_association_params(step, params_json=None):
+    params_dict = json.loads(params_json)
+    for key, value in params_dict.items():
+        eq_(value, world.association['object'].get(key))

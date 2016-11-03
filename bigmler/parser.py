@@ -116,6 +116,11 @@ under the License.""" % version
 
     main_options = subcommand_options["main"]
 
+    dataset_sampling_options = { \
+        '--replacement': main_options['--replacement'],
+        '--sample-rate': main_options['--sample-rate'],
+        '--seed': main_options['--seed']}
+
     defaults = general_defaults["BigMLer whizzml"]
     subcommand_options["whizzml"] = get_whizzml_options(defaults=defaults)
     subcommand_options["whizzml"].update(common_options)
@@ -134,15 +139,12 @@ under the License.""" % version
         '--balance': main_options['--balance'],
         '--no-balance': main_options['--no-balance'],
         '--number-of-models': main_options['--number-of-models'],
-        '--sample-rate': main_options['--sample-rate'],
         '--missing-splits': main_options['--missing-splits'],
         '--pruning': main_options['--pruning'],
         '--weight-field': main_options['--weight-field'],
-        '--replacement': main_options['--replacement'],
         '--ensemble-sample-no-replacement': main_options[ \
             '--ensemble-sample-no-replacement'],
         '--ensemble-sample-rate': main_options['--ensemble-sample-rate'],
-        '--seed': main_options['--seed'],
         '--ensemble-sample-seed': main_options['--ensemble-sample-seed'],
         '--objective-weights': main_options['--objective-weights'],
         '--model-attributes': main_options['--model-attributes'],
@@ -155,6 +157,7 @@ under the License.""" % version
         '--datasets': main_options['--datasets'],
         '--dataset-file': main_options['--dataset-file'],
         '--dataset-tag': delete_options['--dataset-tag']})
+    subcommand_options["analyze"].update(dataset_sampling_options)
 
     defaults = general_defaults["BigMLer cluster"]
     subcommand_options["cluster"] = get_cluster_options(defaults=defaults)
@@ -163,6 +166,7 @@ under the License.""" % version
     subcommand_options["cluster"].update(source_options)
     subcommand_options["cluster"].update(dataset_options)
     subcommand_options["cluster"].update(test_options)
+    subcommand_options["cluster"].update(dataset_sampling_options)
     subcommand_options["cluster"].update({
         '--cpp': main_options['--cpp'],
         '--fields-map': main_options['--fields-map'],
@@ -188,6 +192,7 @@ under the License.""" % version
     subcommand_options["anomaly"].update(source_options)
     subcommand_options["anomaly"].update(dataset_options)
     subcommand_options["anomaly"].update(test_options)
+    subcommand_options["anomaly"].update(dataset_sampling_options)
     subcommand_options["anomaly"].update({
         '--cpp': main_options['--cpp'],
         '--fields-map': main_options['--fields-map'],
@@ -261,6 +266,7 @@ under the License.""" % version
     subcommand_options["association"].update(source_options)
     subcommand_options["association"].update(dataset_options)
     subcommand_options["association"].update(test_options)
+    subcommand_options["association"].update(dataset_sampling_options)
     subcommand_options["association"].update({
         '--source-tag': delete_options['--source-tag'],
         '--dataset-tag': delete_options['--dataset-tag'],
@@ -280,6 +286,7 @@ under the License.""" % version
     subcommand_options["logistic-regression"].update(source_options)
     subcommand_options["logistic-regression"].update(dataset_options)
     subcommand_options["logistic-regression"].update(test_options)
+    subcommand_options["logistic-regression"].update(dataset_sampling_options)
     subcommand_options["logistic-regression"].update({
         '--source-tag': delete_options['--source-tag'],
         '--dataset-tag': delete_options['--dataset-tag'],

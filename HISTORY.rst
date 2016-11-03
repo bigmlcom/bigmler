@@ -3,6 +3,12 @@
 History
 -------
 
+3.8.7 (2016-11-04)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug in bigmler commands when using samples to create different model
+  types.
+
 3.8.6 (2016-10-25)
 ~~~~~~~~~~~~~~~~~~
 

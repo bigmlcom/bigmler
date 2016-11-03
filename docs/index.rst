@@ -3519,7 +3519,7 @@ Analyze subcommand Options
 ``--nodes-step`` *INTEGER*            Step in the node threshold search
                                       iteration
                                       (default 50)
-``--exclude-features``                Comma-separated list of features in the
+``--exclude-features`` *FEATURES*     Comma-separated list of features in the
                                       dataset
                                       to be excluded from the features analysis
 ``--score``                           Causes the training set to be run

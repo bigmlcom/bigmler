@@ -26,6 +26,7 @@ from bigmler.tests.world import (world, common_setup_module,
 import bigmler.tests.dataset_advanced_steps as dataset_adv
 import bigmler.tests.basic_tst_prediction_steps as test_pred
 import bigmler.tests.basic_anomaly_prediction_steps as test_anomaly
+import bigmler.tests.basic_logistic_r_steps as test_logistic
 
 
 
@@ -239,3 +240,127 @@ class TestDatasetAdvanced(object):
             test_pred.i_check_create_dataset(self, suffix=None)
             dataset_adv.i_import_fields(self, summary=example[2])
             dataset_adv.field_attribute_value(self, field=example[3], attribute=example[4], attribute_value=example[5])
+
+
+    def test_scenario8(self):
+        """
+            Scenario: Successfully building a cluster from a sampled dataset
+                Given I create a BigML dataset from "<data>" and store logs in "<output_dir>"
+                And I check that the source has been created
+                And I check that the dataset has been created
+                And I create a BigML cluster with params "<params>" from dataset in "<output_dir>"
+                And I check that the cluster has been created
+                And the cluster params are "<params_json>"
+
+                Examples:
+                |data |output_dir | params | params_json
+                |../data/iris.csv | ./scenario_d_8 | "--sample-rate 0.2 --replacement" | {"sample-rate": 0.2, "replacement": true}
+        """
+        print self.test_scenario8.__doc__
+        examples = [
+            ['data/iris.csv', 'scenario_d_8',
+             '--sample-rate 0.2 --replacement',
+             '{"sample_rate": 0.2, "replacement": true}']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            dataset_adv.i_create_dataset(self, data=example[0],
+                                         output_dir=example[1])
+            test_pred.i_check_create_source(self)
+            test_pred.i_check_create_dataset(self, suffix=None)
+            dataset_adv.i_create_cluster_with_params_from_dataset( \
+                self, cluster_params=example[2], output_dir=example[1])
+            test_pred.i_check_create_cluster(self)
+            dataset_adv.i_check_cluster_params(self, params_json=example[3])
+
+
+    def test_scenario9(self):
+        """
+            Scenario: Successfully building an anomaly detector from a sampled dataset
+                Given I create a BigML dataset from "<data>" and store logs in "<output_dir>"
+                And I check that the source has been created
+                And I check that the dataset has been created
+                And I create a BigML anomaly with params "<params>" from dataset in "<output_dir>"
+                And I check that the anomaly has been created
+                And the anomaly params are "<params_json>"
+
+                Examples:
+                |data |output_dir | params | params_json
+                |../data/iris.csv | ./scenario_d_9 | "--sample-rate 0.2 --replacement" | {"sample-rate": 0.2, "replacement": true}
+        """
+        print self.test_scenario9.__doc__
+        examples = [
+            ['data/iris.csv', 'scenario_d_9',
+             '--sample-rate 0.2 --replacement',
+             '{"sample_rate": 0.2, "replacement": true}']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            dataset_adv.i_create_dataset(self, data=example[0],
+                                         output_dir=example[1])
+            test_pred.i_check_create_source(self)
+            test_pred.i_check_create_dataset(self, suffix=None)
+            dataset_adv.i_create_anomaly_with_params_from_dataset( \
+                self, params=example[2], output_dir=example[1])
+            test_pred.i_check_create_anomaly(self)
+            dataset_adv.i_check_anomaly_params(self, params_json=example[3])
+
+
+    def test_scenario10(self):
+        """
+            Scenario: Successfully building logistic regression from a sampled dataset
+                Given I create a BigML dataset from "<data>" and store logs in "<output_dir>"
+                And I check that the source has been created
+                And I check that the dataset has been created
+                And I create a BigML logistic regression with params "<params>" from dataset in "<output_dir>"
+                And I check that the logistic regression has been created
+                And the logistic regression params are "<params_json>"
+
+                Examples:
+                |data |output_dir | params | params_json
+                |../data/iris.csv | ./scenario_d_10 | "--sample-rate 0.2 --replacement" | {"sample-rate": 0.2, "replacement": true}
+        """
+        print self.test_scenario10.__doc__
+        examples = [
+            ['data/iris.csv', 'scenario_d_10',
+             '--sample-rate 0.2 --replacement',
+             '{"sample_rate": 0.2, "replacement": true}']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            dataset_adv.i_create_dataset(self, data=example[0],
+                                         output_dir=example[1])
+            test_pred.i_check_create_source(self)
+            test_pred.i_check_create_dataset(self, suffix=None)
+            dataset_adv.i_create_logistic_with_params_from_dataset( \
+                self, params=example[2], output_dir=example[1])
+            test_logistic.i_check_create_lr_model(self)
+            dataset_adv.i_check_logistic_params(self, params_json=example[3])
+
+
+    def test_scenario11(self):
+        """
+            Scenario: Successfully building association from a sampled dataset
+                Given I create a BigML dataset from "<data>" and store logs in "<output_dir>"
+                And I check that the source has been created
+                And I check that the dataset has been created
+                And I create a BigML association with params "<params>" from dataset in "<output_dir>"
+                And I check that the association has been created
+                And the association params are "<params_json>"
+
+                Examples:
+                |data |output_dir | params | params_json
+                |../data/iris.csv | ./scenario_d_11 | "--sample-rate 0.2 --replacement" | {"sample-rate": 0.2, "replacement": true}
+        """
+        print self.test_scenario11.__doc__
+        examples = [
+            ['data/iris.csv', 'scenario_d_11',
+             '--sample-rate 0.2 --replacement',
+             '{"sample_rate": 0.2, "replacement": true}']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            dataset_adv.i_create_dataset(self, data=example[0],
+                                         output_dir=example[1])
+            test_pred.i_check_create_source(self)
+            test_pred.i_check_create_dataset(self, suffix=None)
+            dataset_adv.i_create_association_with_params_from_dataset( \
+                self, params=example[2], output_dir=example[1])
+            test_pred.i_check_create_association(self)
+            dataset_adv.i_check_association_params(self, params_json=example[3])

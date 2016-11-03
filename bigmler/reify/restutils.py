@@ -272,7 +272,8 @@ def default_setting(child, key, *defaults):
 
     if isinstance(defaults, basestring):
         defaults = [defaults]
-    if not child.get(key, defaults[0]) in defaults:
+    if child.get(key) is not None and \
+            not child.get(key, defaults[0]) in defaults:
         return {key: child[key]}
     else:
         return {}
