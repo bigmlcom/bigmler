@@ -57,6 +57,7 @@ from bigmler.reify.dispatcher import reify_dispatcher
 from bigmler.project.dispatcher import project_dispatcher
 from bigmler.association.dispatcher import association_dispatcher
 from bigmler.logisticregression.dispatcher import logistic_regression_dispatcher
+from bigmler.topicmodel.dispatcher import topic_model_dispatcher
 from bigmler.execute.dispatcher import execute_dispatcher
 from bigmler.whizzml.dispatcher import whizzml_dispatcher
 from bigmler.parser import SUBCOMMANDS
@@ -117,6 +118,8 @@ def main(args=sys.argv[1:]):
             association_dispatcher(args=new_args)
         elif new_args[0] == "logistic-regression":
             logistic_regression_dispatcher(args=new_args)
+        elif new_args[0] == "topic-model":
+            topic_model_dispatcher(args=new_args)
         elif new_args[0] == "whizzml":
             whizzml_dispatcher(args=new_args)
     else:
@@ -130,6 +133,7 @@ def main(args=sys.argv[1:]):
                  "\n\nbigmler project --help\n\n"
                  "\n\nbigmler association --help\n\n"
                  "\n\nbigmler logistic-regression --help\n\n"
+                 "\n\nbigmler topic-model --help\n\n"
                  "\n\nbigmler execute --help\n\n"
                  "\n\nbigmler whizzml --help\n\n"
                  "\n\nbigmler delete --help\n\n"

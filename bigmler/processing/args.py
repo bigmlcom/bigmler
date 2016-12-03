@@ -414,6 +414,18 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
+    # Parses topic model fields if provided.
+    try:
+        if command_args.topic_fields:
+            topic_fields_arg = [
+                field.strip() for field in command_args.topic_fields.split(
+                    command_args.args_separator)]
+            command_args.topic_model_fields_ = topic_fields_arg
+        else:
+            command_args.topic_model_fields_ = []
+    except AttributeError:
+        pass
+
     # Parses field_codings for logistic regressions
     try:
         if command_args.field_codings:
@@ -595,6 +607,27 @@ def get_output_args(api, command_args, resume):
         command_args.logistic_regression_ids_ = logistic_regression_ids
     except AttributeError:
         pass
+
+    topic_model_ids = []
+    try:
+        # Parses topicmodel/ids if provided.
+        if command_args.topic_models:
+            topic_model_ids = u.read_resources(command_args.topic_models)
+        command_args.topic_model_ids_ = topic_model_ids
+    except AttributeError:
+        pass
+
+    # Retrieve topicmodel/ids if provided.
+    try:
+        if command_args.topic_model_tag:
+            topic_model_ids = (topic_model_ids +
+                               u.list_ids(api.list_topic_models,
+                                          "tags__in=%s" %
+                                          command_args.topic_model_tag))
+        command_args.topic_model_ids_ = topic_model_ids
+    except AttributeError:
+        pass
+
 
     # Parses cluster names to generate datasets if provided
     try:

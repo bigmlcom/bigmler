@@ -465,3 +465,24 @@ def is_library_created(path):
                 return False, None
     except IOError:
         return False, None
+
+
+def are_topic_models_created(path, number_of_topic_models):
+    """Checks existence and reads the topic model ids from the
+       topic models file in the
+       path directory
+
+    """
+    topic_model_ids = []
+    try:
+        with open("%s%stopic_models" % (path, os.sep)) as topic_models_file:
+            for line in topic_models_file:
+                topic_model = line.strip()
+                try:
+                    topic_model_id = bigml.api.get_topic_model_id(topic_model)
+                    topic_model_ids.append(topic_model_id)
+                except ValueError:
+                    return False, topic_model_ids
+        return len(topic_model_ids) == number_of_topic_model, topic_model_ids
+    except IOError:
+        return False, topic_model_ids

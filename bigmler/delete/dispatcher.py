@@ -216,6 +216,14 @@ def filtered_selectors(args, api):
          api.list_batch_anomaly_scores, None),
         ("sample", args.sample_tag, api.list_samples, None),
         ("association", args.association_tag, api.list_associations, None),
+        ("logisticregression", args.logistic_regression_tag,
+         api.list_logistic_regressions, None),
+        ("topicmodel", args.topic_model_tag,
+         api.list_topic_models, None),
+        ("topicdistribution", args.topic_distribution_tag,
+         api.list_topic_distributions, None),
+        ("batchtopicdistribution", args.batch_topic_distribution_tag,
+         api.list_batch_topic_distributions, None),
         ("script", args.script_tag, api.list_scripts, None),
         ("library", args.library_tag, api.list_libraries, None)]
 

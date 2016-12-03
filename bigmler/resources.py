@@ -2673,3 +2673,265 @@ def update_sample_parameters_args(resource_args, args):
     if hasattr(args, "randomize") and args.randomize:
         resource_args.update({"randomize": True})
     return resource_args
+
+
+def set_topic_model_args(args, name=None, fields=None,
+                         objective_id=None,
+                         topic_model_fields=None):
+    """Return topic_model arguments dict
+
+    """
+    if name is None:
+        name = args.name
+    if topic_model_fields is None:
+        topic_model_fields = args.topic_model_fields_
+
+    topic_model_args = {
+        "name": name,
+        "description": args.description_,
+        "category": args.category,
+        "tags": args.tag,
+        "seed": SEED if args.seed is None else args.seed,
+        "topicmodel_seed": SEED if args.seed is None else args.seed
+    }
+
+    topic_model_args.update({"sample_rate": args.sample_rate})
+    topic_model_args.update({"bigrams": args.bigrams})
+    topic_model_args.update({"case_sensitive": args.case_sensitive})
+    if args.number_of_topics is not None:
+        topic_model_args.update({"number_of_topics": args.number_of_topics})
+    if args.term_limit is not None:
+        topic_model_args.update({"term_limit": args.term_limit})
+    if args.top_n_terms is not None:
+        topic_model_args.update({"top_n_terms": args.top_n_terms})
+
+    if args.excluded_terms:
+        topic_model_args.update({"excluded_terms": args.excluded_terms_})
+
+    topic_model_args = update_sample_parameters_args( \
+        topic_model_args, args)
+
+    if 'topic_model' in args.json_args:
+        update_json_args(topic_model_args,
+                         args.json_args.get('topic_model'),
+                         fields)
+    return topic_model_args
+
+
+def create_topic_models(datasets, topic_model_ids, topic_model_args,
+                        args, api=None, path=None,
+                        session_file=None, log=None):
+    """Create remote topic models
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+
+    topic_models = topic_model_ids[:]
+    existing_topic_models = len(topic_models)
+    topic_model_args_list = []
+    datasets = datasets[existing_topic_models:]
+    # if resuming and all topic models were created, there will
+    # be no datasets left
+    if datasets:
+        if isinstance(topic_model_args, list):
+            topic_model_args_list = topic_model_args
+
+        # Only one topic model per command, at present
+        number_of_topic_models = 1
+        message = dated("Creating %s.\n" %
+                        plural("topic model", number_of_topic_models))
+        log_message(message, log_file=session_file,
+                    console=args.verbosity)
+
+        query_string = FIELDS_QS
+        inprogress = []
+        for i in range(0, number_of_topic_models):
+            wait_for_available_tasks(inprogress,
+                                     args.max_parallel_topic_models,
+                                     api, "topicmodel")
+            if topic_model_args_list:
+                topic_model_args = topic_model_args_list[i]
+
+            topic_model = api.create_topic_model(datasets,
+                                                 topic_model_args,
+                                                 retries=None)
+            topic_model_id = check_resource_error( \
+                topic_model,
+                "Failed to create topic model: ")
+            log_message("%s\n" % topic_model_id, log_file=log)
+            topic_model_ids.append(topic_model_id)
+            inprogress.append(topic_model_id)
+            topic_models.append(topic_model)
+            log_created_resources("topic_models", path, topic_model_id,
+                                  mode='a')
+
+        if args.verbosity:
+            if bigml.api.get_status(topic_model)['code'] != bigml.api.FINISHED:
+                try:
+                    topic_model = check_resource( \
+                        topic_model, api.get_topic_model,
+                        query_string=query_string)
+                except ValueError, exception:
+                    sys.exit("Failed to get a finished topic model: %s" %
+                             str(exception))
+                topic_models[0] = topic_model
+            message = dated("Topic model created: %s\n" %
+                            get_url(topic_model))
+            log_message(message, log_file=session_file,
+                        console=args.verbosity)
+            if args.reports:
+                report(args.reports, path, topic_model)
+
+    return topic_models, topic_model_ids
+
+
+def get_topic_models(topic_model_ids,
+                     args, api=None, session_file=None):
+    """Retrieves remote topic model in its actual status
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+
+    topic_model_id = ""
+    topic_models = topic_model_ids
+    topic_model_id = topic_model_ids[0]
+    message = dated("Retrieving %s. %s\n" %
+                    (plural("topic model", len(topic_model_ids)),
+                     get_url(topic_model_id)))
+    log_message(message, log_file=session_file, console=args.verbosity)
+    # only one topic_model at present
+    try:
+        # we need the whole fields structure when exporting fields
+        query_string = FIELDS_QS if not args.export_fields else ALL_FIELDS_QS
+        topic_model = check_resource(topic_model_ids[0],
+                                     api.get_topic_model,
+                                     query_string=query_string)
+    except ValueError, exception:
+        sys.exit("Failed to get a finished topic model: %s" % \
+            str(exception))
+    topic_models[0] = topic_model
+
+    return topic_models, topic_model_ids
+
+
+def set_publish_topic_model_args(args):
+    """Set args to publish topic model
+
+    """
+    public_topic_model = {}
+    if args.public_topic_model:
+        public_topic_model = {"private": False}
+        if args.model_price:
+            public_topic_model.update(price=args.model_price)
+        if args.cpp:
+            public_topic_model.update(credits_per_prediction=args.cpp)
+    return public_topic_model
+
+
+def update_topic_model(topic_model, topic_model_args,
+                       args, api=None, path=None, session_file=None):
+    """Updates topic model properties
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+
+    message = dated("Updating topic model. %s\n" %
+                    get_url(topic_model))
+    log_message(message, log_file=session_file,
+                console=args.verbosity)
+    topic_model = api.update_topic_model(topic_model, \
+        topic_model_args)
+    check_resource_error(topic_model,
+                         "Failed to update topic model: %s"
+                         % topic_model['resource'])
+    topic_model = check_resource(topic_model,
+                                 api.get_topic_model,
+                                 query_string=FIELDS_QS)
+    if is_shared(topic_model):
+        message = dated("Shared topic model link. %s\n" %
+                        get_url(topic_model, shared=True))
+        log_message(message, log_file=session_file, console=args.verbosity)
+        if args.reports:
+            report(args.reports, path, topic_model)
+
+    return topic_model
+
+
+def set_batch_topic_distribution_args( \
+    args, fields=None, dataset_fields=None):
+    """Return batch topic distribution args dict
+
+    """
+    batch_topic_distribution_args = {
+        "name": args.name,
+        "description": args.description_,
+        "tags": args.tag,
+        "header": args.prediction_header,
+        "output_dataset": args.to_dataset
+    }
+
+    if args.fields_map_ and fields is not None:
+        if dataset_fields is None:
+            dataset_fields = fields
+        batch_topic_distribution_args.update({
+            "fields_map": map_fields(args.fields_map_,
+                                     fields, dataset_fields)})
+
+    if args.prediction_info == FULL_FORMAT:
+        batch_topic_distribution_args.update(all_fields=True)
+    if args.prediction_fields:
+        batch_topic_distribution_args.update(all_fields=False)
+        prediction_fields = []
+        for field in args.prediction_fields.split(args.args_separator):
+            field = field.strip()
+            if not field in dataset_fields.fields:
+                try:
+                    field = dataset_fields.field_id(field)
+                except ValueError, exc:
+                    sys.exit(exc)
+            prediction_fields.append(field)
+        batch_topic_distribution_args.update(output_fields=prediction_fields)
+    if 'batch_topic_distribution' in args.json_args:
+        update_json_args(
+            batch_topic_distribution_args, args.json_args.get( \
+                'batch_topic_distribution'), fields)
+
+    return batch_topic_distribution_args
+
+
+def create_batch_topic_distribution(topic_model, test_dataset,
+                                    batch_topic_distribution_args, args,
+                                    api=None, session_file=None,
+                                    path=None, log=None):
+    """Creates remote batch topic distribution
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+    message = dated("Creating batch topic distribution.\n")
+    log_message(message, log_file=session_file, console=args.verbosity)
+    batch_topic_distribution = api.create_batch_topic_distribution( \
+        topic_model, test_dataset, batch_topic_distribution_args, retries=None)
+    log_created_resources( \
+        "batch_topic_distribution", path,
+        bigml.api.get_batch_topic_distribution_id(batch_topic_distribution),
+        mode='a')
+    batch_topic_distribution_id = check_resource_error(
+        batch_topic_distribution,
+        "Failed to create batch topic distribution: ")
+    try:
+        batch_topic_distribution = check_resource( \
+            batch_topic_distribution, api.get_batch_topic_distribution)
+    except ValueError, exception:
+        sys.exit("Failed to get a finished batch topic distribution: %s"
+                 % str(exception))
+    message = dated("Batch topic distribution created: %s\n"
+                    % get_url(batch_topic_distribution))
+    log_message(message, log_file=session_file, console=args.verbosity)
+    log_message("%s\n" % batch_topic_distribution_id, log_file=log)
+    if args.reports:
+        report(args.reports, path, batch_topic_distribution)
+    return batch_topic_distribution

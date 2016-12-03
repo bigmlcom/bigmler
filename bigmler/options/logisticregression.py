@@ -28,7 +28,7 @@ def get_logistic_regression_options(defaults=None):
         defaults = {}
 
     options = {
-        # Input fields to include in the cluster.
+        # Input fields to include in the logistic regression.
         '--logistic-fields': {
             "action": 'store',
             "dest": 'logistic_fields',

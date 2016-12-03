@@ -173,6 +173,26 @@ def get_delete_options(defaults=None):
             'default': defaults.get('batch_centroid_tag', None),
             'help': "Retrieve batch centroids that were tagged with tag."},
 
+        # Use it to retrieve topic models that were tagged with tag.
+        '--topic-model-tag': {
+            'dest': 'topic_model_tag',
+            'default': defaults.get('topic_model_tag', None),
+            'help': "Retrieve topic models that were tagged with tag."},
+
+        # Use it to retrieve topic distributions that were tagged with tag.
+        '--topic-distribution-tag': {
+            'dest': 'topic_distribution_tag',
+            'default': defaults.get('topic_distribution_tag', None),
+            'help': "Retrieve topic distributions that were tagged with tag."},
+
+        # Use it to retrieve batch topic distributions
+        # that were tagged with tag.
+        '--batch-topic-distribution-tag': {
+            'dest': 'batch_topic_distribution_tag',
+            'default': defaults.get('batch_topic_distribution_tag', None),
+            'help': ("Retrieve batch topic distributions that were"
+                     " tagged with tag.")},
+
         # Use it to retrieve batch centroids that were tagged with tag.
         '--sample-tag': {
             'dest': 'sample_tag',

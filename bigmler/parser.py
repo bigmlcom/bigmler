@@ -39,11 +39,12 @@ from bigmler.options.reify import get_reify_options
 from bigmler.options.project import get_project_options
 from bigmler.options.association import get_association_options
 from bigmler.options.logisticregression import get_logistic_regression_options
+from bigmler.options.topicmodel import get_topic_model_options
 from bigmler.options.execute import get_execute_options
 
 SUBCOMMANDS = ["main", "analyze", "cluster", "anomaly", "sample",
                "delete", "report", "reify", "project", "association",
-               "logistic-regression", "execute", "whizzml"]
+               "logistic-regression", "topic-model", "execute", "whizzml"]
 
 
 MAIN = SUBCOMMANDS[0]
@@ -324,6 +325,35 @@ under the License.""" % version
          '--script-tag': delete_options['--script-tag'],
          '--library-tag': delete_options['--library-tag'],
          '--execution-tag': delete_options['--execution-tag']})
+
+    defaults = general_defaults["BigMLer topic model"]
+    subcommand_options["topic-model"] = get_topic_model_options(
+        defaults=defaults)
+    # general options
+    subcommand_options["topic-model"].update(common_options)
+    subcommand_options["topic-model"].update(source_options)
+    subcommand_options["topic-model"].update(dataset_options)
+    subcommand_options["topic-model"].update(test_options)
+    subcommand_options["topic-model"].update(dataset_sampling_options)
+    subcommand_options["topic-model"].update({
+        '--cpp': main_options['--cpp'],
+        '--fields-map': main_options['--fields-map'],
+        '--source-tag': delete_options['--source-tag'],
+        '--dataset-tag': delete_options['--dataset-tag'],
+        '--topic-model-tag': delete_options['--topic-model-tag'],
+        '--topic-distribution-tag': delete_options['--topic-distribution-tag'],
+        '--batch-topic-distribution-tag': delete_options[ \
+            '--batch-topic-distribution-tag'],
+        '--prediction-info': main_options['--prediction-info'],
+        '--prediction-header': main_options['--prediction-header'],
+        '--prediction-fields': main_options['--prediction-fields'],
+        '--reports': main_options['--reports'],
+        '--remote': main_options['--remote'],
+        '--no-batch': main_options['--no-batch'],
+        '--no-csv': main_options['--no-csv'],
+        '--no-no-csv': main_options['--no-no-csv'],
+        '--to-dataset': main_options['--to-dataset']})
+
 
     for subcommand in SUBCOMMANDS:
         subparser = subparsers.add_parser(subcommand)

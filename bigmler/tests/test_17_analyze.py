@@ -267,11 +267,11 @@ class TestAnalyze(object):
 
                 Examples:
                 | data                | attributes | output                    | kfold | metric   | category | selection   | metric_value
-                | ../data/spam.csv    | ../data/spam_attributes.json |./scenario_a_9/evaluation | 2     | recall   | spam     | Message     | 61.24%
+                | ../data/spam.csv    | ../data/spam_attributes.json |./scenario_a_9/evaluation | 2     | recall   | spam     | Message     | 58.69%
         """
         print self.test_scenario7.__doc__
         examples = [
-            ['data/spam.csv', 'data/spam_attributes.json', 'scenario_a_9/evaluation', '2', 'recall', 'spam', 'Message', '61.24%']]
+            ['data/spam.csv', 'data/spam_attributes.json', 'scenario_a_9/evaluation', '2', 'recall', 'spam', 'Message', '58.69%']]
         for example in examples:
             print "\nTesting with:\n", example
             test_pred.i_create_dataset_with_attributes(self, data=example[0], attributes=example[1], output=example[2])

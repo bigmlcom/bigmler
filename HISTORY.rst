@@ -3,6 +3,11 @@
 History
 -------
 
+3.9.0 (2016-12-03)
+~~~~~~~~~~~~~~~~~~
+
+- Adding new bigmler topic-model subcommand.
+
 3.8.7 (2016-11-04)
 ~~~~~~~~~~~~~~~~~~
 
