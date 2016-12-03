@@ -377,5 +377,5 @@ def delete_resources(command_args, api, deleted_list=None):
         # if projects and executions have already been deleted, delete the rest
         delete_resources(command_args, api, deleted_list=delete_list)
     else:
-         u.print_generated_files(path, log_file=session_file,
+        u.print_generated_files(path, log_file=session_file,
                                 verbosity=command_args.verbosity)

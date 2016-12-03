@@ -99,8 +99,7 @@ def logistic_regression_dispatcher(args=sys.argv[1:]):
     if (a.has_train(command_args) or a.has_test(command_args)
             or command_args.export_fields):
         output_args = a.get_output_args(api, command_args, resume)
-        a.transform_args(command_args, command.flags, api,
-                         command.user_defaults)
+        a.transform_args(command_args, command.flags, api)
         compute_output(**output_args)
     u.log_message("_" * 80 + "\n", log_file=session_file)
 

@@ -337,7 +337,7 @@ def retrieve_models_split(models_split, api, query_string=FIELDS_QS,
     complete_models = []
     if models_order is None:
         models_order = []
-    for index, model in enumerate(models_split):
+    for model in models_split:
         if (isinstance(model, basestring) or
                 bigml.api.get_status(model)['code'] != bigml.api.FINISHED):
             try:

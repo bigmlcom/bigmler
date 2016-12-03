@@ -23,6 +23,7 @@ import sys
 import os
 import shutil
 
+import bigml.api
 
 import bigmler.utils as u
 import bigmler.resources as r
@@ -93,8 +94,7 @@ def topic_model_dispatcher(args=sys.argv[1:]):
     # Selects the action to perform
     if a.has_train(command_args) or a.has_test(command_args):
         output_args = a.get_output_args(api, command_args, resume)
-        a.transform_args(command_args, command.flags, api,
-                         command.user_defaults)
+        a.transform_args(command_args, command.flags, api)
         compute_output(**output_args)
     u.log_message("_" * 80 + "\n", log_file=session_file)
 
@@ -232,8 +232,8 @@ def compute_output(api, args):
             test_fields = pd.get_fields_structure(test_dataset,
                                                   csv_properties)
             batch_topic_distribution_args = \
-                r.set_batch_topic_distribution_args(
-                args, fields=fields,
+                r.set_batch_topic_distribution_args( \
+                args, fields=fields, \
                 dataset_fields=test_fields)
 
             remote_topic_distribution( \

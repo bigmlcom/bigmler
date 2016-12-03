@@ -86,7 +86,7 @@ def get_topic_model_options(defaults=None):
             'dest': 'excluded_terms',
             'default': defaults.get('excluded_terms', None),
             'help': ("Comma-separated list of terms to be excluded from "
-                      "text analysis.")},
+                     "text analysis.")},
 
         # Number of topics to be generated
         '--number-of-topics': {

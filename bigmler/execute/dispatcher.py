@@ -81,8 +81,7 @@ def execute_dispatcher(args=sys.argv[1:]):
     # Creates the corresponding api instance
     api = a.get_api_instance(command_args, u.check_dir(session_file))
     _ = a.get_output_args(api, command_args, resume)
-    a.transform_args(command_args, command.flags, api,
-                     command.user_defaults)
+    a.transform_args(command_args, command.flags, api)
     execute_whizzml(command_args, api, session_file)
     u.log_message("_" * 80 + "\n", log_file=session_file)
 

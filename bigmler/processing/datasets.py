@@ -24,12 +24,13 @@ import re
 import os
 
 import bigml.api
-import bigmler.utils as u
-import bigmler.resources as r
-import bigmler.checkpoint as c
 
 from bigml.fields import Fields
 from bigml.predicate import TM_FULL_TERM
+
+import bigmler.utils as u
+import bigmler.resources as r
+import bigmler.checkpoint as c
 
 from bigmler.prediction import OTHER
 

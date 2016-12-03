@@ -25,11 +25,10 @@ import datetime
 
 import bigml.api
 
-import bigmler.utils as u
-
-
 from bigml.multivote import COMBINATION_WEIGHTS, COMBINER_MAP
 from bigml.tree import LAST_PREDICTION, PROPORTIONAL
+
+import bigmler.utils as u
 
 from bigmler.resources import ADD_REMOVE_PREFIX
 from bigmler.prediction import FULL_FORMAT, COMBINATION, COMBINATION_LABEL
@@ -752,7 +751,7 @@ def attribute_args(command_args):
             command_args.json_args[resource_type] = {}
 
 
-def transform_args(command_args, flags, api, user_defaults):
+def transform_args(command_args, flags, api):
     """Transforms the formatted argument strings into structured arguments
 
     """
@@ -771,7 +770,8 @@ def transform_args(command_args, flags, api, user_defaults):
     # Parses multi-dataset attributes in json such as field maps
     try:
         if command_args.multi_dataset_attributes:
-            multi_dataset_json = u.read_json(command_args.multi_dataset_attributes)
+            multi_dataset_json = u.read_json(
+                command_args.multi_dataset_attributes)
             command_args.multi_dataset_json = multi_dataset_json
         else:
             command_args.multi_dataset_json = {}
@@ -907,7 +907,8 @@ def transform_args(command_args, flags, api, user_defaults):
         (hasattr(command_args, 'ensemble_tag')
          and command_args.ensemble_tag))
 
-    command_args.has_models_ = (command_args.has_supervised_ or
+    command_args.has_models_ = (
+        command_args.has_supervised_ or
         (hasattr(command_args, 'cluster') and command_args.cluster) or
         (hasattr(command_args, 'clusters') and command_args.clusters) or
         (hasattr(command_args, 'anomaly') and command_args.anomaly) or

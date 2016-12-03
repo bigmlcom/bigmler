@@ -63,7 +63,7 @@ def topic_model_processing(datasets, topic_models, topic_model_ids,
                 u.log_message(message, log_file=session_file,
                               console=args.verbosity)
 
-            topic_models = topic_models_ids
+            topic_models = topic_model_ids
             number_of_topic_models -= len(topic_model_ids)
 
         topic_model_args = r.set_topic_model_args( \

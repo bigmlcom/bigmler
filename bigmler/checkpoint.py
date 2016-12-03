@@ -483,6 +483,28 @@ def are_topic_models_created(path, number_of_topic_models):
                     topic_model_ids.append(topic_model_id)
                 except ValueError:
                     return False, topic_model_ids
-        return len(topic_model_ids) == number_of_topic_model, topic_model_ids
+        return len(topic_model_ids) == number_of_topic_models, topic_model_ids
     except IOError:
         return False, topic_model_ids
+
+
+def is_batch_topic_distribution_created(path):
+    """Checks existence and reads the batch topic distribution id from the
+       batch_topic_distribution file in the path directory
+
+    """
+    batch_topic_distribution_id = None
+    try:
+        with open("%s%sbatch_topic_distribution"
+                  % (path, os.sep)) as batch_prediction_file:
+            batch_topic_distribution_id = \
+                batch_prediction_file.readline().strip()
+            try:
+                batch_topic_distribution_id = \
+                    bigml.api.get_batch_topic_distribution_id( \
+                    batch_topic_distribution_id)
+                return True, batch_topic_distribution_id
+            except ValueError:
+                return False, None
+    except IOError:
+        return False, None

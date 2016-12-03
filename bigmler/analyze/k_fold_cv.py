@@ -806,7 +806,7 @@ def best_node_threshold(datasets_file, args, common_options,
             best_unchanged_count += 1
         node_threshold += args.nodes_step
     if args.predictions_csv:
-        resume = create_prediction_dataset(output_dir,
+        resume = create_prediction_dataset(args.output_dir,
                                            "node_th%s" % best_counter,
                                            args, resume)
     message = ('The best node threshold is: %s \n'
@@ -996,7 +996,7 @@ def best_candidates_number(datasets_file, args, common_options,
                           console=args.verbosity)
         random_candidates += DEFAULT_CANDIDATES_STEP
     if args.predictions_csv:
-        resume = create_prediction_dataset(output_dir,
+        resume = create_prediction_dataset(args.output_dir,
                                            "random%s" % best_counter,
                                            args, resume)
     message = ('The best random candidates number is: %s \n'

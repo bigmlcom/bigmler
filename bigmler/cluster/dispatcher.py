@@ -94,8 +94,7 @@ def cluster_dispatcher(args=sys.argv[1:]):
             or command_args.cluster_datasets is not None
             or command_args.export_fields is not None):
         output_args = a.get_output_args(api, command_args, resume)
-        a.transform_args(command_args, command.flags, api,
-                         command.user_defaults)
+        a.transform_args(command_args, command.flags, api)
         compute_output(**output_args)
     u.log_message("_" * 80 + "\n", log_file=session_file)
 
@@ -244,13 +243,14 @@ def compute_output(api, args):
         centroids_info = cluster['object']['clusters']['clusters']
         centroids = {centroid['name']: centroid['id']
                      for centroid in centroids_info}
-        datasets = cluster['object']['cluster_datasets']
+        cluster_datasets = cluster['object']['cluster_datasets']
         if args.cluster_datasets == '':
             centroid_ids = centroids.values()
         else:
             centroid_ids = [centroids[cluster_name] for cluster_name in
                             args.cluster_datasets_
-                            if datasets.get(centroids[cluster_name], '') == '']
+                            if cluster_datasets.get(centroids[cluster_name],
+                                                    '') == '']
 
         for centroid_id in centroid_ids:
             dataset_args = {'centroid': centroid_id}

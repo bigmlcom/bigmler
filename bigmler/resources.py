@@ -2676,7 +2676,6 @@ def update_sample_parameters_args(resource_args, args):
 
 
 def set_topic_model_args(args, name=None, fields=None,
-                         objective_id=None,
                          topic_model_fields=None):
     """Return topic_model arguments dict
 

@@ -164,8 +164,8 @@ def topic_distribution(topic_models, fields, args, session_file=None):
     test_reader.close()
 
 def remote_topic_distribution( \
-    topic_model, test_dataset, batch_topic_distribution_args, args,
-    api, resume, prediction_file=None, session_file=None,
+    topic_model, test_dataset, batch_topic_distribution_args, args, \
+    api, resume, prediction_file=None, session_file=None, \
     path=None, log=None):
     """Computes a topic distributioin for each entry in the `test_set`.
 
