@@ -3009,7 +3009,7 @@ Requirements
 
 Python 2.7 and 3 are currently supported by BigMLer.
 
-BigMLer requires `bigml 4.6.9 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 4.7.3 <https://github.com/bigmlcom/python>`_  or
 higher. Using proportional missing strategy will additionally request
 the use of the `numpy <http://www.numpy.org/>`_ and
 `scipy <http://www.scipy.org/>`_ libraries. They are not
@@ -4075,7 +4075,6 @@ Delete Subcommand Options
 ``--batch-topic-distribution-tag`` *TAG*   Retrieves batch topic distributions
                                            that were
                                            tagged with tag to delete them
-
 ``--project`` *TAG*                   Retrieves projects that were
                                       tagged with tag to delete them
 ``--association `` *TAG*              Retrieves associations that were
