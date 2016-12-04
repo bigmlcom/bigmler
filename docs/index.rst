@@ -18,13 +18,8 @@ BigMLer subcommands
 In addition to the ``BigMLer`` simple command, that covers the main
 functionality, there are some additional subcommands:
 
-
-
-``bigmler analyze``:
-
-
-Used for feature analysis, node threshold analysis and
-k-fold cross-validation. See :ref:`bigmler-analyze`.
+Usual workflows' subcommands
+----------------------------
 
 ``bigmler cluster``:
 
@@ -40,34 +35,8 @@ See :ref:`bigmler-anomaly`.
 
 ``bigmler sample``:
 
-
 Used to generate samples of data from your existing datasets.
 See :ref:`bigmler-sample`.
-
-``bigmler delete``:
-
-
-Used to delete the remotely created resources. See
-:ref:`bigmler-delete`.
-
-``bigmler reify``:
-
-
-Used to generate scripts to reproduce the existing resources in BigML. See
-:ref:`bigmler-reify`.
-
-``bigmler report``:
-
-
-Used to generate reports for the analyze subcommand showing the ROC curve and
-evaluation metrics of cross-validations. See
-:ref:`bigmler-report`.
-
-``bigmler project``:
-
-
-Used to generate and manage projects for organization purposes. See
-:ref:`bigmler-project`.
 
 ``bigmler association``:
 
@@ -80,6 +49,59 @@ Used to generate association rules from your datasets. See
 
 Used to generate logistic regression models and predictions. See
 :ref:`bigmler-logistic-regression`.
+
+``bigmler topic-model``:
+
+
+Used to generate topic models and topic distributions. See
+:ref:`bigmler-topic-model`.
+
+``bigmler project``:
+
+
+Used to generate and manage projects for organization purposes. See
+:ref:`bigmler-project`.
+
+
+Management subcommands
+----------------------
+
+``bigmler delete``:
+
+
+Used to delete the remotely created resources. See
+:ref:`bigmler-delete`.
+
+Reporting subcommands
+---------------------
+
+``bigmler report``:
+
+
+Used to generate reports for the analyze subcommand showing the ROC curve and
+evaluation metrics of cross-validations. See
+:ref:`bigmler-report`.
+
+Model tuning subcommands
+------------------------
+
+``bigmler analyze``:
+
+
+Used for feature analysis, node threshold analysis and
+k-fold cross-validation. See :ref:`bigmler-analyze`.
+
+
+Scripting subcommands
+---------------------
+
+
+``bigmler reify``:
+
+
+Used to generate scripts to reproduce the existing resources in BigML. See
+:ref:`bigmler-reify`.
+
 
 ``bigmler execute``:
 
@@ -458,7 +480,7 @@ a description, and tags to your resources. This is easy too. For example
 
 Please note:
 
-    - You can get a full list of BigML category codes `here <https://bigml.com/developers/sources#s_categories>`_.
+    - You can get a full list of BigML category codes `here <https://bigml.com/api/sources#s_categories>`_.
     - Descriptions are provided in a text file that can also include `markdown <http://en.wikipedia.org/wiki/Markdown>`_.
     - Many tags can be added to the same resource.
     - Use ``--no_tag`` if you do not want default BigMLer tags to be added.
@@ -587,7 +609,7 @@ existing source or dataset
 
 The results of an evaluation are stored both in txt and json files. Its
 contents will follow the description given in the
-`Developers guide, evaluation section <https://bigml.com/developers/evaluations>`_
+`Developers guide, evaluation section <https://bigml.com/api/evaluations>`_
 and vary depending on the model being a classification or regression one.
 
 Finally, you can also evaluate a preexisting model using a separate set of
@@ -781,7 +803,7 @@ then the contents of the ``attributes.json`` file could be as well
 
 The ``source-attributes`` JSON can contain any of the updatable attributes
 described in the
-`developers section <https://bigml.com/developers/sources#sr_source_properties>`_
+`developers section <https://bigml.com/api/sources#sr_source_properties>`_
 You can specify the fields that you want to include in the dataset by naming
 them explicitly
 
@@ -872,7 +894,7 @@ Advanced Dataset management
 ---------------------------
 
 As you can find in the BigML's API documentation on
-`datasets <https://bigml.com/developers/datasets>`_ besides the basic name,
+`datasets <https://bigml.com/api/datasets>`_ besides the basic name,
 label and description that we discussed in previous sections, there are many
 more configurable options in a dataset resource.
 As an example, to publish a dataset in the
@@ -891,7 +913,7 @@ the `Flatline expression <https://github.com/bigmlcom/flatline>`_ to
 combine them. This structure
 must follow the rules of a specific languange described in the `Transformations
 item of the developers
-section <https://bigml.com/developers/transformations>`_
+section <https://bigml.com/api/transformations>`_
 
 .. code-block:: bash
 
@@ -1078,7 +1100,7 @@ where ``filter.lisp`` is a file containing a expression like this
     (< 7.00 (field "sepal length"))
 
 For more details, see the BigML's API documentation on
-`filtering rows <https://bigml.com/developers/datasets#d_filteringrows>`_.
+`filtering rows <https://bigml.com/api/datasets#d_filteringrows>`_.
 
 Multi-labeled categories in training data
 ------------------------------------------
@@ -1924,7 +1946,7 @@ and values.
 With this command, only rows where field id ``000001`` is missing and
 field id ``000004`` is not ``Iris-setosa`` will be retrieved. You can check
 the available operators and syntax in the
-`samples' developers doc <https://bigml.com/developers/samples#filtering-ro>`_ .
+`samples' developers doc <https://bigml.com/api/samples#filtering-ro>`_ .
 More available
 options can be found in the `Samples subcommand Options <#samples-option>`_
 section.
@@ -2174,7 +2196,7 @@ where the ``my_inputs.json`` file would contain:
 
 For more details about the syntax to declare inputs and outputs, please
 refer to the
-`Developers documentation <https://bigml.com/developers/scripts#ws_script_arguments>`_.
+`Developers documentation <https://bigml.com/api/scripts#ws_script_arguments>`_.
 
 
 You can also provide default configuration attributes
@@ -2218,7 +2240,7 @@ code in your script explicitly specifies a different value, in which case
 it takes precedence over these defaults.
 
 
-.. _bigmler-execute:
+.. _bigmler-whizzml:
 
 Whizzml subcommand
 ------------------
@@ -2575,8 +2597,8 @@ For example, a numeric field with values ranging from 0 to 600 split
 into 3 segments:
 segment 1 → [0, 200), segment 2 → [200, 400), segment 3 → [400, 600].
 You can refine the behavior of the transformation using
-`discretization <https://bigml.com/developers/associations#ad_create_discretization>`_
-and `field_discretizations <https://bigml.com/developers/associations#ad_create_field_discretizations>`_.
+`discretization <https://bigml.com/api/associations#ad_create_discretization>`_
+and `field_discretizations <https://bigml.com/api/associations#ad_create_field_discretizations>`_.
 
 
 The ``bigmler association`` subcommand will discover the association
@@ -2699,6 +2721,86 @@ dealing with a high number of scores or when adding to the final result
 the original dataset fields with ``--prediction-info full``, that may result
 in a large CSV to be created as output.
 
+.. _bigmler-topic-model:
+
+Topic Model subcommand
+----------------------
+
+Using this subcommand an generate all the
+resources leading to finding a ``topic model`` and its ``topic distributions``.
+These are unsupervised learning models which find out the topics in a
+collection of documents and will then be useful to classify new documents
+according to the topics. The ``bigmler topic-model`` subcommand
+will follow the steps to generate
+``topic models`` and predict the ``topic distribution``, or distribution of
+probabilities for the new document to be associated to a certain topic. As
+shown in the ``bigmler`` command section, the simplest call is
+
+.. code-block:: bash
+
+    bigmler topic-model --train data/spam.csv
+
+This command will upload the data in the ``data/spam.csv`` file and
+generate
+the corresponding ``source``, ``dataset`` and ``topic model`` objects in BigML.
+You
+can use any of the intermediate generated objects to produce new
+topic models. For instance, you
+could set a subgroup of the fields of the generated dataset to produce a
+different topic model by using
+
+.. code-block:: bash
+
+    bigmler topic-model --dataset dataset/53b1f71437203f5ac30004ed \
+                        --topic-fields="-Message"
+
+that would exclude the field ``Message`` from the topic model creation input
+fields.
+
+Similarly to the models and datasets, the generated clusters can be shared
+using the ``--shared`` option, e.g.
+
+.. code-block:: bash
+
+    bigmler topic-model --source source/53b1f71437203f5ac30004e0 \
+                        --shared
+
+will generate a secret link for both the created dataset and topic model that
+can be used to share the resource selectively.
+
+As models were used to generate predictions (class names in classification
+problems and an estimated number for regressions), topic models can be used
+to classify a new document in the discovered list of topics. The classification
+is run by computing the probability for the document to belonging to the topic
+group. The command
+
+.. code-block:: bash
+
+    bigmler topic-model --topic-model topicmodel/58437a277e0a8d38ec028a5f \
+                        --test data/my_test.csv
+
+would produce a file ``topic_distributions.csv`` where each row will contain
+the probabilities
+associated to each topic for the corresponding test input.
+When the command is executed, the topic model information is downloaded
+to your local computer and the distributions are computed locally, with
+no more latencies involved. Just in case you prefer to use BigML to compute
+the topic distributions remotely, you can do so too
+
+.. code-block:: bash
+
+    bigmler topic-model --topic-model topicmodel/58437a277e0a8d38ec028a5f \
+                        --test data/my_test.csv --remote
+
+would create a remote source and dataset from the test file data,
+generate a ``batch topic distribution`` also remotely and finally
+download the result
+to your computer. If you prefer the result not to be
+dowloaded but to be stored as a new dataset remotely, add ``--no-csv`` and
+``to-dataset`` to the command line. This can be specially helpful when
+dealing with a high number of scores or when adding to the final result
+the original dataset fields with ``--prediction-info full``, that may result
+in a large CSV to be created as output.
 
 Additional Features
 ===================
@@ -2733,12 +2835,26 @@ The same is available for clusters
     bigmler cluster --cluster-file my_dir/cluster_532db2b637203f3f1a000348 \
                     --test data/test_diabetes.csv
 
-or anomaly detectors
+anomaly detectors
 
 .. code-block:: bash
 
     bigmler anomaly --anomaly-file my_dir/anomaly_532db2b637203f3f1a00053a \
                     --test data/test_kdd.csv
+
+logistic regressions
+
+.. code-block:: bash
+
+    bigmler logistic-regression --logistic-file my_dir/logisticregression_532db2b637203f3f1a00053a \
+                    --test data/test_diabetes.csv
+
+topic models
+
+.. code-block:: bash
+
+    bigmler topic-model --topic-model-file my_dir/topicmodel_532db2b637203f3f1a00053a \
+                        --test data/test_spam.csv
 
 Even for ensembles
 
@@ -3209,7 +3325,7 @@ Content
 =============================== ===============================================
 ``--name`` *NAME*               Name for the resources in BigML.
 ``--category`` *CATEGORY*       Category code. See
-                                `full list <https://bigml.com/developers/sources#s_categories>`_.
+                                `full list <https://bigml.com/api/sources#s_categories>`_.
 ``--description`` *DESCRIPTION* Path to a file with a description in plain text
                                 or markdown
 ``--tag`` *TAG*                 Tag to later retrieve new resources
@@ -3247,42 +3363,42 @@ Data Configuration
                                           with attributes to be used as
                                           arguments (any of the updatable
                                           attributes described in the
-                                          `developers section <https://bigml.com/developers/sources#sr_source_properties>`_ )
+                                          `developers section <https://bigml.com/api/sources#sr_source_properties>`_ )
                                           in create source calls
 ``--dataset-attributes`` *PATH*           Path to a file containing a JSON
                                           expression
                                           with attributes to be used as
                                           arguments (any of the updatable
                                           attributes described in the
-                                          `developers section <https://bigml.com/developers/datasets#ds_dataset_properties>`_ )
+                                          `developers section <https://bigml.com/api/datasets#ds_dataset_properties>`_ )
                                           in create dataset calls
 ``--model-attributes`` *PATH*             Path to a file containing a JSON
                                           expression
                                           with attributes to be used as
                                           arguments (any of the updatable
                                           attributes described in the
-                                          `developers section <https://bigml.com/developers/models#md_model_properties>`_ )
+                                          `developers section <https://bigml.com/api/models#md_model_properties>`_ )
                                           in create model calls
 ``--ensemble-attributes`` *PATH*          Path to a file containing a JSON
                                           expression
                                           with attributes to be used as
                                           arguments (any of the updatable
                                           attributes described in the
-                                          `developers section <https://bigml.com/developers/ensembles#es_ensemble_properties>`_ )
+                                          `developers section <https://bigml.com/api/ensembles#es_ensemble_properties>`_ )
                                           in create ensemble calls
 ``--evaluation-attributes`` *PATH*        Path to a file containing a JSON
                                           expression
                                           with attributes to be used as
                                           arguments (any of the updatable
                                           attributes described in the
-                                          `developers section <https://bigml.com/developers/evaluations#ev_evaluation_properties>`_ )
+                                          `developers section <https://bigml.com/api/evaluations#ev_evaluation_properties>`_ )
                                           in create evaluation calls
 ``--batch_prediction-attributes`` *PATH*  Path to a file containing a JSON
                                           expression
                                           with attributes to be used as
                                           arguments (any of the updatable
                                           attributes described in the
-                                          `developers section <https://bigml.com/developers/batch_predictions#bp_batch_prediction_properties>`_ )
+                                          `developers section <https://bigml.com/api/batch_predictions#bp_batch_prediction_properties>`_ )
                                           in create batch prediction calls
 ``--json-filter`` *PATH*                  Path to a file containing a JSON
                                           expression
@@ -3561,7 +3677,7 @@ Cluster Specific Subcommand Options
 ``--cluster-attributes`` *PATH*           Path to a JSON file containing
                                           attributes (any of the updatable
                                           attributes described in the
-                                          `developers section <https://bigml.com/developers/clusters#cl_cluster_properties>`_ )
+                                          `developers section <https://bigml.com/api/clusters#cl_cluster_properties>`_ )
                                           to
                                           be used in the cluster creation call
 ``--cluster-datasets`` *CENTROID_NAMES*   Comma-separated list of centroid
@@ -3579,13 +3695,13 @@ Cluster Specific Subcommand Options
 ``--centroid-attributes`` *PATH*          Path to a JSON file containing
                                           attributes (any of the updatable
                                           attributes described in the
-                                          `developers section <https://bigml.com/developers/centroids#ct_centroid_properties>`_ )
+                                          `developers section <https://bigml.com/api/centroids#ct_centroid_properties>`_ )
                                           to be used in the centroid creation
                                           call
 ``--batch-centroid-attributes`` *PATH*    Path to a JSON file containing
                                           attributes (any of the updatable
                                           attributes described in the
-                                          `developers section <https://bigml.com/developers/batch_centroids#bc_batch_centroid_properties>`_ )
+                                          `developers section <https://bigml.com/api/batch_centroids#bc_batch_centroid_properties>`_ )
                                           to be used in the batch centroid
                                           creation call
 ``--cluster-models`` *CENTROID_NAMES*     Comma-separated list of centroid
@@ -3622,7 +3738,7 @@ Anomaly Specific Subcommand Options
 ``--anomaly-attributes`` *PATH*               Path to a JSON file containing
                                               attributes (any of the updatable
                                               attributes described in the
-                                              `developers section <https://bigml.com/developers/anomalies#an_anomaly_detector_properties>`_ )
+                                              `developers section <https://bigml.com/api/anomalies#an_anomaly_detector_properties>`_ )
                                               to
                                               be used in the anomaly creation
                                               call
@@ -3633,14 +3749,14 @@ Anomaly Specific Subcommand Options
 ``--anomaly-score-attributes`` *PATH*         Path to a JSON file containing
                                               attributes (any of the updatable
                                               attributes described in the
-                                              `developers section <https://bigml.com/developers/anomalyscores#as_anomaly_score_properties>`_ )
+                                              `developers section <https://bigml.com/api/anomalyscores#as_anomaly_score_properties>`_ )
                                               to be used in the
                                               anomaly
                                               score creation call
 ``--batch-anomaly-score-attributes`` *PATH*   Path to a JSON file containing
                                               attributes (any of the updatable
                                               attributes described in the
-                                              `developers section <https://bigml.com/developers/batch_anomalyscores#ba_batch_anomaly_score_properties>`_ )
+                                              `developers section <https://bigml.com/api/batch_anomalyscores#ba_batch_anomaly_score_properties>`_ )
                                               to
                                               be used in the batch anomaly
                                               score creation call
@@ -3673,7 +3789,7 @@ Samples Subcommand Options
 ``--sample-attributes`` *PATH*                Path to a JSON file containing
                                               attributes (any of the updatable
                                               attributes described in the
-                                              `developers section <https://bigml.com/developers/samples#sp_sample_properties>`_ )
+                                              `developers section <https://bigml.com/api/samples#sp_sample_properties>`_ )
                                               to
                                               be used in the sample creation
                                               call
@@ -3687,7 +3803,7 @@ Samples Subcommand Options
                                               the usual operators. You can see
                                               some
                                               examples in the
-                                              `developers section <https://bigml.com/developers/samples#filtering-rows-from-a-sample>`_
+                                              `developers section <https://bigml.com/api/samples#filtering-rows-from-a-sample>`_
 ``--sample-header``                           Adds a headers row to the
                                               sample.csv
                                               output
@@ -3738,7 +3854,7 @@ Logistic regression Subcommand Options
 ``--logistic-regression`` *LOGISTIC_R*        BigML logistic regression Id
 ``--logistic-regressions`` *PATH*             Path to a file containing
                                               logisticregression/ids.
-                                              One anomaly per line
+                                              One logistic regression per line
                                               (e.g., logisticregression/4f824203ce80051)
 ``--no-logistic-regression``                  No logistic regression will be
                                               generated
@@ -3766,13 +3882,45 @@ Logistic regression Subcommand Options
 ``--logistic-regression-attributes`` *PATH*   Path to a JSON file containing
                                               attributes (any of the updatable
                                               attributes described in the
-                                              `developers section <https://bigml.com/developers/logisticregressions#lr_logistic_regression_arguments>`_ )
+                                              `developers section <https://bigml.com/api/logisticregressions#lr_logistic_regression_arguments>`_ )
                                               to
                                               be used in the logistic
                                               regression creation
                                               call
 ``--logistic-regression-file`` *PATH*         Path to a JSON file containing
                                               the logistic regression info
+============================================= =================================
+
+
+Topic Model Subcommand Options
+------------------------------
+
+============================================= =================================
+``--topic-model`` *TOPIC_MODEL*               BigML topic model Id
+``--topic-models`` *PATH*                     Path to a file containing
+                                              topicmodel/ids.
+                                              One topic model per line
+                                              (e.g., topicmodel/4f824203ce80051)
+``--no-topic-model``                          No topic model will be
+                                              generated
+``--topic-fields`` *TOPIC_FIELDS*             Comma-separated list of fields
+                                              that
+                                              will be used in the topic
+                                              model construction
+``--bigrams``                                 Use bigrams in topic search
+``--case-sensitive``                          Use case sensitive tokenization
+``--excluded-terms`` *EXCLUDED_TERMS*         Comma-separated list of terms
+                                              to be excluded from the analysis
+``--use-stopwords``                           Use stopwords in the analysis.
+``--topic-model-attributes`` *PATH*           Path to a JSON file containing
+                                              attributes (any of the updatable
+                                              attributes described in the
+                                              `developers section <https://bigml.com/api/topicmodels#tm_topic_model_arguments>`_ )
+                                              to
+                                              be used in the topic model
+                                              creation call
+``--topic-model-file`` *PATH*                 Path to a JSON file containing
+                                              the topic model info
 ============================================= =================================
 
 
@@ -3803,19 +3951,19 @@ Execute Subcommand Options
                                                 for created resources. Please,
                                                 see details in the
                                                 `API Developers documentation
-                                                <https://bigml.com/developers/executions#we_execution_arguments>`_
+                                                <https://bigml.com/api/executions#we_execution_arguments>`_
 ``--declare-inputs`` *INPUTS_DECLARATION*       Path to the JSON file with the
                                                 description of the
                                                 input parameters. Please,
                                                 see details in the
                                                 `API Developers documentation
-                                                <https://bigml.com/developers/scripts#ws_script_arguments>`_
+                                                <https://bigml.com/api/scripts#ws_script_arguments>`_
 ``--declare-outputs`` *OUTPUTS_DECLARATION*     Path to the JSON file with the
                                                 description of the
                                                 script outputs. Please,
                                                 see details in the
                                                 `API Developers documentation
-                                                <https://bigml.com/developers/scripts#ws_script_arguments>`_
+                                                <https://bigml.com/api/scripts#ws_script_arguments>`_
 ``--execution`` *EXECUTION_ID*                  BigML execution ID
 ``--execution-file`` *EXECUTION_FILE*           BigML execution JSON
                                                 structure file
@@ -3837,7 +3985,7 @@ Execute Subcommand Options
                                                 execution inputs. Please,
                                                 see details in the
                                                 `API Developers documentation
-                                                <https://bigml.com/developers/executions#we_execution_arguments>`_
+                                                <https://bigml.com/api/executions#we_execution_arguments>`_
 ``--libraries`` *LIBRARIES*                     Path to a file containing
                                                 libraries/ids. Just one
                                                 library per line (e.g.,
@@ -3852,7 +4000,7 @@ Execute Subcommand Options
                                                 parameters. Please,
                                                 see details in the
                                                 `API Developers documentation
-                                                <https://bigml.com/developers/executions#we_execution_arguments>`_
+                                                <https://bigml.com/api/executions#we_execution_arguments>`_
 ``--script`` *SCRIPT*                           BigML script Id.
 ``--script-file`` *SCRIPT_FILE*                 BigML script JSON structure
                                                 file.
@@ -3916,6 +4064,18 @@ Delete Subcommand Options
                                       tag to delete them
 ``--batch-anomlay-score-tag`` *TAG*   Retrieves batch anomaly scores that were
                                       tagged with tag to delete them
+``--logistic-regression-tag`` *TAG*   Retrieves logistic regressions
+                                      that were tagged with
+                                      tag to delete them
+``--topic-model-tag`` *TAG*           Retrieves topic models that were tagged
+                                      with tag to delete them
+``--topic-distribution-tag`` *TAG*    Retrieves topic distributions that were
+                                      tagged with
+                                      tag to delete them
+``--batch-topic-distribution-tag`` *TAG*   Retrieves batch topic distributions
+                                           that were
+                                           tagged with tag to delete them
+
 ``--project`` *TAG*                   Retrieves projects that were
                                       tagged with tag to delete them
 ``--association `` *TAG*              Retrieves associations that were
@@ -3970,7 +4130,7 @@ Association Specific Subcommand Options
 ``--association-attributes``          Path to a JSON file containing
                                       attributes (any of the updatable
                                       attributes described in the
-                                      `developers section <https://bigml.com/developers/associations#ad_association_properties>`_ )
+                                      `developers section <https://bigml.com/api/associations#ad_association_properties>`_ )
                                       for the association
 ``--max-k`` K                         Maximum number of rules to be found
 ``--search-strategy`` STRATEGY        Strategy used when searching for the
@@ -4034,7 +4194,7 @@ For additional information, see
 the `full documentation for the Python
 bindings on Read the Docs <http://bigml.readthedocs.org>`_. For more
 information about BigML's API, see the
-`BigML developer's documentation <https://bigml.com/developers>`_.
+`BigML developer's documentation <https://bigml.com/api>`_.
 
 How to Contribute
 =================
@@ -4047,4 +4207,4 @@ Please follow the next steps:
   4. Send a `pull request <https://github.com/bigmlcom/bigmler/pulls>`_.
 
 For details on the underlying API, see the
-`BigML API documentation <https://bigml.com/developers>`_.
+`BigML API documentation <https://bigml.com/api>`_.
