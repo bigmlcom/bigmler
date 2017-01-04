@@ -78,7 +78,7 @@ class TestTopicModel(object):
         """
         print self.test_scenario01.__doc__
         examples = [
-            ['data/spam.csv', '--test-separator="\\t" --prediction-header',
+            ['data/spam.csv', '--test-separator="\t" --prediction-header',
              'scenario1_td/topic_distributions.csv',
              'check_files/topic_distributions_spam.csv',
              './check_files/topic_distributions_spam.csv']]
@@ -132,7 +132,7 @@ class TestTopicModel(object):
         """
         print self.test_scenario03.__doc__
         examples = [
-            ['data/spam.csv', '--test-separator="\\t" --prediction-header',
+            ['data/spam.csv', '--test-separator="\t" --prediction-header',
              'scenario3_td/topic_distributions.csv',
              'check_files/topic_distributions_spam.csv',
              './check_files/topic_distributions_spam.csv']]
@@ -164,7 +164,7 @@ class TestTopicModel(object):
         """
         print self.test_scenario04.__doc__
         examples = [
-            ['data/spam.csv', '--test-separator="\\t" --prediction-header',
+            ['data/spam.csv', '--test-separator="\t" --prediction-header',
              'scenario4_td/topic_distributions.csv',
              'check_files/topic_distributions_spam.csv',
              './check_files/topic_distributions_spam.csv']]
@@ -195,7 +195,7 @@ class TestTopicModel(object):
         """
         print self.test_scenario05.__doc__
         examples = [
-            ['data/spam.csv', '--test-separator="\\t" --prediction-header',
+            ['data/spam.csv', '--test-separator="\t" --prediction-header',
              'scenario5_td/topic_distributions.csv',
              'check_files/topic_distributions_spam.csv',
              './check_files/topic_distributions_spam.csv']]
