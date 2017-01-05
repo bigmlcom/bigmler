@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 #
-# Copyright 2015-2016 BigML
+# Copyright 2015-2017 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -628,3 +628,37 @@ class TestPrediction(object):
                                                          in_ensemble=True)
             test_pred.i_check_create_predictions(self)
             test_pred.i_check_predictions(self, example[4])
+
+
+    def test_scenario22(self):
+        """
+            Scenario: Successfully building threshold test predictions remotely from ensemble
+                Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
+                And I create BigML resources using ensemble of <number_of_models> models with replacement to test "<test>" and log predictions in "<output>"
+                And I check that the ensemble has been created
+                And I check that the predictions are ready
+                And I create BigML resources using the previous ensemble with different thresholds "<threshold_class>" to remotely test "<test>" and log predictions in "<output2>" and "<output3>"
+                Then local predictions for different thresholds in "<output2>" and "<output3>" are different
+
+                Examples:
+                |scenario    | kwargs                                                  | number_of_models | test                    | output                  | output2 | output3 | threshold_class
+                | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | 10              | ../data/test_iris.csv   | ./scenario22/predictions.csv   | ./scenario22/predictions2.csv | ./scenario22/predictions3.csv | Iris-virginica
+
+        """
+        print self.test_scenario22.__doc__
+        examples = [
+            ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}', '10', 'data/test_iris.csv', 'scenario22/predictions.csv', 'scenario22/predictions2.csv', 'scenario22/predictions3.csv', 'Iris-virginica']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            test_pred.i_have_previous_scenario_or_reproduce_it( \
+                self, example[0], example[1])
+            test_pred.i_create_resources_from_ensemble_with_replacement( \
+                self, number_of_models=example[2], test=example[3],
+                output=example[4])
+            test_pred.i_check_create_ensemble(self)
+            test_pred.i_check_create_predictions(self)
+            test_pred.i_create_resources_from_ensemble_with_threshold_rem( \
+                self, test=example[3], output2=example[5], output3=example[6],
+                threshold_class=example[7])
+            test_pred.i_check_predictions_with_different_thresholds( \
+                self, example[5], example[6])

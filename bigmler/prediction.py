@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2012-2016 BigML
+# Copyright 2012-2017 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -609,8 +609,7 @@ def predict(models, fields, args, api=None, log=None,
         # For instance,
         #     model_50c0de043b563519830001c2_predictions.csv
         # Predictions are computed individually only if no_batch flag is set
-        if (args.remote and args.no_batch and not args.multi_label
-                and args.method != THRESHOLD_CODE):
+        if (args.remote and args.no_batch and not args.multi_label):
             if args.ensemble is not None:
                 remote_predict_ensemble(args.ensemble, test_reader,
                                         prediction_file, api, args, resume,
@@ -630,7 +629,14 @@ def predict(models, fields, args, api=None, log=None,
             options.update(threshold=args.threshold)
             if args.threshold_class is None:
                 local_model = Model(models[0])
-                args.threshold_class = local_model.tree.distribution[0][0]
+                # default class is the first class that appears in the dataset
+                # objective field summary, which might be different from the
+                # objective summary of each model becaus model are built with
+                # sampling
+                objective_field = local_model.objective_id
+                distribution = local_model.tree.fields[objective_field][ \
+                    "summary"]["categories"]
+                args.threshold_class = distribution[0][0]
             options.update(category=args.threshold_class)
         # For a model we build a Model and for a small number of models,
         # we build a MultiModel using all of

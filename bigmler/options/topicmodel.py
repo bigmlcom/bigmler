@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2016 BigML
+# Copyright 2016-2017 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -140,6 +140,14 @@ def get_topic_model_options(defaults=None):
             'action': 'store_false',
             'dest': 'no_topic_model',
             'default': defaults.get('no_topic_model', False),
-            'help': "Create a topic model."}}
+            'help': "Create a topic model."},
+
+        # The path to a file containing topic model attributes.
+        '--topic-model-attributes': {
+            'action': 'store',
+            'dest': 'topic_model_attributes',
+            'default': defaults.get('topic_model_attributes', None),
+            'help': ("Path to a json file describing topic model"
+                     " attributes.")}}
 
     return options

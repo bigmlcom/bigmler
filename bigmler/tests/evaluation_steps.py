@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2014-2016 BigML
+# Copyright 2014-2017 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -268,6 +268,31 @@ def i_evaluate_ensemble_with_dataset(step, ensemble_dir=None, dataset_dir=None, 
     command = ("bigmler --dataset " + dataset_id +
                " --ensemble " + ensemble_id + " --store" +
                " --output " + output + " --evaluate")
+    command = check_debug(command)
+    try:
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.output = output
+            assert True
+    except OSError as exc:
+        assert False, str(exc)
+
+
+#@step(r'I evaluate the ensemble in directory "(.*)" with the dataset in directory "(.*)" and log evaluation in "(.*)"')
+def i_evaluate_ensemble_with_dataset_and_options( \
+    step, ensemble_dir=None, dataset_dir=None, output=None, options=None):
+    if ensemble_dir is None or dataset_dir is None or output is None \
+            or options is None:
+        assert False
+    world.directory = os.path.dirname(output)
+    world.folders.append(world.directory)
+    ensemble_id = read_id_from_file(os.path.join(ensemble_dir, "ensembles"))
+    dataset_id = read_id_from_file(os.path.join(dataset_dir, "dataset_test"))
+    command = ("bigmler --dataset " + dataset_id +
+               " --ensemble " + ensemble_id + " --store" +
+               " --output " + output + " --evaluate " + options)
     command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)

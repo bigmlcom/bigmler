@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2014-2016 BigML
+# Copyright 2014-2017 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -48,7 +48,7 @@ RESOURCE_TYPES = ["source", "dataset", "model", "ensemble", "batch_prediction",
                   "cluster", "centroid", "batch_centroid", "anomaly",
                   "anomaly_score", "batch_anomaly_score", "project", "sample",
                   "association", "logistic_regression", "script",
-                  "library", "execution"]
+                  "library", "execution", "evaluation", "topic_model"]
 
 STORED_MODELS = ["model_file", "ensemble_file", "logistic_file",
                  "cluster_file", "anomaly_file"]

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2012-2016 BigML
+# Copyright 2012-2017 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -263,6 +263,7 @@ FLAGS = {
         {'flag': 'number_of_topics', 'type': 'int'},
         {'flag': 'term_limit', 'type': 'int'},
         {'flag': 'top_n_terms', 'type': 'int'},
+        {'flag': 'topic_model_attributes', 'type': 'string'},
         {'flag': 'use_stopwords', 'type': 'boolean'}],
     'BigMLer execute': [
         {'flag': 'script', 'type': 'string'},

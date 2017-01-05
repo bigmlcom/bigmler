@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 #
-# Copyright 2015-2016 BigML
+# Copyright 2015-2017 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -110,6 +110,7 @@ class World(object):
         self.api = None
         self.api_dev_mode = None
         self.debug = False
+        self.api_debug = False
         self.source_lower = None
         self.source_upper = None
         self.source_reference = None
@@ -128,7 +129,8 @@ class World(object):
         self.USERNAME = os.environ.get('BIGML_USERNAME')
         self.API_KEY = os.environ.get('BIGML_API_KEY')
         try:
-            self.debug = bool(os.environ.get('BIGML_DEBUG', 0))
+            self.debug = bool(os.environ.get('BIGMLER_DEBUG', 0))
+            self.api_debug = bool(os.environ.get('BIGML_DEBUG', 0))
         except ValueError:
             pass
         if self.USERNAME is None or self.API_KEY is None:
@@ -138,7 +140,7 @@ class World(object):
                            "set them before testing.")
         else:
             assert True
-        self.api = BigML(self.USERNAME, self.API_KEY, debug=self.debug)
+        self.api = BigML(self.USERNAME, self.API_KEY, debug=self.api_debug)
         print self.api.connection_info()
         output_dir = "./last_run"
         for _, subFolders, _ in os.walk("./"):
@@ -190,9 +192,9 @@ class World(object):
         """Reset the api connection values
 
         """
-        self.api = BigML(self.USERNAME, self.API_KEY, debug=self.debug)
+        self.api = BigML(self.USERNAME, self.API_KEY, debug=self.api_debug)
         self.api_dev_mode = BigML(self.USERNAME, self.API_KEY, dev_mode=True,
-                                  debug=self.debug)
+                                  debug=self.api_debug)
 
     def delete_resources(self):
         """Deletes the created objects

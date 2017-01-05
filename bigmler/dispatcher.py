@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2012-2016 BigML
+# Copyright 2012-2017 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -258,7 +258,6 @@ def compute_output(api, args):
     dataset_fields = args.dataset_fields_
 
     check_args_coherence(args)
-
     path = u.check_dir(output)
     session_file = "%s%s%s" % (path, os.sep, SESSIONS_LOG)
     csv_properties = {}
@@ -549,7 +548,7 @@ def compute_output(api, args):
         # in bigml.com except when --no-batch flag is set on or multi-label
         # or max-categories are used
         if (args.remote and not args.no_batch and not args.multi_label
-                and not args.method in [THRESHOLD_CODE, COMBINATION]):
+                and not args.method == COMBINATION):
             # create test source from file
             test_name = "%s - test" % args.name
             if args.test_source is None:

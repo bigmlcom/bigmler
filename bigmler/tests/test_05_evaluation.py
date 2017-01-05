@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 #
-# Copyright 2015-2016 BigML
+# Copyright 2015-2017 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -284,3 +284,46 @@ class TestEvaluation(object):
             lr_pred.i_check_create_lr_model(self)
             test_pred.i_check_create_evaluation(self)
             evaluation.then_the_evaluation_file_is_like(self, example[2])
+
+
+    def test_scenario9(self):
+        """
+            Scenario: Successfully building ensemble evaluations from start and test-split:
+                Given I create BigML resources uploading train "<data>" file to evaluate an ensemble of <number_of_models> models with test-split <split> threshold "<threshold>" and log evaluation in "<output>"
+                And I check that the source has been created
+                And I check that the dataset has been created
+                And I check that the train dataset has been created
+                And I check that the test dataset has been created
+                And I check that the ensemble has been created
+                And I check that the evaluation has been created
+                Then the evaluation key "<key>" value for the model is greater than <value>
+                And I evaluate the ensemble in directory "<directory>" with the dataset in directory "<directory>" and log evaluation in "<output2>"
+                And I check that the evaluation has been created
+                Then the evaluation key "<key>" value for the model is greater than <value>
+
+                Examples:
+                | data             | output                   | split    | number_of_models | key         | value | directory      | output2
+                | ../data/iris.csv | ./scenario_e8/evaluation | 0.2      | 5                | average_phi | 0.8985  | ./scenario_e9/ | ./scenario_e9/evaluation
+        """
+        print self.test_scenario9.__doc__
+        examples = [
+            ['data/iris.csv', 'scenario_e9/evaluation', '0.2', '5', 'average_phi', '0.89', 'scenario_e9', 'scenario_e9/evaluation', "--method threshold --threshold 5 --class Iris-virginica"]]
+        for example in examples:
+            print "\nTesting with:\n", example
+            evaluation.i_create_with_split_to_evaluate_ensemble( \
+                self, data=example[0], number_of_models=example[3],
+                split=example[2], output=example[1])
+            test_pred.i_check_create_source(self)
+            test_pred.i_check_create_dataset(self, suffix=None)
+            test_pred.i_check_create_dataset(self, suffix='train ')
+            test_pred.i_check_create_dataset(self, suffix='test ')
+            test_pred.i_check_create_ensemble(self)
+            test_pred.i_check_create_evaluation(self)
+            evaluation.i_check_evaluation_key( \
+                self, key=example[4], value=example[5])
+            evaluation.i_evaluate_ensemble_with_dataset_and_options( \
+                self, ensemble_dir=example[6], dataset_dir=example[6],
+                output=example[7], options=example[8])
+            test_pred.i_check_create_evaluation(self)
+            evaluation.i_check_evaluation_key( \
+                self, key=example[4], value=example[5])

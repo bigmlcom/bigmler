@@ -3,6 +3,13 @@
 History
 -------
 
+3.9.1 (2017-01-04)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug in bigmler: --evaluation-attributes were not used
+- Fixing bug in bigmler: --threshold and --class were not used
+- Fixing bug in bigmler topic-model: adding --topic-model-attributes
+
 3.9.0 (2016-12-03)
 ~~~~~~~~~~~~~~~~~~
 

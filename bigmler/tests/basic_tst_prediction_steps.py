@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2014-2016 BigML
+# Copyright 2014-2017 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -449,6 +449,42 @@ def i_create_resources_from_ensemble_with_threshold(step, test=None, output2=Non
                    " --test " + test + " --tag my_ensemble --store --output " +
                    output3 + " --method threshold --threshold 1")
         command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+
+#@step(r'I create BigML resources using the previous ensemble with different thresholds to test "(.*)" remotely and log predictions in "(.*)" and "(.*)"')
+def i_create_resources_from_ensemble_with_threshold_rem( \
+    step, test=None, output2=None, output3=None, threshold_class=None):
+    ok_(test is not None and output2 is not None and output3 is not None \
+        and threshold_class is not None)
+    try:
+        test = res_filename(test)
+        command = ("bigmler --ensemble " + world.ensemble['resource'] +
+                   " --test " + test + " --tag my_ensemble --store --output " +
+                   output2 + ' --class ' + threshold_class +
+                   " --remote --method threshold" +
+                   " --threshold " +
+                   str(world.number_of_models))
+        command = check_debug(command)
+        print command
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            assert True
+        command = ("bigmler --ensemble " + world.ensemble['resource'] +
+                   " --test " + test + " --tag my_ensemble --store --output " +
+                   output3 + ' --class ' + threshold_class +
+                   " --remote --method threshold" +
+                   " --threshold 1")
+        command = check_debug(command)
+        print command
         retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False

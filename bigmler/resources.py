@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2012-2016 BigML
+# Copyright 2012-2017 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -1098,6 +1098,16 @@ def set_evaluation_args(args, fields=None,
     if hasattr(args, 'method') and (args.number_of_models > 1
                                     or args.ensemble):
         evaluation_args.update(combiner=args.method)
+    if hasattr(args, 'method') and args.method:
+        evaluation_args.update({"combiner": args.method})
+        if args.method == 3:
+            threshold = {}
+            if hasattr(args, 'threshold') and args.threshold is not None:
+                threshold.update(k=args.threshold)
+            if hasattr(args, 'threshold_class') \
+                    and args.threshold_class is not None:
+                threshold.update({"class": args.threshold_class})
+            evaluation_args.update(threshold=threshold)
     if args.fields_map_ and fields is not None:
         if dataset_fields is None:
             dataset_fields = fields
@@ -1311,6 +1321,14 @@ def set_batch_prediction_args(args, fields=None,
 
     if hasattr(args, 'method') and args.method:
         batch_prediction_args.update({"combiner": args.method})
+        if args.method == 3:
+            threshold = {}
+            if hasattr(args, 'threshold') and args.threshold is not None:
+                threshold.update(k=args.threshold)
+            if hasattr(args, 'threshold_class') \
+                    and args.threshold_class is not None:
+                threshold.update({"class": args.threshold_class})
+            batch_prediction_args.update(threshold=threshold)
     if args.fields_map_ and fields is not None:
         if dataset_fields is None:
             dataset_fields = fields
