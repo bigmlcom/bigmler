@@ -29,6 +29,7 @@ except ImportError:
 import bigml.api
 
 from bigml.util import bigml_locale
+from bigml.multivote import THRESHOLD_CODE
 
 from bigmler.utils import (dated, get_url, log_message, plural, check_resource,
                            check_resource_error, log_created_resources,
@@ -1100,7 +1101,7 @@ def set_evaluation_args(args, fields=None,
         evaluation_args.update(combiner=args.method)
     if hasattr(args, 'method') and args.method:
         evaluation_args.update({"combiner": args.method})
-        if args.method == 3:
+        if args.method == THRESHOLD_CODE:
             threshold = {}
             if hasattr(args, 'threshold') and args.threshold is not None:
                 threshold.update(k=args.threshold)
@@ -1321,7 +1322,7 @@ def set_batch_prediction_args(args, fields=None,
 
     if hasattr(args, 'method') and args.method:
         batch_prediction_args.update({"combiner": args.method})
-        if args.method == 3:
+        if args.method == THRESHOLD_CODE:
             threshold = {}
             if hasattr(args, 'threshold') and args.threshold is not None:
                 threshold.update(k=args.threshold)

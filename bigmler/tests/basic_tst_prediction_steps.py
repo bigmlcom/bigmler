@@ -62,25 +62,22 @@ def shell_execute(command, output, test=None, options=None,
     world.folders.append(world.directory)
     try:
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            if test is not None:
-                world.test_lines = file_number_of_lines(test)
-                if options is None or \
-                        options.find('--prediction-header') == -1:
-                    # test file has headers in it, so first line must be ignored
-                    world.test_lines -= 1
-            elif test_rows is not None:
-                world.test_lines = test_rows
-                if options is not None and \
-                        options.find('--prediction-header') > -1:
-                    world.test_lines += 1
-            elif options is not None and \
+        ok_(retcode >= 0)
+        if test is not None:
+            world.test_lines = file_number_of_lines(test)
+            if options is None or \
+                    options.find('--prediction-header') == -1:
+                # test file has headers in it, so first line must be ignored
+                world.test_lines -= 1
+        elif test_rows is not None:
+            world.test_lines = test_rows
+            if options is not None and \
                     options.find('--prediction-header') > -1:
                 world.test_lines += 1
-            world.output = output
-            assert True
+        elif options is not None and \
+                options.find('--prediction-header') > -1:
+            world.test_lines += 1
+        world.output = output
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
@@ -165,13 +162,10 @@ def i_create_source_with_locale(step, data=None, locale=None,
     command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.directory = os.path.dirname(output)
-            world.folders.append(world.directory)
-            world.output = output
-            assert True
+        ok_(retcode >=0)
+        world.directory = os.path.dirname(output)
+        world.folders.append(world.directory)
+        world.output = output
     except OSError as e:
         assert False
 
@@ -197,12 +191,9 @@ def i_create_kfold_cross_validation_objective(step, k_folds=None,
     command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.output = os.path.join(world.directory, "test", "kfold1",
-                                        "evaluation")
-            assert True
+        ok_(retcode >= 0)
+        world.output = os.path.join(world.directory, "test", "kfold1",
+                                    "evaluation")
     except OSError as e:
         assert False
 
@@ -219,12 +210,9 @@ def i_create_kfold_cross_validation_options(step, k_folds=None,
     command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.output = os.path.join(world.directory, "test", "kfold1",
-                                        "evaluation")
-            assert True
+        ok_(retcode >= 0)
+        world.output = os.path.join(world.directory, "test", "kfold1",
+                                    "evaluation")
     except OSError as e:
         assert False
 
@@ -441,19 +429,13 @@ def i_create_resources_from_ensemble_with_threshold(step, test=None, output2=Non
                    str(world.number_of_models))
         command = check_debug(command)
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            assert True
+        ok_(retcode >= 0)
         command = ("bigmler --ensemble " + world.ensemble['resource'] +
                    " --test " + test + " --tag my_ensemble --store --output " +
                    output3 + " --method threshold --threshold 1")
         command = check_debug(command)
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            assert True
+        ok_(retcode >= 0)
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
@@ -472,24 +454,16 @@ def i_create_resources_from_ensemble_with_threshold_rem( \
                    " --threshold " +
                    str(world.number_of_models))
         command = check_debug(command)
-        print command
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            assert True
+        ok_(retcode >= 0)
         command = ("bigmler --ensemble " + world.ensemble['resource'] +
                    " --test " + test + " --tag my_ensemble --store --output " +
                    output3 + ' --class ' + threshold_class +
                    " --remote --method threshold" +
                    " --threshold 1")
         command = check_debug(command)
-        print command
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            assert True
+        ok_(retcode >= 0)
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
@@ -510,15 +484,13 @@ def i_create_resources_from_local_ensemble(step, number_of_models=None, director
                    " --output " + output)
         command = check_debug(command)
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.test_lines = file_number_of_lines(test)
-            # test file has headers in it, so first line must be ignored
-            world.test_lines -= 1
-            world.output = output
-            world.number_of_models = len(world.ensemble['object']['models'])
-            assert True
+        ok_(retcode >= 0)
+
+        world.test_lines = file_number_of_lines(test)
+        # test file has headers in it, so first line must be ignored
+        world.test_lines -= 1
+        world.output = output
+        world.number_of_models = len(world.ensemble['object']['models'])
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
@@ -546,15 +518,12 @@ def i_create_resources_from_ensemble_generic(step, number_of_models=None, \
                    " --output " + output + no_replacement)
         command = check_debug(command)
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.test_lines = file_number_of_lines(test)
-            # test file has headers in it, so first line must be ignored
-            world.test_lines -= 1
-            world.output = output
-            world.number_of_models = int(number_of_models)
-            assert True
+        ok_(retcode >= 0)
+        world.test_lines = file_number_of_lines(test)
+        # test file has headers in it, so first line must be ignored
+        world.test_lines -= 1
+        world.output = output
+        world.number_of_models = int(number_of_models)
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
@@ -604,11 +573,8 @@ def i_create_cross_validation_from_dataset(step, rate=None, dataset_file=None, o
                    + output)
         command = check_debug(command)
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.output = output
-            assert True
+        ok_(retcode >= 0)
+        world.output = output
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
@@ -624,12 +590,9 @@ def i_find_predictions_files(step, directory1=None, directory2=None, output=None
                    " --store --output " + output)
         command = check_debug(command)
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.test_lines = file_number_of_lines("%s%spredictions.csv" % (directory1, os.sep))
-            world.output = output
-            assert True
+        ok_(retcode >= 0)
+        world.test_lines = file_number_of_lines("%s%spredictions.csv" % (directory1, os.sep))
+        world.output = output
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
@@ -645,12 +608,9 @@ def i_find_predictions_files_with_method(step, directory1=None, directory2=None,
                    " --store --output " + output + " --method " + method)
         command = check_debug(command)
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.test_lines = file_number_of_lines("%s%spredictions.csv" % (directory1, os.sep))
-            world.output = output
-            assert True
+        ok_(retcode >= 0)
+        world.test_lines = file_number_of_lines("%s%spredictions.csv" % (directory1, os.sep))
+        world.output = output
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
@@ -665,10 +625,7 @@ def i_create_balanced_model(step, data=None, output_dir=None):
                    " --store --output-dir " + output_dir)
         command = check_debug(command)
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            assert True
+        ok_(retcode >= 0)
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
@@ -682,10 +639,7 @@ def i_create_weighted_field_model(step, data=None, field=None, output_dir=None):
                    " --store --output-dir " + output_dir)
         command = check_debug(command)
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            assert True
+        ok_(retcode >= 0)
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
@@ -701,10 +655,7 @@ def i_create_objective_weighted_model(step, data=None, path=None, output_dir=Non
                    " --store --output-dir " + output_dir)
         command = check_debug(command)
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            assert True
+        ok_(retcode >= 0)
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
@@ -719,7 +670,6 @@ def i_check_create_source(step):
         world.sources.append(source['resource'])
         world.source = source
         source_file.close()
-        assert True
     except Exception, exc:
         assert False, str(exc)
 
@@ -741,7 +691,6 @@ def i_check_create_dataset(step, suffix=None):
         world.datasets.append(dataset['resource'])
         world.dataset = dataset
         dataset_file.close()
-        assert True
     except Exception, exc:
         assert False, traceback.format_exc()
 
@@ -757,7 +706,6 @@ def i_check_create_new_dataset(step):
         world.datasets.append(dataset['resource'])
         world.dataset = dataset
         dataset_file.close()
-        assert True
     except Exception, exc:
         assert False, str(exc)
 
@@ -778,7 +726,6 @@ def i_check_create_model(step):
         world.models.append(model['resource'])
         world.model = model
         model_file.close()
-        assert True
     except Exception, exc:
         assert False, str(exc)
 
@@ -861,7 +808,6 @@ def i_check_create_ensemble(step):
         world.ensembles.append(ensemble['resource'])
         world.ensemble = ensemble
         ensemble_file.close()
-        assert True
     except Exception, exc:
         assert False, str(exc)
 
@@ -897,8 +843,6 @@ def i_check_create_models_in_ensembles(step, in_ensemble=True):
                     world.ensembles.append(ensemble_id)
             else:
                 world.models.append(model_id)
-
-            assert True
         except Exception, exc:
             assert False, str(exc)
 
@@ -913,7 +857,6 @@ def i_check_create_evaluation(step):
         world.evaluations.append(evaluation['resource'])
         world.evaluation = evaluation
         evaluation_file.close()
-        assert True
     except:
         assert False
 
@@ -925,10 +868,7 @@ def check_create_kfold_cross_validation(step, kfolds, directory):
             evaluations_list = map(str.strip, evaluations_file.readlines())
         world.evaluations.extend(evaluations_list)
         world.evaluation = evaluations_list[-1]
-        if int(kfolds) == len(evaluations_list):
-            assert True
-        else:
-            assert False
+        assert_equal(int(kfolds), len(evaluations_list))
     except:
         assert False
 
@@ -960,10 +900,7 @@ def i_check_create_kfold_datasets(step, kfolds):
             datasets_list = map(str.strip, datasets_file.readlines())
         world.datasets.extend(datasets_list)
         world.dataset = datasets_list[-1]
-        if int(kfolds) == len(datasets_list):
-            assert True
-        else:
-            assert False
+        assert_equal(int(kfolds), len(datasets_list))
     except:
         assert False
 
@@ -980,10 +917,7 @@ def i_check_feature_selection(step, selection, metric, metric_value):
                 content = decode2(content)
         text = "The best feature subset is: %s \n%s = %s" % (
             selection, metric.capitalize(), metric_value)
-        if content.find(text) > -1:
-            assert True
-        else:
-            assert False
+        ok_(content.find(text) > -1)
     except Exception, exc:
         assert False, str(exc)
 
@@ -1000,10 +934,7 @@ def i_check_node_threshold(step, node_threshold, metric, metric_value):
                 content = decode2(content)
         text = "The best node threshold is: %s \n%s = %s" % (
             node_threshold, metric.capitalize(), metric_value)
-        if content.find(text) > -1:
-            assert True
-        else:
-            assert False
+        ok_(content.find(text) > -1)
     except:
         assert False
 
@@ -1022,12 +953,9 @@ def i_check_gazibit_reports(step, shared=''):
     try:
         gazibit_file = open(gazibit_file, "r")
         content = gazibit_file.read()
-        if (content.find('%START_BIGML_') < 0 and
-                content.find('%END_BIGML_') < 0 and
-                content.find('%BIGML_') < 0):
-            assert True
-        else:
-            assert False
+        ok_(content.find('%START_BIGML_') < 0 and
+            content.find('%END_BIGML_') < 0 and
+            content.find('%BIGML_') < 0)
     except Exception, exc:
         assert False, str(exc)
 
@@ -1056,7 +984,6 @@ def i_check_create_evaluations(step, number_of_evaluations=None):
         try:
             evaluation = check_resource(evaluation_id, world.api.get_evaluation)
             world.evaluations.append(evaluation_id)
-            assert True
         except Exception, exc:
             assert False, str(exc)
 
@@ -1071,10 +998,7 @@ def i_check_create_predictions(step):
         predictions_lines = 0
         for line in predictions_file:
             predictions_lines += 1
-        if predictions_lines == world.test_lines:
-            assert True
-        else:
-            assert False, "predictions lines: %s, test lines: %s" % (predictions_lines, world.test_lines)
+        assert_equal(predictions_lines, world.test_lines)
         predictions_file.close()
     except Exception, exc:
         assert False, str(exc)
@@ -1096,7 +1020,7 @@ def i_check_predictions(step, check_file):
             with UnicodeReader(check_file) as check_file:
                 for row in predictions_file:
                     check_row = check_file.next()
-                    assert len(check_row) == len(row)
+                    assert_equal(len(check_row), len(row))
                     for index in range(len(row)):
                         dot = row[index].find(".")
                         decimal_places = 1
@@ -1150,7 +1074,6 @@ def i_check_stored_source(step):
         if os.path.exists(storage_source_file):
             with open(storage_source_file, "r") as storage_source_file:
                 world.source = json.loads(storage_source_file.read().strip())
-            assert True
         else:
             assert False
     except Exception, exc:
@@ -1161,10 +1084,7 @@ def i_check_stored_source(step):
 def i_check_source_locale(step, bigml_locale):
     try:
         locale = world.source['object']["source_parser"]["locale"]
-        if bigml_locale == locale:
-            assert True
-        else:
-            assert False, "Found locale: %s, expected %s" % (locale, bigml_locale)
+        assert_equal(bigml_locale, locale)
     except KeyError, exc:
         assert False, str(exc)
 
@@ -1173,10 +1093,7 @@ def i_check_source_locale(step, bigml_locale):
 def i_check_source_type(step, field_id, field_type):
     try:
         type = world.source['object']["fields"][field_id]['optype']
-        if type == field_type:
-            assert True
-        else:
-            assert False, "Found field type: %s, expected %s" % (type, field_type)
+        assert_equal(type, field_type)
     except KeyError, exc:
         assert False, str(exc)
 
@@ -1185,10 +1102,7 @@ def i_check_source_type(step, field_id, field_type):
 def i_check_source_label(step, field_id, field_label):
     try:
         label = world.source['object']["fields"][field_id]['label']
-        if label == field_label:
-            assert True
-        else:
-            assert False, "Found field label: %s, expected %s" % (label, field_label)
+        assert_equal(label, field_label)
     except KeyError, exc:
         assert False, str(exc)
 
@@ -1200,13 +1114,10 @@ def i_create_all_resources_to_evaluate(step, data=None, output=None):
     command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.directory = os.path.dirname(output)
-            world.folders.append(world.directory)
-            world.output = output
-            assert True
+        ok_(retcode >= 0)
+        world.directory = os.path.dirname(output)
+        world.folders.append(world.directory)
+        world.output = output
     except OSError as e:
         assert False
 
@@ -1221,13 +1132,9 @@ def i_create_all_resources_to_evaluate_and_report(
     command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.directory = os.path.dirname(output)
-            world.folders.append(world.directory)
-            world.output = output
-            assert True
+        world.directory = os.path.dirname(output)
+        world.folders.append(world.directory)
+        world.output = output
     except OSError as e:
         assert False
 
@@ -1240,13 +1147,10 @@ def i_create_all_resources_to_evaluate_and_share(step, data=None, output=None):
     command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.directory = os.path.dirname(output)
-            world.folders.append(world.directory)
-            world.output = output
-            assert True
+        ok_(retcode >= 0)
+        world.directory = os.path.dirname(output)
+        world.folders.append(world.directory)
+        world.output = output
     except OSError as e:
         assert False
 
@@ -1260,13 +1164,10 @@ def i_create_dataset_with_attributes(step, data=None, attributes=None, output=No
     command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.directory = os.path.dirname(output)
-            world.folders.append(world.directory)
-            world.output = output
-            assert True
+        ok_(retcode >= 0)
+        world.directory = os.path.dirname(output)
+        world.folders.append(world.directory)
+        world.output = output
     except OSError as e:
         assert False
 
@@ -1279,13 +1180,10 @@ def i_create_dataset(step, data=None, output=None):
     command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.directory = os.path.dirname(output)
-            world.folders.append(world.directory)
-            world.output = output
-            assert True
+        ok_(retcode >= 0)
+        world.directory = os.path.dirname(output)
+        world.folders.append(world.directory)
+        world.output = output
     except OSError as e:
         assert False
 
@@ -1300,12 +1198,9 @@ def i_create_kfold_cross_validation(step, k_folds=None):
     command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.output = os.path.join(world.directory, "test", "k_fold0",
-                                        "evaluation")
-            assert True
+        ok_(retcode >= 0)
+        world.output = os.path.join(world.directory, "test", "k_fold0",
+                                    "evaluation")
     except OSError as e:
         assert False
 
@@ -1373,12 +1268,9 @@ def i_create_kfold_cross_validation_separator_metric_no_fields(
     command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.output = os.path.join(world.directory, "test", "kfold1",
-                                        "evaluation")
-            assert True
+        ok_(retcode >= 0)
+        world.output = os.path.join(world.directory, "test", "kfold1",
+                                    "evaluation")
     except OSError as e:
         assert False
 
@@ -1394,12 +1286,9 @@ def i_create_kfold_cross_validation_in_dev(step, k_folds=None, metric=None):
     command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.output = os.path.join(world.directory, "test", "kfold1",
-                                        "evaluation")
-            assert True
+        ok_(retcode >= 0)
+        world.output = os.path.join(world.directory, "test", "kfold1",
+                                    "evaluation")
     except OSError as e:
         assert False
 
@@ -1415,12 +1304,9 @@ def i_create_kfold_cross_validation_metric_category(step, k_folds=None, metric=N
     command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.output = os.path.join(world.directory, "test", "kfold1",
-                                        "evaluation")
-            assert True
+        ok_(retcode >= 0)
+        world.output = os.path.join(world.directory, "test", "kfold1",
+                                    "evaluation")
     except OSError as e:
         assert False
 
@@ -1436,12 +1322,9 @@ def i_create_kfold_cross_validation_metric(step, k_folds=None, metric=None):
     command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.output = os.path.join(world.directory, "test", "kfold1",
-                                        "evaluation")
-            assert True
+        ok_(retcode >= 0)
+        world.output = os.path.join(world.directory, "test", "kfold1",
+                                    "evaluation")
     except OSError as e:
         assert False
 
@@ -1453,12 +1336,9 @@ def i_generate_report(step):
     command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.output = os.path.join(world.directory, "test", "kfold1",
-                                        "evaluation")
-            assert True
+        ok_(retcode >= 0)
+        world.output = os.path.join(world.directory, "test", "kfold1",
+                                    "evaluation")
     except OSError as e:
         assert False
 
@@ -1557,13 +1437,10 @@ def i_create_dev_dataset(step, data=None, output=None):
     ok_(data is not None and output is not None)
     try:
         retcode = check_call("bigmler --train " + res_filename(data) + " --no-model --store --dev --output " + output, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.directory = os.path.dirname(output)
-            world.folders.append(world.directory)
-            world.output = output
-            assert True
+        ok_(retcode >= 0)
+        world.directory = os.path.dirname(output)
+        world.folders.append(world.directory)
+        world.output = output
     except OSError as e:
         assert False
 
@@ -1579,12 +1456,9 @@ def i_create_random_analysis(step, k_fold=None, metric=None):
                              " --output " + world.directory +
                              " --optimize " + metric,
                              shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.output = os.path.join(world.directory, "test", "random1",
-                                        "evaluation")
-            assert True
+        ok_(retcode >= 0)
+        world.output = os.path.join(world.directory, "test", "random1",
+                                    "evaluation")
     except OSError as e:
         assert False
 
@@ -1603,10 +1477,7 @@ def i_check_create_kfold_random_forest(step, kfolds):
 
             world.ensembles.extend(ensembles_list)
             world.ensemble = ensembles_list[-1]
-            if int(kfolds) == len(ensembles_list):
-                assert True
-            else:
-                assert False
+            assert_equal(int(kfolds), len(ensembles_list))
         except Exception, exc:
             assert False, str(exc)
 
@@ -1623,9 +1494,6 @@ def i_check_random_candidates(step, random_candidates, metric, metric_value):
                 content = decode2(content)
         text = "The best random candidates number is: %s \n%s = %s" % (
             random_candidates, metric.capitalize(), metric_value)
-        if content.find(text) > -1:
-            assert True
-        else:
-            assert False
+        ok_(content.find(text) > -1)
     except:
         assert False
