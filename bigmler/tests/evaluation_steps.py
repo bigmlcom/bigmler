@@ -28,9 +28,13 @@ from bigml.api import check_resource
 
 from bigmler.tests.common_steps import check_debug
 
+from nose.tools import ok_, assert_equal
 
-#@step(r'I create BigML resources using source to evaluate and log evaluation in "(.*)"')
-def given_i_create_bigml_resources_using_source_to_evaluate(step, output=None):
+
+#@step(r'I create BigML resources using source to evaluate and log
+# evaluation in "(.*)"')
+def given_i_create_bigml_resources_using_source_to_evaluate(step,
+                                                            output=None):
     if output is None:
         assert False
     command = ("bigmler --evaluate --source " + world.source['resource'] +
@@ -38,13 +42,10 @@ def given_i_create_bigml_resources_using_source_to_evaluate(step, output=None):
     command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.directory = os.path.dirname(output)
-            world.folders.append(world.directory)
-            world.output = output
-            assert True
+        ok_(retcode >= 0)
+        world.directory = os.path.dirname(output)
+        world.folders.append(world.directory)
+        world.output = output
     except OSError as e:
         assert False
 
@@ -58,8 +59,10 @@ def read_id_from_file(path):
         return id_file.readline().strip()
 
 
-#@step(r'I create BigML resources using dataset to evaluate and log evaluation in "(.*)"')
-def given_i_create_bigml_resources_using_dataset_to_evaluate(step, output=None):
+#@step(r'I create BigML resources using dataset to evaluate and log
+# evaluation in "(.*)"')
+def given_i_create_bigml_resources_using_dataset_to_evaluate(step,
+                                                             output=None):
     if output is None:
         assert False
     command = ("bigmler --evaluate --dataset " + world.dataset['resource'] +
@@ -67,19 +70,18 @@ def given_i_create_bigml_resources_using_dataset_to_evaluate(step, output=None):
     command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.directory = os.path.dirname(output)
-            world.folders.append(world.directory)
-            world.output = output
-            assert True
+        ok_(retcode >= 0)
+        world.directory = os.path.dirname(output)
+        world.folders.append(world.directory)
+        world.output = output
     except OSError as e:
         assert False
 
 
-#@step(r'I create BigML resources using test file "([^"]*)" and a fields map "([^"]*)" to evaluate a model and log evaluation in "(.*)"')
-def i_create_all_resources_to_evaluate_with_model_and_map(step, data=None, fields_map=None, output=None):
+#@step(r'I create BigML resources using test file "([^"]*)" and a fields
+# map "([^"]*)" to evaluate a model and log evaluation in "(.*)"')
+def i_create_all_resources_to_evaluate_with_model_and_map( \
+    step, data=None, fields_map=None, output=None):
     if data is None or fields_map is None or output is None:
         assert False
     command = ("bigmler --evaluate --test " + res_filename(data) +
@@ -89,39 +91,39 @@ def i_create_all_resources_to_evaluate_with_model_and_map(step, data=None, field
     command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.directory = os.path.dirname(output)
-            world.folders.append(world.directory)
-            world.output = output
-            assert True
+        ok_(retcode >= 0)
+        world.directory = os.path.dirname(output)
+        world.folders.append(world.directory)
+        world.output = output
     except OSError as e:
         assert False
 
 
-#@step(r'I create BigML resources using test file "([^"]*)" to evaluate a model and log evaluation in "(.*)"')
-def i_create_all_resources_to_evaluate_with_model(step, data=None, output=None):
+#@step(r'I create BigML resources using test file "([^"]*)" to evaluate
+# a model and log evaluation in "(.*)"')
+def i_create_all_resources_to_evaluate_with_model(step,
+                                                  data=None,
+                                                  output=None):
     if data is None or output is None:
         assert False
-    command = ("bigmler --evaluate --test " + res_filename(data) + " --model " +
+    command = ("bigmler --evaluate --test " + res_filename(data) +
+               " --model " +
                world.model['resource'] + " --output " + output)
     command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.directory = os.path.dirname(output)
-            world.folders.append(world.directory)
-            world.output = output
-            assert True
+        ok_(retcode >= 0)
+        world.directory = os.path.dirname(output)
+        world.folders.append(world.directory)
+        world.output = output
     except OSError as e:
         assert False
 
 
-#@step(r'I create BigML resources using a dataset to evaluate a model and log evaluation in "(.*)"')
-def given_i_create_bigml_resources_using_dataset_to_evaluate_with_model(step, output=None):
+#@step(r'I create BigML resources using a dataset to evaluate a
+# model and log evaluation in "(.*)"')
+def given_i_create_bigml_resources_using_dataset_to_evaluate_with_model( \
+    step, output=None):
     if output is None:
         assert False
     command = ("bigmler --evaluate --dataset " +
@@ -130,18 +132,16 @@ def given_i_create_bigml_resources_using_dataset_to_evaluate_with_model(step, ou
     command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.directory = os.path.dirname(output)
-            world.folders.append(world.directory)
-            world.output = output
-            assert True
+        ok_(retcode >= 0)
+        world.directory = os.path.dirname(output)
+        world.folders.append(world.directory)
+        world.output = output
     except OSError as e:
         assert False
 
 
-#@step(r'I create BigML resources uploading train "(.*)" file to evaluate with test-split (.*) and log evaluation in "(.*)"')
+#@step(r'I create BigML resources uploading train "(.*)" file to evaluate with
+# test-split (.*) and log evaluation in "(.*)"')
 def i_create_with_split_to_evaluate(step, data=None, split=None, output=None):
     if data is None or split is None or output is None:
         assert False
@@ -150,13 +150,10 @@ def i_create_with_split_to_evaluate(step, data=None, split=None, output=None):
     command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.directory = os.path.dirname(output)
-            world.folders.append(world.directory)
-            world.output = output
-            assert True
+        ok_(retcode >= 0)
+        world.directory = os.path.dirname(output)
+        world.folders.append(world.directory)
+        world.output = output
     except OSError as e:
         assert False
 
@@ -177,13 +174,10 @@ def i_create_proportional_to_evaluate(step, test=None):
                    output)
         command = check_debug(command)
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.directory = output_dir
-            world.folders.append(world.directory)
-            world.output = output
-            assert True
+        ok_(retcode >= 0)
+        world.directory = output_dir
+        world.folders.append(world.directory)
+        world.output = output
     except OSError as e:
         assert False
 
@@ -199,8 +193,8 @@ def then_the_evaluation_file_is_like(step, check_file_json):
         evaluation = evaluation_file_json.readline()
         check = json.loads(check)
         evaluation = json.loads(evaluation)
-        assert check['model'] == evaluation['model']
-        assert check['mode'] == evaluation['mode']
+        assert_equal(check['model'], evaluation['model'])
+        assert_equal(check['mode'], evaluation['mode'])
         evaluation_file_json.close()
         check_file_json.close()
     except:
@@ -216,7 +210,6 @@ def i_check_create_dataset(step, dataset_type=None):
         world.datasets.append(dataset['resource'])
         world.dataset = dataset
         dataset_file.close()
-        assert True
     except Exception, exc:
         assert False, str(exc)
 
@@ -229,14 +222,18 @@ def i_check_evaluation_key(step, key=None, value=None):
         evaluation = evaluation_file_json.readline()
         evaluation = json.loads(evaluation)
         model_evaluation = evaluation['model']
-        assert model_evaluation[key] > float(value), "model evaluation %s: %s" % (key, value)
+        ok_(model_evaluation[key] > float(value),
+            "model key: %s, expected >: %s" % ( \
+            model_evaluation[key], float(value)))
         evaluation_file_json.close()
-    except:
-        assert False
+    except Exception, exc:
+        assert False, str(exc)
 
 
-#@step(r'I create BigML resources uploading train "(.*)" file to evaluate an ensemble of (\d+) models with test-split (.*) and log evaluation in "(.*)"')
-def i_create_with_split_to_evaluate_ensemble(step, data=None, number_of_models=None, split=None, output=None):
+#@step(r'I create BigML resources uploading train "(.*)" file to evaluate an
+# ensemble of (\d+) models with test-split (.*) and log evaluation in "(.*)"')
+def i_create_with_split_to_evaluate_ensemble( \
+    step, data=None, number_of_models=None, split=None, output=None):
     if data is None or split is None or output is None:
         assert False
     command = ("bigmler --evaluate --train " + res_filename(data) +
@@ -246,19 +243,18 @@ def i_create_with_split_to_evaluate_ensemble(step, data=None, number_of_models=N
     command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.directory = os.path.dirname(output)
-            world.folders.append(world.directory)
-            world.output = output
-            assert True
+        ok_(retcode >= 0)
+        world.directory = os.path.dirname(output)
+        world.folders.append(world.directory)
+        world.output = output
     except OSError as e:
         assert False
 
 
-#@step(r'I evaluate the ensemble in directory "(.*)" with the dataset in directory "(.*)" and log evaluation in "(.*)"')
-def i_evaluate_ensemble_with_dataset(step, ensemble_dir=None, dataset_dir=None, output=None):
+#@step(r'I evaluate the ensemble in directory "(.*)" with the dataset in
+# directory "(.*)" and log evaluation in "(.*)"')
+def i_evaluate_ensemble_with_dataset( \
+    step, ensemble_dir=None, dataset_dir=None, output=None):
     if ensemble_dir is None or dataset_dir is None or output is None:
         assert False
     world.directory = os.path.dirname(output)
@@ -271,16 +267,14 @@ def i_evaluate_ensemble_with_dataset(step, ensemble_dir=None, dataset_dir=None, 
     command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.output = output
-            assert True
+        ok_(retcode >= 0)
+        world.output = output
     except OSError as exc:
         assert False, str(exc)
 
 
-#@step(r'I evaluate the ensemble in directory "(.*)" with the dataset in directory "(.*)" and log evaluation in "(.*)"')
+#@step(r'I evaluate the ensemble in directory "(.*)" with the dataset in
+# directory "(.*)" and log evaluation in "(.*)"')
 def i_evaluate_ensemble_with_dataset_and_options( \
     step, ensemble_dir=None, dataset_dir=None, output=None, options=None):
     if ensemble_dir is None or dataset_dir is None or output is None \
@@ -296,10 +290,7 @@ def i_evaluate_ensemble_with_dataset_and_options( \
     command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.output = output
-            assert True
+        ok_(retcode >= 0)
+        world.output = output
     except OSError as exc:
         assert False, str(exc)
