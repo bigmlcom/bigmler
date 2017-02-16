@@ -711,13 +711,14 @@ def i_create_balanced_model(step, data=None, output_dir=None):
 #@step(r'I create a BigML field weighted model from "(.*)" using field "(.*)"
 # as weight and store logs in "(.*)"')
 def i_create_weighted_field_model( \
-    step, data=None, field=None, output_dir=None):
-    ok_(data is not None and field is not None and output_dir is not None)
+    step, data=None, field=None, output_dir=None, objective=None):
+    ok_(data is not None and field is not None and output_dir is not None and
+        objective is not None)
     world.directory = output_dir
     world.folders.append(world.directory)
     try:
         command = ("bigmler --train " + res_filename(data) +
-                   " --weight-field " + field +
+                   " --weight-field " + field + " --objective " + objective +
                    " --store --output-dir " + output_dir)
         command = check_debug(command)
         retcode = check_call(command, shell=True)

@@ -83,22 +83,22 @@ class TestWeights(object):
     def test_scenario2(self):
         """
             Scenario: Successfully building a field weighted model
-                Given I create a BigML field weighted model from "<data>" using field "<field>" as weight and store logs in "<output_dir>"
+                Given I create a BigML field weighted model from "<data>" using field "<field>" as weight and "<objective>" and store logs in "<output_dir>"
                 And I check that the source has been created
                 And I check that the dataset has been created
                 And I check that the model has been created
                 Then I check that the model uses as weight "<field_id>"
 
                 Examples:
-                |data |field | output_dir  | field_id
-                |../data/iris_w.csv | weight |./scenario_w_2 | 000005
+                |data |field | output_dir  | field_id | objective
+                |../data/iris_w.csv | weight |./scenario_w_2 | 000005 |000004
         """
         print self.test_scenario2.__doc__
         examples = [
-            ['data/iris_w.csv', 'weight', 'scenario_w_2', '000005']]
+            ['data/iris_w.csv', 'weight', 'scenario_w_2', '000005', 'species']]
         for example in examples:
             print "\nTesting with:\n", example
-            test_pred.i_create_weighted_field_model(self, data=example[0], field=example[1], output_dir=example[2])
+            test_pred.i_create_weighted_field_model(self, data=example[0], field=example[1], output_dir=example[2], objective=example[4])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
             test_pred.i_check_create_model(self)
