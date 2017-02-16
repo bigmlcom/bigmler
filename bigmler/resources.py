@@ -514,7 +514,7 @@ def publish_dataset(dataset, args, api=None, session_file=None):
     public_dataset = {"private": False}
     if args.dataset_price:
         public_dataset.update(price=args.dataset_price)
-    dataset = update_dataset(dataset, public_dataset, args.verbosity, api=api,
+    dataset = update_dataset(dataset, public_dataset, args, api=api,
                              session_file=session_file)
     check_resource_error(dataset, "Failed to update dataset: ")
     dataset = check_resource(dataset, api.get_dataset,

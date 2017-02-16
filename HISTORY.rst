@@ -3,6 +3,11 @@
 History
 -------
 
+3.9.2 (2017-02-16)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug in bigmler subcommands when publishing datasets
+
 3.9.1 (2017-01-04)
 ~~~~~~~~~~~~~~~~~~
 
