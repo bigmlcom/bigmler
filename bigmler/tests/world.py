@@ -80,6 +80,18 @@ TRANSLATED_RESOURCES = {
     'batchtopicdistribution': 'batch_topic_distributions'}
 
 
+def show_doc(self, examples=None):
+    """ Shows the name and documentation of the method passed as argument
+
+    """
+    print "%s:\n%s" % (self.__name__, self.__doc__)
+    if examples:
+        print "                |%s" % \
+            "\n                |".join(["|".join([str(item)
+                                                  for item in example]) for
+                                        example in examples])
+
+
 def plural(resource_type):
     """Creates the plural form of a resource type
 

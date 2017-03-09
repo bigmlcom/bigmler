@@ -197,6 +197,10 @@ def create_package(args, api, common_options, resume=False):
             if imports:
                 command_args.extend(["--imports", ",".join(imports)])
             command_args.extend(["--verbosity", str(args.verbosity)])
+            if args.username:
+                command_args.extend(["--username", args.username])
+            if args.api_key:
+                command_args.extend(["--api-key", args.api_key])
 
             if resume:
                 next_command = subcommand_list.pop()

@@ -3,17 +3,22 @@
 History
 -------
 
+3.9.3 (2017-03-08)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing bug in bigmler whizzml when using --username and --api-key.
+
 3.9.2 (2017-02-16)
 ~~~~~~~~~~~~~~~~~~
 
-- Fixing bug in bigmler subcommands when publishing datasets
+- Fixing bug in bigmler subcommands when publishing datasets.
 
 3.9.1 (2017-01-04)
 ~~~~~~~~~~~~~~~~~~
 
-- Fixing bug in bigmler: --evaluation-attributes were not used
-- Fixing bug in bigmler: --threshold and --class were not used
-- Fixing bug in bigmler topic-model: adding --topic-model-attributes
+- Fixing bug in bigmler: --evaluation-attributes were not used.
+- Fixing bug in bigmler: --threshold and --class were not used.
+- Fixing bug in bigmler topic-model: adding --topic-model-attributes.
 
 3.9.0 (2016-12-03)
 ~~~~~~~~~~~~~~~~~~

@@ -44,11 +44,10 @@ def check_debug(command, project=True):
         extend_cmd = u' --debug'
     if command.find("bigmler report") < 0:
         command = u"%s --verbosity %s%s" % (command, verbosity, extend_cmd)
-    if debug:
-        print command
     if not PYTHON3:
         command = command.encode(SYSTEM_ENCODING)
-    print command
+    if debug:
+        print command
     return command
 
 
