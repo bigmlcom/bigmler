@@ -45,6 +45,7 @@ from bigmler.utils import (log_created_resources, check_resource_error, dated,
 MAX_MODELS = 10
 AGGREGATION = -1
 COMBINATION = -2
+BOOSTING = 4
 COMBINATION_LABEL = 'combined'
 OTHER = "***** other *****"
 
@@ -317,6 +318,7 @@ def local_predict(models, test_reader, output, args, options=None,
         input_data_dict = dict(zip(test_reader.raw_headers, input_data))
         prediction = local_model.predict(
             input_data_dict, **kwargs)
+
         if single_model and args.median and local_model.tree.regression:
             # only single models' predictions can be based on the median value
             # predict
@@ -641,9 +643,10 @@ def predict(models, fields, args, api=None, log=None,
         # For a model we build a Model and for a small number of models,
         # we build a MultiModel using all of
         # the given models and issue a combined prediction
-        if (len(models) <= args.max_batch_models and args.fast and
+        if (args.boosting or (len(models) <= args.max_batch_models
+                and args.fast and
                 not args.multi_label and args.max_categories == 0
-                and args.method != COMBINATION):
+                and args.method != COMBINATION)):
             local_predict(models, test_reader, output, args, options, exclude)
         # For large numbers of models, we split the list of models in chunks
         # and build a MultiModel for each chunk, issue and store predictions

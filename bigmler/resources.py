@@ -53,7 +53,8 @@ FULL_FORMAT = 'full'
 VALID_FIELD_ATTRIBUTES = {
     "source": ["name", "label", "description", "optype", "term_analysis"],
     "dataset": ["name", "label", "description", "preferred", "term_analysis"]}
-
+BOOSTING_OPTIONS = ["iterations", "early_holdout", "learning_rate", \
+    "early_out_of_bag", "step_out_of_bag"]
 
 def get_basic_seed(order):
     """ Builds a standard seed from a text adding the order
@@ -889,7 +890,6 @@ def set_ensemble_args(args, name=None,
     ensemble_args = {
         "name": name,
         "description": args.description_,
-        "number_of_models": args.number_of_models,
         "category": args.category,
         "tags": args.tag,
         "missing_splits": args.missing_splits,
@@ -899,6 +899,15 @@ def set_ensemble_args(args, name=None,
     }
     if objective_id is not None and fields is not None:
         ensemble_args.update({"objective_field": objective_id})
+
+    if args.boosting:
+        boosting_args = {}
+        for option in BOOSTING_OPTIONS:
+            if hasattr(args, option) and getattr(args, option) is not None:
+                boosting_args.update({option: getattr(args, option)})
+        ensemble_args.update({"boosting": boosting_args})
+    else:
+        ensemble_args.update({"number_of_models": args.number_of_models})
 
     # If evaluate flag is on and no test_split flag is provided,
     # we choose a deterministic sampling with
@@ -935,7 +944,6 @@ def set_ensemble_args(args, name=None,
 
     ensemble_args = update_sample_parameters_args(ensemble_args, args)
 
-    ensemble_args.update(tlp=args.tlp)
     ensemble_args["ensemble_sample"].update( \
         {"rate": args.ensemble_sample_rate,
          "replacement": args.ensemble_sample_replacement})
@@ -1338,6 +1346,9 @@ def set_batch_prediction_args(args, fields=None,
                                      fields, dataset_fields)})
 
     if args.prediction_info in [NORMAL_FORMAT, FULL_FORMAT]:
+        if args.boosting:
+            batch_prediction_args.update(confidence=True)
+        # TODO: change this to else: and previous line to probability=True
         batch_prediction_args.update(confidence=True)
 
     if args.prediction_info == FULL_FORMAT:

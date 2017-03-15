@@ -87,10 +87,11 @@ def models_processing(datasets, models, model_ids,
         model_ids = []
         models = []
         if args.multi_label:
-            # If --number-of-models is not set or is 1, create one model per
+            # If --number-of-models is not set or is 1, and there's
+            # no boosting options on, create one model per
             # label. Otherwise, create one ensemble per label with the required
             # number of models
-            if args.number_of_models < 2:
+            if args.number_of_models < 2 and not args.boosting:
                 models, model_ids, resume = model_per_label(
                     labels, datasets, api, args, resume,
                     fields=fields, multi_label_data=multi_label_data,
@@ -102,7 +103,7 @@ def models_processing(datasets, models, model_ids,
                      multi_label_data=multi_label_data,
                      session_file=session_file, path=path, log=log)
 
-        elif args.number_of_models > 1:
+        elif args.number_of_models > 1 or args.boosting:
             ensembles = []
             # Ensembles of models
             (ensembles, ensemble_ids,

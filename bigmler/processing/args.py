@@ -731,6 +731,14 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
+    # if boosting arguments are used, set on boosting
+    try:
+        if command_args.iterations or command_args.learning_rate \
+                or command_args.early_holdout:
+            command_args.boosting = True
+    except AttributeError:
+        pass
+
     return {"api": api, "args": command_args}
 
 

@@ -54,7 +54,7 @@ setuptools.setup(
                 'bigmler.tests', 'bigmler.reify', 'bigmler.project',
                 'bigmler.association', 'bigmler.logisticregression',
                 'bigmler.execute', 'bigmler.whizzml', 'bigmler.topicmodel'],
-    install_requires = ['bigml>=4.8.3, <4.9.0'],
+    install_requires = ['bigml>=4.9.0, <4.10.0'],
     package_data={'bigmler':['static/*.json', 'static/*.html']},
     classifiers=[
         'Development Status :: 4 - Beta',

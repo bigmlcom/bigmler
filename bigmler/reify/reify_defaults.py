@@ -103,7 +103,7 @@ DEFAULTS = {
             'replacement': [False],
             'seed': [None],
             'ensemble_seed': [None],
-            'tlp': [1]
+            'boosting': [False, {}]
         }
     },
     "prediction": {

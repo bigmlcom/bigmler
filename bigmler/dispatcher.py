@@ -493,6 +493,9 @@ def compute_output(api, args):
     # them yet and need them
     if model and not args.evaluate and (a.has_test(args) or
                                         args.export_fields):
+        # if we are using boosted ensembles to predict, activate boosting
+        if model['object'].get('boosted_ensemble'):
+            args.boosting = True
         # If more than one model, use the full field structure
         if (not single_model and not args.multi_label and
                 belongs_to_ensemble(model)):

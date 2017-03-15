@@ -234,16 +234,6 @@ def get_main_options(defaults=None, constants=None):
             'default': defaults.get('ensemble', None),
             'help': "BigML ensemble Id."},
 
-        # If a BigML ensemble is created, creation will use this task-level
-        # parallelism
-        '--tlp': {
-            'action': 'store',
-            'dest': 'tlp',
-            'default': defaults.get('tlp', 1),
-            'type': int,
-            'help': ("BigML ensemble's creation task-level"
-                     " parallelism.")},
-
         # Prediction log format: `short` will only log predictions, `long` will
         # log also confidence information
         '--prediction-info': {
@@ -486,6 +476,62 @@ def get_main_options(defaults=None, constants=None):
             'dest': 'ensemble_sample_replacement',
             'default': defaults.get('ensemble_sample_replacement', True),
             'help': "Don't use replacement when bagging."},
+
+        # Create a boosting ensemble
+        '--boosting': {
+            'action': 'store_true',
+            'dest': 'boosting',
+            'default': defaults.get('boosting', False),
+            'help': "Create a boosted ensemble"},
+
+        # Maximum number of iterations used in boosted ensembles.
+        '--boosting-iterations': {
+            'action': 'store',
+            'dest': 'iterations',
+            'default': defaults.get('iterations', None),
+            'type': int,
+            'help': ("Maximum number of iterations used in boosted"
+                     " ensembles.")},
+
+        # The portion of the dataset that will be held out for testing
+        # at the end of every iteration.
+        '--early-holdout': {
+            'action': 'store',
+            'dest': 'early_holdout',
+            'default': defaults.get('early_holdout', None),
+            'type': float,
+            'help': ("The portion of the dataset that will be held out for"
+                     " testing at the end of every iteration in boosted"
+                     " ensembles (between 0 and 1).")},
+
+        # Boosted ensemble: Causes the out of bag samples to be tested after
+        # every iteration.
+        '--no-early-out-of-bag': {
+            'action': 'store_false',
+            'dest': 'early_out_of_bag',
+            'default': defaults.get('early_out_of_bag', True),
+            'help': ("Causes the out of bag samples not to be tested after"
+                     " every iteration in boosted ensembles.")},
+
+        # It controls how aggressively the boosting algorithm will fit the data
+        '--learning-rate': {
+            'action': 'store',
+            'dest': 'learning_rate',
+            'default': defaults.get('learning_rate', None),
+            'type': float,
+            'help': ("It controls how aggressively the boosting algorithm"
+                     " will fit the data in boosted"
+                     " ensembles (between 0 and 1).")},
+
+        # Boosted ensemble: the out_of_bag samples are tested after every
+        # iteration to choose the gradient step size.
+        '--no-step-out-of-bag': {
+            'action': 'store_false',
+            'dest': 'step_out_of_bag',
+            'default': defaults.get('step_out_of_bag', True),
+            'help': ("Causes the out of bag samples not to be tested after"
+                     " every iteration to choose the gradient step size"
+                     " in boosted ensembles.")},
 
         # Disables reports upload.
         '--no-upload': {
