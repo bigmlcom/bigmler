@@ -631,3 +631,59 @@ class TestPrediction(object):
                 threshold_class=example[7])
             test_pred.i_check_predictions_with_different_thresholds( \
                 self, example[5], example[6])
+
+
+    def test_scenario23(self):
+        """
+        Scenario: Successfully building test predictions from boosted ensemble
+            Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
+            And I create BigML resources using boosted ensemble in <iterations> iterations to test "<test>" and log predictions in "<output>"
+            And I check that the ensemble has been created
+            And I check that the predictions are ready
+            Then the local prediction file is like "<predictions_file>"
+
+            Examples:
+            |scenario    | kwargs                                                  | iterations | test                    | output                        |predictions_file                      |
+        """
+        examples = [
+            ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}', '10', 'data/test_iris.csv', 'scenario23/predictions.csv', 'check_files/predictions_iris_boost.csv']]
+        show_doc(self.test_scenario23, examples)
+        for example in examples:
+            print "\nTesting with:\n", example
+            test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
+            test_pred.i_create_resources_from_boosted_ensemble(self, iterations=example[2], test=example[3], output=example[4])
+            test_pred.i_check_create_ensemble(self)
+            test_pred.i_check_create_predictions(self)
+            test_pred.i_check_predictions(self, example[5])
+
+
+    def test_scenario24(self):
+        """
+            Scenario: Successfully  test predictions remotely from boosted ensemble
+                Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
+                And I create BigML resources using boosted ensemble in <iterations> iterations to remotely test "<test>" and log predictions in "<output>"
+                And I check that the ensemble has been created
+                And I check that the predictions are ready
+                And I check that the batch prediction is ready
+                And I check that the bath predictions datset is ready
+                Then the local prediction file is like "<predictions_file>"
+
+                Examples:
+                |scenario    | kwargs                                                  | iterations | test                    | output                        |predictions_file                      |
+
+        """
+        examples = [
+            ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}', '10', 'data/test_iris.csv', 'scenario23/predictions.csv', 'check_files/predictions_iris_boost.csv']]
+        show_doc(self.test_scenario24, examples)
+        for example in examples:
+            print "\nTesting with:\n", example
+            test_pred.i_have_previous_scenario_or_reproduce_it( \
+                self, example[0], example[1])
+            test_pred.i_create_resources_remotely_from_boosted_ensemble( \
+                self, iterationss=example[2], test=example[3],
+                output=example[4])
+            test_pred.i_check_create_ensemble(self)
+            test_pred.i_check_create_batch_prediction(self)
+            test_pred.i_check_create_batch_prediction_dataset(self)
+            test_pred.i_check_create_predictions(self)
+            test_pred.i_check_predictions(self, example[5])

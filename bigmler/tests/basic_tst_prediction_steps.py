@@ -570,6 +570,60 @@ def i_create_resources_from_ensemble( \
         " --no-fast --ensemble-sample-no-replacement",
         test, output)
 
+
+#@step(r'I create BigML resources using boosted ensemble in
+# <iterations> iterations to test "<test>"
+# and log predictions in "(.*)"')
+def i_create_resources_from_boosted_ensemble( \
+    step, iterations=None, test=None, output=None):
+    ok_(iterations is not None and test is not None and \
+        output is not None)
+    world.directory = os.path.dirname(output)
+    world.folders.append(world.directory)
+    try:
+        test = res_filename(test)
+        command = ("bigmler --dataset " + world.dataset['resource'] +
+                   " --test " + test + " --boosting-iterations " +
+                   str(iterations) + " --tag my_ensemble --store" +
+                   " --output " + output)
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        ok_(retcode >= 0)
+        world.test_lines = file_number_of_lines(test)
+        # test file has headers in it, so first line must be ignored
+        world.test_lines -= 1
+        world.output = output
+        world.iterations = int(iterations)
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+
+#@step(r'I create BigML resources using boosted ensemble in <iterations>
+# iterations to remotely test "<test>" and log predictions in "(.*)"')
+def i_create_resources_remotely_from_boosted_ensemble( \
+    step, iterations=None, test=None, output=None):
+    ok_(iterations is not None and test is not None and \
+        output is not None)
+    world.directory = os.path.dirname(output)
+    world.folders.append(world.directory)
+    try:
+        test = res_filename(test)
+        command = ("bigmler --dataset " + world.dataset['resource'] +
+                   " --test " + test + " --boosting-iterations " +
+                   str(iterations) + " --remote --tag my_ensemble --store" +
+                   " --output " + output + " --to-csv")
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        ok_(retcode >= 0)
+        world.test_lines = file_number_of_lines(test)
+        # test file has headers in it, so first line must be ignored
+        world.test_lines -= 1
+        world.output = output
+        world.iterations = int(iterations)
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+
 def i_create_resources_from_ensemble_generic(step, number_of_models=None, \
     no_replacement="", test=None, output=None):
     ok_(number_of_models is not None and test is not None and \
