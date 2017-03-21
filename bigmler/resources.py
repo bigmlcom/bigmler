@@ -1346,10 +1346,10 @@ def set_batch_prediction_args(args, fields=None,
                                      fields, dataset_fields)})
 
     if args.prediction_info in [NORMAL_FORMAT, FULL_FORMAT]:
-        if args.boosting:
+        if hasattr(args, 'boosting') and args.boosting:
+            batch_prediction_args.update(probability=True)
+        else:
             batch_prediction_args.update(confidence=True)
-        # TODO: change this to else: and previous line to probability=True
-        batch_prediction_args.update(confidence=True)
 
     if args.prediction_info == FULL_FORMAT:
         batch_prediction_args.update(all_fields=True)

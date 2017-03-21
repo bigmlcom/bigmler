@@ -36,7 +36,7 @@ from bigmler.tests.max_categories_tst_prediction_steps import \
     i_check_create_max_categories_datasets, i_create_all_mc_resources
 from bigmler.tests.basic_batch_tst_prediction_steps import \
     i_check_create_test_source, i_check_create_test_dataset, \
-    i_check_create_batch_prediction
+    i_check_create_batch_prediction, i_check_create_batch_predictions_dataset
 from bigmler.tests.basic_cluster_prediction_steps import \
     i_create_all_cluster_resources, i_check_create_cluster
 from bigmler.tests.basic_anomaly_prediction_steps import \

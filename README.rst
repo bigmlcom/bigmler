@@ -176,7 +176,8 @@ Quick Start
 ===========
 
 Let's see some basic usage examples. Check the `installation` and `authentication`
-sections in `BigMLer on Read the Docs <http://bigmler.readthedocs.org>`_ if you are not familiar with BigML.
+sections in `BigMLer on Read the Docs <http://bigmler.readthedocs.org>`_ if
+you are not familiar with BigML.
 
 Basics
 ------
@@ -202,19 +203,25 @@ You can also specify a file name to save the newly created predictions
 
     bigmler --train data/iris.csv --test data/test_iris.csv --output predictions
 
-If you do not specify the path to an output file, BigMLer will auto-generate one for you under a
-new directory named after the current date and time (e.g., `MonNov1212_174715/predictions.csv`).
+If you do not specify the path to an output file, BigMLer will auto-generate
+one for you under a
+new directory named after the current date and time
+(e.g., `MonNov1212_174715/predictions.csv`).
 With ``--prediction-info``
 flag set to ``brief`` only the prediction result will be stored (default is
 ``normal`` and includes confidence information).
 
-A different ``objective field`` (the field that you want to predict) can be selected using
+A different ``objective field`` (the field that you want to predict) can
+be selected using
 
 .. code-block:: bash
 
-    bigmler --train data/iris.csv --test data/test_iris.csv  --objective 'sepal length'
+    bigmler --train data/iris.csv  \
+            --test data/test_iris.csv \
+            --objective 'sepal length'
 
-If you do not explicitly specify an objective field, BigML will default to the last
+If you do not explicitly specify an objective field, BigML will
+default to the last
 column in your dataset.
 
 Also, if your test file uses a particular field separator for its data,

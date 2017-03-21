@@ -3,6 +3,11 @@
 History
 -------
 
+3.10.0 (2017-03-21)
+~~~~~~~~~~~~~~~~~~~
+
+- Adding suport for booted ensembles' new options.
+
 3.9.3 (2017-03-08)
 ~~~~~~~~~~~~~~~~~~
 

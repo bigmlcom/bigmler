@@ -673,17 +673,16 @@ class TestPrediction(object):
 
         """
         examples = [
-            ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}', '10', 'data/test_iris.csv', 'scenario23/predictions.csv', 'check_files/predictions_iris_boost.csv']]
+            ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}', '10', 'data/test_iris.csv', 'scenario24/predictions.csv', 'check_files/predictions_iris_boost.csv']]
         show_doc(self.test_scenario24, examples)
         for example in examples:
             print "\nTesting with:\n", example
             test_pred.i_have_previous_scenario_or_reproduce_it( \
                 self, example[0], example[1])
             test_pred.i_create_resources_remotely_from_boosted_ensemble( \
-                self, iterationss=example[2], test=example[3],
+                self, iterations=example[2], test=example[3],
                 output=example[4])
             test_pred.i_check_create_ensemble(self)
             test_pred.i_check_create_batch_prediction(self)
-            test_pred.i_check_create_batch_prediction_dataset(self)
             test_pred.i_check_create_predictions(self)
             test_pred.i_check_predictions(self, example[5])

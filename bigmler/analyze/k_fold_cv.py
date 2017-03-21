@@ -454,9 +454,6 @@ def add_model_options(command_args, args):
     if args.objective_weights:
         command_args.append("--objective-weights")
         command_args.append(args.objective_weights)
-    if args.tlp:
-        command_args.append("--tlp")
-        command_args.append(str(args.tlp))
     if args.model_attributes:
         command_args.append("--model-attributes")
         command_args.append(args.model_attributes)

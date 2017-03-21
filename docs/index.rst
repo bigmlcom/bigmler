@@ -331,11 +331,26 @@ just use the `--randomize` option
 
      bigmler --train data/iris.csv --test data/test_iris.csv \
              --number-of-models 10 --sample-rate 0.75 --replacement \
-             --tag my_ensemble --randomize
+             --tag my_random_forest --randomize
 
 The fields to choose from will be randomized at each split creating a random
 decision forest that when used together will increase the prediction
 performance of the individual models.
+
+To create a boosted trees' ensemble use the `--boosting` option
+
+.. code-block:: bash
+
+     bigmler --train data/iris.csv --test data/test_iris.csv \
+             --boosting --tag my_boosted_trees
+
+or add the ``--boosting-iterations` limit
+
+.. code-block:: bash
+
+     bigmler --train data/iris.csv --test data/test_iris.csv \
+             --booting-iterations 10 --sample-rate 0.75 --replacement \
+             --tag my_boosted_trees
 
 Once you have an existing ensemble, you can use it to predict.
 You can do so with the command
@@ -3523,7 +3538,33 @@ Ensembles
 ``--combine-votes`` *LIST_OF_DIRS*                Combines the votes of models
                                                   generated
                                                   in a list of directories
-``--tlp`` *LEVEL*                                 Task-level parallelization
+``--ensemble-sample-rate`` *RATE*                 Ensemble sampling rate for
+                                                  bagging
+``--ensemble-sample-seed`` *SEED*                 Value used as seed in
+                                                  ensembles random selections
+``--ensemble-sample-no-replacement``              Don't use replacement when
+                                                  bagging
+``--boosting``                                    Create a boosted ensemble
+``--boosting-iterations`` *ITERATIONS*            Maximum number of iterations
+                                                  used in boosted ensembles.
+``--early-holdout`` *HOLDOUT*                     The portion of the dataset
+                                                  that will be held out for
+                                                  testing at the end of every
+                                                  iteration in boosted
+                                                  ensembles (between 0 and 1)
+``--no-early-out-of-bag``                         Causes the out of bag samples
+                                                  not to be tested after
+                                                  every iteration in boosted
+                                                  ensembles.
+``--learning-rate`` *RATE*                        It controls how aggressively
+                                                  the boosting algorithm
+                                                  will fit the data in boosted
+                                                  ensembles (between 0 and 1)
+``--no-step-out-of-bag``                          Causes the out of bag samples
+                                                  not to be tested after
+                                                  every iteration to choose the
+                                                  gradient step size
+                                                  in boosted ensembles.
 ================================================= =============================
 
 
