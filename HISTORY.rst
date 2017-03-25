@@ -3,6 +3,13 @@
 History
 -------
 
+3.10.1 (2017-03-25)
+~~~~~~~~~~~~~~~~~~~
+
+- Adding --embed-libs and --embedded-libraries to bigmler whizzml and
+  bigmler execute subcommands to embed the libraries'
+  code in the scripts.
+
 3.10.0 (2017-03-21)
 ~~~~~~~~~~~~~~~~~~~
 

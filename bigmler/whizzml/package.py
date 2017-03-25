@@ -49,7 +49,8 @@ SESSIONS_LOG = u"bigmler_sessions"
 NAME_MAX_LENGTH = 127
 
 METADATA_FILE = "metadata.json"
-WHIZZML_RESOURCES = ["library", "script"]
+WHIZZML_LIBRARY = "library"
+WHIZZML_RESOURCES = [WHIZZML_LIBRARY, "script"]
 
 
 subcommand_list = []
@@ -114,6 +115,16 @@ def read_library_id(path):
     return library_id
 
 
+def get_library_code(library_ids, api):
+    """Download the code in the libraries and return an array of source codes
+
+    """
+    code = []
+    for library_id in library_ids:
+        source_code = api.get_library(library_id)["object"]["source_code"]
+        code.append(source_code)
+
+
 def create_package(args, api, common_options, resume=False):
     """Creates the package whizzml resources as referred in the metadata.json
     file.
@@ -150,24 +161,34 @@ def create_package(args, api, common_options, resume=False):
             lib_imports = metadata.get("imports")
             for lib_import in lib_imports:
                 args.package_dir = os.path.join(package_dir, lib_import)
+                if args.embed_libs:
+                    library_ref = create_package( \
+                        args, api, common_options, resume=resume)
+                    u.log_created_resources("imports",
+                                            output_dir, library_ref)
+                else:
+                    try:
                 # try to read the library id, if it is already there
-                try:
-                    library_id = read_library_id(os.path.join( \
-                        output_dir, os.path.basename(args.package_dir)))
-                except IOError:
-                    create_package(args, api, common_options, resume=resume)
-                    library_id = read_library_id(os.path.join( \
-                        output_dir, os.path.basename(args.package_dir)))
-                imports.append(library_id)
+                        library_ref = read_library_id(os.path.join( \
+                            output_dir, os.path.basename(args.package_dir)))
+                    except IOError:
+                        library_ref = create_package( \
+                            args, api, common_options, resume=resume)
+                        library_ref = read_library_id(os.path.join( \
+                            output_dir, os.path.basename(args.package_dir)))
+                imports.append(library_ref)
                 args.package_dir = package_dir
         # read the metadata.json information
         message = ('Creating the %s.........\n' % metadata.get("kind"))
         u.log_message(message, log_file=session_file,
                       console=args.verbosity)
         if metadata.get("kind") in WHIZZML_RESOURCES:
-            whizzml_code = os.path.join(args.package_dir, \
+            whizzml_code = os.path.normpath(os.path.join(args.package_dir, \
                 metadata.get("source_code", "%s.whizzml" % \
-                metadata.get("kind")))
+                metadata.get("kind"))))
+            if args.embed_libs and metadata.get("kind") == WHIZZML_LIBRARY:
+                return whizzml_code
+
             args.output_dir = os.path.join(output_dir, \
                 os.path.basename(package_dir))
             # creating command to create the resource
@@ -175,6 +196,7 @@ def create_package(args, api, common_options, resume=False):
                                                         args.output_dir)
             command_args = command.split()
             bigml.util.check_dir(args.output_dir)
+
             # getting inputs and outputs for the script from metadata
             if "inputs" in metadata:
                 inputs_file = os.path.join(args.output_dir, "inputs.json")
@@ -195,7 +217,14 @@ def create_package(args, api, common_options, resume=False):
                 command_args.extend(["--name", metadata.get("name")])
             # adding imports, if any
             if imports:
-                command_args.extend(["--imports", ",".join(imports)])
+                if args.embed_libs:
+                    # imports to be embedded are in the same output directory
+                    command_args.extend( \
+                        ["--embedded-imports", os.path.join(output_dir,
+                                                           "imports")])
+                else:
+                    # imports to be refereced by ID
+                    command_args.extend(["--imports", ",".join(imports)])
             command_args.extend(["--verbosity", str(args.verbosity)])
             if args.username:
                 command_args.extend(["--username", args.username])
@@ -215,3 +244,4 @@ def create_package(args, api, common_options, resume=False):
                 u.sys_log_message(command, log_file=subcommand_file)
                 execute_dispatcher(args=command_args)
             args.output_dir = output_dir
+            return whizzml_code

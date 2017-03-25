@@ -275,6 +275,7 @@ FLAGS = {
         {'flag': 'library', 'type': 'string'},
         {'flag': 'execution', 'type': 'string'},
         {'flag': 'code_file', 'type': 'string'},
+        {'flag': 'embedded_imports', 'type': 'string'},
         {'flag': 'output', 'type': 'string'},
         {'flag': 'imports', 'type': 'string'},
         {'flag': 'inputs', 'type': 'string'},
@@ -285,7 +286,8 @@ FLAGS = {
         {'flag': 'creation_defaults', 'type': 'string'},
         {'flag': 'no_execute', 'type': 'boolean'}],
     'BigMLer whizzml': [
-        {'flag': 'package_dir', 'type': 'string'}]}
+        {'flag': 'package_dir', 'type': 'string'},
+        {'flag': 'embed_libs', 'type': 'boolean'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):

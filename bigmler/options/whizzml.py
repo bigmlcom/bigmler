@@ -34,6 +34,13 @@ def get_whizzml_options(defaults=None):
             "action": 'store',
             "dest": 'package_dir',
             "default": defaults.get('package_dir', None),
-            "help": "Directory for the package."}}
+            "help": "Directory for the package."},
 
+        # any imported library's code will be embedded in the script
+        '--embed-libs': {
+            "action": 'store_true',
+            "dest": 'embed_libs',
+            "default": defaults.get('embed_libs', False),
+            "help": ("Any imported library's code will be embedded in"
+                     " the script.")}}
     return options

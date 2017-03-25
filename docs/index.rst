@@ -3024,7 +3024,7 @@ Requirements
 
 Python 2.7 and 3 are currently supported by BigMLer.
 
-BigMLer requires `bigml 4.9.0 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 4.9.1 <https://github.com/bigmlcom/python>`_  or
 higher. Using proportional missing strategy will additionally request
 the use of the `numpy <http://www.numpy.org/>`_ and
 `scipy <http://www.scipy.org/>`_ libraries. They are not
@@ -4005,6 +4005,10 @@ Execute Subcommand Options
                                                 see details in the
                                                 `API Developers documentation
                                                 <https://bigml.com/api/scripts#ws_script_arguments>`_
+``--embedded-libraries`` *PATH*                 Path to a file that contains
+                                                the location of the files to
+                                                be embedded in the script as
+                                                libraries
 ``--execution`` *EXECUTION_ID*                  BigML execution ID
 ``--execution-file`` *EXECUTION_FILE*           BigML execution JSON
                                                 structure file
@@ -4054,6 +4058,20 @@ Execute Subcommand Options
 ``--to-library``                                Boolean that  causes the code
                                                 to be compiled and stored as
                                                 a library
+=============================================== ===============================
+
+
+Whizzml Subcommand Options
+--------------------------
+
+=============================================== ===============================
+``--package-dir`` *DIR*                         Directory that stores the
+                                                package files
+``--embed-libs ``                               I causes the subcommand to
+                                                embed the libraries code in
+                                                the package scripts instead
+                                                of creating libraries and
+                                                importing them
 =============================================== ===============================
 
 

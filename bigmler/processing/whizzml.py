@@ -47,6 +47,11 @@ def script_processing(api, args,
             script = args.script
         if not resume:
             args.resume = resume
+            imports_code = []
+            if args.embedded_imports is not None:
+                for import_file in args.embedded_imports_:
+                    with open(import_file) as code_file:
+                        imports_code.append(code_file.read())
             if args.code_file:
                 try:
                     with open(args.code_file) as code_file:
@@ -56,6 +61,8 @@ def script_processing(api, args,
                              args.code_file)
             else:
                 source_code = args.code
+            if imports_code:
+                source_code = "%s\n%s" % ("\n".join(imports_code), source_code)
             # Check if there's a created project for it
             args.project_id = pp.project_processing(
                 api, args, resume, session_file=session_file,

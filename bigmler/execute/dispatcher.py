@@ -114,7 +114,6 @@ def execute_whizzml(args, api, session_file):
             args.script = script['resource']
             args.script_ids = scripts
 
-
         if (args.script or args.scripts) and not args.no_execute:
             execution = pw.execution_processing( \
                 api, args, session_file=session_file, path=path, log=log)

@@ -739,6 +739,16 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
+    # Extracts the imports from the JSON metadata file
+    try:
+        if command_args.embedded_imports:
+            command_args.embedded_imports_ = u.read_resources( \
+                command_args.embedded_imports)
+        else:
+            command_args.embedded_imports_ = []
+    except AttributeError:
+        pass
+
     return {"api": api, "args": command_args}
 
 

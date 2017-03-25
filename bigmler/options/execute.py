@@ -127,6 +127,14 @@ def get_execute_options(defaults=None):
             'help': ("Comma-separated list of libraries IDs to be"
                      " included as imports in scripts or other libraries.")},
 
+        # File that contains the paths to the import code files, one per line.
+        "--embedded-imports": {
+            'action': 'store',
+            'dest': 'embedded_imports',
+            'default': defaults.get('embedded_imports', None),
+            'help': ("File that contains the paths to the import code files,"
+                     " one per line.")},
+
         # Path to the JSON file with the values of the execution parms.
         "--inputs": {
             'action': 'store',
