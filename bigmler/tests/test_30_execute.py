@@ -96,7 +96,7 @@ class TestExecute(object):
         """
         print self.test_scenario02.__doc__
         examples = [
-            ['data/code_lib.whizzml', 'scenario2_exe']]
+            ['data/whizzml_lib/lib/code_lib.whizzml', 'scenario2_exe']]
         for example in examples:
             print "\nTesting with:\n", example
             execute.i_create_all_library_resources(self, example[0], example[1])
@@ -119,7 +119,7 @@ class TestExecute(object):
         """
         print self.test_scenario03.__doc__
         examples = [
-            ['data/code.whizzml', 'scenario3_exe', 'data/inputs_dec.json', 'data/outputs_dec.json', 'data/inputs.json', 'check_files/results_s3exe.json']]
+            ['data/whizzml/code.whizzml', 'scenario3_exe', 'data/inputs_dec.json', 'data/outputs_dec.json', 'data/inputs.json', 'check_files/results_s3exe.json']]
         for example in examples:
             print "\nTesting with:\n", example
             execute.i_create_all_execution_with_io_resources(self, example[0], example[1], example[2], example[3], example[4])
@@ -142,8 +142,28 @@ class TestExecute(object):
         """
         print self.test_scenario04.__doc__
         examples = [
-            ['data', 'scenario4_pck']]
+            ['data/whizzml', 'scenario4_pck']]
         for example in examples:
             print "\nTesting with:\n", example
             execute.i_create_from_whizzml_package(self, example[0], example[1])
+            execute.i_check_create_package_script(self, example[0])
+
+
+    def test_scenario04(self):
+        """
+        Scenario: Successfully creating an whizzml package from a metadata file embedding library code:
+            Given I create a BigML whizzml package from "<package_dir>", embed any library and log results in  "<output_dir>"
+            Then I check that the script in "<package_dir>" has been created
+
+            Examples:
+            | package_dir                   | output_dir       |
+            | data/whizzml_lib              | scenario5_pck    |
+
+        """
+        print self.test_scenario04.__doc__
+        examples = [
+            ['data/whizzml_lib', 'scenario5_pck']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            execute.i_create_from_whizzml_package_embedding(self, example[0], example[1])
             execute.i_check_create_package_script(self, example[0])

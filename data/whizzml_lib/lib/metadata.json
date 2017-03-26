@@ -1,0 +1,6 @@
+{
+  "name": "Example of a library in whizzml",
+  "description": "Defining an addition function using a library",
+  "kind": "library",
+  "source_code": "code_lib.whizzml"
+}

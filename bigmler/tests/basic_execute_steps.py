@@ -53,7 +53,6 @@ def shell_execute(command, output, test=None, options=None,
                 data_lines = file_number_of_lines(data) - 1
                 world.test_lines = int(data_lines * float(test_split))
             world.output = output
-            assert True
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
@@ -104,7 +103,6 @@ def i_check_create_script(step):
         world.scripts.append(script['resource'])
         world.script = script
         script_file.close()
-        assert True
     except Exception, exc:
         assert False, str(exc)
 
@@ -119,7 +117,6 @@ def i_check_create_execution(step):
         world.executions.append(execution['resource'])
         world.execution = execution
         execution_file.close()
-        assert True
     except Exception, exc:
         assert False, str(exc)
 
@@ -132,7 +129,6 @@ def i_check_create_result(step):
         world.results = json.load(result_file)
         del world.results["sources"]
         result_file.close()
-        assert True
     except Exception, exc:
         assert False, str(exc)
 
@@ -144,7 +140,6 @@ def i_check_result_is(step, check_file=None):
         del results["sources"]
         assert_equal(results, world.results)
         check_file.close()
-        assert True
     except Exception, exc:
         assert False, str(exc)
 
@@ -159,15 +154,14 @@ def i_check_create_library(step):
         world.libraries.append(library['resource'])
         world.library = library
         library_file.close()
-        assert True
     except Exception, exc:
         assert False, str(exc)
 
 
 #@step(r'I check that the package script in "(.*)" has been created')
 def i_check_create_package_script(step, package_dir=None):
-    print world.directory, package_dir
-    script_file = os.path.join(world.directory, package_dir, "scripts")
+    script_file = os.path.join(world.directory, os.path.basename(package_dir),
+                               "scripts")
     try:
         script_file = open(script_file, "r")
         script = check_resource(script_file.readline().strip(),
@@ -175,6 +169,14 @@ def i_check_create_package_script(step, package_dir=None):
         world.scripts.append(script['resource'])
         world.script = script
         script_file.close()
-        assert True
     except Exception, exc:
         assert False, str(exc)
+
+
+#@step(r'I create a BigML whizzml package from "(.*)", embed any library and log results in  "(.*)"$')
+def i_create_from_whizzml_package_embedding(step, package_dir=None,
+                                            output_dir=None):
+    ok_(package_dir is not None and output_dir is not None)
+    command = ("bigmler whizzml --package-dir " + res_filename(package_dir) +
+               " --embed-libs --store --output-dir " + output_dir)
+    shell_execute(command, "%s/xx.txt" % output_dir)
