@@ -43,9 +43,10 @@ from bigmler.utils import (log_created_resources, check_resource_error, dated,
                            get_url, log_message)
 
 MAX_MODELS = 10
-AGGREGATION = -1
+BOOSTING = -1
 COMBINATION = -2
-BOOSTING = 4
+AGGREGATION = -3
+
 COMBINATION_LABEL = 'combined'
 OTHER = "***** other *****"
 

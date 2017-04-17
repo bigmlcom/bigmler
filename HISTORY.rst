@@ -3,6 +3,14 @@
 History
 -------
 
+3.10.2 (2017-04-13)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing bug: the --package-dir option in bigmler whizzml did not expand
+  the ~ character to its associated user path.
+- Fixing bug: Multi-label predictions failed because of changes in the
+  bindings internal coding for combiners.
+
 3.10.1 (2017-03-25)
 ~~~~~~~~~~~~~~~~~~~
 

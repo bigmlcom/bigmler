@@ -168,7 +168,7 @@ def create_package(args, api, common_options, resume=False):
                                             output_dir, library_ref)
                 else:
                     try:
-                # try to read the library id, if it is already there
+                    # try to read the library id, if it is already there
                         library_ref = read_library_id(os.path.join( \
                             output_dir, os.path.basename(args.package_dir)))
                     except IOError:

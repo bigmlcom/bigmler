@@ -75,8 +75,9 @@ def report_dispatcher(args=sys.argv[1:]):
         os.chdir(os.path.join(HOME, SERVER_DIRECTORY))
         httpd = None
         try:
-            httpd = StoppableHTTPServer((DEFAULT_HOST, port),
-                                        SimpleHTTPServer.SimpleHTTPRequestHandler)
+            httpd = StoppableHTTPServer(\
+                (DEFAULT_HOST, port),
+                SimpleHTTPServer.SimpleHTTPRequestHandler)
             thread.start_new_thread(httpd.serve, ())
         except socket.error, exc:
             print exc
