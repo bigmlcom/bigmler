@@ -243,7 +243,6 @@ def avg_class_statistics(total, component, number_of_evaluations):
     special_keys = ['class_name', 'present_in_test_data', 'occurrences',
                     'ks_statistic', 'max_phi',
                     'per_threshold_confusion_matrices']
-    avg_keys = []
     for class_info in component:
         class_name = class_info['class_name']
         found = False
@@ -257,28 +256,35 @@ def avg_class_statistics(total, component, number_of_evaluations):
                     total_class_info['occurrences'] -= 1
                     occurrences = float(total_class_info['occurrences'])
                     for key in total_class_info:
-                        # renormalizing previous average count
-                        if not (isinstance(key, tuple) or key in special_keys):
-                            total_class_info[key] *= ((occurrences + 1) /
-                                                      occurrences)
+                        try:
+                            # renormalizing previous average count
+                            if not (isinstance(key, tuple) or
+                                    key in special_keys):
+                                total_class_info[key] *= ((occurrences + 1) /
+                                                          occurrences)
+                        except ValueError:
+                            pass
                 if not total_class_info['present_in_test_data']:
                     total_class_info['present_in_test_data'] = flag
                 occurrences = float(total_class_info['occurrences'])
                 for key in class_info:
-                    if not (isinstance(key, tuple) or key in special_keys):
-                        new_key = (key if key.startswith("average_")
-                                   else ("average_%s" % key))
-                        if new_key in total_class_info:
-                            total_class_info[new_key] += (class_info[key] /
-                                                          occurrences)
-                        else:
-                            total_class_info[new_key] = (class_info[key] /
-                                                         occurrences)
-                        sd_key = "%s_standard_deviation" % key
-                        if not (sd_key, new_key) in total_class_info:
-                            total_class_info[(sd_key, new_key)] = []
-                        total_class_info[
-                            (sd_key, new_key)].append(class_info[key])
+                    try:
+                        if not (isinstance(key, tuple) or key in special_keys):
+                            new_key = (key if key.startswith("average_")
+                                       else ("average_%s" % key))
+                            if new_key in total_class_info:
+                                total_class_info[new_key] += (class_info[key] /
+                                                              occurrences)
+                            else:
+                                total_class_info[new_key] = (class_info[key] /
+                                                             occurrences)
+                            sd_key = "%s_standard_deviation" % key
+                            if not (sd_key, new_key) in total_class_info:
+                                total_class_info[(sd_key, new_key)] = []
+                            total_class_info[
+                                (sd_key, new_key)].append(class_info[key])
+                    except ValueError:
+                        pass
                 break
         if not found:
             flag = class_info['present_in_test_data']
@@ -287,22 +293,27 @@ def avg_class_statistics(total, component, number_of_evaluations):
                 class_info['occurrences'] -= 1
             keys = class_info.keys()
             for key in keys:
-                if not key in special_keys:
-                    sd_key = "%s_standard_deviation" % key
-                    if not key.startswith("average_"):
-                        new_key = "average_%s" % key
-                        class_info[new_key] = (float(class_info[key]) /
+                try:
+                    if not key in special_keys:
+                        sd_key = "%s_standard_deviation" % key
+                        if not key.startswith("average_"):
+                            new_key = "average_%s" % key
+                            class_info[new_key] = (float(class_info[key]) /
+                                                   class_info['occurrences'])
+                            if not (sd_key, new_key) in class_info:
+                                class_info[(sd_key, new_key)] = []
+                            class_info[(sd_key, new_key)].append( \
+                                class_info[key])
+                            del class_info[key]
+                        else:
+                            new_key = key
+                            class_info[key] = (float(class_info[key]) /
                                                class_info['occurrences'])
-                        if not (sd_key, new_key) in class_info:
-                            class_info[(sd_key, new_key)] = []
-                        class_info[(sd_key, new_key)].append(class_info[key])
-                        del class_info[key]
-                    else:
-                        new_key = key
-                        class_info[key] = (float(class_info[key]) /
-                                           class_info['occurrences'])
-                        if not (sd_key, new_key) in class_info:
-                            class_info[(sd_key, new_key)] = []
-                        class_info[(sd_key, new_key)].append(class_info[key])
+                            if not (sd_key, new_key) in class_info:
+                                class_info[(sd_key, new_key)] = []
+                            class_info[(sd_key, new_key)].append( \
+                                class_info[key])
+                except ValueError:
+                    pass
             total.append(class_info)
     return total
