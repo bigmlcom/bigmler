@@ -5,6 +5,7 @@ python:
 # command to install dependencies
 install: "python setup.py install"
 # command to run tests
-script: - export BIGML_USERNAME
-- export BIGML_API_KEY
-- nosetests
+script:
+  - export BIGML_USERNAME
+  - export BIGML_API_KEY
+  - nosetests
