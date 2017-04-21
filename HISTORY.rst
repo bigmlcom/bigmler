@@ -3,6 +3,12 @@
 History
 -------
 
+3.10.3 (2017-04-21)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing bug: Adapting to changes in the structure of evaluations that caused
+  cross-validation failure.
+
 3.10.2 (2017-04-13)
 ~~~~~~~~~~~~~~~~~~~
 
