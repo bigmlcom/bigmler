@@ -240,7 +240,10 @@ def avg_class_statistics(total, component, number_of_evaluations):
     """Adds a new set of per class evaluation measures to the total average
 
     """
-    special_keys = ['class_name', 'present_in_test_data', 'occurrences']
+    special_keys = ['class_name', 'present_in_test_data', 'occurrences',
+                    'ks_statistic', 'max_phi',
+                    'per_threshold_confusion_matrices']
+    avg_keys = []
     for class_info in component:
         class_name = class_info['class_name']
         found = False
