@@ -5,8 +5,8 @@ python:
 env:
   - BML_TESTS="01 02 03 04 05"
   - BML_TESTS="06 07 08 09 10 11 12 13 14 15 16"
-  - BML_TESTS="17 18"
-  - BML_TESTS="19 20"
+  - BML_TESTS="17"
+  - BML_TESTS="18 19 20"
   - BML_TESTS="21 22 23 24 25"
   - BML_TESTS="26 27 28 29 30 31 32"
 # command to install dependencies
