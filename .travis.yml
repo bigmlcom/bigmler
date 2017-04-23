@@ -4,16 +4,16 @@ python:
   - "3.6"
 env:
   - BML_TESTS="01 02 03 04 05"
-  - BML_TESTS="06 07 08 09 10"
-  - BML_TESTS="11 12 13 14 15"
-  - BML_TESTS="16 17 18 19 20"
+  - BML_TESTS="06 07 08 09 10 11 12 13 14 15 16"
+  - BML_TESTS="17 18"
+  - BML_TESTS="19 20"
   - BML_TESTS="21 22 23 24 25"
   - BML_TESTS="26 27 28 29 30 31 32"
 # command to install dependencies
-install: 
+install:
   - python setup.py develop
 # command to run tests
-script: 
+script:
   - export TESTS=$(for t in $BML_TESTS; do ls bigmler/tests/*$t*;done|paste -sd ",")
+  - echo $TESTS
   - python setup.py nosetests --tests=$TESTS
-
