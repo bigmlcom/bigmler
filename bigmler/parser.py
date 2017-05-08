@@ -37,6 +37,7 @@ from bigmler.options.sample import get_sample_options
 from bigmler.options.report import get_report_options
 from bigmler.options.reify import get_reify_options
 from bigmler.options.project import get_project_options
+from bigmler.options.export import get_export_options
 from bigmler.options.association import get_association_options
 from bigmler.options.logisticregression import get_logistic_regression_options
 from bigmler.options.topicmodel import get_topic_model_options
@@ -44,7 +45,8 @@ from bigmler.options.execute import get_execute_options
 
 SUBCOMMANDS = ["main", "analyze", "cluster", "anomaly", "sample",
                "delete", "report", "reify", "project", "association",
-               "logistic-regression", "topic-model", "execute", "whizzml"]
+               "logistic-regression", "topic-model", "execute", "whizzml",
+               "export"]
 
 
 MAIN = SUBCOMMANDS[0]
@@ -236,6 +238,18 @@ under the License.""" % version
 
     defaults = general_defaults["BigMLer report"]
     subcommand_options["report"] = get_report_options(defaults=defaults)
+
+    defaults = general_defaults["BigMLer export"]
+    subcommand_options["export"] = get_export_options(defaults=defaults)
+    export_common_options_list = ['clear-logs', 'username', 'api-key',
+                                  'version',
+                                  'dev', 'no-dev', 'output-dir', 'verbosity',
+                                  'resume', 'stack-level', 'debug', 'store']
+    export_common_options = {}
+    for option in export_common_options_list:
+        option = '--%s' % option
+        export_common_options.update({option: common_options[option]})
+    subcommand_options["export"].update(export_common_options)
 
     defaults = general_defaults["BigMLer reify"]
     subcommand_options["reify"] = get_reify_options(defaults=defaults)

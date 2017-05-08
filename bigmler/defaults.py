@@ -287,7 +287,9 @@ FLAGS = {
         {'flag': 'no_execute', 'type': 'boolean'}],
     'BigMLer whizzml': [
         {'flag': 'package_dir', 'type': 'string'},
-        {'flag': 'embed_libs', 'type': 'boolean'}]}
+        {'flag': 'embed_libs', 'type': 'boolean'}],
+    'BigMLer export': [
+        {'flag': 'language', 'type': 'string'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):
