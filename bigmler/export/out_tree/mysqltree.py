@@ -23,7 +23,7 @@ predictions
 
 from bigml.tree_utils import (filter_nodes, split, ruby_string,
                               missing_branch, none_value,
-                              one_branch, PYTHON_OPERATOR)
+                              one_branch, INDENT)
 
 from bigml.tree import Tree
 
@@ -32,6 +32,16 @@ T_MISSING_OPERATOR = {
     "!=": "NOT ISNULL("
 }
 
+# Map operator str to its corresponding mysql operator
+MYSQL_OPERATOR = {
+    "<": "<",
+    "<=": "<=",
+    "=": "=",
+    "!=": "!=",
+    "/=": "!=",
+    ">=": ">=",
+    ">": ">"
+}
 
 def sql_string(text):
     """Transforms string output for sql
@@ -43,9 +53,9 @@ def sql_string(text):
 class MySQLTree(Tree):
 
 
-    def plug_in_body(self, body=u"", conditions=None, cmv=None,
-                     ids_path=None, subtree=True):
-        """Translate the model into a set of "if" statemets in tableau syntax
+    def plug_in_body(self, depth=0, cmv=None,
+                     ids_path=None, subtree=True, body=u""):
+        """Translate the model into a mysql function
 
         `depth` controls the size of indentation. As soon as a value is missing
         that node is returned without further evaluation.
@@ -56,10 +66,8 @@ class MySQLTree(Tree):
             cmv = []
 
         if body:
-             alternate = u",\nIF ("
+             alternate = u",\n%sIF (" % (depth * INDENT)
         else:
-            if conditions is None:
-                conditions = []
             alternate = u"IF ("
         post_missing_body = u""
         children = filter_nodes(self.children, ids=ids_path,
@@ -72,17 +80,17 @@ class MySQLTree(Tree):
             # no missing branch in the children list
             if (not has_missing_branch and
                     not self.fields[field]['name'] in cmv):
-                conditions.append("ISNULL(`%s`)" % self.fields[field]['name'])
+                condition = "ISNULL(`%s`)" % self.fields[field]['name']
                 body += (u"%s (%s)" %
-                         (alternate, conditions[-1]))
+                         (alternate, condition))
                 if self.fields[self.objective_id]['optype'] == 'numeric':
                     value = self.output
                 else:
                     value = sql_string(self.output)
                 body += (u", %s" % value)
                 cmv.append(self.fields[field]['name'])
-                alternate = u",\nIF ("
-                del conditions[-1]
+                depth += 1
+                alternate = u",\n%sIF (" % (depth * INDENT)
                 post_missing_body += u")"
 
             for child in children:
@@ -108,23 +116,25 @@ class MySQLTree(Tree):
                 else:
                     value = sql_string(child.predicate.value)
                 operator = ("" if child.predicate.value is None else
-                            PYTHON_OPERATOR[child.predicate.operator])
+                            MYSQL_OPERATOR[child.predicate.operator])
                 if child.predicate.value is None:
                     pre_condition = (
                         T_MISSING_OPERATOR[child.predicate.operator])
                     post_condition = ")"
 
-                conditions.append("%s`%s`%s%s%s" % (
+                condition = ("%s`%s`%s%s%s" % ( \
                     pre_condition,
                     self.fields[child.predicate.field]['name'],
                     operator,
                     value,
                     post_condition))
                 body += (
-                    u"%s (%s)" % (alternate, conditions[-1]))
-                body = child.plug_in_body(body, conditions[:], cmv=cmv[:],
-                                          ids_path=ids_path, subtree=subtree)
-                del conditions[-1]
+                    u"%s (%s)" % (alternate, condition))
+                depth += 1
+                alternate = u",\n%sIF (" % (depth * INDENT)
+                body = child.plug_in_body(depth, cmv=cmv[:],
+                                          ids_path=ids_path, subtree=subtree,
+                                          body=body)
             body += u", NULL))" + post_missing_body
             post_missing_body = u""
         else:
