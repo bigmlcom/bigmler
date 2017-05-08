@@ -45,15 +45,13 @@ EXPORTS = { \
     "javascript": JsModel,
     "python": PythonModel,
     "tableau": TableauModel,
-    "mysql": MySQLModel
-}
+    "mysql": MySQLModel}
 
 EXTENSIONS = {\
     "javascript": "js",
     "python": "py",
     "tableau": "tb",
-    "mysql": "sql"
-}
+    "mysql": "sql"}
 
 
 def export_dispatcher(args=sys.argv[1:]):

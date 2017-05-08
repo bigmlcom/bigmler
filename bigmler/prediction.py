@@ -612,7 +612,7 @@ def predict(models, fields, args, api=None, log=None,
         # For instance,
         #     model_50c0de043b563519830001c2_predictions.csv
         # Predictions are computed individually only if no_batch flag is set
-        if (args.remote and args.no_batch and not args.multi_label):
+        if args.remote and args.no_batch and not args.multi_label:
             if args.ensemble is not None:
                 remote_predict_ensemble(args.ensemble, test_reader,
                                         prediction_file, api, args, resume,
@@ -644,9 +644,9 @@ def predict(models, fields, args, api=None, log=None,
         # For a model we build a Model and for a small number of models,
         # we build a MultiModel using all of
         # the given models and issue a combined prediction
-        if (args.boosting or (len(models) <= args.max_batch_models
-                and args.fast and
-                not args.multi_label and args.max_categories == 0
+        if (args.boosting or (len(models) <= args.max_batch_models \
+                and args.fast and \
+                not args.multi_label and args.max_categories == 0 \
                 and args.method != COMBINATION)):
             local_predict(models, test_reader, output, args, options, exclude)
         # For large numbers of models, we split the list of models in chunks

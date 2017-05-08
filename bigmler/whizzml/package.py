@@ -221,7 +221,7 @@ def create_package(args, api, common_options, resume=False):
                     # imports to be embedded are in the same output directory
                     command_args.extend( \
                         ["--embedded-imports", os.path.join(output_dir,
-                                                           "imports")])
+                                                            "imports")])
                 else:
                     # imports to be refereced by ID
                     command_args.extend(["--imports", ",".join(imports)])

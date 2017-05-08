@@ -34,7 +34,7 @@ def get_export_options(defaults=None):
             'dest': 'model',
             'default': defaults.get('model', None),
             'help': ("ID of the model to generate a local model.")},
-       '--language': {
+        '--language': {
             'action': 'store',
             'dest': 'language',
             'choices': ['python', 'javascript', 'tableau', 'mysql'],
