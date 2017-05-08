@@ -42,8 +42,7 @@ import bigmler.processing.models as pm
 from bigmler.evaluation import evaluate, cross_validate
 from bigmler.defaults import DEFAULTS_FILE
 from bigmler.prediction import predict, combine_votes, remote_predict
-from bigmler.prediction import (OTHER, COMBINATION,
-                                THRESHOLD_CODE)
+from bigmler.prediction import OTHER, COMBINATION
 from bigmler.reports import clear_reports, upload_reports
 from bigmler.command import Command, get_stored_command
 from bigmler.command import COMMAND_LOG, DIRS_LOG, SESSIONS_LOG

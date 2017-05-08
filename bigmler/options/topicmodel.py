@@ -127,14 +127,6 @@ def get_topic_model_options(defaults=None):
             'default': defaults.get('no_topic_model', False),
             'help': "Do not create a topic model."},
 
-        # The path to a file containing topic model attributes.
-        '--topic-model-attributes': {
-            'action': 'store',
-            'dest': 'topic_model_attributes',
-            'default': defaults.get('topic_model_attributes', None),
-            'help': ("Path to a json file describing topic model"
-                     " attributes.")},
-
         # Create a topic model, not just a dataset.
         '--no-no-topic-model': {
             'action': 'store_false',
