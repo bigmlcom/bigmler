@@ -52,8 +52,10 @@ class TableauModel(Model):
             if response:
                 out.write(u"END\n")
             else:
-                out.write(u"\nThis function cannot be represented "
-                          u"in Tableau syntax.\n")
+                sys.exit(u"\nFailed to represent this model in "
+                         u"in Tableau syntax. Currently, only "
+                         u"models with categorical and numeric fields "
+                         u"can be generated.\n")
             out.flush()
             return None
 

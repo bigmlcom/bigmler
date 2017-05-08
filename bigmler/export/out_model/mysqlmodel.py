@@ -55,8 +55,9 @@ class MySQLModel(Model):
             if response:
                 out.write(u"\n")
             else:
-                out.write(u"\nThis function cannot be represented "
-                          u"in MySQL syntax.\n")
+                sys.exit(u"\nFailed to represent this model "
+                         u"in MySQL syntax. Currently only models with "
+                         u"categorical and numeric fields can be generated.\n")
             out.flush()
             return None
 
