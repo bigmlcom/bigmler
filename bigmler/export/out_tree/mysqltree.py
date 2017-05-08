@@ -34,14 +34,7 @@ T_MISSING_OPERATOR = {
 
 # Map operator str to its corresponding mysql operator
 MYSQL_OPERATOR = {
-    "<": "<",
-    "<=": "<=",
-    "=": "=",
-    "!=": "!=",
-    "/=": "!=",
-    ">=": ">=",
-    ">": ">"
-}
+    "/=": "!="}
 
 def sql_string(text):
     """Transforms string output for sql
@@ -116,7 +109,8 @@ class MySQLTree(Tree):
                 else:
                     value = sql_string(child.predicate.value)
                 operator = ("" if child.predicate.value is None else
-                            MYSQL_OPERATOR[child.predicate.operator])
+                            MYSQL_OPERATOR.get(child.predicate.operator,
+                                               child.predicate.operator))
                 if child.predicate.value is None:
                     pre_condition = (
                         T_MISSING_OPERATOR[child.predicate.operator])
