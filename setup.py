@@ -54,7 +54,8 @@ setuptools.setup(
                 'bigmler.tests', 'bigmler.reify', 'bigmler.project',
                 'bigmler.association', 'bigmler.logisticregression',
                 'bigmler.execute', 'bigmler.whizzml', 'bigmler.topicmodel',
-                'bigmler.export'],
+                'bigmler.export'. 'bigmler.export.out_model',
+                'bigmler.export.out_tree'],
     install_requires = ['bigml>=4.10.0, <4.11.0'],
     package_data={'bigmler':['static/*.json', 'static/*.html']},
     classifiers=[
