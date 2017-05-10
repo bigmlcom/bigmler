@@ -551,9 +551,9 @@ if count > 0:
         predictor_doc = (INDENT + u"\"\"\" " + docstring +
                          u"\n" + INDENT + u"\"\"\"\n")
         body, term_analysis_predicates, item_analysis_predicates = \
-            self.tree.python_body(input_map=input_map,
-                                  ids_path=ids_path,
-                                  subtree=subtree)
+            self.tree.plug_in_body(input_map=input_map,
+                                   ids_path=ids_path,
+                                   subtree=subtree)
         terms_body = ""
         if term_analysis_predicates or item_analysis_predicates:
             terms_body = self.term_analysis_body(term_analysis_predicates,
