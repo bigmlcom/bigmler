@@ -276,7 +276,6 @@ def common_teardown_module():
             world.project_id)['object']['stats']
         for resource_type, value in project_stats.items():
             if value['count'] != 0:
-                # assert False, ("Increment in %s: %s" % (resource_type, value))
                 print "WARNING: Increment in %s: %s" % (resource_type, value)
         world.api.delete_project(world.project_id)
         world.project_id = None
