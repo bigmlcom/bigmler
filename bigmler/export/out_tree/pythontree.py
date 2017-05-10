@@ -40,7 +40,7 @@ def value_to_print(value, optype):
     """
     if (optype == 'numeric' or value is None):
         return value
-    return "\"%s\"" % value.replace('"', '\\"')
+    return u"\"%s\"" % value.replace('"', '\\"')
 
 
 def map_data(field, input_map=False, missing=False):

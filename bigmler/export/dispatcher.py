@@ -53,6 +53,8 @@ EXTENSIONS = {\
     "tableau": "tb",
     "mysql": "sql"}
 
+SEPARATE_OUTPUT = ['tableau', 'mysql']
+
 
 def export_dispatcher(args=sys.argv[1:]):
     """Parses command line and calls the different export functions
@@ -109,3 +111,9 @@ def export_code(args, api=None):
             "%s.%s") % (args.model.replace("/", "_"),
                         EXTENSIONS[args.language]), "w") as handler:
             local_model.plug_in(out=handler)
+        # creating a separate file to predict confidence
+        if args.language in SEPARATE_OUTPUT:
+            with open(os.path.join(args.output_dir, \
+                "%s_confidence.%s") % (args.model.replace("/", "_"),
+                            EXTENSIONS[args.language]), "w") as handler:
+                local_model.plug_in(out=handler, attr='confidence')

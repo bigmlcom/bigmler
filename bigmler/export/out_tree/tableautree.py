@@ -32,12 +32,78 @@ T_MISSING_OPERATOR = {
     "!=": "NOT ISNULL("
 }
 
+# Map operator str to its corresponding mysql operator
+MYSQL_OPERATOR = {
+    "/=": "!="}
+
+def value_to_print(value, optype):
+    """String of code that represents a value according to its type
+
+    """
+    if (value is None):
+        return "NULL"
+    if (optype == 'numeric'):
+        return value
+    return u"'%s'" % value.replace("'", '\\\'')
+
 
 class TableauTree(Tree):
 
+    def missing_check_code(self, field, alternate, cmv, conditions, attr=None):
+        """Builds the code to predict when the field is missing
+
+        """
+        conditions.append("ISNULL([%s])" % self.fields[field]['name'])
+        code = u"%s %s THEN " % \
+            (alternate, " AND ".join(conditions))
+        if attr is None:
+            value = value_to_print( \
+                self.output, self.fields[self.objective_id]['optype'])
+        else:
+            value = getattr(self, attr)
+        code += (u"%s\n" % value)
+        cmv.append(self.fields[field]['name'])
+        del conditions[-1]
+
+        return code
+
+    def missing_prefix_code(self, field, cmv):
+        """Part of the condition that checks for missings when missing_splits
+        has been used
+
+        """
+
+        negation = u"" if self.predicate.missing else u"NOT "
+        connection = u"OR" if self.predicate.missing else u"AND"
+        if not self.predicate.missing:
+            cmv.append(self.fields[field]['name'])
+        return u"(%sISNULL([%s]) %s " % ( \
+            negation, self.fields[field]['name'],
+            connection)
+
+    def split_condition_code(self, field, conditions,
+                             pre_condition, post_condition):
+        """Condition code for the split
+
+        """
+        optype = self.fields[field]['optype']
+        value = value_to_print(self.predicate.value, optype)
+        operator = ("" if self.predicate.value is None else
+                    PYTHON_OPERATOR[self.predicate.operator])
+        if self.predicate.value is None:
+            pre_condition = (
+                T_MISSING_OPERATOR[self.predicate.operator])
+            post_condition = ")"
+
+        conditions.append("%s[%s]%s%s%s" % (
+            pre_condition,
+            self.fields[self.predicate.field]['name'],
+            operator,
+            value,
+            post_condition))
 
     def plug_in_body(self, body=u"", conditions=None, cmv=None,
-                     ids_path=None, subtree=True):
+                     ids_path=None, subtree=True, attr=None):
         """Translate the model into a set of "if" statemets in tableau syntax
 
         `depth` controls the size of indentation. As soon as a value is missing
@@ -58,6 +124,7 @@ class TableauTree(Tree):
         children = filter_nodes(self.children, ids=ids_path,
                                 subtree=subtree)
         if children:
+
             field = split(children)
             has_missing_branch = (missing_branch(children) or
                                   none_value(children))
@@ -65,63 +132,31 @@ class TableauTree(Tree):
             # no missing branch in the children list
             if (not has_missing_branch and
                     not self.fields[field]['name'] in cmv):
-                conditions.append("ISNULL([%s])" % self.fields[field]['name'])
-                body += (u"%s %s THEN " %
-                         (alternate, " AND ".join(conditions)))
-                if self.fields[self.objective_id]['optype'] == 'numeric':
-                    value = self.output
-                else:
-                    value = ruby_string(self.output)
-                body += (u"%s\n" % value)
-                cmv.append(self.fields[field]['name'])
+                body += self.missing_check_code(field, alternate, cmv,
+                                                conditions, attr=attr)
                 alternate = u"ELSEIF"
-                del conditions[-1]
 
             for child in children:
                 pre_condition = u""
                 post_condition = u""
                 if has_missing_branch and child.predicate.value is not None:
-                    negation = u"" if child.predicate.missing else u"NOT "
-                    connection = u"OR" if child.predicate.missing else u"AND"
-                    pre_condition = (u"(%sISNULL([%s]) %s " % (
-                                     negation, self.fields[field]['name'],
-                                     connection))
-                    if not child.predicate.missing:
-                        cmv.append(self.fields[field]['name'])
+                    pre_condition = missing_prefix_code(child, field, cmv)
                     post_condition = u")"
-                optype = self.fields[child.predicate.field]['optype']
 
-                if child.predicate.value is None:
-                    value = ""
-                elif optype == 'numeric':
-                    value = child.predicate.value
-                elif optype in ['text', 'items']:
-                    return u""
-                else:
-                    value = repr(child.predicate.value)
-                operator = ("" if child.predicate.value is None else
-                            PYTHON_OPERATOR[child.predicate.operator])
-                if child.predicate.value is None:
-                    pre_condition = (
-                        T_MISSING_OPERATOR[child.predicate.operator])
-                    post_condition = ")"
+                child.split_condition_code(field, conditions,
+                                           pre_condition, post_condition)
 
-                conditions.append("%s[%s]%s%s%s" % (
-                    pre_condition,
-                    self.fields[child.predicate.field]['name'],
-                    operator,
-                    value,
-                    post_condition))
                 body = child.plug_in_body(body, conditions[:], cmv=cmv[:],
-                                          ids_path=ids_path, subtree=subtree)
+                                          ids_path=ids_path, subtree=subtree,
+                                          attr=attr)
                 del conditions[-1]
         else:
-            if self.fields[self.objective_id]['optype'] == 'numeric':
-                value = self.output
+            if attr is None:
+                value = value_to_print( \
+                    self.output, self.fields[self.objective_id]['optype'])
             else:
-                value = ruby_string(self.output)
-            body += (
-                u"%s %s THEN" % (alternate, " AND ".join(conditions)))
+                value = getattr(self, attr)
+            body += u"%s %s THEN" % (alternate, " AND ".join(conditions))
             body += u" %s\n" % value
 
         return body

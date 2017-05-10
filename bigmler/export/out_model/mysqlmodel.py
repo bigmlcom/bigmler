@@ -39,21 +39,23 @@ class MySQLModel(Model):
         Model.__init__(self, model, api, fields)
 
     def plug_in(self, out=sys.stdout, hadoop=False,
-                filter_id=None, subtree=True):
+                filter_id=None, subtree=True, attr=None):
         """Returns a basic MySQL SQL expression that implements a function
            describing the model.
 
-        `out` is file descriptor to write the MySQL code.
+        `out`  is file descriptor to write the MySQL code.
+        `attr` is used to predict an attribute (e.g 'confidence') other
+               than the output
 
         """
         ids_path = self.get_ids_path(filter_id)
         if hadoop:
             return "Hadoop output not available."
         else:
-            response = self.mysql(out, ids_path=ids_path,
-                                  subtree=subtree)
+            response = self.mysql(out, ids_path=ids_path, subtree=subtree,
+                                  attr=attr)
             if response:
-                out.write(u"\n")
+                out.write(u"\n\n")
             else:
                 sys.exit(u"\nFailed to represent this model "
                          u"in MySQL syntax. Currently only models with "
@@ -61,7 +63,7 @@ class MySQLModel(Model):
             out.flush()
             return None
 
-    def mysql(self, out, ids_path=None, subtree=True):
+    def mysql(self, out, ids_path=None, subtree=True, attr=None):
         """Writes a MySQL function that implements the model.
 
         """
@@ -85,10 +87,14 @@ class MySQLModel(Model):
             'VARCHAR(250)'
         if function_name == "":
             function_name = "field_" + self.objective_id
-
+        # when the output is a confidence metric (error/confidence)
+        if attr is not None:
+            function_name += "_%s" % attr
+            return_type = 'NUMERIC'
         definition = definition % (function_name, ", ".join(args), return_type)
         out.write(definition)
-        body = self.tree.plug_in_body(ids_path=ids_path, subtree=subtree)
+        body = self.tree.plug_in_body(ids_path=ids_path, subtree=subtree,
+                                      attr=attr)
         if not body:
             return False
         out.write(body)

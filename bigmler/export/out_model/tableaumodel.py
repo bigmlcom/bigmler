@@ -37,7 +37,7 @@ class TableauModel(Model):
         Model.__init__(self, model, api, fields)
 
     def plug_in(self, out=sys.stdout, hadoop=False,
-                filter_id=None, subtree=True):
+                filter_id=None, subtree=True, attr=None):
         """Returns a basic Tableau function that implements the model.
 
         `out` is file descriptor to write the tableau code.
@@ -48,7 +48,7 @@ class TableauModel(Model):
             return "Hadoop output not available."
         else:
             response = self.tableau(out, ids_path=ids_path,
-                                    subtree=subtree)
+                                    subtree=subtree, attr=attr)
             if response:
                 out.write(u"END\n")
             else:
@@ -59,11 +59,12 @@ class TableauModel(Model):
             out.flush()
             return None
 
-    def tableau(self, out, ids_path=None, subtree=True):
+    def tableau(self, out, ids_path=None, subtree=True, attr=None):
         """Writes a Tableau function that implements the model.
 
         """
-        body = self.tree.tableau_body(ids_path=ids_path, subtree=subtree)
+        body = self.tree.plug_in_body(ids_path=ids_path, subtree=subtree,
+                                      attr=attr)
         if not body:
             return False
         out.write(body)

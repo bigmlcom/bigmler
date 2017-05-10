@@ -28,7 +28,15 @@ from bigml.util import split
 from bigml.tree import Tree
 
 
-from bigmler.export.out_tree.pythontree import value_to_print
+def value_to_print(value, optype):
+    """String of code that represents a value according to its type
+
+    """
+    if value is None:
+        return "null"
+    if optype == 'numeric':
+        return value
+    return "\"%s\"" % value.replace('"', '\\"')
 
 
 class JsTree(Tree):
@@ -70,18 +78,6 @@ class JsTree(Tree):
         """Condition code for the split
 
         """
-        """
-        type_key = self.fields[field]['optype']
-        if (type_key in ['numeric', 'text', 'items'] or
-                child.predicate.value is None):
-            value = "%s" % child.predicate.value
-            operator = (" " +
-                        PYTHON_OPERATOR[child.predicate.operator] +
-                        " ")
-        else:
-            value = "\"%s\"" % java_string(child.predicate.value)
-            operator = PYTHON_OPERATOR[child.predicate.operator]
-        """
         optype = self.fields[field]['optype']
         operator = PYTHON_OPERATOR[self.predicate.operator]
         value = value_to_print(self.predicate.value, optype)
@@ -106,7 +102,6 @@ class JsTree(Tree):
                  value)
         if self.predicate.value is None:
             cmv.append(self.fields[field]['camelCase'])
-            value = 'null'
         return u"%sif (%s%s%s %s %s) {\n" % \
             (INDENT * depth + alternative, pre_condition,
              prefix,

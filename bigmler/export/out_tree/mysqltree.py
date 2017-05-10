@@ -36,22 +36,92 @@ T_MISSING_OPERATOR = {
 MYSQL_OPERATOR = {
     "/=": "!="}
 
-def sql_string(text):
-    """Transforms string output for sql
+def value_to_print(value, optype):
+    """String of code that represents a value according to its type
 
     """
-    return u"'%s'" % text.replace("'", '\\\'')
+    if (value is None):
+        return "NULL"
+    if (optype == 'numeric'):
+        return value
+    return u"'%s'" % value.replace("'", '\\\'')
 
 
 class MySQLTree(Tree):
 
 
+    def missing_check_code(self, field, alternate, cmv, attr=None):
+        """Builds the code to predict when the field is missing
+
+        """
+
+
+        condition = "ISNULL(`%s`)" % self.fields[field]['name']
+        code = (u"%s (%s)" %
+                 (alternate, condition))
+
+        # used when printing the confidence metric
+        if attr != None:
+            value = getattr(self, attr)
+        else:
+            value = value_to_print( \
+                self.output,
+                self.fields[self.objective_id]['optype'])
+
+        code += (u", %s" % value)
+        cmv.append(self.fields[field]['name'])
+
+        return code
+
+    def missing_prefix_code(self, field, cmv):
+        """Part of the condition that checks for missings when missing_splits
+        has been used
+
+        """
+
+        negation = u"" if child.predicate.missing else u"NOT "
+        connection = u"OR" if child.predicate.missing else u"AND"
+        if not child.predicate.missing:
+            cmv.append(self.fields[field]['name'])
+        return u"(%sISNULL(`%s`) %s " % ( \
+            negation, self.fields[field]['name'],
+            connection)
+
+    def split_condition_code(self, field, alternate,
+                             pre_condition):
+        """Condition code for the split
+
+        """
+
+        post_condition = u""
+        optype = self.fields[field]['optype']
+        value = value_to_print(self.predicate.value, optype)
+        operator = ("" if self.predicate.value is None else
+                    MYSQL_OPERATOR.get(self.predicate.operator,
+                                       self.predicate.operator))
+        if self.predicate.value is None:
+            value = u""
+            pre_condition = (
+                T_MISSING_OPERATOR[self.predicate.operator])
+            post_condition = ")"
+
+        condition = u"%s`%s`%s%s%s" % ( \
+            pre_condition,
+            self.fields[self.predicate.field]['name'],
+            operator,
+            value,
+            post_condition)
+        return u"%s (%s)" % (alternate, condition)
+
     def plug_in_body(self, depth=0, cmv=None,
-                     ids_path=None, subtree=True, body=u""):
+                     ids_path=None, subtree=True, body=u"", attr=None):
         """Translate the model into a mysql function
 
         `depth` controls the size of indentation. As soon as a value is missing
         that node is returned without further evaluation.
+        `attr` is used to decide the value returned by the function. When
+        it's set to None, the prediction is returned. When set to the
+        name of an attribute (e.g. 'confidence') this attribute is returned
 
         """
 
@@ -59,83 +129,53 @@ class MySQLTree(Tree):
             cmv = []
 
         if body:
-             alternate = u",\n%sIF (" % (depth * INDENT)
+            alternate = u",\n%sIF (" % (depth * INDENT)
         else:
             alternate = u"IF ("
         post_missing_body = u""
+
+
         children = filter_nodes(self.children, ids=ids_path,
                                 subtree=subtree)
         if children:
+
+            # field used in the split
             field = split(children)
+
             has_missing_branch = (missing_branch(children) or
                                   none_value(children))
             # the missing is singled out as a special case only when there's
             # no missing branch in the children list
             if (not has_missing_branch and
                     not self.fields[field]['name'] in cmv):
-                condition = "ISNULL(`%s`)" % self.fields[field]['name']
-                body += (u"%s (%s)" %
-                         (alternate, condition))
-                if self.fields[self.objective_id]['optype'] == 'numeric':
-                    value = self.output
-                else:
-                    value = sql_string(self.output)
-                body += (u", %s" % value)
-                cmv.append(self.fields[field]['name'])
+                body += self.missing_check_code(field, alternate, cmv, attr)
                 depth += 1
                 alternate = u",\n%sIF (" % (depth * INDENT)
                 post_missing_body += u")"
 
             for child in children:
                 pre_condition = u""
-                post_condition = u""
+                # code when missing splits has been used
                 if has_missing_branch and child.predicate.value is not None:
-                    negation = u"" if child.predicate.missing else u"NOT "
-                    connection = u"OR" if child.predicate.missing else u"AND"
-                    pre_condition = (u"(%sISNULL(`%s`) %s " % (
-                                     negation, self.fields[field]['name'],
-                                     connection))
-                    if not child.predicate.missing:
-                        cmv.append(self.fields[field]['name'])
+                    pre_condition = missing_prefix_code(child, field, cmv)
 
-                optype = self.fields[child.predicate.field]['optype']
+                # complete split condition code
+                body += child.split_condition_code( \
+                    field, alternate, pre_condition)
 
-                if child.predicate.value is None:
-                    value = u""
-                elif optype == 'numeric':
-                    value = child.predicate.value
-                elif optype in ['text', 'items']:
-                    return u""
-                else:
-                    value = sql_string(child.predicate.value)
-                operator = ("" if child.predicate.value is None else
-                            MYSQL_OPERATOR.get(child.predicate.operator,
-                                               child.predicate.operator))
-                if child.predicate.value is None:
-                    pre_condition = (
-                        T_MISSING_OPERATOR[child.predicate.operator])
-                    post_condition = ")"
-
-                condition = ("%s`%s`%s%s%s" % ( \
-                    pre_condition,
-                    self.fields[child.predicate.field]['name'],
-                    operator,
-                    value,
-                    post_condition))
-                body += (
-                    u"%s (%s)" % (alternate, condition))
                 depth += 1
                 alternate = u",\n%sIF (" % (depth * INDENT)
                 body = child.plug_in_body(depth, cmv=cmv[:],
                                           ids_path=ids_path, subtree=subtree,
-                                          body=body)
+                                          body=body, attr=attr)
             body += u", NULL))" + post_missing_body
             post_missing_body = u""
         else:
-            if self.fields[self.objective_id]['optype'] == 'numeric':
-                value = self.output
+            if attr is None:
+                value = value_to_print( \
+                    self.output, self.fields[self.objective_id]['optype'])
             else:
-                value = sql_string(self.output)
+                value = getattr(self, attr)
             body += u", %s" % (value)
 
         return body
