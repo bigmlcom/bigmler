@@ -72,6 +72,11 @@ Management subcommands
 Used to delete the remotely created resources. See
 :ref:`bigmler-delete`.
 
+``bigmler.export``:
+
+Used to generate the code you need to predict locally with no connection
+to BigML. See :ref: `bigmler-export`.
+
 Reporting subcommands
 ---------------------
 
@@ -2505,6 +2510,40 @@ to delete other resources, you can select them by choosing their status:
     bigmler delete --older-than 2 --status failed
 
 would remove all failed resources created more than two days ago.
+
+
+.. _bigmler-export:
+
+Export subcommand
+-----------------
+
+
+The ``bigmler export`` subcommand is intended to help generating the code
+needed for the models in BigML to be integrated in other applications.
+To produce a prediction using a BigML model you just need a function that
+receives as argument the new test
+case data and returns this prediction (and a confidence). The `bigmler export`
+subcommand will retrieve the JSON information of your existing
+decision tree model in BigML and will create from it this function and
+store it in a file that can be imported or copied directly in your application.
+
+Obviously, the function syntax will depend on the model and the language
+used in your application, so these will be the options we need to provide:
+
+.. code-block:: bash
+
+    bigmler export --model model/532db2b637203f3f1a001304 \
+                   --language javascript --output-dir my_exports
+
+This command will create a javascript version of the function that
+produces the predictions and store it in a file named
+`model_532db2b637203f3f1a001304.js` (after the model
+ID) in the `my_exports` directory.
+
+Models can currently exported in `Python` and `Javascript`. For models
+whose fields are numeric or cataegorical, the command
+also supports creating `MySQL` functions and Tableau separate expressions
+for both the prediction and the confidence.
 
 
 .. _bigmler-project:
