@@ -23,7 +23,7 @@ predictions
 
 from bigml.tree_utils import (filter_nodes, split, ruby_string,
                               missing_branch, none_value,
-                              one_branch, PYTHON_OPERATOR)
+                              one_branch, PYTHON_OPERATOR, COMPOSED_FIELDS)
 
 from bigml.tree import Tree
 
@@ -32,9 +32,6 @@ T_MISSING_OPERATOR = {
     "!=": "NOT ISNULL("
 }
 
-# Map operator str to its corresponding mysql operator
-MYSQL_OPERATOR = {
-    "/=": "!="}
 
 def value_to_print(value, optype):
     """String of code that represents a value according to its type
@@ -130,7 +127,9 @@ class TableauTree(Tree):
                                   none_value(children))
             # the missing is singled out as a special case only when there's
             # no missing branch in the children list
-            if (not has_missing_branch and
+            one_branch = not has_missing_branch or \
+                self.fields[field]['optype'] in COMPOSED_FIELDS
+            if (one_branch and
                     not self.fields[field]['name'] in cmv):
                 body += self.missing_check_code(field, alternate, cmv,
                                                 conditions, attr=attr)

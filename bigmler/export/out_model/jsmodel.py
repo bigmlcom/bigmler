@@ -138,6 +138,8 @@ u"""
             for option in field['term_analysis']:
                 if option in TERM_OPTIONS:
                     value = repr(field['term_analysis'][option])
+                    if value.startswith("u"):
+                        value = value[1:]
                     if value == 'True':
                         value = 'true'
                     elif value == 'False':
@@ -282,6 +284,8 @@ u"""
                 if option in ITEM_OPTIONS and field['item_analysis'][option] \
                         is not None:
                     value = repr(field['item_analysis'][option])
+                    if value.startswith("u"):
+                        value = value[1:]
                     body += """
                 \"%s\": %s,""" % (option, value)
             body += """

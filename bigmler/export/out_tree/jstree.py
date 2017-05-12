@@ -23,7 +23,8 @@ predictions
 
 from bigml.tree_utils import (
     filter_nodes, missing_branch, java_string, none_value,
-    INDENT, PYTHON_OPERATOR, MAX_ARGS_LENGTH)
+    INDENT, PYTHON_OPERATOR, MAX_ARGS_LENGTH, COMPOSED_FIELDS,
+    NUMERIC_VALUE_FIELDS)
 from bigml.util import split
 from bigml.tree import Tree
 
@@ -34,7 +35,7 @@ def value_to_print(value, optype):
     """
     if value is None:
         return "null"
-    if optype == 'numeric':
+    if optype in NUMERIC_VALUE_FIELDS: # value is numeric for these fields
         return value
     return "\"%s\"" % value.replace('"', '\\"')
 
@@ -52,7 +53,7 @@ class JsTree(Tree):
         value = value_to_print(self.output,
                                self.fields[self.objective_id]['optype'])
         code += u"%sreturn {prediction: %s," \
-            u" %s: %s}\n" % \
+            u" %s: %s}}\n" % \
             (INDENT * (depth + 1), value, metric, self.confidence)
         cmv.append(self.fields[field]['camelCase'])
         return code
@@ -63,9 +64,9 @@ class JsTree(Tree):
 
         """
 
-        operator = u"==" if child.predicate.missing else u"!="
-        connection = u"||" if child.predicate.missing else u"&&"
-        if not child.predicate.missing:
+        operator = u"==" if self.predicate.missing else u"!="
+        connection = u"||" if self.predicate.missing else u"&&"
+        if not self.predicate.missing:
             cmv.append(self.fields[field]['camelCase'])
         return u"%s%s %s null %s " % (prefix,
                                       self.fields[field]['camelCase'],
@@ -92,12 +93,13 @@ class JsTree(Tree):
                                              self.predicate.term))
                 matching_function = "item_matches"
 
-            return u"%sif (%stermMatches(%s%s, %s, %s)%s%s) {\n" % \
+            return u"%sif (%stermMatches(%s%s, %s, %s) %s %s) {\n" % \
                 (INDENT * depth + alternative, pre_condition,
                  prefix,
                  self.fields[field]['camelCase'],
-                 value_to_print(self.fields[field]['camelCase'], 'text'),
-                 value_to_print(self.predicate.term, 'text'),
+                 value_to_print(self.fields[field]['camelCase'],
+                     'categorical'),
+                 value_to_print(self.predicate.term, 'categorical'),
                  operator,
                  value)
         if self.predicate.value is None:
@@ -140,7 +142,9 @@ class JsTree(Tree):
             has_missing_branch = missing_branch(children)
             # the missing is singled out as a special case only when there's
             # no missing branch in the children list
-            if (not has_missing_branch and
+            one_branch = not has_missing_branch or \
+                self.fields[field]['optype'] in COMPOSED_FIELDS
+            if (one_branch and
                     not self.fields[field]['camelCase'] in cmv):
                 body += self.missing_check_code(field, depth, prefix, cmv,
                                                 metric)

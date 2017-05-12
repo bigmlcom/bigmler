@@ -23,7 +23,8 @@ predictions
 import sys
 
 from bigml.tree_utils import slugify, INDENT, sort_fields, docstring_comment, \
-    MAX_ARGS_LENGTH, TERM_OPTIONS
+    MAX_ARGS_LENGTH, TERM_OPTIONS, TM_TOKENS, TM_FULL_TERM, TM_ALL, \
+    ITEM_OPTIONS
 from bigml.model import Model
 
 from bigmler.export.out_tree.pythontree import PythonTree
@@ -429,7 +430,6 @@ if count > 0:
 
             term_analysis_options = set(map(lambda x: x[0],
                                            term_analysis_predicates))
-            print " \n\n{0}\n\n".format(term_analysis_options)
             term_analysis_predicates = set(term_analysis_predicates)
             body += """
     term_analysis = {"""

@@ -35,23 +35,28 @@ from bigmler.export.out_model.jsmodel import JsModel
 from bigmler.export.out_model.pythonmodel import PythonModel
 from bigmler.export.out_model.tableaumodel import TableauModel
 from bigmler.export.out_model.mysqlmodel import MySQLModel
+from bigmler.export.out_model.pythonlr import PythonLR
 
 
 COMMAND_LOG = u".bigmler_export"
 DIRS_LOG = u".bigmler_export_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 
-EXPORTS = { \
+EXPORTS = {
     "javascript": JsModel,
     "python": PythonModel,
     "tableau": TableauModel,
     "mysql": MySQLModel}
 
-EXTENSIONS = {\
+EXTENSIONS = {
     "javascript": "js",
     "python": "py",
     "tableau": "tb",
     "mysql": "sql"}
+
+LR_EXPORTS   = {
+    "python": PythonLR
+}
 
 SEPARATE_OUTPUT = ['tableau', 'mysql']
 
@@ -99,6 +104,22 @@ def export_dispatcher(args=sys.argv[1:]):
                             verbosity=command_args.verbosity)
 
 
+def generate_output(local_model, args, model_type="model", attr="confidence"):
+    """Generates the output for the prediction (and confidence) function
+
+    """
+    with open(os.path.join(args.output_dir, \
+        "%s.%s") % (getattr(args, model_type).replace("/", "_"),
+                    EXTENSIONS[args.language]), "w") as handler:
+        local_model.plug_in(out=handler)
+    # creating a separate file to predict confidence
+    if args.language in SEPARATE_OUTPUT:
+        with open(os.path.join(args.output_dir, \
+            "%s_confidence.%s") % (getattr(args, model_type).replace("/", "_"),
+                        EXTENSIONS[args.language]), "w") as handler:
+            local_model.plug_in(out=handler, attr=attr)
+
+
 def export_code(args, api=None):
     """Generates the plugin code in the language required by the user
 
@@ -106,14 +127,15 @@ def export_code(args, api=None):
     args.language = args.language or "javascript"
 
     if args.model is not None and args.language in EXPORTS:
+
         local_model = EXPORTS[args.language](args.model, api=api)
-        with open(os.path.join(args.output_dir, \
-            "%s.%s") % (args.model.replace("/", "_"),
-                        EXTENSIONS[args.language]), "w") as handler:
-            local_model.plug_in(out=handler)
-        # creating a separate file to predict confidence
-        if args.language in SEPARATE_OUTPUT:
-            with open(os.path.join(args.output_dir, \
-                "%s_confidence.%s") % (args.model.replace("/", "_"),
-                            EXTENSIONS[args.language]), "w") as handler:
-                local_model.plug_in(out=handler, attr='confidence')
+        generate_output(local_model, args, model_type="model")
+
+    if args.logistic_regression is not None:
+        if args.language not in LR_EXPORTS:
+            sys.exit("Exporting to %s is not yet supported for this kind of "
+                     "models." % args.language)
+        local_logistic = LR_EXPORTS[args.language]( \
+            args.logistic_regression, api=api)
+        generate_output(local_logistic, args, model_type="logistic_regression",
+                        attr="probability")

@@ -24,7 +24,8 @@ predictions
 from bigml.tree_utils import (
     slugify, sort_fields, filter_nodes, missing_branch, none_value,
     one_branch, split, MAX_ARGS_LENGTH, INDENT, PYTHON_OPERATOR, TM_TOKENS,
-    TM_FULL_TERM, TM_ALL, TERM_OPTIONS, ITEM_OPTIONS)
+    TM_FULL_TERM, TM_ALL, TERM_OPTIONS, ITEM_OPTIONS, COMPOSED_FIELDS,
+    NUMERIC_VALUE_FIELDS)
 
 from bigml.tree import Tree
 
@@ -38,7 +39,8 @@ def value_to_print(value, optype):
     """String of code that represents a value according to its type
 
     """
-    if (optype == 'numeric' or value is None):
+    # the value is numeric for these fields
+    if (optype in NUMERIC_VALUE_FIELDS or value is None):
         return value
     return u"\"%s\"" % value.replace('"', '\\"')
 
@@ -109,7 +111,7 @@ class PythonTree(Tree):
                                              self.predicate.term))
                 matching_function = "item_matches"
 
-            return u"%sif (%s%s(%s, \"%s\", %s\"%s\") %s " \
+            return u"%sif (%s%s(%s, \"%s\", %s%s) %s " \
                    u"%s):\n" % \
                   (INDENT * depth, pre_condition, matching_function,
                    map_data(self.fields[field]['slug'],
@@ -117,7 +119,7 @@ class PythonTree(Tree):
                             False),
                    self.fields[self.predicate.field]['slug'],
                    'u' if isinstance(self.predicate.term, unicode) else '',
-                   value_to_print(self.predicate.term, 'text'),
+                   value_to_print(self.predicate.term, 'categorical'),
                    PYTHON_OPERATOR[self.predicate.operator],
                    value)
 
@@ -160,7 +162,9 @@ class PythonTree(Tree):
                                   none_value(children))
             # the missing is singled out as a special case only when there's
             # no missing branch in the children list
-            if (not has_missing_branch and
+            one_branch = not has_missing_branch or \
+                self.fields[field]['optype'] in COMPOSED_FIELDS
+            if (one_branch and
                 not self.fields[field]['slug'] in cmv):
                 body += self.missing_check_code(field, depth, input_map, cmv,
                                                 metric)
