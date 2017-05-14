@@ -37,7 +37,7 @@ def get_export_options(defaults=None):
         '--language': {
             'action': 'store',
             'dest': 'language',
-            'choices': ['python', 'javascript', 'tableau', 'mysql'],
+            'choices': ['python', 'javascript', 'tableau', 'mysql', 'r'],
             'default': defaults.get('language', 'javascript'),
             'help': ("Language to be used in code generation.")},
         # If a BigML logistic regression is provided, the script will

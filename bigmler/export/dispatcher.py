@@ -35,6 +35,7 @@ from bigmler.export.out_model.jsmodel import JsModel
 from bigmler.export.out_model.pythonmodel import PythonModel
 from bigmler.export.out_model.tableaumodel import TableauModel
 from bigmler.export.out_model.mysqlmodel import MySQLModel
+from bigmler.export.out_model.rmodel import RModel
 from bigmler.export.out_model.pythonlr import PythonLR
 
 
@@ -46,13 +47,15 @@ EXPORTS = {
     "javascript": JsModel,
     "python": PythonModel,
     "tableau": TableauModel,
-    "mysql": MySQLModel}
+    "mysql": MySQLModel,
+    "r": RModel}
 
 EXTENSIONS = {
     "javascript": "js",
     "python": "py",
     "tableau": "tb",
-    "mysql": "sql"}
+    "mysql": "sql",
+    "r": "R"}
 
 LR_EXPORTS   = {
     "python": PythonLR
