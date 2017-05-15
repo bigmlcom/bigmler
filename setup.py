@@ -56,7 +56,7 @@ setuptools.setup(
                 'bigmler.execute', 'bigmler.whizzml', 'bigmler.topicmodel',
                 'bigmler.export', 'bigmler.export.out_model',
                 'bigmler.export.out_tree'],
-    install_requires = ['bigml>=4.10.0, <4.11.0'],
+    install_requires = ['bigml>=4.10.1, <4.11.0'],
     package_data={'bigmler':['static/*.json', 'static/*.html']},
     classifiers=[
         'Development Status :: 4 - Beta',

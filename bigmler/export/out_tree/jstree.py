@@ -73,7 +73,7 @@ class JsTree(Tree):
                                       operator,
                                       connection)
 
-    def split_condition_code(self, field, depth, prefix, alternative,
+    def split_condition_code(self, field, depth, prefix,
                              pre_condition, term_analysis_fields,
                              item_analysis_fields):
         """Condition code for the split
@@ -94,7 +94,7 @@ class JsTree(Tree):
                 matching_function = "item_matches"
 
             return u"%sif (%stermMatches(%s%s, %s, %s) %s %s) {\n" % \
-                (INDENT * depth + alternative, pre_condition,
+                (INDENT * depth, pre_condition,
                  prefix,
                  self.fields[field]['camelCase'],
                  value_to_print(self.fields[field]['camelCase'],
@@ -105,7 +105,7 @@ class JsTree(Tree):
         if self.predicate.value is None:
             cmv.append(self.fields[field]['camelCase'])
         return u"%sif (%s%s%s %s %s) {\n" % \
-            (INDENT * depth + alternative, pre_condition,
+            (INDENT * depth, pre_condition,
              prefix,
              self.fields[field]['camelCase'],
              operator,
@@ -134,7 +134,6 @@ class JsTree(Tree):
                                 subtree=subtree)
 
         if children:
-            alternative = u""
 
             # field used in the split
             field = split(children)
@@ -148,7 +147,6 @@ class JsTree(Tree):
                     not self.fields[field]['camelCase'] in cmv):
                 body += self.missing_check_code(field, depth, prefix, cmv,
                                                 metric)
-                alternative = u"else "
 
             for child in children:
 
@@ -162,7 +160,7 @@ class JsTree(Tree):
 
                 # complete split condition code
                 body += child.split_condition_code( \
-                    field, depth, prefix, alternative, pre_condition,
+                    field, depth, prefix, pre_condition,
                     term_analysis_fields, item_analysis_fields)
 
                 # value to be determined in next node
@@ -173,7 +171,6 @@ class JsTree(Tree):
                 body += u"%s}\n" % (INDENT * depth)
                 term_analysis_fields.extend(next_level[1])
                 item_analysis_fields.extend(next_level[2])
-                alternative = u"else "
 
         else:
             value = value_to_print(self.output,
