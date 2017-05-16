@@ -3,6 +3,12 @@
 History
 -------
 
+3.11.0 (2017-05-16)
+~~~~~~~~~~~~~~~~~~~
+
+- Adding bigmler export subcommand to generate the prediction function from
+  a decision tree in several languages.
+
 3.10.3 (2017-04-21)
 ~~~~~~~~~~~~~~~~~~~
 
