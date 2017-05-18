@@ -57,7 +57,9 @@ setuptools.setup(
                 'bigmler.export', 'bigmler.export.out_model',
                 'bigmler.export.out_tree'],
     install_requires = ['bigml>=4.10.1, <4.11.0'],
-    package_data={'bigmler':['static/*.json', 'static/*.html']},
+    package_data={'bigmler':['static/*.json',
+                             'static/*.html',
+                             'static/out_model/*']},
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
