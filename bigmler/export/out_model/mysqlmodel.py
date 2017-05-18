@@ -38,9 +38,8 @@ class MySQLModel(Model):
         self.tree_class = MySQLTree
         Model.__init__(self, model, api, fields)
 
-    def plug_in(self, out=sys.stdout, hadoop=False,
-                filter_id=None, subtree=True, attr=None):
-        """Returns a basic MySQL SQL expression that implements a function
+    def plug_in(self, out=sys.stdout, filter_id=None, subtree=True, attr=None):
+        """Generates a basic MySQL SQL expression that implements a function
            describing the model.
 
         `out`  is file descriptor to write the MySQL code.
@@ -49,19 +48,15 @@ class MySQLModel(Model):
 
         """
         ids_path = self.get_ids_path(filter_id)
-        if hadoop:
-            return "Hadoop output not available."
+        response = self.mysql(out, ids_path=ids_path, subtree=subtree,
+                              attr=attr)
+        if response:
+            out.write(u"\n\n")
         else:
-            response = self.mysql(out, ids_path=ids_path, subtree=subtree,
-                                  attr=attr)
-            if response:
-                out.write(u"\n\n")
-            else:
-                sys.exit(u"\nFailed to represent this model "
-                         u"in MySQL syntax. Currently only models with "
-                         u"categorical and numeric fields can be generated.\n")
-            out.flush()
-            return None
+            sys.exit(u"\nFailed to represent this model "
+                     u"in MySQL syntax. Currently only models with "
+                     u"categorical and numeric fields can be generated.\n")
+        out.flush()
 
     def mysql(self, out, ids_path=None, subtree=True, attr=None):
         """Writes a MySQL function that implements the model.
@@ -95,8 +90,6 @@ class MySQLModel(Model):
         out.write(definition)
         body = self.tree.plug_in_body(ids_path=ids_path, subtree=subtree,
                                       attr=attr)
-        if not body:
-            return False
+
         out.write(body)
         out.flush()
-        return True

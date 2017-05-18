@@ -24,10 +24,18 @@ import sys
 
 from bigml.tree_utils import (
     to_camel_js, sort_fields, docstring_comment,
-    INDENT, MAX_ARGS_LENGTH, TERM_OPTIONS, ITEM_OPTIONS)
+    INDENT, MAX_ARGS_LENGTH, TERM_OPTIONS, ITEM_OPTIONS,
+    TM_TOKENS, TM_FULL_TERM, TM_ALL)
 
 from bigml.model import Model
 from bigmler.export.out_tree.rtree import RTree
+from bigmler.reports import BIGMLER_SCRIPT
+
+
+# templates for static javascript
+TERM_TEMPLATE = "%s/static/out_model/term_analysis.R" % BIGMLER_SCRIPT
+ITEMS_TEMPLATE = "%s/static/out_model/items_analysis.R" % BIGMLER_SCRIPT
+
 
 def dot(name):
     """Creates a dot-separated name
@@ -47,15 +55,6 @@ class RModel(Model):
 
     def plug_in(self, out=sys.stdout, filter_id=None, subtree=True):
         """Writes an R function that implements the model.
-
-        """
-
-
-    def plug_in(self, out=sys.stdout, hadoop=False,
-                filter_id=None, subtree=True):
-        """Returns a basic javascript implementation of local predictions
-
-        `out` is file descriptor to write the javascript code.
 
         """
         # fill the dotted variable names with the R_KEYWORDS restrictions
@@ -162,60 +161,13 @@ class RModel(Model):
     )
 """
         body += """
-    TM_TOKENS <- "tokens_only"
-    TM_FULL_TERM <- "full_terms_only"
-    TM_ALL <- "all"
-    FULL_TERM_PATTERN <- '^.+\\\\b.+$'
+    TM_TOKENS <- "%s"
+    TM_FULL_TERM <- "%s"
+    TM_ALL <- "%s" \
+""" % (TM_TOKENS, TM_FULL_TERM, TM_ALL)
 
-    termMatches <- function (text, fieldLabel, term) {
-
-      # Computes term matches depending on the chosen text analysis options
-      #
-      # @param {string} text Input text
-      # @param {string} fieldLabel Name of the field
-      # @param {string} term Term to compare
-
-      if (is.na(text))
-        return(0)
-      options <- TERM_ANALYSIS[[fieldLabel]]
-      fieldTerms <- TERM_FORMS[[fieldLabel]]
-      tokenMode <- options[['token_mode']]
-      caseSensitive <- !is.null(options[['case_sensitive']]) && options[['case_sensitive']]
-      if (!caseSensitive) {
-        text <- tolower(text)
-        term <- tolower(term)
-      }
-      terms <- if (is.null(fieldTerms[[term]]))
-          list(term) else fieldTerms[[term]]
-      firstTerm <- terms[[1]]
-      if (tokenMode == TM_FULL_TERM) {
-        return(fullTermMatch(text, firstTerm))
-      }
-      if (tokenMode == TM_ALL && lengths(terms) == 1) {
-        if (regexpr(FULL_TERM_PATTERN, firstTerm, perl=TRUE) > 0) {
-          # full term match in 'all' token mode
-          return(if (text == firstTerm) 1 else 0)
-        }
-      }
-      return(termMatchesTokens(text, terms));
-    };
-
-    termMatchesTokens <- function (text, terms) {
-
-      # Computes term matches depending on the chosen text analysis options
-      #
-      # @param {string} text Input text
-      # @param {array} terms String array of terms to match
-
-      terms <- paste(terms, collapse='(\\\\b|_)|(\\\\b|_)')
-      pattern <- paste('(\\\\b|_)', terms, '(\\\\b|_)', sep="")
-      matches <- gregexpr(pattern, text , perl=TRUE)
-      if (matches < 0)
-        return(0)
-      return(lengths(matches))
-    }
-
-"""
+        with open(TERM_TEMPLATE) as template_hander:
+            body += template_handler.read()
         return body
 
     def r_item_analysis_body(self, item_analysis_predicates):
@@ -249,36 +201,6 @@ class RModel(Model):
         body += ",\n".join(lines) + """
     )"""
 
-        body += """
-    escape <- function (text) {
-      return(gsub("(\\\\W)", "\\\\\\\\\\1", text))
-    };
-
-
-    itemMatches <- function (text, fieldLabel, item) {
-
-      # Computes item matches depending on the chosen item analysis options
-      #
-      # @param {string} text Input text
-      # @param {string} fieldLabel Name of the field
-      # @param {string} item Item to compare
-
-      if (is.na(text))
-        return(0)
-      options <- ITEM_ANALYSIS[[fieldLabel]]
-      separator <- options[["separator"]]
-      pattern <- options[["separator_regexp"]]
-      if (is.null(pattern)) {
-        if (is.null(separator)) {
-          separator <- " "
-        }
-        pattern <- escape(separator)
-      }
-      inputs <- strsplit(text, pattern)
-      if (item %in% inputs[[1]])
-        return(1)
-      return(0)
-    }
-
-"""
+        with open(ITEMS_TEMPLATE) as template_hander:
+            body += template_handler.read()
         return body

@@ -36,7 +36,7 @@ class TableauModel(Model):
         self.tree_class = TableauTree
         Model.__init__(self, model, api, fields)
 
-    def plug_in(self, out=sys.stdout, hadoop=False,
+    def plug_in(self, out=sys.stdout,
                 filter_id=None, subtree=True, attr=None):
         """Returns a basic Tableau function that implements the model.
 
@@ -44,20 +44,16 @@ class TableauModel(Model):
 
         """
         ids_path = self.get_ids_path(filter_id)
-        if hadoop:
-            return "Hadoop output not available."
+        response = self.tableau(out, ids_path=ids_path,
+                                subtree=subtree, attr=attr)
+        if response:
+            out.write(u"END\n")
         else:
-            response = self.tableau(out, ids_path=ids_path,
-                                    subtree=subtree, attr=attr)
-            if response:
-                out.write(u"END\n")
-            else:
-                sys.exit(u"\nFailed to represent this model in "
-                         u"in Tableau syntax. Currently, only "
-                         u"models with categorical and numeric fields "
-                         u"can be generated.\n")
-            out.flush()
-            return None
+            sys.exit(u"\nFailed to represent this model in "
+                     u"in Tableau syntax. Currently, only "
+                     u"models with categorical and numeric fields "
+                     u"can be generated.\n")
+        out.flush()
 
     def tableau(self, out, ids_path=None, subtree=True, attr=None):
         """Writes a Tableau function that implements the model.
@@ -65,8 +61,5 @@ class TableauModel(Model):
         """
         body = self.tree.plug_in_body(ids_path=ids_path, subtree=subtree,
                                       attr=attr)
-        if not body:
-            return False
         out.write(body)
         out.flush()
-        return True

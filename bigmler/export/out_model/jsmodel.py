@@ -31,6 +31,11 @@ ITEM_OPTIONS = ["separator", "separator_regexp"]
 
 from bigml.model import Model
 from bigmler.export.out_tree.jstree import JsTree
+from bigmler.reports import BIGMLER_SCRIPT
+
+# templates for static javascript
+TERM_TEMPLATE = "%s/static/out_model/term_analysis.js" % BIGMLER_SCRIPT
+ITEMS_TEMPLATE = "%s/static/out_model/items_analysis.js" % BIGMLER_SCRIPT
 
 class JsModel(Model):
 
@@ -64,7 +69,7 @@ u"""
 
     def plug_in(self, out=sys.stdout, hadoop=False,
                 filter_id=None, subtree=True):
-        """Returns a basic javascript implementation of local predictions
+        """Generates a basic javascript implementation of local predictions
 
         `out` is file descriptor to write the javascript code.
 
@@ -120,7 +125,8 @@ u"""
         return output
 
     def js_term_analysis_body(self, term_analysis_predicates):
-        """ Writes auxiliary functions to handle the term analysis fields
+        """ Generates the string of
+            auxiliary functions to handle the term analysis fields
 
         """
         term_analysis_options = set(map(lambda x: x[0],
@@ -181,87 +187,9 @@ u"""
             body +="""
     }
 """
-        body += """
+        with open(TERM_TEMPLATE) as template_handler:
+            body += template_handler.read()
 
-
-    var TM_TOKENS = 'tokens_only', TM_FULL_TERM = 'full_terms_only', TM_ALL = 'all';
-    var FULL_TERM_PATTERN = new RegExp('^.+\\b.+$');
-
-    function termMatches(text, fieldLabel, term) {
-      /**
-       * Computes term matches depending on the chosen text analysis options
-       *
-       * @param {string} text Input text
-       * @param {string} fieldLabel Name of the field
-       * @param {string} term Term to compare
-       */
-
-      var options = TERM_ANALYSIS[fieldLabel];
-      var fieldTerms = TERM_FORMS[fieldLabel];
-      var terms = (typeof fieldTerms[term] === 'undefined') ?
-          [term] : fieldTerms[term];
-      var tokenMode = options['token_mode'];
-      var caseSensitive = options['case_sensitive'];
-      var firstTerm = terms[0];
-      if (tokenMode === TM_FULL_TERM) {
-        return fullTermMatch(text, firstTerm, caseSensitive);
-      }
-      if (tokenMode === TM_ALL && terms.length == 1) {
-        if (firstTerm.match(FULL_TERM_PATTERN)) {
-           return fullTermMatch(text, firstTerm, caseSensitive);
-        }
-      }
-      return termMatchesTokens(text, terms, caseSensitive);
-    };
-
-
-    function fullTermMatch(text, fullTerm, caseSensitive) {
-      /**
-       * Counts the match for full terms according to the caseSensitive option
-       *
-       * @param {string} text Input text
-       * @param {string} fullTerm String to match
-       * @param {boolean} caseSensitive Text analysis case_sensitive option
-       */
-
-      if (!caseSensitive) {
-        text = text.toLowerCase();
-        fullTerm = fullTerm.toLowerCase();
-      }
-      return (text == fullTerm) ? 1 : 0;
-    }
-
-    function getTokensFlags(caseSensitive) {
-      /**
-       * Modifiers for RegExp matching according to case_sensitive option
-       *
-       * @param {boolean} caseSensitive Text analysis case_sensitive option
-       */
-      var flags = 'g';
-      if (!caseSensitive) {
-        flags += 'i';
-      }
-      return flags;
-    }
-
-
-    function termMatchesTokens(text, terms, caseSensitive) {
-      /**
-       * Computes term matches depending on the chosen text analysis options
-       *
-       * @param {string} text Input text
-       * @param {array} terms String array of terms to match
-       * @param {boolean} caseSensitive Text analysis case_sensitive option
-       */
-
-      var flags = getTokensFlags(caseSensitive);
-      var terms = terms.join('(\\\\b|_)|(\\\\b|_)');
-      var pattern = new RegExp('(\\\\b|_)' + terms + '(\\\\b|_)', flags);
-      var matches = text.match(pattern);
-      return (matches == null) ? 0 : matches.length;
-    }
-
-"""
         return body
 
     def js_item_analysis_body(self, item_analysis_predicates):
@@ -293,42 +221,6 @@ u"""
         body += """
     }"""
 
-        body += """
-
-    var escape = function(text) {
-      return text.replace(/[-[\]{}()*+?.,\\\\^$|#\s]/g, \"\\\\$&\");
-    };
-
-    function itemMatches(text, fieldLabel, item) {
-      /**
-       * Computes item matches depending on the chosen item analysis options
-       *
-       * @param {string} text Input text
-       * @param {string} fieldLabel Name of the field
-       * @param {string} item Item to compare
-       */
-
-      var options = ITEM_ANALYSIS[fieldLabel];
-      var separator = options.separator;
-      var regexp = options.separator_regexp;
-      if (typeof(regexp) === 'undefined') {
-        if (typeof(separator) === 'undefined') {
-          separator = " ";
-        }
-        regexp = escape(separator);
-      }
-
-      var pattern = new RegExp(regexp, 'g');
-      var inputs = text.split(pattern);
-      var counter = 0;
-      for (var index = 0; index < inputs.length; index++) {
-        if (inputs[index] == item) {
-          counter++;
-          break;
-        }
-      }
-      return counter;
-    };
-
-"""
+        with open(ITEMS_TEMPLATE) as template_handler:
+            body += template_handler.read()
         return body

@@ -2524,7 +2524,7 @@ To produce a prediction using a BigML model you just need a function that
 receives as argument the new test
 case data and returns this prediction (and a confidence). The `bigmler export`
 subcommand will retrieve the JSON information of your existing
-decision tree model in BigML and will create from it this function and
+decision tree model in BigML and will generate from it this function code and
 store it in a file that can be imported or copied directly in your application.
 
 Obviously, the function syntax will depend on the model and the language
@@ -2540,9 +2540,9 @@ produces the predictions and store it in a file named
 `model_532db2b637203f3f1a001304.js` (after the model
 ID) in the `my_exports` directory.
 
-Models can currently exported in `Python` and `Javascript`. For models
-whose fields are numeric or cataegorical, the command
-also supports creating `MySQL` functions and Tableau separate expressions
+Models can currently exported in `Python`, `Javascript` and `R`. For models
+whose fields are numeric or categorical, the command
+also supports creating `MySQL` functions and `Tableau` separate expressions
 for both the prediction and the confidence.
 
 
