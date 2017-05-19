@@ -166,7 +166,7 @@ class RModel(Model):
     TM_ALL <- "%s" \
 """ % (TM_TOKENS, TM_FULL_TERM, TM_ALL)
 
-        with open(TERM_TEMPLATE) as template_hander:
+        with open(TERM_TEMPLATE) as template_handler:
             body += template_handler.read()
         return body
 
@@ -201,6 +201,6 @@ class RModel(Model):
         body += ",\n".join(lines) + """
     )"""
 
-        with open(ITEMS_TEMPLATE) as template_hander:
+        with open(ITEMS_TEMPLATE) as template_handler:
             body += template_handler.read()
         return body

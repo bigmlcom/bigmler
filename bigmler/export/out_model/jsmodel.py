@@ -183,7 +183,7 @@ u"""
             \"%s\": %s,""" % (term, term_forms[field][term])
                 body += """
         },
-                """
+"""
             body +="""
     }
 """

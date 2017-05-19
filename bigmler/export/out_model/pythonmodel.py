@@ -271,7 +271,9 @@ for values in csv:
             body += """
     tm_tokens = '%s'
     tm_full_term = '%s'
-    tm_all = '%s' """ % (TM_TOKENS, TM_FULL_TERM, TM_ALL)
+    tm_all = '%s'
+
+""" % (TM_TOKENS, TM_FULL_TERM, TM_ALL)
 
             with open(TERM_TEMPLATE) as template_handler:
                 body += template_handler.read()

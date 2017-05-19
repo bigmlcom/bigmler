@@ -48,9 +48,9 @@ class MySQLModel(Model):
 
         """
         ids_path = self.get_ids_path(filter_id)
-        response = self.mysql(out, ids_path=ids_path, subtree=subtree,
-                              attr=attr)
-        if response:
+        length = self.mysql(out, ids_path=ids_path, subtree=subtree,
+                            attr=attr)
+        if length > 0:
             out.write(u"\n\n")
         else:
             sys.exit(u"\nFailed to represent this model "
@@ -93,3 +93,4 @@ class MySQLModel(Model):
 
         out.write(body)
         out.flush()
+        return len(body)

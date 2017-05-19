@@ -35,7 +35,6 @@ def value_to_print(value, optype):
         return "NA"
     if optype in NUMERIC_VALUE_FIELDS:
         return value
-    print "***", value, optype
     return "\"%s\"" % value.replace('"', '\\"')
 
 
@@ -80,7 +79,6 @@ class RTree(Tree):
 
         """
         optype = self.fields[field]['optype']
-        print field, self.fields[field]['name'], "**%s++" % repr(self.predicate.value)
         operator = PYTHON_OPERATOR[self.predicate.operator]
         value = value_to_print(self.predicate.value, optype)
 
@@ -144,7 +142,6 @@ class RTree(Tree):
 
             for child in self.children:
                 field = child.predicate.field
-                print "*** child field", field
                 pre_condition = u""
                 # code when missing_splits has been used
                 if has_missing_branch and field not in COMPOSED_FIELDS \

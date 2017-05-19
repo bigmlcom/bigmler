@@ -44,9 +44,9 @@ class TableauModel(Model):
 
         """
         ids_path = self.get_ids_path(filter_id)
-        response = self.tableau(out, ids_path=ids_path,
-                                subtree=subtree, attr=attr)
-        if response:
+        length = self.tableau(out, ids_path=ids_path,
+                              subtree=subtree, attr=attr)
+        if length > 0:
             out.write(u"END\n")
         else:
             sys.exit(u"\nFailed to represent this model in "
@@ -63,3 +63,4 @@ class TableauModel(Model):
                                       attr=attr)
         out.write(body)
         out.flush()
+        return len(body)

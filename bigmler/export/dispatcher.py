@@ -134,6 +134,7 @@ def export_code(args, api=None):
         local_model = EXPORTS[args.language](args.model, api=api)
         generate_output(local_model, args, model_type="model")
 
+    """
     if args.logistic_regression is not None:
         if args.language not in LR_EXPORTS:
             sys.exit("Exporting to %s is not yet supported for this kind of "
@@ -142,3 +143,4 @@ def export_code(args, api=None):
             args.logistic_regression, api=api)
         generate_output(local_logistic, args, model_type="logistic_regression",
                         attr="probability")
+    """
