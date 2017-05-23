@@ -103,7 +103,7 @@ def predict_rating(gender=None,
 
     item_analysis = {
         "genres": {
-            "separator": u'$',
+            "separator": '$',
         },
     }
 

@@ -141,7 +141,8 @@ u"""
             field = self.tree.fields[field_id]
             body += """
         \"%s\": {""" % field['camelCase']
-            for option in field['term_analysis']:
+            options = sorted(field['term_analysis'].keys())
+            for option in options:
                 if option in TERM_OPTIONS:
                     value = repr(field['term_analysis'][option])
                     if value.startswith("u"):

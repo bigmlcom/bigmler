@@ -51,7 +51,7 @@ class RTree(Tree):
         value = value_to_print(self.output,
                                self.fields[self.objective_id]['optype'])
         indent_depth = INDENT * (depth + 1)
-        code += u"%sreturn(list(prediction=%s, %s=%s));\n%s}\n" % \
+        code += u"%sreturn(list(prediction=%s, %s=%s))\n%s}\n" % \
                (indent_depth,
                 value, metric, self.confidence, INDENT * depth)
         cmv.append(self.fields[field]['dotted'])
@@ -92,8 +92,8 @@ class RTree(Tree):
                                              self.predicate.term))
                 matching_function = "itemMatches"
 
-            return u"%sif (%stermMatches(%s, %s, %s)%s%s) {\n" % \
-                (INDENT * depth, pre_condition,
+            return u"%sif (%s%s(%s, %s, %s)%s%s) {\n" % \
+                (INDENT * depth, pre_condition, matching_function,
                  self.fields[field]['dotted'],
                  value_to_print(self.fields[field]['dotted'], 'categorical'),
                  value_to_print(self.predicate.term, 'categorical'),
@@ -164,7 +164,7 @@ class RTree(Tree):
         else:
             value = value_to_print(self.output,
                                    self.fields[self.objective_id]['optype'])
-            body = u"%sreturn(list(prediction=%s, %s=%s));\n" % \
+            body = u"%sreturn(list(prediction=%s, %s=%s))\n" % \
                   (INDENT * depth,
                    value, metric, self.confidence)
         return body, term_analysis_fields, item_analysis_fields

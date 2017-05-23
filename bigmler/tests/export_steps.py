@@ -28,6 +28,7 @@ from bigml.api import check_resource
 from bigmler.checkpoint import file_number_of_lines
 from bigmler.tests.common_steps import check_debug
 from bigmler.export.dispatcher import EXTENSIONS
+from bigml.util import PY3
 
 
 def extract_content(file_handler):
@@ -99,11 +100,19 @@ def i_create_all_resources_to_model_with_source_attrs( \
 #@step(r'I check the output for "(.*)" is like "(.*)" expected file')
 def i_check_if_the_output_is_like_expected_file(step, language, expected_file):
     ok_(language is not None and expected_file is not None)
-    with open(res_filename(expected_file), "rb") as file_handler:
+    with open(res_filename(expected_file)) as file_handler:
         expected_content = extract_content(file_handler)
     with open(os.path.join(world.directory, "%s.%s" % \
             (world.model['resource'].replace("/", "_"),
              EXTENSIONS[language]))) \
             as file_handler:
         output = extract_content(file_handler)
+    if PY3 and output.strip() != expected_content.strip():
+        try:
+            name, extension = expected_file.split(".")
+            expected_file = "%s_p3.%s" % (name, extension)
+            with open(res_filename(expected_file)) as file_handler:
+                expected_content = extract_content(file_handler)
+        except IOError:
+            pass
     eq_(output.strip(), expected_content.strip())

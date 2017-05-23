@@ -87,14 +87,16 @@ class JsTree(Tree):
             if optype == 'text':
                 term_analysis_fields.append((field,
                                              self.predicate.term))
-                matching_function = "term_matches"
+                matching_function = "termMatches"
             else:
                 item_analysis_fields.append((field,
                                              self.predicate.term))
-                matching_function = "item_matches"
+                matching_function = "itemMatches"
 
-            return u"%sif (%stermMatches(%s%s, %s, %s) %s %s) {\n" % \
-                (INDENT * depth, pre_condition,
+            return u"%sif (%s%s(%s%s, %s, %s) %s %s) {\n" % \
+                (INDENT * depth,
+                 pre_condition,
+                 matching_function,
                  prefix,
                  self.fields[field]['camelCase'],
                  value_to_print(self.fields[field]['camelCase'],

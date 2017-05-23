@@ -8,7 +8,7 @@ locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 
 class CSVInput(object):
-    \"\"\"Reads and parses csv input from stdin
+    """Reads and parses csv input from stdin
 
        Expects a data section (without headers) with the following fields:
        %s
@@ -17,10 +17,10 @@ class CSVInput(object):
        INPUT_TYPES, and per field PREFIXES and SUFFIXES are removed. You can
        also provide strings to be considered as no content markers in
        MISSING_TOKENS.
-    \"\"\"
+    """
     def __init__(self, input=sys.stdin):
-        \"\"\" Opens stdin and defines parsing constants
+        """ Opens stdin and defines parsing constants
 
-        \"\"\"
+        """
         try:
             self.reader = csv.reader(input, delimiter=',', quotechar='\"')

@@ -2,7 +2,7 @@
 
     var TM_TOKENS = 'tokens_only', TM_FULL_TERM = 'full_terms_only',
       TM_ALL = 'all';
-    var FULL_TERM_PATTERN = new RegExp('^.+\\b.+$');
+    var FULL_TERM_PATTERN = new RegExp('^.+\b.+$');
 
     function termMatches(text, fieldLabel, term) {
       /**
@@ -72,8 +72,8 @@
        */
 
       var flags = getTokensFlags(caseSensitive);
-      var terms = terms.join('(\\\\b|_)|(\\\\b|_)');
-      var pattern = new RegExp('(\\\\b|_)' + terms + '(\\\\b|_)', flags);
+      var terms = terms.join('(\\b|_)|(\\b|_)');
+      var pattern = new RegExp('(\\b|_)' + terms + '(\\b|_)', flags);
       var matches = text.match(pattern);
       return (matches == null) ? 0 : matches.length;
     }

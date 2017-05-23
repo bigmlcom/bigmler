@@ -7,8 +7,8 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
 
     var TERM_ANALYSIS = {
         "title": {
-                "token_mode": 'all',
                 "case_sensitive": false,
+                "token_mode": 'all',
         },
     }
     var TERM_FORMS = {
@@ -20,7 +20,7 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
 
     var TM_TOKENS = 'tokens_only', TM_FULL_TERM = 'full_terms_only',
       TM_ALL = 'all';
-    var FULL_TERM_PATTERN = new RegExp('^.+\\b.+$');
+    var FULL_TERM_PATTERN = new RegExp('^.+\b.+$');
 
     function termMatches(text, fieldLabel, term) {
       /**
@@ -90,8 +90,8 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
        */
 
       var flags = getTokensFlags(caseSensitive);
-      var terms = terms.join('(\\\\b|_)|(\\\\b|_)');
-      var pattern = new RegExp('(\\\\b|_)' + terms + '(\\\\b|_)', flags);
+      var terms = terms.join('(\\b|_)|(\\b|_)');
+      var pattern = new RegExp('(\\b|_)' + terms + '(\\b|_)', flags);
       var matches = text.match(pattern);
       return (matches == null) ? 0 : matches.length;
     }
@@ -102,7 +102,7 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
         },
     }
     var escape = function(text) {
-      return text.replace(/[-[\]{}()*+?.,\\\\^$|#\s]/g, \"\\\\$&\");
+      return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
     };
 
     function itemMatches(text, fieldLabel, item) {
@@ -140,7 +140,7 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
     // predict body
     if (genres == null) {
         return {prediction: 3.7, error: 1.28278}}
-    if (termMatches(genres, "genres", "Comedy") > 0) {
+    if (itemMatches(genres, "genres", "Comedy") > 0) {
         if (title == null) {
             return {prediction: 3.39535, error: 1.57231}}
         if (termMatches(title, "title", "life") > 0) {
@@ -158,7 +158,7 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
                     if (zipcode == null) {
                         return {prediction: 3.25316, error: 1.5086}}
                     if (zipcode > 7753) {
-                        if (termMatches(genres, "genres", "Horror") > 0) {
+                        if (itemMatches(genres, "genres", "Horror") > 0) {
                             if (timestamp == null) {
                                 return {prediction: 2, error: 5.08228}}
                             if (timestamp > 978258115) {
@@ -168,18 +168,18 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
                                 return {prediction: 3, error: 5.08228};
                             }
                         }
-                        if (termMatches(genres, "genres", "Horror") <= 0) {
+                        if (itemMatches(genres, "genres", "Horror") <= 0) {
                             if (timestamp == null) {
                                 return {prediction: 3.3913, error: 1.43342}}
                             if (timestamp > 978218758) {
-                                if (termMatches(genres, "genres", "Thriller") > 0) {
+                                if (itemMatches(genres, "genres", "Thriller") > 0) {
                                     return {prediction: 2, error: 10.53528};
                                 }
-                                if (termMatches(genres, "genres", "Thriller") <= 0) {
-                                    if (termMatches(genres, "genres", "Crime") > 0) {
+                                if (itemMatches(genres, "genres", "Thriller") <= 0) {
+                                    if (itemMatches(genres, "genres", "Crime") > 0) {
                                         return {prediction: 5, error: 0.9578};
                                     }
-                                    if (termMatches(genres, "genres", "Crime") <= 0) {
+                                    if (itemMatches(genres, "genres", "Crime") <= 0) {
                                         if (termMatches(title, "title", "breakfast club, the (1985)") > 0) {
                                             return {prediction: 2, error: 1.31722};
                                         }
@@ -193,11 +193,11 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
                                                 }
                                                 if (termMatches(title, "title", "stand by me (1986)") <= 0) {
                                                     if (timestamp > 978228710) {
-                                                        if (termMatches(genres, "genres", "Musical") > 0) {
+                                                        if (itemMatches(genres, "genres", "Musical") > 0) {
                                                             return {prediction: 4.5, error: 5.26764};
                                                         }
-                                                        if (termMatches(genres, "genres", "Musical") <= 0) {
-                                                            if (termMatches(genres, "genres", "Romance") > 0) {
+                                                        if (itemMatches(genres, "genres", "Musical") <= 0) {
+                                                            if (itemMatches(genres, "genres", "Romance") > 0) {
                                                                 if (termMatches(title, "title", "day") > 0) {
                                                                     return {prediction: 2, error: 1.38964};
                                                                 }
@@ -215,14 +215,14 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
                                                                     }
                                                                 }
                                                             }
-                                                            if (termMatches(genres, "genres", "Romance") <= 0) {
+                                                            if (itemMatches(genres, "genres", "Romance") <= 0) {
                                                                 if (occupation == null) {
                                                                     return {prediction: 3.65385, error: 1.31541}}
                                                                 if (occupation == "writer") {
                                                                     return {prediction: 5, error: 1.31541};
                                                                 }
                                                                 if (occupation != "writer") {
-                                                                    if (termMatches(genres, "genres", "Drama") > 0) {
+                                                                    if (itemMatches(genres, "genres", "Drama") > 0) {
                                                                         if (termMatches(title, "title", "1997") > 0) {
                                                                             return {prediction: 5, error: 1.56826};
                                                                         }
@@ -230,7 +230,7 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
                                                                             return {prediction: 4, error: 0.78413};
                                                                         }
                                                                     }
-                                                                    if (termMatches(genres, "genres", "Drama") <= 0) {
+                                                                    if (itemMatches(genres, "genres", "Drama") <= 0) {
                                                                         if (timestamp > 978298248) {
                                                                             if (timestamp > 978298391) {
                                                                                 if (zipcode > 48070) {
@@ -336,10 +336,10 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
                                                     }
                                                 }
                                                 if (timestamp <= 978200651) {
-                                                    if (termMatches(genres, "genres", "Romance") > 0) {
+                                                    if (itemMatches(genres, "genres", "Romance") > 0) {
                                                         return {prediction: 3, error: 2.93426};
                                                     }
-                                                    if (termMatches(genres, "genres", "Romance") <= 0) {
+                                                    if (itemMatches(genres, "genres", "Romance") <= 0) {
                                                         return {prediction: 2, error: 2.07483};
                                                     }
                                                 }
@@ -371,14 +371,14 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
                         }
                     }
                     if (zipcode <= 7753) {
-                        if (termMatches(genres, "genres", "Drama") > 0) {
+                        if (itemMatches(genres, "genres", "Drama") > 0) {
                             return {prediction: 4, error: 2.60606};
                         }
-                        if (termMatches(genres, "genres", "Drama") <= 0) {
-                            if (termMatches(genres, "genres", "Romance") > 0) {
+                        if (itemMatches(genres, "genres", "Drama") <= 0) {
+                            if (itemMatches(genres, "genres", "Romance") > 0) {
                                 return {prediction: 1, error: 2.07461};
                             }
-                            if (termMatches(genres, "genres", "Romance") <= 0) {
+                            if (itemMatches(genres, "genres", "Romance") <= 0) {
                                 if (termMatches(title, "title", "1997") > 0) {
                                     return {prediction: 3, error: 2.93426};
                                 }
@@ -392,7 +392,7 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
             }
         }
     }
-    if (termMatches(genres, "genres", "Comedy") <= 0) {
+    if (itemMatches(genres, "genres", "Comedy") <= 0) {
         if (title == null) {
             return {prediction: 3.82843, error: 1.25974}}
         if (termMatches(title, "title", "1995") > 0) {
@@ -402,10 +402,10 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
                 return {prediction: 1, error: 3.25095};
             }
             if (occupation != "clerical/admin") {
-                if (termMatches(genres, "genres", "Romance") > 0) {
+                if (itemMatches(genres, "genres", "Romance") > 0) {
                     return {prediction: 4, error: 2.47964};
                 }
-                if (termMatches(genres, "genres", "Romance") <= 0) {
+                if (itemMatches(genres, "genres", "Romance") <= 0) {
                     if (occupation == "writer") {
                         return {prediction: 2, error: 2.03402};
                     }
@@ -416,7 +416,7 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
             }
         }
         if (termMatches(title, "title", "1995") <= 0) {
-            if (termMatches(genres, "genres", "Horror") > 0) {
+            if (itemMatches(genres, "genres", "Horror") > 0) {
                 if (timestamp == null) {
                     return {prediction: 3.35, error: 2.2498}}
                 if (timestamp > 978200824) {
@@ -424,7 +424,7 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
                         return {prediction: 2, error: 1.97983};
                     }
                     if (timestamp <= 978876267) {
-                        if (termMatches(genres, "genres", "Thriller") > 0) {
+                        if (itemMatches(genres, "genres", "Thriller") > 0) {
                             if (termMatches(title, "title", "alien") > 0) {
                                 return {prediction: 4, error: 2.93426};
                             }
@@ -432,7 +432,7 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
                                 return {prediction: 3, error: 2.07483};
                             }
                         }
-                        if (termMatches(genres, "genres", "Thriller") <= 0) {
+                        if (itemMatches(genres, "genres", "Thriller") <= 0) {
                             if (timestamp > 978268588) {
                                 if (termMatches(title, "title", "king") > 0) {
                                     return {prediction: 4, error: 2.03402};
@@ -478,7 +478,7 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
                     }
                 }
             }
-            if (termMatches(genres, "genres", "Horror") <= 0) {
+            if (itemMatches(genres, "genres", "Horror") <= 0) {
                 if (gender == null) {
                     return {prediction: 3.92135, error: 1.21004}}
                 if (gender == "Male") {
@@ -492,10 +492,10 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
                             if (timestamp == null) {
                                 return {prediction: 3.2, error: 2.52836}}
                             if (timestamp > 978243869) {
-                                if (termMatches(genres, "genres", "Romance") > 0) {
+                                if (itemMatches(genres, "genres", "Romance") > 0) {
                                     return {prediction: 4, error: 2.5701};
                                 }
-                                if (termMatches(genres, "genres", "Romance") <= 0) {
+                                if (itemMatches(genres, "genres", "Romance") <= 0) {
                                     if (timestamp > 978246320) {
                                         if (timestamp > 978246556) {
                                             return {prediction: 2, error: 2.93426};
@@ -514,10 +514,10 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
                                     return {prediction: 3, error: 3.32155};
                                 }
                                 if (termMatches(title, "title", "1994") <= 0) {
-                                    if (termMatches(genres, "genres", "Film-Noir") > 0) {
+                                    if (itemMatches(genres, "genres", "Film-Noir") > 0) {
                                         return {prediction: 4, error: 2.93426};
                                     }
-                                    if (termMatches(genres, "genres", "Film-Noir") <= 0) {
+                                    if (itemMatches(genres, "genres", "Film-Noir") <= 0) {
                                         return {prediction: 4.5, error: 5.26764};
                                     }
                                 }
@@ -565,10 +565,10 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
                                                 return {prediction: 2, error: 1.16977};
                                             }
                                             if (termMatches(title, "title", "1990") <= 0) {
-                                                if (termMatches(genres, "genres", "Film-Noir") > 0) {
+                                                if (itemMatches(genres, "genres", "Film-Noir") > 0) {
                                                     return {prediction: 4, error: 0.95152};
                                                 }
-                                                if (termMatches(genres, "genres", "Film-Noir") <= 0) {
+                                                if (itemMatches(genres, "genres", "Film-Noir") <= 0) {
                                                     if (termMatches(title, "title", "1980") > 0) {
                                                         return {prediction: 4, error: 0.77415};
                                                     }
@@ -603,20 +603,20 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
                                                         return {prediction: 1, error: 2.43201};
                                                     }
                                                     if (occupation != "other") {
-                                                        if (termMatches(genres, "genres", "Drama") > 0) {
+                                                        if (itemMatches(genres, "genres", "Drama") > 0) {
                                                             return {prediction: 5, error: 1.38965};
                                                         }
-                                                        if (termMatches(genres, "genres", "Drama") <= 0) {
+                                                        if (itemMatches(genres, "genres", "Drama") <= 0) {
                                                             if (zipcode == null) {
                                                                 return {prediction: 3.75, error: 1.96736}}
                                                             if (zipcode > 94327) {
                                                                 return {prediction: 5, error: 1.96736};
                                                             }
                                                             if (zipcode <= 94327) {
-                                                                if (termMatches(genres, "genres", "Thriller") > 0) {
+                                                                if (itemMatches(genres, "genres", "Thriller") > 0) {
                                                                     return {prediction: 5, error: 1.90304};
                                                                 }
-                                                                if (termMatches(genres, "genres", "Thriller") <= 0) {
+                                                                if (itemMatches(genres, "genres", "Thriller") <= 0) {
                                                                     if (termMatches(title, "title", "dragonheart (1996)") > 0) {
                                                                         return {prediction: 3, error: 10.53528};
                                                                     }
@@ -643,7 +643,7 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
                                                         return {prediction: 3, error: 0.82118};
                                                     }
                                                     if (termMatches(title, "title", "negotiator") <= 0) {
-                                                        if (termMatches(genres, "genres", "War") > 0) {
+                                                        if (itemMatches(genres, "genres", "War") > 0) {
                                                             if (timestamp > 978201771) {
                                                                 if (timestamp > 978294214) {
                                                                     if (timestamp > 978295884) {
@@ -671,7 +671,7 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
                                                                 return {prediction: 5, error: 2.56453};
                                                             }
                                                         }
-                                                        if (termMatches(genres, "genres", "War") <= 0) {
+                                                        if (itemMatches(genres, "genres", "War") <= 0) {
                                                             if (age_range == null) {
                                                                 return {prediction: 4.30435, error: 1.10419}}
                                                             if (age_range == "Under 18") {
@@ -685,12 +685,12 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
                                                             if (age_range != "Under 18") {
                                                                 if (timestamp > 978201899) {
                                                                     if (timestamp > 978215603) {
-                                                                        if (termMatches(genres, "genres", "Adventure") > 0) {
+                                                                        if (itemMatches(genres, "genres", "Adventure") > 0) {
                                                                             if (zipcode == null) {
                                                                                 return {prediction: 4.72727, error: 1.09872}}
                                                                             if (zipcode > 22103) {
                                                                                 if (timestamp > 978219518) {
-                                                                                    if (termMatches(genres, "genres", "Action") > 0) {
+                                                                                    if (itemMatches(genres, "genres", "Action") > 0) {
                                                                                         if (termMatches(title, "title", "hope") > 0) {
                                                                                             return {prediction: 5, error: 2.93426};
                                                                                         }
@@ -698,7 +698,7 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
                                                                                             return {prediction: 4, error: 2.07483};
                                                                                         }
                                                                                     }
-                                                                                    if (termMatches(genres, "genres", "Action") <= 0) {
+                                                                                    if (itemMatches(genres, "genres", "Action") <= 0) {
                                                                                         return {prediction: 5, error: 1.35815};
                                                                                     }
                                                                                 }
@@ -710,7 +710,7 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
                                                                                 return {prediction: 5, error: 0.49136};
                                                                             }
                                                                         }
-                                                                        if (termMatches(genres, "genres", "Adventure") <= 0) {
+                                                                        if (itemMatches(genres, "genres", "Adventure") <= 0) {
                                                                             if (timestamp > 978294097) {
                                                                                 if (timestamp > 978298847) {
                                                                                     return {prediction: 3, error: 1.25106};
@@ -772,7 +772,7 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
                                                                                             return {prediction: 3, error: 1.51877};
                                                                                         }
                                                                                         if (termMatches(title, "title", "edge") <= 0) {
-                                                                                            if (termMatches(genres, "genres", "Drama") > 0) {
+                                                                                            if (itemMatches(genres, "genres", "Drama") > 0) {
                                                                                                 if (zipcode == null) {
                                                                                                     return {prediction: 4.83333, error: 1.28505}}
                                                                                                 if (zipcode > 22103) {
@@ -782,7 +782,7 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
                                                                                                     return {prediction: 4, error: 1.28505};
                                                                                                 }
                                                                                             }
-                                                                                            if (termMatches(genres, "genres", "Drama") <= 0) {
+                                                                                            if (itemMatches(genres, "genres", "Drama") <= 0) {
                                                                                                 if (timestamp > 978227687) {
                                                                                                     return {prediction: 5, error: 1.56826};
                                                                                                 }
@@ -878,10 +878,10 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
                             }
                         }
                         if (timestamp <= 978237189) {
-                            if (termMatches(genres, "genres", "Thriller") > 0) {
+                            if (itemMatches(genres, "genres", "Thriller") > 0) {
                                 return {prediction: 4, error: 2.03402};
                             }
-                            if (termMatches(genres, "genres", "Thriller") <= 0) {
+                            if (itemMatches(genres, "genres", "Thriller") <= 0) {
                                 return {prediction: 3, error: 1.17434};
                             }
                         }
@@ -891,7 +891,7 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
                             return {prediction: 3, error: 1.35749};
                         }
                         if (termMatches(title, "title", "1997") <= 0) {
-                            if (termMatches(genres, "genres", "Adventure") > 0) {
+                            if (itemMatches(genres, "genres", "Adventure") > 0) {
                                 if (timestamp > 978153877) {
                                     return {prediction: 4, error: 2.07483};
                                 }
@@ -899,7 +899,7 @@ function predictRating(gender, age_range, occupation, zipcode, title, genres, ti
                                     return {prediction: 5, error: 2.93426};
                                 }
                             }
-                            if (termMatches(genres, "genres", "Adventure") <= 0) {
+                            if (itemMatches(genres, "genres", "Adventure") <= 0) {
                                 if (timestamp > 978152601) {
                                     return {prediction: 5, error: 0.25805};
                                 }

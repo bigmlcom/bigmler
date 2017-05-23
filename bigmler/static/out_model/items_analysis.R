@@ -1,7 +1,7 @@
-    escape <- function (text) {
-      return(gsub("(\\\\W)", "\\\\\\\\\\1", text))
-    };
 
+    escape <- function (text) {
+      return(gsub("(\\W)", "\\\\\1", text))
+    }
 
     itemMatches <- function (text, fieldLabel, item) {
 

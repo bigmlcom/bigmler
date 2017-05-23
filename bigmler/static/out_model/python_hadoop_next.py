@@ -4,24 +4,24 @@
                              \" input. %s\\n\" % str(exc))
 
     def __iter__(self):
-        \"\"\" Iterator method
+        """ Iterator method
 
-        \"\"\"
+        """
         return self
 
     def next(self):
-        \"\"\" Returns processed data in a list structure
+        """ Returns processed data in a list structure
 
-        \"\"\"
+        """
         def normalize(value):
-            \"\"\"Transforms to unicode and cleans missing tokens
-            \"\"\"
+            """Transforms to unicode and cleans missing tokens
+            """
             value = unicode(value.decode('utf-8'))
             return \"\" if value in self.MISSING_TOKENS else value
 
         def cast(function_value):
-            \"\"\"Type related transformations
-            \"\"\"
+            """Type related transformations
+            """
             function, value = function_value
             if not len(value):
                 return None

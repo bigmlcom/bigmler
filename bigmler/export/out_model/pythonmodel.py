@@ -278,6 +278,52 @@ for values in csv:
             with open(TERM_TEMPLATE) as template_handler:
                 body += template_handler.read()
 
+            term_analysis_options = set(map(lambda x: x[0],
+                                            term_analysis_predicates))
+            term_analysis_predicates = set(term_analysis_predicates)
+            body += """
+    term_analysis = {"""
+            for field_id in term_analysis_options:
+                field = self.fields[field_id]
+                body += """
+        \"%s\": {""" % field['slug']
+                options = sorted(field['term_analysis'].keys())
+                for option in options:
+                    if option in TERM_OPTIONS:
+                        body += """
+            \"%s\": %s,""" % (option, repr(field['term_analysis'][option]))
+                body += """
+        },"""
+            body += """
+    }"""
+            body += """
+    term_forms = {"""
+            term_forms = {}
+            fields = self.fields
+            for field_id, term in term_analysis_predicates:
+                alternatives = []
+                field = fields[field_id]
+                if field['slug'] not in term_forms:
+                    term_forms[field['slug']] = {}
+                all_forms = field['summary'].get('term_forms', {})
+                if all_forms:
+                    alternatives = all_forms.get(term, [])
+                    if alternatives:
+                        terms = [term]
+                        terms.extend(all_forms.get(term, []))
+                        term_forms[field['slug']][term] = terms
+            for field in term_forms:
+                body += """
+        \"%s\": {""" % field
+                for term in term_forms[field]:
+                    body += """
+            u\"%s\": %s,""" % (term, term_forms[field][term])
+                body += """
+        },"""
+            body += """
+    }
+
+"""
         if item_analysis_predicates:
             with open(ITEMS_TEMPLATE) as template_handler:
                 body += template_handler.read()

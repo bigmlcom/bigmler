@@ -1,6 +1,6 @@
 
     var escape = function(text) {
-      return text.replace(/[-[\]{}()*+?.,\\\\^$|#\s]/g, \"\\\\$&\");
+      return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
     };
 
     function itemMatches(text, fieldLabel, item) {

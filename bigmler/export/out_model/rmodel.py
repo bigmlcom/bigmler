@@ -89,7 +89,7 @@ class RModel(Model):
                          u"\n" + u"#\n")
         output = predictor_doc + predictor
         output += terms_body + items_body + body
-        output += u"%sreturn(NA);\n}\n" % INDENT
+        output += u"%sreturn(NA)\n}\n" % INDENT
         out.write(output)
         out.flush()
 
@@ -111,7 +111,8 @@ class RModel(Model):
             field = self.tree.fields[field_id]
             lines.append("""
         \"%s\"=list(""" % field['dotted'])
-            for option in field['term_analysis']:
+            options = sorted(field['term_analysis'].keys())
+            for option in options:
                 if option in TERM_OPTIONS:
                     value = repr(field['term_analysis'][option])
                     value = value if not value.startswith("u") else value[1:]
@@ -119,9 +120,10 @@ class RModel(Model):
                         value = 'TRUE'
                     elif value == 'False':
                         value = 'FALSE'
-                    inner_lines.append("""
+                    inner_lines.append("""\
                 \"%s\"= %s""" % (option, value))
-            lines[-1] = lines[-1] +  ",\n".join(inner_lines)
+            if inner_lines:
+                lines[-1] = lines[-1] + "\n" + ",\n".join(inner_lines)
         lines[-1] = lines[-1] + """
         )"""
         body += ",\n".join(lines) + """
@@ -151,10 +153,11 @@ class RModel(Model):
                 lines.append("""
         \"%s\"=list(""" % field)
                 for term in term_forms[field]:
-                    inner_lines.append("""
+                    inner_lines.append("""\
             \"%s\"=%s""" % (encode(term, "utf-8"),
                             encode(term_forms[field][term], "utf-8")))
-                lines[-1] = lines[-1] + ",\n".join(inner_lines)
+                if inner_lines:
+                    lines[-1] = lines[-1] + "\n" + ",\n".join(inner_lines)
             lines[-1] = lines[-1] + """
         )"""
             body += ",\n".join(lines) + """
@@ -163,7 +166,7 @@ class RModel(Model):
         body += """
     TM_TOKENS <- "%s"
     TM_FULL_TERM <- "%s"
-    TM_ALL <- "%s" \
+    TM_ALL <- "%s"\
 """ % (TM_TOKENS, TM_FULL_TERM, TM_ALL)
 
         with open(TERM_TEMPLATE) as template_handler:
@@ -193,13 +196,15 @@ class RModel(Model):
                         is not None:
                     value = repr(field['item_analysis'][option])
                     value = value if not value.startswith("u") else value[1:]
-                    inner_lines.append("""
+                    inner_lines.append("""\
                 \"%s\"=%s""" % (option, value))
-            lines[-1] = lines[-1] +  ",\n".join(inner_lines)
+            if inner_lines:
+                lines[-1] = lines[-1] + "\n" + ",\n".join(inner_lines)
         lines[-1] = lines[-1] + """
         )"""
         body += ",\n".join(lines) + """
-    )"""
+    )
+"""
 
         with open(ITEMS_TEMPLATE) as template_handler:
             body += template_handler.read()
