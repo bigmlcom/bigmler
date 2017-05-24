@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 def predict_rating(gender=None,
                    age_range=None,
                    occupation=None,

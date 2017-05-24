@@ -30,6 +30,8 @@ from bigml.tree_utils import (
 ITEM_OPTIONS = ["separator", "separator_regexp"]
 
 from bigml.model import Model
+from bigml.util import PY3
+
 from bigmler.export.out_tree.jstree import JsTree
 from bigmler.reports import BIGMLER_SCRIPT
 
@@ -94,6 +96,8 @@ u"""
         output = self.js_pre_body()
         output += terms_body + items_body + body
         output += u"%sreturn null;\n}\n" % INDENT
+        if not PY3:
+            output = output.encode("utf8")
         out.write(output)
         out.flush()
 
@@ -180,8 +184,10 @@ u"""
                 body += """
         \"%s\": {""" % field
                 for term in term_forms[field]:
+                    terms_list = u"[\"" + \
+                        u"\", \"".join(term_forms[field][term]) + u"\"]"
                     body += """
-            \"%s\": %s,""" % (term, term_forms[field][term])
+            \"%s\": %s,""" % (term, terms_list)
                 body += """
         },
 """

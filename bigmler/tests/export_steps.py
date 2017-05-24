@@ -36,7 +36,7 @@ def extract_content(file_handler):
 
     """
     content = file_handler.read()
-    variable_comment = "Predictor for rating from" \
+    variable_comment = " from" \
         " model/"
     try:
         position = content.index(variable_comment)

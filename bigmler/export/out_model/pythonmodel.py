@@ -26,6 +26,7 @@ from bigml.tree_utils import slugify, INDENT, sort_fields, docstring_comment, \
     MAX_ARGS_LENGTH, TERM_OPTIONS, TM_TOKENS, TM_FULL_TERM, TM_ALL, \
     ITEM_OPTIONS
 from bigml.model import Model
+from bigml.util import PY3
 
 from bigmler.export.out_tree.pythontree import PythonTree
 from bigmler.reports import BIGMLER_SCRIPT
@@ -315,7 +316,8 @@ for values in csv:
             for field in term_forms:
                 body += """
         \"%s\": {""" % field
-                for term in term_forms[field]:
+                terms = sorted(term_forms[field].keys())
+                for term in terms:
                     body += """
             u\"%s\": %s,""" % (term, term_forms[field][term])
                 body += """
@@ -375,7 +377,7 @@ for values in csv:
             function_name = function_name[1:]
         if function_name == "":
             function_name = "field_" + self.objective_id
-
+        python_header = u"#!/usr/bin/env python\n# -*- coding: utf-8 -*-\n"
         predictor_definition = (u"def predict_%s" %
                                 function_name)
         depth = len(predictor_definition) + 1
@@ -391,6 +393,9 @@ for values in csv:
         if term_analysis_predicates or item_analysis_predicates:
             terms_body = self.term_analysis_body(term_analysis_predicates,
                                                  item_analysis_predicates)
-        predictor += predictor_doc + terms_body + body
+        predictor = python_header + predictor + \
+            predictor_doc + terms_body + body
+        if not PY3:
+            predictor = predictor.encode("utf8")
         out.write(predictor)
         out.flush()

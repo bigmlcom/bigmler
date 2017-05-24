@@ -23,11 +23,13 @@ predictions
 import sys
 
 from bigml.tree_utils import (
-    to_camel_js, sort_fields, docstring_comment,
+    to_camel_js, sort_fields, docstring_comment, slugify,
     INDENT, MAX_ARGS_LENGTH, TERM_OPTIONS, ITEM_OPTIONS,
     TM_TOKENS, TM_FULL_TERM, TM_ALL)
 
 from bigml.model import Model
+from bigml.util import PY3
+
 from bigmler.export.out_tree.rtree import RTree
 from bigmler.reports import BIGMLER_SCRIPT
 
@@ -41,7 +43,7 @@ def dot(name):
     """Creates a dot-separated name
 
     """
-    return name.replace(" ", ".")
+    return slugify(name.replace(" ", "."))
 
 
 class RModel(Model):
@@ -90,6 +92,8 @@ class RModel(Model):
         output = predictor_doc + predictor
         output += terms_body + items_body + body
         output += u"%sreturn(NA)\n}\n" % INDENT
+        if not PY3:
+            output = output.encode("utf8")
         out.write(output)
         out.flush()
 
@@ -153,9 +157,12 @@ class RModel(Model):
                 lines.append("""
         \"%s\"=list(""" % field)
                 for term in term_forms[field]:
+                    terms_list = u"list(\"" + \
+                        u"\", \"".join(term_forms[field][term])
+                    terms_list += "\")"
                     inner_lines.append("""\
             \"%s\"=%s""" % (term,
-                            term_forms[field][term]))
+                            terms_list))
                 if inner_lines:
                     lines[-1] = lines[-1] + "\n" + ",\n".join(inner_lines)
             lines[-1] = lines[-1] + """

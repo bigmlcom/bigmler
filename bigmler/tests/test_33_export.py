@@ -76,7 +76,10 @@ class TestExport(object):
             ['data/movies.csv', 'data/movies_source_attrs.json', 'scenario_exp_1_b/model', 'javascript', 'check_files/export/model_function.js'],
             ['data/movies.csv', 'data/movies_source_attrs.json', 'scenario_exp_1_c/model', 'r', 'check_files/export/model_function.R'],
             ['data/iris.csv', '', 'scenario_exp_1_d/model', 'tableau', 'check_files/export/model_function.tb'],
-            ['data/iris.csv', '', 'scenario_exp_1_e/model', 'mysql', 'check_files/export/model_function.sql']]
+            ['data/iris.csv', '', 'scenario_exp_1_e/model', 'mysql', 'check_files/export/model_function.sql'],
+            ['data/libros.csv', 'data/libros_source_attrs.json', 'scenario_exp_1_f/model', 'python', 'check_files/export/model_function_utf8.py'],
+            ['data/libros.csv', 'data/libros_source_attrs.json', 'scenario_exp_1_g/model', 'r', 'check_files/export/model_function_utf8.R'],
+            ['data/libros.csv', 'data/libros_source_attrs.json', 'scenario_exp_1_h/model', 'javascript', 'check_files/export/model_function_utf8.js']]
         for example in examples:
             print "\nTesting with:\n", example
             export.i_create_all_resources_to_model_with_source_attrs( \

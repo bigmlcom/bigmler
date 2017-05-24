@@ -3,6 +3,11 @@
 History
 -------
 
+3.11.1 (2017-05-25)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing bug in bigmler export when non-ascii characters are used in a model.
+
 3.11.0 (2017-05-16)
 ~~~~~~~~~~~~~~~~~~~
 

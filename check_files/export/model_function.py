@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 def predict_rating(gender=None,
                    age_range=None,
                    occupation=None,
@@ -5,7 +7,7 @@ def predict_rating(gender=None,
                    title=None,
                    genres=None,
                    timestamp=None):
-    """ Predictor for rating from model/591e238e7e0a8d2bc101bf54
+    """ Predictor for rating from model/59260650663ac2402d002f4a
 
         Created using BigMLer
     """
