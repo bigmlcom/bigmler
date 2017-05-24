@@ -154,8 +154,8 @@ class RModel(Model):
         \"%s\"=list(""" % field)
                 for term in term_forms[field]:
                     inner_lines.append("""\
-            \"%s\"=%s""" % (encode(term, "utf-8"),
-                            encode(term_forms[field][term], "utf-8")))
+            \"%s\"=%s""" % (term,
+                            term_forms[field][term]))
                 if inner_lines:
                     lines[-1] = lines[-1] + "\n" + ",\n".join(inner_lines)
             lines[-1] = lines[-1] + """
