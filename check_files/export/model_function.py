@@ -72,7 +72,7 @@ def predict_rating(gender=None,
     term_analysis = {
         "title": {
             "case_sensitive": False,
-            "token_mode": 'all',
+            "token_mode": u'all',
         },
     }
     term_forms = {
