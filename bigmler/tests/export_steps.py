@@ -115,4 +115,6 @@ def i_check_if_the_output_is_like_expected_file(step, language, expected_file):
                 expected_content = extract_content(file_handler)
         except IOError:
             pass
-    eq_(output.strip(), expected_content.strip())
+    eq_(output.strip(), expected_content.strip(), "Found: %s\nExpected:%s" % \
+        (world.directory + "/" + world.model["resource"],
+         expected_file))

@@ -156,7 +156,8 @@ class RModel(Model):
                 inner_lines = []
                 lines.append("""
         \"%s\"=list(""" % field)
-                for term in term_forms[field]:
+                terms = sorted(term_forms[field].keys())
+                for term in terms:
                     terms_list = u"list(\"" + \
                         u"\", \"".join(term_forms[field][term])
                     terms_list += "\")"

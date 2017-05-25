@@ -23,6 +23,8 @@ predictions
 
 import sys
 
+from unidecode import unidecode
+
 from bigml.tree_utils import (
     to_camel_js, sort_fields, docstring_comment,
     INDENT, MAX_ARGS_LENGTH, TERM_OPTIONS)
@@ -78,12 +80,12 @@ u"""
         """
         # fill the camelcase variable names with the JS_KEYWORDS restrictions
         objective_field = self.tree.fields[self.tree.objective_id]
-        camelcase = to_camel_js(objective_field['name'], False)
+        camelcase = to_camel_js(unidecode(objective_field['name']), False)
         objective_field['CamelCase'] = camelcase
         for field in [(key, val) for key, val in
                       sort_fields(self.tree.fields)]:
             field_obj = self.tree.fields[field[0]]
-            field_obj['camelCase'] = to_camel_js(field_obj['name'])
+            field_obj['camelCase'] = to_camel_js(unidecode(field_obj['name']))
 
         body, term_analysis_predicates, item_analysis_predicates = \
             self.tree.plug_in_body()
@@ -107,7 +109,7 @@ u"""
         """
         objective_field = self.tree.fields[self.tree.objective_id]
         if not 'CamelCase' in objective_field:
-            camelcase = to_camel_js(objective_field['name'], False)
+            camelcase = to_camel_js(unidecode(objective_field['name']), False)
             objective_field['CamelCase'] = camelcase
 
         output = u"function predict%s(" % objective_field['CamelCase']
@@ -120,7 +122,8 @@ u"""
                           sort_fields(self.tree.fields)]:
                 field_obj = self.tree.fields[field[0]]
                 if not 'camelCase' in field_obj:
-                    field_obj['camelCase'] = to_camel_js(field_obj['name'])
+                    field_obj['camelCase'] = to_camel_js( \
+                        unidecode(field_obj['name']))
                 if field[0] != self.tree.objective_id:
                     args.append(u"%s" % field_obj['camelCase'])
         args_string = u", ".join(args)
@@ -183,7 +186,8 @@ u"""
             for field in term_forms:
                 body += """
         \"%s\": {""" % field
-                for term in term_forms[field]:
+                terms = sorted(term_forms[field].keys())
+                for term in terms:
                     terms_list = u"[\"" + \
                         u"\", \"".join(term_forms[field][term]) + u"\"]"
                     body += """

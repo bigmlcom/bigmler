@@ -1,20 +1,20 @@
 
 /**
-*  Predictor for Imagen from model/592619f9663ac2403400a126
+*  Predictor for Imagen from model/5926fe6d663ac2403400cdf5
 *  Created using BigMLer
 */
-function predictImagen(tTulo, grados, aOLanzamiento, pGinas, codBarras) {
+function predictImagen(titulo, grados, anoLanzamiento, paginas, codBarras) {
 
     var TERM_ANALYSIS = {
-        "tTulo": {
+        "titulo": {
                 "case_sensitive": false,
                 "token_mode": 'all',
         },
     }
     var TERM_FORMS = {
-        "tTulo": {
-            "gigante": ["gigante", "gigantes"],
+        "titulo": {
             "fantásticos": ["fantásticos", "fantásticas"],
+            "gigante": ["gigante", "gigantes"],
         },
 
     }
@@ -100,18 +100,18 @@ function predictImagen(tTulo, grados, aOLanzamiento, pGinas, codBarras) {
     if (codBarras == null) {
         return {prediction: 1.82, error: 5.53698}}
     if (codBarras > 9789872414340) {
-        if (aOLanzamiento == null) {
+        if (anoLanzamiento == null) {
             return {prediction: 9, error: 7.02326}}
-        if (aOLanzamiento > 2008) {
-            if (pGinas == null) {
+        if (anoLanzamiento > 2008) {
+            if (paginas == null) {
                 return {prediction: 10.5, error: 5.88884}}
-            if (pGinas > 90) {
-                if (tTulo == null) {
+            if (paginas > 90) {
+                if (titulo == null) {
                     return {prediction: 9, error: 5.08228}}
-                if (termMatches(tTulo, "tTulo", "fantásticos") > 0) {
+                if (termMatches(titulo, "titulo", "fantásticos") > 0) {
                     return {prediction: 8, error: 5.08228};
                 }
-                if (termMatches(tTulo, "tTulo", "fantásticos") <= 0) {
+                if (termMatches(titulo, "titulo", "fantásticos") <= 0) {
                     if (grados == null) {
                         return {prediction: 9.5, error: 5.26764}}
                     if (grados == "Elsa Pizzi") {
@@ -122,13 +122,13 @@ function predictImagen(tTulo, grados, aOLanzamiento, pGinas, codBarras) {
                     }
                 }
             }
-            if (pGinas <= 90) {
-                if (tTulo == null) {
+            if (paginas <= 90) {
+                if (titulo == null) {
                     return {prediction: 12, error: 5.08228}}
-                if (termMatches(tTulo, "tTulo", "gigante") > 0) {
+                if (termMatches(titulo, "titulo", "gigante") > 0) {
                     return {prediction: 11, error: 5.08228};
                 }
-                if (termMatches(tTulo, "tTulo", "gigante") <= 0) {
+                if (termMatches(titulo, "titulo", "gigante") <= 0) {
                     if (grados == null) {
                         return {prediction: 12.5, error: 5.26764}}
                     if (grados == "Patricia Roggio") {
@@ -140,7 +140,7 @@ function predictImagen(tTulo, grados, aOLanzamiento, pGinas, codBarras) {
                 }
             }
         }
-        if (aOLanzamiento <= 2008) {
+        if (anoLanzamiento <= 2008) {
             if (grados == null) {
                 return {prediction: 6, error: 5.08228}}
             if (grados == "4°, 5°") {
@@ -158,9 +158,9 @@ function predictImagen(tTulo, grados, aOLanzamiento, pGinas, codBarras) {
     }
     if (codBarras <= 9789872414340) {
         if (codBarras > 9789872414309) {
-            if (pGinas == null) {
+            if (paginas == null) {
                 return {prediction: 3, error: 5.08228}}
-            if (pGinas > 100) {
+            if (paginas > 100) {
                 if (grados == null) {
                     return {prediction: 2.5, error: 5.26764}}
                 if (grados == "4°, 5°") {
@@ -170,7 +170,7 @@ function predictImagen(tTulo, grados, aOLanzamiento, pGinas, codBarras) {
                     return {prediction: 3, error: 5.26764};
                 }
             }
-            if (pGinas <= 100) {
+            if (paginas <= 100) {
                 return {prediction: 4, error: 5.08228};
             }
         }

@@ -17,8 +17,8 @@ predictImagen <- function(titulo=NA,
     )
     TERM_FORMS <- list(
         "titulo"=list(
-            "gigante"=list("gigante", "gigantes"),
-            "fantásticos"=list("fantásticos", "fantásticas")
+            "fantásticos"=list("fantásticos", "fantásticas"),
+            "gigante"=list("gigante", "gigantes")
         )
     )
 
