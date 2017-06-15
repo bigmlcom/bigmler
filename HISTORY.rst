@@ -3,6 +3,11 @@
 History
 -------
 
+3.11.2 (2017-06-16)
+~~~~~~~~~~~~~~~~~~~
+
+- Improving boosted ensembles local predictions by using new bindings version.
+
 3.11.1 (2017-05-25)
 ~~~~~~~~~~~~~~~~~~~
 

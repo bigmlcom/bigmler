@@ -644,11 +644,14 @@ def predict(models, fields, args, api=None, log=None,
         # For a model we build a Model and for a small number of models,
         # we build a MultiModel using all of
         # the given models and issue a combined prediction
-        if (args.boosting or (len(models) <= args.max_batch_models \
+        if (len(models) <= args.max_batch_models \
                 and args.fast and \
                 not args.multi_label and args.max_categories == 0 \
-                and args.method != COMBINATION)):
+                and args.method != COMBINATION):
             local_predict(models, test_reader, output, args, options, exclude)
+        elif args.boosting:
+            local_predict(args.ensemble, test_reader, output, args,
+                          options, exclude)
         # For large numbers of models, we split the list of models in chunks
         # and build a MultiModel for each chunk, issue and store predictions
         # for each model and combine all of them eventually.
