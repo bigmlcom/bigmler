@@ -60,6 +60,12 @@ def has_test(args):
     return (args.test_set or args.test_source or args.test_dataset or
             args.test_stdin or args.test_datasets)
 
+def has_ts_test(args):
+    """Returns if some kind of test data for time series is given in args.
+
+    """
+    return args.test_set or args.test_stdin or args.forecast or args.horizon
+
 
 def has_train(args):
     """Returns if some kind of train data is given in args.
@@ -447,6 +453,30 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
+    # Parses objective fields for time-series.
+    try:
+        if command_args.objectives:
+            objective_fields_arg = [
+                field.strip() for field in command_args.objectives.split(
+                    command_args.args_separator)]
+            command_args.objective_fields_ = objective_fields_arg
+        else:
+            command_args.objective_fields_ = []
+    except AttributeError:
+        pass
+
+    # Parses range.
+    try:
+        if command_args.range:
+            range_arg = [
+                value.strip() for value in command_args.range.split(
+                    command_args.args_separator)]
+            command_args.range_ = range_arg
+        else:
+            command_args.range_ = []
+    except AttributeError:
+        pass
+
     # Parses parameters for scripts.
     try:
         if command_args.declare_inputs:
@@ -627,6 +657,26 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
+
+    time_series_ids = []
+    try:
+        # Parses timeseries/ids if provided.
+        if command_args.time_series_set:
+            time_series_ids = u.read_resources(command_args.time_series)
+        command_args.time_series_ids_ = time_series_ids
+    except AttributeError:
+        pass
+
+    # Retrieve timeseries/ids if provided.
+    try:
+        if command_args.time_series_tag:
+            time_series_ids = (time_series_ids +
+                               u.list_ids(api.list_time_series,
+                                          "tags__in=%s" %
+                                          command_args.time_series_tag))
+        command_args.time_series_ids_ = time_series_ids
+    except AttributeError:
+        pass
 
     # Parses cluster names to generate datasets if provided
     try:
@@ -947,6 +997,7 @@ def transform_args(command_args, flags, api):
          command_args.test_datasets) or
         (hasattr(command_args, 'test_dataset_tag') and
          command_args.test_dataset_tag))
+
 
 def transform_dataset_options(command_args, api):
     """Retrieves the dataset ids from the different input options

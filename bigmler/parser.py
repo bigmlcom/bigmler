@@ -18,6 +18,7 @@
 """
 from __future__ import absolute_import
 
+import sys
 import argparse
 import pkg_resources
 
@@ -41,12 +42,13 @@ from bigmler.options.export import get_export_options
 from bigmler.options.association import get_association_options
 from bigmler.options.logisticregression import get_logistic_regression_options
 from bigmler.options.topicmodel import get_topic_model_options
+from bigmler.options.timeseries import get_time_series_options
 from bigmler.options.execute import get_execute_options
 
 SUBCOMMANDS = ["main", "analyze", "cluster", "anomaly", "sample",
                "delete", "report", "reify", "project", "association",
-               "logistic-regression", "topic-model", "execute", "whizzml",
-               "export"]
+               "logistic-regression", "topic-model", "time-series",
+               "execute", "whizzml", "export"]
 
 
 MAIN = SUBCOMMANDS[0]
@@ -331,6 +333,27 @@ under the License.""" % version
         '--number-of-evaluations': main_options[
             '--number-of-evaluations'],
         '--no-no-csv': main_options['--no-no-csv']})
+
+    # time-series
+    defaults = general_defaults["BigMLer time-series"]
+    subcommand_options["time-series"] = get_time_series_options( \
+        defaults=defaults)
+
+    subcommand_options["time-series"].update(common_options)
+    subcommand_options["time-series"].update(source_options)
+    subcommand_options["time-series"].update(dataset_options)
+    subcommand_options["time-series"].update(test_options)
+    subcommand_options["time-series"].update({
+        '--source-tag': delete_options['--source-tag'],
+        '--dataset-tag': delete_options['--dataset-tag'],
+        '--time-series-tag': delete_options[
+            '--time-series-tag'],
+        '--objective': main_options['--objective'],
+        '--evaluate': main_options['--evaluate'],
+        '--prediction-header': main_options['--prediction-header'],
+        '--reports': main_options['--reports'],
+        '--remote': main_options['--remote']})
+
 
     defaults = general_defaults["BigMLer execute"]
     subcommand_options["execute"] = get_execute_options(defaults=defaults)

@@ -253,6 +253,18 @@ def get_delete_options(defaults=None):
             'default': defaults.get('logistic_regression_tag', None),
             'help': "Retrieve logistic regression that were tagged with tag."},
 
+        # Use it to retrieve time-series that were tagged with tag.
+        '--time-series-tag': {
+            'dest': 'time_series_tag',
+            'default': defaults.get('time_series_tag', None),
+            'help': "Retrieve time-series that were tagged with tag."},
+
+        # Use it to retrieve forecast that were tagged with tag.
+        '--forecast-tag': {
+            'dest': 'forecast_tag',
+            'default': defaults.get('forecast_tag', None),
+            'help': "Retrieve forecasts that were tagged with tag."},
+
         # Filter the resources to be deleted by its status (finished if
         # not set)
         '--status': {

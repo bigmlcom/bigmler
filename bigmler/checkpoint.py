@@ -508,3 +508,24 @@ def is_batch_topic_distribution_created(path):
                 return False, None
     except IOError:
         return False, None
+
+
+def are_time_series_created(path, number_of_time_series):
+    """Checks existence and reads the time-series ids from the
+       time-series file in the
+       path directory
+
+    """
+    time_series_ids = []
+    try:
+        with open("%s%stime_series" % (path, os.sep)) as time_series_file:
+            for line in time_series_file:
+                time_series = line.strip()
+                try:
+                    time_series_id = bigml.api.get_time_series_id(time_series)
+                    time_series_ids.append(time_series_id)
+                except ValueError:
+                    return False, time_series_ids
+        return len(time_series_ids) == number_of_time_series, time_series_ids
+    except IOError:
+        return False, time_series_ids

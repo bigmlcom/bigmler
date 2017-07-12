@@ -141,6 +141,7 @@ def read_json(path):
         json_attributes = json.loads(attributes_reader.read())
     except ValueError:
         sys.exit("Error: no valid json found in %s" % path)
+    attributes_reader.close()
     return json_attributes
 
 
