@@ -119,8 +119,13 @@ def compute_output(api, args):
     output = args.predictions
     # there's only one time_series to be generated at present
     args.max_parallel_time_series = 1
+    args.max_parallel_evaluations = 1
     # time_series cannot be published yet.
     args.public_time_series = False
+    # no cross-validations
+    args.dataset_off = False
+    args.cross_validation_rate = 0
+    args.number_of_evaluations = 1
 
     # It is compulsory to have a description to publish either datasets or
     # time_series
@@ -160,6 +165,10 @@ def compute_output(api, args):
         # Now we have a dataset, let's check if there's an objective_field
         # given by the user and update it in the fields structure
         args.objective_id_ = get_objective_id(args, fields)
+        # if the time series is going to be evaluated, and we don't have
+        # test data, we need to divide the rows using ranges, so we'll need
+        # max rows
+        args.max_rows = datasets[0]["object"]["rows"]
     if args.time_series_file:
         # time-series is retrieved from the contents of the given local
         # JSON file
@@ -256,6 +265,9 @@ def compute_output(api, args):
             dataset = datasets[0]
             if args.test_split > 0 or args.has_test_datasets_:
                 dataset = test_dataset
+            else:
+                args.range_ = [int(args.max_rows * r.EVALUATE_SAMPLE_RATE),
+                               args.max_rows]
             dataset = u.check_resource(dataset, api=api,
                                        query_string=r.ALL_FIELDS_QS)
             dataset_fields = pd.get_fields_structure(dataset, None)

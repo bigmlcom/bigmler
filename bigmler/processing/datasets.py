@@ -283,6 +283,39 @@ def split_processing(dataset, api, args, resume,
     return train_dataset, test_dataset, resume
 
 
+def split_range_processing(dataset, api, args, resume,
+                           multi_label_data=None, session_file=None,
+                           path=None, log=None):
+    """Splits a dataset into train and test datasets using ranges
+
+    """
+    train_dataset = None
+    test_dataset = None
+    test_rate = args.test_split
+    train_rate = 1 - test_rate
+    split_row = int(dataset["object"]["rows"] * train_rate)
+    args.range_ = [1, split_row]
+    args.test_split = 0
+    dataset_alternative_args = r.set_dataset_split_args(
+        "%s - train (%s %%)" % (
+            args.name, int(train_rate * 100)),
+        args.description_, args,
+        multi_label_data=multi_label_data)
+    train_dataset, resume = alternative_dataset_processing(
+        dataset, "train", dataset_alternative_args, api, args,
+        resume, session_file=session_file, path=path, log=log)
+    args.range_ = [split_row + 1, dataset["object"]["rows"]]
+    dataset_alternative_args = r.set_dataset_split_args(
+        "%s - test (%s %%)" % (
+            args.name, int(test_rate * 100)),
+        args.description_, args, multi_label_data=multi_label_data)
+    test_dataset, resume = alternative_dataset_processing(
+        dataset, "test", dataset_alternative_args, api, args,
+        resume, session_file=session_file, path=path, log=log)
+
+    return train_dataset, test_dataset, resume
+
+
 def create_categories_datasets(dataset, distribution,
                                fields, args, api, resume,
                                session_file=None, path=None, log=None,

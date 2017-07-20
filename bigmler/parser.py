@@ -346,6 +346,7 @@ under the License.""" % version
     subcommand_options["time-series"].update({
         '--source-tag': delete_options['--source-tag'],
         '--dataset-tag': delete_options['--dataset-tag'],
+        '--fields-map': main_options['--fields-map'],
         '--time-series-tag': delete_options[
             '--time-series-tag'],
         '--objective': main_options['--objective'],

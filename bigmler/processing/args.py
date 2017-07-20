@@ -163,6 +163,9 @@ def parse_and_check(command):
     command_args = parser.parse_args(args)
     command_args.train_stdin = command.train_stdin
     command_args.test_stdin = command.test_stdin
+    command_args.subcommand = command.command.split(" ")[1]
+    if command_args.subcommand.startswith("-"):
+        command_args.subcommand = "main"
 
     # Checks options' compatibility
     try:

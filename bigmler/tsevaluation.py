@@ -34,7 +34,6 @@ from bigml.util import slugify
 def evaluate(time_series_set, datasets, api, args, resume,
              session_file=None, path=None, log=None,
              fields=None, dataset_fields=None,
-             labels=None, all_labels=None,
              objective_field=None):
     """Evaluates a list of time-series with the given dataset
 
@@ -42,7 +41,7 @@ def evaluate(time_series_set, datasets, api, args, resume,
     output = args.predictions
     evaluation_files = []
     evaluations, resume = evaluations_process(
-        time_series, datasets, fields,
+        time_series_set, datasets, fields,
         dataset_fields, api, args, resume,
         session_file=session_file, path=path, log=log,
         objective_field=objective_field)

@@ -84,10 +84,18 @@ def get_dataset_info(api, args, resume, source,
     # If test_split is used, split the dataset in a training and a test dataset
     # according to the given split
     if args.test_split > 0:
-        dataset, test_dataset, resume = pd.split_processing(
-            dataset, api, args, resume,
-            session_file=session_file, path=path, log=log)
-        datasets[0] = dataset
+        if args.subcommand == "time-series":
+            # use ranges
+            dataset, test_dataset, resume = pd.split_range_processing(
+                dataset, api, args, resume,
+                session_file=session_file, path=path, log=log)
+            datasets[0] = dataset
+        else:
+            # use sample_rate
+            dataset, test_dataset, resume = pd.split_processing(
+                dataset, api, args, resume,
+                session_file=session_file, path=path, log=log)
+            datasets[0] = dataset
 
     # If multi-dataset flag is on, generate a new dataset from the given
     # list of datasets

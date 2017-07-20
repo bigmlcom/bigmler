@@ -396,6 +396,10 @@ def set_basic_dataset_args(args, name=None):
             "sample_rate": args.sample_rate
         })
 
+    if args.range_:
+        dataset_args.update({
+            "range": args_range
+        })
     return dataset_args
 
 
@@ -438,7 +442,7 @@ def set_dataset_args(args, fields, multi_label_data=None):
     return dataset_args
 
 
-def set_dataset_split_args(name, description, args, sample_rate,
+def set_dataset_split_args(name, description, args, sample_rate=1,
                            out_of_bag=False, multi_label_data=None):
     """Return dataset arguments dict to split a dataset
 
@@ -452,6 +456,11 @@ def set_dataset_split_args(name, description, args, sample_rate,
         "sample_rate": sample_rate,
         "out_of_bag": out_of_bag
     }
+
+    if args.range_:
+        dataset_args.update({
+            "range": args_range
+        })
     if (hasattr(args, "multi_label") and
             args.multi_label and multi_label_data is not None):
         dataset_args.update(
@@ -1128,6 +1137,13 @@ def set_evaluation_args(args, fields=None,
     if 'evaluation' in args.json_args:
         update_json_args(
             evaluation_args, args.json_args.get('evaluation'), fields)
+    # if evaluating time series we need to use ranges
+    if args.subcommand == "time-series" and args.test_split == 0 and \
+            not args.has_test_datasets_:
+        args.range_ = [int(args.max_rows * EVALUATE_SAMPLE_RATE) + 1,
+                       args.max_rows]
+        evaluation_args.update({"range": args.range_})
+        return evaluation_args
     # Two cases to use out_of_bag and sample_rate: standard evaluations where
     # only the training set is provided, and cross_validation
     # [--dataset|--test] [--model|--models|--model-tag|--ensemble] --evaluate
@@ -2664,6 +2680,9 @@ def set_time_series_args(args, name=None, fields=None,
         "period": args.period
     }
 
+    # if we need to evaluate and there's no previous split, use a range
+    if args.evaluate and args.test_split == 0 and not args.has_test_datasets_:
+        args.range_ = [1, int(args.max_rows * EVALUATE_SAMPLE_RATE)]
     if objective_id is not None:
         time_series_args.update({"objective_field": objective_id})
     if args.objectives:
@@ -2678,12 +2697,10 @@ def set_time_series_args(args, name=None, fields=None,
             args.default_numeric_value})
     if args.field_parameters:
         time_series_args.update({"field_parameters": args.field_parameters_})
-    if args.range is not None:
+    if args.range_:
         time_series_args.update({"range": args.range_})
     if args.seasonality is not None:
         time_series_args.update({"seasonality": args.seasonality})
-    if args.range:
-        time_series_args.update({"range": args.range})
     if args.trend is not None:
         time_series_args.update({"trend": args.trend})
 
