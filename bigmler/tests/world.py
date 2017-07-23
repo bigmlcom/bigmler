@@ -55,6 +55,8 @@ RESOURCE_TYPES = [
     'topicmodel',
     'topicdistribution',
     'batchtopicdistribution',
+    'timeseries',
+    'forecast',
     'script',
     'library',
     'execution']
@@ -68,6 +70,7 @@ IRREGULAR_PLURALS = {
     'topicmodel': 'topic_models',
     'topicdistribution': 'topic_distributions',
     'batchtopicdistribution': 'batch_topic_distributions',
+    'timeseries': 'time_series_set',
     'library': 'libraries'}
 TRANSLATED_RESOURCES = {
     'batchprediction': 'batch_prediction',
@@ -77,7 +80,8 @@ TRANSLATED_RESOURCES = {
     'logisticregression': 'logistic_regression',
     'topicmodel': 'topic_model',
     'topicdistribution': 'topic_distribution',
-    'batchtopicdistribution': 'batch_topic_distributions'}
+    'timeseries': 'time_series',
+    'batchtopicdistribution': 'batch_topic_distribution'}
 
 
 def show_doc(self, examples=None):
@@ -170,6 +174,8 @@ class World(object):
         print "Counting resources (%s)." % time_tag
         for resource_type in RESOURCE_TYPES:
             resource_type = plural(resource_type)
+            if resource_type == "time_series_set":
+                resource_type = "time_series"
             if (not changed or len(getattr(self, resource_type))) > 0:
                 resources = getattr(self.api,"list_%s" % resource_type)()
                 if resource_type == 'source' and resources['code'] != HTTP_OK:

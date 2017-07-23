@@ -193,12 +193,17 @@ def then_the_evaluation_file_is_like(step, check_file_json):
         evaluation = evaluation_file_json.readline()
         check = json.loads(check)
         evaluation = json.loads(evaluation)
-        assert_equal(check['model'], evaluation['model'])
-        assert_equal(check['mode'], evaluation['mode'])
+        if 'model' in check:
+            assert_equal(check['model'], evaluation['model'])
+            assert_equal(check['mode'], evaluation['mode'])
+        else:
+            del check["datasets"]
+            del evaluation["datasets"]
+            assert_equal(check, evaluation)
         evaluation_file_json.close()
         check_file_json.close()
-    except:
-        assert False
+    except Exception, exc:
+        assert False, str(exc)
 
 #@step(r'I check that the (.*) dataset has been created$')
 def i_check_create_dataset(step, dataset_type=None):

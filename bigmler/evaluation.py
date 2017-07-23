@@ -240,10 +240,16 @@ def avg_class_statistics(total, component, number_of_evaluations):
     """Adds a new set of per class evaluation measures to the total average
 
     """
-    special_keys = ['class_name', 'present_in_test_data', 'occurrences',
-                    'ks_statistic', 'max_phi',
-                    'per_threshold_confusion_matrices']
+    special_keys = ['class_name', 'present_in_test_data', 'occurrences']
+    remove_keys = ['ks_statistic', 'max_phi',
+                   'per_threshold_confusion_matrices',
+                   'roc_curve', 'pr_curve', 'negative_cdf', 'max_phi',
+                   'lift_curve', 'ks_statistic', 'gain_curve']
+
     for class_info in component:
+        for key in remove_keys:
+            if key in class_info:
+                del class_info[key]
         class_name = class_info['class_name']
         found = False
         for total_class_info in total:
@@ -262,7 +268,7 @@ def avg_class_statistics(total, component, number_of_evaluations):
                                     key in special_keys):
                                 total_class_info[key] *= ((occurrences + 1) /
                                                           occurrences)
-                        except ValueError:
+                        except (ValueError, TypeError):
                             pass
                 if not total_class_info['present_in_test_data']:
                     total_class_info['present_in_test_data'] = flag
@@ -283,7 +289,7 @@ def avg_class_statistics(total, component, number_of_evaluations):
                                 total_class_info[(sd_key, new_key)] = []
                             total_class_info[
                                 (sd_key, new_key)].append(class_info[key])
-                    except ValueError:
+                    except (ValueError, TypeError):
                         pass
                 break
         if not found:
@@ -313,7 +319,7 @@ def avg_class_statistics(total, component, number_of_evaluations):
                                 class_info[(sd_key, new_key)] = []
                             class_info[(sd_key, new_key)].append( \
                                 class_info[key])
-                except ValueError:
+                except (ValueError, TypeError):
                     pass
             total.append(class_info)
     return total

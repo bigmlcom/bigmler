@@ -394,9 +394,14 @@ class RESTChain(object):
         """
         child = self.get_resource(resource_id)
         _, parent_id = u.get_origin_info(child)
+
         # add options defined at model level
         _, opts = self._inspect_model(child['models'][0])
         # the default value for replacement in models is the oposite, so
+        # name, exclude automatic naming alternatives
+        autonames = [u'']
+        u.non_automatic_name( \
+            child, opts, autonames=autonames)
         # it will be added afterwards
         if 'replacement' in opts['create']:
             del opts['create']['replacement']

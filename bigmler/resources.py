@@ -396,7 +396,7 @@ def set_basic_dataset_args(args, name=None):
             "sample_rate": args.sample_rate
         })
 
-    if args.range_:
+    if hasattr(args, "range") and args.range_:
         dataset_args.update({
             "range": args_range
         })
@@ -457,7 +457,7 @@ def set_dataset_split_args(name, description, args, sample_rate=1,
         "out_of_bag": out_of_bag
     }
 
-    if args.range_:
+    if hasattr(args, "range") and args.range_:
         dataset_args.update({
             "range": args_range
         })

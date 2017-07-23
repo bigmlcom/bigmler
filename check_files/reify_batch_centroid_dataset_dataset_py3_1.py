@@ -5,23 +5,22 @@
     api.ok(source1)
 
     dataset1 = api.create_dataset(source1, \
-        {'name': 'iris dataset'})
+        {'name': 'iris'})
     api.ok(dataset1)
 
     cluster1 = api.create_cluster(dataset1, \
-        {'name': "iris dataset's cluster"})
+        {'name': 'iris'})
     api.ok(cluster1)
 
     batchcentroid1 = api.create_batch_centroid(cluster1, dataset1, \
-        {'name': "Batch Centroid of iris dataset's cluster with iris dataset",
-         'output_dataset': True})
+        {'name': 'iris using iris dataset', 'output_dataset': True})
     api.ok(batchcentroid1)
 
     dataset2 = api.get_dataset(batchcentroid1['object']['output_dataset_resource'])
     api.ok(dataset2)
 
     dataset2 = api.update_dataset(dataset2, \
-        {'name': "Batch Centroid of iris dataset's cluster with iris dataset"})
+        {'name': 'iris using iris dataset'})
     api.ok(dataset2)
 
     dataset3 = api.create_dataset(dataset2, \

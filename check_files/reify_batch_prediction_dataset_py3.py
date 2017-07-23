@@ -9,11 +9,11 @@
     api.ok(dataset1)
 
     model1 = api.create_model(dataset1, \
-        {'name': "iris dataset's model"})
+        {'name': 'iris'})
     api.ok(model1)
 
     batchprediction1 = api.create_batch_prediction(model1, dataset1, \
-        {'name': "Batch Prediction of iris dataset's model with iris dataset",
+        {'name': 'iris using iris dataset',
          'output_dataset': True})
     api.ok(batchprediction1)
 

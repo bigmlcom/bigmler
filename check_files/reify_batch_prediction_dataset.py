@@ -5,16 +5,15 @@ source1 = api.create_source("iris.csv")
 api.ok(source1)
 
 dataset1 = api.create_dataset(source1, \
-    {'name': u'iris dataset'})
+    {'name': u'iris'})
 api.ok(dataset1)
 
 model1 = api.create_model(dataset1, \
-    {'name': u"iris dataset's model"})
+    {'name': u'iris'})
 api.ok(model1)
 
 batchprediction1 = api.create_batch_prediction(model1, dataset1, \
-    {'name': u"Batch Prediction of iris dataset's model with iris dataset",
-     'output_dataset': True})
+    {'name': u'iris using iris dataset', 'output_dataset': True})
 api.ok(batchprediction1)
 
 dataset2 = api.get_dataset(batchprediction1['object']['output_dataset_resource'])

@@ -207,7 +207,7 @@ def range_opts(resource, referrer, opts, call="create"):
 
 
 def common_model_opts(resource, referrer, opts, call="create"):
-    """Stores the options that are commont to all the model types
+    """Stores the options that are common to all the model types
 
     """
     common_dataset_opts(resource, referrer, opts, call=call)

@@ -29,7 +29,7 @@ from bigmler.tests.world import (world, common_setup_module,
 import bigmler.tests.basic_tst_prediction_steps as test_pred
 import bigmler.tests.basic_logistic_r_steps as lr_pred
 import bigmler.tests.evaluation_steps as evaluation
-
+import bigmler.tests.basic_time_series_steps as ts_pred
 
 
 def setup_module():
@@ -327,3 +327,29 @@ class TestEvaluation(object):
             test_pred.i_check_create_evaluation(self)
             evaluation.i_check_evaluation_key( \
                 self, key=example[4], value=example[5])
+
+    def test_scenario10(self):
+        """
+            Scenario: Successfully building evaluations for time series from start:
+                Given I create BigML time series resources uploading train "<data>" file to evaluate and log evaluation in "<output>"
+                And I check that the source has been created
+                And I check that the dataset has been created
+                And I check that the time series has been created
+                And I check that the evaluation has been created
+                Then the evaluation file is like "<json_evaluation_file>"
+
+                Examples:
+                | data             | output                   | json_evaluation_file    |
+                | ../data/grades.csv | ./scenario_e10/evaluation | ./check_files/evaluation_grades_ts.json |
+        """
+        print self.test_scenario10.__doc__
+        examples = [
+            ['data/grades.csv', 'scenario_e10/evaluation', 'check_files/evaluation_grades_ts.json']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            ts_pred.i_create_all_ts_resources_to_evaluate(self, data=example[0], output=example[1])
+            test_pred.i_check_create_source(self)
+            test_pred.i_check_create_dataset(self, suffix=None)
+            ts_pred.i_check_create_time_series(self)
+            test_pred.i_check_create_evaluation(self)
+            evaluation.then_the_evaluation_file_is_like(self, example[2])

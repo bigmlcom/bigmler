@@ -3,6 +3,13 @@
 History
 -------
 
+3.12.0 (2017-07-22)
+~~~~~~~~~~~~~~~~~~~
+
+- Adding bigmler timeseries subcommand to create time series models and
+  forecasts.
+- Solving issues in cross-validation due to new evaluation formats.
+
 3.11.2 (2017-06-16)
 ~~~~~~~~~~~~~~~~~~~
 
