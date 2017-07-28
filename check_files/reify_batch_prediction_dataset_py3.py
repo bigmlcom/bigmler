@@ -5,7 +5,7 @@
     api.ok(source1)
 
     dataset1 = api.create_dataset(source1, \
-        {'name': 'iris dataset'})
+        {'name': 'iris'})
     api.ok(dataset1)
 
     model1 = api.create_model(dataset1, \
