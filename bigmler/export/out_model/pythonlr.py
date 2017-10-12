@@ -47,7 +47,8 @@ import re
 from bigml.util import cast
 from bigml.predicate import TM_FULL_TERM, TM_ALL
 from bigml.cluster import parse_terms, parse_items, OPTIONAL_FIELDS
-from bigml.logistic import LogisticRegression, get_unique_terms, balance_input
+from bigml.logistic import LogisticRegression, balance_input
+from bigml.modelfields import get_unique_terms
 
 CONSTANTS = """
 EXPANSION_ATTRIBUTES = {"categorical": "categories", "text": "tag_cloud",

@@ -529,3 +529,27 @@ def are_time_series_created(path, number_of_time_series):
         return len(time_series_ids) == number_of_time_series, time_series_ids
     except IOError:
         return False, time_series_ids
+
+
+def are_deepnets_created(path, number_of_deepnets):
+    """Checks existence and reads the deepnet ids
+       from the deepnets file in the
+       path directory
+
+    """
+    deepnet_ids = []
+    try:
+        with open("%s%sdeepnets" % (path, os.sep)) as \
+            deepnets_file:
+            for line in deepnets_file:
+                deepnet = line.strip()
+                try:
+                    deepnet_id = bigml.api.get_deepnet_id( \
+                        deepnet)
+                    deepnet_ids.append(deepnet_id)
+                except ValueError:
+                    return False, deepnet_ids
+        return len(deepnet_ids) == number_of_deepnets, \
+            deepnet_ids
+    except IOError:
+        return False, deepnet_ids

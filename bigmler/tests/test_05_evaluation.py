@@ -30,6 +30,7 @@ import bigmler.tests.basic_tst_prediction_steps as test_pred
 import bigmler.tests.basic_logistic_r_steps as lr_pred
 import bigmler.tests.evaluation_steps as evaluation
 import bigmler.tests.basic_time_series_steps as ts_pred
+import bigmler.tests.basic_deepnet_steps as dn_pred
 
 
 def setup_module():
@@ -351,5 +352,32 @@ class TestEvaluation(object):
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
             ts_pred.i_check_create_time_series(self)
+            test_pred.i_check_create_evaluation(self)
+            evaluation.then_the_evaluation_file_is_like(self, example[2])
+
+
+    def test_scenario11(self):
+        """
+            Scenario: Successfully building evaluations for deepnets from start:
+                Given I create BigML deepnet resources uploading train "<data>" file to evaluate and log evaluation in "<output>"
+                And I check that the source has been created
+                And I check that the dataset has been created
+                And I check that the deepnet has been created
+                And I check that the evaluation has been created
+                Then the evaluation file is like "<json_evaluation_file>"
+
+                Examples:
+                | data             | output                   | json_evaluation_file    |
+                | ../data/iris.csv | ./scenario_e11/evaluation | ./check_files/evaluation_iris_dn.json |
+        """
+        print self.test_scenario11.__doc__
+        examples = [
+            ['data/iris.csv', 'scenario_e11/evaluation', 'check_files/evaluation_iris_dn.json']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            dn_pred.i_create_all_dn_resources_to_evaluate(self, data=example[0], output=example[1])
+            test_pred.i_check_create_source(self)
+            test_pred.i_check_create_dataset(self, suffix=None)
+            dn_pred.i_check_create_dn_model(self)
             test_pred.i_check_create_evaluation(self)
             evaluation.then_the_evaluation_file_is_like(self, example[2])

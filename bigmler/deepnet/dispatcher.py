@@ -14,7 +14,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-"""BigMLer - logistic regression subcommand processing dispatching
+"""BigMLer - deepnet subcommand processing dispatching
 
 """
 from __future__ import absolute_import
@@ -28,12 +28,12 @@ import bigmler.utils as u
 import bigmler.resources as r
 import bigmler.pre_model_steps as pms
 import bigmler.processing.args as a
-import bigmler.processing.logisticregressions as plr
+import bigmler.processing.deepnets as pdn
 import bigmler.processing.sources as ps
 import bigmler.processing.datasets as pd
 
 from bigmler.defaults import DEFAULTS_FILE
-from bigmler.lrprediction import lr_prediction, remote_lr_prediction
+from bigmler.dnprediction import dn_prediction, remote_dn_prediction
 from bigmler.reports import clear_reports, upload_reports
 from bigmler.command import get_stored_command
 from bigmler.evaluation import evaluate
@@ -41,14 +41,14 @@ from bigmler.dispatcher import (SESSIONS_LOG, command_handling,
                                 clear_log_files, get_test_dataset,
                                 get_objective_id)
 
-COMMAND_LOG = u".bigmler_logistic_regression"
-DIRS_LOG = u".bigmler_logistic_regression_dir_stack"
+COMMAND_LOG = u".bigmler_deepnet"
+DIRS_LOG = u".bigmler_deepnet_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 MINIMUM_MODEL = "full=false"
 DEFAULT_OUTPUT = u"predictions.csv"
 
 
-def logistic_regression_dispatcher(args=sys.argv[1:]):
+def deepnet_dispatcher(args=sys.argv[1:]):
     """Parses command line and calls the different processing functions
 
     """
@@ -110,22 +110,21 @@ def compute_output(api, args):
 
     """
 
-    logistic_regression = None
-    logistic_regressions = None
-    # no multi-label support at present
+    deepnet = None
+    deepnets = None
 
     # variables from command-line options
     resume = args.resume_
-    logistic_regression_ids = args.logistic_regression_ids_
+    deepnet_ids = args.deepnet_ids_
     output = args.predictions
-    # there's only one logistic regression to be generated at present
-    args.max_parallel_logistic_regressions = 1
-    # logistic regressions cannot be published yet.
-    args.public_logistic_regression = False
+    # there's only one deepnet to be generated at present
+    args.max_parallel_deepnets = 1
+    # deepnets cannot be published yet.
+    args.public_deepnet = False
 
     # It is compulsory to have a description to publish either datasets or
-    # logistic regressions
-    if (not args.description_ and (args.public_logistic_regression or
+    # deepnet
+    if (not args.description_ and (args.public_deepnet or
                                    args.public_dataset)):
         sys.exit("You should provide a description to publish.")
 
@@ -161,65 +160,66 @@ def compute_output(api, args):
         # Now we have a dataset, let's check if there's an objective_field
         # given by the user and update it in the fields structure
         args.objective_id_ = get_objective_id(args, fields)
-    if args.logistic_file:
-        # logistic regression is retrieved from the contents of the given local
+    if args.deepnet_file:
+        # deepnet is retrieved from the contents of the given local
         # JSON file
-        logistic_regression, csv_properties, fields = u.read_local_resource(
-            args.logistic_file,
+        deepnet, csv_properties, fields = u.read_local_resource(
+            args.deepnet_file,
             csv_properties=csv_properties)
-        logistic_regressions = [logistic_regression]
-        logistic_regression_ids = [logistic_regression['resource']]
+        deepnets = [deepnet]
+        deepnet_ids = [deepnet['resource']]
     else:
-        # logistic regression is retrieved from the remote object
-        logistic_regressions, logistic_regression_ids, resume = \
-            plr.logistic_regressions_processing( \
-            datasets, logistic_regressions, logistic_regression_ids, \
+        # deepnet is retrieved from the remote object
+        deepnets, deepnet_ids, resume = \
+            pdn.deepnets_processing( \
+            datasets, deepnets, deepnet_ids, \
             api, args, resume, fields=fields, \
             session_file=session_file, path=path, log=log)
-        if logistic_regressions:
-            logistic_regression = logistic_regressions[0]
+        if deepnets:
+            deepnet = deepnets[0]
 
-    # We update the logistic regression's public state if needed
-    if logistic_regression:
-        if isinstance(logistic_regression, basestring):
+    # We update the deepnet's public state if needed
+    if deepnet:
+        if isinstance(deepnet, basestring) or \
+                api.status(deepnet) != bigml.api.FINISHED:
             if not a.has_test(args):
                 query_string = MINIMUM_MODEL
             elif args.export_fields:
                 query_string = r.ALL_FIELDS_QS
             else:
                 query_string = ''
-            logistic_regression = u.check_resource(logistic_regression,
-                                                   api.get_logistic_regression,
-                                                   query_string=query_string)
-        logistic_regressions[0] = logistic_regression
-        if (args.public_logistic_regression or
+            deepnet = u.check_resource(deepnet,
+                                       api.get_deepnet,
+                                       query_string=query_string)
+        deepnets[0] = deepnet
+        if (args.public_deepnet or
                 (args.shared_flag and r.shared_changed(args.shared,
-                                                       logistic_regression))):
-            logistic_regression_args = {}
+                                                       deepnet))):
+            deepnet_args = {}
             if args.shared_flag and r.shared_changed(args.shared,
-                                                     logistic_regression):
-                logistic_regression_args.update(shared=args.shared)
-            if args.public_logistic_regression:
-                logistic_regression_args.update( \
-                    r.set_publish_logistic_regression_args(args))
-            if logistic_regression_args:
-                logistic_regression = r.update_logistic_regression( \
-                    logistic_regression, logistic_regression_args, args,
+                                                     deepnet):
+                deepnet_args.update(shared=args.shared)
+            if args.public_deepnet:
+                deepnet_args.update( \
+                    r.set_publish_deepnet_args(args))
+            if deepnet_args:
+                deepnet = r.update_deepnet( \
+                    deepnet, deepnet_args, args,
                     api=api, path=path, \
                     session_file=session_file)
-                logistic_regressions[0] = logistic_regression
+                deepnet[0] = deepnet
 
-    # We get the fields of the logistic_regression if we haven't got
+    # We get the fields of the deepnet if we haven't got
     # them yet and need them
-    if logistic_regression and (args.test_set or args.export_fields):
-        fields = plr.get_logistic_fields( \
-            logistic_regression, csv_properties, args)
+    if deepnet and (args.test_set or args.export_fields):
+        fields = pdn.get_deepnet_fields( \
+            deepnet, csv_properties, args)
 
     if fields and args.export_fields:
         fields.summary_csv(os.path.join(path, args.export_fields))
 
     # If predicting
-    if logistic_regressions and (a.has_test(args) or \
+    if deepnets and (a.has_test(args) or \
             (test_dataset and args.remote)):
         if test_dataset is None:
             test_dataset = get_test_dataset(args)
@@ -256,13 +256,13 @@ def compute_output(api, args):
                 args, fields=fields,
                 dataset_fields=test_fields)
 
-            remote_lr_prediction(logistic_regression, test_dataset, \
+            remote_dn_prediction(deepnet, test_dataset, \
                 batch_prediction_args, args, \
                 api, resume, prediction_file=output, \
                 session_file=session_file, path=path, log=log)
 
         else:
-            lr_prediction(logistic_regressions, fields, args,
+            dn_prediction(deepnets, fields, args,
                           session_file=session_file)
 
     # If evaluate flag is on, create remote evaluation and save results in
@@ -283,7 +283,7 @@ def compute_output(api, args):
                                   objective_field_present=False)
             test_fields = pd.get_fields_structure(test_dataset,
                                                   csv_properties)
-            resume = evaluate(logistic_regressions, args.test_dataset_ids, api,
+            resume = evaluate(deepnets, args.test_dataset_ids, api,
                               args, resume,
                               fields=fields, dataset_fields=test_fields,
                               session_file=session_file, path=path,
@@ -296,7 +296,7 @@ def compute_output(api, args):
             dataset = u.check_resource(dataset, api=api,
                                        query_string=r.ALL_FIELDS_QS)
             dataset_fields = pd.get_fields_structure(dataset, None)
-            resume = evaluate(logistic_regressions, [dataset], api,
+            resume = evaluate(deepnets, [dataset], api,
                               args, resume,
                               fields=fields, dataset_fields=dataset_fields,
                               session_file=session_file, path=path,

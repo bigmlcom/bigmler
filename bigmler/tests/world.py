@@ -57,6 +57,7 @@ RESOURCE_TYPES = [
     'batchtopicdistribution',
     'timeseries',
     'forecast',
+    'deepnet',
     'script',
     'library',
     'execution']

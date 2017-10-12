@@ -47,11 +47,11 @@ DEFAULT_DESCRIPTION = "Created using BigMLer"
 RESOURCE_TYPES = ["source", "dataset", "model", "ensemble", "batch_prediction",
                   "cluster", "centroid", "batch_centroid", "anomaly",
                   "anomaly_score", "batch_anomaly_score", "project", "sample",
-                  "association", "logistic_regression", "script",
+                  "association", "logistic_regression", "deepnet", "script",
                   "library", "execution", "evaluation", "topic_model"]
 
 STORED_MODELS = ["model_file", "ensemble_file", "logistic_file",
-                 "cluster_file", "anomaly_file"]
+                 "cluster_file", "anomaly_file", "deepnet_file"]
 
 def has_test(args):
     """Returns if some kind of test data is given in args.
@@ -422,6 +422,19 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
+
+    # Parses deepnet input fields if provided.
+    try:
+        if command_args.deepnet_fields:
+            deepnet_fields_arg = [
+                field.strip() for field in command_args.deepnet_fields.split(
+                    command_args.args_separator)]
+            command_args.deepnet_fields_ = deepnet_fields_arg
+        else:
+            command_args.deepnet_fields_ = []
+    except AttributeError:
+        pass
+
     # Parses topic model fields if provided.
     try:
         if command_args.topic_fields:
@@ -434,7 +447,7 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
-    # Parses field_codings for logistic regressions
+    # Parses field_codings for deepnet
     try:
         if command_args.field_codings:
             command_args.field_codings_ = u.read_json(
@@ -630,13 +643,34 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
-    # Retrieve logisticregression/ids if provided.
+    # Retrieve logsticregression/ids if provided.
     try:
-        if command_args.logistic_tag:
+        if command_args.logistic_regression_tag:
             logistic_regression_ids = (logistic_regression_ids + \
                 u.list_ids(api.list_logistic_regressions,
-                           "tags__in=%s" % command_args.logistic_tag))
+                           "tags__in=%s" %
+                           command_args.logistic_regression_tag))
         command_args.logistic_regression_ids_ = logistic_regression_ids
+    except AttributeError:
+        pass
+
+    deepnet_ids = []
+    try:
+        # Parses deepnet/ids if provided.
+        if command_args.deepnets:
+            deepnet_ids = u.read_resources( \
+                command_args.deepnets)
+        command_args.deepnet_ids_ = deepnet_ids
+    except AttributeError:
+        pass
+
+    # Retrieve deepnet/ids if provided.
+    try:
+        if command_args.deepnet_tag:
+            deepnet_regression_ids = (deepnet_ids + \
+                u.list_ids(api.list_deepnets,
+                           "tags__in=%s" % command_args.deepnet_tag))
+        command_args.deepnet_ids_ = deepnet_ids
     except AttributeError:
         pass
 
@@ -799,6 +833,16 @@ def get_output_args(api, command_args, resume):
                 command_args.embedded_imports)
         else:
             command_args.embedded_imports_ = []
+    except AttributeError:
+        pass
+
+    # Parses hidden_layers for deepnets.
+    try:
+        if command_args.hidden_layers:
+            command_args.hidden_layers_ = u.read_json(
+                command_args.hidden_layers)
+        else:
+            command_args.hidden_layers_ = []
     except AttributeError:
         pass
 
@@ -975,6 +1019,12 @@ def transform_args(command_args, flags, api):
          command_args.logistic_regressions) or
         (hasattr(command_args, 'logistic_regression_tag') and
          command_args.logistic_regression_tag) or
+        (hasattr(command_args, 'deepnet') and
+         command_args.deepnet) or
+        (hasattr(command_args, 'deepnets') and
+         command_args.deepnets) or
+        (hasattr(command_args, 'deepnet_tag') and
+         command_args.deepnet_tag) or
         (hasattr(command_args, 'ensemble_tag')
          and command_args.ensemble_tag))
 

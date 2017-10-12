@@ -265,6 +265,12 @@ def get_delete_options(defaults=None):
             'default': defaults.get('forecast_tag', None),
             'help': "Retrieve forecasts that were tagged with tag."},
 
+        # Use it to retrieve deepnet that were tagged with tag.
+        '--deepnet-tag': {
+            'dest': 'deepnet_tag',
+            'default': defaults.get('deepnet_tag', None),
+            'help': "Retrieve deepnets that were tagged with tag."},
+
         # Filter the resources to be deleted by its status (finished if
         # not set)
         '--status': {

@@ -59,6 +59,7 @@ from bigmler.association.dispatcher import association_dispatcher
 from bigmler.logisticregression.dispatcher import logistic_regression_dispatcher
 from bigmler.topicmodel.dispatcher import topic_model_dispatcher
 from bigmler.timeseries.dispatcher import time_series_dispatcher
+from bigmler.deepnet.dispatcher import deepnet_dispatcher
 from bigmler.execute.dispatcher import execute_dispatcher
 from bigmler.whizzml.dispatcher import whizzml_dispatcher
 from bigmler.export.dispatcher import export_dispatcher
@@ -124,6 +125,8 @@ def main(args=sys.argv[1:]):
             topic_model_dispatcher(args=new_args)
         elif new_args[0] == "time-series":
             time_series_dispatcher(args=new_args)
+        elif new_args[0] == "deepnet":
+            deepnet_dispatcher(args=new_args)
         elif new_args[0] == "whizzml":
             whizzml_dispatcher(args=new_args)
         elif new_args[0] == "export":
@@ -141,6 +144,7 @@ def main(args=sys.argv[1:]):
                  "\n\nbigmler logistic-regression --help\n\n"
                  "\n\nbigmler topic-model --help\n\n"
                  "\n\nbigmler time-series --help\n\n"
+                 "\n\nbigmler deepnet --help\n\n"
                  "\n\nbigmler execute --help\n\n"
                  "\n\nbigmler whizzml --help\n\n"
                  "\n\nbigmler export --help\n\n"

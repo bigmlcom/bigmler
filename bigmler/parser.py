@@ -43,12 +43,13 @@ from bigmler.options.association import get_association_options
 from bigmler.options.logisticregression import get_logistic_regression_options
 from bigmler.options.topicmodel import get_topic_model_options
 from bigmler.options.timeseries import get_time_series_options
+from bigmler.options.deepnet import get_deepnet_options
 from bigmler.options.execute import get_execute_options
 
 SUBCOMMANDS = ["main", "analyze", "cluster", "anomaly", "sample",
                "delete", "report", "reify", "project", "association",
                "logistic-regression", "topic-model", "time-series",
-               "execute", "whizzml", "export"]
+               "execute", "whizzml", "export", "deepnet"]
 
 
 MAIN = SUBCOMMANDS[0]
@@ -396,6 +397,41 @@ under the License.""" % version
         '--no-csv': main_options['--no-csv'],
         '--no-no-csv': main_options['--no-no-csv'],
         '--to-dataset': main_options['--to-dataset']})
+
+
+    defaults = general_defaults["BigMLer deepnet"]
+    subcommand_options["deepnet"] = \
+        get_deepnet_options(defaults=defaults)
+    # general options
+    subcommand_options["deepnet"].update(common_options)
+    subcommand_options["deepnet"].update(source_options)
+    subcommand_options["deepnet"].update(dataset_options)
+    subcommand_options["deepnet"].update(test_options)
+    subcommand_options["deepnet"].update(dataset_sampling_options)
+    subcommand_options["deepnet"].update({
+        '--source-tag': delete_options['--source-tag'],
+        '--dataset-tag': delete_options['--dataset-tag'],
+        '--deepnet-tag': delete_options[
+            '--deepnet-tag'],
+        '--objective': main_options['--objective'],
+        '--evaluate': main_options['--evaluate'],
+        '--prediction-info': main_options['--prediction-info'],
+        '--prediction-header': main_options['--prediction-header'],
+        '--prediction-fields': main_options['--prediction-fields'],
+        '--reports': main_options['--reports'],
+        '--remote': main_options['--remote'],
+        '--no-batch': main_options['--no-batch'],
+        '--to-dataset': main_options['--to-dataset'],
+        '--no-csv': main_options['--no-csv'],
+        '--fields-map': main_options['--fields-map'],
+        '--dataset-off': main_options['--dataset-off'],
+        '--max-parallel-evaluations': main_options[
+            '--max-parallel-evaluations'],
+        '--cross-validation-rate': main_options[
+            '--cross-validation-rate'],
+        '--number-of-evaluations': main_options[
+            '--number-of-evaluations'],
+        '--no-no-csv': main_options['--no-no-csv']})
 
 
     for subcommand in SUBCOMMANDS:
