@@ -13,7 +13,7 @@ anomaly1 = api.create_anomaly(dataset1, \
 api.ok(anomaly1)
 
 batchanomalyscore1 = api.create_batch_anomaly_score(anomaly1, dataset1, \
-    {'name': u'iris using iris dataset', 'output_dataset': True})
+    {'name': u'iris dataset with iris', 'output_dataset': True})
 api.ok(batchanomalyscore1)
 
 dataset2 = api.get_dataset(batchanomalyscore1['object']['output_dataset_resource'])

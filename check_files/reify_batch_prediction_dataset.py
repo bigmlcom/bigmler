@@ -13,7 +13,7 @@ model1 = api.create_model(dataset1, \
 api.ok(model1)
 
 batchprediction1 = api.create_batch_prediction(model1, dataset1, \
-    {'name': u'iris using iris dataset', 'output_dataset': True})
+    {'name': u'iris dataset with iris', 'output_dataset': True})
 api.ok(batchprediction1)
 
 dataset2 = api.get_dataset(batchprediction1['object']['output_dataset_resource'])
