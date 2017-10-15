@@ -3,6 +3,11 @@
 History
 -------
 
+3.13.0 (2017-07-22)
+~~~~~~~~~~~~~~~~~~~
+
+- Adding bigmler deepnet command to create deepnet models and predictions.
+
 3.12.0 (2017-07-22)
 ~~~~~~~~~~~~~~~~~~~
 
