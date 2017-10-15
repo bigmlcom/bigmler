@@ -2994,7 +2994,7 @@ The simplest call to build a deepnet is:
 
 .. code-block:: bash
 
-    bigmler logistic-regression --train data/iris.csv
+    bigmler deepnet --train data/iris.csv
 
 uploads the data in the ``data/iris.csv`` file and generates
 the corresponding ``source``, ``dataset`` and ``deepnet``
@@ -3021,7 +3021,7 @@ description of the available arguments.
                     --number-of-hidden-layers 3
                     --max-iterations 10 --default-numeric-value mean
 
-with this code, the deepnet is built using an 3 hidden layers, approximations
+with this code, the deepnet is built using 3 hidden layers, approximations
 will stop after 10 iterations and the missing numerics will be filled with
 the mean of the rest of values in the field.
 
