@@ -82,7 +82,8 @@ def get_deepnet_options(defaults=None):
             'choices': ["mean", "median", "minimum", "maximum", "zero"],
             'help': ("It accepts any of the following strings to substitute"
                      " missing numeric values across all the numeric fields"
-                     " in the dataset.")},
+                     " in the dataset: 'mean', 'median', 'minimum',"
+                     " 'maximum', 'zero'.")},
 
         # dropout to control overfitting
         '--dropout-rate': {
@@ -160,7 +161,7 @@ def get_deepnet_options(defaults=None):
             'dest': 'number_of_model_candidates',
             'type': int,
             'default': defaults.get('number_of_model_candidates', None),
-            'help': ("A integer specifying the number of models to try "
+            'help': ("An  integer specifying the number of models to try "
                      "during the model search. ")},
 
         # use search

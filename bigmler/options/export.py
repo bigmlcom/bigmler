@@ -34,6 +34,13 @@ def get_export_options(defaults=None):
             'dest': 'model',
             'default': defaults.get('model', None),
             'help': ("ID of the model to generate a local model.")},
+        # ID of the ensemble to generate the local models in the ensemble
+        '--ensemble': {
+            'action': 'store',
+            'dest': 'ensemble',
+            'default': defaults.get('ensemble', None),
+            'help': ("ID of the ensemble to generate the local models in"
+                     " the ensemble.")},
         '--language': {
             'action': 'store',
             'dest': 'language',

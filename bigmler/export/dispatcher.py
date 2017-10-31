@@ -23,9 +23,12 @@ import sys
 import os
 import shutil
 
+
 import bigmler.processing.args as a
 import bigmler.utils as u
 
+
+from bigml.ensemble import Ensemble
 
 from bigmler.defaults import DEFAULTS_FILE
 from bigmler.command import get_stored_command
@@ -95,9 +98,10 @@ def export_dispatcher(args=sys.argv[1:]):
         clear_log_files(LOG_FILES)
 
     # Creates the corresponding api instance
+    resource = command_args.ensemble or command_args.model
     api = a.get_api_instance(command_args, u.check_dir(session_file))
     message = "Generating %s code for %s\n\n" % (command_args.language,
-                                                 command_args.model)
+                                                 resource)
     u.log_message(message, \
         log_file=session_file, console=command_args.verbosity)
     export_code(command_args, api)
@@ -112,7 +116,7 @@ def generate_output(local_model, args, model_type="model", attr="confidence"):
 
     """
     with open(os.path.join(args.output_dir, \
-        "%s.%s") % (getattr(args, model_type).replace("/", "_"),
+        "%s.%s") % (local_model.resource_id.replace("/", "_"),
                     EXTENSIONS[args.language]), "w") as handler:
         local_model.plug_in(out=handler)
     # creating a separate file to predict confidence
@@ -133,6 +137,16 @@ def export_code(args, api=None):
 
         local_model = EXPORTS[args.language](args.model, api=api)
         generate_output(local_model, args, model_type="model")
+
+    if args.ensemble is not None and args.language in EXPORTS:
+        local_ensemble = Ensemble(args.ensemble, api=api)
+
+        for model_id in local_ensemble.model_ids:
+            local_model = EXPORTS[args.language](model_id,
+                                                 api=api,
+                                                 fields=local_ensemble.fields)
+            generate_output(local_model, args, model_type="model")
+
 
     """
     if args.logistic_regression is not None:

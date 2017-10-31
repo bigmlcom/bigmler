@@ -23,7 +23,7 @@ predictions
 import sys
 
 from bigml.tree_utils import slugify, INDENT, sort_fields, docstring_comment, \
-    MAX_ARGS_LENGTH, TERM_OPTIONS, TM_TOKENS, TM_FULL_TERM, TM_ALL, \
+    TERM_OPTIONS, TM_TOKENS, TM_FULL_TERM, TM_ALL, \
     ITEM_OPTIONS
 from bigml.model import Model
 from bigml.util import PY3
@@ -32,13 +32,14 @@ from bigmler.export.out_tree.pythontree import PythonTree
 from bigmler.reports import BIGMLER_SCRIPT
 
 
-# templates for static javascript
+# templates for static Python
 TERM_TEMPLATE = "%s/static/out_model/term_analysis.py" % BIGMLER_SCRIPT
 ITEMS_TEMPLATE = "%s/static/out_model/items_analysis.py" % BIGMLER_SCRIPT
 HADOOP_CSV_TEMPLATE = "%s/static/out_model/python_hadoop_csv.py" % \
     BIGMLER_SCRIPT
 HADOOP_NEXT_TEMPLATE = "%s/static/out_model/python_hadoop_next.py" % \
     BIGMLER_SCRIPT
+MAX_ARGS_LENGTH = -1 # in this version, the argument will be the input array
 
 PYTHON_CONV = {
     "double": "locale.atof",
@@ -166,7 +167,6 @@ class PythonModel(Model):
         else:
             return self.python(out, self.docstring(), ids_path=ids_path,
                                subtree=subtree)
-
 
     def hadoop_python_mapper(self, out=sys.stdout, ids_path=None,
                              subtree=True):
@@ -355,9 +355,10 @@ for values in csv:
         """Generates a python function that implements the model.
 
         """
+
         args = []
         parameters = sort_fields(self.fields)
-        input_map = len(parameters) > MAX_ARGS_LENGTH
+        input_map = len(parameters) > MAX_ARGS_LENGTH and MAX_ARGS_LENGTH > 0
         reserved_keywords = PYTHON_KEYWORDS if not input_map else None
         prefix = "_" if not input_map else ""
         for field in [(key, val) for key, val in parameters]:
@@ -372,6 +373,7 @@ for values in csv:
                     args.append("%s=None" % (slug))
         if input_map:
             args.append("data={}")
+
         function_name = self.fields[self.objective_id]['slug']
         if prefix == "_" and function_name[0] == prefix:
             function_name = function_name[1:]
