@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 def predict_rating(gender=None,
-                   age_range=None,
                    occupation=None,
                    zipcode=None,
                    title=None,
                    genres=None,
                    timestamp=None):
-    """ Predictor for rating from model/591e238e7e0a8d2bc101bf54
+    """ Predictor for rating from model/59ff6f97e2bd07054d0001dd
 
         Created using BigMLer
     """
@@ -181,13 +180,15 @@ def predict_rating(gender=None,
                                                                     if (item_matches(genres, "genres", u"Drama") <= 0):
                                                                         if (timestamp > 978298248):
                                                                             if (timestamp > 978298391):
-                                                                                if (zipcode > 48070):
+                                                                                if (gender is None):
+                                                                                    return {"prediction": 3.6, "error": 1.92072}
+                                                                                if (gender == "Female"):
+                                                                                    return {"prediction":4, "error":1.35815}
+                                                                                if (gender == "Male"):
                                                                                     if (term_matches(title, "title", u"1996") > 0):
                                                                                         return {"prediction":4, "error":2.93426}
                                                                                     if (term_matches(title, "title", u"1996") <= 0):
                                                                                         return {"prediction":3, "error":2.07483}
-                                                                                if (zipcode <= 48070):
-                                                                                    return {"prediction":4, "error":1.35815}
                                                                             if (timestamp <= 978298391):
                                                                                 return {"prediction":5, "error":2.36951}
                                                                         if (timestamp <= 978298248):
@@ -248,11 +249,11 @@ def predict_rating(gender=None,
                                         if (term_matches(title, "title", u"1985") > 0):
                                             return {"prediction":5, "error":2.93395}
                                         if (term_matches(title, "title", u"1985") <= 0):
-                                            if (gender is None):
+                                            if (occupation is None):
                                                 return {"prediction": 3.5, "error": 2.34869}
-                                            if (gender == "Male"):
+                                            if (occupation == "sales/marketing"):
                                                 return {"prediction":4, "error":2.34869}
-                                            if (gender == "Female"):
+                                            if (occupation != "sales/marketing"):
                                                 if (timestamp > 978174551):
                                                     return {"prediction":4, "error":2.93426}
                                                 if (timestamp <= 978174551):
@@ -452,30 +453,28 @@ def predict_rating(gender=None,
                                                             if (timestamp <= 978201771):
                                                                 return {"prediction":5, "error":2.56453}
                                                         if (item_matches(genres, "genres", u"War") <= 0):
-                                                            if (age_range is None):
-                                                                return {"prediction": 4.30435, "error": 1.10419}
-                                                            if (age_range == "Under 18"):
+                                                            if (occupation == "K-12 student"):
                                                                 if (timestamp > 978146981):
                                                                     return {"prediction":4, "error":2.93426}
                                                                 if (timestamp <= 978146981):
                                                                     return {"prediction":3, "error":2.07483}
-                                                            if (age_range != "Under 18"):
+                                                            if (occupation != "K-12 student"):
                                                                 if (timestamp > 978201899):
                                                                     if (timestamp > 978215603):
                                                                         if (item_matches(genres, "genres", u"Adventure") > 0):
                                                                             if (zipcode is None):
                                                                                 return {"prediction": 4.72727, "error": 1.09872}
                                                                             if (zipcode > 22103):
-                                                                                if (timestamp > 978219518):
-                                                                                    if (item_matches(genres, "genres", u"Action") > 0):
-                                                                                        if (term_matches(title, "title", u"hope") > 0):
-                                                                                            return {"prediction":5, "error":2.93426}
-                                                                                        if (term_matches(title, "title", u"hope") <= 0):
-                                                                                            return {"prediction":4, "error":2.07483}
-                                                                                    if (item_matches(genres, "genres", u"Action") <= 0):
-                                                                                        return {"prediction":5, "error":1.35815}
-                                                                                if (timestamp <= 978219518):
+                                                                                if (occupation == "technician/engineer"):
                                                                                     return {"prediction":4, "error":1.72408}
+                                                                                if (occupation != "technician/engineer"):
+                                                                                    if (term_matches(title, "title", u"king") > 0):
+                                                                                        return {"prediction":4, "error":1.92072}
+                                                                                    if (term_matches(title, "title", u"king") <= 0):
+                                                                                        if (term_matches(title, "title", u"jones") > 0):
+                                                                                            return {"prediction":4, "error":2.03402}
+                                                                                        if (term_matches(title, "title", u"jones") <= 0):
+                                                                                            return {"prediction":5, "error":1.17434}
                                                                             if (zipcode <= 22103):
                                                                                 return {"prediction":5, "error":0.49136}
                                                                         if (item_matches(genres, "genres", u"Adventure") <= 0):
@@ -487,9 +486,9 @@ def predict_rating(gender=None,
                                                                                         if (timestamp > 978298584):
                                                                                             return {"prediction":5, "error":0.80826}
                                                                                         if (timestamp <= 978298584):
-                                                                                            if (age_range == "25-34"):
+                                                                                            if (occupation == "scientist"):
                                                                                                 return {"prediction":5, "error":1.18675}
-                                                                                            if (age_range != "25-34"):
+                                                                                            if (occupation != "scientist"):
                                                                                                 if (term_matches(title, "title", u"terminator") > 0):
                                                                                                     return {"prediction":5, "error":1.18253}
                                                                                                 if (term_matches(title, "title", u"terminator") <= 0):

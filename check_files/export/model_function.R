@@ -1,9 +1,8 @@
-# Predictor for rating from model/591f6fd4663ac21cf10253e9
+# Predictor for rating from model/59ff70757e0a8d175c001c5b
 #
 #        Created using BigMLer
 #
 predictRating <- function(gender=NA,
-                          age_range=NA,
                           occupation=NA,
                           zipcode=NA,
                           title=NA,
@@ -206,16 +205,19 @@ predictRating <- function(gender=NA,
                                                                     if (itemMatches(genres, "genres", "Drama")<=0) {
                                                                         if (timestamp > 978298248) {
                                                                             if (timestamp > 978298391) {
-                                                                                if (zipcode > 48070) {
+                                                                                if (is.na(gender)){
+                                                                                    return(list(prediction=3.6, error=1.92072))
+                                                                                }
+                                                                                if (gender == "Female") {
+                                                                                    return(list(prediction=4, error=1.35815))
+                                                                                }
+                                                                                if (gender == "Male") {
                                                                                     if (termMatches(title, "title", "1996")>0) {
                                                                                         return(list(prediction=4, error=2.93426))
                                                                                     }
                                                                                     if (termMatches(title, "title", "1996")<=0) {
                                                                                         return(list(prediction=3, error=2.07483))
                                                                                     }
-                                                                                }
-                                                                                if (zipcode <= 48070) {
-                                                                                    return(list(prediction=4, error=1.35815))
                                                                                 }
                                                                             }
                                                                             if (timestamp <= 978298391) {
@@ -325,13 +327,13 @@ predictRating <- function(gender=NA,
                                             return(list(prediction=5, error=2.93395))
                                         }
                                         if (termMatches(title, "title", "1985")<=0) {
-                                            if (is.na(gender)){
+                                            if (is.na(occupation)){
                                                 return(list(prediction=3.5, error=2.34869))
                                             }
-                                            if (gender == "Male") {
+                                            if (occupation == "sales/marketing") {
                                                 return(list(prediction=4, error=2.34869))
                                             }
-                                            if (gender == "Female") {
+                                            if (occupation != "sales/marketing") {
                                                 if (timestamp > 978174551) {
                                                     return(list(prediction=4, error=2.93426))
                                                 }
@@ -654,10 +656,7 @@ predictRating <- function(gender=NA,
                                                             }
                                                         }
                                                         if (itemMatches(genres, "genres", "War")<=0) {
-                                                            if (is.na(age_range)){
-                                                                return(list(prediction=4.30435, error=1.10419))
-                                                            }
-                                                            if (age_range == "Under 18") {
+                                                            if (occupation == "K-12 student") {
                                                                 if (timestamp > 978146981) {
                                                                     return(list(prediction=4, error=2.93426))
                                                                 }
@@ -665,7 +664,7 @@ predictRating <- function(gender=NA,
                                                                     return(list(prediction=3, error=2.07483))
                                                                 }
                                                             }
-                                                            if (age_range != "Under 18") {
+                                                            if (occupation != "K-12 student") {
                                                                 if (timestamp > 978201899) {
                                                                     if (timestamp > 978215603) {
                                                                         if (itemMatches(genres, "genres", "Adventure")>0) {
@@ -673,21 +672,21 @@ predictRating <- function(gender=NA,
                                                                                 return(list(prediction=4.72727, error=1.09872))
                                                                             }
                                                                             if (zipcode > 22103) {
-                                                                                if (timestamp > 978219518) {
-                                                                                    if (itemMatches(genres, "genres", "Action")>0) {
-                                                                                        if (termMatches(title, "title", "hope")>0) {
-                                                                                            return(list(prediction=5, error=2.93426))
-                                                                                        }
-                                                                                        if (termMatches(title, "title", "hope")<=0) {
-                                                                                            return(list(prediction=4, error=2.07483))
-                                                                                        }
-                                                                                    }
-                                                                                    if (itemMatches(genres, "genres", "Action")<=0) {
-                                                                                        return(list(prediction=5, error=1.35815))
-                                                                                    }
-                                                                                }
-                                                                                if (timestamp <= 978219518) {
+                                                                                if (occupation == "technician/engineer") {
                                                                                     return(list(prediction=4, error=1.72408))
+                                                                                }
+                                                                                if (occupation != "technician/engineer") {
+                                                                                    if (termMatches(title, "title", "king")>0) {
+                                                                                        return(list(prediction=4, error=1.92072))
+                                                                                    }
+                                                                                    if (termMatches(title, "title", "king")<=0) {
+                                                                                        if (termMatches(title, "title", "jones")>0) {
+                                                                                            return(list(prediction=4, error=2.03402))
+                                                                                        }
+                                                                                        if (termMatches(title, "title", "jones")<=0) {
+                                                                                            return(list(prediction=5, error=1.17434))
+                                                                                        }
+                                                                                    }
                                                                                 }
                                                                             }
                                                                             if (zipcode <= 22103) {
@@ -705,10 +704,10 @@ predictRating <- function(gender=NA,
                                                                                             return(list(prediction=5, error=0.80826))
                                                                                         }
                                                                                         if (timestamp <= 978298584) {
-                                                                                            if (age_range == "25-34") {
+                                                                                            if (occupation == "scientist") {
                                                                                                 return(list(prediction=5, error=1.18675))
                                                                                             }
-                                                                                            if (age_range != "25-34") {
+                                                                                            if (occupation != "scientist") {
                                                                                                 if (termMatches(title, "title", "terminator")>0) {
                                                                                                     return(list(prediction=5, error=1.18253))
                                                                                                 }
