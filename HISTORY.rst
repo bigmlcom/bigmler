@@ -3,6 +3,12 @@
 History
 -------
 
+3.13.1 (2017-11-05)
+~~~~~~~~~~~~~~~~~~~
+
+- Extending bigmler export to generate the code for the models in an ensemble.
+- Fixing code generation in bigmler export for models with missings.
+
 3.13.0 (2017-07-22)
 ~~~~~~~~~~~~~~~~~~~
 

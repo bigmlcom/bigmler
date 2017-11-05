@@ -89,7 +89,8 @@ Used to delete the remotely created resources. See
 ``bigmler.export``:
 
 Used to generate the code you need to predict locally with no connection
-to BigML. See :ref: `bigmler-export`.
+to BigML. See
+:ref:`bigmler-export`.
 
 Reporting subcommands
 ---------------------
@@ -2569,6 +2570,17 @@ whose fields are numeric or categorical, the command
 also supports creating `MySQL` functions and `Tableau` separate expressions
 for both the prediction and the confidence.
 
+You can also generate the code for all the models in an ensemble in a
+single bigmler export command using the `--ensemble` option followed
+by the corresponding ensemble ID. The code for
+each model will be stored in a separate file, named after the model ID and
+transforming the slash into an underscore.
+
+.. code-block:: bash
+
+    bigmler export --ensemble ensemble/532db2b637203f3f1a001307 \
+                   --language javascript --output-dir my_ensemble
+
 
 .. _bigmler-project:
 
@@ -3316,7 +3328,7 @@ from the Git repository
     $ pip install -e git://github.com/bigmlcom/bigmler.git#egg=bigmler
 
 For a detailed description of install instructions on Windows see the
-`BigMLer on Windows <#bigmler-on-windows>`_ section.
+:ref:bigmler-windows section.
 
 
 BigML Authentication
@@ -3345,7 +3357,10 @@ script as follows
             --api-key ae579e7e53fb9abd646a6ff8aa99d4afe83ac291
 
 For a detailed description of authentication instructions on Windows see the
-`BigMLer on Windows <#bigmler-on-windows>`_ section.
+:ref:bigmler-windows section.
+
+
+.. _bigmler-windows:
 
 
 BigMLer on Windows
