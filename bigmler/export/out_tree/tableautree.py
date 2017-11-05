@@ -139,7 +139,7 @@ class TableauTree(Tree):
                 pre_condition = u""
                 post_condition = u""
                 if has_missing_branch and child.predicate.value is not None:
-                    pre_condition = missing_prefix_code(child, field, cmv)
+                    pre_condition = self.missing_prefix_code(child, field, cmv)
                     post_condition = u")"
 
                 child.split_condition_code(field, conditions,

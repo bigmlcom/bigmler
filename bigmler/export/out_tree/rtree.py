@@ -57,7 +57,7 @@ class RTree(Tree):
         cmv.append(self.fields[field]['dotted'])
         return code
 
-    def missing_prefix_code(self, field, prefix, cmv):
+    def missing_prefix_code(self, field, cmv):
         """Part of the condition that checks for missings when missing_splits
         has been used
 
@@ -67,8 +67,7 @@ class RTree(Tree):
         connection = u"||" if self.predicate.missing else u"&&"
         if not self.predicate.missing:
             cmv.append(self.fields[field]['dotted'])
-        return u"%s%s %s NA %s " % (prefix,
-                                    self.fields[field]['dotted'],
+        return u"%s%s %s NA %s " % (self.fields[field]['dotted'],
                                     operator,
                                     connection)
 
@@ -146,7 +145,7 @@ class RTree(Tree):
                 # code when missing_splits has been used
                 if has_missing_branch and field not in COMPOSED_FIELDS \
                         and child.predicate.value is not None:
-                    pre_condition = missing_prefix_code(child, field, cmv)
+                    pre_condition = self.missing_prefix_code(child, field, cmv)
 
                 # complete split condition code
                 body += child.split_condition_code( \

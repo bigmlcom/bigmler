@@ -157,8 +157,8 @@ class JsTree(Tree):
                 pre_condition = u""
                 # code when missing_splits has been used
                 if has_missing_branch and child.predicate.value is not None:
-                    pre_condition = missing_prefix_code(child, field,
-                                                        prefix, cmv)
+                    pre_condition = self.missing_prefix_code(child, field,
+                                                             prefix, cmv)
 
                 # complete split condition code
                 body += child.split_condition_code( \

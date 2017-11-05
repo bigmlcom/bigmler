@@ -157,7 +157,7 @@ class MySQLTree(Tree):
                 pre_condition = u""
                 # code when missing splits has been used
                 if has_missing_branch and child.predicate.value is not None:
-                    pre_condition = missing_prefix_code(child, field, cmv)
+                    pre_condition = self.missing_prefix_code(child, field, cmv)
 
                 # complete split condition code
                 body += child.split_condition_code( \
