@@ -559,11 +559,7 @@ class RESTChain(object):
         # non-default create options
         u.non_default_opts(child, opts)
 
-        # model/ensemble to dataset mapping
-        fields = parent2['fields'].keys()
-        default_map = dict(zip(fields, fields))
-        opts['create'].update(
-            u.default_setting(child, 'fields_map', default_map))
+        u.fields_map_options(child, parent1, parent2, opts, call="create")
 
         # name, exclude automatic naming alternatives
         u.non_automatic_name(

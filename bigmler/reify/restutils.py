@@ -226,9 +226,21 @@ def common_batch_options(resource, referrer1, referrer2, opts, call="create"):
     # non-default create options
     non_default_opts(resource, opts, call=call)
 
+    fields_map_options(resource, referrer1, referrer2, opts, call=call)
+
+
+def fields_map_options(resource, referrer1, referrer2, opts, call="create"):
+    """Stores the fields_map option if needed
+
+    """
     # model to dataset mapping
-    fields = referrer2['fields'].keys()
+    resource_type = get_resource_type(referrer1['resource'])
+    if resource_type == 'model':
+        fields = referrer1['model']['model_fields']
+    else:
+        fields = referrer2['fields'].keys()
     default_map = dict(zip(fields, fields))
+
     opts[call].update(
         default_setting(resource, 'fields_map', default_map))
 
