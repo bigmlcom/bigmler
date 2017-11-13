@@ -3,6 +3,12 @@
 History
 -------
 
+3.13.2 (2017-11-10)
+~~~~~~~~~~~~~~~~~~~
+
+- Extending bigmler export to generate the code for the models in boosted
+  ensembles.
+
 3.13.1 (2017-11-05)
 ~~~~~~~~~~~~~~~~~~~
 

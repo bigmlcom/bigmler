@@ -5,7 +5,7 @@ def predict_imagen(titulo=None,
                    ano_lanzamiento=None,
                    paginas=None,
                    codbarras=None):
-    """ Predictor for Imagen from model/59260c7e663ac24034009ff7
+    """ Predictor for Imagen from model/5a087b8836452723e7005ecf
 
         Created using BigMLer
     """
@@ -142,3 +142,12 @@ def predict_imagen(titulo=None,
                 return {"prediction":1, "error":0.26071}
             if (codbarras <= 9789871989852):
                 return {"prediction":0, "error":0.04286}
+
+
+def predict(titulo=None,
+            grados=None,
+            ano_lanzamiento=None,
+            paginas=None,
+            codbarras=None):
+    prediction = predict_imagen(titulo=titulo, grados=grados, ano_lanzamiento=ano_lanzamiento, paginas=paginas, codbarras=codbarras)
+    return prediction
