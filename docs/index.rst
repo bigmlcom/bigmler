@@ -3327,6 +3327,14 @@ from the Git repository
 
     $ pip install -e git://github.com/bigmlcom/bigmler.git#egg=bigmler
 
+`Pystemmer <https://pypi.python.org/pypi/PyStemmer>`_
+is needed in order to use the ``bigmler topic-model`` subcommand.
+This library is not installed automatically because it needs compilation and
+some developer tools to be present in your operative system.
+If the ``pip install pystemmer`` command ends in error,
+please check the error message for the link to these tools (Windows) or
+install the Xcode developer tools (OSX).
+
 For a detailed description of install instructions on Windows see the
 :ref:bigmler-windows section.
 

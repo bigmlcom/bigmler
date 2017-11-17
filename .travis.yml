@@ -11,6 +11,7 @@ env:
   - BML_TESTS="28 29 30 31 32 33"
 # command to install dependencies
 install:
+  - pip install pystemmer
   - python setup.py develop
 # command to run tests
 script:
