@@ -35,7 +35,10 @@ from bigmler.command import get_stored_command
 from bigmler.dispatcher import (SESSIONS_LOG, command_handling,
                                 clear_log_files)
 from bigmler.export.out_model.jsmodel import JsModel
-from bigml.out_model.pythonmodel import PythonModel
+try:
+    from bigml.out_model.pythonmodel import PythonModel
+except:
+    from bigml.model import Model as PythonModel
 from bigmler.export.out_model.tableaumodel import TableauModel
 from bigmler.export.out_model.mysqlmodel import MySQLModel
 from bigmler.export.out_model.rmodel import RModel
