@@ -315,14 +315,10 @@ def local_predict(models, test_reader, output, args, options=None,
                                api=args.retrieve_api_)
         kwargs.update({"method": args.method, "options": options,
                        "median": args.median})
-    print "***local predict", len(models), local_model
-    #print "***models", models
     for input_data in test_reader:
         input_data_dict = dict(zip(test_reader.raw_headers, input_data))
-        print input_data_dict
         prediction = local_model.predict(
             input_data_dict, **kwargs)
-        print prediction
         if single_model and args.median and local_model.tree.regression:
             # only single models' predictions can be based on the median value
             # predict
