@@ -1385,13 +1385,17 @@ def set_batch_prediction_args(args, fields=None,
         batch_prediction_args.update(output_fields=prediction_fields)
     if hasattr(args, 'missing_strategy') and args.missing_strategy:
         batch_prediction_args.update(missing_strategy=args.missing_strategy)
+    if args.operating_point_:
+        batch_prediction_args.update(operating_point=args.operating_point_)
+        if args.operating_point_.get("kind") == "probability":
+            batch_prediction_args.update({"probability": True,
+                                          "confidence": False})
 
     if 'batch_prediction' in args.json_args:
         update_json_args(
             batch_prediction_args,
             args.json_args.get('batch_prediction'),
             fields)
-
     return batch_prediction_args
 
 

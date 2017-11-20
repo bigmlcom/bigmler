@@ -127,6 +127,9 @@ def write_prediction(prediction, output=sys.stdout,
     if isinstance(prediction, list):
         prediction, confidence = ((prediction[0], None) if len(prediction) == 1
                                   else prediction)
+    if isinstance(prediction, dict):
+        confidence = prediction.get("confidence", prediction.get("probability"))
+        prediction = prediction["prediction"]
 
     row = []
     # input data is added if prediction format is BRIEF (no confidence) or FULL
@@ -315,6 +318,8 @@ def local_predict(models, test_reader, output, args, options=None,
                                api=args.retrieve_api_)
         kwargs.update({"method": args.method, "options": options,
                        "median": args.median})
+    if args.operating_point_:
+        kwargs.update({"operating_point": args.operating_point_})
     for input_data in test_reader:
         input_data_dict = dict(zip(test_reader.raw_headers, input_data))
         prediction = local_model.predict(
@@ -323,7 +328,9 @@ def local_predict(models, test_reader, output, args, options=None,
             # only single models' predictions can be based on the median value
             # predict
             prediction[0] = prediction[-1]
-        write_prediction(prediction[0: 2],
+        if not isinstance(prediction, dict):
+            prediction = prediction[0: 2]
+        write_prediction(prediction,
                          output,
                          args.prediction_info, input_data, exclude)
 

@@ -846,6 +846,16 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
+    # Parses operating_point for predictions.
+    try:
+        if command_args.operating_point:
+            command_args.operating_point_ = u.read_json(
+                command_args.operating_point)
+        else:
+            command_args.operating_point_ = []
+    except AttributeError:
+        pass
+
     return {"api": api, "args": command_args}
 
 

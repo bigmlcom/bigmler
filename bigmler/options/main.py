@@ -703,6 +703,14 @@ def get_main_options(defaults=None, constants=None):
             'help': ("Create a dataset as ouput of a batch"
                      " prediction.")},
 
+        # The path to a file containing the operating point description.
+        '--operating-point': {
+            'action': 'store',
+            'dest': 'operating_point',
+            'default': defaults.get('operating_point', None),
+            'help': ("Path to a json file containing the operating "
+                     "point description.")},
+
         # Use median as predicted value in local models predictions
         '--median': {
             'action': 'store_true',
