@@ -6,7 +6,7 @@ def predict_rating(gender=None,
                    title=None,
                    genres=None,
                    timestamp=None):
-    """ Predictor for rating from model/59ff6f97e2bd07054d0001dd
+    """ Predictor for rating from model/5a14388536452779fe00339f
 
         Created using BigMLer
     """
@@ -591,3 +591,13 @@ def predict_rating(gender=None,
                                     return {"prediction":5, "error":0.25805}
                                 if (timestamp <= 978152601):
                                     return {"prediction":4, "error":0.77415}
+
+
+def predict(gender=None,
+            occupation=None,
+            zipcode=None,
+            title=None,
+            genres=None,
+            timestamp=None):
+    prediction = predict_rating(gender=gender, occupation=occupation, zipcode=zipcode, title=title, genres=genres, timestamp=timestamp)
+    return prediction
