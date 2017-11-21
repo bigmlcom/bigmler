@@ -213,3 +213,26 @@ class TestPrediction(object):
             batch_pred.i_check_create_batch_prediction(self)
             test_pred.i_check_create_predictions(self)
             test_pred.i_check_predictions(self, example[4])
+
+    def test_scenario07(self):
+        """
+        Scenario: Successfully building batch test predictions from model
+            Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
+            And I create BigML logistic regression resources using model to test "<test>" as a batch prediction and log predictions in "<output>"
+            And I check that the predictions are ready
+            Then the local prediction file is like "<predictions_file>"
+
+            Examples:
+            |scenario    | kwargs                                                  | test                    | output                        |predictions_file           |
+            | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | ../data/test_iris.csv   | ./scenario6_lr/predictions.csv   | ./check_files/predictions_iris.csv   |
+
+        """
+        print self.test_scenario07.__doc__
+        examples = [
+            ['scenario1_lr', '{"data": "data/iris.csv", "output": "scenario1_lr/predictions.csv", "test": "data/test_iris.csv"}', 'data/test_iris.csv', 'scenario6_lr/predictions_p.csv', 'check_files/predictions_iris_lr_op_prob.csv', 'data/operating_point_prob.json']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
+            lr_pred.i_create_lr_resources_from_model_with_op(self, test=example[2], output=example[3], operating_point=example[5])
+            test_pred.i_check_create_predictions(self)
+            test_pred.i_check_predictions(self, example[4])

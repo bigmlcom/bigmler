@@ -327,6 +327,7 @@ under the License.""" % version
         '--no-csv': main_options['--no-csv'],
         '--fields-map': main_options['--fields-map'],
         '--dataset-off': main_options['--dataset-off'],
+        '--operating-point': main_options['--operating-point'],
         '--max-parallel-evaluations': main_options[
             '--max-parallel-evaluations'],
         '--cross-validation-rate': main_options[

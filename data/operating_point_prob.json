@@ -1,0 +1,3 @@
+{"kind": "probability",
+ "threshold": 1,
+ "positive_class": "Iris-versicolor"}

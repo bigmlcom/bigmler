@@ -686,3 +686,60 @@ class TestPrediction(object):
             test_pred.i_check_create_batch_prediction(self)
             test_pred.i_check_create_predictions(self)
             test_pred.i_check_predictions(self, example[5])
+
+    def test_scenario25(self):
+        """
+        Scenario: Successfully building test predictions from model with operating point
+            Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
+            And I create BigML resources using model with operating point "<operating_point>" to test "<test>" and log predictions in "<output>"
+            And I check that the predictions are ready
+            Then the local prediction file is like "<predictions_file>"
+
+            Examples:
+            |scenario    | kwargs                                                  |
+            operating_point | test                    | output                        |predictions_file           |
+
+        """
+        examples = [
+            ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}', 'data/test_iris.csv', 'scenario25/predictions_p.csv', 'check_files/predictions_iris_op_prob.csv', "data/operating_point_prob.json"],
+            ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}', 'data/test_iris.csv', 'scenario25/predictions_c.csv', 'check_files/predictions_iris_op_conf.csv', "data/operating_point_conf.json"]]
+
+        show_doc(self.test_scenario25, examples)
+        for example in examples:
+            print "\nTesting with:\n", example
+            test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
+            test_pred.i_create_resources_from_model_with_op(self, operating_point=example[5], test=example[2], output=example[3])
+            test_pred.i_check_create_predictions(self)
+            test_pred.i_check_predictions(self, example[4])
+
+    def test_scenario26(self):
+        """
+            Scenario: Successfully building test predictions from ensemble
+                Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
+                Given I have previously executed "<scenario2>" or reproduce it with arguments <kwargs2>
+                And I create BigML resources using local ensemble of <number_of_models> models in "<scenario2>" to test "<test>" and log predictions in "<output>"
+                And I check that the predictions are ready
+                Then the local prediction file is like "<predictions_file>"
+
+                Examples:
+                |scenario    | kwargs                                                  |scenario2    | kwargs2                                                  | number_of_models | test                    | output                        |predictions_file                      |
+
+
+        """
+        examples = [
+            ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}',
+             'scenario5', '{"number_of_models": 10, "output": "scenario5/predictions.csv", "test": "data/test_iris.csv"}',
+             '10', 'scenario5', 'data/test_iris.csv', 'scenario26/predictions_p.csv', 'check_files/predictions_iris_e_op_prob.csv', 'data/operating_point_prob.json'],
+            ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}',
+             'scenario5', '{"number_of_models": 10, "output": "scenario5/predictions.csv", "test": "data/test_iris.csv"}',
+             '10', 'scenario5', 'data/test_iris.csv', 'scenario26/predictions_c.csv', 'check_files/predictions_iris_e_op_conf.csv', 'data/operating_point_conf.json']]
+        show_doc(self.test_scenario26, examples)
+        for example in examples:
+            print "\nTesting with:\n", example
+            test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
+            test_pred.i_have_previous_scenario_or_reproduce_it(self, example[2], example[3])
+            test_pred.i_create_resources_from_local_ensemble_with_op( \
+                self, number_of_models=example[4], directory=example[5],
+                test=example[6], output=example[7], operating_point=example[9])
+            test_pred.i_check_create_predictions(self)
+            test_pred.i_check_predictions(self, example[8])

@@ -127,6 +127,20 @@ def i_create_lr_resources_from_model_remote(step, test=None, output=None):
     shell_execute(command, output, test=test)
 
 
+#@step(r'I create BigML resources using model to test "(.*)" as batch prediction and log predictions in "(.*)"')
+def i_create_lr_resources_from_model_with_op(step, test=None, output=None,
+                                             operating_point=None):
+    ok_(test is not None and output is not None and \
+        operating_point is not None)
+    test = res_filename(test)
+    operating_point = res_filename(operating_point)
+    command = ("bigmler logistic-regression --logistic-regression " +
+               world.logistic_regression['resource'] + " --test " + test +
+               " --operating-point " + operating_point +
+               " --store --no-balance-fields --no-bias --output " +
+               output)
+    shell_execute(command, output, test=test)
+
 #@step(r'I check that the logistic regression model has been created')
 def i_check_create_lr_model(step):
     lr_file = "%s%slogistic_regressions" % (world.directory, os.sep)

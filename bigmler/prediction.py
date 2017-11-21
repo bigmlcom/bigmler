@@ -320,6 +320,7 @@ def local_predict(models, test_reader, output, args, options=None,
                        "median": args.median})
     if args.operating_point_:
         kwargs.update({"operating_point": args.operating_point_})
+
     for input_data in test_reader:
         input_data_dict = dict(zip(test_reader.raw_headers, input_data))
         prediction = local_model.predict(

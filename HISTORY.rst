@@ -3,6 +3,12 @@
 History
 -------
 
+3.14.0 (2017-11-22)
+~~~~~~~~~~~~~~~~~~~
+
+- Adding the --operating-point option for models, ensembles and logistic
+  regressions.
+
 3.13.2 (2017-11-10)
 ~~~~~~~~~~~~~~~~~~~
 

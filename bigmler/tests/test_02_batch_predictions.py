@@ -241,3 +241,29 @@ class TestBatchPrediction(object):
             test_batch_pred.i_check_create_batch_prediction(self)
             test_batch_pred.i_check_create_batch_predictions_dataset(self)
             anomaly_pred.i_check_no_local_CSV(self)
+
+    def test_scenario7(self):
+        """
+        Scenario: Successfully building test predictions from model with operating point
+            Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
+            And I create BigML resources using model with operating point "<operating_point>" to test "<test>" and log predictions in "<output>"
+            And I check that the predictions are ready
+            Then the local prediction file is like "<predictions_file>"
+
+            Examples:
+            |scenario    | kwargs                                                  |
+            operating_point | test                    | output                        |predictions_file           |
+
+        """
+        examples = [
+            ['scenario_r1', '{"data": "data/iris.csv", "output": "scenario_r1/predictions.csv", "test": "data/test_iris.csv"}', 'data/test_iris.csv', 'scenario_r7/predictions_p.csv', 'check_files/predictions_iris_op_prob.csv', "data/operating_point_prob.json"],
+            ['scenario_r1', '{"data": "data/iris.csv", "output": "scenario_r1/predictions.csv", "test": "data/test_iris.csv"}', 'data/test_iris.csv', 'scenario_r7/predictions_c.csv', 'check_files/predictions_iris_op_conf.csv', "data/operating_point_conf.json"]]
+
+        print self.test_scenario7.__doc__
+        for example in examples:
+            print "\nTesting with:\n", example
+            test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
+            test_batch_pred.i_create_resources_from_model_with_op_remote(self, operating_point=example[5], test=example[2], output=example[3])
+            test_batch_pred.i_check_create_batch_prediction(self)
+            test_pred.i_check_create_predictions(self)
+            test_pred.i_check_predictions(self, example[4])

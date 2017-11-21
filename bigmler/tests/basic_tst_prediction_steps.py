@@ -473,6 +473,20 @@ def i_create_resources_from_model(step, test=None, output=None):
                test + " --store --output " + output + " --max-batch-models 1")
     shell_execute(command, output, test=test)
 
+#@step(r'I create BigML resources using model with operating point "(.*)"
+# to test "(.*)" and
+# log predictions in "(.*)"')
+def i_create_resources_from_model_with_op(step, operating_point=None,
+                                          test=None, output=None):
+    ok_(operating_point is not None and
+        test is not None and output is not None)
+    test = res_filename(test)
+    operating_point = res_filename(operating_point)
+    command = ("bigmler --model " + world.model['resource'] + " --test " +
+               test + " --operating-point " + operating_point +
+               " --store --output " + output + " --max-batch-models 1")
+    shell_execute(command, output, test=test)
+
 #@step(r'I create BigML resources using the previous ensemble with different
 # thresholds to test "(.*)" and log predictions in "(.*)" and "(.*)"')
 def i_create_resources_from_ensemble_with_threshold( \
@@ -543,6 +557,41 @@ def i_create_resources_from_local_ensemble(step, number_of_models=None,
                    storage_file_name(directory, ensemble_id) +
                    " --test " + test + " --store" +
                    " --output " + output)
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        ok_(retcode >= 0)
+
+        world.test_lines = file_number_of_lines(test)
+        # test file has headers in it, so first line must be ignored
+        world.test_lines -= 1
+        world.output = output
+        world.number_of_models = len(world.ensemble['object']['models'])
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+
+#@step(r'I create BigML resources using local ensemble of (.*) models with
+# operating point "(.*)" in "(.*)"
+# to test "(.*)" and log predictions in "(.*)"')
+def i_create_resources_from_local_ensemble_with_op( \
+        step, number_of_models=None,
+        directory=None, test=None,
+        output=None, operating_point=None):
+    ok_(number_of_models is not None and test is not None and \
+        output is not None and directory is not None and \
+        operating_point is not None)
+    world.directory = os.path.dirname(output)
+    world.folders.append(world.directory)
+    with open(os.path.join(directory, "ensembles")) as ensemble_file:
+        ensemble_id = ensemble_file.read().strip()
+    try:
+        test = res_filename(test)
+        operating_point = res_filename(operating_point)
+        command = ("bigmler --ensemble-file " +
+                   storage_file_name(directory, ensemble_id) +
+                   " --test " + test + " --store" +
+                   " --output " + output + " --operating-point " +
+                   operating_point)
         command = check_debug(command)
         retcode = check_call(command, shell=True)
         ok_(retcode >= 0)
