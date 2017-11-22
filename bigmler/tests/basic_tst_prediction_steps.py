@@ -1230,6 +1230,8 @@ def i_check_predictions(step, check_file):
                                     index]), decimal_places)
                             except ValueError:
                                 decimal_places = 1
+                            # we set 10 decimal places as max precision
+                            decimal_places = min([10, decimal_places])
                             assert_almost_equal(check_row[index], row[index],
                                                 places=(decimal_places - 1))
                         else:
