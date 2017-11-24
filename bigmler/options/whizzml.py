@@ -41,7 +41,7 @@ def get_whizzml_options(defaults=None):
             "action": 'store_true',
             "dest": 'upgrade',
             "default": defaults.get('upgrade', False),
-            "help": "Creates only if the resource is not found."},
+            "help": "Create resource only if it doesn't exist."},
 
         # any imported library's code will be embedded in the script
         '--embed-libs': {
