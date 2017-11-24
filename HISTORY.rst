@@ -6,6 +6,12 @@ History
 3.14.0 (2017-11-22)
 ~~~~~~~~~~~~~~~~~~~
 
+- Adding the --upgrade flag to the bigmler execute and package subcommands to
+  check whether a script is already loaded and its version.
+
+3.14.0 (2017-11-22)
+~~~~~~~~~~~~~~~~~~~
+
 - Adding the --operating-point option for models, ensembles and logistic
   regressions.
 

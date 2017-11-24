@@ -29,6 +29,33 @@ import bigmler.checkpoint as c
 import bigmler.processing.projects as pp
 
 
+def build_query_string(args):
+    """Builds the query string that selects the script or library id for
+    the required name and version
+
+    """
+    query_string = "name=%s" % args.name
+    try:
+        version = args.name.split("-")[1].strip()
+        return "%s;tags=%s" % (query_string, version)
+    except IndexError:
+        return query_string
+
+
+def add_version_tag(resource_args, name):
+    """Adds the version tag to the create args
+
+    """
+    try:
+        version = name.split("-")[1].strip()
+        tags = resource_args.get("tags", [])
+        if version != "":
+            tags.append(version)
+        resource_args.update({"tags": tags})
+    except IndexError:
+        pass
+
+
 def script_processing(api, args,
                       session_file=None, path=None, log=None):
     """Creating or retrieving a script
@@ -67,10 +94,27 @@ def script_processing(api, args,
             args.project_id = pp.project_processing(
                 api, args, resume, session_file=session_file,
                 path=path, log=log)
-            script_args = r.set_script_args(args)
-            script = r.create_script(source_code, script_args, args, api,
-                                     path, session_file, log)
-            args.script = script['resource']
+
+            # Check if we are upgrading
+            if args.upgrade:
+                script = u.get_last_resource("script",
+                                             api,
+                                             build_query_string(args))
+                r.log_created_resources("script", path,
+                                        script, mode='a')
+                message = u.dated("Script found: %s"
+                                  "\n    (script ID: %s)\n" %
+                                  (args.name, script))
+                u.log_message(message, log_file=session_file,
+                              console=args.verbosity)
+            if script is None:
+                script_args = r.set_script_args(args)
+                add_version_tag(script_args, args.name)
+                script = r.create_script(source_code, script_args, args, api,
+                                         path, session_file, log)
+
+            args.script = script if isinstance(script, basestring) else \
+                script.get('resource')
         scripts = [script]
 
     # If a script is provided either through the command line or in resume
@@ -123,6 +167,7 @@ def library_processing(api, args,
     """Creating or retrieving a library
 
     """
+
     library = None
     resume = args.resume
     if args.code_file or args.code:
@@ -149,7 +194,21 @@ def library_processing(api, args,
             args.project_id = pp.project_processing(
                 api, args, resume, session_file=session_file,
                 path=path, log=log)
-            library_args = r.set_library_args(args)
-            library = r.create_library(source_code, library_args, args, api,
-                                       path, session_file, log)
+            # Check if we are upgrading
+            if args.upgrade:
+                library = u.get_last_resource("library",
+                                              api,
+                                              build_query_string(args))
+                r.log_created_resources("library", path,
+                                        library, mode='a')
+                message = u.dated("Library found: %s \n"
+                                  "    (library ID: %s)\n" %
+                                  (args.name, library))
+                u.log_message(message, log_file=session_file,
+                              console=args.verbosity)
+            if library is None:
+                library_args = r.set_library_args(args)
+                add_version_tag(library_args, args.name)
+                library = r.create_library(source_code, library_args, args, api,
+                                           path, session_file, log)
     return library

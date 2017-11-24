@@ -366,6 +366,7 @@ under the License.""" % version
     subcommand_options["execute"].update(execute_common_options)
     subcommand_options["execute"].update(
         {'--project': source_options['--project'],
+         '--upgrade': subcommand_options['whizzml']['--upgrade'],
          '--project-id': source_options['--project-id'],
          '--script-tag': delete_options['--script-tag'],
          '--library-tag': delete_options['--library-tag'],

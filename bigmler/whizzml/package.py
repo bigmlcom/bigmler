@@ -230,6 +230,8 @@ def create_package(args, api, common_options, resume=False):
                 command_args.extend(["--username", args.username])
             if args.api_key:
                 command_args.extend(["--api-key", args.api_key])
+            if args.upgrade:
+                command_args.extend(["--upgrade"])
 
             if resume:
                 next_command = subcommand_list.pop()

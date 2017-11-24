@@ -294,20 +294,22 @@ def read_local_resource(path, csv_properties=None):
     return resource, csv_properties, fields
 
 
-def list_ids(api_function, query_string, status_code=bigml.api.FINISHED):
+def list_ids(api_function, query_string, status_code=bigml.api.FINISHED,
+             limit=None):
     """Lists BigML resources filtered by `query_string`.
 
     """
-    q_s = 'status.code=%s;limit=%s;%s' % (
-        status_code, PAGE_LENGTH, query_string)
+    limit_s = 'limit=%s' % (PAGE_LENGTH if limit is None else limit)
+    q_s = 'status.code=%s;%s;%s' % (
+        status_code, limit_s, query_string)
     resources = api_function(q_s)
     ids = [obj['resource'] for obj in (resources['objects'] or [])]
-    while (resources['objects'] and
+    while (resources['objects'] and (limit is None or len(ids) < limit) and
            (resources['meta']['total_count'] > (resources['meta']['offset'] +
                                                 resources['meta']['limit']))):
         offset = resources['meta']['offset'] + PAGE_LENGTH
         q_s = 'status.code=%s;offset=%s;limit=%s;%s' % (
-            status_code, offset, PAGE_LENGTH, query_string)
+            status_code, offset, limit_s, query_string)
         resources = api_function(q_s)
         if resources['objects']:
             ids.extend([obj['resource'] for obj in resources['objects']])
@@ -714,3 +716,17 @@ def transform_fields_keys(json_attributes, fields):
             fields_structure[key] = json_attributes["fields"][old_key]
         json_attributes["fields"] = fields_structure
     return json_attributes
+
+
+def get_last_resource(resource_type, api=None, query_string=None):
+    """Retrieves the last resource that meets the conditions in args
+
+    """
+    if query_string is None:
+        query_string = ""
+    if api is None:
+        api = bigml.api.BigML()
+    ids = list_ids(api.listers[resource_type], query_string, limit=1)
+    if ids:
+        return ids[0]
+    return None

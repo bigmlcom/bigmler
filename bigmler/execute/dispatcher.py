@@ -111,7 +111,8 @@ def execute_whizzml(args, api, session_file):
         elif args.code_file or args.code:
             script, scripts = pw.script_processing( \
                 api, args, session_file=session_file, path=path, log=log)
-            args.script = script['resource']
+            args.script = script if isinstance(script, basestring) else \
+                script.get('resource')
             args.script_ids = scripts
 
         if (args.script or args.scripts) and not args.no_execute:

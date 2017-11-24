@@ -36,6 +36,13 @@ def get_whizzml_options(defaults=None):
             "default": defaults.get('package_dir', None),
             "help": "Directory for the package."},
 
+        # upgrade flag, causes to check before creating the resource
+        '--upgrade': {
+            "action": 'store_true',
+            "dest": 'upgrade',
+            "default": defaults.get('upgrade', False),
+            "help": "Creates only if the resource is not found."},
+
         # any imported library's code will be embedded in the script
         '--embed-libs': {
             "action": 'store_true',

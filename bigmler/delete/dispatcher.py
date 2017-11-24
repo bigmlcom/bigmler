@@ -44,7 +44,7 @@ RESOURCES_LOG_FILES = set(['project', 'source', 'dataset', 'dataset_train',
                            'ensembles', 'evaluations',
                            'clusters', 'batch_prediction', 'batch_centroid',
                            'anomalies', 'batch_anomaly_score', 'sample',
-                           'associations',
+                           'associations', 'time_series', "deepnets",
                            'scripts', 'library', 'execution'])
 STATUS_CODES = {
     "finished": bigml.api.FINISHED,
@@ -224,6 +224,9 @@ def filtered_selectors(args, api):
          api.list_topic_distributions, None),
         ("batchtopicdistribution", args.batch_topic_distribution_tag,
          api.list_batch_topic_distributions, None),
+        ("timeseries", args.time_series_tag, api.list_time_series, None),
+        ("forecast", args.forecast_tag, api.list_forecasts, None),
+        ("deepnet", args.deepnet_tag, api.list_deepnets, None),
         ("script", args.script_tag, api.list_scripts, None),
         ("library", args.library_tag, api.list_libraries, None)]
 
