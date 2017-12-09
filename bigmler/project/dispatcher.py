@@ -50,17 +50,7 @@ def project_dispatcher(args=sys.argv[1:]):
     command_args, command, api, session_file, resume = get_context(args,
                                                                    SETTINGS)
 
-    # If logging is required set the file for logging
-    log = None
-    if command_args.log_file:
-        u.check_dir(command_args.log_file)
-        log = command_args.log_file
-        # If --clear_logs the log files are cleared
-        clear_log_files([log])
-
-    a.get_output_args(api, command_args, command_args.resume)
-    a.attribute_args(command_args)
-
+    path = u.check_dir(command_args.output)
     if not command_args.project_id and command_args.name:
         command_args.project = command_args.name
     if command_args.project:

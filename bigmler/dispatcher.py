@@ -189,8 +189,7 @@ def main_dispatcher(args=sys.argv[1:]):
     # the predictions flag prevails to store the results
     if (a.has_train(command_args) or a.has_test(command_args)
             or command_args.votes_dirs):
-        output_args = a.get_output_args(api, command_args, resume)
-        compute_output(**output_args)
+        compute_output(api, command_args)
     u.log_message("_" * 80 + "\n", log_file=session_file)
 
 

@@ -67,7 +67,7 @@ def logistic_regression_dispatcher(args=sys.argv[1:]):
     settings = {}
     settings.update(SETTINGS)
     if '--evaluate' in args:
-        setting.update({"default_output": "evaluation"})
+        settings.update({"default_output": "evaluation"})
 
     command_args, command, api, session_file, resume = get_context(args,
                                                                    settings)
@@ -75,8 +75,7 @@ def logistic_regression_dispatcher(args=sys.argv[1:]):
     # Selects the action to perform
     if (a.has_train(command_args) or a.has_test(command_args)
             or command_args.export_fields):
-        output_args = a.get_output_args(api, command_args, resume)
-        compute_output(**output_args)
+        compute_output(api, command_args)
     u.log_message("_" * 80 + "\n", log_file=session_file)
 
 

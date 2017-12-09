@@ -191,7 +191,7 @@ def fill_remote_context(command_args, command, session_file,
     """
     if api is None:
         api = a.get_api_instance(command_args, u.check_dir(session_file))
-    _ = a.get_output_args(api, command_args, resume)
+    a.get_output_args(api, command_args, resume)
     a.transform_args(command_args, command.flags, api)
     return command_args, api
 
