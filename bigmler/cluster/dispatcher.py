@@ -35,15 +35,21 @@ import bigmler.processing.datasets as pd
 from bigmler.defaults import DEFAULTS_FILE
 from bigmler.centroid import centroid, remote_centroid
 from bigmler.reports import clear_reports, upload_reports
-from bigmler.command import get_stored_command
-from bigmler.dispatcher import (SESSIONS_LOG, command_handling,
-                                clear_log_files, get_test_dataset)
+from bigmler.command import get_context
+from bigmler.dispatcher import SESSIONS_LOG, clear_log_files, get_test_dataset
 
 COMMAND_LOG = u".bigmler_cluster"
 DIRS_LOG = u".bigmler_cluster_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 MINIMUM_MODEL = "full=false"
 DEFAULT_OUTPUT = u"centroids.csv"
+
+SETTINGS = {
+    "command_log": COMMAND_LOG,
+    "sessions_log": SESSIONS_LOG,
+    "dirs_log": DIRS_LOG,
+    "default_output": DEFAULT_OUTPUT,
+    "defaults_file": DEFAULTS_FILE}
 
 
 def cluster_dispatcher(args=sys.argv[1:]):
@@ -55,46 +61,14 @@ def cluster_dispatcher(args=sys.argv[1:]):
     if "--clear-logs" in args:
         clear_log_files(LOG_FILES)
 
-    command = command_handling(args, COMMAND_LOG)
-
-    # Parses command line arguments.
-    command_args = a.parse_and_check(command)
-    resume = command_args.resume
-    if command_args.resume:
-        command_args, session_file, output_dir = get_stored_command(
-            args, command_args.debug, command_log=COMMAND_LOG,
-            dirs_log=DIRS_LOG, sessions_log=SESSIONS_LOG)
-        if command_args.predictions is None:
-            command_args.predictions = os.path.join(output_dir,
-                                                    DEFAULT_OUTPUT)
-    else:
-        if command_args.output_dir is None:
-            command_args.output_dir = a.NOW
-        if command_args.predictions is None:
-            command_args.predictions = os.path.join(command_args.output_dir,
-                                                    DEFAULT_OUTPUT)
-        if len(os.path.dirname(command_args.predictions).strip()) == 0:
-            command_args.predictions = os.path.join(command_args.output_dir,
-                                                    command_args.predictions)
-        directory = u.check_dir(command_args.predictions)
-        session_file = os.path.join(directory, SESSIONS_LOG)
-        u.log_message(command.command + "\n", log_file=session_file)
-        try:
-            shutil.copy(DEFAULTS_FILE, os.path.join(directory, DEFAULTS_FILE))
-        except IOError:
-            pass
-        u.sys_log_message(u"%s\n" % os.path.abspath(directory),
-                          log_file=DIRS_LOG)
-
-    # Creates the corresponding api instance
-    api = a.get_api_instance(command_args, u.check_dir(session_file))
+    command_args, command, api, session_file, resume = get_context(args,
+                                                                   SETTINGS)
 
     # Selects the action to perform
     if (a.has_train(command_args) or a.has_test(command_args)
             or command_args.cluster_datasets is not None
             or command_args.export_fields is not None):
         output_args = a.get_output_args(api, command_args, resume)
-        a.transform_args(command_args, command.flags, api)
         compute_output(**output_args)
     u.log_message("_" * 80 + "\n", log_file=session_file)
 

@@ -30,9 +30,8 @@ import bigmler.processing.args as a
 import bigmler.processing.samples as psa
 
 from bigmler.defaults import DEFAULTS_FILE
-from bigmler.command import get_stored_command
-from bigmler.dispatcher import (SESSIONS_LOG, command_handling,
-                                clear_log_files)
+from bigmler.command import get_context
+from bigmler.dispatcher import SESSIONS_LOG, clear_log_files
 from bigmler.sampleoutput import sample_file
 from bigmler.reports import clear_reports, upload_reports
 
@@ -41,6 +40,13 @@ DIRS_LOG = u".bigmler_sample_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 MINIMUM_MODEL = "full=false"
 DEFAULT_OUTPUT = u"sample.csv"
+
+SETTINGS = {
+    "command_log": COMMAND_LOG,
+    "sessions_log": SESSIONS_LOG,
+    "dirs_log": DIRS_LOG,
+    "default_output": DEFAULT_OUTPUT,
+    "defaults_file": DEFAULTS_FILE}
 
 
 def has_sample(args):
@@ -59,42 +65,12 @@ def sample_dispatcher(args=sys.argv[1:]):
     if "--clear-logs" in args:
         clear_log_files(LOG_FILES)
 
-    command = command_handling(args, COMMAND_LOG)
-
-    # Parses command line arguments.
-    command_args = a.parse_and_check(command)
-    resume = command_args.resume
-    if command_args.resume:
-        command_args, session_file, output_dir = get_stored_command(
-            args, command_args.debug, command_log=COMMAND_LOG,
-            dirs_log=DIRS_LOG, sessions_log=SESSIONS_LOG)
-        command_args.predictions = os.path.join(output_dir,
-                                                DEFAULT_OUTPUT)
-    else:
-        if command_args.output_dir is None:
-            command_args.output_dir = a.NOW
-        command_args.predictions = os.path.join(command_args.output_dir,
-                                                DEFAULT_OUTPUT)
-        if len(os.path.dirname(command_args.predictions).strip()) == 0:
-            command_args.predictions = os.path.join(command_args.output_dir,
-                                                    command_args.predictions)
-        directory = u.check_dir(command_args.predictions)
-        session_file = os.path.join(directory, SESSIONS_LOG)
-        u.log_message(command.command + "\n", log_file=session_file)
-        try:
-            shutil.copy(DEFAULTS_FILE, os.path.join(directory, DEFAULTS_FILE))
-        except IOError:
-            pass
-        u.sys_log_message(u"%s\n" % os.path.abspath(directory),
-                          log_file=DIRS_LOG)
-
-    # Creates the corresponding api instance
-    api = a.get_api_instance(command_args, u.check_dir(session_file))
+    command_args, command, api, session_file, resume = get_context(args,
+                                                                   SETTINGS)
 
     # Selects the action to perform
     if a.has_train(command_args) or has_sample(command_args):
         output_args = a.get_output_args(api, command_args, resume)
-        a.transform_args(command_args, command.flags, api)
         compute_output(**output_args)
     u.log_message("_" * 80 + "\n", log_file=session_file)
 

@@ -37,7 +37,7 @@ def get_test_options(defaults=None):
         # Name of the file to output predictions.
         "--output": {
             'action': 'store',
-            'dest': 'predictions',
+            'dest': 'output',
             'default': defaults.get('output', None),
             'help': "Path to the file to output predictions."},
 

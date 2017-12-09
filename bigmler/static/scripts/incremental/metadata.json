@@ -1,0 +1,10 @@
+{
+  "name": "BigMLer: Incremental retrain",
+  "description": "Libraries and scripts to retrain any ML modeling resource using incremental data",
+  "kind": "package",
+  "components":[
+    "reify",
+    "generate_whizzml",
+    "retrain"
+  ]
+}

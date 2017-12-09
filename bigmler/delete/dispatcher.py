@@ -29,9 +29,8 @@ import bigmler.utils as u
 import bigmler.processing.args as a
 
 from bigmler.defaults import DEFAULTS_FILE
-from bigmler.command import get_stored_command
-from bigmler.dispatcher import (SESSIONS_LOG, command_handling,
-                                clear_log_files)
+from bigmler.command import get_stored_command, command_handling
+from bigmler.dispatcher import SESSIONS_LOG, clear_log_files
 
 COMMAND_LOG = u".bigmler_delete"
 DIRS_LOG = u".bigmler_delete_dir_stack"

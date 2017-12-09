@@ -28,7 +28,7 @@ import socket
 
 import bigmler.processing.args as a
 
-from bigmler.dispatcher import command_handling
+from bigmler.command import command_handling
 from bigmler.reports import (evaluations_report, SERVER_DIRECTORY,
                              HOME, REPORTS_DIR, ANALYZE_TEMPLATE,
                              ANALYZE_DIR)

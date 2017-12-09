@@ -28,13 +28,18 @@ import bigmler.processing.args as a
 import bigmler.processing.projects as pp
 
 from bigmler.defaults import DEFAULTS_FILE
-from bigmler.command import get_stored_command
-from bigmler.dispatcher import (SESSIONS_LOG, command_handling,
-                                clear_log_files)
+from bigmler.command import get_context
+from bigmler.dispatcher import SESSIONS_LOG, clear_log_files
 
 COMMAND_LOG = u".bigmler_project"
 DIRS_LOG = u".bigmler_project_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
+
+SETTINGS = {
+    "command_log": COMMAND_LOG,
+    "sessions_log": SESSIONS_LOG,
+    "dirs_log": DIRS_LOG,
+    "defaults_file": DEFAULTS_FILE}
 
 
 def project_dispatcher(args=sys.argv[1:]):
@@ -42,36 +47,9 @@ def project_dispatcher(args=sys.argv[1:]):
 
     """
 
-    command = command_handling(args, COMMAND_LOG)
+    command_args, command, api, session_file, resume = get_context(args,
+                                                                   SETTINGS)
 
-    # Parses command line arguments.
-    command_args = a.parse_and_check(command)
-    if command_args.resume:
-        command_args, session_file, _ = get_stored_command(
-            args, command_args.debug, command_log=COMMAND_LOG,
-            dirs_log=DIRS_LOG, sessions_log=SESSIONS_LOG)
-    else:
-        if command_args.output_dir is None:
-            command_args.output_dir = a.NOW
-        directory = u.check_dir("%s/x.txt" % command_args.output_dir)
-        command_args.output_dir = directory
-        session_file = os.path.join(directory, SESSIONS_LOG)
-        u.log_message(command.command + "\n", log_file=session_file)
-
-
-        directory = u.check_dir(os.path.join(command_args.output_dir, "tmp"))
-        session_file = os.path.join(directory, SESSIONS_LOG)
-        u.log_message(command.command + "\n", log_file=session_file)
-        try:
-            shutil.copy(DEFAULTS_FILE, os.path.join(directory, DEFAULTS_FILE))
-        except IOError:
-            pass
-        u.sys_log_message(u"%s\n" % os.path.abspath(directory),
-                          log_file=DIRS_LOG)
-
-
-    path = u.check_dir("%s/x.txt" % command_args.output_dir)
-    session_file = u"%s%s%s" % (path, os.sep, SESSIONS_LOG)
     # If logging is required set the file for logging
     log = None
     if command_args.log_file:
@@ -80,12 +58,8 @@ def project_dispatcher(args=sys.argv[1:]):
         # If --clear_logs the log files are cleared
         clear_log_files([log])
 
-
-    # Creates the corresponding api instance
-    api = a.get_api_instance(command_args, u.check_dir(session_file))
     a.get_output_args(api, command_args, command_args.resume)
     a.attribute_args(command_args)
-
 
     if not command_args.project_id and command_args.name:
         command_args.project = command_args.name

@@ -32,9 +32,8 @@ from bigmler.analyze.k_fold_cv import (create_kfold_cv,
                                        create_features_analysis,
                                        create_nodes_analysis,
                                        create_candidates_analysis)
-from bigmler.dispatcher import (SESSIONS_LOG, command_handling,
-                                clear_log_files)
-from bigmler.command import get_stored_command
+from bigmler.dispatcher import SESSIONS_LOG, clear_log_files
+from bigmler.command import get_stored_command, command_handling
 
 
 COMMAND_LOG = u".bigmler_analyze"

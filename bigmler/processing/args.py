@@ -301,6 +301,7 @@ def get_output_args(api, command_args, resume):
         pass
 
     command_args.resume_ = resume
+    command_args.predictions = command_args.output
 
     # Reads description if provided.
     try:

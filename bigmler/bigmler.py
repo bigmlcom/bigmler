@@ -63,6 +63,7 @@ from bigmler.deepnet.dispatcher import deepnet_dispatcher
 from bigmler.execute.dispatcher import execute_dispatcher
 from bigmler.whizzml.dispatcher import whizzml_dispatcher
 from bigmler.export.dispatcher import export_dispatcher
+from bigmler.retrain.dispatcher import retrain_dispatcher
 from bigmler.parser import SUBCOMMANDS
 from bigmler.utils import SYSTEM_ENCODING
 
@@ -131,6 +132,8 @@ def main(args=sys.argv[1:]):
             whizzml_dispatcher(args=new_args)
         elif new_args[0] == "export":
             export_dispatcher(args=new_args)
+        elif new_args[0] == "retrain":
+            retrain_dispatcher(args=new_args)
     else:
         sys.exit("BigMLer used with no arguments. Check:\nbigmler --help\n\nor"
                  "\n\nbigmler sample --help\n\n"
@@ -148,6 +151,7 @@ def main(args=sys.argv[1:]):
                  "\n\nbigmler execute --help\n\n"
                  "\n\nbigmler whizzml --help\n\n"
                  "\n\nbigmler export --help\n\n"
+                 "\n\nbigmler retrain --help\n\n"
                  "\n\nbigmler delete --help\n\n"
                  " for a list of options")
 

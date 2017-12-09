@@ -22,6 +22,7 @@ from __future__ import absolute_import
 
 import os
 import shlex
+import shutil
 
 
 import bigmler.processing.args as a
@@ -97,6 +98,102 @@ def get_stored_command(args, debug=False, command_log=COMMAND_LOG,
         # set debug on if it wasn't in the stored command but now is
         command_args.debug = True
     return command_args, session_file, stored_command.output_dir
+
+
+def command_handling(args, log=COMMAND_LOG):
+    """Rebuilds command string, logs it for --resume future requests and
+       parses it.
+
+    """
+    # Create the Command object
+    command = Command(args, None)
+
+    # Resume calls are not logged
+    if not command.resume:
+        u.sys_log_message(command.command.replace('\\', '\\\\'), log_file=log)
+
+    return command
+
+
+
+def get_context(args, settings):
+    """Fills all the context configuration variables from the command line and
+    retrieves the needed remote information
+
+    """
+
+    # parses the command line to get the context args and the log files to use
+    command_args, command, session_file, resume = get_cmd_context(args,
+                                                                  settings)
+
+    # Creates a remote connection and fills the part of the context that
+    # needs to be retrieved from the remote service
+    command_args, api = fill_remote_context(command_args, command,
+                                            session_file, resume)
+
+    return command_args, command, api, session_file, resume
+
+
+def get_cmd_context(args, settings):
+    """Parses the args array to create an args object storing the defaults and
+    user-given values. It also sets the output directory and the log files.
+
+    """
+
+    command = command_handling(args, settings['command_log'])
+
+    # Parses command line arguments.
+    command_args = a.parse_and_check(command)
+    resume = command_args.resume
+
+    if command_args.resume:
+        command_args, session_file, output_dir = get_stored_command(
+            args, command_args.debug, command_log=settings['command_log'],
+            dirs_log=settings["dirs_log"],
+            sessions_log=settings['sessions_log'])
+        if settings.get('default_output') is None:
+            settings['default_output'] = "tmp.txt"
+        if not hasattr(command_args, "output") or command_args.output is None:
+            command_args.output = os.path.join(output_dir,
+                                               settings['default_output'])
+    else:
+        if command_args.output_dir is None:
+            command_args.output_dir = a.NOW
+        if settings.get('default_output') is None:
+            settings['default_output'] = "tmp.txt"
+        if not hasattr(command_args, "output") or command_args.output is None:
+            command_args.output = os.path.join(command_args.output_dir,
+                                               settings['default_output'])
+        if len(os.path.dirname(command_args.output).strip()) == 0:
+            command_args.output = os.path.join(command_args.output_dir,
+                                               command_args.output)
+        directory = u.check_dir(command_args.output)
+        session_file = os.path.join(directory, settings['sessions_log'])
+        u.log_message(command.command + "\n", log_file=session_file)
+        if settings.get('defaults_file') is not None:
+            try:
+                shutil.copy(settings['defaults_file'],
+                            os.path.join(directory, settings['defaults_file']))
+            except IOError:
+                pass
+        u.sys_log_message(u"%s\n" % os.path.abspath(directory),
+                          log_file=settings['dirs_log'])
+    return command_args, command, session_file, resume
+
+
+def fill_remote_context(command_args, command, session_file,
+                        resume=False, api=None):
+    """Fills the part of the context that needs to be retrieved from the
+    remote server. Creates a connection to the API and manages the requests
+    that retrive the resource ids to be used. Transforms arguments from the
+    command-line-friendly format to the required structure.
+
+    """
+    if api is None:
+        api = a.get_api_instance(command_args, u.check_dir(session_file))
+    _ = a.get_output_args(api, command_args, resume)
+    a.transform_args(command_args, command.flags, api)
+    return command_args, api
 
 
 class Command(object):

@@ -44,12 +44,21 @@ from bigmler.defaults import DEFAULTS_FILE
 from bigmler.prediction import predict, combine_votes, remote_predict
 from bigmler.prediction import OTHER, COMBINATION
 from bigmler.reports import clear_reports, upload_reports
-from bigmler.command import Command, get_stored_command
+from bigmler.command import get_context
 from bigmler.command import COMMAND_LOG, DIRS_LOG, SESSIONS_LOG
 
 
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 MINIMUM_MODEL = "full=false"
+
+DEFAULT_OUTPUT = 'predictions.csv'
+
+SETTINGS = {
+    "command_log": COMMAND_LOG,
+    "sessions_log": SESSIONS_LOG,
+    "dirs_log": DIRS_LOG,
+    "default_output": DEFAULT_OUTPUT,
+    "defaults_file": DEFAULTS_FILE}
 
 
 def belongs_to_ensemble(model):
@@ -85,22 +94,6 @@ def has_source(args):
     """
     return (args.training_set or args.source or args.source_file or
             args.train_stdin)
-
-
-
-def command_handling(args, log=COMMAND_LOG):
-    """Rebuilds command string, logs it for --resume future requests and
-       parses it.
-
-    """
-    # Create the Command object
-    command = Command(args, None)
-
-    # Resume calls are not logged
-    if not command.resume:
-        u.sys_log_message(command.command.replace('\\', '\\\\'), log_file=log)
-
-    return command
 
 
 def clear_log_files(log_files):
@@ -186,48 +179,17 @@ def main_dispatcher(args=sys.argv[1:]):
     if "--clear-logs" in args:
         clear_log_files(LOG_FILES)
 
-    command = command_handling(args, COMMAND_LOG)
+    settings = {}
+    settings.update(SETTINGS)
+    if '--evaluate' in args:
+        settings.update({"default_output": "evaluation"})
 
-    # Parses command line arguments.
-    command_args = a.parse_and_check(command)
-    default_output = ('evaluation' if command_args.evaluate
-                      else 'predictions.csv')
-    resume = command_args.resume
-    if command_args.resume:
-        command_args, session_file, output_dir = get_stored_command(
-            args, command_args.debug, command_log=COMMAND_LOG,
-            dirs_log=DIRS_LOG, sessions_log=SESSIONS_LOG)
-        default_output = ('evaluation' if command_args.evaluate
-                          else 'predictions.csv')
-        if command_args.predictions is None:
-            command_args.predictions = os.path.join(output_dir,
-                                                    default_output)
-    else:
-        if command_args.output_dir is None:
-            command_args.output_dir = a.NOW
-        if command_args.predictions is None:
-            command_args.predictions = os.path.join(command_args.output_dir,
-                                                    default_output)
-        if len(os.path.dirname(command_args.predictions).strip()) == 0:
-            command_args.predictions = os.path.join(command_args.output_dir,
-                                                    command_args.predictions)
-        directory = u.check_dir(command_args.predictions)
-        session_file = os.path.join(directory, SESSIONS_LOG)
-        u.log_message(command.command + "\n", log_file=session_file)
-        try:
-            shutil.copy(DEFAULTS_FILE, os.path.join(directory, DEFAULTS_FILE))
-        except IOError:
-            pass
-        u.sys_log_message(u"%s\n" % os.path.abspath(directory),
-                          log_file=DIRS_LOG)
-
-    # Creates the corresponding api instance
-    api = a.get_api_instance(command_args, u.check_dir(session_file))
-
+    command_args, command, api, session_file, resume = get_context(args,
+                                                                   settings)
+    # the predictions flag prevails to store the results
     if (a.has_train(command_args) or a.has_test(command_args)
             or command_args.votes_dirs):
         output_args = a.get_output_args(api, command_args, resume)
-        a.transform_args(command_args, command.flags, api)
         compute_output(**output_args)
     u.log_message("_" * 80 + "\n", log_file=session_file)
 
@@ -253,7 +215,7 @@ def compute_output(api, args):
     # variables from command-line options
     resume = args.resume_
     model_ids = args.model_ids_
-    output = args.predictions
+    output = args.output
     dataset_fields = args.dataset_fields_
 
     check_args_coherence(args)
@@ -300,6 +262,8 @@ def compute_output(api, args):
             api, args, resume,
             csv_properties=csv_properties, multi_label_data=multi_label_data,
             session_file=session_file, path=path, log=log)
+    if source is not None:
+        args.source = bigml.api.get_source_id(source)
     if args.multi_label and source:
         multi_label_data = l.get_multi_label_data(source)
         (args.objective_field,

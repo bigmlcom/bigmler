@@ -1,0 +1,2341 @@
+;; Functions used to reify the resources in BigML. The reify output is a
+;; structure that contains the list of resources needed as origins and
+;; the steps and configurations needed to generate the final resource.
+
+;; COMMON-DEFAULTS
+;;
+;; attributes used in all types of resouce
+;;
+(define COMMON-DEFAULTS {"category" [0]
+                         "description" [false ""]
+                         "tags" [[]]
+                         "project" [false]})
+;; DEFAULTS
+;;
+;; attributes used in some of the resources, keyed by resource type
+;;
+(define DEFAULTS {"source" {"name" ["Unnamed inline source"
+                                    "Unnamed remote source"]
+                            "data" [false ""]
+                            "disable_datetime" [false]
+                            "remote" [false]
+                            "size" [false]
+                            "source_parser" [{"header" true
+                                              "locale" "en-us"
+                                              "missing_tokens" [""
+                                                                "NaN"
+                                                                "NULL"
+                                                                "N/A"
+                                                                "null"
+                                                                "-"
+                                                                "#REF!"
+                                                                "#VALUE!"
+                                                                "?"
+                                                                "#NULL!"
+                                                                "#NUM!"
+                                                                "#DIV/0"
+                                                                "n/a"
+                                                                "#NAME?"
+                                                                "NIL"
+                                                                "nil"
+                                                                "na"
+                                                                "#N/A"
+                                                                "NA"]
+                                              "quote" "\""
+                                              "separator" ","}
+                                             {"header" true
+                                              "locale" "en_US"
+                                              "missing_tokens" [""
+                                                                "NaN"
+                                                                "NULL"
+                                                                "N/A"
+                                                                "null"
+                                                                "-"
+                                                                "#REF!"
+                                                                "#VALUE!"
+                                                                "?"
+                                                                "#NULL!"
+                                                                "#NUM!"
+                                                                "#DIV/0"
+                                                                "n/a"
+                                                                "#NAME?"
+                                                                "NIL"
+                                                                "nil"
+                                                                "na"
+                                                                "#N/A"
+                                                                "NA"]
+                                              "quote" "\""
+                                              "separator" ","}]
+                           "term_analysis" [{"enabled" true}]
+                           "item_analysis" [{} false]}
+                  "dataset" {"name" [false]
+                             "excluded_fields" [[] false]
+                             "all_but" [[] false]
+                             "all_fields" [true]
+                             "json_filter" [false]
+                             "lisp_filter" [false]
+                             "sample_rate" [1.0 false]
+                             "out_of_bag" [false]
+                             "seed" [false]
+                             "price" [0 0.0]
+                             "replacement" [false]
+                             "tags" [[]]
+                             "term_limit" [1000]
+                             "private" [true]
+                             "shared" [false]
+                             "size" [false]
+                             "centroid" [false]
+                             "range" [false []]
+                             "ranges" [false {}]
+                             "rows" [false]
+                             "objective_field" [false]
+                             "new_fields" [false []]
+                             "output_fields" [false []]
+                             "input_fields" [false []]
+                             "row_offset" [false 0]
+                             "row_step" [false 1]}
+                  "model" {"name" [false]
+                           "excluded_fields" [[] false]
+                           "ordering" [0]
+                           "out_of_bag" [false]
+                           "randomize" [false]
+                           "replacement" [false]
+                           "sample_rate" [1.0]
+                           "seed" [false]
+                           "stat_pruning" [true]
+                           "balance_objective" [false]
+                           "weight_field" [false]
+                           "objective_weights" [false []]
+                           "missing_splits" [false]
+                           "node_threshold" [512]
+                           "private" [true]
+                           "shared" [false]
+                           "range" [false []]
+                           "input_fields" [false []]
+                           "objective_field" [false]}
+                  "ensemble" {"name" [false]
+                              "number_of_models" [10]
+                              "ensemble_sample" [false {}]
+                              "replacement" [false]
+                              "input_fields" [false []]
+                              "ordering" [0]
+                              "out_of_bag" [false]
+                              "randomize" [false]
+                              "replacement" [false]
+                              "sample_rate" [1.0]
+                              "seed" [false]
+                              "stat_pruning" [true]
+                              "balance_objective" [false]
+                              "random_candidates_ratio" [false]
+                              "random_candidates" [false]
+                              "weight_field" [false]
+                              "objective_weights" [false []]
+                              "missing_splits" [false]
+                              "node_threshold" [512]
+                              "excluded_fields" [[] false]
+                              "boosting" [false {}]
+                              "objective_field" [false]
+                              "models" [[]]}
+                  "prediction" {"name" [false]
+                                "combiner" [0 false]
+                                "ordering" [0 false]
+                                "missing_strategy" [0 false]
+                                "private" [true]
+                                "threshold" [false {}]
+                                "input_data" [false]}
+                  "evaluation" {"name" [false]
+                                "confidence_threshold" [false]
+                                "combiner" [0, false]
+                                "missing_strategy" [0]
+                                "ordering" [0]
+                                "out_of_bag" [false]
+                                "negative_class" [false]
+                                "positive_class" [false]
+                                "replacement" [false]
+                                "sample_rate" [1.0]
+                                "seed" [false]
+                                "threshold" [false]
+                                "probability_threshold" [false]
+                                "range" [false []]
+                                "ranges" [false {}]
+                                "private" [true]}
+                  "cross-validation" {"name" [false]}
+                  "anomaly" {"name" [false]
+                             "anomaly_seed" [false]
+                             "constraints" [false]
+                             "excluded_fields" [[] false]
+                             "id_fields" [[]]
+                             "forest_size" [128]
+                             "out_of_bag" [false]
+                             "replacement" [false]
+                             "sample_rate" [1.0]
+                             "seed" [false]
+                             "range" [false []]
+                             "ranges" [false {}]
+                             "input_fields" [false []]
+                             "top_n" [10]}
+                  "cluster" {"name" [false]
+                             "k" [false]
+                             "balance_fields" [true]
+                             "cluster_seed" [false]
+                             "critical_value" [false]
+                             "default_numeric_value" [false]
+                             "excluded_fields" [[] false]
+                             "field_scales" [{}]
+                             "model_clusters" [false]
+                             "out_of_bag" [false]
+                             "replacement" [false]
+                             "sample_rate" [1.0]
+                             "seed" [false]
+                             "range" [false []]
+                             "ranges" [false {}]
+                             "input_fields" [false []]
+                             "summary_fields" [[]]
+                             "weight_field" [false ""]}
+                  "centroid" {"name" [false]
+                              "private" [true]
+                              "input_data" [false]}
+                  "anomalyscore" {"name" [false]
+                                  "input_data" [false]}
+                  "associationset" {"name" [false]
+                                    "input_data" [false]}
+                  "batchanomalyscore" {"name" [false]
+                                       "all_fields" [false]
+                                       "fields_map" [false]
+                                       "header" [true]
+                                       "output_dataset" [false]
+                                       "output_fields" [false []]
+                                       "separator" [","]
+                                       "score_name" ["score" false]}
+                  "batchcentroid" {"name" [false]
+                                   "all_fields" [false]
+                                   "fields_map" [false]
+                                   "header" [true]
+                                   "output_dataset" [false]
+                                   "output_fields" [false []]
+                                   "distance_name" [false ""]
+                                   "centroid_name" [false ""]
+                                   "separator" [","]
+                                   "distance" [false]}
+                  "batchprediction" {"name" [false]
+                                     "all_fields" [false]
+                                     "fields_map" [false]
+                                     "confidence_threshold" [false]
+                                     "combiner" [0 false]
+                                     "confidence" [false]
+                                     "header" [true]
+                                     "missing_strategy" [0]
+                                     "negative_class" [false]
+                                     "negative_class_confidence" [false]
+                                     "output_dataset" [false]
+                                     "output_fields" [false []]
+                                     "positive_class" [false]
+                                     "separator" [","]
+                                     "prediction_name" [false ""]
+                                     "confidence_name" [false ""]
+                                     "threshold" [false]
+                                     "probability_threshold" [false]}
+                  "association" {"name" [false]
+                                 "complement" [false]
+                                 "default_numeric_value" [false "median"]
+                                 "discretization" [false]
+                                 "excluded_fields" [false []]
+                                 "field_discretizations" [false]
+                                 "input_fields" [false []]
+                                 "max_k" [false 100]
+                                 "max_lhs" [false 4]
+                                 "min_confidence" [false 0 0.0]
+                                 "min_leverage" [false 0 0.0]
+                                 "min_lift" [false 1 1.0]
+                                 "min_support" [false 1 1.0]
+                                 "missing_items" [false]
+                                 "out_of_bag" [false]
+                                 "replacement" [false]
+                                 "sample_rate" [1.0]
+                                 "seed" [false]
+                                 "rhs_predicate" [false []]
+                                 "range" [false []]
+                                 "search_strategy" [false "leverage"]
+                                 "significance_level" [false 0.05]}
+                  "logisticregression" {"name" [false]
+                                        "private" [true]
+                                        "shared" [false]
+                                        "default_numeric_value" [false,
+                                                                 "median"]
+                                        "balance_fields" [false]
+                                        "balance_objective" [false]
+                                        "objective_weights" [false []]
+                                        "bias" [true]
+                                        "c" [false, 1]
+                                        "eps" [false, 0.0001]
+                                        "excluded_fields" [false []]
+                                        "field_codings" [false]
+                                        "input_fields" [false []]
+                                        "missing_numerics" [true]
+                                        "normalize" [false]
+                                        "out_of_bag" [false]
+                                        "objective_field" [false]
+                                        "range" [false []]
+                                        "regularization" [false "l2"]
+                                        "replacement" [false]
+                                        "sample_rate" [1.0]
+                                        "seed" [false]},
+                  "topicmodel" {"name" [false]
+                                "private" [true]
+                                "shared" [false]
+                                "bigrams" [false]
+                                "case_sensitive" [false]
+                                "excluded_terms" [false []]
+                                "number_of_topics" [false 0]
+                                "eps" [false, 0.00001]
+                                "excluded_fields" [false []]
+                                "field_codings" [false]
+                                "input_fields" [false []]
+                                "term_limit" [false 4096]
+                                "top_n_terms" [false 10]
+                                "topicmodel_seed" [false]
+                                "use_stopwords" [false]
+                                "out_of_bag" [false]
+                                "range" [false []]
+                                "regularization" [false "l2"]
+                                "replacement" [false]
+                                "sample_rate" [1.0]
+                                "seed" [false]}
+                  "topicdistribution" {"name" [false]
+                                       "private" [true]
+                                       "input_data" [false]}
+                  "batchtopicdistribution" {"name" [false]
+                                            "all_fields" [false]
+                                            "header" [true]
+                                            "output_dataset" [false]
+                                            "fields_map" [false]
+                                            "newline" ["LF" false]
+                                            "output_fields" [false []]
+                                            "separator" [","]}
+                  "timeseries" {"name" [false]
+                                "all_numeric_objectives" [false]
+                                "damped_trend" [false]
+                                "default_numeric_value" ["spline interpolation"
+                                                         false]
+                                "error" [false]
+                                "field_parameters" [false]
+                                "period" [false 1]
+                                "private" [true]
+                                "shared" [false]
+                                "range" [false []]
+                                "seasonality" [false]
+                                "time_range" [false {}]
+                                "trend" [false]
+                                "horizon" [false 50]
+                                "objective_field" [false]
+                                "objective_fields" [false]}
+                  "deepnet" {"name" [false]
+                             "balance_objective" [false]
+                             "batch_normalization" [false]
+                             "deepnet_seed" ["" false]
+                             "default_numeric_value" [false]
+                             "dropout_rate" [0.0 false]
+                             "excluded_fields" [false []]
+                             "hidden_layers" [false []]
+                             "input_fields" [false []]
+                             "learn_residuals" [false]
+                             "learning_rate" [0.01 false]
+                             "max_iterations" [20000 false]
+                             "max_training_time" [1800 false]
+                             "missing_numerics" [true]
+                             "number_of_hidden_layers" [10 false]
+                             "number_of_model_candidates" [128 false]
+                             "objective_field" [false]
+                             "objective_weights" [false []]
+                             "optimizer" [{} false]
+                             "ordering" [false 0]
+                             "out_of_bag" [false]
+                             "range" [false []]
+                             "replacement" [false]
+                             "sample_rate" [1.0]
+                             "seed" [false]
+                             "search" [false]
+                             "suggest_structure" [true]
+                             "tree_embedding" [false]
+                             "weight_field" [false]}
+                  "forecast" {"name" [false]
+                              "private" [true]
+                              "input_data" [false]
+                              "intervals" [true]}})
+
+;; MODELS
+;;
+;; Resource types for the model resources
+(define MODELS ["model" "ensemble" "anomaly"
+                "logisticregression" "topicmodel"
+                "timeseries" "deepnet"])
+
+;; REFERENCE-ONLY
+;;
+;; attributes that are kept temporarily as reference information to be used
+;; when comparing resources to their parents.
+;;
+
+(define REFERENCE-ONLY {"source" ["size" "remote"]
+                        "dataset" ["rows" "ranges" "private"]
+                        "model" ["private" "shared"]
+                        "ensemble" ["models"]
+                        "logisticregression" ["private" "shared"]})
+
+
+;; BOOSTING-ATTRS
+;;
+;; arguments to be sent in creation calls of boosting ensembles
+;;
+(define BOOSTING-ATTRS ["iterations"
+                        "early_holdout"
+                        "early_out_of_bag"
+                        "step_out_of_bag"
+                        "learning_rate"])
+
+;; SAMPLE-ATTRS
+;;
+;; arguments to be sent in creation calls of sampled ensembles
+;;
+(define SAMPLE-ATTRS ["seed"
+                      "rate"
+                      "replacement"])
+
+;; ORIGINS
+;;
+;; attributes that point to the origin resource or file from where the
+;; keyed resource type is built
+;;
+
+(define ORIGINS {"source" [["file_name",
+                            "remote"]]
+                 "dataset" [["new_fields"
+                             "origin_batch_resource"
+                             "cluster"
+                             "ranges"
+                             "origin_dataset"
+                             "origin_datasets"
+                             "source"]]
+                 "cross-validation" [["evaluations"]]
+                 "model" [["cluster"
+                           "datasets"
+                           "dataset"]]
+                 "ensemble" [["datasets"
+                              "dataset"]]
+                 "cluster" [["datasets"
+                             "dataset"]]
+                 "anomaly" [["datasets"
+                             "dataset"]]
+                 "prediction" [["deepnet"
+                                "logisticregression"
+                                "ensemble"
+                                "model"]]
+                 "centroid" [["cluster"]]
+                 "anomalyscore" [["anomaly"]]
+                 "associationset" [["association"]]
+                 "topicdistribution" [["topicmodel"]]
+                 "evaluation" [["ensemble"
+                                "model"
+                                "logisticregression"
+                                "timeseries"
+                                "deepnet"]
+                               ["dataset"]]
+                 "batchprediction" [["deepnet"
+                                     "logisticregression"
+                                     "ensemble"
+                                     "model"]
+                                    ["dataset"]]
+                 "batchcentroid" [["cluster"]
+                                  ["dataset"]]
+                 "batchanomalyscore" [["anomaly"]
+                                      ["dataset"]]
+                 "batchtopicdistribution" [["topicmodel"]
+                                           ["dataset"]]
+                 "association" [["datasets"
+                                 "dataset"]]
+                 "deepnet" [["datasets"
+                             "dataset"]]
+                 "logisticregression" [["datasets"
+                                        "dataset"]]
+                 "topicmodel" [["datasets"
+                                "dataset"]]
+                 "timeseries" [["datasets"
+                                "dataset"]]
+                 "forecast" [["timeseries"]]})
+
+(define NAMED-ATTRIBUTES ["objective_field" "weight_field" "objective_fields"])
+
+;; PER-TYPE-PROCESS
+;;
+;; specific transformations or checkings that must be applied only to the keyed
+;; resource type.
+;;
+(define PER-TYPE-PROCESS {
+  "source" (lambda (id chain)
+             ;; sources that come from remote data can be reproduced, so we
+             ;; use the create and update calls. Sources that come from a
+             ;; local file cannot be created from whizzml, so we move the
+             ;; attributes to the update call and leave a source_id argument
+             ;; free.
+             (if (not (chain ["defs" id "create" "remote"] false))
+                 ;; local file
+                 (let (chain (dissoc-in chain
+                                        ["defs" id "create" "file_name"])
+                       update (chain ["defs" id "update"] {})
+                       chain (if (chain ["defs" id "create" "source_parser"]
+                                        false)
+                                 (assoc-in chain
+                                           ["defs" id "update-parser"]
+                                           (chain ["defs" id "create"]
+                                           false))
+                                 (assoc-in chain
+                                           ["defs" id "update"]
+                                           (merge update
+                                                  (chain ["defs" id "create"]
+                                                         false)))))
+                   (dissoc-in chain ["defs" id "create"]))
+                 chain))
+  "dataset" (lambda (id chain)
+              (let (ancestors (dataset-get-ancestors id chain)
+                    conf (chain ["defs" id "create"] false)
+                    upd-conf (chain ["defs" id "update"] false)
+                    upd-conf (if upd-conf
+                                 (dataset-set-objective upd-conf)
+                                 upd-conf)
+                    conf (dataset-set-objective conf)
+                    conf (dataset-set-size id conf ancestors)
+                    conf (dataset-set-new-fields conf)
+                    chain (assoc-in chain ["defs" id "create"] conf)
+                    chain (dataset-updates id chain))
+               (if upd-conf
+                   (assoc-in chain ["defs" id "update"] upd-conf)
+                   chain)))
+  "model" (lambda (id chain)
+            (let (ancestors (model-get-ancestors id chain)
+                  conf (chain ["defs" id "create"] false)
+                  conf (model-set-objective conf ancestors)
+                  chain (model-updates id chain))
+              (assoc-in chain ["defs"
+                               id
+                               "create"]
+                               conf)))
+  "cluster" (lambda (id chain)
+              (let (conf (chain ["defs" id "create"]))
+                (if (and (contains? conf "critical_value")
+                         (contains? conf "k"))
+                    (dissoc-in chain ["defs" id "create" "k"])
+                    chain)))
+  "ensemble" (lambda (id chain)
+               (let (ancestors (model-get-ancestors id chain)
+                     conf (chain ["defs" id "create"] false)
+                     conf (model-set-objective conf ancestors)
+                     conf (if (contains? conf "boosting")
+                              (filter-attrs conf "boosting" BOOSTING-ATTRS)
+                              conf)
+                     conf (if (contains? conf "ensemble_sample")
+                              (filter-attrs conf
+                                            "ensemble_sample"
+                                            SAMPLE-ATTRS)
+                              conf)
+                     chain (model-updates id chain))
+                 (assoc-in chain ["defs"
+                                  id
+                                  "create"]
+                                  conf)))
+  "logisticregression" (lambda (id chain)
+                         (let (ancestors (model-get-ancestors id chain)
+                               conf (chain ["defs" id "create"] false)
+                               conf (model-set-objective conf ancestors)
+                               chain (model-updates id chain))
+                           (assoc-in chain ["defs"
+                                            id
+                                            "create"]
+                                     conf)))
+  "deepnet" (lambda (id chain)
+              (let (ancestors (model-get-ancestors id chain)
+                    conf (chain ["defs" id "create"] false)
+                    conf (model-set-objective conf ancestors)
+                    conf (remove-layers-type conf)
+                    chain (model-updates id chain))
+                (assoc-in chain ["defs"
+                                 id
+                                 "create"]
+                          conf)))
+  "timeseries" (lambda (id chain)
+                 (let (ancestors (model-get-ancestors id chain)
+                       conf (chain ["defs" id "create"] false)
+                       conf (model-set-objective conf ancestors)
+                       chain (model-updates id chain))
+                   (assoc-in chain ["defs"
+                                    id
+                                    "create"]
+                               conf)))
+  "batchprediction" (lambda (id chain)
+                       (if (not (chain ["defs"
+                                               id
+                                               "create"
+                                               "header"] true))
+                           (let (chain (dissoc-in chain ["defs"
+                                                         id
+                                                         "create"
+                                                         "prediction_name"]))
+                             (dissoc-in chain ["defs"
+                                               id
+                                               "create"
+                                               "confidence_name"]))
+                           chain))
+  "batchcentroid" (lambda (id chain)
+                    (if (not (chain ["defs"
+                                            id
+                                            "create"
+                                            "header"] true))
+                         (let (chain (dissoc-in chain ["defs"
+                                                      id
+                                                      "create"
+                                                      "centroid_name"]))
+                          (dissoc-in chain ["defs"
+                                            id
+                                            "create"
+                                            "distance_name"]))
+                        chain))
+  "batchanomalyscore" (lambda (id chain)
+                        (if (not (chain ["defs"
+                                                id
+                                                "create"
+                                                "header"] true))
+                            (dissoc-in chain ["defs"
+                                              id
+                                              "create"
+                                              "score_name"])
+                            chain))})
+
+;; DEFAULT-UPDATABLE
+;;
+;; field properties updatable in all resources that contain a field structure
+;;
+
+(define DEFAULT-UPDATABLE ["name" "label" "description"])
+
+;; DATASET-UPDATABLE
+;;
+;; field properties updatable in a dataset
+;;
+(define DATASET-UPDATABLE (concat DEFAULT-UPDATABLE ["preferred"]))
+
+
+;; SOURCE-UPDATABLE
+;;
+;; field properties updatable in a source
+;;
+
+(define SOURCE-UPDATABLE (concat DEFAULT-UPDATABLE ["optype"]))
+
+
+;; FIELDS-PATH
+;;
+;; attribute that contains the field structure keyed by resource type
+;;
+
+(define FIELDS-PATH {"source" ["fields"]
+                     "dataset" ["fields"]
+                     "model" ["model" "fields"]
+                     "ensemble" ["ensemble" "fields"]
+                     "cluster" ["clusters" "fields"]
+                     "anomaly" ["model" "fields"]
+                     "correlation" ["correlations" "fields"]
+                     "statisticaltests" ["statistical_tests" "fields"]
+                     "logisticregression" ["logistic_regression" "fields"]
+                     "deepnet" ["deepnet" "fields"]
+                     "association" ["associations" "fields"]
+                     "topicmodel" ["topic_model" "fields"]
+                     "timeseries" ["time_series" "fields"]})
+
+
+;; INNER-INFO-NAMES-PATH
+;;
+;; attribute that contains inner clusters and topics info
+;;
+
+(define INNER-INFO-NAMES-PATH {"cluster" ["clusters" "clusters"]
+                               "topicmodel" ["topic_model" "topics"]})
+
+
+;; INNER-INFO-PATH
+;;
+;; attribute that contains inner clusters and topics info
+;;
+(define INNER-INFO-PATH {"model" "model"
+                         "association" "associations"
+                         "cluster" "clusters"
+                         "anomaly" "model"
+                         "logisticregression" "logistic_regression"
+                         "deepnet" "deepnet"
+                         "timeseries" "time_series"})
+
+
+;; DFT-NAMES
+;;
+;; Default names for the clusters and topics
+;;
+
+(define DFT-NAMES {"cluster" "Cluster \\d+?"
+                   "topicmodel" "Topic \\d+?"})
+
+
+;; SCRIPTIFY-CATEGORY
+;;
+;; Category that the scriptified script is assigned to
+;;
+(define SCRIPTIFY-CATEGORY 4)
+
+;; filter-attrs
+;;
+;; filters the arguments that can be sent when the parent attribute is a map
+;;
+;; Inputs:
+;;   conf: (map) map that describes the configuration
+;;   parent-attr: (string) attribute to be filtered
+;;   attrs: (list) list of valid arguments
+;;
+;; Output: (map) map that describes the configuration
+
+(define (filter-attrs conf parent-attr attrs)
+  (let (parent (conf parent-attr {})
+        filtered-attr (iterate (r {} attr (keys parent))
+                        (if (member? attr attrs)
+                            (assoc r attr (parent attr))
+                            r)))
+        (assoc conf parent-attr filtered-attr)))
+
+;; model-updates
+;;
+;; special code to be run on
+;; model-specific attributes that can be different from the default values
+;; like private and shared
+;;
+;; Inputs:
+;;   id: (string) model ID
+;;   chain: (map) map that describes the reify chain of resources
+;;
+;; Output: (map) map that describes the reify chain of resources
+
+(define (model-updates id chain)
+  (let (conf (chain ["defs" id "create"] false)
+        private (if (member? "private" (keys conf))
+                    (conf "private" false)
+                    true)
+        shared (conf "shared" false)
+        chain (if (not private)
+                  (assoc-in chain ["defs"
+                                   id
+                                   "update"
+                                   "private"]
+                                   private)
+                  chain))
+    (if shared
+        (assoc-in chain ["defs" id "update" "shared"] shared)
+        chain)))
+
+;; model-get-ancestors
+;;
+;; getting the ancestors attributes (parent and grandparent)
+;; to check attributes
+;;
+;; Inputs:
+;;  id: (string) model ID
+;;  chain: (map) map that describes the reify chain of resources
+;; Output: (map) ancestor resources and attributes
+
+(define (model-get-ancestors id chain)
+  (let (parents (chain ["defs" id "parents"] false)
+        parent (head parents)
+        origin (nth parent 0)
+        parent (nth parent 1)
+        ;; if model comes from a list of dataset, get only first one
+        parent (if (list? parent) (head parent) parent)
+        parent-conf (chain ["defs" parent "create"] false)
+        ;; as two-steps result from a cluster
+        grandparent parent
+        ancestors (assoc {} "parent" parent)
+        ancestors (assoc ancestors "origin" origin)
+        ancestors (assoc ancestors "parent-conf" parent-conf)
+        ancestors (assoc ancestors "grandparent" grandparent))
+    (if (= origin "cluster")
+      (let (grandparents (chain ["defs" parent "parents"] false)
+            grandparent (head grandparents)
+            gp-origin (nth grandparent 0)
+            grandparent (nth grandparent 1)
+            grandparent (if (list? grandparent) (head grandparent) grandparent)
+            gp-conf (chain ["defs" grandparent "create"] false)
+            ancestors (assoc ancestors "grandparent" grandparent))
+        (assoc ancestors "gp-conf" (chain ["defs"
+                                           grandparent
+                                           "create"]
+                                          false)))
+      (assoc ancestors "gp-conf" (chain ["defs"
+                                         grandparent
+                                         "create"]
+                                        false)))))
+
+
+;; model-set-objective
+;;
+;; Adding the objective field information if not set in previous resources
+;; Inputs:
+;;  conf: (map) model configuration attributes
+;;  ancestors: (map) ancestors configuration attributes
+;; Output: (map) model updated configuration
+(define (model-set-objective conf ancestors)
+  (let (gp-conf (or (ancestors "gp-conf" {}) {})
+        origin (or (ancestors "origin" {}) {}))
+    (if (or (not (conf "objective_field" false)) (= origin "cluster"))
+        (dissoc conf "objective_field")
+        (let (objective (conf ["objective_field"] false)
+              gp-objective (gp-conf ["objective_field" "id"] false))
+          (if (not (= objective gp-objective))
+              (assoc conf "objective_field" objective)
+              (dissoc conf "objective_field"))))))
+
+;;ensemble-get-fields
+;;
+;; Retrieving the field structure for an ensemble from the first model
+;;
+;; Inputs:
+;;   id: (string) Ensemble ID
+;;   configuraiton: (map) configuration attributes
+;;
+;; Output: (map) resource's configuration attributes
+(define (ensemble-get-fields id configuration)
+  (let (first-model (fetch (head (configuration "models"))))
+    (get-fields first-model configuration)))
+
+;; dataset-updates
+;;
+;; Moving the attributes that have to be set in datasets to update time
+;; in case the dataset comes from batch_resources
+;;
+;; Inputs:
+;;   id: (string) Dataset ID
+;;   chain: (map) reify chain of resources
+;;
+;; Output: (map) reify chain of resources
+
+(define (dataset-updates id chain)
+  (let (chain (model-updates id chain)
+        conf (chain ["defs" id "create"] false)
+        origin (head (head (chain ["defs" id "parents"] false))))
+    ;; for batch_predictions, batch_clusters, batch_anomaly_scores the
+    ;; generated datasets have the default parameters and all the attributes
+    ;; need to be updated after creation time.
+    (if (= origin "origin_batch_resource")
+        (let (chain (dissoc-in chain ["defs" id "create"])
+              conf (dissoc conf "input_fields")
+              chain (assoc-in chain ["defs" id "update"] conf))
+          (assoc-in chain ["defs" id "get"] "output_dataset_resource"))
+        chain)))
+
+;; dataset-set-size
+;;
+;; Adding the size if changed from the origin resource
+;;
+;; Inputs:
+;;   id: (string) dataset ID
+;;   conf: (map) dataset attributes
+;;   ancestors: (map) ancestors attributes
+;;
+;; Outputs: (map) dataset updated configuration
+
+(define (dataset-set-size id conf ancestors)
+  (let (parent-type (resource-type (ancestors "parent" false)))
+    (if (and (= parent-type "source")
+             (not (= (conf "size" false)
+                     (ancestors ["parent-conf" "size"] false))))
+        conf
+        (dissoc conf "size"))))
+
+;; remove-layers-type
+;;
+;; Removes the inner "type" key in hidden_layers
+;;
+;; Inputs:
+;;   conf: (map) deepnet attributes
+;;
+;; Outputs: (map) deepnet updated configuration
+
+(define (remove-layers-type conf)
+  (let (hidden-layers (conf "hidden_layers")
+        hidden-layers (map (lambda (x) (dissoc x "type")) hidden-layers))
+    (assoc conf "hidden_layers" hidden-layers)))
+
+;; deepnet-suggest-dft
+;;
+;; special code to be run on
+;; to handle the suggest_structure attribute in deepnets
+;;
+;; Inputs:
+;;   id: (string) model ID
+;;   chain: (map) map that describes the reify chain of resources
+;;
+;; Output: (map) map that describes the reify chain of resources
+
+(define (deepnet-suggest-dft id chain)
+  (let (conf (chain ["defs" id "create"] false)
+        suggest (if (member? "suggest_structure" (keys conf))
+                    (conf "suggest_structure" false)
+                    true))
+    chain (if (not suggest)
+              (assoc-in chain ["defs"
+                               id
+                               "create"
+                               "suggest_structure"]
+                               suggest)
+              chain)))
+
+
+;; new-fields-generators
+;;
+;; Updating the `new_fields` attribute with the generators in `output_fields`
+;;
+;; Inputs:
+;;   conf: (map) dataset configuration
+;;
+;; Output: (map) updated dataset configuration
+
+(define (new-fields-generators conf)
+  (let (generators (conf "output_fields" false)
+        generator-fn (lambda (x) (let (y (select-keys x ["generator" "names"])
+                                       y (assoc y "field" (y
+                                                           "generator"
+                                                           false)))
+                                    (dissoc y "generator"))))
+    (assoc conf "new_fields" (map generator-fn generators))))
+
+;; dataset-set-new-fields
+;;
+;; Set the attributes to reproduce the `new_fields` attribute if present
+;;
+;; Inputs:
+;;   conf: (map) dataset configuration
+;;
+;; Output: (map) updated dataset configuration
+
+(define (dataset-set-new-fields conf)
+  ;; if new_fields is not empty, remove input_fields and get new_fields from
+  ;; output_fields generators. Remove output_fields, and all_but
+  (let (new-fields (conf "new_fields" false)
+        conf (if (and new-fields (not (empty? new-fields)))
+                 (dissoc conf "input_fields")
+                 conf)
+        conf (if (and new-fields (not (empty? new-fields)))
+                 (new-fields-generators conf)
+                 conf)
+        conf (dissoc conf "output_fields"))
+    (dissoc conf "all_but")))
+
+;; dataset-set-objective
+;;
+;; Sets the objective field attribute
+;;
+;; Inputs:
+;;   conf: (map) dataset configuration
+;;
+;; Output: (map) updated dataset configuration
+
+(define (dataset-set-objective conf)
+  (let (objective (conf "objective_field" false))
+    (if objective
+        (assoc conf "objective_field" {"id" (objective "id" "")})
+        conf)))
+
+;; dataset-get-ancestors
+;;
+;; Fills in the attributes of the ancestors (parent and grandparent) of
+;; the given dataset for further checks
+;;
+;; Inputs:
+;;   id: (string) dataset ID
+;;   chain: (map) reify chain of resources
+;;
+;; Output: (map) ancestors attributes
+
+(define (dataset-get-ancestors id chain)
+  (let (parents (chain ["defs" id "parents"] false)
+        parent (head parents)
+        origin (nth parent 0)
+        parent (nth parent 1)
+        ;; if dataset comes from a list of dataset, get only first one
+        parent (if (list? parent) (head parent) parent)
+        parent-conf (chain ["defs" parent "create"] false)
+        ;; as two-steps result from a cluster or batch prediction, centroid
+        ;; or anomaly score
+        grandparent parent
+        ancestors (assoc {} "parent" parent)
+        ancestors (assoc ancestors "origin" origin)
+        ancestors (assoc ancestors "parent-conf" parent-conf)
+        ancestors (assoc ancestors "grandparent" grandparent))
+    (if (= origin "origin_batch_resource")
+      (let (grandparents (chain ["defs" parent "parents"] false)
+            grandparent (head grandparents)
+            gp-origin (nth grandparent 0)
+            grandparent (nth grandparent 1)
+            grandparent (if (list? grandparent) (head grandparent) grandparent)
+            grandparent (if (> (count grandparents) 1)
+                          (loop (index 0 grandparent grandparent)
+                            (if (= index (count grandparents))
+                                grandparent
+                                (let (gp-origin (nth (head (nth grandparents
+                                                                index))
+                                                     0))
+                                  (if (= gp-origin "dataset")
+                                      (nth (head (nth grandparents index)) 1)
+                                      (recur (+ index 1) grandparent)))))
+                          grandparent)
+            ancestors (assoc ancestors "grandparent" grandparent)))
+        (assoc ancestors "gp-conf" (chain ["defs"
+                                           grandparent
+                                           "create"]
+                                          false))
+        (assoc ancestors "gp-conf" (chain ["defs"
+                                           grandparent
+                                           "create"]
+                                          false)))))
+
+;; get-non-defaults
+;;
+;; checks the attributes defaults and fills in only the attributes in the
+;; resource that differ from them
+;;
+;; Inputs:
+;;   resource: (map) resource attributes
+;;   defaults: (map) attribute, values pairs
+;;   configuration: (map) previous configuration information
+;;
+;; Output: (map) updated configuration
+
+(define (get-non-defaults resource defaults configuration)
+  (loop (index 0 lconfiguration configuration)
+    (if (= index (count (keys defaults)))
+        lconfiguration
+        (let (attribute (nth (keys defaults) index)
+              res-type (resource-type resource)
+              value (resource attribute false)
+              value (if (and (not value)
+                             (contains? INNER-INFO-PATH res-type)
+                             (contains? (resource (INNER-INFO-PATH res-type)
+                                                  {})
+                                                  attribute))
+                        (resource [(INNER-INFO-PATH res-type) attribute]
+                                   false)
+                        value)
+              lconfiguration (if (not (member? value
+                                               (defaults attribute [])))
+                                 (assoc lconfiguration
+                                        attribute
+                                        value)
+                                 lconfiguration))
+          (recur (+ index 1) lconfiguration)))))
+
+;; clean-origin-info
+;;
+;; Checks that the contents of the attribute are a single or a list of
+;; resource IDs
+;;
+;; Inputs:
+;;   info: (string|list) resource ID or list of IDs
+;;
+;; Output: (string|list|false) resource ID, list of IDs or false
+
+(define (clean-origin-info info)
+  (let (info-check (if (list? info)
+                       (reduce (lambda (x y) (and x y))
+                               true
+                               (map resource-id? info))
+                       (resource-id? info)))
+    (if info-check
+        info
+        false)))
+
+;; get-parents-argument
+;;
+;; Finds the origin type of resource and its ID or IDs
+;;
+;; Inputs:
+;;   resource: (map) resource information
+;;   argument-origins: (list) types of origin allowed in each of the origin
+;;                     arguments
+;;                     (some resources, such as evaluations, have more than
+;;                      one argument that contains an origin ID)
+;;   found-origins: (list) origins found
+;;
+;; Outputs: (map) origins found
+
+(define (get-parents-argument resource argument-origins found-origins)
+  (loop (index 0 lfound-origins found-origins)
+    (if (= index (count argument-origins))
+        lfound-origins
+        (let (origin (nth argument-origins index)
+              origin (if (= origin "new_fields")
+                         "origin_dataset"
+                         origin)
+              origin-info (resource origin false)
+              origin-info (if (and (list? origin-info) (empty? origin-info))
+                              false
+                              origin-info)
+              origin-info (if origin-info
+                              (if (= origin "ranges")
+                                  (keys origin-info)
+                                  origin-info)
+                              origin-info)
+              origin-info (if (not (= origin "remote"))
+                              (clean-origin-info origin-info)
+                              origin-info)
+              lfound-origins (if origin-info
+                                 (append lfound-origins [origin origin-info])
+                                 lfound-origins))
+          (if (not origin-info)
+              (recur (+ index 1) lfound-origins)
+              lfound-origins)))))
+
+
+;; get-parents
+;;
+;; returns the list of resources used as origin for the present resource.
+;;
+;; Inputs:
+;;   resource: (map) resource information
+;;   type: (string) type of the resource
+;;
+;; Outputs: (list) List of two-element lists. The two elements are the
+;;                 origin type and the ID of the origin resource
+
+(define (get-parents resource type)
+  (let (origins (ORIGINS type [])
+        found-origins [])
+    (loop (index 0 lfound-origins found-origins)
+      (if (= index (count origins))
+          (if (not lfound-origins)
+              (raise {"message"
+                      "Failed to find the complete origin information."
+                      "code" 42})
+              lfound-origins)
+          (let (argument-origins (nth origins index)
+                lfound-origins (get-parents-argument resource
+                                                     argument-origins
+                                                     lfound-origins))
+            (recur (+ index 1) lfound-origins))))))
+
+
+;; parent-ids
+;;
+;; Filtering only IDs from the origin, ID pairs
+;;
+;; Inputs:
+;;   parents: (list) origin information in two-element lists
+;;
+;; Output: (list) list of parent IDs
+
+(define (parent-ids parents)
+  (reduce (lambda (x y) (if (list? y)
+                            (concat x y)
+                            (append x y)))
+          []
+          (map (lambda (x) (nth x 1)) parents)))
+
+;; add-parents
+;;
+;; Adds the IDs found in the reify process to the list of reified resources
+;;
+;; Inputs:
+;;   reify-chain: (map) reify chain of resources
+;;   parents: (list) list of parents in a [origin-type origin-id] format
+;;
+;; Output: (map) updated reify chain of resources
+
+(define (add-parents reify-chain parents)
+  (let (parents (parent-ids parents)
+        reify-chain-list (concat (reify-chain "list" [])
+                         parents))
+    reify-chain (assoc reify-chain "list" reify-chain-list)))
+
+;; add-reify-step
+;;
+;; Adds the configuration and the reference to origin resources to the
+;; reify chain.
+;;
+;; Inputs:
+;;   reify-chain: (map) reify chain of resources
+;;   resource-id: (string) Resource ID
+;;   configuration: (map) selected attributes for the resource-id
+;;   parents: (list) list of resources used as origin
+;;
+;; Output: (map) reify chain
+
+(define (add-reify-step reify-chain resource-id configuration parents)
+  (if (not (contains? (reify-chain "defs" {}) resource-id))
+      (let (reify-chain-defs (assoc (reify-chain "defs" {})
+                                    resource-id
+                                    {"create" configuration
+                                     "parents" parents})
+            reify-chain (assoc reify-chain "defs" reify-chain-defs))
+            (add-parents reify-chain parents))
+      (add-parents reify-chain parents)))
+
+;; reify-step
+;;
+;; Retrieves the resource information and selects the information
+;; about other resources used as origin for the call and selects the
+;; attributes which can be used at creation or update time. It also
+;; defines the input for the reification script.
+;;
+;; Inputs:
+;;   resource-id: (string) Resource ID
+;;   reify-chain: (map) chain of resources for reification
+;;   step: (boolean) If set to true, only the last setp of the reify chain
+;;                   is added
+;;   counter: (integer) Controls the number of reified resources when step is
+;;                      true
+;;
+;; Outputs: (map) chain of resources for reification
+;;
+
+(define (reify-step resource-id reify-chain step counter)
+  (log-info "resource " resource-id " found.")
+  (if (and step (< counter 0))
+      (fill-input resource-id reify-chain)
+      (if (contains? (reify-chain "defs" {}) resource-id)
+        (let (reify-chain (add-parents reify-chain
+                                       (reify-chain ["defs"
+                                                     resource-id
+                                                     "parents"]
+                                                    false)))
+          (reify-parents reify-chain
+                         (reify-chain ["defs" resource-id "parents"] false)
+                         resource-id
+                         step
+                         counter))
+        (if (resource-id? resource-id)
+            (try
+              (let (resource (fetch resource-id))
+                (if resource
+                    (fill-attributes resource-id
+                                     resource reify-chain
+                                     step
+                                     counter)
+                    (fill-input resource-id reify-chain)))
+              (catch e
+                (log-info "Stopping at deleted resource: " resource-id)
+                (fill-input resource-id reify-chain)))
+            (fill-input resource-id reify-chain)))))
+
+;; fill-input
+;;
+;; Adds the information about the input needed for the reification script.
+;; The last resource in the ancestors' chain or the remote URL used to
+;; build the source.
+;;
+;; Inputs:
+;;   resource-id: (string) Resource ID
+;;   reify-chain: (map) chain of resources for reification
+;;
+;; Output: (map) chain of resources for reification
+;;
+
+(define (fill-input resource-id reify-chain)
+  (let (inputs (reify-chain "inputs" [])
+        inputs (if (member? resource-id inputs)
+                   inputs
+                   (append (reify-chain "inputs" []) resource-id)))
+    (assoc reify-chain "inputs" inputs)))
+
+;; update-tags
+;;
+(define (update-tags resource-id tags)
+  (fetch (update-and-wait resource-id {"tags" tags})))
+
+
+;; fill-attributes
+;;
+;; Fills the attributes that can be used at creation or update time
+;;
+;; Inputs:
+;;   resource-id: (string) Resource ID
+;;   resource: (map) Resource information
+;;   reify-chain: (map) chain of resources for reification
+;;
+;; Outputs: (map) chain of resources for reification
+;;
+
+(define (fill-attributes resource-id resource reify-chain step counter)
+  (let (reified-id ((reify-chain "list" []) 0)
+        tags (resource "tags" [])
+        retrain-label (str "retrain:" reified-id)
+        tags (if (member? retrain-label tags)
+                 tags
+                 (append tags retrain-label))
+        resource (if (member? (resource-type reified-id) MODELS)
+                     (update-tags resource-id tags)
+                     resource)
+        is-cv? (and (= (resource-type resource) "evaluation")
+               (= (resource "type" false) 2))
+        res-type (if is-cv? "cross-validation" (resource-type resource))
+        parents (get-parents resource res-type)
+        configuration (get-non-defaults resource COMMON-DEFAULTS {})
+        configuration (get-non-defaults resource
+                                        (DEFAULTS res-type false)
+                                        configuration)
+        configuration (get-fields resource configuration)
+        configuration (get-inner-names resource configuration)
+        reify-chain (add-reify-step reify-chain
+                                    resource-id
+                                    configuration
+                                    parents))
+    (reify-parents reify-chain parents resource-id step counter)))
+
+;; reify-parents
+;;
+;; Calls the reify-step function for each of the parents of a resource
+;;
+;; Inputs:
+;;   reify-chain: (map) chain of resources for reifcation
+;;   parents: (list) List of parent IDs
+;;   resource-id: (string) ID of the reified resource
+;;   step: (boolean) If set to true, only the last setp of the reify chain
+;;                   is added
+;;   counter: (integer) Controls the number of reified resources when step is
+;;                      true
+;;
+;; Output: (map) chain of resources for reification
+;;
+
+(define (reify-parents reify-chain parents resource-id step counter)
+  (if (not (empty? parents))
+      (let (parents (parent-ids parents)
+            counter (if step
+                        (- counter 1)
+                        counter))
+        (loop (index 0 lreify-chain reify-chain)
+          (if (= index (count parents))
+              lreify-chain
+              (let (parent-id (nth parents index)
+                    lreify-chain (reify-step parent-id
+                                             lreify-chain
+                                             step
+                                             counter))
+                (recur (+ index 1) lreify-chain)))))
+      (if (= (resource-type resource-id) "source")
+          (fill-input resource-id reify-chain)
+          reify-chain)))
+
+
+;; input-fields-names
+;;
+;; Changes the input_fields ids to the corresponding names to allow
+;; using ancestors with different IDs.
+;;
+;; Inputs:
+;;   resource-id: (string) Resource ID
+;;   reify-chain: (map) chain of resources for reification
+;;
+;; Output: (map) chain of resources for reification
+;;
+
+(define (input-fields-names resource-id reify-chain)
+  (let (attribute "input_fields"
+        config (reify-chain ["defs" resource-id "create"] false)
+        parents (reify-chain
+                        ["defs" resource-id "parents"] false)
+        fields (config "fields" {})
+        objective_field (config "objective_field" "")
+        objective_field (if (string? objective_field)
+                            objective_field
+                            (objective_field "id" ""))
+        objective-name (or (fields [objective_field "name"]
+                                   false)
+                           false))
+    (if (and (list? parents) (not (empty? parents)))
+        (let (parents (parent-ids parents)
+              parent (head parents)
+              parent-fields (reify-chain
+                                    ["defs" parent "ref" "fields"] false)
+              objective? (config "objective_field" false))
+          (if (and parent-fields
+                   (contains? config attribute))
+              (let (new-input-fields (map (lambda (x)
+                                           (parent-fields [x "name"] false))
+                                           (config attribute false)))
+                ;; same number of fields or only lack objective field
+                (if (or (= (count new-input-fields)
+                           (count (keys parent-fields)))
+                        (and objective-name
+                             (= (count new-input-fields)
+                                (- (count (keys parent-fields)) 1))
+                             (not (member? objective-name new-input-fields))))
+                  (dissoc-in reify-chain ["defs"
+                                          resource-id
+                                          "create"
+                                          attribute])
+                  (assoc-in reify-chain ["defs" resource-id "create" attribute]
+                                        new-input-fields)))
+              reify-chain))
+        reify-chain)))
+
+
+;; excluded-fields-names
+;;
+;; Changes the excluded_fields ids to the corresponding names to allow
+;; using ancestors with different IDs.
+;;
+;; Inputs:
+;;   resource-id: (string) Resource ID
+;;   reify-chain: (map) chain of resources for reification
+;;
+;; Output: (map) chain of resources for reification
+;;
+
+(define (excluded-fields-names resource-id reify-chain)
+  (let (attribute "excluded_fields"
+        config (reify-chain ["defs" resource-id "create"] false)
+        parents (reify-chain
+                        ["defs" resource-id "parents"] false))
+    (if (and (list? parents) (not (empty? parents)))
+        (let (parents (parent-ids parents)
+              parent (head parents)
+              parent-fields (reify-chain
+                                    ["defs" parent "create" "fields"] false)
+              objective? (config "objective_field" false))
+          (if (and parent-fields
+                   (contains? config attribute))
+              (let (new-input-fields (map (lambda (x)
+                                           (parent-fields [x "name"] false))
+                                           (config attribute [])))
+                (assoc-in reify-chain ["defs" resource-id "create" attribute]
+                                      new-input-fields))
+              reify-chain))
+        reify-chain)))
+
+
+;; remove-inherited
+;;
+;; Removes the attributes that contain values which have been inherited from
+;; the ancestors' attributes.
+;;
+;; Inputs:
+;;   resource-id: (string) Resource ID
+;;   reify-chain: (map) chain of resources for reification
+;;
+;; Output: (map) chain of resources for reification
+;;
+
+(define (remove-inherited resource-id reify-chain)
+  (let (attributes (keys COMMON-DEFAULTS))
+    (loop (index 0 lchain reify-chain)
+      (let (attribute (nth attributes index)
+            config (lchain ["defs" resource-id "ref"] false)
+            parents (lchain
+                            ["defs" resource-id "parents"] false))
+        (if (and (list? parents) (not (empty? parents)))
+            (let (parents (parent-ids parents)
+                  parent (head parents)
+                  parent-config (lchain
+                                        ["defs" parent "ref"] false))
+              (if (and parent-config
+                       (contains? config attribute)
+                       (contains? parent-config attribute)
+                       (= (config attribute false) (parent-config
+                                                            attribute
+                                                            false)))
+                  (let (config (dissoc config attribute)
+                        lchain (assoc-in lchain ["defs"
+                                                 resource-id
+                                                 "ref"]
+                                                 config))
+                    (if (< (+ index 1) (count attributes))
+                        (recur (+ index 1) lchain)
+                        lchain))
+                  (if (< (+ index 1) (count attributes))
+                      (recur (+ index 1) lchain)
+                      lchain)))
+              lchain)))))
+
+;; remove-reference-only
+;;
+;; Removes the attributes that are only used as reference in the
+;; ancestors chain. They are only used as reference value in case they have
+;; changed.
+;;
+;; Inputs:
+;;   resource-id: (string) Resource ID
+;;   reify-chain: (map) chain of resources for reification
+;;
+;; Output: (map) chain of resources for reification
+;;
+
+(define (remove-reference-only resource-id reify-chain)
+  (let (attributes (REFERENCE-ONLY (resource-type resource-id) false))
+    (loop (index 0 lchain reify-chain)
+      (if (= index (count attributes))
+          lchain
+          (let (attribute (nth attributes index)
+                action (cond (contains? (lchain ["defs" resource-id] {})
+                                        "create")
+                             "create"
+                             (contains? (lchain ["defs" resource-id] {})
+                                        "update-parser")
+                             "update-parser"
+                             "update")
+                config (lchain ["defs" resource-id action] {})
+                lchain (if (contains? config attribute)
+                           (dissoc-in lchain ["defs"
+                                              resource-id
+                                              action
+                                              attribute])
+                           lchain))
+            (recur (+ index 1) lchain))))))
+
+;; remove-range
+;;
+;; Checks whether the range has changed. Removes the attribute if it hasn't.
+;;
+;; Inputs:
+;;   resource-id: (string) Resource ID
+;;   reify-chain: (map) chain of resources for reification
+;;
+;; Output: (map) chain of resources for reification
+;;
+(define (remove-range resource-id reify-chain)
+  (let (attribute "range"
+        config (reify-chain ["defs" resource-id "create"] false)
+        parents (reify-chain
+                        ["defs" resource-id "parents"]
+                        false))
+    (if (and (list? parents) (not (empty? parents)))
+        (let (parents (parent-ids parents)
+              parents (reduce (lambda (x y) (if (= (resource-type y) "dataset")
+                                                (append x y)
+                                                x))
+                              []
+                              parents))
+          (if (not (empty? parents))
+            (let (parent (head parents)
+                  parent-config (reify-chain
+                                        ["defs" parent "create"]
+                                        {}))
+;; TODO: check ranges?
+;;                  rows (if (contains? conf "ranges")
+;;                           (reduce (lambda (x y) (+ x (nth (nth y 1) 1)))
+;;                                    0
+;;                                    (values (conf "ranges" false))))
+;;              (if (contains? config "ranges")
+              (if (and (contains? config attribute)
+                       (member? (config attribute)
+                                [[] [1 (parent-config "rows" false)]]))
+                  (let (config (dissoc config attribute))
+                    (assoc-in reify-chain ["defs"
+                                           resource-id
+                                           "create"]
+                                           config))
+                  reify-chain))
+                reify-chain))
+              reify-chain)))
+
+;; non-equal-fields
+;;
+;; Checks whether the fields structure has changed. Removes the inherited
+;; attributes.
+;;
+;; Inputs:
+;;   fields: (map) fields structure
+;;   parent-fields: (map) ancestor's fields structure
+;;
+;; Output: (map) fields structure for changed attributes
+;;
+(define (non-equal-fields fields parent-fields)
+  (let (field-ids (keys fields))
+    (loop (index 0 new-fields {})
+      (cond (= index (count field-ids))
+            new-fields
+            (not (contains? parent-fields (nth field-ids index)))
+            (recur (+ index 1) new-fields)
+            (let (field-id (nth field-ids index)
+                  attributes (keys (fields field-id false))
+                  new-fields (merge new-fields
+                                    (attributes-not-in-parent fields
+                                                              parent-fields
+                                                              field-id
+                                                              attributes)))
+              (recur (+ index 1) new-fields))))))
+
+;; attributes-not-in-parent
+;;
+;; Select the attributes in a field structure that are not inherited or empty.
+;;
+;; Inputs:
+;;   fields: (map) Resource fields structure
+;;   parent-fields: (map) Ancestor's fields structure
+;;   field-id: (string) ID for the field
+;;   attributes: (list) List of updatable attributes for the resource
+;;
+;; Output: (map) fields structure
+
+(define (attributes-not-in-parent fields parent-fields field-id attributes)
+  (loop (index 0 new-fields {})
+    (if (= index (count attributes))
+        new-fields
+        (let (attribute (nth attributes index))
+          (if (or (and (contains? (fields field-id false) attribute)
+                       (contains? (parent-fields field-id false) attribute)
+                       (= (fields [field-id attribute] false)
+                       (parent-fields
+                               [field-id attribute] false)))
+                  (and (contains? (fields field-id false) attribute)
+                       (not (parent-fields [field-id attribute] false))
+                       (= (fields [field-id attribute]) ""))
+                  (and (= attribute "preferred")
+                       (fields [field-id attribute] false))
+                  (and (= attribute "preferred")
+                       (not (contains? (fields field-id false) attribute))))
+               (recur (+ index 1) new-fields)
+               (recur (+ index 1) (assoc-in new-fields
+                                            [field-id attribute]
+                                            (fields
+                                                    [field-id
+                                                     attribute]
+                                                    false))))))))
+
+;; remove-fields
+;;
+;; Removes the fields attributes that are inherited from ancestors
+;;
+;; Inputs:
+;;   resource-id: (string) Resource ID
+;;   reify-chain: (map) chain of resources for reification
+;;
+;; Output: (map) chain of resources for reification
+
+(define (remove-fields resource-id reify-chain)
+  (let (attribute "fields"
+        config (reify-chain ["defs" resource-id "create"] false)
+        parents (reify-chain ["defs" resource-id "parents"] false)
+        type (resource-type resource-id)
+        fields (config "fields" {})
+        reify-chain (assoc-in reify-chain
+                              ["defs"
+                               resource-id
+                               "fields"]
+                              fields))
+    (cond (= type "source")
+          ;; for sources, fields settings always are at update
+          (let (reify-chain (dissoc-in reify-chain
+                             ["defs" resource-id "create" attribute]))
+            (assoc-in reify-chain ["defs" resource-id "update" attribute]
+                                  fields))
+          (if (and (list? parents) (not (empty? parents)))
+              (let (parents (parent-ids parents)
+                    parent (head parents)
+                    parent-config (reify-chain
+                                          ["defs" parent "ref"]
+                                          {})
+                    reify-chain (dissoc-in reify-chain
+                                           ["defs"
+                                            resource-id
+                                            "create"
+                                            "fields"])
+                    fields (if (and (contains? config attribute)
+                               (contains? parent-config attribute))
+                               (non-equal-fields (config attribute false)
+                                                 (parent-config attribute
+                                                                false))
+                               fields))
+                (if (not (empty? fields))
+                    (let (reify-chain (assoc-in reify-chain
+                                                ["defs"
+                                                 resource-id
+                                                 "update"
+                                                 "fields"]
+                                                fields))
+                      ;; if we are updating a dataset and an objective field is
+                      ;; set, move the objective field setting too just
+                      ;; in case it affects a previously non-preferred field
+                      (if (and (= type "dataset")
+                               (contains? config "objective_field"))
+                          (let (reify-chain (dissoc-in reify-chain
+                                                       ["defs"
+                                                        resource-id
+                                                        "create"
+                                                        "objective_field"]))
+                            (assoc-in reify-chain ["defs"
+                                                   resource-id
+                                                   "update"
+                                                   "objective_field"]
+                                                  (config "objective_field")))
+                          reify-chain))
+                    reify-chain))
+              reify-chain))))
+
+
+;; inner-names-update
+;;
+;; Inner names can only be changed by an update call
+;;
+;; Inputs:
+;;   resource-id: (string) Resource ID
+;;   reify-chain: (map) chain of resources for reification
+;;
+;; Output: (map) chain of resources for reification
+
+(define (inner-names-update resource-id reify-chain attribute)
+  (let (config (reify-chain ["defs" resource-id "create"]))
+    (if (contains? config attribute)
+        (let (update (config attribute)
+              reify-chain (dissoc-in reify-chain ["defs"
+                                                  resource-id
+                                                  "create"
+                                                  attribute]))
+          (assoc-in reify-chain
+                    ["defs" resource-id "update" attribute]
+                    update))
+        reify-chain)))
+
+;; select-keys
+;;
+;; Filters the keys in a map, keeping only the ones that appear in the list.
+;;
+;; Inputs:
+;;   a-map: (map) Key, value maps
+;;   keys-list: (list) List of keys to be kept in the map
+;; Output: (map) filtered map with only the keys in the keys-list
+;;
+(define (select-keys a-map keys-list)
+  (reduce (lambda (x y) (let (value (a-map y false)
+                              has-key? (contains? a-map y))
+                             (cond has-key? (assoc x y value) x)))
+          {}
+          keys-list))
+
+;; get-fields
+;;
+;; extracts the fields structure from the resource information structure
+;;
+;; Inputs:
+;;   resource: (map) resource information structure
+;;   configuration: (map) attributes used in create or update calls
+;;
+;; Output: (map) attributes used in create or update calls
+
+(define (get-fields resource configuration)
+  (let (fields-path (FIELDS-PATH
+                         (resource-type (resource "resource" false))
+                         false))
+    (if fields-path
+        (let (fields (resource fields-path {})
+              field-ids (keys fields)
+              resource-id (resource "resource" false)
+              filter (cond (= (resource-type resource-id) "source")
+                           SOURCE-UPDATABLE
+                           (= (resource-type resource-id) "dataset")
+                           DATASET-UPDATABLE
+                           DEFAULT-UPDATABLE)
+              fields (reduce (lambda (x y) (assoc x
+                                                  y
+                                                  (select-keys (fields
+                                                                    y
+                                                                    false)
+                                                               filter)))
+                             {}
+                             field-ids))
+          (if (not (empty? fields))
+              (assoc configuration "fields" fields)
+              configuration))
+        configuration)))
+
+
+;; get-inner-names
+;;
+;; extracts the changes (if any) to clusters or topics names
+;;
+;; Inputs:
+;;   resource: (map) resource information structure
+;;   configuration: (map) attributes used in create or update calls
+;;
+;; Output: (map) attributes used in create or update calls
+
+(define (get-inner-names resource configuration)
+  (let (type (resource-type (resource "resource" false))
+        info-path (INNER-INFO-NAMES-PATH type false))
+    (if info-path
+        (let (objs (resource info-path [])
+              update (reduce (lambda (x y) (if (not (matches? (DFT-NAMES type)
+                                                              (y "name")))
+                                               (assoc x
+                                                      (y "id")
+                                                      {"name" (y "name")})
+                                               x))
+                             {}
+                             objs))
+          (if (not (empty? update))
+              (assoc configuration ((INNER-INFO-NAMES-PATH type) 1) update)
+              configuration))
+        configuration)))
+
+
+;; replace-id
+;;
+;; Replaces the field ID by its name in the required attributes
+;;
+;; Inputs:
+;;   config: (map) configuration to be changed
+;;   attribute: (string) name of the attribute to be replaced
+;;   fields: (map) fields structure
+;;
+;; Output: (map) modified configuration
+
+(define (replace-id config attribute fields)
+  (let (attr (config attribute false))
+    (if attr
+      (if (list? attr) ;; if it's a list like objective_fields
+        (let (new-attr (for (item attr)
+                            (fields [item "name"] false)))
+          (assoc config attribute new-attr))
+        (if (and (map? attr) (contains? attr "id"))
+            ;; dataset's objective field has the id key in it
+            ;; and the ID must be kept because we don't accept names
+            ;; in this case
+            config
+            (assoc config attribute (fields [attr "name"] false))))
+      config)))
+
+;; translate-field-ids
+;;
+;; Translates the field IDs to names for the given attributes
+;;
+;; Inputs:
+;;   resource-id: (string) ID of the resource to be processed
+;;   reify-chain: (map) chain of resources for reification
+;;
+;; Output: (map) chain of resources for reification
+
+(define (translate-field-ids resource-id reify-chain)
+  (let (fields (reify-chain ["defs" resource-id "fields"] false))
+    (loop (index 0 reify-chain reify-chain)
+      (if (= index (count NAMED-ATTRIBUTES))
+          reify-chain
+          (let (attribute (nth NAMED-ATTRIBUTES index)
+                create-config (reify-chain ["defs" resource-id "create"] false)
+                update-config (reify-chain ["defs" resource-id "update"] false)
+                reify-chain (if (and create-config
+                                     (contains? create-config attribute))
+                                (assoc-in reify-chain
+                                          ["defs"
+                                           resource-id
+                                           "create"]
+                                          (replace-id create-config
+                                                      attribute
+                                                      fields))
+                                reify-chain)
+                reify-chain (if (and update-config
+                                     (contains? update-config attribute))
+                                (assoc-in reify-chain
+                                          ["defs"
+                                           resource-id
+                                           "update"]
+                                          (replace-id update-config
+                                                      attribute
+                                                      fields))
+                                reify-chain))
+            (recur (+ index 1) reify-chain))))))
+
+
+;; reify
+;; Extracts the whole chain of resources and configurations that leads
+;; to the resource identified by the argument ID
+;;
+;; Inputs:
+;;   resource-id: (string) ID of the resource to be reified
+;;   step: (boolean) If set to true, only the last step of the call chain
+;;                   is reified
+;;
+;; Output: map object with keys "list" and "defs". The first one has the
+;;         list of resources' IDs in the chain of calls. The second one
+;;         is a map whose keys are the IDs of the resources. The values
+;;         are also maps with "create" (and/or "update") storing the resource
+;;         attributes needed to reproduce the resource and "parents" storing
+;;         the origin information for the resource.
+;;
+
+(define (reify resource-id step)
+  (let (reify-chain (reify-step resource-id {"list" [resource-id]} step 0)
+        resource-ids (keys (reify-chain "defs" {}))
+        reify-chain (iterate (lchain reify-chain resource-id resource-ids)
+                             (if (contains? (lchain ["defs" resource-id] {})
+                                            "ref")
+                                 lchain
+                                 (assoc-in lchain
+                                           ["defs" resource-id "ref"]
+                                           (lchain ["defs"
+                                                    resource-id
+                                                    "create"])))))
+    (loop (index 0 lchain reify-chain)
+      (if (= index (count resource-ids))
+          lchain
+          (let (resource-id (nth resource-ids index)
+                type (resource-type resource-id)
+                lchain (remove-inherited resource-id lchain)
+                lchain (input-fields-names resource-id lchain)
+                lchain (excluded-fields-names resource-id lchain)
+                lchain (remove-fields resource-id lchain)
+                lchain (remove-range resource-id lchain)
+                per-type-process (PER-TYPE-PROCESS type false)
+                lchain (if per-type-process
+                           (per-type-process resource-id lchain)
+                           lchain)
+                lchain (translate-field-ids resource-id lchain)
+                inner-names-attr (INNER-INFO-NAMES-PATH type false)
+                lchain (if inner-names-attr
+                           (inner-names-update resource-id
+                                               lchain
+                                               (inner-names-attr 1))
+                           lchain)
+                lchain (if (REFERENCE-ONLY type false)
+                           (remove-reference-only resource-id lchain)
+                           lchain))
+                (recur (+ index 1) lchain))))))
+
+;; whizzml-args
+;;
+;; Creates the list of arguments for the create or update call
+;;
+;; Inputs:
+;;   type: (string) Resource type
+;;   configuration: (map) attributes used in create or update calls
+;;
+;; Output: (list) list of arguments
+;;
+(define (whizzml-args type configuration)
+  (let (config (configuration "create" false)
+        attributes (keys config)
+        args [])
+    (if (> (count attributes) 0)
+        (loop (index 0 largs args)
+          (let (attribute (nth attributes index)
+                largs (if (REFERENCE-ONLY [type attribute] false)
+                           largs
+                           (concat largs [attribute (config
+                                                         attribute
+                                                         false)])))
+            (if (< (+ index 1) (count attributes))
+              (recur (+ index 1) largs)
+              largs)))
+        args)))
+
+;; whizzml-origins
+;;
+;; Creates the list of origin resources to be used as argument for create
+;; calls.
+;;
+;; Inputs:
+;;   resource-id: (string) Resource ID
+;;   configuration: (map) attributes for the create call of the resource
+;;   mapped-ids: (map) variable names to assign to origin resources
+;;
+;; Output: (list) list of origin attributes
+;;
+(define (whizzml-origins resource-id configuration mapped-ids)
+  (let (parents (configuration "parents" false)
+        type (resource-type resource-id))
+    (if (> (count parents) 0)
+        (let (origins (parent-ids parents)
+              origin-types (map resource-type origins))
+          (origin-args type origins origin-types mapped-ids))
+        [])))
+
+;; origin-args
+;;
+;; Generates the origin key, value pairs for the create calls
+;;
+;; Inputs:
+;;   type: (string) resource type
+;;   origins: (list) list of origin-type origin arguments
+;;   origin-types: types of the origin IDs
+;;   mapped-ids: variable names to assign to origin resources
+;;
+(define (origin-args type origins origin-types mapped-ids)
+  (let (origin (head origins)
+        origin-names (map (lambda (x) (head (reverse (mapped-ids
+                                                      x
+                                                      false))))
+                                                     origins)
+        origin-name (head origin-names)
+        origin-type (head origin-types))
+    (cond (= type "source")
+            ["\"remote\"" origin-name]
+          (and (= type "dataset") (= origin-type "source"))
+            ["\"source\"" origin-name]
+          (and (= type "dataset") (= origin-type "cluster"))
+            ["\"cluster\"" origin-name]
+          (and (= type "dataset")
+               (= origin-type "dataset")
+               (< (count origin-types) 2))
+            ["\"origin_dataset\"" origin-name]
+          (= type "dataset")
+            ["\"origin_datasets\"" (flatline "[@{origin-names}]")]
+          (and (= type "model") (= origin-type "cluster"))
+            ["\"cluster\"" origin-name]
+          (and (member? type ["model"
+                              "logisticregression"
+                              "deepnet"
+                              "association"
+                              "ensemble"
+                              "cluster"
+                              "anomaly"
+                              "topicmodel"
+                              "timeseries"])
+               (< (count origin-types) 2)
+               (= origin-type "dataset"))
+            ["\"dataset\"" origin-name]
+          (member? type ["model"
+                         "logisticregression"
+                         "deepnet"
+                         "association"
+                         "ensemble"
+                         "cluster"
+                         "anomaly"
+                         "topicmodel"
+                         "timeseries"])
+            ["\"datasets\"" (flatline "[@{origin-names}]")]
+          (member? type ["batchprediction"
+                         "batchcentroid"
+                         "batchanomaly"
+                         "batchtopicdistribution"])
+            [(str "\"" origin-type "\"")
+             origin-name
+             "\"dataset\""
+             (nth origin-names 1)]
+          (= type "evaluation")
+            (if (= origin-type "evaluation")
+                ["\"evaluations\""
+                 (flatline "[@{origin-names}]")]
+                [(str "\"" origin-type "\"")
+                 origin-name
+                 "\"dataset\""
+                 (nth origin-names 1)])
+          (member? type ["prediction"
+                         "centroid"
+                         "anomalyscore"
+                         "associationset"
+                         "topicdistribution"
+                         "forecast"])
+            [(str "\"" origin-type "\"")
+             origin-name]
+          (and (= type "correlation")
+               (< (count origin-types) 2)
+               (= origin-type "dataset"))
+            ["\"dataset\"" origin-name]
+          (and (= type "statisticaltest")
+               (< (count origin-types) 2)
+               (= origin-type "dataset"))
+            ["\"dataset\"" origin-name]
+          [])))
+
+
+(define (stringify-map map)
+  (let (keys (keys map))
+    (reduce (lambda (x y) (assoc x (flatline "{{y}}") (map
+                                                           y
+                                                           false))) {} keys)))
+
+
+(define (whizzml-create resource-id configuration mapped-ids name reified-id)
+  (let (resource-name (head (mapped-ids resource-id false))
+        type (resource-type resource-id)
+        periodic-model (and (= reified-id resource-id)
+                            (member? type MODELS))
+        output (if periodic-model
+                   (str "(define origins (map (lambda (x)"
+                        " (x \"resource\")) (list-datasets "
+                        "{\"tags__in\" \"retrain:"
+                        reified-id
+                        "\"})))")
+                   "")
+        origins (if periodic-model
+                    "\"datasets\" origins"
+                    (join " " (whizzml-origins resource-id
+                                               configuration
+                                               mapped-ids)))
+        xx (log-info origins)
+        arguments (whizzml-args type configuration)
+        arguments (join " " (map pr-str arguments))
+        arguments (if (and (not (= origins "")) (not (= arguments "")))
+                   (join " " [origins arguments])
+                   (str origins arguments))
+        arguments (if (not (= arguments ""))
+                      (str " {" arguments "}")
+                      arguments)
+        output (pretty-whizzml
+                 (str output "(define " resource-name " (create-and-wait-" type
+         arguments
+         "))"))
+        output (str ";; WhizzML for resource: "
+                    name
+                    "\n;; "
+                    resource-id
+                    "\n"
+                    output))
+    output))
+
+
+
+(define (whizzml-args-list config)
+  (let (attributes (keys config)
+        args [])
+    (if (> (count attributes) 0)
+        (loop (index 0 largs args)
+          (let (attribute (nth attributes index)
+                largs (concat largs [attribute (config attribute false)]))
+            (if (< (+ index 1) (count attributes))
+              (recur (+ index 1) largs)
+              largs)))
+        args)))
+
+
+(define (whizzml-update resource-id conf mapped-ids name)
+  (let (arguments (whizzml-args-list conf)
+        arguments (join " " (map pr-str arguments))
+        arguments (if (not (= arguments ""))
+                      (str " {" arguments "}")
+                      arguments)
+        names (reverse (mapped-ids resource-id false))
+        last-name (names 1)
+        resource-name (names 0)
+        output (pretty-whizzml
+                 (str "(define "
+                      resource-name
+                      " (update-and-wait "
+                      last-name
+                      arguments
+                      "))"))
+        output (str ";; Updating properties for resource: "
+                    name
+                    "\n;; "
+                    resource-id
+                    "\n" output))
+    output))
+
+(define (whizzml-get resource-id configuration mapped-ids name)
+  (let (resource-name (head (mapped-ids resource-id false))
+        parent-id (head (parent-ids (configuration "parents")))
+        parent-name (head (mapped-ids parent-id))
+        suffix (pr-str (configuration "get" false))
+        output (pretty-whizzml
+                 (str "(define " resource-name
+                      " ((fetch " parent-name ") " suffix " false))"))
+
+        output (str ";; WhizzML for resource: "
+                    name
+                    "\n;; "
+                    resource-id
+                    "\n" output))
+    output))
+
+(define (whizzml-script reify-chain exclude-name)
+  (let (lines []
+        reified-id (head (reify-chain "list" []))
+        ids-chain (filter resource-id? (reverse (reify-chain
+                                                     "list"
+                                                     false)))
+        source-urls (filter (lambda (x) (not (resource-id? x)))
+                    (reverse (reify-chain "inputs" [])))
+        mapped-ids (loop (index 0 mapped-ids {})
+                      (if (= index (count source-urls))
+                          mapped-ids
+                          (let (url (nth source-urls index)
+                                index (+ 1 index)
+                                mapped-ids (assoc mapped-ids
+                                                  url
+                                                  [(str "source-url"
+                                                        index)]))
+                            (recur index mapped-ids))))
+        inputs (reify-chain "inputs" [])
+        confs (reify-chain "defs" false)
+        script-info {"code" ""
+                     "mapped-ids" mapped-ids
+                     "type-counters" {}})
+    (loop (index 0
+           script-info script-info)
+      (let (code (script-info "code" false)
+            mapped-ids (script-info "mapped-ids" false)
+            type-counters (script-info "type-counters" false))
+        (if (= index (count ids-chain))
+            (let (res-id (head (reify-chain "list" false)))
+              (merge script-info
+                     {"code" (str code
+                                  "\n(define output-"
+                                  (resource-type (nth ids-chain (- index 1)))
+                                  " "
+                                  (head
+                                    (reverse
+                                      (mapped-ids res-id false)))
+                                  ")")
+                      "inputs" (reify-chain "inputs" false)
+                      "output" res-id
+                      ;; inherits description and tags if available
+                      "res-name" (confs [res-id "create" "name"] res-id)
+                      "res-desc" (confs [res-id "create" "description"]
+                                        (str "Script for "
+                                             (confs [res-id "create" "name"]
+                                                    res-id)))
+                      "res-tags" (confs [res-id "create" "tags"]
+                                        ["script" res-id])}))
+            (let (resource-id (nth ids-chain index))
+              ;; check whether the resource is seen by the first time
+              (if (mapped-ids resource-id false)
+                  (recur (+ index 1) {"code" code
+                                      "mapped-ids" mapped-ids
+                                      "type-counters" type-counters})
+                  ;; new resource: map its name and write the create, get,
+                  ;; update calls
+                  (let (type (resource-type resource-id)
+                        type-counter (+ (type-counters type 0) 1)
+                        type-counters (assoc type-counters
+                                             type
+                                             type-counter)
+                        resource-name (str (resource-type resource-id)
+                                           type-counter)
+                        mapped-ids (assoc mapped-ids
+                                          resource-id
+                                          [resource-name])
+                        name (confs [resource-id "create" "name"] false)
+                        confs (if (and confs exclude-name)
+                                  (dissoc-in confs [resource-id
+                                                    "create"
+                                                    "name"])
+                                  confs)
+                        lines (if (and (confs [resource-id "create"] false)
+                                      (not (member? resource-id inputs)))
+                                  (append lines
+                                          (whizzml-create resource-id
+                                                          (confs resource-id
+                                                                 false)
+                                                          mapped-ids
+                                                          name
+                                                          reified-id))
+                                  lines)
+                        name (confs [resource-id "get" "name"] name)
+                        confs (if (and confs exclude-name)
+                                  (dissoc-in confs [resource-id
+                                                    "get"
+                                                    "name"])
+                                  confs)
+                        lines (if (confs [resource-id "get"] false)
+                                  (append lines (whizzml-get resource-id
+                                                             (confs resource-id
+                                                                    false)
+                                                             mapped-ids
+                                                             name))
+                                  lines)
+                        ;; sources must update source_parser separately
+                        update-conf (confs [resource-id "update-parser"] false)
+                        name (confs [resource-id "update-parser" "name"] name)
+                        confs (if (and confs exclude-name)
+                                  (dissoc-in confs [resource-id
+                                                    "update-parser"
+                                                    "name"])
+                                  confs)
+                        update-conf (if (and update-conf exclude-name)
+                                        (dissoc update-conf "name")
+                                        update-conf)
+                        type-counter (if update-conf
+                                         (+ (type-counters type 0) 1)
+                                         type-counter)
+                        type-counters (if update-conf
+                                          (assoc type-counters
+                                                 type
+                                                 type-counter)
+                                          type-counters)
+                        resource-name (str (resource-type resource-id)
+                                           type-counter)
+                        mapped-ids (if update-conf
+                                       (assoc mapped-ids
+                                              resource-id
+                                              (append (mapped-ids resource-id
+                                                                  [])
+                                                      resource-name))
+                                       mapped-ids)
+                        lines (if update-conf
+                                  (append lines (whizzml-update resource-id
+                                                                update-conf
+                                                                mapped-ids
+                                                                name))
+                                  lines)
+                        ;; rest of updates, including fields properties
+                        update-conf (confs [resource-id "update"] false)
+                        type-counter (if update-conf
+                                         (+ (type-counters type 0) 1)
+                                         type-counter)
+                        type-counters (if update-conf
+                                          (assoc type-counters
+                                                 type
+                                                 type-counter)
+                                          type-counters)
+                        resource-name (str (resource-type resource-id)
+                                           type-counter)
+                        mapped-ids (if update-conf
+                                       (assoc mapped-ids
+                                              resource-id
+                                              (append (mapped-ids resource-id
+                                                                  [])
+                                                      resource-name))
+                                       mapped-ids)
+                        lines (if update-conf
+                                  (append lines
+                                          (whizzml-update resource-id
+                                                          update-conf
+                                                          mapped-ids
+                                                          name))
+                                  lines))
+                    (recur (+ index 1)
+                           {"code" (str code (join "\n" lines) "\n")
+                            "mapped-ids" mapped-ids
+                            "type-counters" type-counters})))))))))
+
+(define (script-args script-info step)
+  (let (output (script-info "output" false)
+        name (script-info "res-name" output)
+        args {"source_code" (script-info "code" false)
+              "name" (if step
+                        (str "Last-step script for " name)
+                        (str "Script for " name))
+              "provider" "bigml-scriptify"}
+        type (resource-type output)
+        inputs (script-info "inputs" [])
+        mapped-ids (script-info "mapped-ids" false)
+        ;;  build output info
+        args (assoc args "outputs" [{"name" (str "output-" type)
+                                     "type" (str type "-id")
+                                     "description" (str "Scriptified "
+                                                         output)}])
+        ;; inherit description and tags and assign to special category
+        args (merge args
+                    {"description" (script-info "res-desc" "")
+                     "tags" (script-info "res-tags" [])
+                     "category" SCRIPTIFY-CATEGORY}))
+        (if inputs
+            (reduce (lambda (x y) (script-input x y mapped-ids))
+                    args
+                    inputs)
+            args)))
+
+
+(define (script-input args input mapped-ids)
+  (let (inputs (args "inputs" [])
+        type (resource-type input)
+        type (if (= type "")
+                 "string"
+                 (str type "-id"))
+        description (if (= type "string")
+                        "Remote URL"
+                        (str "Scripting from " type " resource")))
+    (assoc args "inputs" (append inputs {"name" (head (mapped-ids
+                                                           input
+                                                           false))
+                                         "type" type
+                                         "description" description}))))

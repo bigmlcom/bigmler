@@ -1,0 +1,18 @@
+bigmler execute --no-execute --code-file /home/merce/github/mmerce/bigmler/bigmler/static/scripts/incremental/retrain/script.whizzml --output-dir /home/merce/github/mmerce/bigmler/bigmler/static/scripts/incremental/retrain --store --declare-inputs /home/merce/github/mmerce/bigmler/bigmler/static/scripts/incremental/retrain/inputs.json --declare-outputs /home/merce/github/mmerce/bigmler/bigmler/static/scripts/incremental/retrain/outputs.json --description /home/merce/github/mmerce/bigmler/bigmler/static/scripts/incremental/retrain/description.txt --name "Retrain modeling resource - 1.0.0" --imports library/5a1dee9692527304d4000027 --verbosity 1 --upgrade
+
+[2017-12-06 00:33:02] Script found: Retrain modeling resource - 1.0.0
+    (script ID: script/5a1dee9a3980b50a76003f53)
+________________________________________________________________________________
+
+Generated files:
+
+ retrain
+  ├─bigmler_sessions
+  ├─script
+  ├─inputs.json
+  ├─outputs.json
+  ├─description.txt
+  ├─script.whizzml
+  └─metadata.json
+
+________________________________________________________________________________

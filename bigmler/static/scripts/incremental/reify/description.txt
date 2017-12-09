@@ -1,0 +1,1 @@
+Retrieves the steps and configurations needed to reproduce a resource

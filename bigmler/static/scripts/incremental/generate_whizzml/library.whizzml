@@ -1,0 +1,443 @@
+;; Auxiliary functions to generate the whizzml code to reproduce a
+;; resource. If the resource is a model, the origin for the model is
+;; a list of incremental datasets.
+
+;; whizzml-args
+;;
+;; Creates the list of arguments for the create or update call
+;;
+;; Inputs:
+;;   type: (string) Resource type
+;;   configuration: (map) attributes used in create or update calls
+;;
+;; Output: (list) list of arguments
+;;
+(define (whizzml-args type configuration)
+  (let (config (configuration "create" false)
+        attributes (keys config)
+        args [])
+    (if (> (count attributes) 0)
+        (loop (index 0 largs args)
+          (let (attribute (nth attributes index)
+                largs (if (REFERENCE-ONLY [type attribute] false)
+                           largs
+                           (concat largs [attribute (config
+                                                         attribute
+                                                         false)])))
+            (if (< (+ index 1) (count attributes))
+              (recur (+ index 1) largs)
+              largs)))
+        args)))
+
+;; whizzml-origins
+;;
+;; Creates the list of origin resources to be used as argument for create
+;; calls.
+;;
+;; Inputs:
+;;   resource-id: (string) Resource ID
+;;   configuration: (map) attributes for the create call of the resource
+;;   mapped-ids: (map) variable names to assign to origin resources
+;;
+;; Output: (list) list of origin attributes
+;;
+(define (whizzml-origins resource-id configuration mapped-ids)
+  (let (parents (configuration "parents" false)
+        type (resource-type resource-id))
+    (if (> (count parents) 0)
+        (let (origins (parent-ids parents)
+              origin-types (map resource-type origins))
+          (origin-args type origins origin-types mapped-ids))
+        [])))
+
+;; origin-args
+;;
+;; Generates the origin key, value pairs for the create calls
+;;
+;; Inputs:
+;;   type: (string) resource type
+;;   origins: (list) list of origin-type origin arguments
+;;   origin-types: types of the origin IDs
+;;   mapped-ids: variable names to assign to origin resources
+;;
+(define (origin-args type origins origin-types mapped-ids)
+  (let (origin (head origins)
+        origin-names (map (lambda (x) (head (reverse (mapped-ids
+                                                      x
+                                                      false))))
+                                                     origins)
+        origin-name (head origin-names)
+        origin-type (head origin-types))
+    (cond (= type "source")
+            ["\"remote\"" origin-name]
+          (and (= type "dataset") (= origin-type "source"))
+            ["\"source\"" origin-name]
+          (and (= type "dataset") (= origin-type "cluster"))
+            ["\"cluster\"" origin-name]
+          (and (= type "dataset")
+               (= origin-type "dataset")
+               (< (count origin-types) 2))
+            ["\"origin_dataset\"" origin-name]
+          (= type "dataset")
+            ["\"origin_datasets\"" (flatline "[@{origin-names}]")]
+          (and (= type "model") (= origin-type "cluster"))
+            ["\"cluster\"" origin-name]
+          (and (member? type ["model"
+                              "logisticregression"
+                              "deepnet"
+                              "association"
+                              "ensemble"
+                              "cluster"
+                              "anomaly"
+                              "topicmodel"
+                              "timeseries"])
+               (< (count origin-types) 2)
+               (= origin-type "dataset"))
+            ["\"dataset\"" origin-name]
+          (member? type ["model"
+                         "logisticregression"
+                         "deepnet"
+                         "association"
+                         "ensemble"
+                         "cluster"
+                         "anomaly"
+                         "topicmodel"
+                         "timeseries"])
+            ["\"datasets\"" (flatline "[@{origin-names}]")]
+          (member? type ["batchprediction"
+                         "batchcentroid"
+                         "batchanomaly"
+                         "batchtopicdistribution"])
+            [(str "\"" origin-type "\"")
+             origin-name
+             "\"dataset\""
+             (nth origin-names 1)]
+          (= type "evaluation")
+            (if (= origin-type "evaluation")
+                ["\"evaluations\""
+                 (flatline "[@{origin-names}]")]
+                [(str "\"" origin-type "\"")
+                 origin-name
+                 "\"dataset\""
+                 (nth origin-names 1)])
+          (member? type ["prediction"
+                         "centroid"
+                         "anomalyscore"
+                         "associationset"
+                         "topicdistribution"
+                         "forecast"])
+            [(str "\"" origin-type "\"")
+             origin-name]
+          (and (= type "correlation")
+               (< (count origin-types) 2)
+               (= origin-type "dataset"))
+            ["\"dataset\"" origin-name]
+          (and (= type "statisticaltest")
+               (< (count origin-types) 2)
+               (= origin-type "dataset"))
+            ["\"dataset\"" origin-name]
+          [])))
+
+
+(define (stringify-map map)
+  (let (keys (keys map))
+    (reduce (lambda (x y) (assoc x (flatline "{{y}}") (map
+                                                           y
+                                                           false))) {} keys)))
+
+
+(define (whizzml-create resource-id configuration mapped-ids name reified-id)
+  (let (resource-name (head (mapped-ids resource-id false))
+        type (resource-type resource-id)
+        periodic-model (and (= reified-id resource-id)
+                            (member? type MODELS))
+        output (if periodic-model
+                   (str "(define origins (map (lambda (x)"
+                        " (x \"resource\")) (list-datasets "
+                        "{\"tags__in\" \"retrain:"
+                        reified-id
+                        "\"})))")
+                   "")
+        origins (if periodic-model
+                    "\"datasets\" origins"
+                    (join " " (whizzml-origins resource-id
+                                               configuration
+                                               mapped-ids)))
+        xx (log-info origins)
+        arguments (whizzml-args type configuration)
+        arguments (join " " (map pr-str arguments))
+        arguments (if (and (not (= origins "")) (not (= arguments "")))
+                   (join " " [origins arguments])
+                   (str origins arguments))
+        arguments (if (not (= arguments ""))
+                      (str " {" arguments "}")
+                      arguments)
+        output (pretty-whizzml
+                 (str output "(define " resource-name " (create-and-wait-" type
+         arguments
+         "))"))
+        output (str ";; WhizzML for resource: "
+                    name
+                    "\n;; "
+                    resource-id
+                    "\n"
+                    output))
+    output))
+
+
+
+(define (whizzml-args-list config)
+  (let (attributes (keys config)
+        args [])
+    (if (> (count attributes) 0)
+        (loop (index 0 largs args)
+          (let (attribute (nth attributes index)
+                largs (concat largs [attribute (config attribute false)]))
+            (if (< (+ index 1) (count attributes))
+              (recur (+ index 1) largs)
+              largs)))
+        args)))
+
+
+(define (whizzml-update resource-id conf mapped-ids name)
+  (let (arguments (whizzml-args-list conf)
+        arguments (join " " (map pr-str arguments))
+        arguments (if (not (= arguments ""))
+                      (str " {" arguments "}")
+                      arguments)
+        names (reverse (mapped-ids resource-id false))
+        last-name (names 1)
+        resource-name (names 0)
+        output (pretty-whizzml
+                 (str "(define "
+                      resource-name
+                      " (update-and-wait "
+                      last-name
+                      arguments
+                      "))"))
+        output (str ";; Updating properties for resource: "
+                    name
+                    "\n;; "
+                    resource-id
+                    "\n" output))
+    output))
+
+(define (whizzml-get resource-id configuration mapped-ids name)
+  (let (resource-name (head (mapped-ids resource-id false))
+        parent-id (head (parent-ids (configuration "parents")))
+        parent-name (head (mapped-ids parent-id))
+        suffix (pr-str (configuration "get" false))
+        output (pretty-whizzml
+                 (str "(define " resource-name
+                      " ((fetch " parent-name ") " suffix " false))"))
+
+        output (str ";; WhizzML for resource: "
+                    name
+                    "\n;; "
+                    resource-id
+                    "\n" output))
+    output))
+
+(define (whizzml-script reify-chain exclude-name)
+  (let (lines []
+        reified-id (head (reify-chain "list" []))
+        ids-chain (filter resource-id? (reverse (reify-chain
+                                                     "list"
+                                                     false)))
+        source-urls (filter (lambda (x) (not (resource-id? x)))
+                    (reverse (reify-chain "inputs" [])))
+        mapped-ids (loop (index 0 mapped-ids {})
+                      (if (= index (count source-urls))
+                          mapped-ids
+                          (let (url (nth source-urls index)
+                                index (+ 1 index)
+                                mapped-ids (assoc mapped-ids
+                                                  url
+                                                  [(str "source-url"
+                                                        index)]))
+                            (recur index mapped-ids))))
+        inputs (reify-chain "inputs" [])
+        confs (reify-chain "defs" false)
+        script-info {"code" ""
+                     "mapped-ids" mapped-ids
+                     "type-counters" {}})
+    (loop (index 0
+           script-info script-info)
+      (let (code (script-info "code" false)
+            mapped-ids (script-info "mapped-ids" false)
+            type-counters (script-info "type-counters" false))
+        (if (= index (count ids-chain))
+            (let (res-id (head (reify-chain "list" false)))
+              (merge script-info
+                     {"code" (str code
+                                  "\n(define output-"
+                                  (resource-type (nth ids-chain (- index 1)))
+                                  " "
+                                  (head
+                                    (reverse
+                                      (mapped-ids res-id false)))
+                                  ")")
+                      "inputs" (reify-chain "inputs" false)
+                      "output" res-id
+                      ;; inherits description and tags if available
+                      "res-name" (confs [res-id "create" "name"] res-id)
+                      "res-desc" (confs [res-id "create" "description"]
+                                        (str "Script for "
+                                             (confs [res-id "create" "name"]
+                                                    res-id)))
+                      "res-tags" (confs [res-id "create" "tags"]
+                                        ["script" res-id])}))
+            (let (resource-id (nth ids-chain index))
+              ;; check whether the resource is seen by the first time
+              (if (mapped-ids resource-id false)
+                  (recur (+ index 1) {"code" code
+                                      "mapped-ids" mapped-ids
+                                      "type-counters" type-counters})
+                  ;; new resource: map its name and write the create, get,
+                  ;; update calls
+                  (let (type (resource-type resource-id)
+                        type-counter (+ (type-counters type 0) 1)
+                        type-counters (assoc type-counters
+                                             type
+                                             type-counter)
+                        resource-name (str (resource-type resource-id)
+                                           type-counter)
+                        mapped-ids (assoc mapped-ids
+                                          resource-id
+                                          [resource-name])
+                        name (confs [resource-id "create" "name"] false)
+                        confs (if (and confs exclude-name)
+                                  (dissoc-in confs [resource-id
+                                                    "create"
+                                                    "name"])
+                                  confs)
+                        lines (if (and (confs [resource-id "create"] false)
+                                      (not (member? resource-id inputs)))
+                                  (append lines
+                                          (whizzml-create resource-id
+                                                          (confs resource-id
+                                                                 false)
+                                                          mapped-ids
+                                                          name
+                                                          reified-id))
+                                  lines)
+                        name (confs [resource-id "get" "name"] name)
+                        confs (if (and confs exclude-name)
+                                  (dissoc-in confs [resource-id
+                                                    "get"
+                                                    "name"])
+                                  confs)
+                        lines (if (confs [resource-id "get"] false)
+                                  (append lines (whizzml-get resource-id
+                                                             (confs resource-id
+                                                                    false)
+                                                             mapped-ids
+                                                             name))
+                                  lines)
+                        ;; sources must update source_parser separately
+                        update-conf (confs [resource-id "update-parser"] false)
+                        name (confs [resource-id "update-parser" "name"] name)
+                        confs (if (and confs exclude-name)
+                                  (dissoc-in confs [resource-id
+                                                    "update-parser"
+                                                    "name"])
+                                  confs)
+                        update-conf (if (and update-conf exclude-name)
+                                        (dissoc update-conf "name")
+                                        update-conf)
+                        type-counter (if update-conf
+                                         (+ (type-counters type 0) 1)
+                                         type-counter)
+                        type-counters (if update-conf
+                                          (assoc type-counters
+                                                 type
+                                                 type-counter)
+                                          type-counters)
+                        resource-name (str (resource-type resource-id)
+                                           type-counter)
+                        mapped-ids (if update-conf
+                                       (assoc mapped-ids
+                                              resource-id
+                                              (append (mapped-ids resource-id
+                                                                  [])
+                                                      resource-name))
+                                       mapped-ids)
+                        lines (if update-conf
+                                  (append lines (whizzml-update resource-id
+                                                                update-conf
+                                                                mapped-ids
+                                                                name))
+                                  lines)
+                        ;; rest of updates, including fields properties
+                        update-conf (confs [resource-id "update"] false)
+                        type-counter (if update-conf
+                                         (+ (type-counters type 0) 1)
+                                         type-counter)
+                        type-counters (if update-conf
+                                          (assoc type-counters
+                                                 type
+                                                 type-counter)
+                                          type-counters)
+                        resource-name (str (resource-type resource-id)
+                                           type-counter)
+                        mapped-ids (if update-conf
+                                       (assoc mapped-ids
+                                              resource-id
+                                              (append (mapped-ids resource-id
+                                                                  [])
+                                                      resource-name))
+                                       mapped-ids)
+                        lines (if update-conf
+                                  (append lines
+                                          (whizzml-update resource-id
+                                                          update-conf
+                                                          mapped-ids
+                                                          name))
+                                  lines))
+                    (recur (+ index 1)
+                           {"code" (str code (join "\n" lines) "\n")
+                            "mapped-ids" mapped-ids
+                            "type-counters" type-counters})))))))))
+
+(define (script-args script-info step)
+  (let (output (script-info "output" false)
+        name (script-info "res-name" output)
+        args {"source_code" (script-info "code" false)
+              "name" (if step
+                        (str "Last-step script for " name)
+                        (str "Script for " name))
+              "provider" "bigml-scriptify"}
+        type (resource-type output)
+        inputs (script-info "inputs" [])
+        mapped-ids (script-info "mapped-ids" false)
+        ;;  build output info
+        args (assoc args "outputs" [{"name" (str "output-" type)
+                                     "type" (str type "-id")
+                                     "description" (str "Scriptified "
+                                                         output)}])
+        ;; inherit description and tags and assign to special category
+        args (merge args
+                    {"description" (script-info "res-desc" "")
+                     "tags" (script-info "res-tags" [])
+                     "category" SCRIPTIFY-CATEGORY}))
+        (if inputs
+            (reduce (lambda (x y) (script-input x y mapped-ids))
+                    args
+                    inputs)
+            args)))
+
+
+(define (script-input args input mapped-ids)
+  (let (inputs (args "inputs" [])
+        type (resource-type input)
+        type (if (= type "")
+                 "string"
+                 (str type "-id"))
+        description (if (= type "string")
+                        "Remote URL"
+                        (str "Scripting from " type " resource")))
+    (assoc args "inputs" (append inputs {"name" (head (mapped-ids
+                                                           input
+                                                           false))
+                                         "type" type
+                                         "description" description}))))

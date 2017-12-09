@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2015-2017 BigML
+# Copyright 2017 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -14,7 +14,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-"""BigMLer - reify processing dispatching
+"""BigMLer retrain main processing
+
+   Functions to retrain a modeling resource
+
 
 """
 from __future__ import absolute_import
@@ -23,18 +26,22 @@ import sys
 import os
 import shutil
 
-import bigmler.utils as u
 import bigmler.processing.args as a
+import bigmler.utils as u
+
 
 from bigmler.defaults import DEFAULTS_FILE
+from bigmler.retrain.retrain import retrain_model
+from bigmler.dispatcher import (SESSIONS_LOG,
+                                clear_log_files)
 from bigmler.command import get_context
-from bigmler.dispatcher import SESSIONS_LOG, clear_log_files
-from bigmler.reify.reify import reify_resources
 
-COMMAND_LOG = u".bigmler_reify"
-DIRS_LOG = u".bigmler_reify_dir_stack"
+
+COMMAND_LOG = u".bigmler_retrain"
+DIRS_LOG = u".bigmler_retrain_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
-DEFAULT_OUTPUT = "reify.py"
+
+DEFAULT_OUTPUT = "retrain_script"
 
 SETTINGS = {
     "command_log": COMMAND_LOG,
@@ -44,8 +51,8 @@ SETTINGS = {
     "defaults_file": DEFAULTS_FILE}
 
 
-def reify_dispatcher(args=sys.argv[1:]):
-    """Parses command line and calls the different processing functions
+def retrain_dispatcher(args=sys.argv[1:]):
+    """Main processing of the parsed options for BigMLer retrain
 
     """
 
@@ -53,25 +60,17 @@ def reify_dispatcher(args=sys.argv[1:]):
     if "--clear-logs" in args:
         clear_log_files(LOG_FILES)
 
+    # parses the command line to get the context args and the log files to use
     command_args, command, api, session_file, resume = get_context(args,
                                                                    SETTINGS)
 
-    def logger(message):
-        """Partial to log messages according to args.verbosity
-
-        """
-        u.log_message(u.dated(message), \
-            log_file=session_file, console=command_args.verbosity)
-
-    message = "Starting reification for %s\n\n" % command_args.resource_id
-    u.log_message(message, \
-        log_file=session_file, console=command_args.verbosity)
-    reify_resources(command_args, api, logger)
-    message = "\nReification complete. See the results in %s\n\n" % \
-        command_args.output
-    u.log_message(message, \
-        log_file=session_file, console=command_args.verbosity)
-    u.log_message("_" * 80 + "\n", log_file=session_file)
-
-    u.print_generated_files(command_args.output_dir, log_file=session_file,
-                            verbosity=command_args.verbosity)
+    # --id is compulsory
+    if command_args.resource_id is not None:
+        retrain_model(command_args, api, command.common_options,
+                      session_file=session_file)
+        u.log_message("_" * 80 + "\n", log_file=session_file)
+    else:
+        sys.exit("You must provide the ID of the resource to be"
+                 " retrained in the --id option."
+                 " Type bigmler retrain --help\n"
+                 " to see all the available options.")

@@ -1,0 +1,21 @@
+{
+  "name": "Retrain modeling resource - 1.0.0",
+  "description": "Basic script to retrain any modeling resource from incremental data",
+  "kind": "script",
+  "source_code": "script.whizzml",
+  "imports": ["../generate_whizzml"],
+  "inputs": [
+    {
+      "name": "model-resource",
+      "type": "resource-id",
+      "description": "Resource ID"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "retrain-script",
+      "type": "string",
+      "description": "Script ID"
+    }
+  ]
+}

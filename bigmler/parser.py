@@ -45,11 +45,13 @@ from bigmler.options.topicmodel import get_topic_model_options
 from bigmler.options.timeseries import get_time_series_options
 from bigmler.options.deepnet import get_deepnet_options
 from bigmler.options.execute import get_execute_options
+from bigmler.options.retrain import get_retrain_options
+
 
 SUBCOMMANDS = ["main", "analyze", "cluster", "anomaly", "sample",
                "delete", "report", "reify", "project", "association",
                "logistic-regression", "topic-model", "time-series",
-               "execute", "whizzml", "export", "deepnet"]
+               "execute", "whizzml", "export", "deepnet", "retrain"]
 
 
 MAIN = SUBCOMMANDS[0]
@@ -371,6 +373,15 @@ under the License.""" % version
          '--script-tag': delete_options['--script-tag'],
          '--library-tag': delete_options['--library-tag'],
          '--execution-tag': delete_options['--execution-tag']})
+
+
+    defaults = {}
+    subcommand_options["retrain"] = get_retrain_options(defaults=defaults)
+    # shared options are like the ones in reify
+    subcommand_options["retrain"].update(reify_common_options)
+    subcommand_options["retrain"].update( \
+        {'--output': subcommand_options['reify']['--output']})
+
 
     defaults = general_defaults["BigMLer topic model"]
     subcommand_options["topic-model"] = get_topic_model_options(

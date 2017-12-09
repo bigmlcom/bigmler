@@ -1,0 +1,16 @@
+bigmler execute --no-execute --code-file /home/merce/github/mmerce/bigmler/bigmler/static/scripts/incremental/generate_whizzml/library.whizzml --output-dir /home/merce/github/mmerce/bigmler/bigmler/static/scripts/incremental/generate_whizzml --store --to-library --description /home/merce/github/mmerce/bigmler/bigmler/static/scripts/incremental/generate_whizzml/description.txt --name "BigMLer: Incremental retrain generator functions - 1.0.0" --imports library/5a1dee9136452779fa00b746 --verbosity 1 --upgrade
+
+[2017-12-06 00:33:01] Library found: BigMLer: Incremental retrain generator functions - 1.0.0 
+    (library ID: library/5a1dee9692527304d4000027)
+________________________________________________________________________________
+
+Generated files:
+
+ generate_whizzml
+  ├─bigmler_sessions
+  ├─library
+  ├─description.txt
+  ├─metadata.json
+  └─library.whizzml
+
+________________________________________________________________________________

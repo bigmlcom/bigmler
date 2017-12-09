@@ -1,0 +1,1 @@
+Generates a WhizzML script to reproduce a resource from incremental data
