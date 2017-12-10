@@ -170,7 +170,7 @@ def get_cmd_context(args, settings):
         if len(os.path.dirname(command_args.output).strip()) == 0:
             command_args.output = os.path.join(command_args.output_dir,
                                                command_args.output)
-        directory = command_args.output_dir
+        directory = u.check_dir(command_args.output)
         session_file = os.path.join(directory, settings['sessions_log'])
         u.log_message(command.command + "\n", log_file=session_file)
         if settings.get('defaults_file') is not None:
