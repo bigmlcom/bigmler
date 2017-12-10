@@ -158,7 +158,7 @@ def get_cmd_context(args, settings):
                                                settings['default_output'])
     else:
         if hasattr(command_args, "output") and \
-                command_args.output_dir is not None:
+                command_args.output is not None:
             command_args.output_dir = u.check_dir(command_args.output)
         if command_args.output_dir is None:
             command_args.output_dir = a.NOW
