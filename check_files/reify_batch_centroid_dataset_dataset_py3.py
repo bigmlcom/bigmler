@@ -27,6 +27,6 @@
         {'name': 'my_dataset_from_dataset_from_batch_centroid_name',
          'new_fields': [{'field': '( integer ( replace ( field "cluster" ) '
                                   '"Cluster " "" ) )',
-                         'name': 'Cluster'}]
+                         'name': 'Cluster'}],
      'objective_field': {'id': '100000'}})
     api.ok(dataset3)
