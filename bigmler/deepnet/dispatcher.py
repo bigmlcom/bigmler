@@ -66,7 +66,7 @@ def deepnet_dispatcher(args=sys.argv[1:]):
     settings = {}
     settings.update(SETTINGS)
     if '--evaluate' in args:
-        setting.update({"default_output": "evaluation"})
+        settings.update({"default_output": "evaluation"})
 
     command_args, command, api, session_file, resume = get_context(args,
                                                                    settings)

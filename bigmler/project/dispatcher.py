@@ -51,6 +51,12 @@ def project_dispatcher(args=sys.argv[1:]):
                                                                    SETTINGS)
 
     path = u.check_dir(command_args.output)
+    log = None
+    if command_args.log_file:
+        u.check_dir(command_args.log_file)
+        log = command_args.log_file
+        # If --clear_logs the log files are cleared
+        clear_log_files([log])
     if not command_args.project_id and command_args.name:
         command_args.project = command_args.name
     if command_args.project:

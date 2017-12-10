@@ -157,6 +157,9 @@ def get_cmd_context(args, settings):
             command_args.output = os.path.join(output_dir,
                                                settings['default_output'])
     else:
+        if hasattr(command_args, "output") and \
+                command_args.output_dir is not None:
+            command_args.output_dir = u.check_dir(command_args.output)
         if command_args.output_dir is None:
             command_args.output_dir = a.NOW
         if settings.get('default_output') is None:
@@ -167,7 +170,7 @@ def get_cmd_context(args, settings):
         if len(os.path.dirname(command_args.output).strip()) == 0:
             command_args.output = os.path.join(command_args.output_dir,
                                                command_args.output)
-        directory = u.check_dir(command_args.output)
+        directory = command_args.output_dir
         session_file = os.path.join(directory, settings['sessions_log'])
         u.log_message(command.command + "\n", log_file=session_file)
         if settings.get('defaults_file') is not None:
