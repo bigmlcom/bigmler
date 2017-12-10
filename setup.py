@@ -54,7 +54,7 @@ setuptools.setup(
                 'bigmler.tests', 'bigmler.reify', 'bigmler.project',
                 'bigmler.association', 'bigmler.logisticregression',
                 'bigmler.execute', 'bigmler.whizzml', 'bigmler.topicmodel',
-                'bigmler.timeseries', 'bigmler.deepnet',
+                'bigmler.timeseries', 'bigmler.deepnet', 'bigmler.retrain',
                 'bigmler.export', 'bigmler.export.out_model',
                 'bigmler.export.out_tree'],
     install_requires = ['bigml>=4.13.5, <4.14.0'],
