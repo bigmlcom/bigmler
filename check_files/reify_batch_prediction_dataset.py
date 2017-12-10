@@ -20,5 +20,5 @@ dataset2 = api.get_dataset(batchprediction1['object']['output_dataset_resource']
 api.ok(dataset2)
 
 dataset2 = api.update_dataset(dataset2, \
-    {'name': u'my_dataset_from_batch_prediction_name', 'tags': [u'species']})
+    {'name': u'my_dataset_from_batch_prediction_name'})
 api.ok(dataset2)

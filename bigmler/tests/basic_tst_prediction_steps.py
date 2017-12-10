@@ -1122,11 +1122,13 @@ def i_check_node_threshold(step, node_threshold, metric, metric_value):
             content = sessions_file.read()
             if not PYTHON3:
                 content = decode2(content)
-        text = "The best node threshold is: %s \n%s = %s" % (
-            node_threshold, metric.capitalize(), metric_value)
-        ok_(content.find(text) > -1)
-    except:
+    except Exception, exc:
+        print str(exc)
         assert False
+    text = "The best node threshold is: %s \n%s = %s" % (
+        node_threshold, metric.capitalize(), metric_value)
+    ok_(content.find(text) > -1)
+
 
 
 #@step(r'I check that the evaluation has been created and shared$')
