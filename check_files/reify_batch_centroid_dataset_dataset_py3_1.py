@@ -28,5 +28,5 @@
          'new_fields': [{'field': '( integer ( replace ( field "cluster" ) "Cluster " '
                                   '"" ) )',
                          'name': 'Cluster'}],
-         'objective_field': {'id': '100000'}}})
+         'objective_field': {'id': '100000'}})
     api.ok(dataset3)
