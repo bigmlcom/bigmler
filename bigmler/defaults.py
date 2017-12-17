@@ -337,7 +337,9 @@ FLAGS = {
         {'flag': 'package_dir', 'type': 'string'},
         {'flag': 'embed_libs', 'type': 'boolean'}],
     'BigMLer export': [
-        {'flag': 'language', 'type': 'string'}]}
+        {'flag': 'language', 'type': 'string'}],
+    'BigMLer retrain': [
+        {'flag': 'model_type', 'type': 'string'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):

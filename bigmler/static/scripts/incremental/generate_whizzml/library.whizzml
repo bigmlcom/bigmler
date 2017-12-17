@@ -141,29 +141,37 @@
 
 (define (stringify-map map)
   (let (keys (keys map))
-    (reduce (lambda (x y) (assoc x (flatline "{{y}}") (map
-                                                           y
+    (reduce (lambda (x y) (assoc x (flatline "{{y}}") (map y
                                                            false))) {} keys)))
 
 
-(define (whizzml-create resource-id configuration mapped-ids name reified-id)
+(define (whizzml-create resource-id
+                        configuration
+                        mapped-ids
+                        name
+                        reified-id)
   (let (resource-name (head (mapped-ids resource-id false))
         type (resource-type resource-id)
         periodic-model (and (= reified-id resource-id)
                             (member? type MODELS))
         output (if periodic-model
-                   (str "(define origins (map (lambda (x)"
-                        " (x \"resource\")) (list-datasets "
-                        "{\"tags__in\" \"retrain:"
+                   (str "(define condition (if (positive? datasets-limit)"
+                        " {\"tags\" \"retrain:"
                         reified-id
-                        "\"})))")
+                        "\""
+                        " \"limit\" datasets-limit}"
+                        " {\"tags\" \"retrain:"
+                        reified-id
+                        "\"}))"
+                        "(define origins (map (lambda (x)"
+                        " (x \"resource\")) (list-datasets "
+                        "condition)))")
                    "")
         origins (if periodic-model
                     "\"datasets\" origins"
                     (join " " (whizzml-origins resource-id
                                                configuration
                                                mapped-ids)))
-        xx (log-info origins)
         arguments (whizzml-args type configuration)
         arguments (join " " (map pr-str arguments))
         arguments (if (and (not (= origins "")) (not (= arguments "")))
@@ -257,7 +265,7 @@
                                                         index)]))
                             (recur index mapped-ids))))
         inputs (reify-chain "inputs" [])
-        confs (reify-chain "defs" false)
+        confs (reify-chain "defs" {})
         script-info {"code" ""
                      "mapped-ids" mapped-ids
                      "type-counters" {}})
@@ -435,9 +443,18 @@
                  (str type "-id"))
         description (if (= type "string")
                         "Remote URL"
-                        (str "Scripting from " type " resource")))
-    (assoc args "inputs" (append inputs {"name" (head (mapped-ids
+                        (str "Scripting from " type " resource"))
+        inputs (append inputs {"name" (head (mapped-ids
                                                            input
                                                            false))
                                          "type" type
-                                         "description" description}))))
+                                         "description" description})
+        inputs (append inputs {"name" "datasets-limit"
+                               "type" "number"
+                               "description" (str "Maximum number of datasets"
+                                                 " to be used to retrain. "
+                                                 "Default is -1, which will "
+                                                 "use all the available"
+                                                 " datasets.")
+                               "default" -1}))
+    (assoc args "inputs" inputs)))

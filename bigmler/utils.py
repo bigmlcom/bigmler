@@ -730,3 +730,16 @@ def get_last_resource(resource_type, api=None, query_string=None):
     if ids:
         return ids[0]
     return None
+
+
+def last_resource_url(resource_id, api=None, query_string=None):
+    """Creates the last resource URL of the given type
+    that meets the conditions in args
+
+    """
+    if query_string is None:
+        query_string = ""
+    if api is None:
+        api = bigml.api.BigML()
+    resource_type = bigml.api.get_resource_type(resource_id)
+    return "%s%s%s%s" % (api.url, resource_type, api.auth, query_string)

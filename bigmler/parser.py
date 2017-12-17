@@ -380,7 +380,16 @@ under the License.""" % version
     # shared options are like the ones in reify
     subcommand_options["retrain"].update(reify_common_options)
     subcommand_options["retrain"].update( \
-        {'--output': subcommand_options['reify']['--output']})
+        {'--output': subcommand_options['reify']['--output'],
+         '--model-tag': delete_options['--model-tag'],
+         '--ensemble-tag': delete_options['--ensemble-tag'],
+         '--logistic-regression-tag': delete_options['--logistic-regression-tag'],
+         '--deepnet-tag': delete_options['--deepnet-tag'],
+         '--cluster-tag': delete_options['--cluster-tag'],
+         '--anomaly-tag': delete_options['--anomaly-tag'],
+         '--association-tag': delete_options['--association-tag'],
+         '--time-series-tag': delete_options['--time-series-tag'],
+         '--topic-model-tag': delete_options['--topic-model-tag']})
 
 
     defaults = general_defaults["BigMLer topic model"]

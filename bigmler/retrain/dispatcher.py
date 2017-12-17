@@ -51,6 +51,14 @@ SETTINGS = {
     "defaults_file": DEFAULTS_FILE}
 
 
+def check_compulsory_options(flags, args):
+    """Checks whether the id or a unique tag are provided
+
+    """
+    return args.resource_id is not None or \
+        len([flag for flag in flags if flag.endswith("-tag")]) > 0
+
+
 def retrain_dispatcher(args=sys.argv[1:]):
     """Main processing of the parsed options for BigMLer retrain
 
@@ -64,13 +72,14 @@ def retrain_dispatcher(args=sys.argv[1:]):
     command_args, command, api, session_file, resume = get_context(args,
                                                                    SETTINGS)
 
-    # --id is compulsory
-    if command_args.resource_id is not None:
+    # --id or --model-tag, --ensemble-tag, etc. is compulsory
+    if check_compulsory_options(command.flags, command_args):
         retrain_model(command_args, api, command.common_options,
                       session_file=session_file)
         u.log_message("_" * 80 + "\n", log_file=session_file)
     else:
         sys.exit("You must provide the ID of the resource to be"
-                 " retrained in the --id option."
+                 " retrained in the --id option or a unique tag"
+                 " to retrieve such ID."
                  " Type bigmler retrain --help\n"
                  " to see all the available options.")

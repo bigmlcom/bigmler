@@ -2342,7 +2342,7 @@ def create_script(source_code, script_args, args, api=None, path=None,
 
     if api is None:
         api = bigml.api.BigML()
-    message = dated("Creating script.\n")
+    message = dated("Creating script \"%s\".\n" % script_args["name"])
     log_message(message, log_file=session_file, console=args.verbosity)
     script = api.create_script(source_code, script_args)
     log_created_resources("scripts", path,
@@ -2905,7 +2905,7 @@ def create_library(source_code, library_args, args, api=None, path=None,
     if api is None:
         api = bigml.api.BigML()
 
-    message = dated("Creating library.\n")
+    message = dated("Creating library \"%s\".\n" % library_args["name"])
     log_message(message, log_file=session_file, console=args.verbosity)
     library = api.create_library(source_code, library_args)
     log_created_resources("library", path,
