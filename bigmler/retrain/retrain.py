@@ -160,7 +160,7 @@ def retrain_model(args, api, common_options, session_file=None):
         command_args, _, _, exe_session_file, _ = get_context(execute_command,
                                                               EXE_SETTINGS)
         command_args.arguments_ = [["source1", source_id],
-                                   ["datasets-limit", args.datasets_limit]]
+                                   ["datasets-limit", args.window_size]]
         command_args.inputs = json.dumps(command_args.arguments_)
         # process the command
         execute_whizzml(command_args, api, session_file)

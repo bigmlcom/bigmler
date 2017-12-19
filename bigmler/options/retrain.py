@@ -38,12 +38,14 @@ def get_retrain_options(defaults=None):
             'dest': 'add',
             'default': defaults.get('add', None),
             'help': ("Path to the data file to be added.")},
-        # maximum number of datasets to be used in retraining
-        '--datasets-limit': {
+        # maximum number of datasets to be used when retraining
+        '--window-size': {
             'type': int,
-            'dest': 'datasets_limit',
-            'default': defaults.get('datasets_limit', -1),
-            'help': ("Maximum number of datasets to be used in retraining.")},
+            'dest': 'window_size',
+            'default': defaults.get('window_size', -1),
+            'help': ("Maximum number of datasets to be used in retraining."
+                     " When not set, the new dataset will be added to the"
+                     " last one used.")},
         # Forces the scripts to be upgraded
         '--upgrade': {
             'action': 'store_true',

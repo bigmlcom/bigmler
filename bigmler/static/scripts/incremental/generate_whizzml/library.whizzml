@@ -162,13 +162,19 @@
                         " \"limit\" datasets-limit}"
                         " {\"tags\" \"retrain:"
                         reified-id
-                        "\"}))"
+                        "\""
+                        " \"limit\" 2}))"
                         "(define origins (map (lambda (x)"
                         " (x \"resource\")) (list-datasets "
-                        "condition)))")
+                        "condition)))"
+                        "(define datasets-list "
+                        "(if (positive? datasets-limit)"
+                        " origins"
+                        " [(create-dataset "
+                        "{\"origin_datasets\" origins})]))")
                    "")
         origins (if periodic-model
-                    "\"datasets\" origins"
+                    "\"datasets\" datasets-list"
                     (join " " (whizzml-origins resource-id
                                                configuration
                                                mapped-ids)))
@@ -454,7 +460,8 @@
                                "description" (str "Maximum number of datasets"
                                                  " to be used to retrain. "
                                                  "Default is -1, which will "
-                                                 "use all the available"
-                                                 " datasets.")
+                                                 "consolidate the "
+                                                 "last available"
+                                                 " dataset.")
                                "default" -1}))
     (assoc args "inputs" inputs)))
