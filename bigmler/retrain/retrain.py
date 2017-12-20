@@ -78,6 +78,7 @@ def retrain_model(args, api, common_options, session_file=None):
     # retrieve the modeling resource to be retrained by tag or id
     if args.resource_id:
         resource_id = args.resource_id
+        reference_tag = "retrain:%s" % resource_id
     else:
         for model_type in MODEL_TYPES:
             if hasattr(args, "%s_tag" % model_type) and \
@@ -93,6 +94,7 @@ def retrain_model(args, api, common_options, session_file=None):
                              "Please, check the tag and"
                              " the connection info (domain and credentials)." %
                              (model_type.replace("_", " "), tag))
+                reference_tag = tag
                 break
     if args.upgrade:
         shutil.rmtree(BIGMLER_SCRIPTS_DIRECTORY)
@@ -171,5 +173,5 @@ def retrain_model(args, api, common_options, session_file=None):
                        u' retrained model.\n\n') % \
                 (model_resource_id, last_resource_url( \
                 resource_id, api, \
-                "limit=1;full=yes;tags=retrain:%s" % resource_id))
+                "limit=1;full=yes;tags=%s" % reference_tag))
             log_message(message, log_file=session_file, console=1)
