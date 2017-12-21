@@ -137,6 +137,15 @@ Used to create WhizzML packages of libraries or scripts based on the
 information of the ``metadata.json`` file in the package directory. See
 :ref:`bigmler-whizzml`
 
+
+``bigmler retrain``:
+
+
+Used to retrain models by adding new data to the existing datasets and
+building a new model from it. See
+:ref:`bigmler-retrain`
+
+
 Quick Start
 ===========
 
@@ -2373,6 +2382,79 @@ libraries. It will also handle dependencies, using the IDs of the created
 libraries as imports for the scripts when needed.
 
 
+.. _bigmler-retrain:
+
+Retrain subcommand
+------------------
+
+This subcommand can be used to retrain an existing modeling resource (model,
+ensemble, deepnet, etc.) by adding new data to it. In BigML, resources are
+immutable to ensure traceability, but at the same time they are reproducible.
+Therefore, any model can be rebuilt using the data stored in a new consolidated
+dataset or even from a list of existing datasets. That's retraining the model
+and the ``bigmler retrain``
+subcommand provides a simple way to do it.
+
+In the basic use case, different parameters and model types are tried and
+evaluated till the best performing model is found. Then you can call:
+
+.. code-block:: bash
+
+    bigmler retrain --id model/5a3ae0f14006833a070003a4 --add data/iris.csv \
+                    --output-dir retrain_directory
+
+so that the data in your local ``data/iris.csv`` file is uploaded to the
+platform and all the steps that led to your existing model are reproduced to
+create a new merged dataset that will be used to retrain your model. The
+command output will contain the URL that you need to call to ensure you
+always use the latest version of your model. The URL will look like:
+
+.. code-block:: bash
+
+https://bigml.io/andromeda/model?username=my_user;api_key=my_api_key;limit=1;full=yes;tags=retrain:model/5a3ae0f14006833a070003a4
+
+
+Instead of using the original model ID, you can choose to add a unique ``tag``
+to your modeling resource and use that as reference:
+
+.. code-block:: bash
+
+    bigmler retrain --ensemble-tag my_ensemble --add data/iris.csv \
+                    --output-dir retrain_directory
+
+in this case, the resource to retrain is an ensemble that has been
+previously tagged as ``my_ensemble``. The ``bigmler retrain`` command will
+look for the newest ensemble that contains that tag and after uploading and
+consolidating your data with the one previously used in the ensemble, it will
+rebuild it. The reference used in the URL that will contain the latest version
+of the ensemble will use this tag also as reference:
+
+.. code-block:: bash
+
+https://bigml.io/andromeda/ensemble?username=my_user;api_key=my_api_key;limit=1;full=yes;tags=my_ensemble
+
+
+In a different scenario, you might want to retrain your model from a list
+of datasets, for instance training an anomaly detector using the data of the
+last 6 months. This means that you don't want your data to be merged. Rather
+you would like to use a window over the list of available datasets.
+
+.. code-block:: bash
+
+    bigmler retrain --ensemble-tag my_ensemble --add data/iris.csv \
+                    --window-size 6 --output-dir retrain_directory
+
+In this case, adding the ``--window-size`` option to your command will cause
+the dataset created by uploading your new data to be added to the list of
+datasets as a separate resource. Then model will be rebuilt using the number
+of datasets set as ``--window-size``.
+
+The operations run by ``bigmler retrain`` are mainly run in BigML's servers
+using WhizzML scripts. This scripts are previously created in the user's
+account the first time you run the command, but they can also be recreated
+by using the ``--upgrade`` flag in any ``bigmler retrain`` command call.
+
+
 .. _bigmler-delete:
 
 Delete subcommand
@@ -4527,6 +4609,37 @@ Whizzml Subcommand Options
 =============================================== ===============================
 
 
+Retrain Subcommand Options
+--------------------------
+
+===================================== =========================================
+``--id`` *RESOURCE_ID*                ID for the resource to be reified
+``--window-size`` *SIZE*              Maximum number of datasets to be used
+``--add`` *PATH*                      Path to the file that contains the data
+                                      to be added
+``--upgrade``                         Causes the scripts that generate the
+                                      models rebuild to be recreated
+``--model-tag`` *TAG*                 Retrieves models that were tagged
+                                      with tag
+``--ensemble-tag`` *TAG*              Retrieves ensembles that were tagged
+                                      with tag
+``--cluster-tag`` *TAG*               Retrieves clusters that were tagged with
+                                      tag
+``--anomaly-tag`` *TAG*               Retrieves anomalies that were tagged with
+                                      tag
+``--logistic-regression-tag`` *TAG*   Retrieves logistic regressions
+                                      that were tagged with tag
+``--topic-model-tag`` *TAG*           Retrieves topic models that were tagged
+                                      with tag
+``--time-series-tag`` *TAG*           Retrieves time series that were tagged
+                                      with tag
+``--association-tag`` *TAG*           Retrieves associations that were tagged
+                                      with tag
+``--deepnet-tag`` *TAG*               Retrieves deepnets that were tagged
+                                      with tag
+===================================== =========================================
+
+
 Delete Subcommand Options
 -------------------------
 
@@ -4621,7 +4734,7 @@ Delete Subcommand Options
                                       dataset,
                                       model, ensemble, prediction,
                                       batch_prediction,
-                                      cluster, centroid, batch_centroid
+                                      cluster, centroid, batch_centroid, etc.
 ``--dry-run``                         Delete simulation. No removal.
 ``--status``                          Status codes used in the filter to
                                       retrieved the resources to be delete. The

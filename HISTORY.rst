@@ -3,7 +3,13 @@
 History
 -------
 
-3.14.0 (2017-11-22)
+3.15.0 (2017-12-21)
+~~~~~~~~~~~~~~~~~~~
+
+- Adding the bigmler retrain command to retrain modeling resources with
+  incremental data.
+
+3.14.1 (2017-11-28)
 ~~~~~~~~~~~~~~~~~~~
 
 - Adding the --upgrade flag to the bigmler execute and package subcommands to
