@@ -60,7 +60,8 @@ setuptools.setup(
     install_requires = ['bigml>=4.13.5, <4.14.0'],
     package_data={'bigmler':['static/*.json',
                              'static/*.html',
-                             'static/out_model/*']},
+                             'static/out_model/*',
+                             'static/scripts/*']},
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
