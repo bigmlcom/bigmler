@@ -796,7 +796,6 @@ def i_find_predictions_files_with_method( \
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
-
 #@step(r'I create a BigML balanced model from "(.*)" and store logs in "(.*)"')
 def i_create_balanced_model(step, data=None, output_dir=None):
     ok_(data is not None and output_dir is not None)
@@ -847,6 +846,21 @@ def i_create_objective_weighted_model( \
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
+#@step(r'I retrain the model from "(.*)" and store logs in "(.*)"')
+def i_retrain_model(step, data=None, output_dir=None):
+    ok_(data is not None and output_dir is not None)
+    world.directory = output_dir
+    world.folders.append(world.directory)
+    world.origin_model = world.model
+    try:
+        command = ("bigmler retrain --add " + res_filename(data) +
+                   " --id " + world.model['resource'] +
+                   " --store --output-dir " + output_dir)
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        ok_(retcode >= 0)
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
 
 #@step(r'I check that the source has been created$')
 def i_check_create_source(step):
@@ -861,6 +875,10 @@ def i_check_create_source(step):
     except Exception, exc:
         assert False, str(exc)
 
+#@step(r'I check that the model has doubled its rows$')
+def i_check_model_double(step):
+    ok_(world.model['object']['rows'] == \
+        2 * world.origin_model['object']['rows'])
 
 #@step(r'I check that the (test\s|train\s)?dataset has been created$')
 def i_check_create_dataset(step, suffix=None):
@@ -916,6 +934,21 @@ def i_check_create_model(step):
         model_file.close()
     except Exception, exc:
         assert False, str(exc)
+
+
+#@step(r'I check that the model has been created in the execution')
+def i_check_create_model_in_execution(step):
+    output_resources = world.execution["object"]["execution"]["output_resources"]
+    for resource in output_resources:
+        try:
+            model = check_resource(resource["id"],
+                                   world.api.get_model)
+            if model is not None:
+                world.models.append(model['resource'])
+                world.model = model
+                break
+        except Exception, exc:
+            continue
 
 
 #@step(r'I check that the (\d*)-models have been created')

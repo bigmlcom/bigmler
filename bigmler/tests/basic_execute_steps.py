@@ -108,14 +108,15 @@ def i_check_create_script(step):
 
 
 #@step(r'I check that the execution has been created')
-def i_check_create_execution(step):
+def i_check_create_execution(step, number_of_executions=1):
     execution_file = os.path.join(world.directory, "execution")
     try:
         execution_file = open(execution_file, "r")
-        execution = check_resource(execution_file.readline().strip(),
-                                   world.api.get_execution)
-        world.executions.append(execution['resource'])
-        world.execution = execution
+        for index in range(0, number_of_executions):
+            execution = check_resource(execution_file.readline().strip(),
+                                       world.api.get_execution)
+            world.executions.append(execution['resource'])
+            world.execution = execution
         execution_file.close()
     except Exception, exc:
         assert False, str(exc)
