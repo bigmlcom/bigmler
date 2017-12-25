@@ -61,7 +61,7 @@ setuptools.setup(
     package_data={'bigmler':['static/*.json',
                              'static/*.html',
                              'static/out_model/*',
-                             'static/scripts/incremental/*',
+                             'static/scripts/incremental/*.json',
                              'static/scripts/incremental/retrain/*',
                              'static/scripts/incremental/reify/*',
                              'static/scripts/incremental/generate_whizzml/*']},

@@ -3390,7 +3390,11 @@ the use of the `numpy <http://www.numpy.org/>`_ and
 `scipy <http://www.scipy.org/>`_ libraries. They are not
 automatically installed as a dependency, as they are quite heavy and
 exclusively required in this case. Therefore, they have been left for
-the user to install them if required.
+the user to install them if required. The same happens with the
+`pystemmer <https://pypi.python.org/pypi/PyStemmer>`_
+library, used only for topic modeling. Check the bindings documentation
+for more info.
+
 
 BigMLer Installation
 ====================

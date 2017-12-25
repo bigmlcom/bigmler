@@ -57,7 +57,11 @@ from bigmler.reify.dispatcher import reify_dispatcher
 from bigmler.project.dispatcher import project_dispatcher
 from bigmler.association.dispatcher import association_dispatcher
 from bigmler.logisticregression.dispatcher import logistic_regression_dispatcher
-from bigmler.topicmodel.dispatcher import topic_model_dispatcher
+try:
+    from bigmler.topicmodel.dispatcher import topic_model_dispatcher
+    no_stemmer = False
+except ImportError:
+    no_stemmer = True
 from bigmler.timeseries.dispatcher import time_series_dispatcher
 from bigmler.deepnet.dispatcher import deepnet_dispatcher
 from bigmler.execute.dispatcher import execute_dispatcher
@@ -123,6 +127,10 @@ def main(args=sys.argv[1:]):
         elif new_args[0] == "logistic-regression":
             logistic_regression_dispatcher(args=new_args)
         elif new_args[0] == "topic-model":
+            if no_stemmer:
+                sys.exit("To use the bigmler topic-model command you need the"
+                         " Pystemmer library. Please, install it and"
+                         " retry your command.")
             topic_model_dispatcher(args=new_args)
         elif new_args[0] == "time-series":
             time_series_dispatcher(args=new_args)

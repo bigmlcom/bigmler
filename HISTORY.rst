@@ -3,6 +3,11 @@
 History
 -------
 
+3.15.1 (2017-12-26)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing bug caused by pystemmer not being installed as a bindings dependency.
+
 3.15.0 (2017-12-21)
 ~~~~~~~~~~~~~~~~~~~
 
