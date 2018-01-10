@@ -240,7 +240,6 @@ def remote_predict_models(models, test_reader, prediction_file, api, args,
                 for input_data in raw_input_data_list:
                     input_data_dict = test_reader.dict(input_data)
                     prediction = api.create_prediction(model, input_data_dict,
-                                                       by_name=test_set_header,
                                                        wait_time=0,
                                                        args=prediction_args)
                     u.check_resource_error(prediction,
@@ -288,7 +287,6 @@ def remote_predict_ensemble(ensemble_id, test_reader, prediction_file, api,
                 input_data_dict = test_reader.dict(input_data)
                 prediction = api.create_prediction(ensemble_id,
                                                    input_data_dict,
-                                                   by_name=test_set_header,
                                                    wait_time=0,
                                                    args=prediction_args)
                 prediction = u.check_resource(prediction,

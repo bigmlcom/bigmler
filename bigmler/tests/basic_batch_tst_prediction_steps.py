@@ -174,3 +174,15 @@ def i_create_resources_from_model_with_op_remote(step, operating_point=None,
                " --store --remote --output " + output +
                " --max-batch-models 1")
     shell_execute(command, output, test=test)
+
+#@step(r'I create BigML remote predictions one by one using model "
+# to test "(.*)" and
+# log predictions in "(.*)"')
+def i_create_resources_from_model_remote_no_batch(step,
+                                                  test=None, output=None):
+    ok_(test is not None and output is not None)
+    test = res_filename(test)
+    command = ("bigmler --model " + world.model['resource'] + " --test " +
+               test + " --no-batch --store --remote --output " + output +
+               " --max-batch-models 1")
+    shell_execute(command, output, test=test)

@@ -3,6 +3,12 @@
 History
 -------
 
+3.15.2 (2018-01-10)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing bug in remote predictions with models and ensembles when --no-batch
+  was used.
+
 3.15.1 (2017-12-26)
 ~~~~~~~~~~~~~~~~~~~
 
