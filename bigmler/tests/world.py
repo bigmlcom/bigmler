@@ -130,7 +130,6 @@ class World(object):
         self.source_lower = None
         self.source_upper = None
         self.source_reference = None
-        self.reset_api()
         self.clear()
         self.dataset_ids = []
         self.fields_properties_dict = {}
