@@ -96,14 +96,6 @@ def i_create_resources_from_ensemble_using_median( \
     world.number_of_models = int(number_of_models)
     shell_execute(command, output, test=test)
 
-#@step(r'I create BigML resources in DEV from "(.*)" using ensemble of (.*)
-# models to test "(.*)" and log predictions in "(.*)"')
-def i_create_resources_in_dev_from_ensemble( \
-    step, data=None, number_of_models=None, test=None, output=None):
-    i_create_resources_in_mode_from_ensemble( \
-        step, data=data, number_of_models=number_of_models, test=test,
-        output=output, dev=True)
-
 
 #@step(r'I create BigML resources from "(.*)" using ensemble of (.*)
 # models to test "(.*)" and log predictions in "(.*)"')
@@ -116,16 +108,15 @@ def i_create_resources_in_prod_from_ensemble( \
 #@step(r'I create BigML resources from "(.*)" using ensemble of (.*) models
 # to test "(.*)" and log predictions in "(.*)"')
 def i_create_resources_in_mode_from_ensemble( \
-    step, data=None, number_of_models=None, test=None, output=None, dev=False):
+    step, data=None, number_of_models=None, test=None, output=None):
     ok_(data is not None and test is not None and output is not None and \
         number_of_models is not None)
     data = res_filename(data)
     test = res_filename(test)
-    dev_str = " --dev" if dev else ""
     command = ("bigmler --train " + data + " --test " + test +
                " --store --output " + output +
                " --number-of-models " + number_of_models +
-               dev_str + " --max-batch-models 1 --no-fast")
+               " --max-batch-models 1 --no-fast")
     world.number_of_models = int(number_of_models)
     shell_execute(command, output, test=test)
 
@@ -1522,24 +1513,6 @@ def i_create_kfold_cross_validation_separator_metric_no_fields(
 
 
 #@step(r'I create BigML feature selection (\d*)-fold cross-validations
-# improving "(.*)" in dev mode$')
-def i_create_kfold_cross_validation_in_dev(step, k_folds=None, metric=None):
-    ok_(k_folds is not None and metric is not None)
-    command = ("bigmler analyze --dataset " +
-               world.dataset['resource'] +
-               " --features --dev --k-folds " + k_folds +
-               " --output " + world.directory +
-               " --optimize " + metric)
-    command = check_debug(command)
-    try:
-        retcode = check_call(command, shell=True)
-        ok_(retcode >= 0)
-        world.output = os.path.join(world.directory, "test", "kfold1",
-                                    "evaluation")
-    except OSError as e:
-        assert False
-
-#@step(r'I create BigML feature selection (\d*)-fold cross-validations
 # improving "(.*)" for category "(.*)"$')
 def i_create_kfold_cross_validation_metric_category( \
     step, k_folds=None, metric=None, category=None):
@@ -1737,22 +1710,6 @@ def i_have_previous_scenario_or_reproduce_it(step, scenario, kwargs):
                 function(step, **kwargs)
             else:
                 function(step)
-
-
-#@step(r'I create BigML dataset in dev mode uploading train "(.*)"
-# file in "(.*)"')
-def i_create_dev_dataset(step, data=None, output=None):
-    ok_(data is not None and output is not None)
-    try:
-        retcode = check_call("bigmler --train " + res_filename(data) +
-                             " --no-model --store --dev --output " + output,
-                             shell=True)
-        ok_(retcode >= 0)
-        world.directory = os.path.dirname(output)
-        world.folders.append(world.directory)
-        world.output = output
-    except OSError as e:
-        assert False
 
 
 #@step(r'I create BigML random fields analysis with (\d*)-cross-validation

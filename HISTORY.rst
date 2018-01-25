@@ -3,6 +3,11 @@
 History
 -------
 
+3.16.0 (2018-01-23)
+~~~~~~~~~~~~~~~~~~~
+
+- Removing --dev flag: development mode has been deprecated.
+
 3.15.2 (2018-01-10)
 ~~~~~~~~~~~~~~~~~~~
 

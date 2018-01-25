@@ -462,7 +462,7 @@ under the License.""" % version
 
     # options to be transmitted from analyze to main
     chained_options = [
-        "--debug", "--dev", "--username", "--api-key", "--resources-log",
+        "--debug", "--username", "--api-key", "--resources-log",
         "--store", "--clear-logs", "--max-parallel-models",
         "--max-parallel-evaluations", "--objective", "--tag",
         "--no-tag", "--no-debug", "--no-dev", "--model-fields", "--balance",

@@ -240,7 +240,6 @@ def get_api_instance(command_args, storage_path):
     api_command_args = {
         'username': command_args.username,
         'api_key': command_args.api_key,
-        'dev_mode': command_args.dev_mode,
         'debug': command_args.debug}
 
     if command_args.store:
@@ -263,7 +262,6 @@ def get_api_instance(command_args, storage_path):
     command_args.retrieve_api_ = bigml.api.BigML(**{ \
         'username': command_args.username,
         'api_key': command_args.api_key,
-        'dev_mode': command_args.dev_mode,
         'debug': command_args.debug,
         'storage': retrieve_dir})
 

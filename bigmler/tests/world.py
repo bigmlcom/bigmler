@@ -125,7 +125,6 @@ class World(object):
         self.USERNAME = None
         self.API_KEY = None
         self.api = None
-        self.api_dev_mode = None
         self.debug = False
         self.api_debug = False
         self.source_lower = None
@@ -207,13 +206,6 @@ class World(object):
         self.source_upper = None
         self.source_reference = None
 
-    def reset_api(self):
-        """Reset the api connection values
-
-        """
-        self.api = BigML(self.USERNAME, self.API_KEY, debug=self.api_debug)
-        self.api_dev_mode = BigML(self.USERNAME, self.API_KEY, dev_mode=True,
-                                  debug=self.api_debug)
 
     def delete_resources(self):
         """Deletes the created objects
@@ -263,7 +255,6 @@ def common_setup_module():
     """Operations to be performed before each module
 
     """
-    world.reset_api()
     if world.project_id is None:
         world.project_id = world.api.create_project( \
             {"name": world.test_project_name})['resource']

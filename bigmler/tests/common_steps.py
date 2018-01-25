@@ -81,12 +81,3 @@ def check_init_equals_final():
 
     """
     world.check_init_equals_final()
-
-
-#@step(r'I want to use api in DEV mode')
-def i_want_api_dev_mode(step):
-    world.api.delete_project(world.project_id)
-    world.project_id = None
-    world.api = world.api_dev_mode
-    world.project_id = world.api.create_project( \
-        {"name": world.test_project_name})['resource']

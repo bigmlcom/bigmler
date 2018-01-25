@@ -3327,20 +3327,21 @@ example, if you use
 
 in the same working directory, the value of the flag will be preeminent and
 resources will be logged in ``another_log.log``. For boolean-valued flags,
-such as ``--dev`` itself, you'll need to use the associated negative flags to
-overide the default behaviour. Than is, following the former example if you
-want to override the dev mode used by default you should use
+such as ``--replacement`` itself, you'll need to use the associated negative
+flags to
+overide the default behaviour. That is, following the former example if you
+want to avoid storing the downloaded resource JSON information,
+you should use the ``--no-store`` flag.
 
 .. code-block:: bash
 
-    bigmler --train data/iris.csv --no-dev
+    bigmler --train data/iris.csv --no-store
 
 The set of negative flags is:
 
 
 ==============================  ===============================================
 ``--no-debug``                  as opposed to ``--debug``
-``--no-dev``                    as opposed to ``--dev``
 ``--no-train-header``           as opposed to ``--train-header``
 ``--no-test-header``            as opposed to ``--test-header``
 ``--local``                     as opposed to ``--remote``
@@ -3384,7 +3385,7 @@ Requirements
 
 Python 2.7 and 3 are currently supported by BigMLer.
 
-BigMLer requires `bigml 4.13.4 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 4.14.0 <https://github.com/bigmlcom/python>`_  or
 higher. Using proportional missing strategy will additionally request
 the use of the `numpy <http://www.numpy.org/>`_ and
 `scipy <http://www.scipy.org/>`_ libraries. They are not
@@ -3509,15 +3510,9 @@ console, so you will need to open a new one to start using them.
 BigML Development Mode
 ======================
 
-Also, you can instruct BigMLer to work in BigML's Sandbox
-environment by using the parameter ``--dev``
-
-.. code-block:: bash
-
-    bigmler --train data/iris.csv --dev
-
-Using the development flag you can run tasks under 1 MB without spending any of
-your BigML credits.
+The Sandbox environment that could be reached by using the flag ``--dev``
+has been deprecated and. Right now, there's only one mode to work with BigML:
+the previous ``Production Model `, so the flag is no longer available.
 
 Using BigMLer
 =============
@@ -3549,8 +3544,6 @@ General configuration
                  values of the ``BIGML_USERNAME`` environment variable
 ``--api-key``    BigML's api_key. If left unspecified, it will default to the
                  values of the ``BIGML_API_KEY`` environment variable
-``--dev``        Uses FREE development environment. Sizes must be under 16MB
-                 though
 ``--debug``      Activates debug level and shows log info for each https
                  request
 ==============   ==============================================================
