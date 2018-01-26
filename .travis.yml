@@ -15,6 +15,6 @@ install:
   - python setup.py develop
 # command to run tests
 script:
-  - export TESTS=$(for t in $BML_TESTS; do ls bigmler/tests/*$t*;done|paste -sd ",")
+  - export TESTS=$(for t in $BML_TESTS; do ls bigmler/tests/*$t*.py;done|sed 's/\//./g'| sed 's/\.py//g'|paste -sd ",")
   - echo $TESTS
   - python setup.py nosetests --tests=$TESTS
