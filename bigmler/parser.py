@@ -455,10 +455,8 @@ under the License.""" % version
             '--number-of-evaluations'],
         '--no-no-csv': main_options['--no-no-csv']})
 
-
-    for subcommand in SUBCOMMANDS:
-        subparser = subparsers.add_parser(subcommand)
-        parser_add_options(subparser, subcommand_options[subcommand])
+    subparser = subparsers.add_parser(subcommand)
+    parser_add_options(subparser, subcommand_options[subcommand])
 
     # options to be transmitted from analyze to main
     chained_options = [

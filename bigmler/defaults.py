@@ -164,7 +164,8 @@ FLAGS = {
         {'flag': 'early_out_of_bag', 'type': 'boolean'},
         {'flag': 'learning_rate', 'type': 'float'},
         {'flag': 'operating_point', 'type': 'string'},
-        {'flag': 'step_out_of_bag', 'type': 'boolean'}],
+        {'flag': 'step_out_of_bag', 'type': 'boolean'},
+        {'flag': 'org_project', 'type': 'string'}],
     'BigMLer analyze': [
         {'flag': 'k-fold', 'type': 'int'},
         {'flag': 'cv', 'type': 'boolean'},

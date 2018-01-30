@@ -31,7 +31,8 @@ def check_debug(command, project=True):
                             "bigmler delete", "bigmler report",
                             "bigmler delete", "bigmler project",
                             "bigmler execute", "bigmler whizzml",
-                            "bigmler export", "bigmler retrain"]
+                            "bigmler export", "bigmler retrain",
+                            "--org-project"]
     # adding project id as source creation parameter
     if (project and
         all([command.find(string) < 0 for string in non_project_commands])):

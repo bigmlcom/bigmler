@@ -244,6 +244,10 @@ def get_api_instance(command_args, storage_path):
 
     if command_args.store:
         api_command_args.update({'storage': storage_path})
+    if hasattr(command_args, "org_project") and command_args.org_project:
+        api_command_args.update({'project': command_args.org_project})
+    if hasattr(command_args, "organization") and command_args.organization:
+        api_command_args.update({"organization": command_args.organization})
 
     command_args.api_ = bigml.api.BigML(**api_command_args)
 

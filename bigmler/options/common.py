@@ -62,6 +62,14 @@ def get_common_options(defaults=None, constants=None):
             "default": defaults.get('api_key', None),
             "help": "BigML's API key."},
 
+        # Id of the project in an organization to be used in resource creation
+        '--org-project': {
+            'action': 'store',
+            'dest': 'org_project',
+            'default': defaults.get('org_project', None),
+            'help': ("Id of the project in an organization to be used in"
+                     "resource creation.")},
+
         # Log file to store resources ids.
         '--resources-log': {
             "action": 'store',

@@ -34,6 +34,14 @@ def get_project_options(defaults=None):
             'dest': 'project_attributes',
             'default': defaults.get('project_attributes', None),
             'help': ("Path to a json file describing project"
-                     " attributes.")}}
+                     " attributes.")},
+
+        # The organization ID that the project should be assigned to
+        '--organization': {
+            'action': 'store',
+            'dest': 'organization',
+            'default': defaults.get('organization', None),
+            'help': ("ID of the organization where the project is to"
+                     " be created.")}}
 
     return options

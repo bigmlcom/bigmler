@@ -20,11 +20,12 @@ import os
 import time
 import csv
 import json
+
 from bigmler.tests.world import world, res_filename
 from subprocess import check_call, CalledProcessError
 from bigmler.checkpoint import file_number_of_lines
 from bigmler.utils import SYSTEM_ENCODING, PYTHON3
-from bigml.api import check_resource
+from bigml.api import check_resource, BigML
 from bigmler.tests.common_steps import check_debug
 from nose.tools import assert_equal, assert_not_equal, ok_
 
@@ -54,7 +55,49 @@ def i_create_source_with_project(step, data=None, project=None, output_dir=None)
             assert False
         else:
             world.output = output_dir
-            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+
+#@step(r'I create a BigML project in an organization named "(.*)" storing results in "(.*)"')
+def i_create_project_in_org(step, name=None, output_dir=None, organization=None):
+    ok_(name is not None and organization is not None)
+    world.directory = output_dir
+    world.folders.append(world.directory)
+    try:
+        command = (u"bigmler project --name \"" + name +
+                   "\" --organization " + organization +
+                   u" --output-dir " + output_dir)
+        if not PYTHON3:
+            command = command.encode(SYSTEM_ENCODING)
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.output = output_dir
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+
+#@step(r'I create a BigML source uploading train "(.*)" file and associate it to the last created project id storing results in "(.*)"')
+def i_create_source_with_org_project(step, data=None, output_dir=None):
+    ok_(data is not None)
+    world.directory = output_dir
+    world.folders.append(world.directory)
+    try:
+        command = (u"bigmler --train " + res_filename(data) +
+                   u" --no-model --no-dataset --store --output-dir " +
+                   output_dir +
+                   u" --org-project " + world.project["resource"])
+        if not PYTHON3:
+            command = command.encode(SYSTEM_ENCODING)
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.output = output_dir
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
@@ -77,7 +120,6 @@ def i_create_source_with_project_id(step, data=None, output_dir=None):
             assert False
         else:
             world.output = output_dir
-            assert True
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
@@ -88,7 +130,7 @@ def check_source_in_project(step):
 
 
 #@step(r'I check that the project has been created$')
-def i_check_create_project(step):
+def i_check_create_project(step, organization=False):
     project_file = "%s%sproject" % (world.directory, os.sep)
     try:
         project_file = open(project_file, "r")
@@ -97,9 +139,13 @@ def i_check_create_project(step):
         world.projects.append(project['resource'])
         world.project = project
         project_file.close()
-        assert True
     except Exception, exc:
         assert False, str(exc)
+    if organization:
+        world.api = BigML(world.USERNAME, world.API_KEY, debug=world.debug,
+                          project=world.project["resource"])
+        print world.api.connection_info()
+
 
 
 #@step(r'the source has no project association')
@@ -123,7 +169,6 @@ def i_create_project(step, project=None, output_dir=None):
             assert False
         else:
             world.output = output_dir
-            assert True
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
@@ -143,10 +188,7 @@ def i_update_project(step, params=None, values=None):
             command = command.encode(SYSTEM_ENCODING)
         command = check_debug(command)
         retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            assert True
+        assert retcode >= 0
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
