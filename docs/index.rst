@@ -547,8 +547,8 @@ will first check for the existence of a project by that name. If it exists,
 will associate the source, dataset and model resources to this project.
 If it doesn't, a new ``project`` is created and then associated.
 
-You can also associate resources to an existing ``project`` by specifying
-the option ``--project-id`` followed by its id
+You can also associate resources to any ``project`` in your account
+by specifying the option ``--project-id`` followed by its id
 
 .. code-block:: bash
 
@@ -559,7 +559,29 @@ derived from this ``source`` will be automatically associated to the same
 ``project``.
 
 You can also create projects or update their properties by using the `bigmler
-project <#bigmler-project>`_ subcommand.
+project <#bigmler-project>`_ subcommand. In particular, when projects need
+to be created in an ``organization``, the ``--organization`` option has to
+be added to inform about the ID of the organization where the project should
+be created:
+
+.. code-block:: bash
+
+    bigmler project --organization organization/524487ef37203f0d6b000594 \
+                    --name "my new project"
+
+Only allowed users can create projects in ``organizations``. If you are not the
+owner or an administrator, please check your permissions with them first.
+You can learn more about organizations at the
+`API documentation <https://bigml.com/api/organizations/>`_.
+
+You can also create resources in an organization's project if your user
+has the right privileges. In order to do that, you should add the
+``--org-project`` option followed by the organization's project ID.
+
+.. code-block:: bash
+
+    bigmler --train data/iris.csv \
+            --org-project project/524487ef37203f0d6b000894
 
 
 Using the existing resources in BigML
@@ -3385,7 +3407,7 @@ Requirements
 
 Python 2.7 and 3 are currently supported by BigMLer.
 
-BigMLer requires `bigml 4.14.0 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 4.15.0 <https://github.com/bigmlcom/python>`_  or
 higher. Using proportional missing strategy will additionally request
 the use of the `numpy <http://www.numpy.org/>`_ and
 `scipy <http://www.scipy.org/>`_ libraries. They are not
@@ -3669,6 +3691,9 @@ Basic Functionality
                                                               associated to
                                                               newly created
                                                               sources
+``--org-project`` *PROJECT_ID*                                Project id for
+                                                              the project of an
+                                                              Organization
 ``--no-csv``                                                  Causes the output
                                                               of a batch
                                                               prediction,
@@ -4745,6 +4770,8 @@ Project Specific Subcommand Options
 -----------------------------------
 
 ===================================== =========================================
+``--organization`` *ORGANIZATION_ID*  Organization ID to create projects
+                                      in an organization
 ``--project-attributes``              Path to a JSON file containing
                                       attributes for the project
 ===================================== =========================================
