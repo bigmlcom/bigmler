@@ -43,7 +43,6 @@ def write_forecasts(forecast, output):
     """
 
     for objective_id, forecast_value in forecast.items():
-        print "***", forecast_value
         headers = [f["model"] for f in forecast_value]
         points = []
         if not forecast_value:
