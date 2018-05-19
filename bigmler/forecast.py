@@ -74,7 +74,7 @@ def forecast(time_series, args, session_file=None):
     elif args.horizon is not None:
         input_data = [{local_time_series.objective_id: { \
             "horizon": args.horizon}}]
-    write_forecasts(local_time_series.forecast(*input_data, by_name=False),
+    write_forecasts(local_time_series.forecast(*input_data),
                     output)
 
 

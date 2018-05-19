@@ -126,12 +126,11 @@ def local_topic_distribution(topic_models, test_reader, output, args,
     if args.prediction_header:
         headers.extend([topic['name'] for topic in local_topic_model.topics])
         output.writerow(headers)
-    test_set_header = test_reader.has_headers()
     for input_data in test_reader:
         input_data_dict = test_reader.dict(input_data, filtering=False)
         try:
             topic_distribution_info = local_topic_model.distribution(
-                input_data_dict, by_name=test_set_header)
+                input_data_dict)
         except Exception:
             topic_distribution_info = []
         write_topic_distribution(topic_distribution_info,

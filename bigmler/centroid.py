@@ -126,12 +126,11 @@ def local_centroid(clusters, test_reader, output, args,
     """
     # Only one cluster at present
     local_cluster = Cluster(clusters[0], api=args.retrieve_api_)
-    test_set_header = test_reader.has_headers()
     for input_data in test_reader:
         input_data_dict = test_reader.dict(input_data, filtering=False)
         try:
             centroid_info = local_cluster.centroid(
-                input_data_dict, by_name=test_set_header)
+                input_data_dict)
         except Exception:
             centroid_info = {'centroid_name': NO_CENTROID}
         write_centroid(centroid_info['centroid_name'], output,

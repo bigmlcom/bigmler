@@ -44,11 +44,10 @@ def local_prediction(deepnets, test_reader, output, args,
     # Only one deepnet at present
     local_deepnet = Deepnet(deepnets[0],
                             api=args.retrieve_api_)
-    test_set_header = test_reader.has_headers()
     for input_data in test_reader:
         input_data_dict = test_reader.dict(input_data, filtering=False)
         prediction_info = local_deepnet.predict(
-            input_data_dict, by_name=test_set_header)
+            input_data_dict)
         write_prediction(prediction_info, output,
                          args.prediction_info, input_data, exclude)
 

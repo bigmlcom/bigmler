@@ -197,7 +197,7 @@ def combine_votes(votes_files, to_prediction, to_file, method=0,
             multivote = votes[index]
             input_data = (None if input_data_list is None
                           else input_data_list[index])
-            write_prediction(multivote.combine(method, True), output,
+            write_prediction(multivote.combine(method, full=True), output,
                              prediction_info, input_data, exclude)
 
 
@@ -211,7 +211,6 @@ def remote_predict_models(models, test_reader, prediction_file, api, args,
     prediction_args = {
         "tags": args.tag
     }
-    test_set_header = test_reader.has_headers()
     if output_path is None:
         output_path = u.check_dir(prediction_file)
     message_logged = False
@@ -271,7 +270,6 @@ def remote_predict_ensemble(ensemble_id, test_reader, prediction_file, api,
         "tags": args.tag,
         "combiner": args.method
     }
-    test_set_header = test_reader.has_headers()
     if output_path is None:
         output_path = u.check_dir(prediction_file)
 
@@ -306,8 +304,7 @@ def local_predict(models, test_reader, output, args, options=None,
 
     """
     single_model = len(models) == 1
-    test_set_header = test_reader.has_headers()
-    kwargs = {"by_name": test_set_header, "with_confidence": True,
+    kwargs = {"full": True,
               "missing_strategy": args.missing_strategy}
     if single_model:
         local_model = Model(models[0], api=args.retrieve_api_)
@@ -326,9 +323,7 @@ def local_predict(models, test_reader, output, args, options=None,
         if single_model and args.median and local_model.tree.regression:
             # only single models' predictions can be based on the median value
             # predict
-            prediction[0] = prediction[-1]
-        if not isinstance(prediction, dict):
-            prediction = prediction[0: 2]
+            prediction["prediction"] = prediction["median"]
         write_prediction(prediction,
                          output,
                          args.prediction_info, input_data, exclude)
@@ -482,7 +477,6 @@ def local_batch_predict(models, test_reader, prediction_file, api, args,
     max_models = args.max_batch_models
     if labels is None:
         labels = []
-    test_set_header = test_reader.has_headers()
     if output_path is None:
         output_path = u.check_dir(prediction_file)
     if output is None:
@@ -526,7 +520,7 @@ def local_batch_predict(models, test_reader, prediction_file, api, args,
             gc.collect()
             try:
                 votes = local_model.batch_predict(
-                    raw_input_data_list, output_path, by_name=test_set_header,
+                    raw_input_data_list, output_path,
                     reuse=True, missing_strategy=args.missing_strategy,
                     headers=test_reader.raw_headers, to_file=(not args.fast),
                     use_median=args.median)
@@ -577,8 +571,8 @@ def local_batch_predict(models, test_reader, prediction_file, api, args,
             # prediction
             prediction = combine_multivote(multivote, other_label=other_label)
         else:
-            prediction = multivote.combine(method=method, with_confidence=True,
-                                           options=options)
+            prediction = multivote.combine(method=method, options=options,
+                                           full=True)
 
         write_prediction(prediction, output, args.prediction_info, input_data,
                          exclude)
