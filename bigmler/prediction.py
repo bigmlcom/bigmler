@@ -412,10 +412,10 @@ def aggregate_multivote(multivote, options, labels, models_per_label, ordered,
         predictions = []
         for label_prediction in label_predictions:
             label_multivote = MultiVote(label_prediction)
-            prediction, confidence = label_multivote.combine(
-                method=AGGREGATION, with_confidence=True, options=options)
-            predictions.append({'prediction': prediction,
-                                'confidence': confidence})
+            prediction_info = label_multivote.combine(
+                method=AGGREGATION, full=True, options=options)
+            predictions.append({'prediction': prediction_info["prediction"],
+                                'confidence': prediction_info["confidence"]})
     for vote_index in range(0, len(predictions)):
         if ast.literal_eval(predictions[vote_index]['prediction']):
             prediction_list.append(labels[vote_index])
