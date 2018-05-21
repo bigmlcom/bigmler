@@ -903,7 +903,8 @@
 
 (define (new-fields-generators conf)
   (let (generators (conf "output_fields" false)
-        generator-fn (lambda (x) (let (y (select-keys x ["generator" "names"])
+        generator-fn (lambda (x) (let (y (select-map-keys x ["generator"
+                                                             "names"])
                                        y (assoc y "field" (y
                                                            "generator"
                                                            false)))
@@ -1703,7 +1704,7 @@
                     update))
         reify-chain)))
 
-;; select-keys
+;; select-map-keys
 ;;
 ;; Filters the keys in a map, keeping only the ones that appear in the list.
 ;;
@@ -1712,7 +1713,7 @@
 ;;   keys-list: (list) List of keys to be kept in the map
 ;; Output: (map) filtered map with only the keys in the keys-list
 ;;
-(define (select-keys a-map keys-list)
+(define (select-map-keys a-map keys-list)
   (reduce (lambda (x y) (let (value (a-map y false)
                               has-key? (contains? a-map y))
                              (cond has-key? (assoc x y value) x)))
@@ -1744,10 +1745,10 @@
                            DEFAULT-UPDATABLE)
               fields (reduce (lambda (x y) (assoc x
                                                   y
-                                                  (select-keys (fields
+                                                  (select-map-keys (fields
                                                                     y
                                                                     false)
-                                                               filter)))
+                                                                   filter)))
                              {}
                              field-ids))
           (if (not (empty? fields))
