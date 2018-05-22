@@ -3,6 +3,12 @@
 History
 -------
 
+3.18.0 (2018-05-23)
+~~~~~~~~~~~~~~~~~~~
+
+- Updating underlying bindings version.
+- Adapting to new evaluation metrics.
+
 3.17.0 (2018-01-30)
 ~~~~~~~~~~~~~~~~~~~
 
