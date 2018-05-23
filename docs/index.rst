@@ -3128,7 +3128,7 @@ that would exclude the field ``sepal length`` from the deepnet
 model creation input fields. You can also change some parameters in the
 deepnet model, like the ``number_of_hidden_layers``, ``max_iterations``
 or ``default_numeric_value``. Please check the `Deepnets section
-of the API documentation <https://bigml.com/api/deepnets`_ for a detailed
+of the API documentation <https://bigml.com/api/deepnets>`_ for a detailed
 description of the available arguments.
 
 .. code-block:: bash
