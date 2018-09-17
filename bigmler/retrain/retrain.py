@@ -47,6 +47,9 @@ MODEL_TYPES = ["model", "ensemble", "logistic_regression", "deepnet",
                "time_series"]
 
 
+STOP_WORKFLOW = {"source-id": "no-dataset",
+                 "dataset-id": "no-model"}
+
 def get_script_id(path):
     """Returns the script id stored in the file in path
 
@@ -67,6 +70,41 @@ def extract_retrain_id(args, api, session_file):
                                 verbosity=args.verbosity,
                                 session_file=session_file)
     return execution['object']['execution']['result']
+
+
+def create_input(args, api, input_type, script_id):
+    """ Creates the resources used as input for the retrain script when adding
+        new data.
+        When remote sources are used, the input is usually the remote url.
+        If a local source is used, then the input should be a source-id
+        or a dataset-id
+
+    """
+    if input_type in ['source-id', 'dataset-id']:
+
+        source_command = ["main", "--train", args.add,
+                          "--output-dir", args.output_dir,
+                          STOP_WORKFLOW[input_type]]
+        command_args, _, _, main_session_file, _ = get_context( \
+            source_command, MAIN_SETTINGS)
+        command_args.predictions = command_args.output
+        a.get_output_args(api, command_args, False)
+        compute_output(api, command_args)
+        resource_type = input_type[-3]
+        resource_id = getattr(command_args, resource_type)
+    else:
+        resource_type = "source-url"
+        resource_id = args.add
+    # apply the retrain script to the new resource
+    execute_command = ['execute',
+                       '--script', script_id,
+                       '--output-dir', args.output_dir]
+    command_args, _, _, exe_session_file, _ = get_context( \
+        execute_command, EXE_SETTINGS)
+    command_args.arguments_ = [["%s1" % resource_type, resource_id],
+                               ["datasets-limit", args.window_size]]
+    command_args.inputs = json.dumps(command_args.arguments_)
+    return command_args
 
 
 def retrain_model(args, api, common_options, session_file=None):
@@ -96,6 +134,7 @@ def retrain_model(args, api, common_options, session_file=None):
                              (model_type.replace("_", " "), tag))
                 reference_tag = tag
                 break
+    # if --upgrade, we force rebuilding the scriptified script
     if args.upgrade:
         shutil.rmtree(BIGMLER_SCRIPTS_DIRECTORY)
         script_id = None
@@ -145,25 +184,13 @@ def retrain_model(args, api, common_options, session_file=None):
         script_id = extract_retrain_id(command_args, api, session_file)
 
     # apply the retrain script to the new data:
-    # create a source with the new data
+    # add new data: depending on the script we will need to use
+    # a source-url, a source or a dataset
     if args.add:
-        source_command = ["main", "--train", args.add, "--no-dataset",
-                          "--output-dir", args.output_dir]
-        command_args, _, _, main_session_file, _ = get_context(source_command,
-                                                               MAIN_SETTINGS)
-        command_args.predictions = command_args.output
-        a.get_output_args(api, command_args, False)
-        compute_output(api, command_args)
-        source_id = command_args.source
-        # apply the retrain script to the new source
-        execute_command = ['execute',
-                           '--script', script_id,
-                           '--output-dir', args.output_dir]
-        command_args, _, _, exe_session_file, _ = get_context(execute_command,
-                                                              EXE_SETTINGS)
-        command_args.arguments_ = [["source1", source_id],
-                                   ["datasets-limit", args.window_size]]
-        command_args.inputs = json.dumps(command_args.arguments_)
+        script_inputs = api.get_script(script_id)['object']['inputs']
+        input_type = script_inputs[0]['type']
+        command_args = create_input(args, api, input_type, script_id)
+
         # process the command
         execute_whizzml(command_args, api, session_file)
         with open("%s.json" % command_args.output) as file_handler:

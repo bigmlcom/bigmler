@@ -10,7 +10,7 @@
 ;; Output: (string) Script ID
 ;;
 (define (reify-resource resource-id)
-  (let (reify-chain (reify resource-id false)
+  (let (reify-chain (resource-workflow resource-id false)
         script-info (whizzml-script reify-chain false)
         args (script-args script-info false)
         script (create-and-wait-script args))

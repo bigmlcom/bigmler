@@ -1,5 +1,5 @@
 {
-  "name": "BigMLer: Incremental retrain generator functions - 1.0.1",
+  "name": "BigMLer: Incremental retrain generator functions - 1.0.2",
   "description": "Generates a WhizzML script to reproduce a resource from incremental data",
   "kind": "library",
   "imports": ["../reify"],

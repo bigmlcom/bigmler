@@ -1,5 +1,5 @@
 {
-  "name": "Retrain modeling resource - 1.0.1",
+  "name": "Retrain modeling resource - 1.0.2",
   "description": "Basic script to retrain any modeling resource from incremental data",
   "kind": "script",
   "source_code": "script.whizzml",

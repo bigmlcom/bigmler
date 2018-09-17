@@ -271,6 +271,12 @@ def get_delete_options(defaults=None):
             'default': defaults.get('deepnet_tag', None),
             'help': "Retrieve deepnets that were tagged with tag."},
 
+        # Use it to retrieve resources filtered by a query string
+        '--filter': {
+            'dest': 'filter',
+            'default': defaults.get('filter', None),
+            'help': "Retrieve resources that match the query string filter."},
+
         # Filter the resources to be deleted by its status (finished if
         # not set)
         '--status': {

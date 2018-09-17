@@ -98,6 +98,15 @@ def time_interval_qs(args, api):
     return query_string_list
 
 
+def filter_qs(args, api):
+    """Building the query string from the filter.
+
+    """
+    query_string_list = []
+    query_string_list.append(args.filter)
+    return query_string_list
+
+
 def get_delete_list(args, api, query_list):
     """Building the list of resources to be deleted by adding the tag
        filtering user options to the
@@ -327,6 +336,10 @@ def delete_resources(command_args, api, deleted_list=None):
     # by time interval and tag (plus filtered resource_types)
     time_qs_list = time_interval_qs(command_args, api)
     delete_list.extend(get_delete_list(command_args, api, time_qs_list))
+
+    # by filter expression (plus filtered resource_types)
+    filter_qs_list = filter_qs(command_args, api)
+    delete_list.extend(get_delete_list(command_args, api, filter_qs_list))
 
     delete_list = [resource_id for resource_id in delete_list \
         if resource_id not in deleted_list]

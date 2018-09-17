@@ -1,374 +1,535 @@
-;; Functions used to reify the resources in BigML. The reify output is a
-;; structure that contains the list of resources needed as origins and
-;; the steps and configurations needed to generate the final resource.
-
 ;; COMMON-DEFAULTS
 ;;
 ;; attributes used in all types of resouce
 ;;
-(define COMMON-DEFAULTS {"category" [0]
-                         "description" [false ""]
-                         "tags" [[]]
-                         "project" [false]})
+(define bigml.reify.COMMON-DEFAULTS {"category" [0]
+                                     "description" [false ""]
+                                     "tags" [[]]
+                                     "project" [false]
+                                     "creator" [false]
+                                     "name_options" ["" false]})
 ;; DEFAULTS
 ;;
 ;; attributes used in some of the resources, keyed by resource type
 ;;
-(define DEFAULTS {"source" {"name" ["Unnamed inline source"
-                                    "Unnamed remote source"]
-                            "data" [false ""]
-                            "disable_datetime" [false]
-                            "remote" [false]
-                            "size" [false]
-                            "source_parser" [{"header" true
-                                              "locale" "en-us"
-                                              "missing_tokens" [""
-                                                                "NaN"
-                                                                "NULL"
-                                                                "N/A"
-                                                                "null"
-                                                                "-"
-                                                                "#REF!"
-                                                                "#VALUE!"
-                                                                "?"
-                                                                "#NULL!"
-                                                                "#NUM!"
-                                                                "#DIV/0"
-                                                                "n/a"
-                                                                "#NAME?"
-                                                                "NIL"
-                                                                "nil"
-                                                                "na"
-                                                                "#N/A"
-                                                                "NA"]
-                                              "quote" "\""
-                                              "separator" ","}
-                                             {"header" true
-                                              "locale" "en_US"
-                                              "missing_tokens" [""
-                                                                "NaN"
-                                                                "NULL"
-                                                                "N/A"
-                                                                "null"
-                                                                "-"
-                                                                "#REF!"
-                                                                "#VALUE!"
-                                                                "?"
-                                                                "#NULL!"
-                                                                "#NUM!"
-                                                                "#DIV/0"
-                                                                "n/a"
-                                                                "#NAME?"
-                                                                "NIL"
-                                                                "nil"
-                                                                "na"
-                                                                "#N/A"
-                                                                "NA"]
-                                              "quote" "\""
-                                              "separator" ","}]
-                           "term_analysis" [{"enabled" true}]
-                           "item_analysis" [{} false]}
-                  "dataset" {"name" [false]
-                             "excluded_fields" [[] false]
-                             "all_but" [[] false]
-                             "all_fields" [true]
-                             "json_filter" [false]
-                             "lisp_filter" [false]
-                             "sample_rate" [1.0 false]
-                             "out_of_bag" [false]
-                             "seed" [false]
-                             "price" [0 0.0]
-                             "replacement" [false]
-                             "tags" [[]]
-                             "term_limit" [1000]
-                             "private" [true]
-                             "shared" [false]
-                             "size" [false]
-                             "centroid" [false]
-                             "range" [false []]
-                             "ranges" [false {}]
-                             "rows" [false]
-                             "objective_field" [false]
-                             "new_fields" [false []]
-                             "output_fields" [false []]
-                             "input_fields" [false []]
-                             "row_offset" [false 0]
-                             "row_step" [false 1]}
-                  "model" {"name" [false]
-                           "excluded_fields" [[] false]
-                           "ordering" [0]
-                           "out_of_bag" [false]
-                           "randomize" [false]
-                           "replacement" [false]
-                           "sample_rate" [1.0]
-                           "seed" [false]
-                           "stat_pruning" [true]
-                           "balance_objective" [false]
-                           "weight_field" [false]
-                           "objective_weights" [false []]
-                           "missing_splits" [false]
-                           "node_threshold" [512]
-                           "private" [true]
-                           "shared" [false]
-                           "range" [false []]
-                           "input_fields" [false []]
-                           "objective_field" [false]}
-                  "ensemble" {"name" [false]
-                              "number_of_models" [10]
-                              "ensemble_sample" [false {}]
-                              "replacement" [false]
-                              "input_fields" [false []]
-                              "ordering" [0]
-                              "out_of_bag" [false]
-                              "randomize" [false]
-                              "replacement" [false]
-                              "sample_rate" [1.0]
-                              "seed" [false]
-                              "stat_pruning" [true]
-                              "balance_objective" [false]
-                              "random_candidates_ratio" [false]
-                              "random_candidates" [false]
-                              "weight_field" [false]
-                              "objective_weights" [false []]
-                              "missing_splits" [false]
-                              "node_threshold" [512]
-                              "excluded_fields" [[] false]
-                              "boosting" [false {}]
-                              "objective_field" [false]
-                              "models" [[]]}
-                  "prediction" {"name" [false]
-                                "combiner" [0 false]
-                                "ordering" [0 false]
-                                "missing_strategy" [0 false]
-                                "private" [true]
-                                "threshold" [false {}]
-                                "input_data" [false]}
-                  "evaluation" {"name" [false]
-                                "confidence_threshold" [false]
-                                "combiner" [0, false]
-                                "missing_strategy" [0]
-                                "ordering" [0]
-                                "out_of_bag" [false]
-                                "negative_class" [false]
-                                "positive_class" [false]
-                                "replacement" [false]
-                                "sample_rate" [1.0]
-                                "seed" [false]
-                                "threshold" [false]
-                                "probability_threshold" [false]
-                                "range" [false []]
-                                "ranges" [false {}]
-                                "private" [true]}
-                  "cross-validation" {"name" [false]}
-                  "anomaly" {"name" [false]
-                             "anomaly_seed" [false]
-                             "constraints" [false]
-                             "excluded_fields" [[] false]
-                             "id_fields" [[]]
-                             "forest_size" [128]
-                             "out_of_bag" [false]
-                             "replacement" [false]
-                             "sample_rate" [1.0]
-                             "seed" [false]
-                             "range" [false []]
-                             "ranges" [false {}]
-                             "input_fields" [false []]
-                             "top_n" [10]}
-                  "cluster" {"name" [false]
-                             "k" [false]
-                             "balance_fields" [true]
-                             "cluster_seed" [false]
-                             "critical_value" [false]
-                             "default_numeric_value" [false]
-                             "excluded_fields" [[] false]
-                             "field_scales" [{}]
-                             "model_clusters" [false]
-                             "out_of_bag" [false]
-                             "replacement" [false]
-                             "sample_rate" [1.0]
-                             "seed" [false]
-                             "range" [false []]
-                             "ranges" [false {}]
-                             "input_fields" [false []]
-                             "summary_fields" [[]]
-                             "weight_field" [false ""]}
-                  "centroid" {"name" [false]
-                              "private" [true]
-                              "input_data" [false]}
-                  "anomalyscore" {"name" [false]
-                                  "input_data" [false]}
-                  "associationset" {"name" [false]
-                                    "input_data" [false]}
-                  "batchanomalyscore" {"name" [false]
-                                       "all_fields" [false]
-                                       "fields_map" [false]
-                                       "header" [true]
-                                       "output_dataset" [false]
-                                       "output_fields" [false []]
-                                       "separator" [","]
-                                       "score_name" ["score" false]}
-                  "batchcentroid" {"name" [false]
-                                   "all_fields" [false]
-                                   "fields_map" [false]
-                                   "header" [true]
-                                   "output_dataset" [false]
-                                   "output_fields" [false []]
-                                   "distance_name" [false ""]
-                                   "centroid_name" [false ""]
-                                   "separator" [","]
-                                   "distance" [false]}
-                  "batchprediction" {"name" [false]
-                                     "all_fields" [false]
-                                     "fields_map" [false]
-                                     "confidence_threshold" [false]
-                                     "combiner" [0 false]
-                                     "confidence" [false]
-                                     "header" [true]
-                                     "missing_strategy" [0]
-                                     "negative_class" [false]
-                                     "negative_class_confidence" [false]
-                                     "output_dataset" [false]
-                                     "output_fields" [false []]
-                                     "positive_class" [false]
-                                     "separator" [","]
-                                     "prediction_name" [false ""]
-                                     "confidence_name" [false ""]
-                                     "threshold" [false]
-                                     "probability_threshold" [false]}
-                  "association" {"name" [false]
-                                 "complement" [false]
-                                 "default_numeric_value" [false "median"]
-                                 "discretization" [false]
-                                 "excluded_fields" [false []]
-                                 "field_discretizations" [false]
-                                 "input_fields" [false []]
-                                 "max_k" [false 100]
-                                 "max_lhs" [false 4]
-                                 "min_confidence" [false 0 0.0]
-                                 "min_leverage" [false 0 0.0]
-                                 "min_lift" [false 1 1.0]
-                                 "min_support" [false 1 1.0]
-                                 "missing_items" [false]
-                                 "out_of_bag" [false]
-                                 "replacement" [false]
-                                 "sample_rate" [1.0]
-                                 "seed" [false]
-                                 "rhs_predicate" [false []]
-                                 "range" [false []]
-                                 "search_strategy" [false "leverage"]
-                                 "significance_level" [false 0.05]}
-                  "logisticregression" {"name" [false]
-                                        "private" [true]
-                                        "shared" [false]
-                                        "default_numeric_value" [false,
-                                                                 "median"]
-                                        "balance_fields" [false]
-                                        "balance_objective" [false]
-                                        "objective_weights" [false []]
-                                        "bias" [true]
-                                        "c" [false, 1]
-                                        "eps" [false, 0.0001]
-                                        "excluded_fields" [false []]
-                                        "field_codings" [false]
-                                        "input_fields" [false []]
-                                        "missing_numerics" [true]
-                                        "normalize" [false]
-                                        "out_of_bag" [false]
-                                        "objective_field" [false]
-                                        "range" [false []]
-                                        "regularization" [false "l2"]
-                                        "replacement" [false]
-                                        "sample_rate" [1.0]
-                                        "seed" [false]},
-                  "topicmodel" {"name" [false]
-                                "private" [true]
-                                "shared" [false]
-                                "bigrams" [false]
-                                "case_sensitive" [false]
-                                "excluded_terms" [false []]
-                                "number_of_topics" [false 0]
-                                "eps" [false, 0.00001]
-                                "excluded_fields" [false []]
-                                "field_codings" [false]
-                                "input_fields" [false []]
-                                "term_limit" [false 4096]
-                                "top_n_terms" [false 10]
-                                "topicmodel_seed" [false]
-                                "use_stopwords" [false]
-                                "out_of_bag" [false]
-                                "range" [false []]
-                                "regularization" [false "l2"]
-                                "replacement" [false]
-                                "sample_rate" [1.0]
-                                "seed" [false]}
-                  "topicdistribution" {"name" [false]
-                                       "private" [true]
-                                       "input_data" [false]}
-                  "batchtopicdistribution" {"name" [false]
-                                            "all_fields" [false]
-                                            "header" [true]
-                                            "output_dataset" [false]
-                                            "fields_map" [false]
-                                            "newline" ["LF" false]
-                                            "output_fields" [false []]
-                                            "separator" [","]}
-                  "timeseries" {"name" [false]
-                                "all_numeric_objectives" [false]
-                                "damped_trend" [false]
-                                "default_numeric_value" ["spline interpolation"
-                                                         false]
-                                "error" [false]
-                                "field_parameters" [false]
-                                "period" [false 1]
-                                "private" [true]
-                                "shared" [false]
-                                "range" [false []]
-                                "seasonality" [false]
-                                "time_range" [false {}]
-                                "trend" [false]
-                                "horizon" [false 50]
-                                "objective_field" [false]
-                                "objective_fields" [false]}
-                  "deepnet" {"name" [false]
-                             "balance_objective" [false]
-                             "batch_normalization" [false]
-                             "deepnet_seed" ["" false]
-                             "default_numeric_value" [false]
-                             "dropout_rate" [0.0 false]
-                             "excluded_fields" [false []]
-                             "hidden_layers" [false []]
-                             "input_fields" [false []]
-                             "learn_residuals" [false]
-                             "learning_rate" [0.01 false]
-                             "max_iterations" [20000 false]
-                             "max_training_time" [1800 false]
-                             "missing_numerics" [true]
-                             "number_of_hidden_layers" [10 false]
-                             "number_of_model_candidates" [128 false]
-                             "objective_field" [false]
-                             "objective_weights" [false []]
-                             "optimizer" [{} false]
-                             "ordering" [false 0]
-                             "out_of_bag" [false]
-                             "range" [false []]
-                             "replacement" [false]
-                             "sample_rate" [1.0]
-                             "seed" [false]
-                             "search" [false]
-                             "suggest_structure" [true]
-                             "tree_embedding" [false]
-                             "weight_field" [false]}
-                  "forecast" {"name" [false]
-                              "private" [true]
-                              "input_data" [false]
-                              "intervals" [true]}})
+(define bigml.reify.DEFAULTS {
+  "source" {
+    "name" ["Unnamed inline source"
+            "Unnamed remote source"]
+            "data" [false ""]
+            "disable_datetime" [false]
+            "remote" [false]
+            "size" [false]
+            "source_parser" [{"header" true
+                              "locale" "en-us"
+                              "missing_tokens" [""
+                                                "NaN"
+                                                "NULL"
+                                                "N/A"
+                                                "null"
+                                                "-"
+                                                "#REF!"
+                                                "#VALUE!"
+                                                "?"
+                                                "#NULL!"
+                                                "#NUM!"
+                                                "#DIV/0"
+                                                "n/a"
+                                                "#NAME?"
+                                                "NIL"
+                                                "nil"
+                                                "na"
+                                                "#N/A"
+                                                "NA"]
+                              "quote" "\""
+                              "separator" ","}
+                             {"header" true
+                              "locale" "en_US"
+                              "missing_tokens" [""
+                                                "NaN"
+                                                "NULL"
+                                                "N/A"
+                                                "null"
+                                                "-"
+                                                "#REF!"
+                                                "#VALUE!"
+                                                "?"
+                                                "#NULL!"
+                                                "#NUM!"
+                                                "#DIV/0"
+                                                "n/a"
+                                                "#NAME?"
+                                                "NIL"
+                                                "nil"
+                                                "na"
+                                                "#N/A"
+                                                "NA"]
+                              "quote" "\""
+                              "separator" ","}]
+           "term_analysis" [{"enabled" true}]
+           "item_analysis" [{} false]}
+  "dataset" {
+    "name" [false]
+    "excluded_fields" [[] false]
+    "all_but" [[] false]
+    "all_fields" [true]
+    "json_filter" [false]
+    "lisp_filter" [false]
+    "sample_rate" [1.0 false]
+    "out_of_bag" [false]
+    "seed" [false]
+    "price" [0 0.0]
+    "replacement" [false]
+    "tags" [[]]
+    "term_limit" [1000]
+    "private" [true]
+    "shared" [false]
+    "shared_clonable" [false]
+    "size" [false]
+    "centroid" [false]
+    "range" [false []]
+    "ranges" [false {}]
+    "refresh_field_types" [false]
+    "refresh_objective" [false]
+    "refresh_preferred" [false]
+    "rows" [false]
+    "objective_field" [false]
+    "new_fields" [false []]
+    "output_fields" [false []]
+    "input_fields" [false []]
+    "row_offset" [false 0]
+    "row_step" [false 1]}
+  "model" {
+    "name" [false]
+    "excluded_fields" [[] false]
+    "credits_per_prediction" [false]
+    "price" [false]
+    "ordering" [0]
+    "depth_threshold" [false 512]
+    "max_training_time" [false 1800]
+    "number_of_model_candidates" [false 128]
+    "out_of_bag" [false]
+    "optimize" [false]
+    "randomize" [false]
+    "replacement" [false]
+    "sample_rate" [1.0]
+    "seed" [false]
+    "stat_pruning" [true]
+    "balance_objective" [false]
+    "weight_field" [false]
+    "objective_weights" [false []]
+    "missing_splits" [false]
+    "node_threshold" [512]
+    "private" [true]
+    "shared" [false]
+    "shared_clonable" [false]
+    "range" [false []]
+    "random_candidate_ratio" [false]
+    "random_candidates" [false]
+    "split_candidates" [false]
+    "support_threshold" [false]
+    "input_fields" [false []]
+    "objective_field" [false]}
+  "ensemble" {
+    "name" [false]
+    "number_of_models" [10]
+    "ensemble_sample" [false {}]
+    "replacement" [false]
+    "input_fields" [false []]
+    "credits_per_prediction" [false]
+    "price" [false]
+    "ordering" [0]
+    "out_of_bag" [false]
+    "randomize" [false]
+    "replacement" [false]
+    "sample_rate" [1.0]
+    "seed" [false]
+    "stat_pruning" [true]
+    "balance_objective" [false]
+    "range" [false []]
+    "random_candidate_ratio" [false]
+    "random_candidates" [false]
+    "split_candidates" [false 32]
+    "support_threshold" [false 0]
+    "weight_field" [false]
+    "objective_weights" [false []]
+    "missing_splits" [false]
+    "node_threshold" [512]
+    "optimize" [false]
+    "shared" [false]
+    "private" [true]
+    "number_of_model_candidates" [false 128]
+    "max_training_time" [false 1800]
+    "excluded_fields" [[] false]
+    "boosting" [false {}]
+    "depth_threshold" [false 512]
+    "objective_field" [false]
+    "models" [[]]}
+  "prediction" {
+    "name" [false]
+    "combiner" [0 false]
+    "explain" [false]
+    "ordering" [0 false]
+    "missing_strategy" [0 false]
+    "private" [true]
+    "threshold" [false {}]
+    "input_data" [false]
+    "operating_kind" [false]
+    "operating_point" [false]
+    "vote_count" [false]
+    "vote_counts" [false]}
+  "evaluation" {
+    "name" [false]
+    "confidence_threshold" [false]
+    "combiner" [0, false]
+    "missing_strategy" [0]
+    "ordering" [0]
+    "out_of_bag" [false]
+    "negative_class" [false]
+    "positive_class" [false]
+    "replacement" [false]
+    "sample_rate" [1.0]
+    "seed" [false]
+    "threshold" [false {}]
+    "probability_threshold" [false]
+    "range" [false []]
+    "ranges" [false {}]
+    "private" [true]
+    "excluded_fields" [[] false]
+    "input_fields" [false []]
+    "fields_map" [false {}]
+    "operating_kind" [false]
+    "operating_point" [false]}
+  "cross-validation" {"name" [false]}
+  "anomaly" {
+    "name" [false]
+    "anomaly_seed" [false]
+    "constraints" [false]
+    "credits_per_prediction" [false]
+    "price" [false]
+    "default_numeric_value" [false]
+    "excluded_fields" [[] false]
+    "id_fields" [[]]
+    "forest_size" [128]
+    "normalize_repeats" [false]
+    "out_of_bag" [false]
+    "replacement" [false]
+    "sample_rate" [1.0]
+    "seed" [false]
+    "shared" [false]
+    "private" [true]
+    "range" [false []]
+    "ranges" [false {}]
+    "input_fields" [false []]
+    "top_n" [10]}
+  "cluster" {
+    "name" [false]
+    "k" [false]
+    "balance_fields" [true]
+    "cluster_seed" [false]
+    "critical_value" [false]
+    "default_numeric_value" [false]
+    "excluded_fields" [[] false]
+    "field_scales" [{} false]
+    "model_clusters" [false]
+    "out_of_bag" [false]
+    "credits_per_prediction" [false]
+    "price" [false]
+    "shared" [false]
+    "private" [true]
+    "replacement" [false]
+    "sample_rate" [1.0]
+    "seed" [false]
+    "range" [false []]
+    "ranges" [false {}]
+    "input_fields" [false []]
+    "regularization" [false "l2"]
+    "summary_fields" [[]]
+    "weight_field" [false ""]}
+  "centroid" {
+    "name" [false]
+    "shared" [false]
+    "private" [true]
+    "input_data" [false]}
+  "anomalyscore" {
+    "name" [false]
+    "input_data" [false]
+    "shared" [false]
+    "private" [true]}
+  "associationset" {
+    "name" [false]
+    "private" [true]
+    "max_k" [false 100]
+    "score_by" [false]
+    "input_data" [false]}
+  "batchanomalyscore" {
+    "name" [false]
+    "all_fields" [false]
+    "fields_map" [false]
+    "header" [true]
+    "default_numeric_value" [false]
+    "excluded_fields" [[] false]
+    "input_fields" [[] false]
+    "importance" [false]
+    "newline" [false "LF"]
+    "output_dataset" [false]
+    "output_fields" [false []]
+    "separator" [","]
+    "score_name" ["score" false]}
+  "batchcentroid" {
+    "name" [false]
+    "all_fields" [false]
+    "fields_map" [false]
+    "header" [true]
+    "output_dataset" [false]
+    "default_numeric_value" [false]
+    "excluded_fields" [[] false]
+    "input_fields" [[] false]
+    "newline" [false "LF"]
+    "output_fields" [false []]
+    "distance_name" [false ""]
+    "centroid_name" [false ""]
+    "separator" [","]
+    "distance" [false]}
+  "batchprediction" {"name" [false]
+    "all_fields" [false]
+    "fields_map" [false]
+    "confidence_threshold" [false]
+    "combiner" [0 false]
+    "confidence" [false]
+    "confidences" [false]
+    "default_numeric_value" [false]
+    "excluded_fields" [[] false]
+    "input_fields" [[] false]
+    "importance" [false]
+    "header" [true]
+    "missing_strategy" [0]
+    "negative_class" [false]
+    "negative_class_confidence" [false]
+    "negative_class_probability" [false]
+    "newline" [false "LF"]
+    "node_id" [false]
+    "operating_kind" [false]
+    "operating_point" [false]
+    "output_dataset" [false]
+    "output_fields" [false []]
+    "positive_class" [false]
+    "probabilities" [false]
+    "probability" [false]
+    "probability_name" [false]
+    "separator" [","]
+    "prediction_name" [false ""]
+    "confidence_name" [false ""]
+    "threshold" [false {}]
+    "probability_threshold" [false]
+    "vote_count" [false]
+    "vote_count_name" [false "votes"]
+    "vote_counts" [false]
+    "votes" [false]}
+  "association" {
+    "name" [false]
+    "complement" [false]
+    "credits_per_prediction" [false]
+    "price" [false]
+    "default_numeric_value" [false "median"]
+    "discretization" [false]
+    "excluded_fields" [false []]
+    "field_discretizations" [false]
+    "input_fields" [false []]
+    "max_k" [false 100]
+    "max_lhs" [false 4]
+    "min_confidence" [false 0 0.0]
+    "min_leverage" [false 0 0.0]
+    "min_lift" [false 1 1.0]
+    "min_support" [false 1 1.0]
+    "missing_items" [false]
+    "out_of_bag" [false]
+    "replacement" [false]
+    "sample_rate" [1.0]
+    "seed" [false]
+    "shared" [false]
+    "private" [true]
+    "rhs_predicate" [false []]
+    "range" [false []]
+    "search_strategy" [false "leverage"]
+    "significance_level" [false 0.05]}
+  "logisticregression" {
+    "name" [false]
+    "compute_stats" [false]
+    "max_training_time" [false 1800]
+    "number_of_model_candidates" [false 128]
+    "private" [true]
+    "shared" [false]
+    "credits_per_prediction" [false]
+    "default_numeric_value" [false,
+                             "median"]
+    "balance_fields" [false]
+    "balance_objective" [false]
+    "objective_weights" [false []]
+    "weight_field" [false]
+    "bias" [true]
+    "c" [false, 1]
+    "eps" [false, 0.0001]
+    "excluded_fields" [false []]
+    "field_codings" [false]
+    "input_fields" [false []]
+    "missing_numerics" [true]
+    "normalize" [false]
+    "out_of_bag" [false]
+    "objective_field" [false]
+    "optimize" [false]
+    "price" [false]
+    "stats_sample_seed" [false ""]
+    "stats_sample_size" [false -1]
+    "range" [false []]
+    "regularization" [false "l2"]
+    "replacement" [false]
+    "sample_rate" [1.0]
+    "seed" [false]}
+  "topicmodel" {
+    "name" [false]
+    "private" [true]
+    "shared" [false]
+    "bigrams" [false]
+    "credits_per_prediction" [false]
+    "price" [false]
+    "case_sensitive" [false]
+    "excluded_terms" [false []]
+    "number_of_topics" [false 0]
+    "eps" [false, 0.00001]
+    "excluded_fields" [false []]
+    "field_codings" [false]
+    "input_fields" [false []]
+    "language" ["en" false]
+    "ngrams" [1 false]
+    "stem_words" [true]
+    "stopword_diligence" ["normal" false]
+    "stopword_removal" ["selected_language" false]
+    "term_filters" [[] false]
+    "term_regexps" [[] false]
+    "term_limit" [false 4096]
+    "token_mode" ["all" false]
+    "top_n_terms" [false 10]
+    "topicmodel_seed" [false]
+    "use_stopwords" [true]
+    "out_of_bag" [false]
+    "range" [false []]
+    "regularization" [false "l2"]
+    "replacement" [false]
+    "sample_rate" [1.0]
+    "seed" [false]}
+  "topicdistribution" {
+    "name" [false]
+    "private" [true]
+    "input_data" [false]}
+  "batchtopicdistribution" {
+    "name" [false]
+    "all_fields" [false]
+    "default_numeric_value" [false]
+    "excluded_fields" [[] false]
+    "input_fields" [[] false]
+    "header" [true]
+    "output_dataset" [false]
+    "fields_map" [false]
+    "newline" ["LF" false]
+    "output_fields" [false []]
+    "separator" [","]}
+  "timeseries" {
+    "name" [false]
+    "all_numeric_objectives" [false]
+    "damped_trend" [false]
+    "default_numeric_value" ["spline interpolation"
+                             false]
+    "error" [false]
+    "credits_per_prediction" [false]
+    "price" [false]
+    "field_parameters" [false]
+    "period" [false 1]
+    "private" [true]
+    "shared" [false]
+    "range" [false []]
+    "seasonality" [false]
+    "time_range" [false {}]
+    "trend" [false]
+    "horizon" [false 50]
+    "objective_field" [false]
+    "objective_fields" [false]}
+  "deepnet" {
+    "name" [false]
+    "balance_objective" [false]
+    "batch_normalization" [false]
+    "deepnet_seed" ["" false]
+    "default_numeric_value" [false]
+    "dropout_rate" [0.0 false]
+    "excluded_fields" [false []]
+    "hidden_layers" [false []]
+    "input_fields" [false []]
+    "learn_residuals" [false]
+    "learning_rate" [0.01 false]
+    "max_iterations" [20000 false]
+    "max_training_time" [1800 false]
+    "missing_numerics" [true]
+    "number_of_hidden_layers" [10 false]
+    "number_of_model_candidates" [128 false]
+    "objective_field" [false]
+    "objective_weights" [false []]
+    "optimizer" [{} false]
+    "ordering" [false 0]
+    "out_of_bag" [false]
+    "price" [false]
+    "range" [false []]
+    "replacement" [false]
+    "sample_rate" [1.0]
+    "seed" [false]
+    "search" [false]
+    "suggest_structure" [true]
+    "tree_embedding" [false]
+    "shared" [false]
+    "private" [true]
+    "weight_field" [false]}
+  "forecast" {
+    "name" [false]
+    "private" [true]
+    "input_data" [false]
+    "intervals" [true]}
+  "fusion" {
+    "name" [false]
+    "fields_maps" [{} false]}
+  "statisticaltest" {
+    "name" [false]
+    "ad_sample_size" [false 1024]
+    "ad_seed" [false]
+    "credits_per_prediction" [false]
+    "price" [false]
+    "default_numeric_value" [false]
+    "excluded_fields" [[] false]
+    "input_fields" [[] false]
+    "shared" [false]
+    "private" [true]
+    "out_of_bag" [false]
+    "range" [false []]
+    "sample_rate" [1.0]
+    "significance_levels" [false [] [0.01, 0.05, 0.1]]}
+  "sample" {
+    "name" [false]}
+  "correlation" {
+    "name" [false]
+    "categories" [false]
+    "default_numeric_value" [false]
+    "credits_per_prediction" [false]
+    "price" [false]
+    "shared" [false]
+    "private" [true]
+    "excluded_fields" [[] false]
+    "input_fields" [[] false]
+    "significance_levels" [false]
+    "objective_field" [false]
+    "out_of_bag" [false]
+    "range" [false []]
+    "sample_rate" [1.0]}
 
-;; MODELS
-;;
-;; Resource types for the model resources
-(define MODELS ["model" "ensemble" "anomaly"
-                "logisticregression" "topicmodel"
-                "timeseries" "deepnet"])
+})
+
 
 ;; REFERENCE-ONLY
 ;;
@@ -376,30 +537,58 @@
 ;; when comparing resources to their parents.
 ;;
 
-(define REFERENCE-ONLY {"source" ["size" "remote"]
-                        "dataset" ["rows" "ranges" "private"]
-                        "model" ["private" "shared"]
-                        "ensemble" ["models"]
-                        "logisticregression" ["private" "shared"]})
+(define bigml.reify.REFERENCE-ONLY {"source" ["size" "remote"]
+                                    "dataset" ["rows" "ranges" "private"]
+                                    "model" ["private" "shared"]
+                                    "ensemble" ["models"]
+                                    "logisticregression" ["private" "shared"]})
+
+
+;; STRICT-ATTRS
+;;
+;; attributes that need to be removed to generalize to other datasets.
+;;
+
+(define bigml.reify.STRICT-ATTRS {"source" ["size"]
+                                  "dataset" ["rows" "ranges" "size" "range"]
+                                  "model" ["range"]
+                                  "ensemble" ["range" "ranges"]
+                                  "logisticregression" ["range"]
+                                  "deepnet" ["range"]
+                                  "cluster" ["range" "ranges"]
+                                  "anomaly" ["range" "ranges"]
+                                  "evaluation" ["range" "ranges"]})
 
 
 ;; BOOSTING-ATTRS
 ;;
 ;; arguments to be sent in creation calls of boosting ensembles
 ;;
-(define BOOSTING-ATTRS ["iterations"
-                        "early_holdout"
-                        "early_out_of_bag"
-                        "step_out_of_bag"
-                        "learning_rate"])
+(define bigml.reify.BOOSTING-ATTRS ["iterations"
+                                    "early_holdout"
+                                    "early_out_of_bag"
+                                    "step_out_of_bag"
+                                    "learning_rate"])
+
 
 ;; SAMPLE-ATTRS
 ;;
 ;; arguments to be sent in creation calls of sampled ensembles
 ;;
-(define SAMPLE-ATTRS ["seed"
-                      "rate"
-                      "replacement"])
+(define bigml.reify.SAMPLE-ATTRS ["seed"
+                                  "rate"
+                                  "replacement"])
+
+
+;; TIME-RANGE-ATTRS
+;;
+;; arguments to be sent in creation calls of time series time range
+;;
+(define bigml.reify.TIME-RANGE-ATTRS ["start"
+                                      "end"
+                                      "interval"
+                                      "interval_unit"
+                                      "timestamp_field"])
 
 ;; ORIGINS
 ;;
@@ -407,220 +596,91 @@
 ;; keyed resource type is built
 ;;
 
-(define ORIGINS {"source" [["file_name",
-                            "remote"]]
-                 "dataset" [["new_fields"
-                             "origin_batch_resource"
-                             "cluster"
-                             "ranges"
-                             "origin_dataset"
-                             "origin_datasets"
-                             "source"]]
-                 "cross-validation" [["evaluations"]]
-                 "model" [["cluster"
-                           "datasets"
-                           "dataset"]]
-                 "ensemble" [["datasets"
-                              "dataset"]]
-                 "cluster" [["datasets"
-                             "dataset"]]
-                 "anomaly" [["datasets"
-                             "dataset"]]
-                 "prediction" [["deepnet"
-                                "logisticregression"
-                                "ensemble"
-                                "model"]]
-                 "centroid" [["cluster"]]
-                 "anomalyscore" [["anomaly"]]
-                 "associationset" [["association"]]
-                 "topicdistribution" [["topicmodel"]]
-                 "evaluation" [["ensemble"
-                                "model"
-                                "logisticregression"
-                                "timeseries"
-                                "deepnet"]
-                               ["dataset"]]
-                 "batchprediction" [["deepnet"
-                                     "logisticregression"
-                                     "ensemble"
-                                     "model"]
-                                    ["dataset"]]
-                 "batchcentroid" [["cluster"]
-                                  ["dataset"]]
-                 "batchanomalyscore" [["anomaly"]
-                                      ["dataset"]]
-                 "batchtopicdistribution" [["topicmodel"]
+(define bigml.reify.ORIGINS {"source" [["file_name",
+                                        "remote"]]
+                             "dataset" [["new_fields"
+                                         "origin_batch_resource"
+                                         "cluster"
+                                         "ranges"
+                                         "origin_dataset"
+                                         "origin_datasets"
+                                         "source"]]
+                             "cross-validation" [["evaluations"]]
+                             "model" [["cluster"
+                                       "datasets"
+                                       "dataset"]]
+                             "ensemble" [["datasets"
+                                          "dataset"]]
+                             "cluster" [["datasets"
+                                         "dataset"]]
+                             "anomaly" [["datasets"
+                                         "dataset"]]
+                             "prediction" [["deepnet"
+                                            "logisticregression"
+                                            "ensemble"
+                                            "model"
+                                            "fusion"]]
+                             "centroid" [["cluster"]]
+                             "anomalyscore" [["anomaly"]]
+                             "associationset" [["association"]]
+                             "topicdistribution" [["topicmodel"]]
+                             "evaluation" [["ensemble"
+                                            "model"
+                                            "logisticregression"
+                                            "timeseries"
+                                            "deepnet"
+                                            "fusion"]
                                            ["dataset"]]
-                 "association" [["datasets"
-                                 "dataset"]]
-                 "deepnet" [["datasets"
-                             "dataset"]]
-                 "logisticregression" [["datasets"
-                                        "dataset"]]
-                 "topicmodel" [["datasets"
-                                "dataset"]]
-                 "timeseries" [["datasets"
-                                "dataset"]]
-                 "forecast" [["timeseries"]]})
+                             "batchprediction" [["deepnet"
+                                                 "logisticregression"
+                                                 "ensemble"
+                                                 "model"
+                                                 "fusion"]
+                                                ["dataset"]]
+                             "batchcentroid" [["cluster"]
+                                              ["dataset"]]
+                             "batchanomalyscore" [["anomaly"]
+                                                  ["dataset"]]
+                             "batchtopicdistribution" [["topicmodel"]
+                                                       ["dataset"]]
+                             "association" [["datasets"
+                                             "dataset"]]
+                             "deepnet" [["datasets"
+                                         "dataset"]]
+                             "logisticregression" [["datasets"
+                                                    "dataset"]]
+                             "topicmodel" [["datasets"
+                                            "dataset"]]
+                             "timeseries" [["datasets"
+                                            "dataset"]]
+                             "forecast" [["timeseries"]]
+                             "fusion" [["models"]]})
 
-(define NAMED-ATTRIBUTES ["objective_field" "weight_field" "objective_fields"])
+(define bigml.reify.NAMED-ATTRIBUTES ["objective_field"
+                                      "weight_field"
+                                      "objective_fields"])
 
-;; PER-TYPE-PROCESS
-;;
-;; specific transformations or checkings that must be applied only to the keyed
-;; resource type.
-;;
-(define PER-TYPE-PROCESS {
-  "source" (lambda (id chain)
-             ;; sources that come from remote data can be reproduced, so we
-             ;; use the create and update calls. Sources that come from a
-             ;; local file cannot be created from whizzml, so we move the
-             ;; attributes to the update call and leave a source_id argument
-             ;; free.
-             (if (not (chain ["defs" id "create" "remote"] false))
-                 ;; local file
-                 (let (chain (dissoc-in chain
-                                        ["defs" id "create" "file_name"])
-                       update (chain ["defs" id "update"] {})
-                       chain (if (chain ["defs" id "create" "source_parser"]
-                                        false)
-                                 (assoc-in chain
-                                           ["defs" id "update-parser"]
-                                           (chain ["defs" id "create"]
-                                           false))
-                                 (assoc-in chain
-                                           ["defs" id "update"]
-                                           (merge update
-                                                  (chain ["defs" id "create"]
-                                                         false)))))
-                   (dissoc-in chain ["defs" id "create"]))
-                 chain))
-  "dataset" (lambda (id chain)
-              (let (ancestors (dataset-get-ancestors id chain)
-                    conf (chain ["defs" id "create"] false)
-                    upd-conf (chain ["defs" id "update"] false)
-                    upd-conf (if upd-conf
-                                 (dataset-set-objective upd-conf)
-                                 upd-conf)
-                    conf (dataset-set-objective conf)
-                    conf (dataset-set-size id conf ancestors)
-                    conf (dataset-set-new-fields conf)
-                    chain (assoc-in chain ["defs" id "create"] conf)
-                    chain (dataset-updates id chain))
-               (if upd-conf
-                   (assoc-in chain ["defs" id "update"] upd-conf)
-                   chain)))
-  "model" (lambda (id chain)
-            (let (ancestors (model-get-ancestors id chain)
-                  conf (chain ["defs" id "create"] false)
-                  conf (model-set-objective conf ancestors)
-                  chain (model-updates id chain))
-              (assoc-in chain ["defs"
-                               id
-                               "create"]
-                               conf)))
-  "cluster" (lambda (id chain)
-              (let (conf (chain ["defs" id "create"]))
-                (if (and (contains? conf "critical_value")
-                         (contains? conf "k"))
-                    (dissoc-in chain ["defs" id "create" "k"])
-                    chain)))
-  "ensemble" (lambda (id chain)
-               (let (ancestors (model-get-ancestors id chain)
-                     conf (chain ["defs" id "create"] false)
-                     conf (model-set-objective conf ancestors)
-                     conf (if (contains? conf "boosting")
-                              (filter-attrs conf "boosting" BOOSTING-ATTRS)
-                              conf)
-                     conf (if (contains? conf "ensemble_sample")
-                              (filter-attrs conf
-                                            "ensemble_sample"
-                                            SAMPLE-ATTRS)
-                              conf)
-                     chain (model-updates id chain))
-                 (assoc-in chain ["defs"
-                                  id
-                                  "create"]
-                                  conf)))
-  "logisticregression" (lambda (id chain)
-                         (let (ancestors (model-get-ancestors id chain)
-                               conf (chain ["defs" id "create"] false)
-                               conf (model-set-objective conf ancestors)
-                               chain (model-updates id chain))
-                           (assoc-in chain ["defs"
-                                            id
-                                            "create"]
-                                     conf)))
-  "deepnet" (lambda (id chain)
-              (let (ancestors (model-get-ancestors id chain)
-                    conf (chain ["defs" id "create"] false)
-                    conf (model-set-objective conf ancestors)
-                    conf (remove-layers-type conf)
-                    chain (model-updates id chain))
-                (assoc-in chain ["defs"
-                                 id
-                                 "create"]
-                          conf)))
-  "timeseries" (lambda (id chain)
-                 (let (ancestors (model-get-ancestors id chain)
-                       conf (chain ["defs" id "create"] false)
-                       conf (model-set-objective conf ancestors)
-                       chain (model-updates id chain))
-                   (assoc-in chain ["defs"
-                                    id
-                                    "create"]
-                               conf)))
-  "batchprediction" (lambda (id chain)
-                       (if (not (chain ["defs"
-                                               id
-                                               "create"
-                                               "header"] true))
-                           (let (chain (dissoc-in chain ["defs"
-                                                         id
-                                                         "create"
-                                                         "prediction_name"]))
-                             (dissoc-in chain ["defs"
-                                               id
-                                               "create"
-                                               "confidence_name"]))
-                           chain))
-  "batchcentroid" (lambda (id chain)
-                    (if (not (chain ["defs"
-                                            id
-                                            "create"
-                                            "header"] true))
-                         (let (chain (dissoc-in chain ["defs"
-                                                      id
-                                                      "create"
-                                                      "centroid_name"]))
-                          (dissoc-in chain ["defs"
-                                            id
-                                            "create"
-                                            "distance_name"]))
-                        chain))
-  "batchanomalyscore" (lambda (id chain)
-                        (if (not (chain ["defs"
-                                                id
-                                                "create"
-                                                "header"] true))
-                            (dissoc-in chain ["defs"
-                                              id
-                                              "create"
-                                              "score_name"])
-                            chain))})
+(define bigml.reify.UPD-ONLY-ATTRS ["private", "shared", "shared_clonable",
+                                    "credits_per_prediction", "price"])
+
+(define bigml.reify.BATCH-HEADER-ATTRS {
+  "batchprediction" ["prediction_name" "confidence_name"]
+  "batchcentroid" ["centroid_name" "distance_name"]
+  "batchanomalyscore" ["score_name"]})
 
 ;; DEFAULT-UPDATABLE
 ;;
 ;; field properties updatable in all resources that contain a field structure
 ;;
 
-(define DEFAULT-UPDATABLE ["name" "label" "description"])
+(define bigml.reify.DEFAULT-UPDATABLE ["name" "label" "description"])
 
 ;; DATASET-UPDATABLE
 ;;
 ;; field properties updatable in a dataset
 ;;
-(define DATASET-UPDATABLE (concat DEFAULT-UPDATABLE ["preferred"]))
+(define bigml.reify.DATASET-UPDATABLE
+        (concat bigml.reify.DEFAULT-UPDATABLE ["preferred"]))
 
 
 ;; SOURCE-UPDATABLE
@@ -628,7 +688,10 @@
 ;; field properties updatable in a source
 ;;
 
-(define SOURCE-UPDATABLE (concat DEFAULT-UPDATABLE ["optype"]))
+(define bigml.reify.SOURCE-UPDATABLE
+        (concat bigml.reify.DEFAULT-UPDATABLE ["optype"
+                                               "term_analysis"
+                                               "item_analysis"]))
 
 
 ;; FIELDS-PATH
@@ -636,19 +699,20 @@
 ;; attribute that contains the field structure keyed by resource type
 ;;
 
-(define FIELDS-PATH {"source" ["fields"]
-                     "dataset" ["fields"]
-                     "model" ["model" "fields"]
-                     "ensemble" ["ensemble" "fields"]
-                     "cluster" ["clusters" "fields"]
-                     "anomaly" ["model" "fields"]
-                     "correlation" ["correlations" "fields"]
-                     "statisticaltests" ["statistical_tests" "fields"]
-                     "logisticregression" ["logistic_regression" "fields"]
-                     "deepnet" ["deepnet" "fields"]
-                     "association" ["associations" "fields"]
-                     "topicmodel" ["topic_model" "fields"]
-                     "timeseries" ["time_series" "fields"]})
+(define bigml.reify.FIELDS-PATH
+        {"source" ["fields"]
+         "dataset" ["fields"]
+         "model" ["model" "fields"]
+         "ensemble" ["ensemble" "fields"]
+         "cluster" ["clusters" "fields"]
+         "anomaly" ["model" "fields"]
+         "correlation" ["correlations" "fields"]
+         "statisticaltests" ["statistical_tests" "fields"]
+         "logisticregression" ["logistic_regression" "fields"]
+         "deepnet" ["deepnet" "fields"]
+         "association" ["associations" "fields"]
+         "topicmodel" ["topic_model" "fields"]
+         "timeseries" ["time_series" "fields"]})
 
 
 ;; INNER-INFO-NAMES-PATH
@@ -656,21 +720,24 @@
 ;; attribute that contains inner clusters and topics info
 ;;
 
-(define INNER-INFO-NAMES-PATH {"cluster" ["clusters" "clusters"]
-                               "topicmodel" ["topic_model" "topics"]})
+(define bigml.reify.INNER-INFO-NAMES-PATH
+        {"cluster" ["clusters" "clusters"]
+         "topicmodel" ["topic_model" "topics"]})
 
 
 ;; INNER-INFO-PATH
 ;;
 ;; attribute that contains inner clusters and topics info
 ;;
-(define INNER-INFO-PATH {"model" "model"
-                         "association" "associations"
-                         "cluster" "clusters"
-                         "anomaly" "model"
-                         "logisticregression" "logistic_regression"
-                         "deepnet" "deepnet"
-                         "timeseries" "time_series"})
+(define bigml.reify.INNER-INFO-PATH
+        {"model" "model"
+         "association" "associations"
+         "cluster" "clusters"
+         "anomaly" "model"
+         "logisticregression" "logistic_regression"
+         "topicmodel" "topic_model"
+         "deepnet" "deepnet"
+         "timeseries" "time_series"})
 
 
 ;; DFT-NAMES
@@ -678,19 +745,186 @@
 ;; Default names for the clusters and topics
 ;;
 
-(define DFT-NAMES {"cluster" "Cluster \\d+?"
-                   "topicmodel" "Topic \\d+?"})
+(define bigml.reify.DFT-NAMES {"cluster" "Cluster \\d+?"
+                               "topicmodel" "Topic \\d+?"})
+
+;; Auxiliar functions for reify
+
+;; balance-objective
+;;
+;; removes the objective_weights attribute when the balance_objective
+;; attribute is found.
+;;
+;; Inputs:
+;;   conf: (map) Map with the configuration of the model
+
+(define (bigml.reify.balance-objective conf)
+  (if (conf "balance_objective" false)
+      (dissoc conf "objective_weights")
+      conf))
+
+;; set-conf
+;;
+;; Sets the wanted configuration in the chain
+;;
+;; Inputs:
+;;  chain: (map) workflow chain of events
+;;  id: (string) resource ID
+;;  action: (string) action label where the change is added
+;;
+;; Output: (map) workflow chain of events
+;;
+(define (bigml.reify.set-conf chain id action config)
+  (assoc-in chain ["defs" id action] config))
 
 
-;; SCRIPTIFY-CATEGORY
+;; get-conf
 ;;
-;; Category that the scriptified script is assigned to
+;; Gets the wanted configuration in the chain
 ;;
-(define SCRIPTIFY-CATEGORY 4)
+;; Inputs:
+;;  chain: (map) workflow chain of events
+;;  id: (string) resource ID
+;;  action: (string) action label where the change is added
+;;
+;; Output: (map) configuration
+;;
+(define (bigml.reify.get-conf chain id action)
+  (chain ["defs" id action] {}))
+
+
+;; remove-conf
+;;
+;; Removes the wanted configuration in the chain
+;;
+;; Inputs:
+;;  chain: (map) workflow chain of events
+;;  id: (string) resource ID
+;;  action: (string) action label where the config is removed
+;;
+;; Output: (map) configuration
+;;
+(define (bigml.reify.remove-conf chain id action)
+  (dissoc-in chain ["defs" id action]))
+
+
+;; add-to
+;;
+;; Adds the key value to the wanted configuration in the chain
+;;
+;; Inputs:
+;;  chain: (map) workflow chain of events
+;;  id: (string) resource ID
+;;  action: (string) action label where the change is added
+;;  attr: (string) attribute to add
+;;  value: (map) value to assign
+;;
+;; Output: (map) workflow chain of events
+;;
+(define (bigml.reify.add-to chain id action attr value)
+  (assoc-in chain ["defs" id action attr] value))
+
+;; remove-from
+;;
+;; Removes the key from the wanted configuration in the chain
+;;
+;; Inputs:
+;;  chain: (map) workflow chain of events
+;;  id: (string) resource ID
+;;  action: (string) action label where the attribute is removed from
+;;  attr: (string) attribute to remove
+;;
+(define (bigml.reify.remove-from chain id action attr)
+  (dissoc-in chain ["defs" id action attr]))
+
+;; get-attr
+;;
+;; Gets the attribute value from the raw configuration in the chain
+;;
+;; Inputs:
+;; chain: (map) worklfow chain of events
+;; id: (string) resource ID
+;; attr: (string) attribute to get
+(define (bigml.reify.get-attr chain id attr)
+  (chain ["defs" id "ref" attr] false))
+
+;; get-attr-action
+;;
+;; Gets the attribute value from the wanted configuration in the chain
+;;
+;; Inputs:
+;; chain: (map) worklfow chain of events
+;; id: (string) resource ID
+;; action: (string) action label where the attribute is
+;; attr: (string) attribute to get
+(define (bigml.reify.get-attr-action chain id action attr)
+  (chain ["defs" id action attr] false))
+
+
+;; batch-headers
+;;
+;; Removes header names in batch resources if no headers are used
+;;
+;; Inputs:
+;; chain: (map) workflow chain of events
+;; id: (string) resource ID
+;;
+;; Outputs: (map) chain of events
+(define (bigml.reify.batch-headers chain id)
+  (if (or (not (contains? (bigml.reify.get-conf chain id "create") "header"))
+           (bigml.reify.get-attr-action chain id "create" "header"))
+      chain
+      (let (type (resource-type id)
+            attrs (bigml.reify.BATCH-HEADER-ATTRS type []))
+        (iterate (acc chain attr attrs)
+          (bigml.reify.remove-from acc id "create" attr)))))
+
+
+
+;; filter-in-values
+;;
+;; filters the arguments in the values of a nested two-level
+;; map structure where we know the first parent attribute and the last
+;; inner attribute, but not the middle keys, like:
+;;
+;; field_parameters: {
+;;   000005: {
+;;     period: 1,
+;;     time_range: {
+;;     descending: false,
+;;     end: 79,
+;;     interval: 1,
+;;     interval_unit: "index",
+;;     start: 0
+;;   }
+;; }
+;;}
+;;
+;; where we want to filter attributes of "time_range" in the "field_parameters"
+;; attributes
+;;
+;; Inputs:
+;;   conf: (map) map that describes the configuration
+;;   outer-attr: (string) outer container map key
+;;   inner-attr: (string) key to the nested value to be filtered
+;;   attrs: (list) list of valid arguments
+;;
+;; Output: (map) map that describes the configuration
+
+(define (bigml.reify.filter-in-values conf outer-attr inner-attr attrs)
+  (let (inner-map (conf outer-attr {})
+        filtered-attr (iterate (r {} attr (keys inner-map))
+                        (assoc r
+                               attr
+                               (bigml.reify.filter-attrs (inner-map attr)
+                                                         inner-attr
+                                                         attrs))))
+        (assoc conf outer-attr filtered-attr)))
+
 
 ;; filter-attrs
 ;;
-;; filters the arguments that can be sent when the parent attribute is a map
+;; filters the arguments in a map to keep only the ones given in a list
 ;;
 ;; Inputs:
 ;;   conf: (map) map that describes the configuration
@@ -699,7 +933,7 @@
 ;;
 ;; Output: (map) map that describes the configuration
 
-(define (filter-attrs conf parent-attr attrs)
+(define (bigml.reify.filter-attrs conf parent-attr attrs)
   (let (parent (conf parent-attr {})
         filtered-attr (iterate (r {} attr (keys parent))
                         (if (member? attr attrs)
@@ -707,11 +941,180 @@
                             r)))
         (assoc conf parent-attr filtered-attr)))
 
-;; model-updates
+
+;; clean-origin-info
+;;
+;; Checks that the contents of the attribute are a single or a list of
+;; resource IDs
+;;
+;; Inputs:
+;;   info: (string|list) resource ID or list of IDs
+;;
+;; Output: (string|list|false) resource ID, list of IDs or false
+
+(define (bigml.reify.clean-origin-info info)
+  (let (info-check (if (list? info)
+                       (reduce (lambda (x y) (and x y))
+                               true
+                               (map resource-id? info))
+                       (resource-id? info)))
+    (if info-check
+        info
+        false)))
+
+
+;; update-attrs?
+;;
+;; True if the resource-type attributes can only be changed in updates
+;;
+;; Inputs:
+;;  res-type: (string) Resource-type
+;;
+;; Output: (boolean) True if any of the update only attributes are available
+;;
+(define (bigml.reify.update-attrs? res-type)
+  (some (lambda (x) (member? x (keys (bigml.reify.DEFAULTS res-type {}))))
+        bigml.reify.UPD-ONLY-ATTRS))
+
+
+
+;;------------------------------------------------------------------------
+;; PER-TYPE-PROCESS
+;;
+;; specific transformations or checkings that must be applied only to some
+;; resource types.
+;;
+(define bigml.reify.PER-TYPE-PROCESS {
+  "source" (lambda (id chain)
+             ;; sources that come from remote data can be reproduced, so we
+             ;; use the create and update calls. Sources that come from a
+             ;; local file cannot be created from whizzml, so we move the
+             ;; attributes to the update call and leave a source_id argument
+             ;; free.
+             (if (not (bigml.reify.get-attr chain id "remote"))
+                 ;; local file
+                 (let (chain (bigml.reify.remove-from chain
+                                                      id
+                                                      "create"
+                                                      "file_name")
+                       update (bigml.reify.get-conf chain id "update")
+                       chain (if (bigml.reify.get-attr chain
+                                                       id
+                                                       "source_parser")
+                                 (bigml.reify.set-conf chain
+                                                       id
+                                                       "update-parser"
+                                    (bigml.reify.get-conf chain id "create"))
+                                 (bigml.reify.set-conf chain
+                                                         id
+                                                         "update"
+                                           (merge update
+                                                  (bigml.reify.get-conf chain
+                                                                        id
+                                                                        "create")))))
+                   (bigml.reify.remove-conf chain id "create"))
+                 chain))
+  "dataset" (lambda (id chain)
+              ;; datasets have an associated objective field and
+              ;; can store transformations from other datasets, so we
+              ;; need to compare them to their parents to check
+              (let (ancestors (bigml.reify.dataset-get-ancestors id chain)
+                    conf (bigml.reify.get-conf chain id "create")
+                    upd-conf (bigml.reify.get-conf chain id "update")
+                    upd-conf (if upd-conf
+                                 (bigml.reify.dataset-set-objective upd-conf)
+                                 upd-conf)
+                    conf (bigml.reify.dataset-set-objective conf)
+                    conf (bigml.reify.dataset-set-size id conf ancestors)
+                    conf (bigml.reify.dataset-set-new-fields conf)
+                    chain (bigml.reify.set-conf chain id "create" conf)
+                    chain (bigml.reify.dataset-updates id chain))
+               (if upd-conf
+                   (bigml.reify.set-conf chain id "update" upd-conf)
+                   chain)))
+  "model" (lambda (id chain)
+            ;; models have an associated objective field and
+            ;; some complementary options for balancing
+            (let (ancestors (bigml.reify.model-get-ancestors id chain)
+                  conf (bigml.reify.get-conf chain id "create")
+                  conf (bigml.reify.model-set-objective conf ancestors)
+                  conf (bigml.reify.balance-objective conf))
+              (bigml.reify.set-conf chain id "create" conf)))
+  "cluster" (lambda (id chain)
+              ;; clusters can either be g-means or k-means. If g-means
+              ;; k must be discarded
+              (let (conf (bigml.reify.get-conf chain id "create"))
+                (if (and (contains? conf "critical_value")
+                         (contains? conf "k"))
+                    (bigml.reify.remove-from chain id "create" "k")
+                    chain)))
+  "ensemble" (lambda (id chain)
+               ;; ensembles have an associated objective field and
+               ;; can be of many types. We need to select attributes according
+               ;; to these types.
+               (let (ancestors (bigml.reify.model-get-ancestors id chain)
+                     conf (bigml.reify.get-conf chain id "create")
+                     conf (bigml.reify.model-set-objective conf ancestors)
+                     conf (if (contains? conf "boosting")
+                              (bigml.reify.filter-attrs
+                                conf
+                                "boosting"
+                                bigml.reify.BOOSTING-ATTRS)
+                              conf)
+                     conf (if (contains? conf "ensemble_sample")
+                              (bigml.reify.filter-attrs
+                                conf
+                                "ensemble_sample"
+                                bigml.reify.SAMPLE-ATTRS)
+                              conf)
+                     conf (bigml.reify.balance-objective conf))
+                 (bigml.reify.set-conf chain id "create" conf)))
+  "logisticregression" (lambda (id chain)
+                         ;; logistic regression have an objective field
+                         ;; that can be balanced too
+                         (let (ancestors (bigml.reify.model-get-ancestors id
+                                                                          chain)
+                               conf (bigml.reify.get-conf chain id "create")
+                               conf (bigml.reify.model-set-objective conf ancestors)
+                               conf (bigml.reify.balance-objective conf))
+                           (bigml.reify.set-conf chain id "create" conf)))
+  "deepnet" (lambda (id chain)
+              ;; deepnets have an objective field, can be balanced and
+              ;; also the ones with search=True should not keep the layers info
+              (let (ancestors (bigml.reify.model-get-ancestors id chain)
+                    conf (bigml.reify.get-conf chain id "create")
+                    conf (bigml.reify.model-set-objective conf ancestors)
+                    conf (bigml.reify.remove-layers-type conf)
+                    conf (bigml.reify.deepnet-suggest-dft conf)
+                    conf (bigml.reify.balance-objective conf))
+                (bigml.reify.set-conf chain id "create" conf)))
+  "timeseries" (lambda (id chain)
+                 ;; timeseries have an objective field (or many)
+                 ;; and only some time-range and field parameters are
+                 ;; accepted in create calls
+                 (let (ancestors (bigml.reify.model-get-ancestors id chain)
+                       conf (bigml.reify.get-conf chain id "create")
+                       conf (bigml.reify.model-set-objective conf ancestors)
+                       conf (if (contains? conf "time_range")
+                                (bigml.reify.filter-attrs
+                                  conf
+                                  "time_range"
+                                  bigml.reify.TIME-RANGE-ATTRS)
+                                conf)
+                       conf (if (contains? conf "field_parameters")
+                                (bigml.reify.filter-in-values
+                                  conf
+                                  "field_parameters"
+                                  "time_range"
+                                  bigml.reify.TIME-RANGE-ATTRS)
+                                conf))
+                   (bigml.reify.set-conf chain id "create" conf)))})
+
+;; adding-updates
 ;;
 ;; special code to be run on
-;; model-specific attributes that can be different from the default values
-;; like private and shared
+;; attributes that can only be updated,
+;; like private and shared, etc.
 ;;
 ;; Inputs:
 ;;   id: (string) model ID
@@ -719,34 +1122,44 @@
 ;;
 ;; Output: (map) map that describes the reify chain of resources
 
-(define (model-updates id chain)
+(define (bigml.reify.adding-updates id chain)
   (let (conf (chain ["defs" id "create"] false)
+        upd-conf (chain ["defs" id "update"] {})
+        upd-conf (iterate (acc upd-conf attr bigml.reify.UPD-ONLY-ATTRS)
+                   (if (member? attr (keys conf))
+                       (assoc acc attr (conf attr false))
+                        acc))
         private (if (member? "private" (keys conf))
-                    (conf "private" false)
+                    (upd-conf "private" false)
                     true)
-        shared (conf "shared" false)
         chain (if (not private)
-                  (assoc-in chain ["defs"
-                                   id
-                                   "update"
-                                   "private"]
-                                   private)
-                  chain))
-    (if shared
-        (assoc-in chain ["defs" id "update" "shared"] shared)
-        chain)))
+                  (assoc-in chain
+                            ["defs" id "update"]
+                            (assoc upd-conf "private" private))
+                  (assoc-in chain
+                            ["defs" id "update"]
+                            upd-conf))
+        chain (if (= (chain ["defs" id "update"]) {})
+                  (assoc-in chain ["defs" id "update"] false)
+                  chain)
+        conf (iterate (acc conf attr bigml.reify.UPD-ONLY-ATTRS)
+               (if (member? attr (keys conf))
+                   (dissoc acc attr)
+                   acc))
+        chain (assoc-in chain ["defs" id "create"] conf))
+    chain))
 
 ;; model-get-ancestors
 ;;
 ;; getting the ancestors attributes (parent and grandparent)
-;; to check attributes
+;; to check inherited attributes and origins
 ;;
 ;; Inputs:
 ;;  id: (string) model ID
 ;;  chain: (map) map that describes the reify chain of resources
 ;; Output: (map) ancestor resources and attributes
 
-(define (model-get-ancestors id chain)
+(define (bigml.reify.model-get-ancestors id chain)
   (let (parents (chain ["defs" id "parents"] false)
         parent (head parents)
         origin (nth parent 0)
@@ -766,16 +1179,14 @@
             gp-origin (nth grandparent 0)
             grandparent (nth grandparent 1)
             grandparent (if (list? grandparent) (head grandparent) grandparent)
-            gp-conf (chain ["defs" grandparent "create"] false)
+            gp-conf (bigml.reify.get-conf ancestors grandparent "create")
             ancestors (assoc ancestors "grandparent" grandparent))
-        (assoc ancestors "gp-conf" (chain ["defs"
-                                           grandparent
-                                           "create"]
-                                          false)))
-      (assoc ancestors "gp-conf" (chain ["defs"
-                                         grandparent
-                                         "create"]
-                                        false)))))
+        (assoc ancestors "gp-conf" (bigml.reify.get-conf chain
+                                                         grandparent
+                                                         "create")))
+      (assoc ancestors "gp-conf" (bigml.reify.get-conf chain
+                                                       grandparent
+                                                       "create")))))
 
 
 ;; model-set-objective
@@ -785,7 +1196,7 @@
 ;;  conf: (map) model configuration attributes
 ;;  ancestors: (map) ancestors configuration attributes
 ;; Output: (map) model updated configuration
-(define (model-set-objective conf ancestors)
+(define (bigml.reify.model-set-objective conf ancestors)
   (let (gp-conf (or (ancestors "gp-conf" {}) {})
         origin (or (ancestors "origin" {}) {}))
     (if (or (not (conf "objective_field" false)) (= origin "cluster"))
@@ -796,18 +1207,6 @@
               (assoc conf "objective_field" objective)
               (dissoc conf "objective_field"))))))
 
-;;ensemble-get-fields
-;;
-;; Retrieving the field structure for an ensemble from the first model
-;;
-;; Inputs:
-;;   id: (string) Ensemble ID
-;;   configuraiton: (map) configuration attributes
-;;
-;; Output: (map) resource's configuration attributes
-(define (ensemble-get-fields id configuration)
-  (let (first-model (fetch (head (configuration "models"))))
-    (get-fields first-model configuration)))
 
 ;; dataset-updates
 ;;
@@ -820,18 +1219,17 @@
 ;;
 ;; Output: (map) reify chain of resources
 
-(define (dataset-updates id chain)
-  (let (chain (model-updates id chain)
-        conf (chain ["defs" id "create"] false)
-        origin (head (head (chain ["defs" id "parents"] false))))
+(define (bigml.reify.dataset-updates id chain)
+  (let (conf (bigml.reify.get-conf chain id "create")
+        origin (head (head (bigml.reify.get-conf chain id "parents"))))
     ;; for batch_predictions, batch_clusters, batch_anomaly_scores the
     ;; generated datasets have the default parameters and all the attributes
     ;; need to be updated after creation time.
     (if (= origin "origin_batch_resource")
-        (let (chain (dissoc-in chain ["defs" id "create"])
+        (let (chain (bigml.reify.remove-conf chain id "create")
               conf (dissoc conf "input_fields")
-              chain (assoc-in chain ["defs" id "update"] conf))
-          (assoc-in chain ["defs" id "get"] "output_dataset_resource"))
+              chain (bigml.reify.set-conf chain id "update" conf))
+          (bigml.reify.set-conf chain id "get" "output_dataset_resource"))
         chain)))
 
 ;; dataset-set-size
@@ -845,7 +1243,7 @@
 ;;
 ;; Outputs: (map) dataset updated configuration
 
-(define (dataset-set-size id conf ancestors)
+(define (bigml.reify.dataset-set-size id conf ancestors)
   (let (parent-type (resource-type (ancestors "parent" false)))
     (if (and (= parent-type "source")
              (not (= (conf "size" false)
@@ -862,10 +1260,12 @@
 ;;
 ;; Outputs: (map) deepnet updated configuration
 
-(define (remove-layers-type conf)
-  (let (hidden-layers (conf "hidden_layers")
-        hidden-layers (map (lambda (x) (dissoc x "type")) hidden-layers))
-    (assoc conf "hidden_layers" hidden-layers)))
+(define (bigml.reify.remove-layers-type conf)
+  (if (conf "hidden_layers" false)
+    (let (hidden-layers (conf "hidden_layers")
+          hidden-layers (map (lambda (x) (dissoc x "type")) hidden-layers))
+      (assoc conf "hidden_layers" hidden-layers))
+    conf))
 
 ;; deepnet-suggest-dft
 ;;
@@ -878,18 +1278,11 @@
 ;;
 ;; Output: (map) map that describes the reify chain of resources
 
-(define (deepnet-suggest-dft id chain)
-  (let (conf (chain ["defs" id "create"] false)
-        suggest (if (member? "suggest_structure" (keys conf))
+(define (bigml.reify.deepnet-suggest-dft conf)
+  (let (suggest (if (member? "suggest_structure" (keys conf))
                     (conf "suggest_structure" false)
                     true))
-    chain (if (not suggest)
-              (assoc-in chain ["defs"
-                               id
-                               "create"
-                               "suggest_structure"]
-                               suggest)
-              chain)))
+    (assoc conf "suggest_structure" suggest)))
 
 
 ;; new-fields-generators
@@ -901,10 +1294,10 @@
 ;;
 ;; Output: (map) updated dataset configuration
 
-(define (new-fields-generators conf)
+(define (bigml.reify.new-fields-generators conf)
   (let (generators (conf "output_fields" false)
-        generator-fn (lambda (x) (let (y (select-map-keys x ["generator"
-                                                             "names"])
+        generator-fn (lambda (x) (let (y (select-keys x ["generator"
+                                                         "names"])
                                        y (assoc y "field" (y
                                                            "generator"
                                                            false)))
@@ -920,7 +1313,7 @@
 ;;
 ;; Output: (map) updated dataset configuration
 
-(define (dataset-set-new-fields conf)
+(define (bigml.reify.dataset-set-new-fields conf)
   ;; if new_fields is not empty, remove input_fields and get new_fields from
   ;; output_fields generators. Remove output_fields, and all_but
   (let (new-fields (conf "new_fields" false)
@@ -928,21 +1321,22 @@
                  (dissoc conf "input_fields")
                  conf)
         conf (if (and new-fields (not (empty? new-fields)))
-                 (new-fields-generators conf)
+                 (bigml.reify.new-fields-generators conf)
                  conf)
         conf (dissoc conf "output_fields"))
     (dissoc conf "all_but")))
 
 ;; dataset-set-objective
 ;;
-;; Sets the objective field attribute
+;; Sets the objective field attribute in datasets, where the syntax is
+;; different from the model resources
 ;;
 ;; Inputs:
 ;;   conf: (map) dataset configuration
 ;;
 ;; Output: (map) updated dataset configuration
 
-(define (dataset-set-objective conf)
+(define (bigml.reify.dataset-set-objective conf)
   (let (objective (conf "objective_field" false))
     (if objective
         (assoc conf "objective_field" {"id" (objective "id" "")})
@@ -959,7 +1353,7 @@
 ;;
 ;; Output: (map) ancestors attributes
 
-(define (dataset-get-ancestors id chain)
+(define (bigml.reify.dataset-get-ancestors id chain)
   (let (parents (chain ["defs" id "parents"] false)
         parent (head parents)
         origin (nth parent 0)
@@ -992,14 +1386,12 @@
                                       (recur (+ index 1) grandparent)))))
                           grandparent)
             ancestors (assoc ancestors "grandparent" grandparent)))
-        (assoc ancestors "gp-conf" (chain ["defs"
-                                           grandparent
-                                           "create"]
-                                          false))
-        (assoc ancestors "gp-conf" (chain ["defs"
-                                           grandparent
-                                           "create"]
-                                          false)))))
+        (assoc ancestors "gp-conf" (bigml.reify.get-conf chain
+                                                         grandparent
+                                                         "create"))
+        (assoc ancestors "gp-conf" (bigml.reify.get-conf chain
+                                                         grandparent
+                                                         "create")))))
 
 ;; get-non-defaults
 ;;
@@ -1013,7 +1405,7 @@
 ;;
 ;; Output: (map) updated configuration
 
-(define (get-non-defaults resource defaults configuration)
+(define (bigml.reify.get-non-defaults resource defaults configuration)
   (loop (index 0 lconfiguration configuration)
     (if (= index (count (keys defaults)))
         lconfiguration
@@ -1021,11 +1413,13 @@
               res-type (resource-type resource)
               value (resource attribute false)
               value (if (and (not value)
-                             (contains? INNER-INFO-PATH res-type)
-                             (contains? (resource (INNER-INFO-PATH res-type)
+                             (contains? bigml.reify.INNER-INFO-PATH res-type)
+                             (contains? (resource (bigml.reify.INNER-INFO-PATH
+                                                   res-type)
                                                   {})
                                                   attribute))
-                        (resource [(INNER-INFO-PATH res-type) attribute]
+                        (resource [(bigml.reify.INNER-INFO-PATH res-type)
+                                  attribute]
                                    false)
                         value)
               lconfiguration (if (not (member? value
@@ -1036,25 +1430,6 @@
                                  lconfiguration))
           (recur (+ index 1) lconfiguration)))))
 
-;; clean-origin-info
-;;
-;; Checks that the contents of the attribute are a single or a list of
-;; resource IDs
-;;
-;; Inputs:
-;;   info: (string|list) resource ID or list of IDs
-;;
-;; Output: (string|list|false) resource ID, list of IDs or false
-
-(define (clean-origin-info info)
-  (let (info-check (if (list? info)
-                       (reduce (lambda (x y) (and x y))
-                               true
-                               (map resource-id? info))
-                       (resource-id? info)))
-    (if info-check
-        info
-        false)))
 
 ;; get-parents-argument
 ;;
@@ -1070,7 +1445,9 @@
 ;;
 ;; Outputs: (map) origins found
 
-(define (get-parents-argument resource argument-origins found-origins)
+(define (bigml.reify.get-parents-argument resource
+                                          argument-origins
+                                          found-origins)
   (loop (index 0 lfound-origins found-origins)
     (if (= index (count argument-origins))
         lfound-origins
@@ -1087,18 +1464,18 @@
                                   (keys origin-info)
                                   origin-info)
                               origin-info)
+              raw-origin-info origin-info
+              origin-info (if (and (= origin "models")
+                                   (map? (origin-info 0)))
+                              (map (lambda (x) (x "id")) origin-info)
+                              origin-info)
               origin-info (if (not (= origin "remote"))
-                              (clean-origin-info origin-info)
+                              (bigml.reify.clean-origin-info origin-info)
                               origin-info)
-              ;; keeping only the first dataset as origin for models
-              origin-info (if (and origin-info (= origin "datasets"))
-                              (head origin-info)
-                              origin-info)
-              origin (if (and origin-info (= origin "datasets"))
-                         "dataset"
-                         origin)
               lfound-origins (if origin-info
-                                 (append lfound-origins [origin origin-info])
+                                 (append lfound-origins [origin
+                                                          origin-info
+                                                          raw-origin-info])
                                  lfound-origins))
           (if (not origin-info)
               (recur (+ index 1) lfound-origins)
@@ -1115,9 +1492,12 @@
 ;;
 ;; Outputs: (list) List of two-element lists. The two elements are the
 ;;                 origin type and the ID of the origin resource
+;;                 The origin type is usually the name of the attribute used
+;;                 in the create payload. Datasets created from batch resources
+;;                 use a different attribute (origin_batch_resource)
 
-(define (get-parents resource type)
-  (let (origins (ORIGINS type [])
+(define (bigml.reify.get-parents resource type)
+  (let (origins (bigml.reify.ORIGINS type [])
         found-origins [])
     (loop (index 0 lfound-origins found-origins)
       (if (= index (count origins))
@@ -1127,22 +1507,23 @@
                       "code" 42})
               lfound-origins)
           (let (argument-origins (nth origins index)
-                lfound-origins (get-parents-argument resource
-                                                     argument-origins
-                                                     lfound-origins))
+                lfound-origins (bigml.reify.get-parents-argument
+                                 resource
+                                 argument-origins
+                                 lfound-origins))
             (recur (+ index 1) lfound-origins))))))
 
 
 ;; parent-ids
 ;;
-;; Filtering only IDs from the origin, ID pairs
+;; Filtering only IDs from the origin, ID pairs (origin type, origin ID)
 ;;
 ;; Inputs:
 ;;   parents: (list) origin information in two-element lists
 ;;
 ;; Output: (list) list of parent IDs
 
-(define (parent-ids parents)
+(define (bigml.reify.parent-ids parents)
   (reduce (lambda (x y) (if (list? y)
                             (concat x y)
                             (append x y)))
@@ -1155,20 +1536,24 @@
 ;;
 ;; Inputs:
 ;;   reify-chain: (map) reify chain of resources
-;;   parents: (list) list of parents in a [origin-type origin-id] format
+;;   parents: (list) list of parents in a [origin-type origin-id origin-raw]
+;;                   format
 ;;
 ;; Output: (map) updated reify chain of resources
 
-(define (add-parents reify-chain parents)
-  (let (parents (parent-ids parents)
+(define (bigml.reify.add-parents reify-chain parents)
+  (let (parents (bigml.reify.parent-ids parents)
         reify-chain-list (concat (reify-chain "list" [])
                          parents))
     reify-chain (assoc reify-chain "list" reify-chain-list)))
 
-;; add-reify-step
+;; add-step-info
 ;;
-;; Adds the configuration and the reference to origin resources to the
-;; reify chain.
+;; Adds the configuration of a concrete resource to the reify chain
+;; adds the reference to its origin resources to the reified info for the
+;;   resource
+;; adds the IDs of its origin resources to the list of resources to be
+;; reified
 ;;
 ;; Inputs:
 ;;   reify-chain: (map) reify chain of resources
@@ -1178,15 +1563,18 @@
 ;;
 ;; Output: (map) reify chain
 
-(define (add-reify-step reify-chain resource-id configuration parents)
+(define (bigml.reify.add-step-info reify-chain
+                                   resource-id
+                                   configuration
+                                   parents)
   (if (not (contains? (reify-chain "defs" {}) resource-id))
       (let (reify-chain-defs (assoc (reify-chain "defs" {})
                                     resource-id
                                     {"create" configuration
                                      "parents" parents})
             reify-chain (assoc reify-chain "defs" reify-chain-defs))
-            (add-parents reify-chain parents))
-      (add-parents reify-chain parents)))
+            (bigml.reify.add-parents reify-chain parents))
+      (bigml.reify.add-parents reify-chain parents)))
 
 ;; reify-step
 ;;
@@ -1206,34 +1594,42 @@
 ;; Outputs: (map) chain of resources for reification
 ;;
 
-(define (reify-step resource-id reify-chain step counter)
-  (log-info "resource " resource-id " found.")
+(define (bigml.reify.reify-step resource-id reify-chain step counter)
   (if (and step (< counter 0))
-      (fill-input resource-id reify-chain)
+      ;; the reify process stops and all resources that have not been
+      ;; reified should be accepted as input parameters
+      (bigml.reify.fill-input resource-id reify-chain) ;; write the inputs
       (if (contains? (reify-chain "defs" {}) resource-id)
-        (let (reify-chain (add-parents reify-chain
-                                       (reify-chain ["defs"
-                                                     resource-id
-                                                     "parents"]
-                                                    false)))
-          (reify-parents reify-chain
-                         (reify-chain ["defs" resource-id "parents"] false)
-                         resource-id
-                         step
-                         counter))
+        ;; when the resource config is already stored, add the origin
+        ;; resources IDs to the list of resources in the workflow
+        ;; and call reify on the origin resources
+        (let (parent-refs (bigml.reify.get-conf reify-chain
+                                                resource-id
+                                                "parents")
+              reify-chain (bigml.reify.add-parents reify-chain
+                                                   parent-refs))
+          (bigml.reify.reify-parents reify-chain
+                                     parent-refs
+                                     resource-id
+                                     step
+                                     counter))
+        ;; retrieving the configuration for the resource and storing it
+        ;; or adding the resource to the expected inputs if not found
         (if (resource-id? resource-id)
             (try
               (let (resource (fetch resource-id))
                 (if resource
-                    (fill-attributes resource-id
-                                     resource reify-chain
-                                     step
-                                     counter)
-                    (fill-input resource-id reify-chain)))
+                    (bigml.reify.fill-attributes resource-id
+                                                 resource
+                                                 reify-chain
+                                                 step
+                                                 counter)
+                    (bigml.reify.fill-input resource-id reify-chain)))
               (catch e
+                (log-info "Error: " e)
                 (log-info "Stopping at deleted resource: " resource-id)
-                (fill-input resource-id reify-chain)))
-            (fill-input resource-id reify-chain)))))
+                (bigml.reify.fill-input resource-id reify-chain)))
+            (bigml.reify.fill-input resource-id reify-chain)))))
 
 ;; fill-input
 ;;
@@ -1248,22 +1644,17 @@
 ;; Output: (map) chain of resources for reification
 ;;
 
-(define (fill-input resource-id reify-chain)
+(define (bigml.reify.fill-input resource-id reify-chain)
   (let (inputs (reify-chain "inputs" [])
         inputs (if (member? resource-id inputs)
                    inputs
                    (append (reify-chain "inputs" []) resource-id)))
     (assoc reify-chain "inputs" inputs)))
 
-;; update-tags
-;;
-(define (update-tags resource-id tags)
-  (fetch (update-and-wait resource-id {"tags" tags})))
-
-
 ;; fill-attributes
 ;;
 ;; Fills the attributes that can be used at creation or update time
+;; and calls the reification of parents
 ;;
 ;; Inputs:
 ;;   resource-id: (string) Resource ID
@@ -1273,31 +1664,33 @@
 ;; Outputs: (map) chain of resources for reification
 ;;
 
-(define (fill-attributes resource-id resource reify-chain step counter)
-  (let (reified-id ((reify-chain "list" []) 0)
-        tags (resource "tags" [])
-        retrain-label (str "retrain:" reified-id)
-        tags (if (member? retrain-label tags)
-                 tags
-                 (append tags retrain-label))
-        resource (if (member? (resource-type reified-id) MODELS)
-                     (update-tags resource-id tags)
-                     resource)
-        is-cv? (and (= (resource-type resource) "evaluation")
+(define (bigml.reify.fill-attributes resource-id
+                                     resource
+                                     reify-chain
+                                     step
+                                     counter)
+  (let (is-cv? (and (= (resource-type resource) "evaluation")
                (= (resource "type" false) 2))
         res-type (if is-cv? "cross-validation" (resource-type resource))
-        parents (get-parents resource res-type)
-        configuration (get-non-defaults resource COMMON-DEFAULTS {})
-        configuration (get-non-defaults resource
-                                        (DEFAULTS res-type false)
-                                        configuration)
-        configuration (get-fields resource configuration)
-        configuration (get-inner-names resource configuration)
-        reify-chain (add-reify-step reify-chain
-                                    resource-id
-                                    configuration
-                                    parents))
-    (reify-parents reify-chain parents resource-id step counter)))
+        parents (bigml.reify.get-parents resource res-type)
+        ;; stores the common and specific attributes. Default values are
+        ;; discarded
+        configuration (bigml.reify.get-non-defaults
+                        resource
+                        bigml.reify.COMMON-DEFAULTS {})
+        configuration (bigml.reify.get-non-defaults
+                        resource
+                        (bigml.reify.DEFAULTS res-type false)
+                        configuration)
+        ;; extract the fields structure
+        configuration (bigml.reify.get-fields resource configuration)
+        ;; extract the inner cluster or topic name changes
+        configuration (bigml.reify.get-inner-names resource configuration)
+        reify-chain (bigml.reify.add-step-info reify-chain
+                                               resource-id
+                                               configuration
+                                               parents))
+    (bigml.reify.reify-parents reify-chain parents resource-id step counter)))
 
 ;; reify-parents
 ;;
@@ -1315,27 +1708,39 @@
 ;; Output: (map) chain of resources for reification
 ;;
 
-(define (reify-parents reify-chain parents resource-id step counter)
+(define (bigml.reify.reify-parents reify-chain
+                                   parents
+                                   resource-id
+                                   step
+                                   counter)
   (if (not (empty? parents))
-      (let (parents (parent-ids parents)
-            counter (if step
+      (let (parents (bigml.reify.parent-ids parents)
+            origin-type (head (head (bigml.reify.get-conf reify-chain
+                                                          resource-id
+                                                          "parents")))
+            type (resource-type resource-id)
+            ;; in the case of datasets created from a batch prediction
+            ;; we store two steps
+            counter (if (and step (or (!= type "dataset")
+                                      (!= origin-type
+                                          "origin_batch_resource")))
                         (- counter 1)
                         counter))
         (loop (index 0 lreify-chain reify-chain)
           (if (= index (count parents))
               lreify-chain
               (let (parent-id (nth parents index)
-                    lreify-chain (reify-step parent-id
-                                             lreify-chain
-                                             step
-                                             counter))
+                    lreify-chain (bigml.reify.reify-step parent-id
+                                                         lreify-chain
+                                                         step
+                                                         counter))
                 (recur (+ index 1) lreify-chain)))))
       (if (= (resource-type resource-id) "source")
-          (fill-input resource-id reify-chain)
+          (bigml.reify.fill-input resource-id reify-chain)
           reify-chain)))
 
 
-;; input-fields-names
+;; input-field-names
 ;;
 ;; Changes the input_fields ids to the corresponding names to allow
 ;; using ancestors with different IDs.
@@ -1347,11 +1752,12 @@
 ;; Output: (map) chain of resources for reification
 ;;
 
-(define (input-fields-names resource-id reify-chain)
+(define (bigml.reify.input-field-names resource-id reify-chain)
   (let (attribute "input_fields"
-        config (reify-chain ["defs" resource-id "create"] false)
-        parents (reify-chain
-                        ["defs" resource-id "parents"] false)
+        config (bigml.reify.get-conf reify-chain resource-id "create")
+        parents (bigml.reify.get-conf reify-chain
+                                      resource-id
+                                      "parents")
         fields (config "fields" {})
         objective_field (config "objective_field" "")
         objective_field (if (string? objective_field)
@@ -1361,10 +1767,11 @@
                                    false)
                            false))
     (if (and (list? parents) (not (empty? parents)))
-        (let (parents (parent-ids parents)
-              parent (head parents)
-              parent-fields (reify-chain
-                                    ["defs" parent "ref" "fields"] false)
+        (let (parents (bigml.reify.parent-ids parents)
+              parent (bigml.reify.get-fields-parent parents)
+              parent-fields (bigml.reify.get-attr reify-chain
+                                                  parent
+                                                  "fields")
               objective? (config "objective_field" false))
           (if (and parent-fields
                    (contains? config attribute))
@@ -1378,14 +1785,38 @@
                              (= (count new-input-fields)
                                 (- (count (keys parent-fields)) 1))
                              (not (member? objective-name new-input-fields))))
-                  (dissoc-in reify-chain ["defs"
-                                          resource-id
-                                          "create"
-                                          attribute])
-                  (assoc-in reify-chain ["defs" resource-id "create" attribute]
-                                        new-input-fields)))
+                  (bigml.reify.remove-from reify-chain
+                                           resource-id
+                                           "create"
+                                           attribute)
+                  (bigml.reify.add-to reify-chain
+                                      resource-id
+                                      "create"
+                                      attribute
+                                       new-input-fields)))
               reify-chain))
         reify-chain)))
+
+;; get-fields-parent
+;;
+;; Some batch resources use as reference the fields in their dataset origin
+;; Retrieves the fields structure from that origin resource
+;;
+;; Inputs:
+;;   resource-id: (string) Resource ID
+;;   reify-chain: (map) chain of resources for reification
+;;
+;; Output: (map) chain of resources for reification
+;;
+(define (bigml.reify.get-fields-parent parent-ids)
+  (let (datasets (filter (lambda (x) (or (list? x)
+                                         (= (resource-type x) "dataset")))
+                         parent-ids))
+    (if (empty? datasets)
+        (head parent-ids)
+        (if (list? (head datasets))
+            (head (head datasets))
+            (head datasets)))))
 
 
 ;; excluded-fields-names
@@ -1400,24 +1831,28 @@
 ;; Output: (map) chain of resources for reification
 ;;
 
-(define (excluded-fields-names resource-id reify-chain)
+(define (bigml.reify.excluded-fields-names resource-id reify-chain)
   (let (attribute "excluded_fields"
-        config (reify-chain ["defs" resource-id "create"] false)
-        parents (reify-chain
-                        ["defs" resource-id "parents"] false))
+        config (bigml.reify.get-conf reify-chain resource-id "create")
+        parents (bigml.reify.get-conf reify-chain resource-id "parents"))
     (if (and (list? parents) (not (empty? parents)))
-        (let (parents (parent-ids parents)
+        (let (parents (bigml.reify.parent-ids parents)
               parent (head parents)
-              parent-fields (reify-chain
-                                    ["defs" parent "create" "fields"] false)
+              parent-fields (bigml.reify.get-attr-action reify-chain
+                                                         parent
+                                                         "create"
+                                                         "fields")
               objective? (config "objective_field" false))
           (if (and parent-fields
                    (contains? config attribute))
-              (let (new-input-fields (map (lambda (x)
-                                           (parent-fields [x "name"] false))
-                                           (config attribute [])))
-                (assoc-in reify-chain ["defs" resource-id "create" attribute]
-                                      new-input-fields))
+              (let (new-fields (map (lambda (x)
+                                      (parent-fields [x "name"] false))
+                                    (config attribute [])))
+                (bigml.reify.add-to reify-chain
+                                    resource-id
+                                    "create"
+                                    attribute
+                                    new-fields))
               reify-chain))
         reify-chain)))
 
@@ -1434,18 +1869,16 @@
 ;; Output: (map) chain of resources for reification
 ;;
 
-(define (remove-inherited resource-id reify-chain)
-  (let (attributes (keys COMMON-DEFAULTS))
+(define (bigml.reify.remove-inherited resource-id reify-chain)
+  (let (attributes (keys bigml.reify.COMMON-DEFAULTS))
     (loop (index 0 lchain reify-chain)
       (let (attribute (nth attributes index)
-            config (lchain ["defs" resource-id "ref"] false)
-            parents (lchain
-                            ["defs" resource-id "parents"] false))
+            config (bigml.reify.get-conf lchain resource-id "ref")
+            parents (bigml.reify.get-conf lchain resource-id "parents"))
         (if (and (list? parents) (not (empty? parents)))
-            (let (parents (parent-ids parents)
+            (let (parents (bigml.reify.parent-ids parents)
                   parent (head parents)
-                  parent-config (lchain
-                                        ["defs" parent "ref"] false))
+                  parent-config (bigml.reify.get-conf lchain parent "ref"))
               (if (and parent-config
                        (contains? config attribute)
                        (contains? parent-config attribute)
@@ -1453,10 +1886,10 @@
                                                             attribute
                                                             false)))
                   (let (config (dissoc config attribute)
-                        lchain (assoc-in lchain ["defs"
-                                                 resource-id
-                                                 "ref"]
-                                                 config))
+                        lchain (bigml.reify.set-conf lchain
+                                                     resource-id
+                                                     "ref"
+                                                     config))
                     (if (< (+ index 1) (count attributes))
                         (recur (+ index 1) lchain)
                         lchain))
@@ -1464,6 +1897,7 @@
                       (recur (+ index 1) lchain)
                       lchain)))
               lchain)))))
+
 
 ;; remove-reference-only
 ;;
@@ -1478,8 +1912,9 @@
 ;; Output: (map) chain of resources for reification
 ;;
 
-(define (remove-reference-only resource-id reify-chain)
-  (let (attributes (REFERENCE-ONLY (resource-type resource-id) false))
+(define (bigml.reify.remove-reference-only resource-id reify-chain)
+  (let (attributes (bigml.reify.REFERENCE-ONLY (resource-type resource-id)
+                                               false))
     (loop (index 0 lchain reify-chain)
       (if (= index (count attributes))
           lchain
@@ -1493,10 +1928,10 @@
                              "update")
                 config (lchain ["defs" resource-id action] {})
                 lchain (if (contains? config attribute)
-                           (dissoc-in lchain ["defs"
-                                              resource-id
-                                              action
-                                              attribute])
+                           (bigml.reify.remove-from lchain
+                                                    resource-id
+                                                    action
+                                                    attribute)
                            lchain))
             (recur (+ index 1) lchain))))))
 
@@ -1510,14 +1945,12 @@
 ;;
 ;; Output: (map) chain of resources for reification
 ;;
-(define (remove-range resource-id reify-chain)
+(define (bigml.reify.remove-range resource-id reify-chain)
   (let (attribute "range"
-        config (reify-chain ["defs" resource-id "create"] false)
-        parents (reify-chain
-                        ["defs" resource-id "parents"]
-                        false))
+        config (bigml.reify.get-conf reify-chain resource-id "create")
+        parents (bigml.reify.get-conf reify-chain resource-id "parents"))
     (if (and (list? parents) (not (empty? parents)))
-        (let (parents (parent-ids parents)
+        (let (parents (bigml.reify.parent-ids parents)
               parents (reduce (lambda (x y) (if (= (resource-type y) "dataset")
                                                 (append x y)
                                                 x))
@@ -1525,23 +1958,17 @@
                               parents))
           (if (not (empty? parents))
             (let (parent (head parents)
-                  parent-config (reify-chain
-                                        ["defs" parent "create"]
-                                        {}))
-;; TODO: check ranges?
-;;                  rows (if (contains? conf "ranges")
-;;                           (reduce (lambda (x y) (+ x (nth (nth y 1) 1)))
-;;                                    0
-;;                                    (values (conf "ranges" false))))
-;;              (if (contains? config "ranges")
+                  parent-config (bigml.reify.get-conf reify-chain
+                                                      parent
+                                                      "create"))
               (if (and (contains? config attribute)
                        (member? (config attribute)
                                 [[] [1 (parent-config "rows" false)]]))
                   (let (config (dissoc config attribute))
-                    (assoc-in reify-chain ["defs"
-                                           resource-id
-                                           "create"]
-                                           config))
+                    (bigml.reify.set-conf reify-chain
+                                          resource-id
+                                          "create"
+                                          config))
                   reify-chain))
                 reify-chain))
               reify-chain)))
@@ -1557,7 +1984,7 @@
 ;;
 ;; Output: (map) fields structure for changed attributes
 ;;
-(define (non-equal-fields fields parent-fields)
+(define (bigml.reify.non-equal-fields fields parent-fields)
   (let (field-ids (keys fields))
     (loop (index 0 new-fields {})
       (cond (= index (count field-ids))
@@ -1567,10 +1994,11 @@
             (let (field-id (nth field-ids index)
                   attributes (keys (fields field-id false))
                   new-fields (merge new-fields
-                                    (attributes-not-in-parent fields
-                                                              parent-fields
-                                                              field-id
-                                                              attributes)))
+                                    (bigml.reify.attributes-not-in-parent
+                                     fields
+                                     parent-fields
+                                     field-id
+                                     attributes)))
               (recur (+ index 1) new-fields))))))
 
 ;; attributes-not-in-parent
@@ -1585,7 +2013,9 @@
 ;;
 ;; Output: (map) fields structure
 
-(define (attributes-not-in-parent fields parent-fields field-id attributes)
+(define (bigml.reify.attributes-not-in-parent fields parent-fields
+                                                     field-id
+                                                     attributes)
   (loop (index 0 new-fields {})
     (if (= index (count attributes))
         new-fields
@@ -1605,10 +2035,9 @@
                (recur (+ index 1) new-fields)
                (recur (+ index 1) (assoc-in new-fields
                                             [field-id attribute]
-                                            (fields
-                                                    [field-id
-                                                     attribute]
-                                                    false))))))))
+                                            (fields  [field-id attribute]
+                                                     false))))))))
+
 
 ;; remove-fields
 ;;
@@ -1620,62 +2049,65 @@
 ;;
 ;; Output: (map) chain of resources for reification
 
-(define (remove-fields resource-id reify-chain)
+(define (bigml.reify.remove-fields resource-id reify-chain)
   (let (attribute "fields"
-        config (reify-chain ["defs" resource-id "create"] false)
-        parents (reify-chain ["defs" resource-id "parents"] false)
+        config (bigml.reify.get-conf reify-chain resource-id "create")
+        parents (bigml.reify.get-conf reify-chain resource-id "parents")
         type (resource-type resource-id)
         fields (config "fields" {})
-        reify-chain (assoc-in reify-chain
-                              ["defs"
-                               resource-id
-                               "fields"]
-                              fields))
+        reify-chain (bigml.reify.set-conf reify-chain
+                                          resource-id
+                                          "fields"
+                                          fields))
     (cond (= type "source")
           ;; for sources, fields settings always are at update
-          (let (reify-chain (dissoc-in reify-chain
-                             ["defs" resource-id "create" attribute]))
-            (assoc-in reify-chain ["defs" resource-id "update" attribute]
-                                  fields))
+          (let (reify-chain (bigml.reify.remove-from reify-chain
+                                                     resource-id
+                                                     "create"
+                                                     attribute))
+            (bigml.reify.add-to reify-chain resource-id
+                                            "update"
+                                            attribute
+                                            fields))
           (if (and (list? parents) (not (empty? parents)))
-              (let (parents (parent-ids parents)
+              (let (parents (bigml.reify.parent-ids parents)
                     parent (head parents)
-                    parent-config (reify-chain
-                                          ["defs" parent "ref"]
-                                          {})
-                    reify-chain (dissoc-in reify-chain
-                                           ["defs"
-                                            resource-id
-                                            "create"
-                                            "fields"])
+                    parent-config (bigml.reify.get-conf reify-chain
+                                                        parent
+                                                        "ref")
+                    reify-chain (bigml.reify.remove-from reify-chain
+                                                         resource-id
+                                                         "create"
+                                                         "fields")
                     fields (if (and (contains? config attribute)
                                (contains? parent-config attribute))
-                               (non-equal-fields (config attribute false)
-                                                 (parent-config attribute
-                                                                false))
+                               (bigml.reify.non-equal-fields (config attribute
+                                                                     false)
+                                                             (parent-config
+                                                               attribute
+                                                               false))
                                fields))
                 (if (not (empty? fields))
-                    (let (reify-chain (assoc-in reify-chain
-                                                ["defs"
-                                                 resource-id
-                                                 "update"
-                                                 "fields"]
-                                                fields))
+                    (let (reify-chain (bigml.reify.add-to reify-chain
+                                                          resource-id
+                                                          "update"
+                                                          "fields"
+                                                          fields))
                       ;; if we are updating a dataset and an objective field is
                       ;; set, move the objective field setting too just
                       ;; in case it affects a previously non-preferred field
                       (if (and (= type "dataset")
                                (contains? config "objective_field"))
-                          (let (reify-chain (dissoc-in reify-chain
-                                                       ["defs"
-                                                        resource-id
-                                                        "create"
-                                                        "objective_field"]))
-                            (assoc-in reify-chain ["defs"
-                                                   resource-id
-                                                   "update"
-                                                   "objective_field"]
-                                                  (config "objective_field")))
+                          (let (reify-chain (bigml.reify.remove-from
+                                              reify-chain
+                                              resource-id
+                                              "create"
+                                              "objective_field"))
+                            (bigml.reify.add-to reify-chain
+                                                resource-id
+                                                "update"
+                                                "objective_field"
+                                                (config "objective_field")))
                           reify-chain))
                     reify-chain))
               reify-chain))))
@@ -1691,34 +2123,21 @@
 ;;
 ;; Output: (map) chain of resources for reification
 
-(define (inner-names-update resource-id reify-chain attribute)
-  (let (config (reify-chain ["defs" resource-id "create"]))
+(define (bigml.reify.inner-names-update resource-id reify-chain attribute)
+  (let (config (bigml.reify.get-conf reify-chain resource-id "create"))
     (if (contains? config attribute)
         (let (update (config attribute)
-              reify-chain (dissoc-in reify-chain ["defs"
-                                                  resource-id
-                                                  "create"
-                                                  attribute]))
-          (assoc-in reify-chain
-                    ["defs" resource-id "update" attribute]
-                    update))
+              reify-chain (bigml.reify.remove-from reify-chain
+                                                   resource-id
+                                                   "create"
+                                                   attribute))
+          (bigml.reify.add-to reify-chain
+                              resource-id
+                              "update"
+                              attribute
+                              update))
         reify-chain)))
 
-;; select-map-keys
-;;
-;; Filters the keys in a map, keeping only the ones that appear in the list.
-;;
-;; Inputs:
-;;   a-map: (map) Key, value maps
-;;   keys-list: (list) List of keys to be kept in the map
-;; Output: (map) filtered map with only the keys in the keys-list
-;;
-(define (select-map-keys a-map keys-list)
-  (reduce (lambda (x y) (let (value (a-map y false)
-                              has-key? (contains? a-map y))
-                             (cond has-key? (assoc x y value) x)))
-          {}
-          keys-list))
 
 ;; get-fields
 ;;
@@ -1730,25 +2149,26 @@
 ;;
 ;; Output: (map) attributes used in create or update calls
 
-(define (get-fields resource configuration)
-  (let (fields-path (FIELDS-PATH
-                         (resource-type (resource "resource" false))
-                         false))
+(define (bigml.reify.get-fields resource configuration)
+  (let (fields-path (bigml.reify.FIELDS-PATH
+                     (resource-type (resource "resource" false))
+                     false))
     (if fields-path
         (let (fields (resource fields-path {})
               field-ids (keys fields)
               resource-id (resource "resource" false)
               filter (cond (= (resource-type resource-id) "source")
-                           SOURCE-UPDATABLE
+                           bigml.reify.SOURCE-UPDATABLE
                            (= (resource-type resource-id) "dataset")
-                           DATASET-UPDATABLE
-                           DEFAULT-UPDATABLE)
-              fields (reduce (lambda (x y) (assoc x
-                                                  y
-                                                  (select-map-keys (fields
-                                                                    y
-                                                                    false)
-                                                                   filter)))
+                           bigml.reify.DATASET-UPDATABLE
+                           bigml.reify.DEFAULT-UPDATABLE)
+              fields (reduce (lambda (x y)
+                               (assoc x
+                                      y
+                                      (select-keys (fields
+                                                    y
+                                                    false)
+                               filter)))
                              {}
                              field-ids))
           (if (not (empty? fields))
@@ -1767,21 +2187,23 @@
 ;;
 ;; Output: (map) attributes used in create or update calls
 
-(define (get-inner-names resource configuration)
+(define (bigml.reify.get-inner-names resource configuration)
   (let (type (resource-type (resource "resource" false))
-        info-path (INNER-INFO-NAMES-PATH type false))
+        info-path (bigml.reify.INNER-INFO-NAMES-PATH type false)
+        fn (lambda (x y) (if (not (matches? (bigml.reify.DFT-NAMES type)
+                                            (y "name")))
+                                            (assoc x
+                                                   (y "id")
+                                                   {"name" (y "name")})
+                                            x)))
     (if info-path
         (let (objs (resource info-path [])
-              update (reduce (lambda (x y) (if (not (matches? (DFT-NAMES type)
-                                                              (y "name")))
-                                               (assoc x
-                                                      (y "id")
-                                                      {"name" (y "name")})
-                                               x))
+              update (reduce fn
                              {}
                              objs))
           (if (not (empty? update))
-              (assoc configuration ((INNER-INFO-NAMES-PATH type) 1) update)
+              (assoc configuration
+                     ((bigml.reify.INNER-INFO-NAMES-PATH type) 1) update)
               configuration))
         configuration)))
 
@@ -1797,7 +2219,7 @@
 ;;
 ;; Output: (map) modified configuration
 
-(define (replace-id config attribute fields)
+(define (bigml.reify.replace-id config attribute fields)
   (let (attr (config attribute false))
     (if attr
       (if (list? attr) ;; if it's a list like objective_fields
@@ -1822,35 +2244,78 @@
 ;;
 ;; Output: (map) chain of resources for reification
 
-(define (translate-field-ids resource-id reify-chain)
-  (let (fields (reify-chain ["defs" resource-id "fields"] false))
+(define (bigml.reify.translate-field-ids resource-id reify-chain)
+  (let (fields (bigml.reify.get-conf reify-chain resource-id "fields"))
     (loop (index 0 reify-chain reify-chain)
-      (if (= index (count NAMED-ATTRIBUTES))
+      (if (= index (count bigml.reify.NAMED-ATTRIBUTES))
           reify-chain
-          (let (attribute (nth NAMED-ATTRIBUTES index)
-                create-config (reify-chain ["defs" resource-id "create"] false)
-                update-config (reify-chain ["defs" resource-id "update"] false)
+          (let (attribute (nth bigml.reify.NAMED-ATTRIBUTES index)
+                create-config (bigml.reify.get-conf reify-chain
+                                                    resource-id
+                                                    "create")
+                update-config (bigml.reify.get-conf reify-chain
+                                                    resource-id
+                                                    "update")
                 reify-chain (if (and create-config
                                      (contains? create-config attribute))
-                                (assoc-in reify-chain
-                                          ["defs"
-                                           resource-id
-                                           "create"]
-                                          (replace-id create-config
-                                                      attribute
-                                                      fields))
+                                (bigml.reify.set-conf reify-chain
+                                                      resource-id
+                                                      "create"
+                                  (bigml.reify.replace-id create-config
+                                                          attribute
+                                                          fields))
                                 reify-chain)
                 reify-chain (if (and update-config
                                      (contains? update-config attribute))
-                                (assoc-in reify-chain
-                                          ["defs"
-                                           resource-id
-                                           "update"]
-                                          (replace-id update-config
-                                                      attribute
-                                                      fields))
+                                (bigml.reify.set-conf reify-chain
+                                                      resource-id
+                                                      "update"
+                                 (bigml.reify.replace-id update-config
+                                                         attribute
+                                                         fields))
                                 reify-chain))
             (recur (+ index 1) reify-chain))))))
+
+
+;; normalize-resource-steps
+;; Transforms the information retrieved in the workflow chain to separate
+;; the steps really needed to reproduce them. It also checks and cleans the
+;; required attributes for the compulsory REST calls and uses field names
+;; instead of IDs when possible.
+;;
+;; Inputs:
+;;  chain: (map) chain of resources for reification
+;;  resource-id: (string) ID of the resource to be analyzed
+;;
+;; Output: (map) transformed chain of resources information
+
+(define (bigml.reify.normalize-resource-steps chain resource-id)
+  (let (type (resource-type resource-id)
+        chain (bigml.reify.remove-inherited resource-id chain)
+        chain (bigml.reify.input-field-names resource-id chain)
+        chain (bigml.reify.excluded-fields-names resource-id chain)
+        chain (bigml.reify.remove-fields resource-id chain)
+        chain (bigml.reify.remove-range resource-id chain)
+        per-type-process (bigml.reify.PER-TYPE-PROCESS type false)
+        chain (if per-type-process
+                  (per-type-process resource-id chain)
+                  chain)
+        chain (if (= (subs resource-id 0 5) "batch")
+                  (bigml.reify.batch-headers chain resource-id)
+                   chain)
+        chain (if (bigml.reify.update-attrs? type)
+                  (bigml.reify.adding-updates resource-id chain)
+                   chain)
+        chain (bigml.reify.translate-field-ids resource-id chain)
+        inner-names-attr (bigml.reify.INNER-INFO-NAMES-PATH type false)
+        chain (if inner-names-attr
+                  (bigml.reify.inner-names-update resource-id
+                                                  chain
+                                                  (inner-names-attr 1))
+                   chain))
+        (if (bigml.reify.REFERENCE-ONLY type false)
+            (bigml.reify.remove-reference-only resource-id chain)
+            chain)))
 
 
 ;; reify
@@ -1870,40 +2335,23 @@
 ;;         the origin information for the resource.
 ;;
 
-(define (reify resource-id step)
-  (let (reify-chain (reify-step resource-id {"list" [resource-id]} step 0)
+(define (resource-workflow resource-id step)
+  ;; recursively retrieving all the information of any existing resource
+  ;; in the reification workflow with reify-step
+  (let (reify-chain (bigml.reify.reify-step resource-id
+                                            {"list" [resource-id]} step 0)
+        ;; IDs of the resources that appeared in the workflow
         resource-ids (keys (reify-chain "defs" {}))
+        ;; keeping a copy of the attributes of each detected resource for
+        ;; reference
         reify-chain (iterate (lchain reify-chain resource-id resource-ids)
                              (if (contains? (lchain ["defs" resource-id] {})
                                             "ref")
                                  lchain
-                                 (assoc-in lchain
-                                           ["defs" resource-id "ref"]
-                                           (lchain ["defs"
-                                                    resource-id
-                                                    "create"])))))
-    (loop (index 0 lchain reify-chain)
-      (if (= index (count resource-ids))
-          lchain
-          (let (resource-id (nth resource-ids index)
-                type (resource-type resource-id)
-                lchain (remove-inherited resource-id lchain)
-                lchain (input-fields-names resource-id lchain)
-                lchain (excluded-fields-names resource-id lchain)
-                lchain (remove-fields resource-id lchain)
-                lchain (remove-range resource-id lchain)
-                per-type-process (PER-TYPE-PROCESS type false)
-                lchain (if per-type-process
-                           (per-type-process resource-id lchain)
-                           lchain)
-                lchain (translate-field-ids resource-id lchain)
-                inner-names-attr (INNER-INFO-NAMES-PATH type false)
-                lchain (if inner-names-attr
-                           (inner-names-update resource-id
-                                               lchain
-                                               (inner-names-attr 1))
-                           lchain)
-                lchain (if (REFERENCE-ONLY type false)
-                           (remove-reference-only resource-id lchain)
-                           lchain))
-                (recur (+ index 1) lchain))))))
+                                 (bigml.reify.set-conf lchain
+                                                       resource-id
+                                                       "ref"
+                                   (bigml.reify.get-conf lchain
+                                                         resource-id
+                                                         "create")))))
+    (reduce bigml.reify.normalize-resource-steps reify-chain resource-ids)))

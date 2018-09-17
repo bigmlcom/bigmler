@@ -3,6 +3,13 @@
 History
 -------
 
+3.18.1 (2018-09-19)
+~~~~~~~~~~~~~~~~~~~
+
+- Updating underlying bindings version.
+- Updating reify library.
+- Improving bigmler retrain to allow remote sources
+
 3.18.0 (2018-05-23)
 ~~~~~~~~~~~~~~~~~~~
 
