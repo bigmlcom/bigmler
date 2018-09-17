@@ -44,9 +44,9 @@ import re
 
 """
 
-from bigml.util import cast
+from bigml.util import cast, NUMERIC
 from bigml.predicate import TM_FULL_TERM, TM_ALL
-from bigml.cluster import parse_terms, parse_items, NUMERIC
+from bigml.cluster import parse_terms, parse_items
 from bigml.logistic import LogisticRegression, balance_input
 from bigml.modelfields import get_unique_terms
 

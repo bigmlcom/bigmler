@@ -103,7 +103,8 @@ def filter_qs(args, api):
 
     """
     query_string_list = []
-    query_string_list.append(args.filter)
+    if args.filter:
+        query_string_list.append(args.filter)
     return query_string_list
 
 
