@@ -46,7 +46,7 @@ import re
 
 from bigml.util import cast
 from bigml.predicate import TM_FULL_TERM, TM_ALL
-from bigml.cluster import parse_terms, parse_items, OPTIONAL_FIELDS
+from bigml.cluster import parse_terms, parse_items, NUMERIC
 from bigml.logistic import LogisticRegression, balance_input
 from bigml.modelfields import get_unique_terms
 
@@ -55,9 +55,9 @@ EXPANSION_ATTRIBUTES = {"categorical": "categories", "text": "tag_cloud",
                         "items": "items"}
 TM_FULL_TERM = %s
 TM_ALL = %s
-OPTIONAL_FIELDS = %s
+NUMERIC = %s
 
-""" % (repr(TM_FULL_TERM), repr(TM_ALL), repr(OPTIONAL_FIELDS))
+""" % (repr(TM_FULL_TERM), repr(TM_ALL), repr(NUMERIC))
 
 FUNCTIONS = [cast, parse_terms, parse_items, get_unique_terms,
              balance_input]
