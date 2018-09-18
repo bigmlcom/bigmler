@@ -868,6 +868,8 @@ def i_check_create_source(step):
 
 #@step(r'I check that the model has doubled its rows$')
 def i_check_model_double(step):
+    print world.model['resource']
+    print world.origin_model['resource']
     ok_(world.model['object']['rows'] == \
         2 * world.origin_model['object']['rows'])
 

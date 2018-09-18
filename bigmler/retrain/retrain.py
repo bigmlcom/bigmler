@@ -47,8 +47,8 @@ MODEL_TYPES = ["model", "ensemble", "logistic_regression", "deepnet",
                "time_series"]
 
 
-STOP_WORKFLOW = {"source-id": "no-dataset",
-                 "dataset-id": "no-model"}
+STOP_WORKFLOW = {"source-id": "--no-dataset",
+                 "dataset-id": "--no-model"}
 
 def get_script_id(path):
     """Returns the script id stored in the file in path
@@ -90,7 +90,7 @@ def create_input(args, api, input_type, script_id):
         command_args.predictions = command_args.output
         a.get_output_args(api, command_args, False)
         compute_output(api, command_args)
-        resource_type = input_type[-3]
+        resource_type = input_type[:-3]
         resource_id = getattr(command_args, resource_type)
     else:
         resource_type = "source-url"

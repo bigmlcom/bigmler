@@ -10,8 +10,8 @@ def print_result(values, prediction, count):
     """Prints input data and predicted value as an ordered list.
 
     """
-    result = \"[%s, %s]\" % (values, prediction)
-    print u\"%s\\t%s\" % (result, count)
+    result = "[%s, %s]" % (values, prediction)
+    print u"%s\\t%s" % (result, count)
 
 for line in sys.stdin:
     values, prediction = line.strip().split('\\t')
