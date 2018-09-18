@@ -102,8 +102,8 @@
   "model" {
     "name" [false]
     "excluded_fields" [[] false]
-    "credits_per_prediction" [false]
-    "price" [false]
+    "credits_per_prediction" [false 0.0]
+    "price" [false 0.0]
     "ordering" [0]
     "depth_threshold" [false 512]
     "max_training_time" [false 1800]
@@ -136,8 +136,8 @@
     "ensemble_sample" [false {}]
     "replacement" [false]
     "input_fields" [false []]
-    "credits_per_prediction" [false]
-    "price" [false]
+    "credits_per_prediction" [false 0.0]
+    "price" [false 0.0]
     "ordering" [0]
     "out_of_bag" [false]
     "randomize" [false]
@@ -181,7 +181,7 @@
   "evaluation" {
     "name" [false]
     "confidence_threshold" [false]
-    "combiner" [0, false]
+    "combiner" [0 false]
     "missing_strategy" [0]
     "ordering" [0]
     "out_of_bag" [false]
@@ -205,8 +205,8 @@
     "name" [false]
     "anomaly_seed" [false]
     "constraints" [false]
-    "credits_per_prediction" [false]
-    "price" [false]
+    "credits_per_prediction" [false 0.0]
+    "price" [false 0.0]
     "default_numeric_value" [false]
     "excluded_fields" [[] false]
     "id_fields" [[]]
@@ -233,8 +233,8 @@
     "field_scales" [{} false]
     "model_clusters" [false]
     "out_of_bag" [false]
-    "credits_per_prediction" [false]
-    "price" [false]
+    "credits_per_prediction" [false 0.0]
+    "price" [false 0.0]
     "shared" [false]
     "private" [true]
     "replacement" [false]
@@ -291,7 +291,8 @@
     "centroid_name" [false ""]
     "separator" [","]
     "distance" [false]}
-  "batchprediction" {"name" [false]
+  "batchprediction" {
+    "name" [false]
     "all_fields" [false]
     "fields_map" [false]
     "confidence_threshold" [false]
@@ -329,8 +330,8 @@
   "association" {
     "name" [false]
     "complement" [false]
-    "credits_per_prediction" [false]
-    "price" [false]
+    "credits_per_prediction" [false 0.0]
+    "price" [false 0.0]
     "default_numeric_value" [false "median"]
     "discretization" [false]
     "excluded_fields" [false []]
@@ -360,16 +361,15 @@
     "number_of_model_candidates" [false 128]
     "private" [true]
     "shared" [false]
-    "credits_per_prediction" [false]
-    "default_numeric_value" [false,
-                             "median"]
+    "credits_per_prediction" [false 0.0]
+    "default_numeric_value" [false "median"]
     "balance_fields" [false]
     "balance_objective" [false]
     "objective_weights" [false []]
     "weight_field" [false]
     "bias" [true]
-    "c" [false, 1]
-    "eps" [false, 0.0001]
+    "c" [false 1]
+    "eps" [false 0.0001]
     "excluded_fields" [false []]
     "field_codings" [false]
     "input_fields" [false []]
@@ -378,7 +378,7 @@
     "out_of_bag" [false]
     "objective_field" [false]
     "optimize" [false]
-    "price" [false]
+    "price" [false 0.0]
     "stats_sample_seed" [false ""]
     "stats_sample_size" [false -1]
     "range" [false []]
@@ -391,12 +391,12 @@
     "private" [true]
     "shared" [false]
     "bigrams" [false]
-    "credits_per_prediction" [false]
-    "price" [false]
+    "credits_per_prediction" [false 0.0]
+    "price" [false 0.0]
     "case_sensitive" [false]
     "excluded_terms" [false []]
     "number_of_topics" [false 0]
-    "eps" [false, 0.00001]
+    "eps" [false 0.00001]
     "excluded_fields" [false []]
     "field_codings" [false]
     "input_fields" [false []]
@@ -441,8 +441,8 @@
     "default_numeric_value" ["spline interpolation"
                              false]
     "error" [false]
-    "credits_per_prediction" [false]
-    "price" [false]
+    "credits_per_prediction" [false 0.0]
+    "price" [false 0.0]
     "field_parameters" [false]
     "period" [false 1]
     "private" [true]
@@ -476,7 +476,7 @@
     "optimizer" [{} false]
     "ordering" [false 0]
     "out_of_bag" [false]
-    "price" [false]
+    "price" [false 0.0]
     "range" [false []]
     "replacement" [false]
     "sample_rate" [1.0]
@@ -499,8 +499,8 @@
     "name" [false]
     "ad_sample_size" [false 1024]
     "ad_seed" [false]
-    "credits_per_prediction" [false]
-    "price" [false]
+    "credits_per_prediction" [false 0.0]
+    "price" [false 0.0]
     "default_numeric_value" [false]
     "excluded_fields" [[] false]
     "input_fields" [[] false]
@@ -509,15 +509,15 @@
     "out_of_bag" [false]
     "range" [false []]
     "sample_rate" [1.0]
-    "significance_levels" [false [] [0.01, 0.05, 0.1]]}
+    "significance_levels" [false [] [0.01 0.05 0.1]]}
   "sample" {
     "name" [false]}
   "correlation" {
     "name" [false]
     "categories" [false]
     "default_numeric_value" [false]
-    "credits_per_prediction" [false]
-    "price" [false]
+    "credits_per_prediction" [false 0.0]
+    "price" [false 0.0]
     "shared" [false]
     "private" [true]
     "excluded_fields" [[] false]
@@ -1123,31 +1123,28 @@
 ;; Output: (map) map that describes the reify chain of resources
 
 (define (bigml.reify.adding-updates id chain)
-  (let (conf (chain ["defs" id "create"] false)
-        upd-conf (chain ["defs" id "update"] {})
+  (let (conf (bigml.reify.get-conf chain id "create")
+        upd-conf (bigml.reify.get-conf chain id "update")
         upd-conf (iterate (acc upd-conf attr bigml.reify.UPD-ONLY-ATTRS)
                    (if (member? attr (keys conf))
-                       (assoc acc attr (conf attr false))
+                       (assoc acc attr (conf attr))
                         acc))
-        private (if (member? "private" (keys conf))
-                    (upd-conf "private" false)
-                    true)
+        private (upd-conf "private" (conf "private" true))
         chain (if (not private)
-                  (assoc-in chain
-                            ["defs" id "update"]
+                  (bigml.reify.set-conf chain id "update"
                             (assoc upd-conf "private" private))
-                  (assoc-in chain
-                            ["defs" id "update"]
-                            upd-conf))
-        chain (if (= (chain ["defs" id "update"]) {})
-                  (assoc-in chain ["defs" id "update"] false)
+                  (bigml.reify.set-conf chain id "update" upd-conf))
+        ;; if no changes are due, then we avoid updating
+        chain (if (= (bigml.reify.get-conf chain id "update") {})
+                  (bigml.reify.set-conf chain id "update" false)
                   chain)
         conf (iterate (acc conf attr bigml.reify.UPD-ONLY-ATTRS)
                (if (member? attr (keys conf))
                    (dissoc acc attr)
                    acc))
-        chain (assoc-in chain ["defs" id "create"] conf))
+        chain (bigml.reify.set-conf chain id "create" conf))
     chain))
+
 
 ;; model-get-ancestors
 ;;
@@ -1835,7 +1832,9 @@
   (let (attribute "excluded_fields"
         config (bigml.reify.get-conf reify-chain resource-id "create")
         parents (bigml.reify.get-conf reify-chain resource-id "parents"))
-    (if (and (list? parents) (not (empty? parents)))
+    (if (and (contains? config attribute)
+             (list? parents)
+             (not (empty? parents)))
         (let (parents (bigml.reify.parent-ids parents)
               parent (head parents)
               parent-fields (bigml.reify.get-attr-action reify-chain
@@ -1843,10 +1842,9 @@
                                                          "create"
                                                          "fields")
               objective? (config "objective_field" false))
-          (if (and parent-fields
-                   (contains? config attribute))
+          (if parent-fields
               (let (new-fields (map (lambda (x)
-                                      (parent-fields [x "name"] false))
+                                      (parent-fields [x "name"] x))
                                     (config attribute [])))
                 (bigml.reify.add-to reify-chain
                                     resource-id
