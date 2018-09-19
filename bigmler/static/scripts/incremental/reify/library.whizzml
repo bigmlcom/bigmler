@@ -748,6 +748,13 @@
 (define bigml.reify.DFT-NAMES {"cluster" "Cluster \\d+?"
                                "topicmodel" "Topic \\d+?"})
 
+;; MODELS
+;;
+;; Resource types for the model resources
+(define bigml.reify.MODELS ["model" "ensemble" "anomaly"
+                            "logisticregression" "topicmodel"
+                            "timeseries" "deepnet"])
+
 ;; Auxiliar functions for reify
 
 ;; balance-objective
@@ -1648,6 +1655,11 @@
                    (append (reify-chain "inputs" []) resource-id)))
     (assoc reify-chain "inputs" inputs)))
 
+;; update-tags
+;;
+(define (bigml.reify.update-tags resource-id tags)
+  (fetch (update-and-wait resource-id {"tags" tags})))
+
 ;; fill-attributes
 ;;
 ;; Fills the attributes that can be used at creation or update time
@@ -1666,7 +1678,16 @@
                                      reify-chain
                                      step
                                      counter)
-  (let (is-cv? (and (= (resource-type resource) "evaluation")
+  (let (reified-id ((reify-chain "list" []) 0)
+        tags (resource "tags" [])
+        retrain-label (str "retrain:" reified-id)
+        tags (if (member? retrain-label tags)
+                 tags
+                 (append tags retrain-label))
+        resource (if (member? (resource-type reified-id) bigml.reify.MODELS)
+                     (bigml.reify.update-tags resource-id tags)
+                     resource)
+        is-cv? (and (= (resource-type resource) "evaluation")
                (= (resource "type" false) 2))
         res-type (if is-cv? "cross-validation" (resource-type resource))
         parents (bigml.reify.get-parents resource res-type)

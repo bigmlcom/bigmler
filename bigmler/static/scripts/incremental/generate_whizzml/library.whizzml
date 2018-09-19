@@ -3,12 +3,18 @@
 ;; a list of incremental datasets.
 
 
-
 ;; SCRIPTIFY-CATEGORY
 ;;
 ;; Category that the scriptified script is assigned to
 ;;
 (define bigml.scriptify.SCRIPTIFY-CATEGORY 4)
+
+;; MODELS
+;;
+;; Resource types for the model resources
+(define bigml.scriptify.MODELS ["model" "ensemble" "anomaly"
+                                "logisticregression" "topicmodel"
+                                "timeseries" "deepnet"])
 
 ;; whizzml-args
 ;;
@@ -27,8 +33,7 @@
     (if (> (count attributes) 0)
         (loop (index 0 largs args)
           (let (attribute (nth attributes index)
-                largs (if (bigml.reify.REFERENCE-ONLY [type attribute]
-                                                      false)
+                largs (if (bigml.reify.REFERENCE-ONLY [type attribute] false)
                            largs
                            (concat largs [attribute (config
                                                          attribute
@@ -37,31 +42,6 @@
               (recur (+ index 1) largs)
               largs)))
         args)))
-
-
-;; id-to-name
-;;
-;; Replaces the IDs in the origins map by the corresponding origin names
-;;
-;; Inputs:
-;;   raw-origins: (list) List of map structures with origin information
-;;   origin-names: (list) List of names to assign to each detected id
-;;
-;; Output: (list) List of maps with origin information structure
-
-(define (id-to-name raw-origins origin-names)
-  (join " " (for (index (range (count raw-origins)))
-              (let (origin-info (raw-origins index))
-                (if (and (map? origin-info) (origin-info "id"))
-                  (let (new-info (dissoc origin-info "id")
-                        str1 (ppr-str {"id" 1})
-                        str2 (ppr-str new-info)
-                        str3 (join " " [(subs str1 0 -3)
-                                        (origin-names index)
-                                        (subs str2 1)]))
-                    (flatline "{str3}"))
-                  origin-info)))))
-
 
 ;; whizzml-origins
 ;;
@@ -84,7 +64,6 @@
               origin-types (map resource-type origins))
           (origin-args type origins origin-types mapped-ids raw-origins))
         [])))
-
 
 ;; origin-args
 ;;
@@ -185,12 +164,64 @@
                                                            false))) {} keys)))
 
 
-(define (whizzml-create resource-id configuration mapped-ids name step-counter)
+;; id-to-name
+;;
+;; Replaces the IDs in the origins map by the corresponding origin names
+;;
+;; Inputs:
+;;   raw-origins: (list) List of map structures with origin information
+;;   origin-names: (list) List of names to assign to each detected id
+;;
+;; Output: (list) List of maps with origin information structure
+
+(define (id-to-name raw-origins origin-names)
+  (join " " (for (index (range (count raw-origins)))
+              (let (origin-info (raw-origins index))
+                (if (and (map? origin-info) (origin-info "id"))
+                  (let (new-info (dissoc origin-info "id")
+                        str1 (ppr-str {"id" 1})
+                        str2 (ppr-str new-info)
+                        str3 (join " " [(subs str1 0 -3)
+                                        (origin-names index)
+                                        (subs str2 1)]))
+                    (flatline "{str3}"))
+                  origin-info)))))
+
+
+(define (whizzml-create resource-id
+                        configuration
+                        mapped-ids
+                        name
+                        reified-id
+                        step-counter)
   (let (resource-name (head (mapped-ids resource-id false))
         type (resource-type resource-id)
-        origins (join " " (whizzml-origins resource-id
-                                           configuration
-                                           mapped-ids))
+        periodic-model (and (= reified-id resource-id)
+                            (member? type bigml.scriptify.MODELS))
+        output (if periodic-model
+                   (str "(define condition (if (positive? datasets-limit)"
+                        " {\"tags\" \"retrain:"
+                        reified-id
+                        "\""
+                        " \"limit\" datasets-limit}"
+                        " {\"tags\" \"retrain:"
+                        reified-id
+                        "\""
+                        " \"limit\" 2}))"
+                        "(define origins (map (lambda (x)"
+                        " (x \"resource\")) (list-datasets "
+                        "condition)))"
+                        "(define datasets-list "
+                        "(if (positive? datasets-limit)"
+                        " origins"
+                        " [(create-dataset "
+                        "{\"origin_datasets\" origins})]))")
+                   "")
+        origins (if periodic-model
+                    "\"datasets\" datasets-list"
+                    (join " " (whizzml-origins resource-id
+                                               configuration
+                                               mapped-ids)))
         creator (configuration ["create" "creator"] "")
         configuration (dissoc-in configuration ["create" "creator"])
         configuration (dissoc-in configuration ["create" "name_options"])
@@ -203,7 +234,7 @@
                       (str " {" arguments "}")
                       arguments)
         output (pretty-whizzml
-                 (str "(define " resource-name " (create-and-wait-" type
+                 (str output "(define " resource-name " (create-and-wait-" type
          arguments
          "))"))
         output (str ";; Step "
@@ -260,6 +291,7 @@
                     "\n" output))
     output))
 
+
 (define (whizzml-get resource-id configuration mapped-ids name step-counter)
   (let (resource-name (head (mapped-ids resource-id false))
         parent-id (head (bigml.reify.parent-ids (configuration "parents")))
@@ -279,21 +311,9 @@
     output))
 
 
-(define (non-strict confs resource-id action)
-  (dissoc-in confs [resource-id
-                    action
-                    "name"])
-  (let (confs (dissoc-in confs [resource-id
-                                action
-                                "name"])
-        type (resource-type resource-id)
-        attrs (bigml.reify.STRICT-ATTRS type []))
-    (iterate (acc confs attr attrs)
-      (dissoc acc attr))))
-
-
 (define (whizzml-script reify-chain exclude-name)
   (let (lines []
+        reified-id (head (reify-chain "list" []))
         ids-chain (filter resource-id? (reverse (reify-chain
                                                      "list"
                                                      false)))
@@ -310,7 +330,7 @@
                                                         index)]))
                             (recur index mapped-ids))))
         inputs (reify-chain "inputs" [])
-        confs (reify-chain "defs" false)
+        confs (reify-chain "defs" {})
         script-info {"code" ""
                      "mapped-ids" mapped-ids
                      "type-counters" {}
@@ -363,7 +383,9 @@
                                           [resource-name])
                         name (confs [resource-id "create" "name"] false)
                         confs (if (and confs exclude-name)
-                                  (non-strict confs resource-id "create")
+                                  (dissoc-in confs [resource-id
+                                                    "create"
+                                                    "name"])
                                   confs)
                         lines (if (and (confs [resource-id "create"] false)
                                       (not (member? resource-id inputs)))
@@ -373,6 +395,7 @@
                                                                  false)
                                                           mapped-ids
                                                           name
+                                                          reified-id
                                                           step-counter))
                                   lines)
                         step-counter (if (and (confs [resource-id "create"] false)
@@ -381,7 +404,9 @@
                                          step-counter)
                         name (confs [resource-id "get" "name"] name)
                         confs (if (and confs exclude-name)
-                                  (non-strict confs resource-id "get")
+                                  (dissoc-in confs [resource-id
+                                                    "get"
+                                                    "name"])
                                   confs)
                         lines (if (confs [resource-id "get"] false)
                                   (append lines (whizzml-get resource-id
@@ -398,10 +423,12 @@
                         update-conf (confs [resource-id "update-parser"] false)
                         name (confs [resource-id "update-parser" "name"] name)
                         confs (if (and confs exclude-name)
-                                  (non-strict confs resource-id "update-parser")
+                                  (dissoc-in confs [resource-id
+                                                    "update-parser"
+                                                    "name"])
                                   confs)
                         update-conf (if (and update-conf exclude-name)
-                                        (non-strict confs resource-id "update-parser")
+                                        (dissoc update-conf "name")
                                         update-conf)
                         type-counter (if update-conf
                                          (+ (type-counters type 0) 1)
@@ -456,10 +483,10 @@
                                                           mapped-ids
                                                           name
                                                           step-counter))
-                                  lines))
+                                  lines)
                         step-counter (if update-conf
                                          (+ step-counter 1)
-                                         step-counter)
+                                         step-counter))
                     (recur (+ index 1)
                            {"code" (str code (join "\n" lines) "\n")
                             "mapped-ids" mapped-ids
@@ -502,9 +529,19 @@
                  (str type "-id"))
         description (if (= type "string")
                         "Remote URL"
-                        (str "Scripting from " type " resource")))
-    (assoc args "inputs" (append inputs {"name" (head (mapped-ids
+                        (str "Scripting from " type " resource"))
+        inputs (append inputs {"name" (head (mapped-ids
                                                            input
                                                            false))
                                          "type" type
-                                         "description" description}))))
+                                         "description" description})
+        inputs (append inputs {"name" "datasets-limit"
+                               "type" "number"
+                               "description" (str "Maximum number of datasets"
+                                                 " to be used to retrain. "
+                                                 "Default is -1, which will "
+                                                 "consolidate the "
+                                                 "last available"
+                                                 " dataset.")
+                               "default" -1}))
+    (assoc args "inputs" inputs)))
