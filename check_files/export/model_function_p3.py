@@ -6,7 +6,7 @@ def predict_rating(gender=None,
                    title=None,
                    genres=None,
                    timestamp=None):
-    """ Predictor for rating from model/5a14388536452779fe00339f
+    """ Predictor for rating from model/5ba50443c7736e400800279a
 
         Created using BigMLer
     """
@@ -78,6 +78,8 @@ def predict_rating(gender=None,
     }
     term_forms = {
         "title": {
+            u"beauty": ['beauty', 'beautiful'],
+            u"day": ['day', 'days'],
         },
     }
 
@@ -192,9 +194,9 @@ def predict_rating(gender=None,
                                                                             if (timestamp <= 978298391):
                                                                                 return {"prediction":5, "error":2.36951}
                                                                         if (timestamp <= 978298248):
-                                                                            if (timestamp > 978298174):
+                                                                            if (term_matches(title, "title", u"1980") > 0):
                                                                                 return {"prediction":2, "error":1.31017}
-                                                                            if (timestamp <= 978298174):
+                                                                            if (term_matches(title, "title", u"1980") <= 0):
                                                                                 if (timestamp > 978297750):
                                                                                     if (term_matches(title, "title", u"1999") > 0):
                                                                                         return {"prediction":3, "error":1.14938}
@@ -262,13 +264,15 @@ def predict_rating(gender=None,
                         if (item_matches(genres, "genres", u"Drama") > 0):
                             return {"prediction":4, "error":2.60606}
                         if (item_matches(genres, "genres", u"Drama") <= 0):
-                            if (item_matches(genres, "genres", u"Romance") > 0):
-                                return {"prediction":1, "error":2.07461}
-                            if (item_matches(genres, "genres", u"Romance") <= 0):
+                            if (timestamp is None):
+                                return {"prediction": 1.8, "error": 2.93395}
+                            if (timestamp > 978904214):
                                 if (term_matches(title, "title", u"1997") > 0):
                                     return {"prediction":3, "error":2.93426}
                                 if (term_matches(title, "title", u"1997") <= 0):
                                     return {"prediction":2, "error":2.07483}
+                            if (timestamp <= 978904214):
+                                return {"prediction":1, "error":2.07461}
     if (item_matches(genres, "genres", u"Comedy") <= 0):
         if (title is None):
             return {"prediction": 3.82843, "error": 1.25974}
@@ -329,9 +333,9 @@ def predict_rating(gender=None,
                 if (gender is None):
                     return {"prediction": 3.92135, "error": 1.21004}
                 if (gender == "Male"):
-                    if (term_matches(title, "title", u"dick") > 0):
+                    if (term_matches(title, "title", u"dick tracy (1990)") > 0):
                         return {"prediction":1, "error":1.29316}
-                    if (term_matches(title, "title", u"dick") <= 0):
+                    if (term_matches(title, "title", u"dick tracy (1990)") <= 0):
                         if (occupation is None):
                             return {"prediction": 3.84892, "error": 1.26101}
                         if (occupation == "writer"):
@@ -361,15 +365,15 @@ def predict_rating(gender=None,
                                 if (term_matches(title, "title", u"mission") > 0):
                                     return {"prediction":2.5, "error":5.26764}
                                 if (term_matches(title, "title", u"mission") <= 0):
-                                    if (zipcode is None):
-                                        return {"prediction": 3.42857, "error": 1.54823}
-                                    if (zipcode > 14856):
-                                        if (term_matches(title, "title", u"cell") > 0):
-                                            return {"prediction":3, "error":1.35815}
-                                        if (term_matches(title, "title", u"cell") <= 0):
-                                            return {"prediction":4, "error":1.10893}
-                                    if (zipcode <= 14856):
+                                    if (term_matches(title, "title", u"cell") > 0):
                                         return {"prediction":3, "error":1.09476}
+                                    if (term_matches(title, "title", u"cell") <= 0):
+                                        if (timestamp is None):
+                                            return {"prediction": 3.6, "error": 1.92072}
+                                        if (timestamp > 978217782):
+                                            return {"prediction":3, "error":1.35815}
+                                        if (timestamp <= 978217782):
+                                            return {"prediction":4, "error":1.10893}
                             if (term_matches(title, "title", u"2000") <= 0):
                                 if (timestamp is None):
                                     return {"prediction": 3.95, "error": 1.26219}
@@ -380,9 +384,9 @@ def predict_rating(gender=None,
                                         if (term_matches(title, "title", u"1997") <= 0):
                                             return {"prediction":4, "error":2.07483}
                                     if (timestamp <= 1009669148):
-                                        if (term_matches(title, "title", u"dead poets society (1989)") > 0):
+                                        if (term_matches(title, "title", u"1989") > 0):
                                             return {"prediction":5, "error":1.59717}
-                                        if (term_matches(title, "title", u"dead poets society (1989)") <= 0):
+                                        if (term_matches(title, "title", u"1989") <= 0):
                                             if (term_matches(title, "title", u"1990") > 0):
                                                 return {"prediction":2, "error":1.16977}
                                             if (term_matches(title, "title", u"1990") <= 0):
@@ -421,16 +425,16 @@ def predict_rating(gender=None,
                                                                 if (item_matches(genres, "genres", u"Thriller") > 0):
                                                                     return {"prediction":5, "error":1.90304}
                                                                 if (item_matches(genres, "genres", u"Thriller") <= 0):
-                                                                    if (term_matches(title, "title", u"dragonheart (1996)") > 0):
+                                                                    if (occupation == "executive/managerial"):
                                                                         return {"prediction":3, "error":10.53528}
-                                                                    if (term_matches(title, "title", u"dragonheart (1996)") <= 0):
-                                                                        if (zipcode > 55115):
-                                                                            if (timestamp > 978261905):
-                                                                                return {"prediction":3.5, "error":5.26764}
-                                                                            if (timestamp <= 978261905):
-                                                                                return {"prediction":3, "error":1.43827}
-                                                                        if (zipcode <= 55115):
-                                                                            return {"prediction":4, "error":0.70119}
+                                                                    if (occupation != "executive/managerial"):
+                                                                        if (zipcode > 58365):
+                                                                            return {"prediction":3, "error":0.99163}
+                                                                        if (zipcode <= 58365):
+                                                                            if (timestamp > 978297836):
+                                                                                return {"prediction":3, "error":1.28505}
+                                                                            if (timestamp <= 978297836):
+                                                                                return {"prediction":4, "error":0.57469}
                                                 if (term_matches(title, "title", u"1996") <= 0):
                                                     if (term_matches(title, "title", u"negotiator") > 0):
                                                         return {"prediction":3, "error":0.82118}
@@ -465,9 +469,9 @@ def predict_rating(gender=None,
                                                                             if (zipcode is None):
                                                                                 return {"prediction": 4.72727, "error": 1.09872}
                                                                             if (zipcode > 22103):
-                                                                                if (occupation == "technician/engineer"):
+                                                                                if (term_matches(title, "title", u"1994") > 0):
                                                                                     return {"prediction":4, "error":1.72408}
-                                                                                if (occupation != "technician/engineer"):
+                                                                                if (term_matches(title, "title", u"1994") <= 0):
                                                                                     if (term_matches(title, "title", u"king") > 0):
                                                                                         return {"prediction":4, "error":1.92072}
                                                                                     if (term_matches(title, "title", u"king") <= 0):
@@ -479,25 +483,25 @@ def predict_rating(gender=None,
                                                                                 return {"prediction":5, "error":0.49136}
                                                                         if (item_matches(genres, "genres", u"Adventure") <= 0):
                                                                             if (timestamp > 978294097):
-                                                                                if (timestamp > 978298847):
+                                                                                if (term_matches(title, "title", u"1960") > 0):
                                                                                     return {"prediction":3, "error":1.25106}
-                                                                                if (timestamp <= 978298847):
+                                                                                if (term_matches(title, "title", u"1960") <= 0):
                                                                                     if (timestamp > 978294245):
                                                                                         if (timestamp > 978298584):
                                                                                             return {"prediction":5, "error":0.80826}
                                                                                         if (timestamp <= 978298584):
-                                                                                            if (occupation == "scientist"):
+                                                                                            if (term_matches(title, "title", u"terminator") > 0):
                                                                                                 return {"prediction":5, "error":1.18675}
-                                                                                            if (occupation != "scientist"):
-                                                                                                if (term_matches(title, "title", u"terminator") > 0):
+                                                                                            if (term_matches(title, "title", u"terminator") <= 0):
+                                                                                                if (term_matches(title, "title", u"1994") > 0):
                                                                                                     return {"prediction":5, "error":1.18253}
-                                                                                                if (term_matches(title, "title", u"terminator") <= 0):
-                                                                                                    if (term_matches(title, "title", u"1976") > 0):
+                                                                                                if (term_matches(title, "title", u"1994") <= 0):
+                                                                                                    if (occupation == "scientist"):
                                                                                                         return {"prediction":5, "error":1.13085}
-                                                                                                    if (term_matches(title, "title", u"1976") <= 0):
-                                                                                                        if (term_matches(title, "title", u"1994") > 0):
+                                                                                                    if (occupation != "scientist"):
+                                                                                                        if (term_matches(title, "title", u"1976") > 0):
                                                                                                             return {"prediction":5, "error":0.958}
-                                                                                                        if (term_matches(title, "title", u"1994") <= 0):
+                                                                                                        if (term_matches(title, "title", u"1976") <= 0):
                                                                                                             return {"prediction":4, "error":0.36209}
                                                                                     if (timestamp <= 978294245):
                                                                                         return {"prediction":5, "error":0.60498}

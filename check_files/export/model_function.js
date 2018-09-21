@@ -1,6 +1,6 @@
 
 /**
-*  Predictor for rating from model/59ff6ffec5285004b7000189
+*  Predictor for rating from model/5ba5024c9252736dee002433
 *  Created using BigMLer
 */
 function predictRating(gender, occupation, zipcode, title, genres, timestamp) {
@@ -13,6 +13,8 @@ function predictRating(gender, occupation, zipcode, title, genres, timestamp) {
     }
     var TERM_FORMS = {
         "title": {
+            "beauty": ["beauty", "beautiful"],
+            "day": ["day", "days"],
         },
 
     }
@@ -252,10 +254,10 @@ function predictRating(gender, occupation, zipcode, title, genres, timestamp) {
                                                                             }
                                                                         }
                                                                         if (timestamp <= 978298248) {
-                                                                            if (timestamp > 978298174) {
+                                                                            if (termMatches(title, "title", "1980") > 0) {
                                                                                 return {prediction: 2, error: 1.31017};
                                                                             }
-                                                                            if (timestamp <= 978298174) {
+                                                                            if (termMatches(title, "title", "1980") <= 0) {
                                                                                 if (timestamp > 978297750) {
                                                                                     if (termMatches(title, "title", "1999") > 0) {
                                                                                         return {prediction: 3, error: 1.14938};
@@ -377,16 +379,18 @@ function predictRating(gender, occupation, zipcode, title, genres, timestamp) {
                             return {prediction: 4, error: 2.60606};
                         }
                         if (itemMatches(genres, "genres", "Drama") <= 0) {
-                            if (itemMatches(genres, "genres", "Romance") > 0) {
-                                return {prediction: 1, error: 2.07461};
-                            }
-                            if (itemMatches(genres, "genres", "Romance") <= 0) {
+                            if (timestamp == null) {
+                                return {prediction: 1.8, error: 2.93395}}
+                            if (timestamp > 978904214) {
                                 if (termMatches(title, "title", "1997") > 0) {
                                     return {prediction: 3, error: 2.93426};
                                 }
                                 if (termMatches(title, "title", "1997") <= 0) {
                                     return {prediction: 2, error: 2.07483};
                                 }
+                            }
+                            if (timestamp <= 978904214) {
+                                return {prediction: 1, error: 2.07461};
                             }
                         }
                     }
@@ -484,10 +488,10 @@ function predictRating(gender, occupation, zipcode, title, genres, timestamp) {
                 if (gender == null) {
                     return {prediction: 3.92135, error: 1.21004}}
                 if (gender == "Male") {
-                    if (termMatches(title, "title", "dick") > 0) {
+                    if (termMatches(title, "title", "dick tracy (1990)") > 0) {
                         return {prediction: 1, error: 1.29316};
                     }
-                    if (termMatches(title, "title", "dick") <= 0) {
+                    if (termMatches(title, "title", "dick tracy (1990)") <= 0) {
                         if (occupation == null) {
                             return {prediction: 3.84892, error: 1.26101}}
                         if (occupation == "writer") {
@@ -531,18 +535,18 @@ function predictRating(gender, occupation, zipcode, title, genres, timestamp) {
                                     return {prediction: 2.5, error: 5.26764};
                                 }
                                 if (termMatches(title, "title", "mission") <= 0) {
-                                    if (zipcode == null) {
-                                        return {prediction: 3.42857, error: 1.54823}}
-                                    if (zipcode > 14856) {
-                                        if (termMatches(title, "title", "cell") > 0) {
+                                    if (termMatches(title, "title", "cell") > 0) {
+                                        return {prediction: 3, error: 1.09476};
+                                    }
+                                    if (termMatches(title, "title", "cell") <= 0) {
+                                        if (timestamp == null) {
+                                            return {prediction: 3.6, error: 1.92072}}
+                                        if (timestamp > 978217782) {
                                             return {prediction: 3, error: 1.35815};
                                         }
-                                        if (termMatches(title, "title", "cell") <= 0) {
+                                        if (timestamp <= 978217782) {
                                             return {prediction: 4, error: 1.10893};
                                         }
-                                    }
-                                    if (zipcode <= 14856) {
-                                        return {prediction: 3, error: 1.09476};
                                     }
                                 }
                             }
@@ -559,10 +563,10 @@ function predictRating(gender, occupation, zipcode, title, genres, timestamp) {
                                         }
                                     }
                                     if (timestamp <= 1009669148) {
-                                        if (termMatches(title, "title", "dead poets society (1989)") > 0) {
+                                        if (termMatches(title, "title", "1989") > 0) {
                                             return {prediction: 5, error: 1.59717};
                                         }
-                                        if (termMatches(title, "title", "dead poets society (1989)") <= 0) {
+                                        if (termMatches(title, "title", "1989") <= 0) {
                                             if (termMatches(title, "title", "1990") > 0) {
                                                 return {prediction: 2, error: 1.16977};
                                             }
@@ -619,20 +623,20 @@ function predictRating(gender, occupation, zipcode, title, genres, timestamp) {
                                                                     return {prediction: 5, error: 1.90304};
                                                                 }
                                                                 if (itemMatches(genres, "genres", "Thriller") <= 0) {
-                                                                    if (termMatches(title, "title", "dragonheart (1996)") > 0) {
+                                                                    if (occupation == "executive/managerial") {
                                                                         return {prediction: 3, error: 10.53528};
                                                                     }
-                                                                    if (termMatches(title, "title", "dragonheart (1996)") <= 0) {
-                                                                        if (zipcode > 55115) {
-                                                                            if (timestamp > 978261905) {
-                                                                                return {prediction: 3.5, error: 5.26764};
-                                                                            }
-                                                                            if (timestamp <= 978261905) {
-                                                                                return {prediction: 3, error: 1.43827};
-                                                                            }
+                                                                    if (occupation != "executive/managerial") {
+                                                                        if (zipcode > 58365) {
+                                                                            return {prediction: 3, error: 0.99163};
                                                                         }
-                                                                        if (zipcode <= 55115) {
-                                                                            return {prediction: 4, error: 0.70119};
+                                                                        if (zipcode <= 58365) {
+                                                                            if (timestamp > 978297836) {
+                                                                                return {prediction: 3, error: 1.28505};
+                                                                            }
+                                                                            if (timestamp <= 978297836) {
+                                                                                return {prediction: 4, error: 0.57469};
+                                                                            }
                                                                         }
                                                                     }
                                                                 }
@@ -689,10 +693,10 @@ function predictRating(gender, occupation, zipcode, title, genres, timestamp) {
                                                                             if (zipcode == null) {
                                                                                 return {prediction: 4.72727, error: 1.09872}}
                                                                             if (zipcode > 22103) {
-                                                                                if (occupation == "technician/engineer") {
+                                                                                if (termMatches(title, "title", "1994") > 0) {
                                                                                     return {prediction: 4, error: 1.72408};
                                                                                 }
-                                                                                if (occupation != "technician/engineer") {
+                                                                                if (termMatches(title, "title", "1994") <= 0) {
                                                                                     if (termMatches(title, "title", "king") > 0) {
                                                                                         return {prediction: 4, error: 1.92072};
                                                                                     }
@@ -712,31 +716,31 @@ function predictRating(gender, occupation, zipcode, title, genres, timestamp) {
                                                                         }
                                                                         if (itemMatches(genres, "genres", "Adventure") <= 0) {
                                                                             if (timestamp > 978294097) {
-                                                                                if (timestamp > 978298847) {
+                                                                                if (termMatches(title, "title", "1960") > 0) {
                                                                                     return {prediction: 3, error: 1.25106};
                                                                                 }
-                                                                                if (timestamp <= 978298847) {
+                                                                                if (termMatches(title, "title", "1960") <= 0) {
                                                                                     if (timestamp > 978294245) {
                                                                                         if (timestamp > 978298584) {
                                                                                             return {prediction: 5, error: 0.80826};
                                                                                         }
                                                                                         if (timestamp <= 978298584) {
-                                                                                            if (occupation == "scientist") {
+                                                                                            if (termMatches(title, "title", "terminator") > 0) {
                                                                                                 return {prediction: 5, error: 1.18675};
                                                                                             }
-                                                                                            if (occupation != "scientist") {
-                                                                                                if (termMatches(title, "title", "terminator") > 0) {
+                                                                                            if (termMatches(title, "title", "terminator") <= 0) {
+                                                                                                if (termMatches(title, "title", "1994") > 0) {
                                                                                                     return {prediction: 5, error: 1.18253};
                                                                                                 }
-                                                                                                if (termMatches(title, "title", "terminator") <= 0) {
-                                                                                                    if (termMatches(title, "title", "1976") > 0) {
+                                                                                                if (termMatches(title, "title", "1994") <= 0) {
+                                                                                                    if (occupation == "scientist") {
                                                                                                         return {prediction: 5, error: 1.13085};
                                                                                                     }
-                                                                                                    if (termMatches(title, "title", "1976") <= 0) {
-                                                                                                        if (termMatches(title, "title", "1994") > 0) {
+                                                                                                    if (occupation != "scientist") {
+                                                                                                        if (termMatches(title, "title", "1976") > 0) {
                                                                                                             return {prediction: 5, error: 0.958};
                                                                                                         }
-                                                                                                        if (termMatches(title, "title", "1994") <= 0) {
+                                                                                                        if (termMatches(title, "title", "1976") <= 0) {
                                                                                                             return {prediction: 4, error: 0.36209};
                                                                                                         }
                                                                                                     }
