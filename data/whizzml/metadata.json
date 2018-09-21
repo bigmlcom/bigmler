@@ -1,0 +1,25 @@
+{
+  "name": "Example of whizzml script",
+  "description": "Test example of a whizzml script that adds two numbers",
+  "kind": "script",
+  "source_code": "code.whizzml",
+  "inputs": [
+      {
+          "name": "a",
+          "type": "number",
+          "description": "First number"
+      },
+      {
+          "name": "b",
+          "type": "number",
+          "description": "Second number"
+      }
+  ],
+  "outputs": [
+      {
+          "name": "addition",
+          "type": "number",
+          "description": "Sum of the numbers"
+      }
+  ]
+}
