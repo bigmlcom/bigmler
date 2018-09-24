@@ -1319,7 +1319,8 @@
 
 (define (bigml.reify.dataset-set-new-fields conf)
   ;; if new_fields is not empty, remove input_fields and get new_fields from
-  ;; output_fields generators. Remove output_fields, and all_but
+  ;; output_fields generators. Set all_fields to false, and remove all_but and
+  ;; output_fields.
   (let (new-fields (conf "new_fields" false)
         conf (if (and new-fields (not (empty? new-fields)))
                  (dissoc conf "input_fields")
@@ -1327,6 +1328,7 @@
         conf (if (and new-fields (not (empty? new-fields)))
                  (bigml.reify.new-fields-generators conf)
                  conf)
+        conf (assoc conf "all_fields" false)
         conf (dissoc conf "output_fields"))
     (dissoc conf "all_but")))
 
