@@ -792,8 +792,10 @@ def i_create_balanced_model(step, data=None, output_dir=None):
     ok_(data is not None and output_dir is not None)
     world.directory = output_dir
     world.folders.append(world.directory)
+    if not data.startswith("https"):
+        data = res_filename(data)
     try:
-        command = ("bigmler --train " + res_filename(data) + " --balance " +
+        command = ("bigmler --train " + data + " --balance " +
                    " --store --output-dir " + output_dir)
         command = check_debug(command)
         retcode = check_call(command, shell=True)
@@ -843,8 +845,10 @@ def i_retrain_model(step, data=None, output_dir=None):
     world.directory = output_dir
     world.folders.append(world.directory)
     world.origin_model = world.model
+    if not data.startswith("https"):
+        data = res_filename(data)
     try:
-        command = ("bigmler retrain --add " + res_filename(data) +
+        command = ("bigmler retrain --add " + data +
                    " --id " + world.model['resource'] +
                    " --store --output-dir " + output_dir)
         command = check_debug(command)

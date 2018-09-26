@@ -175,7 +175,7 @@
     "threshold" [false {}]
     "input_data" [false]
     "operating_kind" [false]
-    "operating_point" [false]
+    "operating_point" [false {}]
     "vote_count" [false]
     "vote_counts" [false]}
   "evaluation" {
@@ -199,7 +199,7 @@
     "input_fields" [false []]
     "fields_map" [false {}]
     "operating_kind" [false]
-    "operating_point" [false]}
+    "operating_point" [false {}]}
   "cross-validation" {"name" [false]}
   "anomaly" {
     "name" [false]
@@ -311,7 +311,7 @@
     "newline" [false "LF"]
     "node_id" [false]
     "operating_kind" [false]
-    "operating_point" [false]
+    "operating_point" [false {}]
     "output_dataset" [false]
     "output_fields" [false []]
     "positive_class" [false]
@@ -748,12 +748,7 @@
 (define bigml.reify.DFT-NAMES {"cluster" "Cluster \\d+?"
                                "topicmodel" "Topic \\d+?"})
 
-;; MODELS
-;;
-;; Resource types for the model resources
-(define bigml.reify.MODELS ["model" "ensemble" "anomaly"
-                            "logisticregression" "topicmodel"
-                            "timeseries" "deepnet"])
+;; ---------------------------------------------------------
 
 ;; Auxiliar functions for reify
 
@@ -1299,7 +1294,9 @@
 ;; Output: (map) updated dataset configuration
 
 (define (bigml.reify.new-fields-generators conf)
-  (let (generators (conf "output_fields" false)
+  (let (conf (dissoc conf "input_fields")
+        conf (assoc conf "all_fields" false)
+        generators (conf "output_fields" false)
         generator-fn (lambda (x) (let (y (select-keys x ["generator"
                                                          "names"])
                                        y (assoc y "field" (y
@@ -1323,12 +1320,8 @@
   ;; output_fields.
   (let (new-fields (conf "new_fields" false)
         conf (if (and new-fields (not (empty? new-fields)))
-                 (dissoc conf "input_fields")
-                 conf)
-        conf (if (and new-fields (not (empty? new-fields)))
                  (bigml.reify.new-fields-generators conf)
                  conf)
-        conf (assoc conf "all_fields" false)
         conf (dissoc conf "output_fields"))
     (dissoc conf "all_but")))
 
@@ -1577,6 +1570,7 @@
       (let (reify-chain-defs (assoc (reify-chain "defs" {})
                                     resource-id
                                     {"create" configuration
+                                     "ref" configuration
                                      "parents" parents})
             reify-chain (assoc reify-chain "defs" reify-chain-defs))
             (bigml.reify.add-parents reify-chain parents))
@@ -1657,11 +1651,6 @@
                    (append (reify-chain "inputs" []) resource-id)))
     (assoc reify-chain "inputs" inputs)))
 
-;; update-tags
-;;
-(define (bigml.reify.update-tags resource-id tags)
-  (fetch (update-and-wait resource-id {"tags" tags})))
-
 ;; fill-attributes
 ;;
 ;; Fills the attributes that can be used at creation or update time
@@ -1680,16 +1669,7 @@
                                      reify-chain
                                      step
                                      counter)
-  (let (reified-id ((reify-chain "list" []) 0)
-        tags (resource "tags" [])
-        retrain-label (str "retrain:" reified-id)
-        tags (if (member? retrain-label tags)
-                 tags
-                 (append tags retrain-label))
-        resource (if (member? (resource-type reified-id) bigml.reify.MODELS)
-                     (bigml.reify.update-tags resource-id tags)
-                     resource)
-        is-cv? (and (= (resource-type resource) "evaluation")
+  (let (is-cv? (and (= (resource-type resource) "evaluation")
                (= (resource "type" false) 2))
         res-type (if is-cv? "cross-validation" (resource-type resource))
         parents (bigml.reify.get-parents resource res-type)
@@ -1789,14 +1769,15 @@
     (if (and (list? parents) (not (empty? parents)))
         (let (parents (bigml.reify.parent-ids parents)
               parent (bigml.reify.get-fields-parent parents)
-              parent-fields (bigml.reify.get-attr reify-chain
-                                                  parent
-                                                  "fields")
+              parent-fields (bigml.reify.get-attr-action reify-chain
+                                                         parent
+                                                         "create"
+                                                         "fields")
               objective? (config "objective_field" false))
           (if (and parent-fields
                    (contains? config attribute))
               (let (new-input-fields (map (lambda (x)
-                                           (parent-fields [x "name"] false))
+                                           (parent-fields [x "name"] x))
                                            (config attribute false)))
                 ;; same number of fields or only lack objective field
                 (if (or (= (count new-input-fields)

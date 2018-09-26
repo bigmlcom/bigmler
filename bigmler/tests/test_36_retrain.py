@@ -77,7 +77,9 @@ class TestRetrain(object):
         """
         print self.test_scenario1.__doc__
         examples = [
-            ['data/iris.csv', 'scenario_rt_1', 'scenario_rt_1b']]
+            ['data/iris.csv', 'scenario_rt_1', 'scenario_rt_1b'],
+            ['https://static.bigml.com/csv/iris.csv', 'scenario_rt_1c',
+             'scenario_rt_1d']]
         for example in examples:
             print "\nTesting with:\n", example
             test_pred.i_create_balanced_model(self, data=example[0], output_dir=example[1])
@@ -85,7 +87,8 @@ class TestRetrain(object):
             test_pred.i_check_create_dataset(self, suffix=None)
             test_pred.i_check_create_model(self)
             test_pred.i_retrain_model(self, data=example[0], output_dir=example[2])
-            test_pred.i_check_create_source(self)
+            if not example[0].startswith("https"):
+                test_pred.i_check_create_source(self)
             execute_steps.i_check_create_execution(self, number_of_executions=2)
             test_pred.i_check_create_model_in_execution(self)
             test_pred.i_check_model_double(self)

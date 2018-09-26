@@ -11,7 +11,7 @@
 ;;
 (define (reify-resource resource-id)
   (let (reify-chain (resource-workflow resource-id false)
-        script-info (whizzml-script reify-chain false)
+        script-info (whizzml-script reify-chain true)
         args (script-args script-info false)
         script (create-and-wait-script args))
     script))
