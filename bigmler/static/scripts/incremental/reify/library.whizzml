@@ -1651,46 +1651,6 @@
                    (append (reify-chain "inputs" []) resource-id)))
     (assoc reify-chain "inputs" inputs)))
 
-;; fill-attributes
-;;
-;; Fills the attributes that can be used at creation or update time
-;; and calls the reification of parents
-;;
-;; Inputs:
-;;   resource-id: (string) Resource ID
-;;   resource: (map) Resource information
-;;   reify-chain: (map) chain of resources for reification
-;;
-;; Outputs: (map) chain of resources for reification
-;;
-
-(define (bigml.reify.fill-attributes resource-id
-                                     resource
-                                     reify-chain
-                                     step
-                                     counter)
-  (let (is-cv? (and (= (resource-type resource) "evaluation")
-               (= (resource "type" false) 2))
-        res-type (if is-cv? "cross-validation" (resource-type resource))
-        parents (bigml.reify.get-parents resource res-type)
-        ;; stores the common and specific attributes. Default values are
-        ;; discarded
-        configuration (bigml.reify.get-non-defaults
-                        resource
-                        bigml.reify.COMMON-DEFAULTS {})
-        configuration (bigml.reify.get-non-defaults
-                        resource
-                        (bigml.reify.DEFAULTS res-type false)
-                        configuration)
-        ;; extract the fields structure
-        configuration (bigml.reify.get-fields resource configuration)
-        ;; extract the inner cluster or topic name changes
-        configuration (bigml.reify.get-inner-names resource configuration)
-        reify-chain (bigml.reify.add-step-info reify-chain
-                                               resource-id
-                                               configuration
-                                               parents))
-    (bigml.reify.reify-parents reify-chain parents resource-id step counter)))
 
 ;; reify-parents
 ;;
@@ -2357,3 +2317,72 @@
                                                          resource-id
                                                          "create")))))
     (reduce bigml.reify.normalize-resource-steps reify-chain resource-ids)))
+
+
+;;------------------ only retrain
+
+;; RETRAIN-MODELS
+;;
+;; Resource types for the model resources
+(define RETRAIN-MODELS ["model" "ensemble" "anomaly"
+                        "logisticregression" "topicmodel"
+                        "timeseries" "deepnet"])
+
+
+;; update-tags
+;;
+(define (update-tags resource-id tags)
+  (fetch (update-and-wait resource-id {"tags" tags})))
+
+
+;; fill-attributes
+;;
+;; Fills the attributes that can be used at creation or update time
+;; and calls the reification of parents
+;; Also, adds tags to allow retraining
+;;
+;; Inputs:
+;;   resource-id: (string) Resource ID
+;;   resource: (map) Resource information
+;;   reify-chain: (map) chain of resources for reification
+;;
+;; Outputs: (map) chain of resources for reification
+;;
+
+
+(define (bigml.reify.fill-attributes resource-id
+                                         resource
+                                         reify-chain
+                                         step
+                                         counter)
+  (let (reified-id ((reify-chain "list" []) 0)
+        tags (resource "tags" [])
+        retrain-label (str "retrain:" reified-id)
+        tags (if (member? retrain-label tags)
+                 tags
+                 (append tags retrain-label))
+        resource (if (member? (resource-type reified-id) RETRAIN-MODELS)
+                     (update-tags resource-id tags)
+                     resource)
+        is-cv? (and (= (resource-type resource) "evaluation")
+               (= (resource "type" false) 2))
+        res-type (if is-cv? "cross-validation" (resource-type resource))
+        parents (bigml.reify.get-parents resource res-type)
+        ;; stores the common and specific attributes. Default values are
+        ;; discarded
+        configuration (bigml.reify.get-non-defaults
+                        resource
+                        bigml.reify.COMMON-DEFAULTS {})
+        configuration (bigml.reify.get-non-defaults
+                        resource
+                        (bigml.reify.DEFAULTS res-type false)
+                        configuration)
+        ;; extract the fields structure
+        configuration (bigml.reify.get-fields resource configuration)
+        ;; extract the inner cluster or topic name changes
+        configuration (bigml.reify.get-inner-names resource configuration)
+        reify-chain (bigml.reify.add-step-info reify-chain
+                                               resource-id
+                                               configuration
+                                               parents))
+    (bigml.reify.reify-parents reify-chain parents resource-id step counter)))
