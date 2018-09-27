@@ -27,7 +27,7 @@
     (if (> (count attributes) 0)
         (loop (index 0 largs args)
           (let (attribute (nth attributes index)
-                largs (if (bigml.reify.REFERENCE-ONLY [type attribute]
+                largs (if (bigmler.reify.REFERENCE-ONLY [type attribute]
                                                       false)
                            largs
                            (concat largs [attribute (config
@@ -79,7 +79,7 @@
   (let (parents (configuration "parents" false)
         type (resource-type resource-id))
     (if (> (count parents) 0)
-        (let (origins (bigml.reify.parent-ids parents)
+        (let (origins (bigmler.reify.parent-ids parents)
               raw-origins (map (lambda (x) (x 2)) parents)
               origin-types (map resource-type origins))
           (origin-args type origins origin-types mapped-ids raw-origins))
@@ -262,7 +262,7 @@
 
 (define (whizzml-get resource-id configuration mapped-ids name step-counter)
   (let (resource-name (head (mapped-ids resource-id false))
-        parent-id (head (bigml.reify.parent-ids (configuration "parents")))
+        parent-id (head (bigmler.reify.parent-ids (configuration "parents")))
         parent-name (head (mapped-ids parent-id))
         suffix (pr-str (configuration "get" false))
         output (pretty-whizzml
@@ -285,7 +285,7 @@
                                 "name"])
 
         type (resource-type resource-id)
-        attrs (bigml.reify.STRICT-ATTRS type []))
+        attrs (bigmler.reify.STRICT-ATTRS type []))
     (iterate (acc confs attr attrs)
       (dissoc-in acc [resource-id action attr]))))
 

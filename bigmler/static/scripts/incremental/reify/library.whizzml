@@ -2,7 +2,7 @@
 ;;
 ;; attributes used in all types of resouce
 ;;
-(define bigml.reify.COMMON-DEFAULTS {"category" [0]
+(define bigmler.reify.COMMON-DEFAULTS {"category" [0]
                                      "description" [false ""]
                                      "tags" [[]]
                                      "project" [false]
@@ -12,7 +12,7 @@
 ;;
 ;; attributes used in some of the resources, keyed by resource type
 ;;
-(define bigml.reify.DEFAULTS {
+(define bigmler.reify.DEFAULTS {
   "source" {
     "name" ["Unnamed inline source"
             "Unnamed remote source"]
@@ -537,7 +537,7 @@
 ;; when comparing resources to their parents.
 ;;
 
-(define bigml.reify.REFERENCE-ONLY {"source" ["size" "remote"]
+(define bigmler.reify.REFERENCE-ONLY {"source" ["size" "remote"]
                                     "dataset" ["rows" "ranges" "private"]
                                     "model" ["private" "shared"]
                                     "ensemble" ["models"]
@@ -549,7 +549,7 @@
 ;; attributes that need to be removed to generalize to other datasets.
 ;;
 
-(define bigml.reify.STRICT-ATTRS {"source" ["size"]
+(define bigmler.reify.STRICT-ATTRS {"source" ["size"]
                                   "dataset" ["rows" "ranges" "size" "range"]
                                   "model" ["range"]
                                   "ensemble" ["range" "ranges"]
@@ -564,7 +564,7 @@
 ;;
 ;; arguments to be sent in creation calls of boosting ensembles
 ;;
-(define bigml.reify.BOOSTING-ATTRS ["iterations"
+(define bigmler.reify.BOOSTING-ATTRS ["iterations"
                                     "early_holdout"
                                     "early_out_of_bag"
                                     "step_out_of_bag"
@@ -575,7 +575,7 @@
 ;;
 ;; arguments to be sent in creation calls of sampled ensembles
 ;;
-(define bigml.reify.SAMPLE-ATTRS ["seed"
+(define bigmler.reify.SAMPLE-ATTRS ["seed"
                                   "rate"
                                   "replacement"])
 
@@ -584,7 +584,7 @@
 ;;
 ;; arguments to be sent in creation calls of time series time range
 ;;
-(define bigml.reify.TIME-RANGE-ATTRS ["start"
+(define bigmler.reify.TIME-RANGE-ATTRS ["start"
                                       "end"
                                       "interval"
                                       "interval_unit"
@@ -596,7 +596,7 @@
 ;; keyed resource type is built
 ;;
 
-(define bigml.reify.ORIGINS {"source" [["file_name",
+(define bigmler.reify.ORIGINS {"source" [["file_name",
                                         "remote"]]
                              "dataset" [["new_fields"
                                          "origin_batch_resource"
@@ -656,14 +656,14 @@
                              "forecast" [["timeseries"]]
                              "fusion" [["models"]]})
 
-(define bigml.reify.NAMED-ATTRIBUTES ["objective_field"
+(define bigmler.reify.NAMED-ATTRIBUTES ["objective_field"
                                       "weight_field"
                                       "objective_fields"])
 
-(define bigml.reify.UPD-ONLY-ATTRS ["private", "shared", "shared_clonable",
+(define bigmler.reify.UPD-ONLY-ATTRS ["private", "shared", "shared_clonable",
                                     "credits_per_prediction", "price"])
 
-(define bigml.reify.BATCH-HEADER-ATTRS {
+(define bigmler.reify.BATCH-HEADER-ATTRS {
   "batchprediction" ["prediction_name" "confidence_name"]
   "batchcentroid" ["centroid_name" "distance_name"]
   "batchanomalyscore" ["score_name"]})
@@ -673,14 +673,14 @@
 ;; field properties updatable in all resources that contain a field structure
 ;;
 
-(define bigml.reify.DEFAULT-UPDATABLE ["name" "label" "description"])
+(define bigmler.reify.DEFAULT-UPDATABLE ["name" "label" "description"])
 
 ;; DATASET-UPDATABLE
 ;;
 ;; field properties updatable in a dataset
 ;;
-(define bigml.reify.DATASET-UPDATABLE
-        (concat bigml.reify.DEFAULT-UPDATABLE ["preferred"]))
+(define bigmler.reify.DATASET-UPDATABLE
+        (concat bigmler.reify.DEFAULT-UPDATABLE ["preferred"]))
 
 
 ;; SOURCE-UPDATABLE
@@ -688,8 +688,8 @@
 ;; field properties updatable in a source
 ;;
 
-(define bigml.reify.SOURCE-UPDATABLE
-        (concat bigml.reify.DEFAULT-UPDATABLE ["optype"
+(define bigmler.reify.SOURCE-UPDATABLE
+        (concat bigmler.reify.DEFAULT-UPDATABLE ["optype"
                                                "term_analysis"
                                                "item_analysis"]))
 
@@ -699,7 +699,7 @@
 ;; attribute that contains the field structure keyed by resource type
 ;;
 
-(define bigml.reify.FIELDS-PATH
+(define bigmler.reify.FIELDS-PATH
         {"source" ["fields"]
          "dataset" ["fields"]
          "model" ["model" "fields"]
@@ -720,7 +720,7 @@
 ;; attribute that contains inner clusters and topics info
 ;;
 
-(define bigml.reify.INNER-INFO-NAMES-PATH
+(define bigmler.reify.INNER-INFO-NAMES-PATH
         {"cluster" ["clusters" "clusters"]
          "topicmodel" ["topic_model" "topics"]})
 
@@ -729,7 +729,7 @@
 ;;
 ;; attribute that contains inner clusters and topics info
 ;;
-(define bigml.reify.INNER-INFO-PATH
+(define bigmler.reify.INNER-INFO-PATH
         {"model" "model"
          "association" "associations"
          "cluster" "clusters"
@@ -745,7 +745,7 @@
 ;; Default names for the clusters and topics
 ;;
 
-(define bigml.reify.DFT-NAMES {"cluster" "Cluster \\d+?"
+(define bigmler.reify.DFT-NAMES {"cluster" "Cluster \\d+?"
                                "topicmodel" "Topic \\d+?"})
 
 ;; ---------------------------------------------------------
@@ -760,7 +760,7 @@
 ;; Inputs:
 ;;   conf: (map) Map with the configuration of the model
 
-(define (bigml.reify.balance-objective conf)
+(define (bigmler.reify.balance-objective conf)
   (if (conf "balance_objective" false)
       (dissoc conf "objective_weights")
       conf))
@@ -776,7 +776,7 @@
 ;;
 ;; Output: (map) workflow chain of events
 ;;
-(define (bigml.reify.set-conf chain id action config)
+(define (bigmler.reify.set-conf chain id action config)
   (assoc-in chain ["defs" id action] config))
 
 
@@ -791,7 +791,7 @@
 ;;
 ;; Output: (map) configuration
 ;;
-(define (bigml.reify.get-conf chain id action)
+(define (bigmler.reify.get-conf chain id action)
   (chain ["defs" id action] {}))
 
 
@@ -806,7 +806,7 @@
 ;;
 ;; Output: (map) configuration
 ;;
-(define (bigml.reify.remove-conf chain id action)
+(define (bigmler.reify.remove-conf chain id action)
   (dissoc-in chain ["defs" id action]))
 
 
@@ -823,7 +823,7 @@
 ;;
 ;; Output: (map) workflow chain of events
 ;;
-(define (bigml.reify.add-to chain id action attr value)
+(define (bigmler.reify.add-to chain id action attr value)
   (assoc-in chain ["defs" id action attr] value))
 
 ;; remove-from
@@ -836,7 +836,7 @@
 ;;  action: (string) action label where the attribute is removed from
 ;;  attr: (string) attribute to remove
 ;;
-(define (bigml.reify.remove-from chain id action attr)
+(define (bigmler.reify.remove-from chain id action attr)
   (dissoc-in chain ["defs" id action attr]))
 
 ;; get-attr
@@ -847,7 +847,7 @@
 ;; chain: (map) worklfow chain of events
 ;; id: (string) resource ID
 ;; attr: (string) attribute to get
-(define (bigml.reify.get-attr chain id attr)
+(define (bigmler.reify.get-attr chain id attr)
   (chain ["defs" id "ref" attr] false))
 
 ;; get-attr-action
@@ -859,7 +859,7 @@
 ;; id: (string) resource ID
 ;; action: (string) action label where the attribute is
 ;; attr: (string) attribute to get
-(define (bigml.reify.get-attr-action chain id action attr)
+(define (bigmler.reify.get-attr-action chain id action attr)
   (chain ["defs" id action attr] false))
 
 
@@ -872,14 +872,14 @@
 ;; id: (string) resource ID
 ;;
 ;; Outputs: (map) chain of events
-(define (bigml.reify.batch-headers chain id)
-  (if (or (not (contains? (bigml.reify.get-conf chain id "create") "header"))
-           (bigml.reify.get-attr-action chain id "create" "header"))
+(define (bigmler.reify.batch-headers chain id)
+  (if (or (not (contains? (bigmler.reify.get-conf chain id "create") "header"))
+           (bigmler.reify.get-attr-action chain id "create" "header"))
       chain
       (let (type (resource-type id)
-            attrs (bigml.reify.BATCH-HEADER-ATTRS type []))
+            attrs (bigmler.reify.BATCH-HEADER-ATTRS type []))
         (iterate (acc chain attr attrs)
-          (bigml.reify.remove-from acc id "create" attr)))))
+          (bigmler.reify.remove-from acc id "create" attr)))))
 
 
 
@@ -913,12 +913,12 @@
 ;;
 ;; Output: (map) map that describes the configuration
 
-(define (bigml.reify.filter-in-values conf outer-attr inner-attr attrs)
+(define (bigmler.reify.filter-in-values conf outer-attr inner-attr attrs)
   (let (inner-map (conf outer-attr {})
         filtered-attr (iterate (r {} attr (keys inner-map))
                         (assoc r
                                attr
-                               (bigml.reify.filter-attrs (inner-map attr)
+                               (bigmler.reify.filter-attrs (inner-map attr)
                                                          inner-attr
                                                          attrs))))
         (assoc conf outer-attr filtered-attr)))
@@ -935,7 +935,7 @@
 ;;
 ;; Output: (map) map that describes the configuration
 
-(define (bigml.reify.filter-attrs conf parent-attr attrs)
+(define (bigmler.reify.filter-attrs conf parent-attr attrs)
   (let (parent (conf parent-attr {})
         filtered-attr (iterate (r {} attr (keys parent))
                         (if (member? attr attrs)
@@ -954,7 +954,7 @@
 ;;
 ;; Output: (string|list|false) resource ID, list of IDs or false
 
-(define (bigml.reify.clean-origin-info info)
+(define (bigmler.reify.clean-origin-info info)
   (let (info-check (if (list? info)
                        (reduce (lambda (x y) (and x y))
                                true
@@ -974,9 +974,9 @@
 ;;
 ;; Output: (boolean) True if any of the update only attributes are available
 ;;
-(define (bigml.reify.update-attrs? res-type)
-  (some (lambda (x) (member? x (keys (bigml.reify.DEFAULTS res-type {}))))
-        bigml.reify.UPD-ONLY-ATTRS))
+(define (bigmler.reify.update-attrs? res-type)
+  (some (lambda (x) (member? x (keys (bigmler.reify.DEFAULTS res-type {}))))
+        bigmler.reify.UPD-ONLY-ATTRS))
 
 
 
@@ -986,131 +986,131 @@
 ;; specific transformations or checkings that must be applied only to some
 ;; resource types.
 ;;
-(define bigml.reify.PER-TYPE-PROCESS {
+(define bigmler.reify.PER-TYPE-PROCESS {
   "source" (lambda (id chain)
              ;; sources that come from remote data can be reproduced, so we
              ;; use the create and update calls. Sources that come from a
              ;; local file cannot be created from whizzml, so we move the
              ;; attributes to the update call and leave a source_id argument
              ;; free.
-             (if (not (bigml.reify.get-attr chain id "remote"))
+             (if (not (bigmler.reify.get-attr chain id "remote"))
                  ;; local file
-                 (let (chain (bigml.reify.remove-from chain
+                 (let (chain (bigmler.reify.remove-from chain
                                                       id
                                                       "create"
                                                       "file_name")
-                       update (bigml.reify.get-conf chain id "update")
-                       chain (if (bigml.reify.get-attr chain
+                       update (bigmler.reify.get-conf chain id "update")
+                       chain (if (bigmler.reify.get-attr chain
                                                        id
                                                        "source_parser")
-                                 (bigml.reify.set-conf chain
+                                 (bigmler.reify.set-conf chain
                                                        id
                                                        "update-parser"
-                                    (bigml.reify.get-conf chain id "create"))
-                                 (bigml.reify.set-conf chain
+                                    (bigmler.reify.get-conf chain id "create"))
+                                 (bigmler.reify.set-conf chain
                                                          id
                                                          "update"
                                            (merge update
-                                                  (bigml.reify.get-conf chain
+                                                  (bigmler.reify.get-conf chain
                                                                         id
                                                                         "create")))))
-                   (bigml.reify.remove-conf chain id "create"))
+                   (bigmler.reify.remove-conf chain id "create"))
                  chain))
   "dataset" (lambda (id chain)
               ;; datasets have an associated objective field and
               ;; can store transformations from other datasets, so we
               ;; need to compare them to their parents to check
-              (let (ancestors (bigml.reify.dataset-get-ancestors id chain)
-                    conf (bigml.reify.get-conf chain id "create")
-                    upd-conf (bigml.reify.get-conf chain id "update")
+              (let (ancestors (bigmler.reify.dataset-get-ancestors id chain)
+                    conf (bigmler.reify.get-conf chain id "create")
+                    upd-conf (bigmler.reify.get-conf chain id "update")
                     upd-conf (if upd-conf
-                                 (bigml.reify.dataset-set-objective upd-conf)
+                                 (bigmler.reify.dataset-set-objective upd-conf)
                                  upd-conf)
-                    conf (bigml.reify.dataset-set-objective conf)
-                    conf (bigml.reify.dataset-set-size id conf ancestors)
-                    conf (bigml.reify.dataset-set-new-fields conf)
-                    chain (bigml.reify.set-conf chain id "create" conf)
-                    chain (bigml.reify.dataset-updates id chain))
+                    conf (bigmler.reify.dataset-set-objective conf)
+                    conf (bigmler.reify.dataset-set-size id conf ancestors)
+                    conf (bigmler.reify.dataset-set-new-fields conf)
+                    chain (bigmler.reify.set-conf chain id "create" conf)
+                    chain (bigmler.reify.dataset-updates id chain))
                (if upd-conf
-                   (bigml.reify.set-conf chain id "update" upd-conf)
+                   (bigmler.reify.set-conf chain id "update" upd-conf)
                    chain)))
   "model" (lambda (id chain)
             ;; models have an associated objective field and
             ;; some complementary options for balancing
-            (let (ancestors (bigml.reify.model-get-ancestors id chain)
-                  conf (bigml.reify.get-conf chain id "create")
-                  conf (bigml.reify.model-set-objective conf ancestors)
-                  conf (bigml.reify.balance-objective conf))
-              (bigml.reify.set-conf chain id "create" conf)))
+            (let (ancestors (bigmler.reify.model-get-ancestors id chain)
+                  conf (bigmler.reify.get-conf chain id "create")
+                  conf (bigmler.reify.model-set-objective conf ancestors)
+                  conf (bigmler.reify.balance-objective conf))
+              (bigmler.reify.set-conf chain id "create" conf)))
   "cluster" (lambda (id chain)
               ;; clusters can either be g-means or k-means. If g-means
               ;; k must be discarded
-              (let (conf (bigml.reify.get-conf chain id "create"))
+              (let (conf (bigmler.reify.get-conf chain id "create"))
                 (if (and (contains? conf "critical_value")
                          (contains? conf "k"))
-                    (bigml.reify.remove-from chain id "create" "k")
+                    (bigmler.reify.remove-from chain id "create" "k")
                     chain)))
   "ensemble" (lambda (id chain)
                ;; ensembles have an associated objective field and
                ;; can be of many types. We need to select attributes according
                ;; to these types.
-               (let (ancestors (bigml.reify.model-get-ancestors id chain)
-                     conf (bigml.reify.get-conf chain id "create")
-                     conf (bigml.reify.model-set-objective conf ancestors)
+               (let (ancestors (bigmler.reify.model-get-ancestors id chain)
+                     conf (bigmler.reify.get-conf chain id "create")
+                     conf (bigmler.reify.model-set-objective conf ancestors)
                      conf (if (contains? conf "boosting")
-                              (bigml.reify.filter-attrs
+                              (bigmler.reify.filter-attrs
                                 conf
                                 "boosting"
-                                bigml.reify.BOOSTING-ATTRS)
+                                bigmler.reify.BOOSTING-ATTRS)
                               conf)
                      conf (if (contains? conf "ensemble_sample")
-                              (bigml.reify.filter-attrs
+                              (bigmler.reify.filter-attrs
                                 conf
                                 "ensemble_sample"
-                                bigml.reify.SAMPLE-ATTRS)
+                                bigmler.reify.SAMPLE-ATTRS)
                               conf)
-                     conf (bigml.reify.balance-objective conf))
-                 (bigml.reify.set-conf chain id "create" conf)))
+                     conf (bigmler.reify.balance-objective conf))
+                 (bigmler.reify.set-conf chain id "create" conf)))
   "logisticregression" (lambda (id chain)
                          ;; logistic regression have an objective field
                          ;; that can be balanced too
-                         (let (ancestors (bigml.reify.model-get-ancestors id
+                         (let (ancestors (bigmler.reify.model-get-ancestors id
                                                                           chain)
-                               conf (bigml.reify.get-conf chain id "create")
-                               conf (bigml.reify.model-set-objective conf ancestors)
-                               conf (bigml.reify.balance-objective conf))
-                           (bigml.reify.set-conf chain id "create" conf)))
+                               conf (bigmler.reify.get-conf chain id "create")
+                               conf (bigmler.reify.model-set-objective conf ancestors)
+                               conf (bigmler.reify.balance-objective conf))
+                           (bigmler.reify.set-conf chain id "create" conf)))
   "deepnet" (lambda (id chain)
               ;; deepnets have an objective field, can be balanced and
               ;; also the ones with search=True should not keep the layers info
-              (let (ancestors (bigml.reify.model-get-ancestors id chain)
-                    conf (bigml.reify.get-conf chain id "create")
-                    conf (bigml.reify.model-set-objective conf ancestors)
-                    conf (bigml.reify.remove-layers-type conf)
-                    conf (bigml.reify.deepnet-suggest-dft conf)
-                    conf (bigml.reify.balance-objective conf))
-                (bigml.reify.set-conf chain id "create" conf)))
+              (let (ancestors (bigmler.reify.model-get-ancestors id chain)
+                    conf (bigmler.reify.get-conf chain id "create")
+                    conf (bigmler.reify.model-set-objective conf ancestors)
+                    conf (bigmler.reify.remove-layers-type conf)
+                    conf (bigmler.reify.deepnet-suggest-dft conf)
+                    conf (bigmler.reify.balance-objective conf))
+                (bigmler.reify.set-conf chain id "create" conf)))
   "timeseries" (lambda (id chain)
                  ;; timeseries have an objective field (or many)
                  ;; and only some time-range and field parameters are
                  ;; accepted in create calls
-                 (let (ancestors (bigml.reify.model-get-ancestors id chain)
-                       conf (bigml.reify.get-conf chain id "create")
-                       conf (bigml.reify.model-set-objective conf ancestors)
+                 (let (ancestors (bigmler.reify.model-get-ancestors id chain)
+                       conf (bigmler.reify.get-conf chain id "create")
+                       conf (bigmler.reify.model-set-objective conf ancestors)
                        conf (if (contains? conf "time_range")
-                                (bigml.reify.filter-attrs
+                                (bigmler.reify.filter-attrs
                                   conf
                                   "time_range"
-                                  bigml.reify.TIME-RANGE-ATTRS)
+                                  bigmler.reify.TIME-RANGE-ATTRS)
                                 conf)
                        conf (if (contains? conf "field_parameters")
-                                (bigml.reify.filter-in-values
+                                (bigmler.reify.filter-in-values
                                   conf
                                   "field_parameters"
                                   "time_range"
-                                  bigml.reify.TIME-RANGE-ATTRS)
+                                  bigmler.reify.TIME-RANGE-ATTRS)
                                 conf))
-                   (bigml.reify.set-conf chain id "create" conf)))})
+                   (bigmler.reify.set-conf chain id "create" conf)))})
 
 ;; adding-updates
 ;;
@@ -1124,27 +1124,27 @@
 ;;
 ;; Output: (map) map that describes the reify chain of resources
 
-(define (bigml.reify.adding-updates id chain)
-  (let (conf (bigml.reify.get-conf chain id "create")
-        upd-conf (bigml.reify.get-conf chain id "update")
-        upd-conf (iterate (acc upd-conf attr bigml.reify.UPD-ONLY-ATTRS)
+(define (bigmler.reify.adding-updates id chain)
+  (let (conf (bigmler.reify.get-conf chain id "create")
+        upd-conf (bigmler.reify.get-conf chain id "update")
+        upd-conf (iterate (acc upd-conf attr bigmler.reify.UPD-ONLY-ATTRS)
                    (if (member? attr (keys conf))
                        (assoc acc attr (conf attr))
                         acc))
         private (upd-conf "private" (conf "private" true))
         chain (if (not private)
-                  (bigml.reify.set-conf chain id "update"
+                  (bigmler.reify.set-conf chain id "update"
                             (assoc upd-conf "private" private))
-                  (bigml.reify.set-conf chain id "update" upd-conf))
+                  (bigmler.reify.set-conf chain id "update" upd-conf))
         ;; if no changes are due, then we avoid updating
-        chain (if (= (bigml.reify.get-conf chain id "update") {})
-                  (bigml.reify.set-conf chain id "update" false)
+        chain (if (= (bigmler.reify.get-conf chain id "update") {})
+                  (bigmler.reify.set-conf chain id "update" false)
                   chain)
-        conf (iterate (acc conf attr bigml.reify.UPD-ONLY-ATTRS)
+        conf (iterate (acc conf attr bigmler.reify.UPD-ONLY-ATTRS)
                (if (member? attr (keys conf))
                    (dissoc acc attr)
                    acc))
-        chain (bigml.reify.set-conf chain id "create" conf))
+        chain (bigmler.reify.set-conf chain id "create" conf))
     chain))
 
 
@@ -1158,7 +1158,7 @@
 ;;  chain: (map) map that describes the reify chain of resources
 ;; Output: (map) ancestor resources and attributes
 
-(define (bigml.reify.model-get-ancestors id chain)
+(define (bigmler.reify.model-get-ancestors id chain)
   (let (parents (chain ["defs" id "parents"] false)
         parent (head parents)
         origin (nth parent 0)
@@ -1178,12 +1178,12 @@
             gp-origin (nth grandparent 0)
             grandparent (nth grandparent 1)
             grandparent (if (list? grandparent) (head grandparent) grandparent)
-            gp-conf (bigml.reify.get-conf ancestors grandparent "create")
+            gp-conf (bigmler.reify.get-conf ancestors grandparent "create")
             ancestors (assoc ancestors "grandparent" grandparent))
-        (assoc ancestors "gp-conf" (bigml.reify.get-conf chain
+        (assoc ancestors "gp-conf" (bigmler.reify.get-conf chain
                                                          grandparent
                                                          "create")))
-      (assoc ancestors "gp-conf" (bigml.reify.get-conf chain
+      (assoc ancestors "gp-conf" (bigmler.reify.get-conf chain
                                                        grandparent
                                                        "create")))))
 
@@ -1195,7 +1195,7 @@
 ;;  conf: (map) model configuration attributes
 ;;  ancestors: (map) ancestors configuration attributes
 ;; Output: (map) model updated configuration
-(define (bigml.reify.model-set-objective conf ancestors)
+(define (bigmler.reify.model-set-objective conf ancestors)
   (let (gp-conf (or (ancestors "gp-conf" {}) {})
         origin (or (ancestors "origin" {}) {}))
     (if (or (not (conf "objective_field" false)) (= origin "cluster"))
@@ -1218,17 +1218,17 @@
 ;;
 ;; Output: (map) reify chain of resources
 
-(define (bigml.reify.dataset-updates id chain)
-  (let (conf (bigml.reify.get-conf chain id "create")
-        origin (head (head (bigml.reify.get-conf chain id "parents"))))
+(define (bigmler.reify.dataset-updates id chain)
+  (let (conf (bigmler.reify.get-conf chain id "create")
+        origin (head (head (bigmler.reify.get-conf chain id "parents"))))
     ;; for batch_predictions, batch_clusters, batch_anomaly_scores the
     ;; generated datasets have the default parameters and all the attributes
     ;; need to be updated after creation time.
     (if (= origin "origin_batch_resource")
-        (let (chain (bigml.reify.remove-conf chain id "create")
+        (let (chain (bigmler.reify.remove-conf chain id "create")
               conf (dissoc conf "input_fields")
-              chain (bigml.reify.set-conf chain id "update" conf))
-          (bigml.reify.set-conf chain id "get" "output_dataset_resource"))
+              chain (bigmler.reify.set-conf chain id "update" conf))
+          (bigmler.reify.set-conf chain id "get" "output_dataset_resource"))
         chain)))
 
 ;; dataset-set-size
@@ -1242,7 +1242,7 @@
 ;;
 ;; Outputs: (map) dataset updated configuration
 
-(define (bigml.reify.dataset-set-size id conf ancestors)
+(define (bigmler.reify.dataset-set-size id conf ancestors)
   (let (parent-type (resource-type (ancestors "parent" false)))
     (if (and (= parent-type "source")
              (not (= (conf "size" false)
@@ -1259,7 +1259,7 @@
 ;;
 ;; Outputs: (map) deepnet updated configuration
 
-(define (bigml.reify.remove-layers-type conf)
+(define (bigmler.reify.remove-layers-type conf)
   (if (conf "hidden_layers" false)
     (let (hidden-layers (conf "hidden_layers")
           hidden-layers (map (lambda (x) (dissoc x "type")) hidden-layers))
@@ -1277,7 +1277,7 @@
 ;;
 ;; Output: (map) map that describes the reify chain of resources
 
-(define (bigml.reify.deepnet-suggest-dft conf)
+(define (bigmler.reify.deepnet-suggest-dft conf)
   (let (suggest (if (member? "suggest_structure" (keys conf))
                     (conf "suggest_structure" false)
                     true))
@@ -1293,7 +1293,7 @@
 ;;
 ;; Output: (map) updated dataset configuration
 
-(define (bigml.reify.new-fields-generators conf)
+(define (bigmler.reify.new-fields-generators conf)
   (let (conf (dissoc conf "input_fields")
         conf (assoc conf "all_fields" false)
         generators (conf "output_fields" false)
@@ -1314,13 +1314,13 @@
 ;;
 ;; Output: (map) updated dataset configuration
 
-(define (bigml.reify.dataset-set-new-fields conf)
+(define (bigmler.reify.dataset-set-new-fields conf)
   ;; if new_fields is not empty, remove input_fields and get new_fields from
   ;; output_fields generators. Set all_fields to false, and remove all_but and
   ;; output_fields.
   (let (new-fields (conf "new_fields" false)
         conf (if (and new-fields (not (empty? new-fields)))
-                 (bigml.reify.new-fields-generators conf)
+                 (bigmler.reify.new-fields-generators conf)
                  conf)
         conf (dissoc conf "output_fields"))
     (dissoc conf "all_but")))
@@ -1335,7 +1335,7 @@
 ;;
 ;; Output: (map) updated dataset configuration
 
-(define (bigml.reify.dataset-set-objective conf)
+(define (bigmler.reify.dataset-set-objective conf)
   (let (objective (conf "objective_field" false))
     (if objective
         (assoc conf "objective_field" {"id" (objective "id" "")})
@@ -1352,7 +1352,7 @@
 ;;
 ;; Output: (map) ancestors attributes
 
-(define (bigml.reify.dataset-get-ancestors id chain)
+(define (bigmler.reify.dataset-get-ancestors id chain)
   (let (parents (chain ["defs" id "parents"] false)
         parent (head parents)
         origin (nth parent 0)
@@ -1385,10 +1385,10 @@
                                       (recur (+ index 1) grandparent)))))
                           grandparent)
             ancestors (assoc ancestors "grandparent" grandparent)))
-        (assoc ancestors "gp-conf" (bigml.reify.get-conf chain
+        (assoc ancestors "gp-conf" (bigmler.reify.get-conf chain
                                                          grandparent
                                                          "create"))
-        (assoc ancestors "gp-conf" (bigml.reify.get-conf chain
+        (assoc ancestors "gp-conf" (bigmler.reify.get-conf chain
                                                          grandparent
                                                          "create")))))
 
@@ -1404,7 +1404,7 @@
 ;;
 ;; Output: (map) updated configuration
 
-(define (bigml.reify.get-non-defaults resource defaults configuration)
+(define (bigmler.reify.get-non-defaults resource defaults configuration)
   (loop (index 0 lconfiguration configuration)
     (if (= index (count (keys defaults)))
         lconfiguration
@@ -1412,12 +1412,12 @@
               res-type (resource-type resource)
               value (resource attribute false)
               value (if (and (not value)
-                             (contains? bigml.reify.INNER-INFO-PATH res-type)
-                             (contains? (resource (bigml.reify.INNER-INFO-PATH
+                             (contains? bigmler.reify.INNER-INFO-PATH res-type)
+                             (contains? (resource (bigmler.reify.INNER-INFO-PATH
                                                    res-type)
                                                   {})
                                                   attribute))
-                        (resource [(bigml.reify.INNER-INFO-PATH res-type)
+                        (resource [(bigmler.reify.INNER-INFO-PATH res-type)
                                   attribute]
                                    false)
                         value)
@@ -1444,7 +1444,7 @@
 ;;
 ;; Outputs: (map) origins found
 
-(define (bigml.reify.get-parents-argument resource
+(define (bigmler.reify.get-parents-argument resource
                                           argument-origins
                                           found-origins)
   (loop (index 0 lfound-origins found-origins)
@@ -1469,7 +1469,7 @@
                               (map (lambda (x) (x "id")) origin-info)
                               origin-info)
               origin-info (if (not (= origin "remote"))
-                              (bigml.reify.clean-origin-info origin-info)
+                              (bigmler.reify.clean-origin-info origin-info)
                               origin-info)
               lfound-origins (if origin-info
                                  (append lfound-origins [origin
@@ -1495,8 +1495,8 @@
 ;;                 in the create payload. Datasets created from batch resources
 ;;                 use a different attribute (origin_batch_resource)
 
-(define (bigml.reify.get-parents resource type)
-  (let (origins (bigml.reify.ORIGINS type [])
+(define (bigmler.reify.get-parents resource type)
+  (let (origins (bigmler.reify.ORIGINS type [])
         found-origins [])
     (loop (index 0 lfound-origins found-origins)
       (if (= index (count origins))
@@ -1506,7 +1506,7 @@
                       "code" 42})
               lfound-origins)
           (let (argument-origins (nth origins index)
-                lfound-origins (bigml.reify.get-parents-argument
+                lfound-origins (bigmler.reify.get-parents-argument
                                  resource
                                  argument-origins
                                  lfound-origins))
@@ -1522,7 +1522,7 @@
 ;;
 ;; Output: (list) list of parent IDs
 
-(define (bigml.reify.parent-ids parents)
+(define (bigmler.reify.parent-ids parents)
   (reduce (lambda (x y) (if (list? y)
                             (concat x y)
                             (append x y)))
@@ -1540,8 +1540,8 @@
 ;;
 ;; Output: (map) updated reify chain of resources
 
-(define (bigml.reify.add-parents reify-chain parents)
-  (let (parents (bigml.reify.parent-ids parents)
+(define (bigmler.reify.add-parents reify-chain parents)
+  (let (parents (bigmler.reify.parent-ids parents)
         reify-chain-list (concat (reify-chain "list" [])
                          parents))
     reify-chain (assoc reify-chain "list" reify-chain-list)))
@@ -1562,7 +1562,7 @@
 ;;
 ;; Output: (map) reify chain
 
-(define (bigml.reify.add-step-info reify-chain
+(define (bigmler.reify.add-step-info reify-chain
                                    resource-id
                                    configuration
                                    parents)
@@ -1573,8 +1573,8 @@
                                      "ref" configuration
                                      "parents" parents})
             reify-chain (assoc reify-chain "defs" reify-chain-defs))
-            (bigml.reify.add-parents reify-chain parents))
-      (bigml.reify.add-parents reify-chain parents)))
+            (bigmler.reify.add-parents reify-chain parents))
+      (bigmler.reify.add-parents reify-chain parents)))
 
 ;; reify-step
 ;;
@@ -1594,21 +1594,21 @@
 ;; Outputs: (map) chain of resources for reification
 ;;
 
-(define (bigml.reify.reify-step resource-id reify-chain step counter)
+(define (bigmler.reify.reify-step resource-id reify-chain step counter)
   (if (and step (< counter 0))
       ;; the reify process stops and all resources that have not been
       ;; reified should be accepted as input parameters
-      (bigml.reify.fill-input resource-id reify-chain) ;; write the inputs
+      (bigmler.reify.fill-input resource-id reify-chain) ;; write the inputs
       (if (contains? (reify-chain "defs" {}) resource-id)
         ;; when the resource config is already stored, add the origin
         ;; resources IDs to the list of resources in the workflow
         ;; and call reify on the origin resources
-        (let (parent-refs (bigml.reify.get-conf reify-chain
+        (let (parent-refs (bigmler.reify.get-conf reify-chain
                                                 resource-id
                                                 "parents")
-              reify-chain (bigml.reify.add-parents reify-chain
+              reify-chain (bigmler.reify.add-parents reify-chain
                                                    parent-refs))
-          (bigml.reify.reify-parents reify-chain
+          (bigmler.reify.reify-parents reify-chain
                                      parent-refs
                                      resource-id
                                      step
@@ -1619,17 +1619,17 @@
             (try
               (let (resource (fetch resource-id))
                 (if resource
-                    (bigml.reify.fill-attributes resource-id
+                    (bigmler.reify.fill-attributes resource-id
                                                  resource
                                                  reify-chain
                                                  step
                                                  counter)
-                    (bigml.reify.fill-input resource-id reify-chain)))
+                    (bigmler.reify.fill-input resource-id reify-chain)))
               (catch e
                 (log-info "Error: " e)
                 (log-info "Stopping at deleted resource: " resource-id)
-                (bigml.reify.fill-input resource-id reify-chain)))
-            (bigml.reify.fill-input resource-id reify-chain)))))
+                (bigmler.reify.fill-input resource-id reify-chain)))
+            (bigmler.reify.fill-input resource-id reify-chain)))))
 
 ;; fill-input
 ;;
@@ -1644,7 +1644,7 @@
 ;; Output: (map) chain of resources for reification
 ;;
 
-(define (bigml.reify.fill-input resource-id reify-chain)
+(define (bigmler.reify.fill-input resource-id reify-chain)
   (let (inputs (reify-chain "inputs" [])
         inputs (if (member? resource-id inputs)
                    inputs
@@ -1668,14 +1668,14 @@
 ;; Output: (map) chain of resources for reification
 ;;
 
-(define (bigml.reify.reify-parents reify-chain
+(define (bigmler.reify.reify-parents reify-chain
                                    parents
                                    resource-id
                                    step
                                    counter)
   (if (not (empty? parents))
-      (let (parents (bigml.reify.parent-ids parents)
-            origin-type (head (head (bigml.reify.get-conf reify-chain
+      (let (parents (bigmler.reify.parent-ids parents)
+            origin-type (head (head (bigmler.reify.get-conf reify-chain
                                                           resource-id
                                                           "parents")))
             type (resource-type resource-id)
@@ -1690,13 +1690,13 @@
           (if (= index (count parents))
               lreify-chain
               (let (parent-id (nth parents index)
-                    lreify-chain (bigml.reify.reify-step parent-id
+                    lreify-chain (bigmler.reify.reify-step parent-id
                                                          lreify-chain
                                                          step
                                                          counter))
                 (recur (+ index 1) lreify-chain)))))
       (if (= (resource-type resource-id) "source")
-          (bigml.reify.fill-input resource-id reify-chain)
+          (bigmler.reify.fill-input resource-id reify-chain)
           reify-chain)))
 
 
@@ -1712,10 +1712,10 @@
 ;; Output: (map) chain of resources for reification
 ;;
 
-(define (bigml.reify.input-field-names resource-id reify-chain)
+(define (bigmler.reify.input-field-names resource-id reify-chain)
   (let (attribute "input_fields"
-        config (bigml.reify.get-conf reify-chain resource-id "create")
-        parents (bigml.reify.get-conf reify-chain
+        config (bigmler.reify.get-conf reify-chain resource-id "create")
+        parents (bigmler.reify.get-conf reify-chain
                                       resource-id
                                       "parents")
         fields (config "fields" {})
@@ -1727,9 +1727,9 @@
                                    false)
                            false))
     (if (and (list? parents) (not (empty? parents)))
-        (let (parents (bigml.reify.parent-ids parents)
-              parent (bigml.reify.get-fields-parent parents)
-              parent-fields (bigml.reify.get-attr-action reify-chain
+        (let (parents (bigmler.reify.parent-ids parents)
+              parent (bigmler.reify.get-fields-parent parents)
+              parent-fields (bigmler.reify.get-attr-action reify-chain
                                                          parent
                                                          "create"
                                                          "fields")
@@ -1746,11 +1746,11 @@
                              (= (count new-input-fields)
                                 (- (count (keys parent-fields)) 1))
                              (not (member? objective-name new-input-fields))))
-                  (bigml.reify.remove-from reify-chain
+                  (bigmler.reify.remove-from reify-chain
                                            resource-id
                                            "create"
                                            attribute)
-                  (bigml.reify.add-to reify-chain
+                  (bigmler.reify.add-to reify-chain
                                       resource-id
                                       "create"
                                       attribute
@@ -1769,7 +1769,7 @@
 ;;
 ;; Output: (map) chain of resources for reification
 ;;
-(define (bigml.reify.get-fields-parent parent-ids)
+(define (bigmler.reify.get-fields-parent parent-ids)
   (let (datasets (filter (lambda (x) (or (list? x)
                                          (= (resource-type x) "dataset")))
                          parent-ids))
@@ -1792,16 +1792,16 @@
 ;; Output: (map) chain of resources for reification
 ;;
 
-(define (bigml.reify.excluded-fields-names resource-id reify-chain)
+(define (bigmler.reify.excluded-fields-names resource-id reify-chain)
   (let (attribute "excluded_fields"
-        config (bigml.reify.get-conf reify-chain resource-id "create")
-        parents (bigml.reify.get-conf reify-chain resource-id "parents"))
+        config (bigmler.reify.get-conf reify-chain resource-id "create")
+        parents (bigmler.reify.get-conf reify-chain resource-id "parents"))
     (if (and (contains? config attribute)
              (list? parents)
              (not (empty? parents)))
-        (let (parents (bigml.reify.parent-ids parents)
+        (let (parents (bigmler.reify.parent-ids parents)
               parent (head parents)
-              parent-fields (bigml.reify.get-attr-action reify-chain
+              parent-fields (bigmler.reify.get-attr-action reify-chain
                                                          parent
                                                          "create"
                                                          "fields")
@@ -1810,7 +1810,7 @@
               (let (new-fields (map (lambda (x)
                                       (parent-fields [x "name"] x))
                                     (config attribute [])))
-                (bigml.reify.add-to reify-chain
+                (bigmler.reify.add-to reify-chain
                                     resource-id
                                     "create"
                                     attribute
@@ -1831,16 +1831,16 @@
 ;; Output: (map) chain of resources for reification
 ;;
 
-(define (bigml.reify.remove-inherited resource-id reify-chain)
-  (let (attributes (keys bigml.reify.COMMON-DEFAULTS))
+(define (bigmler.reify.remove-inherited resource-id reify-chain)
+  (let (attributes (keys bigmler.reify.COMMON-DEFAULTS))
     (loop (index 0 lchain reify-chain)
       (let (attribute (nth attributes index)
-            config (bigml.reify.get-conf lchain resource-id "ref")
-            parents (bigml.reify.get-conf lchain resource-id "parents"))
+            config (bigmler.reify.get-conf lchain resource-id "ref")
+            parents (bigmler.reify.get-conf lchain resource-id "parents"))
         (if (and (list? parents) (not (empty? parents)))
-            (let (parents (bigml.reify.parent-ids parents)
+            (let (parents (bigmler.reify.parent-ids parents)
                   parent (head parents)
-                  parent-config (bigml.reify.get-conf lchain parent "ref"))
+                  parent-config (bigmler.reify.get-conf lchain parent "ref"))
               (if (and parent-config
                        (contains? config attribute)
                        (contains? parent-config attribute)
@@ -1848,7 +1848,7 @@
                                                             attribute
                                                             false)))
                   (let (config (dissoc config attribute)
-                        lchain (bigml.reify.set-conf lchain
+                        lchain (bigmler.reify.set-conf lchain
                                                      resource-id
                                                      "ref"
                                                      config))
@@ -1874,8 +1874,8 @@
 ;; Output: (map) chain of resources for reification
 ;;
 
-(define (bigml.reify.remove-reference-only resource-id reify-chain)
-  (let (attributes (bigml.reify.REFERENCE-ONLY (resource-type resource-id)
+(define (bigmler.reify.remove-reference-only resource-id reify-chain)
+  (let (attributes (bigmler.reify.REFERENCE-ONLY (resource-type resource-id)
                                                false))
     (loop (index 0 lchain reify-chain)
       (if (= index (count attributes))
@@ -1890,7 +1890,7 @@
                              "update")
                 config (lchain ["defs" resource-id action] {})
                 lchain (if (contains? config attribute)
-                           (bigml.reify.remove-from lchain
+                           (bigmler.reify.remove-from lchain
                                                     resource-id
                                                     action
                                                     attribute)
@@ -1907,12 +1907,12 @@
 ;;
 ;; Output: (map) chain of resources for reification
 ;;
-(define (bigml.reify.remove-range resource-id reify-chain)
+(define (bigmler.reify.remove-range resource-id reify-chain)
   (let (attribute "range"
-        config (bigml.reify.get-conf reify-chain resource-id "create")
-        parents (bigml.reify.get-conf reify-chain resource-id "parents"))
+        config (bigmler.reify.get-conf reify-chain resource-id "create")
+        parents (bigmler.reify.get-conf reify-chain resource-id "parents"))
     (if (and (list? parents) (not (empty? parents)))
-        (let (parents (bigml.reify.parent-ids parents)
+        (let (parents (bigmler.reify.parent-ids parents)
               parents (reduce (lambda (x y) (if (= (resource-type y) "dataset")
                                                 (append x y)
                                                 x))
@@ -1920,14 +1920,14 @@
                               parents))
           (if (not (empty? parents))
             (let (parent (head parents)
-                  parent-config (bigml.reify.get-conf reify-chain
+                  parent-config (bigmler.reify.get-conf reify-chain
                                                       parent
                                                       "create"))
               (if (and (contains? config attribute)
                        (member? (config attribute)
                                 [[] [1 (parent-config "rows" false)]]))
                   (let (config (dissoc config attribute))
-                    (bigml.reify.set-conf reify-chain
+                    (bigmler.reify.set-conf reify-chain
                                           resource-id
                                           "create"
                                           config))
@@ -1946,7 +1946,7 @@
 ;;
 ;; Output: (map) fields structure for changed attributes
 ;;
-(define (bigml.reify.non-equal-fields fields parent-fields)
+(define (bigmler.reify.non-equal-fields fields parent-fields)
   (let (field-ids (keys fields))
     (loop (index 0 new-fields {})
       (cond (= index (count field-ids))
@@ -1956,7 +1956,7 @@
             (let (field-id (nth field-ids index)
                   attributes (keys (fields field-id false))
                   new-fields (merge new-fields
-                                    (bigml.reify.attributes-not-in-parent
+                                    (bigmler.reify.attributes-not-in-parent
                                      fields
                                      parent-fields
                                      field-id
@@ -1975,7 +1975,7 @@
 ;;
 ;; Output: (map) fields structure
 
-(define (bigml.reify.attributes-not-in-parent fields parent-fields
+(define (bigmler.reify.attributes-not-in-parent fields parent-fields
                                                      field-id
                                                      attributes)
   (loop (index 0 new-fields {})
@@ -2011,46 +2011,46 @@
 ;;
 ;; Output: (map) chain of resources for reification
 
-(define (bigml.reify.remove-fields resource-id reify-chain)
+(define (bigmler.reify.remove-fields resource-id reify-chain)
   (let (attribute "fields"
-        config (bigml.reify.get-conf reify-chain resource-id "create")
-        parents (bigml.reify.get-conf reify-chain resource-id "parents")
+        config (bigmler.reify.get-conf reify-chain resource-id "create")
+        parents (bigmler.reify.get-conf reify-chain resource-id "parents")
         type (resource-type resource-id)
         fields (config "fields" {})
-        reify-chain (bigml.reify.set-conf reify-chain
+        reify-chain (bigmler.reify.set-conf reify-chain
                                           resource-id
                                           "fields"
                                           fields))
     (cond (= type "source")
           ;; for sources, fields settings always are at update
-          (let (reify-chain (bigml.reify.remove-from reify-chain
+          (let (reify-chain (bigmler.reify.remove-from reify-chain
                                                      resource-id
                                                      "create"
                                                      attribute))
-            (bigml.reify.add-to reify-chain resource-id
+            (bigmler.reify.add-to reify-chain resource-id
                                             "update"
                                             attribute
                                             fields))
           (if (and (list? parents) (not (empty? parents)))
-              (let (parents (bigml.reify.parent-ids parents)
+              (let (parents (bigmler.reify.parent-ids parents)
                     parent (head parents)
-                    parent-config (bigml.reify.get-conf reify-chain
+                    parent-config (bigmler.reify.get-conf reify-chain
                                                         parent
                                                         "ref")
-                    reify-chain (bigml.reify.remove-from reify-chain
+                    reify-chain (bigmler.reify.remove-from reify-chain
                                                          resource-id
                                                          "create"
                                                          "fields")
                     fields (if (and (contains? config attribute)
                                (contains? parent-config attribute))
-                               (bigml.reify.non-equal-fields (config attribute
+                               (bigmler.reify.non-equal-fields (config attribute
                                                                      false)
                                                              (parent-config
                                                                attribute
                                                                false))
                                fields))
                 (if (not (empty? fields))
-                    (let (reify-chain (bigml.reify.add-to reify-chain
+                    (let (reify-chain (bigmler.reify.add-to reify-chain
                                                           resource-id
                                                           "update"
                                                           "fields"
@@ -2060,12 +2060,12 @@
                       ;; in case it affects a previously non-preferred field
                       (if (and (= type "dataset")
                                (contains? config "objective_field"))
-                          (let (reify-chain (bigml.reify.remove-from
+                          (let (reify-chain (bigmler.reify.remove-from
                                               reify-chain
                                               resource-id
                                               "create"
                                               "objective_field"))
-                            (bigml.reify.add-to reify-chain
+                            (bigmler.reify.add-to reify-chain
                                                 resource-id
                                                 "update"
                                                 "objective_field"
@@ -2085,15 +2085,15 @@
 ;;
 ;; Output: (map) chain of resources for reification
 
-(define (bigml.reify.inner-names-update resource-id reify-chain attribute)
-  (let (config (bigml.reify.get-conf reify-chain resource-id "create"))
+(define (bigmler.reify.inner-names-update resource-id reify-chain attribute)
+  (let (config (bigmler.reify.get-conf reify-chain resource-id "create"))
     (if (contains? config attribute)
         (let (update (config attribute)
-              reify-chain (bigml.reify.remove-from reify-chain
+              reify-chain (bigmler.reify.remove-from reify-chain
                                                    resource-id
                                                    "create"
                                                    attribute))
-          (bigml.reify.add-to reify-chain
+          (bigmler.reify.add-to reify-chain
                               resource-id
                               "update"
                               attribute
@@ -2111,8 +2111,8 @@
 ;;
 ;; Output: (map) attributes used in create or update calls
 
-(define (bigml.reify.get-fields resource configuration)
-  (let (fields-path (bigml.reify.FIELDS-PATH
+(define (bigmler.reify.get-fields resource configuration)
+  (let (fields-path (bigmler.reify.FIELDS-PATH
                      (resource-type (resource "resource" false))
                      false))
     (if fields-path
@@ -2120,10 +2120,10 @@
               field-ids (keys fields)
               resource-id (resource "resource" false)
               filter (cond (= (resource-type resource-id) "source")
-                           bigml.reify.SOURCE-UPDATABLE
+                           bigmler.reify.SOURCE-UPDATABLE
                            (= (resource-type resource-id) "dataset")
-                           bigml.reify.DATASET-UPDATABLE
-                           bigml.reify.DEFAULT-UPDATABLE)
+                           bigmler.reify.DATASET-UPDATABLE
+                           bigmler.reify.DEFAULT-UPDATABLE)
               fields (reduce (lambda (x y)
                                (assoc x
                                       y
@@ -2149,10 +2149,10 @@
 ;;
 ;; Output: (map) attributes used in create or update calls
 
-(define (bigml.reify.get-inner-names resource configuration)
+(define (bigmler.reify.get-inner-names resource configuration)
   (let (type (resource-type (resource "resource" false))
-        info-path (bigml.reify.INNER-INFO-NAMES-PATH type false)
-        fn (lambda (x y) (if (not (matches? (bigml.reify.DFT-NAMES type)
+        info-path (bigmler.reify.INNER-INFO-NAMES-PATH type false)
+        fn (lambda (x y) (if (not (matches? (bigmler.reify.DFT-NAMES type)
                                             (y "name")))
                                             (assoc x
                                                    (y "id")
@@ -2165,7 +2165,7 @@
                              objs))
           (if (not (empty? update))
               (assoc configuration
-                     ((bigml.reify.INNER-INFO-NAMES-PATH type) 1) update)
+                     ((bigmler.reify.INNER-INFO-NAMES-PATH type) 1) update)
               configuration))
         configuration)))
 
@@ -2181,7 +2181,7 @@
 ;;
 ;; Output: (map) modified configuration
 
-(define (bigml.reify.replace-id config attribute fields)
+(define (bigmler.reify.replace-id config attribute fields)
   (let (attr (config attribute false))
     (if attr
       (if (list? attr) ;; if it's a list like objective_fields
@@ -2206,33 +2206,33 @@
 ;;
 ;; Output: (map) chain of resources for reification
 
-(define (bigml.reify.translate-field-ids resource-id reify-chain)
-  (let (fields (bigml.reify.get-conf reify-chain resource-id "fields"))
+(define (bigmler.reify.translate-field-ids resource-id reify-chain)
+  (let (fields (bigmler.reify.get-conf reify-chain resource-id "fields"))
     (loop (index 0 reify-chain reify-chain)
-      (if (= index (count bigml.reify.NAMED-ATTRIBUTES))
+      (if (= index (count bigmler.reify.NAMED-ATTRIBUTES))
           reify-chain
-          (let (attribute (nth bigml.reify.NAMED-ATTRIBUTES index)
-                create-config (bigml.reify.get-conf reify-chain
+          (let (attribute (nth bigmler.reify.NAMED-ATTRIBUTES index)
+                create-config (bigmler.reify.get-conf reify-chain
                                                     resource-id
                                                     "create")
-                update-config (bigml.reify.get-conf reify-chain
+                update-config (bigmler.reify.get-conf reify-chain
                                                     resource-id
                                                     "update")
                 reify-chain (if (and create-config
                                      (contains? create-config attribute))
-                                (bigml.reify.set-conf reify-chain
+                                (bigmler.reify.set-conf reify-chain
                                                       resource-id
                                                       "create"
-                                  (bigml.reify.replace-id create-config
+                                  (bigmler.reify.replace-id create-config
                                                           attribute
                                                           fields))
                                 reify-chain)
                 reify-chain (if (and update-config
                                      (contains? update-config attribute))
-                                (bigml.reify.set-conf reify-chain
+                                (bigmler.reify.set-conf reify-chain
                                                       resource-id
                                                       "update"
-                                 (bigml.reify.replace-id update-config
+                                 (bigmler.reify.replace-id update-config
                                                          attribute
                                                          fields))
                                 reify-chain))
@@ -2251,32 +2251,32 @@
 ;;
 ;; Output: (map) transformed chain of resources information
 
-(define (bigml.reify.normalize-resource-steps chain resource-id)
+(define (bigmler.reify.normalize-resource-steps chain resource-id)
   (let (type (resource-type resource-id)
-        chain (bigml.reify.remove-inherited resource-id chain)
-        chain (bigml.reify.input-field-names resource-id chain)
-        chain (bigml.reify.excluded-fields-names resource-id chain)
-        chain (bigml.reify.remove-fields resource-id chain)
-        chain (bigml.reify.remove-range resource-id chain)
-        per-type-process (bigml.reify.PER-TYPE-PROCESS type false)
+        chain (bigmler.reify.remove-inherited resource-id chain)
+        chain (bigmler.reify.input-field-names resource-id chain)
+        chain (bigmler.reify.excluded-fields-names resource-id chain)
+        chain (bigmler.reify.remove-fields resource-id chain)
+        chain (bigmler.reify.remove-range resource-id chain)
+        per-type-process (bigmler.reify.PER-TYPE-PROCESS type false)
         chain (if per-type-process
                   (per-type-process resource-id chain)
                   chain)
         chain (if (= (subs resource-id 0 5) "batch")
-                  (bigml.reify.batch-headers chain resource-id)
+                  (bigmler.reify.batch-headers chain resource-id)
                    chain)
-        chain (if (bigml.reify.update-attrs? type)
-                  (bigml.reify.adding-updates resource-id chain)
+        chain (if (bigmler.reify.update-attrs? type)
+                  (bigmler.reify.adding-updates resource-id chain)
                    chain)
-        chain (bigml.reify.translate-field-ids resource-id chain)
-        inner-names-attr (bigml.reify.INNER-INFO-NAMES-PATH type false)
+        chain (bigmler.reify.translate-field-ids resource-id chain)
+        inner-names-attr (bigmler.reify.INNER-INFO-NAMES-PATH type false)
         chain (if inner-names-attr
-                  (bigml.reify.inner-names-update resource-id
+                  (bigmler.reify.inner-names-update resource-id
                                                   chain
                                                   (inner-names-attr 1))
                    chain))
-        (if (bigml.reify.REFERENCE-ONLY type false)
-            (bigml.reify.remove-reference-only resource-id chain)
+        (if (bigmler.reify.REFERENCE-ONLY type false)
+            (bigmler.reify.remove-reference-only resource-id chain)
             chain)))
 
 
@@ -2297,10 +2297,10 @@
 ;;         the origin information for the resource.
 ;;
 
-(define (resource-workflow resource-id step)
+(define (reify resource-id step)
   ;; recursively retrieving all the information of any existing resource
   ;; in the reification workflow with reify-step
-  (let (reify-chain (bigml.reify.reify-step resource-id
+  (let (reify-chain (bigmler.reify.reify-step resource-id
                                             {"list" [resource-id]} step 0)
         ;; IDs of the resources that appeared in the workflow
         resource-ids (keys (reify-chain "defs" {}))
@@ -2310,13 +2310,13 @@
                              (if (contains? (lchain ["defs" resource-id] {})
                                             "ref")
                                  lchain
-                                 (bigml.reify.set-conf lchain
+                                 (bigmler.reify.set-conf lchain
                                                        resource-id
                                                        "ref"
-                                   (bigml.reify.get-conf lchain
+                                   (bigmler.reify.get-conf lchain
                                                          resource-id
                                                          "create")))))
-    (reduce bigml.reify.normalize-resource-steps reify-chain resource-ids)))
+    (reduce bigmler.reify.normalize-resource-steps reify-chain resource-ids)))
 
 
 ;;------------------ only retrain
@@ -2350,7 +2350,7 @@
 ;;
 
 
-(define (bigml.reify.fill-attributes resource-id
+(define (bigmler.reify.fill-attributes resource-id
                                          resource
                                          reify-chain
                                          step
@@ -2367,22 +2367,22 @@
         is-cv? (and (= (resource-type resource) "evaluation")
                (= (resource "type" false) 2))
         res-type (if is-cv? "cross-validation" (resource-type resource))
-        parents (bigml.reify.get-parents resource res-type)
+        parents (bigmler.reify.get-parents resource res-type)
         ;; stores the common and specific attributes. Default values are
         ;; discarded
-        configuration (bigml.reify.get-non-defaults
+        configuration (bigmler.reify.get-non-defaults
                         resource
-                        bigml.reify.COMMON-DEFAULTS {})
-        configuration (bigml.reify.get-non-defaults
+                        bigmler.reify.COMMON-DEFAULTS {})
+        configuration (bigmler.reify.get-non-defaults
                         resource
-                        (bigml.reify.DEFAULTS res-type false)
+                        (bigmler.reify.DEFAULTS res-type false)
                         configuration)
         ;; extract the fields structure
-        configuration (bigml.reify.get-fields resource configuration)
+        configuration (bigmler.reify.get-fields resource configuration)
         ;; extract the inner cluster or topic name changes
-        configuration (bigml.reify.get-inner-names resource configuration)
-        reify-chain (bigml.reify.add-step-info reify-chain
+        configuration (bigmler.reify.get-inner-names resource configuration)
+        reify-chain (bigmler.reify.add-step-info reify-chain
                                                resource-id
                                                configuration
                                                parents))
-    (bigml.reify.reify-parents reify-chain parents resource-id step counter)))
+    (bigmler.reify.reify-parents reify-chain parents resource-id step counter)))
