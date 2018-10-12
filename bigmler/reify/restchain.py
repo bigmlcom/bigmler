@@ -426,7 +426,6 @@ class RESTChain(object):
 
         if child.get('critical_value') is None and  'k' in child:
             opts['create'].update({"k": child['k']})
-
         # name, exclude automatic naming alternatives
         autonames = [u'']
         u.non_automatic_name( \
@@ -566,7 +565,8 @@ class RESTChain(object):
             child, opts)
 
         # range in dataset
-        if not child.get('range', []) in [[], [1, parent2.get('rows', None)]]:
+        if not child.get('range', []) in [[], None, \
+                [1, parent2.get('rows', None)]]:
             opts['create'].update({"range": child['range']})
 
         calls = u.build_calls(

@@ -199,10 +199,10 @@ def range_opts(resource, referrer, opts, call="create"):
     if resource.get('ranges'):
         rows = sum([row_range[1][1] for
                     row_range in resource.get('ranges').items()])
-        if resource.get('range') != [1, rows]:
-            opts[call].update({"range": resource['range']})
-    elif not resource.get('range', []) in \
-            [[], [1, referrer.get('rows', None)]]:
+    else:
+        rows = referrer.get('rows')
+    if resource.get('range') not in \
+            [[], None, [1, rows]]:
         opts[call].update({"range": resource['range']})
 
 
