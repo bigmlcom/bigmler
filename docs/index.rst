@@ -4623,7 +4623,7 @@ Whizzml Subcommand Options
 =============================================== ===============================
 ``--package-dir`` *DIR*                         Directory that stores the
                                                 package files
-``--embed-libs ``                               I causes the subcommand to
+``--embed-libs``                                It causes the subcommand to
                                                 embed the libraries code in
                                                 the package scripts instead
                                                 of creating libraries and

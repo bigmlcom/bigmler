@@ -3,6 +3,13 @@
 History
 -------
 
+3.18.2 (2018-09-19)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing bigmler deepnet subcommand predictions.
+- Adding operating point options to bigmler deepnet.
+- Adding model types to bigmler retrain.
+
 3.18.1 (2018-09-19)
 ~~~~~~~~~~~~~~~~~~~
 

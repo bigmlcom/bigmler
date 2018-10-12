@@ -2325,6 +2325,7 @@
 ;;
 ;; Resource types for the model resources
 (define RETRAIN-MODELS ["model" "ensemble" "anomaly"
+                        "cluster" "association"
                         "logisticregression" "topicmodel"
                         "timeseries" "deepnet"])
 

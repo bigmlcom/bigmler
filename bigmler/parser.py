@@ -446,6 +446,7 @@ under the License.""" % version
         '--to-dataset': main_options['--to-dataset'],
         '--no-csv': main_options['--no-csv'],
         '--fields-map': main_options['--fields-map'],
+        '--operating-point': main_options['--operating-point'],
         '--dataset-off': main_options['--dataset-off'],
         '--max-parallel-evaluations': main_options[
             '--max-parallel-evaluations'],
