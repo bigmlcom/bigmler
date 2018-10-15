@@ -32,7 +32,7 @@ from bigmler.tests.world import (world, common_setup_module, res_filename,
 import bigmler.tests.basic_tst_prediction_steps as test_pred
 import bigmler.tests.sample_steps as test_sample
 import bigmler.tests.reify_steps as test_reify
-
+import bigmler.tests.dataset_advanced_steps as dataset_adv
 
 def setup_module():
     """Setup for the module
@@ -630,5 +630,35 @@ class TestReify(object):
                 example[0], output=example[1], args=example[2])
             test_reify.i_create_output(
                 self, example[1], example[4], resource_type='dataset')
+            test_reify.i_check_output_file(self, output=example[1],
+                                           check_file=example[3])
+
+    def test_scenario21(self):
+        """
+            Scenario: Successfully building a dataset from a list of datasets
+            reify output in python
+                Given I create a BigML dataset from a list of datasets with data "<data>" and params "<params>"
+                And I check that the source has been created
+                And I check that the dataset has been created
+                Then I create a BigML dataset from a source with data "<data>" and params "<params>"
+                And I check that the source has been created
+                And I check that the dataset has been created
+                Then I create a reify output in "<output>" for "<language>"
+                And the "<output>" file is like "<check_file>"
+
+                Examples:
+                | data | output | params |check_file | language
+                | data/iris.csv | scenario_re2/reify.py | {"name": "my_dataset_name"}|../check_files/reify_dataset.py | python
+        """
+        print self.test_scenario2.__doc__
+        examples = [
+            ['data/iris.csv', 'scenario_re21/reify.py', {"name": "my_dataset_name"}, 'check_files/reify_dataset_datasets.py', 'python', 'scenario_re21']]
+
+        for example in examples:
+            print "\nTesting with:\n", example
+            test_reify.create_dataset_from_datasets( \
+                example[0], output=example[1], args=example[2])
+            test_reify.i_create_output(self, example[1], example[4],
+                                       resource_type='dataset')
             test_reify.i_check_output_file(self, output=example[1],
                                            check_file=example[3])

@@ -3,7 +3,12 @@
 History
 -------
 
-3.18.2 (2018-09-19)
+3.18.3 (2018-10-16)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing bigmler reify subcommand for multidatasets.
+
+3.18.2 (2018-10-12)
 ~~~~~~~~~~~~~~~~~~~
 
 - Fixing bigmler deepnet subcommand predictions.

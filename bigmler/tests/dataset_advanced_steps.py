@@ -189,13 +189,11 @@ def i_create_multi_dataset(step, output_dir):
 
 #@step(r'I check that the multi-dataset\'s origin are the datasets in "(.*)"')
 def i_check_multi_dataset_origin(step, output_dir=None):
-    # disabling this test temporarily
-    return True
     if output_dir is None:
         assert False
     datasets_file = "%s%sdataset" % (output_dir, os.sep)
     try:
-        origin_datasets = world.dataset['object']['ranges'].keys()
+        origin_datasets = world.dataset['object']['origin_datasets']
         count = 0
         with open(datasets_file, 'r') as datasets_file_handler:
             for dataset_id in datasets_file_handler:

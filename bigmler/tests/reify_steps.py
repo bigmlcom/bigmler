@@ -173,6 +173,26 @@ def create_dataset_from_dataset(filename, output=None, args=None):
     world.api.ok(world.dataset)
     world.datasets.append(world.dataset['resource'])
 
+#@step(r'I create a BigML dataset from a list of datasets with data "(.*)" and params "(.*)"')
+def create_dataset_from_datasets(filename, output=None, args=None):
+    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
+    world.source = source
+    world.directory = os.path.dirname(output)
+    world.output = output
+    world.api.ok(world.source)
+    world.sources.append(source['resource'])
+    world.dataset = world.api.create_dataset(source)
+    world.api.ok(world.dataset)
+    world.datasets.append(world.dataset['resource'])
+    datasets = [world.dataset['resource']]
+    world.dataset = world.api.create_dataset(source)
+    world.api.ok(world.dataset)
+    world.datasets.append(world.dataset['resource'])
+    datasets.append(world.dataset)
+    world.dataset = world.api.create_dataset(datasets, args)
+    world.api.ok(world.dataset)
+    world.datasets.append(world.dataset['resource'])
+
 #@step(r'I create a BigML model from a dataset with data "(.*)" and params "(.*)"')
 def create_model(filename, output=None, args=None):
     source = world.api.create_source(res_filename(filename), {"project": world.project_id})
