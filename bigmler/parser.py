@@ -381,6 +381,7 @@ under the License.""" % version
     subcommand_options["retrain"].update(reify_common_options)
     subcommand_options["retrain"].update( \
         {'--output': subcommand_options['reify']['--output'],
+         '--upgrade': subcommand_options['reify']['--upgrade'],
          '--model-tag': delete_options['--model-tag'],
          '--ensemble-tag': delete_options['--ensemble-tag'],
          '--logistic-regression-tag': delete_options['--logistic-regression-tag'],

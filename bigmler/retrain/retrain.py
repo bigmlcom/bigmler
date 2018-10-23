@@ -32,7 +32,8 @@ from bigmler.whizzml.dispatcher import whizzml_dispatcher
 from bigmler.execute.dispatcher import execute_whizzml
 from bigmler.execute.dispatcher import SETTINGS as EXE_SETTINGS
 from bigmler.dispatcher import SETTINGS as MAIN_SETTINGS, compute_output
-from bigmler.utils import get_last_resource, log_message, last_resource_url
+from bigmler.utils import get_last_resource, log_message, last_resource_url, \
+    get_script_id
 from bigmler.reports import BIGMLER_SCRIPT, HOME
 from bigmler.command import get_context
 
@@ -50,15 +51,7 @@ MODEL_TYPES = ["model", "ensemble", "logistic_regression", "deepnet",
 STOP_WORKFLOW = {"source-id": "--no-dataset",
                  "dataset-id": "--no-model"}
 
-def get_script_id(path):
-    """Returns the script id stored in the file in path
 
-    """
-    try:
-        with open(path) as file_handler:
-            return file_handler.read().strip()
-    except IOError:
-        return None
 
 
 def extract_retrain_id(args, api, session_file):

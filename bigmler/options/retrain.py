@@ -45,14 +45,7 @@ def get_retrain_options(defaults=None):
             'default': defaults.get('window_size', -1),
             'help': ("Maximum number of datasets to be used in retraining."
                      " When not set, the new dataset will be added to the"
-                     " last one used.")},
-        # Forces the scripts to be upgraded
-        '--upgrade': {
-            'action': 'store_true',
-            'dest': 'upgrade',
-            'default': defaults.get('upgrade', False),
-            'help': ("Force the scripts used in the retraining to be"
-                     " upgraded.")},
+                     " last one used.")}
     }
 
     return options

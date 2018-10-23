@@ -743,3 +743,14 @@ def last_resource_url(resource_id, api=None, query_string=None):
         api = bigml.api.BigML()
     resource_type = bigml.api.get_resource_type(resource_id)
     return "%s%s%s%s" % (api.url, resource_type, api.auth, query_string)
+
+
+def get_script_id(path):
+    """Returns the script id stored in the file in path
+
+    """
+    try:
+        with open(path) as file_handler:
+            return file_handler.read().strip()
+    except IOError:
+        return None

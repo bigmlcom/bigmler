@@ -1,0 +1,21 @@
+{
+  "name": "Whizzml code to scriptify - 1.0.0",
+  "description": "WhizzML code and inputs needed to reproduce a resource",
+  "kind": "script",
+  "source_code": "script.whizzml",
+  "imports": [],
+  "inputs": [
+    {
+      "name": "res-id",
+      "type": "resource-id",
+      "description": "Resource ID"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "whizzml-code",
+      "type": "map",
+      "description": "WhizzML code to rebuild the resource."
+    }
+  ]
+}

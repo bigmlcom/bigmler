@@ -22,11 +22,132 @@ from __future__ import absolute_import
 import sys
 import os
 import stat
+import nbformat as nbf
+import pprint
+import json
+import shutil
+import re
 
 from bigml.resourcehandler import get_resource_id
+from bigml.api import check_resource
 
-from bigmler.utils import PYTHON3
-from bigmler.reify.restchain import RESTChain
+from bigmler.utils import PYTHON3, get_last_resource, get_script_id
+from bigmler.reports import BIGMLER_SCRIPT, HOME
+from bigmler.command import get_context
+from bigmler.whizzml.dispatcher import whizzml_dispatcher
+from bigmler.execute.dispatcher import execute_whizzml
+from bigmler.execute.dispatcher import SETTINGS as EXE_SETTINGS
+from bigmler.dispatcher import SETTINGS as MAIN_SETTINGS, compute_output
+
+
+REIFY_PACKAGE_PATH = os.path.join(BIGMLER_SCRIPT, "static", "scripts",
+                                  "reify")
+BIGMLER_SCRIPTS_DIRECTORY = os.path.join(HOME, "bigmler", "scripts", "reify")
+
+SCRIPT_FILE = {"nb": "python"}
+
+
+def create_connection(api):
+    """ Creates the code that defines the same connection object used
+        in bigmler
+
+    """
+    [(username, api_key)] = re.findall(r'\?username=(.*?);api_key=(.*?);',
+                                       api.auth)
+    obj_code = "BigML(\"%s\", \"%s\"" % (username, api_key)
+    if api.general_domain != "bigml.io":
+        obj_code = "%s, domain=\"%s\"" % (obj_code, api.general_domain)
+    if api.project:
+        obj_code = "%s, project=\"%s\"" % (obj_code, api.project)
+    if api.organization:
+        obj_code = "%s, organization=\"%s\"" % (obj_code, api.organization)
+    return "%s)" % obj_code
+
+
+def write_nb_output(resource_id, workflow, filename, api):
+    """ Write the output to a file in jupyter notebook format
+
+    """
+    nb = nbf.v4.new_notebook()
+    cells = [nbf.v4.new_markdown_cell("Reified resource: %s" % resource_id),
+             nbf.v4.new_code_cell("from bigml.api import BigML\napi = %s" %
+                      create_connection(api))]
+    for step in workflow:
+        for (cell_type, cell_text) in step.items():
+            if cell_type == "args":
+                cell_text = "args = \\\n    %s" % pprint.pformat( \
+                    json.loads(cell_text)).replace("\n", "\n    ")
+                cell_type = "code"
+            cell_text = cell_text if not PYTHON3 else cell_text.encode("utf-8")
+            cells.append(getattr(nbf.v4, "new_%s_cell" % cell_type)(cell_text))
+    nb["cells"] = cells
+    nbf.write(nb, filename)
+
+
+def python_output(resource_id, workflow, api):
+    """ Content for the script in Python
+
+    """
+    lines = ["# Reified resource: %s" % resource_id,
+             "from bigml.api import BigML",
+             "api = %s" % create_connection(api)]
+    for step in workflow:
+        for (cell_type, cell_text) in step.items():
+            if cell_type == "args":
+                cell_text = "args = \\\n    %s" % pprint.pformat( \
+                    json.loads(cell_text)).replace("\n", "\n    ")
+                cell_type = "code"
+            if cell_type == "markdown":
+                cell_text = "# %s" % cell_text.replace("<br/>", "\n# ")
+            lines.append(cell_text)
+    return "\n".join(lines)
+
+
+def whizzml_script(args, api):
+    """Returns the ID of the script to be used to generate the output
+
+    """
+    # each language has its own script, so first check:
+    # - whether the script exists in the account
+    # - whether it has the same version
+    # else, we act as if we wanted to upgrade the script
+    script_dir = os.path.join(REIFY_PACKAGE_PATH,
+                              SCRIPT_FILE.get(args.language, args.language))
+    if not args.upgrade:
+        # the script is retrieved by name
+        # Reading the name of the script
+        with open(os.path.join(script_dir, "metadata.json")) as meta_file:
+            meta = json.load(meta_file)
+        # check for the last script used to retrain the model
+        query_string = "name=%s" % meta["name"]
+        reify_script = get_last_resource( \
+            "script",
+            api=api,
+            query_string=query_string)
+    else:
+        reify_script = None
+
+    # create or retrieve the script to generate the output
+    # if --upgrade, we force rebuilding the scriptified script
+    if reify_script is None :
+        try:
+            shutil.rmtree(os.path.join(BIGMLER_SCRIPTS_DIRECTORY,
+                                       SCRIPT_FILE.get(args.language,
+                                                       args.language)))
+        except Exception, exc:
+            pass
+
+    if reify_script is None:
+        # new bigmler command: creating the scriptify scripts
+        whizzml_command = ['whizzml',
+                           '--package-dir', REIFY_PACKAGE_PATH,
+                           '--output-dir', BIGMLER_SCRIPTS_DIRECTORY]
+        whizzml_dispatcher(args=whizzml_command)
+        reify_file = os.path.join(BIGMLER_SCRIPTS_DIRECTORY,
+                                  SCRIPT_FILE.get(args.language,
+                                                  args.language), "scripts")
+        reify_script = get_script_id(reify_file)
+    return reify_script
 
 
 def reify_resources(args, api, logger):
@@ -40,9 +161,44 @@ def reify_resources(args, api, logger):
         sys.exit("Failed to match a valid resource ID. Please, check: %s"
                  % args.resource_id)
 
-    api_calls = RESTChain(api, resource_id, args.add_fields,
-                          logger, args.output_dir)
-    output = api_calls.reify(args.language)
+    # check whether the resource exists
+    try:
+        check_resource(resource_id, raise_on_error=True, api=api)
+    except Exception, exc:
+        sys.exit("Failed to find the resource %s. Please, check its ID and"
+                 " the connection info (domain and credentials)." %
+                 resource_id)
+
+    reify_script = whizzml_script(args, api)
+
+    # apply the retrain script to the new resource
+    execute_command = ['execute',
+                       '--script', reify_script,
+                       '--output-dir', args.output_dir]
+    command_args, _, _, exe_session_file, _ = get_context( \
+        execute_command, EXE_SETTINGS)
+    command_args.arguments_ = [["res-id", resource_id]]
+    command_args.inputs = json.dumps(command_args.arguments_)
+
+    # process the command
+    session_file = None
+    execute_whizzml(command_args, api, session_file)
+    with open("%s.json" % command_args.output) as file_handler:
+        exe_output = json.load(file_handler)['result']
+
+    if args.language == "nb":
+        write_nb_output(resource_id, exe_output, args.output, api)
+        return
+    elif args.language == "whizzml":
+        output = exe_output["source_code"]
+        exe_output["source_code"] = args.output
+        exe_output["kind"] = "script"
+        with open(os.path.join(os.path.dirname(args.output),
+                               "metadata.json"), "w") as meta_handler:
+            meta_handler.write(json.dumps(exe_output))
+    else:
+        output = python_output(resource_id, exe_output, api)
+
     if PYTHON3:
         with open(args.output, "w", encoding="utf-8") as reify_file:
             reify_file.write(output)

@@ -1,0 +1,21 @@
+{
+  "name": "Python code to scriptify - 1.0.0",
+  "description": "Python code and inputs needed to reproduce a resource",
+  "kind": "script",
+  "source_code": "script.whizzml",
+  "imports": [],
+  "inputs": [
+    {
+      "name": "res-id",
+      "type": "resource-id",
+      "description": "Resource ID"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "python-code",
+      "type": "list",
+      "description": "List of instructions. Each line is a map tagged as markdown, code or args."
+    }
+  ]
+}

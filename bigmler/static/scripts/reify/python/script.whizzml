@@ -1,0 +1,88 @@
+;;python-code
+;;
+;;creates a the code of the script that will reproduce the resoure
+;;
+;;
+;; Inputs:
+;;   resource-id: (string) Resource ID
+;;
+;; Output: (list) list of maps, one per line, tagged as markdown, code or args
+;;
+
+(define RESOURCE-TYPE {"batchprediction" "batch_prediction"
+                       "batchcentroid" "batch_centroid"
+                       "batchanomalyscore" "batch_anomaly_score"
+                       "batchtopicdistribution" "batch_topic_distribution"
+                       "timeseries" "time_series"
+                       "topicmodel" "topic_model"
+                       "topicdistribution" "topic_distribution"})
+
+
+(define (python workflow)
+  (reduce concat [] (map py-step (workflow "steps"))))
+
+
+(define (py-inputs workflow)
+  (let (inputs (workflow "inputs")
+        mapped-ids (workflow "mapped-ids")
+        input-vars (map (lambda (x) (last (mapped-ids x))) inputs)
+        lines [{"markdown" "Add the inputs for the workflow"}])
+    (iterate (acc lines value inputs var input-vars)
+      (append acc {"code" (str (pythonize var) " = " (pr-str value))}))))
+
+
+(define (py-step step)
+  (let (lines []
+        lines (append lines {"markdown" (py-markdown step)})
+        lines (if (!= "get" (step "action"))
+                  (append lines {"args" (py-args step)})
+                  lines))
+    lines (append lines {"code" (py-code step)})))
+
+(define (py-origins step)
+  (let (action (step "action"))
+    (if (= "create" action)
+        (join ", " (map pythonize (values (step "origin"))))
+        (step "origin"))))
+
+(define (py-args step)
+  (let (args (step "args"))
+    (if (= "create" (step "action"))
+        (let (args (iterate (acc args attr (keys (step "origin")))
+                     (dissoc acc attr)))
+          (if (empty? args)
+              ""
+             (json-str args)))
+        (json-str args))))
+
+
+(define (py-code step)
+  (let (type (resource-type (step ["ref" "id"]))
+        line (str (step "output")
+                   " = api."
+                   (step "action")
+                   "_"
+                   (RESOURCE-TYPE type type)
+                   "("
+                   (py-origins step))
+        line (if (= "get" (step "action"))
+                 (str line "[\"object\"][" (pr-str (step "args")) "])")
+                 (str line ", args)"))
+        line (str line "\napi.ok(" (step "output") ")\n"))
+    line))
+
+
+(define (py-markdown step)
+  (let (comments (bigml.scriptify.scriptify-comments step)
+        comments (replace comments "\n;;" "<br/>"))
+    (replace comments "WhizzML for resource" "Python for resource")))
+
+
+(define (pythonize name)
+  (replace name "-" "_"))
+
+
+(define workflow (resource-workflow res-id true false))
+(define python-inputs (py-inputs workflow))
+(define python-steps (python workflow))
+(define python-code (concat python-inputs python-steps))

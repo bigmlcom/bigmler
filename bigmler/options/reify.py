@@ -38,7 +38,7 @@ def get_reify_options(defaults=None):
         '--language': {
             'dest': 'language',
             'default': defaults.get('language', 'python'),
-            'choices': ["python", "whizzml"],
+            'choices': ["python", "whizzml", "nb"],
             'help': ("Language for the resource to be reified in.")},
 
         # Name of the file to output the code.
@@ -64,6 +64,13 @@ def get_reify_options(defaults=None):
             'default': defaults.get('add_fields', False),
             'help': ("Don't add the updatable fields structure information"
                      " to the source update call.")},
+        # Forces the scripts to be upgraded
+        '--upgrade': {
+            'action': 'store_true',
+            'dest': 'upgrade',
+            'default': defaults.get('upgrade', False),
+            'help': ("Force the scripts used in the retraining to be"
+                     " upgraded.")}
     }
 
     return options

@@ -1,0 +1,12 @@
+;;whizzml-code
+;;
+;;creates a the code of the script that will reproduce the resoure
+;;
+;;
+;; Inputs:
+;;   res-id: (string) Resource ID
+;;
+;; Output: (map) map of inputs and WhizzML code
+;;
+
+(define whizzml-code (scriptify (resource-workflow res-id true false)))

@@ -63,7 +63,6 @@ def reify_dispatcher(args=sys.argv[1:]):
         u.log_message(u.dated(message), \
             log_file=session_file, console=command_args.verbosity)
 
-    print command_args.output, command_args.output_dir
     message = "Starting reification for %s\n\n" % command_args.resource_id
     u.log_message(message, \
         log_file=session_file, console=command_args.verbosity)
