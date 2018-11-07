@@ -3,6 +3,11 @@
 History
 -------
 
+3.18.4 (2018-11-07)
+~~~~~~~~~~~~~~~~~~~
+
+- Adding jupyter notebook output format to bigmler reify.
+
 3.18.3 (2018-10-16)
 ~~~~~~~~~~~~~~~~~~~
 

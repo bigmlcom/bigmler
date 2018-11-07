@@ -18,26 +18,50 @@
                        "topicdistribution" "topic_distribution"})
 
 
+(define (change-to-local workflow)
+  (let (inputs (workflow "inputs")
+        steps (workflow "steps")
+        mapped-ids (workflow "mapped-ids")
+        input-vars (map (lambda (x) (last (mapped-ids x))) inputs)
+        local-inputs (iterate (acc {} step steps)
+                       (if (contains? step "file-name")
+                           (assoc acc (step "origin") (step "file-name"))
+                           acc)))
+    (assoc workflow "local-inputs" local-inputs)))
+
+
 (define (python workflow)
-  (reduce concat [] (map py-step (workflow "steps"))))
+  (let (workflow (change-to-local workflow))
+    (reduce concat [] (map py-step (workflow "steps")))))
 
 
 (define (py-inputs workflow)
   (let (inputs (workflow "inputs")
         mapped-ids (workflow "mapped-ids")
-        input-vars (map (lambda (x) (last (mapped-ids x))) inputs)
+        input-vars (map (lambda (x) (head (mapped-ids x))) inputs)
+        local-inputs (workflow "local-inputs")
         lines [{"markdown" "Add the inputs for the workflow"}])
     (iterate (acc lines value inputs var input-vars)
-      (append acc {"code" (str (pythonize var) " = " (pr-str value))}))))
+      (if (contains? local-inputs var)
+          (append acc {"code" (str (pythonize var)
+                                   "_file = "
+                                   (pr-str (local-inputs var)))})
+          (append acc {"code" (str (pythonize var) " = " (pr-str value))})))))
 
 
 (define (py-step step)
-  (let (lines []
+  (let (step (if (contains? step "file-name")
+                 (assoc step "origin" (str (step "origin") "_file"))
+                 step)
+        lines []
         lines (append lines {"markdown" (py-markdown step)})
+        args (py-args step)
         lines (if (!= "get" (step "action"))
-                  (append lines {"args" (py-args step)})
+                  (if (= args "")
+                      lines
+                      (append lines {"args" (py-args step)}))
                   lines))
-    lines (append lines {"code" (py-code step)})))
+    lines (append lines {"code" (py-code step args)})))
 
 (define (py-origins step)
   (let (action (step "action"))
@@ -56,18 +80,22 @@
         (json-str args))))
 
 
-(define (py-code step)
+(define (py-code step args)
   (let (type (resource-type (step ["ref" "id"]))
         line (str (step "output")
                    " = api."
-                   (step "action")
+                   (if (contains? step "file-name")
+                       "create" ;; local code can create sources by uploading
+                       (step "action"))
                    "_"
                    (RESOURCE-TYPE type type)
                    "("
                    (py-origins step))
         line (if (= "get" (step "action"))
                  (str line "[\"object\"][" (pr-str (step "args")) "])")
-                 (str line ", args)"))
+                 (if (= args "")
+                     (str line ")")
+                     (str line ", args)")))
         line (str line "\napi.ok(" (step "output") ")\n"))
     line))
 
@@ -82,7 +110,7 @@
   (replace name "-" "_"))
 
 
-(define workflow (resource-workflow res-id true false))
+(define workflow (change-to-local (resource-workflow res-id true false)))
 (define python-inputs (py-inputs workflow))
 (define python-steps (python workflow))
 (define python-code (concat python-inputs python-steps))

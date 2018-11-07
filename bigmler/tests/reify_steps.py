@@ -83,55 +83,52 @@ def i_check_output_file(step, output=None, check_file=None):
     output_file = os.path.join(world.directory, "reify.py")
     with open(check_file, open_mode("r")) as check_file_handler:
         check_contents = check_file_handler.read().strip("\n")
+    """
         check_contents_lines = check_contents.split("\n")
         for index, line in enumerate(check_contents_lines):
             if line:
                 check_contents_lines[index] = INDENT + line
         check_contents = "\n".join(check_contents_lines)
+    """
     # remove unicode mark for strings if Python3
     if PYTHON3:
         check_contents = check_contents.replace( \
             " u'", " '").replace("{u'", "{'").replace( \
             ' u"', ' "').replace('u\\\'', '\\\'')
+        check_contents = re.sub(r'\n\s*', '\n', check_contents)
     with open(output_file, open_mode("r")) as output_file:
         output_file_contents = output_file.read()
+
     #strip comments at the beginning of the file
     output_file_contents = re.sub(r'#!.*def\smain\(\):\n', '',
                                   output_file_contents,
                                   flags=re.S).strip("\n")
     output_file_contents = output_file_contents.replace( \
-        '\n\nif __name__ == "__main__":\n    main()', '')
+        '\nif __name__ == "__main__":\n    main()', '')
 
     #strip internally added project id information
     prefix = "" if PYTHON3 else "u"
-    p_str = r',\s\\\n%s\{\'project\':\s%s\'project/[a-f0-9]{24}\'\}\)' \
-        % (INDENT * 2, prefix)
-    output_file_contents = re.sub(p_str,
-                                  ')', output_file_contents,
-                                  flags=re.S).strip("\n")
-    p_str = r',\s\\\n%s\s\'project\':\s%s\'project/[a-f0-9]{24}\'\}\)' \
-        % (INDENT * 2, prefix)
-    output_file_contents = re.sub(p_str,
-                                  ')', output_file_contents,
-                                  flags=re.S).strip("\n")
-    p_str = r',\n%s\s\'project\':\s%s\'project/[a-f0-9]{24}\'\}\)' \
-        % (INDENT * 2, prefix)
-    output_file_contents = re.sub(p_str,
-                                  '})', output_file_contents,
-                                  flags=re.S).strip("\n")
-    p_str = r',\s\'project\':\s%s\'project/[a-f0-9]{24}\'' % prefix
+    p_str = r'%s\'project\':\s%s\'project/[a-f0-9]{24}\',?\s?' \
+        % (prefix, prefix)
     output_file_contents = re.sub(p_str,
                                   '', output_file_contents,
                                   flags=re.S).strip("\n")
-    if check_contents == output_file_contents:
-        assert True
-    else:
+    p_str = r'    api = .*?\n'
+    output_file_contents = re.sub(p_str,
+                                  '    api = BigML()\n', output_file_contents,
+                                  flags=re.S).strip("\n")
+    if PYTHON3:
+        output_file_contents = re.sub(r'\n\s*', '\n', output_file_contents)
+    if check_contents != output_file_contents:
         if PYTHON3:
             # look for an alternative in PYTHON3
             check_contents = python3_contents(check_file, check_contents)
+            output_file_contents = output_file_contents.strip("\n")
             if check_contents != output_file_contents:
                 check_contents = python3_contents(
                     check_file, check_contents, alternative="_1")
+        with open("%s_bck" % check_file, "w") as bck_file:
+            bck_file.write(output_file_contents)
         eq_(check_contents, output_file_contents)
 
 
@@ -148,7 +145,8 @@ def create_source(filename, output=None, args=None):
 
 #@step(r'I create a BigML dataset from a source with data "(.*)" and params "(.*)"')
 def create_dataset(filename, output=None, args=None):
-    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
+    source = world.api.create_source( \
+        res_filename(filename), {"project": world.project_id})
     world.source = source
     world.directory = os.path.dirname(output)
     world.output = output
@@ -160,7 +158,8 @@ def create_dataset(filename, output=None, args=None):
 
 #@step(r'I create a BigML dataset from dataset with data "(.*)" and params "(.*)"')
 def create_dataset_from_dataset(filename, output=None, args=None):
-    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
+    source = world.api.create_source( \
+        res_filename(filename), {"project": world.project_id})
     world.source = source
     world.directory = os.path.dirname(output)
     world.output = output
@@ -175,7 +174,8 @@ def create_dataset_from_dataset(filename, output=None, args=None):
 
 #@step(r'I create a BigML dataset from a list of datasets with data "(.*)" and params "(.*)"')
 def create_dataset_from_datasets(filename, output=None, args=None):
-    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
+    source = world.api.create_source( \
+        res_filename(filename), {"project": world.project_id})
     world.source = source
     world.directory = os.path.dirname(output)
     world.output = output
@@ -195,7 +195,8 @@ def create_dataset_from_datasets(filename, output=None, args=None):
 
 #@step(r'I create a BigML model from a dataset with data "(.*)" and params "(.*)"')
 def create_model(filename, output=None, args=None):
-    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
+    source = world.api.create_source( \
+        res_filename(filename), {"project": world.project_id})
     world.source = source
     world.directory = os.path.dirname(output)
     world.output = output
@@ -210,7 +211,8 @@ def create_model(filename, output=None, args=None):
 
 #@step(r'I create a BigML prediction for (.*) from a model with data "(.*)" and params "(.*)"')
 def create_prediction(filename, input_data= None, output=None, args=None):
-    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
+    source = world.api.create_source( \
+        res_filename(filename), {"project": world.project_id})
     world.source = source
     world.directory = os.path.dirname(output)
     world.output = output
@@ -222,13 +224,15 @@ def create_prediction(filename, input_data= None, output=None, args=None):
     world.model = world.api.create_model(world.dataset)
     world.api.ok(world.model)
     world.models.append(world.model['resource'])
-    world.prediction = world.api.create_prediction(world.model, input_data, args)
+    world.prediction = world.api.create_prediction( \
+        world.model, input_data, args)
     world.api.ok(world.prediction)
     world.predictions.append(world.prediction['resource'])
 
 #@step(r'I create a BigML cluster from a dataset with data "(.*)" and params "(.*)"')
 def create_cluster(filename, output=None, args=None):
-    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
+    source = world.api.create_source( \
+        res_filename(filename), {"project": world.project_id})
     world.source = source
     world.directory = os.path.dirname(output)
     world.output = output
@@ -237,13 +241,15 @@ def create_cluster(filename, output=None, args=None):
     world.dataset = world.api.create_dataset(source)
     world.api.ok(world.dataset)
     world.datasets.append(world.dataset['resource'])
+    args.update({"cluster_seed": "bigml"})
     world.cluster = world.api.create_cluster(world.dataset, args)
     world.api.ok(world.cluster)
     world.clusters.append(world.cluster['resource'])
 
 #@step(r'I create a BigML anomaly from a dataset with data "(.*)" and params "(.*)"')
 def create_anomaly(filename, output=None, args=None):
-    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
+    source = world.api.create_source( \
+        res_filename(filename), {"project": world.project_id})
     world.source = source
     world.directory = os.path.dirname(output)
     world.output = output
@@ -252,13 +258,15 @@ def create_anomaly(filename, output=None, args=None):
     world.dataset = world.api.create_dataset(source)
     world.api.ok(world.dataset)
     world.datasets.append(world.dataset['resource'])
+    args.update({"seed": "bigml", "anomaly_seed": "bigml"})
     world.anomaly = world.api.create_anomaly(world.dataset, args)
     world.api.ok(world.anomaly)
     world.anomalies.append(world.anomaly['resource'])
 
 #@step(r'I create a BigML centroid for (.*) from a cluster with data "(.*)" and params "(.*)"')
 def create_centroid(filename, input_data=None, output=None, args=None):
-    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
+    source = world.api.create_source( \
+        res_filename(filename), {"project": world.project_id})
     world.source = source
     world.directory = os.path.dirname(output)
     world.output = output
@@ -267,16 +275,19 @@ def create_centroid(filename, input_data=None, output=None, args=None):
     world.dataset = world.api.create_dataset(source)
     world.api.ok(world.dataset)
     world.datasets.append(world.dataset['resource'])
-    world.cluster = world.api.create_cluster(world.dataset)
+    world.cluster = world.api.create_cluster( \
+        world.dataset, {"cluster_seed": "bigml"})
     world.api.ok(world.cluster)
     world.clusters.append(world.cluster['resource'])
-    world.centroid = world.api.create_centroid(world.cluster, input_data, args)
+    world.centroid = world.api.create_centroid( \
+        world.cluster, input_data, args)
     world.api.ok(world.centroid)
     world.centroids.append(world.centroid['resource'])
 
 #@step(r'I create a BigML anomaly score for (.*) from an anomaly detector with data "(.*)" and params "(.*)"')
 def create_anomaly_score(filename, input_data=None, output=None, args=None):
-    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
+    source = world.api.create_source( \
+        res_filename(filename), {"project": world.project_id})
     world.source = source
     world.directory = os.path.dirname(output)
     world.output = output
@@ -285,10 +296,12 @@ def create_anomaly_score(filename, input_data=None, output=None, args=None):
     world.dataset = world.api.create_dataset(source)
     world.api.ok(world.dataset)
     world.datasets.append(world.dataset['resource'])
-    world.anomaly = world.api.create_anomaly(world.dataset)
+    world.anomaly = world.api.create_anomaly( \
+        world.dataset, {"seed": "bigml", "anomaly_seed": "bigml"})
     world.api.ok(world.anomaly)
     world.anomalies.append(world.anomaly['resource'])
-    world.anomaly_score = world.api.create_anomaly_score(world.anomaly, input_data, args)
+    world.anomaly_score = world.api.create_anomaly_score( \
+        world.anomaly, input_data, args)
     world.api.ok(world.anomaly_score)
     world.anomaly_scores.append(world.anomaly_score['resource'])
 
@@ -306,13 +319,15 @@ def create_batch_prediction(filename, output=None, args=None):
     world.model = world.api.create_model(world.dataset)
     world.api.ok(world.model)
     world.models.append(world.model['resource'])
-    world.batch_prediction = world.api.create_batch_prediction(world.model, world.dataset, args)
+    world.batch_prediction = world.api.create_batch_prediction( \
+        world.model, world.dataset, args)
     world.api.ok(world.batch_prediction)
     world.batch_predictions.append(world.batch_prediction['resource'])
 
 #@step(r'I create a BigML batch centroid from a cluster with data "(.*)" and params "(.*)"')
 def create_batch_centroid(filename, output=None, args=None):
-    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
+    source = world.api.create_source( \
+        res_filename(filename), {"project": world.project_id})
     world.source = source
     world.directory = os.path.dirname(output)
     world.output = output
@@ -321,16 +336,19 @@ def create_batch_centroid(filename, output=None, args=None):
     world.dataset = world.api.create_dataset(source)
     world.api.ok(world.dataset)
     world.datasets.append(world.dataset['resource'])
-    world.cluster = world.api.create_cluster(world.dataset)
+    world.cluster = world.api.create_cluster( \
+        world.dataset, {"cluster_seed": "bigml"})
     world.api.ok(world.cluster)
     world.clusters.append(world.cluster['resource'])
-    world.batch_centroid = world.api.create_batch_centroid(world.cluster, world.dataset, args)
+    world.batch_centroid = world.api.create_batch_centroid( \
+        world.cluster, world.dataset, args)
     world.api.ok(world.batch_centroid)
     world.batch_centroids.append(world.batch_centroid['resource'])
 
 #@step(r'I create a BigML batch anomaly score from an anomaly detector with data "(.*)" and params "(.*)"')
 def create_batch_anomaly_score(filename, output=None, args=None):
-    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
+    source = world.api.create_source( \
+        res_filename(filename), {"project": world.project_id})
     world.source = source
     world.directory = os.path.dirname(output)
     world.output = output
@@ -339,16 +357,19 @@ def create_batch_anomaly_score(filename, output=None, args=None):
     world.dataset = world.api.create_dataset(source)
     world.api.ok(world.dataset)
     world.datasets.append(world.dataset['resource'])
-    world.anomaly = world.api.create_anomaly(world.dataset)
+    world.anomaly = world.api.create_anomaly( \
+        world.dataset, {"seed": "bigml", "anomaly_seed": "bigml"})
     world.api.ok(world.anomaly)
     world.anomalies.append(world.anomaly['resource'])
-    world.batch_anomaly_score = world.api.create_batch_anomaly_score(world.anomaly, world.dataset, args)
+    world.batch_anomaly_score = world.api.create_batch_anomaly_score( \
+        world.anomaly, world.dataset, args)
     world.api.ok(world.batch_anomaly_score)
     world.batch_anomaly_scores.append(world.batch_anomaly_score['resource'])
 
 #@step(r'I create a BigML evaluation with data "(.*)" and params "(.*)"')
 def create_evaluation(filename, output=None, args=None):
-    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
+    source = world.api.create_source( \
+        res_filename(filename), {"project": world.project_id})
     world.source = source
     world.directory = os.path.dirname(output)
     world.output = output
@@ -360,14 +381,16 @@ def create_evaluation(filename, output=None, args=None):
     world.model = world.api.create_model(world.dataset)
     world.api.ok(world.model)
     world.models.append(world.model['resource'])
-    world.evaluation = world.api.create_evaluation(world.model, world.dataset, args)
+    world.evaluation = world.api.create_evaluation( \
+        world.model, world.dataset, args)
     world.api.ok(world.evaluation)
     world.evaluations.append(world.evaluation['resource'])
 
 
 #@step(r'I create a BigML ensemble from a dataset with data "(.*)" and params "(.*)"')
 def create_ensemble(filename, output=None, args=None):
-    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
+    source = world.api.create_source( \
+        res_filename(filename), {"project": world.project_id})
     world.source = source
     world.directory = os.path.dirname(output)
     world.output = output
@@ -376,14 +399,15 @@ def create_ensemble(filename, output=None, args=None):
     world.dataset = world.api.create_dataset(source)
     world.api.ok(world.dataset)
     world.datasets.append(world.dataset['resource'])
-    args.update({"seed": "BigML"})
+    args.update({"seed": "BigML", "ensemble_sample": {"seed": "bigml"}})
     world.ensemble = world.api.create_ensemble(world.dataset, args)
     world.api.ok(world.ensemble)
     world.ensembles.append(world.ensemble['resource'])
 
 #@step(r'I create a BigML evaluation with data "(.*)" split training/test and params "(.*)"')
 def create_evaluation_split(filename, output=None, args=None):
-    source = world.api.create_source(res_filename(filename), {"project": world.project_id})
+    source = world.api.create_source( \
+        res_filename(filename), {"project": world.project_id})
     world.source = source
     world.directory = os.path.dirname(output)
     world.output = output
@@ -403,7 +427,8 @@ def create_evaluation_split(filename, output=None, args=None):
     world.model = world.api.create_model(world.dataset_train)
     world.api.ok(world.model)
     world.models.append(world.model['resource'])
-    world.evaluation = world.api.create_evaluation(world.model, world.dataset_test, args)
+    world.evaluation = world.api.create_evaluation( \
+        world.model, world.dataset_test, args)
     world.api.ok(world.evaluation)
     world.evaluations.append(world.evaluation['resource'])
 
@@ -421,13 +446,15 @@ def create_dataset_from_batch_prediction(filename, output=None, args=None):
     world.model = world.api.create_model(world.dataset)
     world.api.ok(world.model)
     world.models.append(world.model['resource'])
-    world.batch_prediction = world.api.create_batch_prediction(world.model, world.dataset, {"output_dataset": True})
+    world.batch_prediction = world.api.create_batch_prediction( \
+        world.model, world.dataset, {"output_dataset": True})
     world.api.ok(world.batch_prediction)
     world.batch_predictions.append(world.batch_prediction['resource'])
     world.batch_prediction_dataset = world.api.get_dataset(
         world.batch_prediction['object']['output_dataset_resource'])
     world.api.ok(world.batch_prediction_dataset)
-    world.batch_prediction_dataset = world.api.update_dataset(world.batch_prediction_dataset, args)
+    world.batch_prediction_dataset = world.api.update_dataset( \
+        world.batch_prediction_dataset, args)
     world.api.ok(world.batch_prediction_dataset)
     world.datasets.append(world.batch_prediction_dataset['resource'])
 
@@ -442,16 +469,19 @@ def create_dataset_from_batch_centroid(filename, output=None, args=None):
     world.dataset = world.api.create_dataset(source)
     world.api.ok(world.dataset)
     world.datasets.append(world.dataset['resource'])
-    world.cluster = world.api.create_cluster(world.dataset)
+    world.cluster = world.api.create_cluster \
+        (world.dataset, {"cluster_seed": "bigml"})
     world.api.ok(world.cluster)
     world.clusters.append(world.cluster['resource'])
-    world.batch_centroid = world.api.create_batch_centroid(world.cluster, world.dataset, {"output_dataset": True})
+    world.batch_centroid = world.api.create_batch_centroid( \
+        world.cluster, world.dataset, {"output_dataset": True})
     world.api.ok(world.batch_centroid)
     world.batch_centroids.append(world.batch_centroid['resource'])
     world.batch_centroid_dataset = world.api.get_dataset(
         world.batch_centroid['object']['output_dataset_resource'])
     world.api.ok(world.batch_centroid_dataset)
-    world.batch_centroid_dataset = world.api.update_dataset(world.batch_centroid_dataset, args)
+    world.batch_centroid_dataset = world.api.update_dataset( \
+        world.batch_centroid_dataset, args)
     world.api.ok(world.batch_centroid_dataset)
     world.datasets.append(world.batch_centroid_dataset['resource'])
 
@@ -466,16 +496,20 @@ def create_dataset_from_batch_anomaly(filename, output=None, args=None):
     world.dataset = world.api.create_dataset(source)
     world.api.ok(world.dataset)
     world.datasets.append(world.dataset['resource'])
-    world.anomaly = world.api.create_anomaly(world.dataset)
+    world.anomaly = world.api.create_anomaly(world.dataset,
+                                             {"seed": "bigml",
+                                              "anomaly_seed": "bigml"})
     world.api.ok(world.anomaly)
     world.anomalies.append(world.anomaly['resource'])
-    world.batch_anomaly_score = world.api.create_batch_anomaly_score(world.anomaly, world.dataset, {"output_dataset": True})
+    world.batch_anomaly_score = world.api.create_batch_anomaly_score( \
+        world.anomaly, world.dataset, {"output_dataset": True})
     world.api.ok(world.batch_anomaly_score)
     world.batch_anomaly_scores.append(world.batch_anomaly_score['resource'])
     world.batch_anomaly_score_dataset = world.api.get_dataset(
         world.batch_anomaly_score['object']['output_dataset_resource'])
     world.api.ok(world.batch_anomaly_score_dataset)
-    world.batch_anomaly_score_dataset = world.api.update_dataset(world.batch_anomaly_score_dataset, args)
+    world.batch_anomaly_score_dataset = world.api.update_dataset( \
+        world.batch_anomaly_score_dataset, args)
     world.api.ok(world.batch_anomaly_score_dataset)
     world.datasets.append(world.batch_anomaly_score_dataset['resource'])
 
@@ -491,16 +525,19 @@ def create_dataset_from_dataset_from_batch_centroid(filename, output=None, args=
     world.dataset = world.api.create_dataset(source)
     world.api.ok(world.dataset)
     world.datasets.append(world.dataset['resource'])
-    world.cluster = world.api.create_cluster(world.dataset)
+    world.cluster = world.api.create_cluster( \
+        world.dataset, {"cluster_seed": "bigml"})
     world.api.ok(world.cluster)
     world.clusters.append(world.cluster['resource'])
-    world.batch_centroid = world.api.create_batch_centroid(world.cluster, world.dataset, {"output_dataset": True})
+    world.batch_centroid = world.api.create_batch_centroid( \
+        world.cluster, world.dataset, {"output_dataset": True})
     world.api.ok(world.batch_centroid)
     world.batch_centroids.append(world.batch_centroid['resource'])
     world.batch_centroid_dataset = world.api.get_dataset(
         world.batch_centroid['object']['output_dataset_resource'])
     world.api.ok(world.batch_centroid_dataset)
     world.datasets.append(world.batch_centroid_dataset['resource'])
-    world.dataset = world.api.create_dataset(world.batch_centroid_dataset['resource'], args)
+    world.dataset = world.api.create_dataset( \
+        world.batch_centroid_dataset['resource'], args)
     world.api.ok(world.dataset)
     world.datasets.append(world.dataset['resource'])
