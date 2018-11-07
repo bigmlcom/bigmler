@@ -8,7 +8,7 @@
 ;;
 ;; Category that the scriptified script is assigned to
 ;;
-(define bigml.scriptify.SCRIPTIFY-CATEGORY 4)
+(define bigmler.scriptify.SCRIPTIFY-CATEGORY 4)
 
 ;; whizzml-args
 ;;
@@ -523,7 +523,7 @@
         args (merge args
                     {"description" (script-info "res-desc" "")
                      "tags" (script-info "res-tags" [])
-                     "category" bigml.scriptify.SCRIPTIFY-CATEGORY}))
+                     "category" bigmler.scriptify.SCRIPTIFY-CATEGORY}))
         (if inputs
             (reduce (lambda (x y) (script-input x y mapped-ids))
                     args
@@ -845,7 +845,7 @@
         args (merge args
                     {"description" (script-info "res-desc" "")
                      "tags" (script-info "res-tags" [])
-                     "category" bigml.scriptify.SCRIPTIFY-CATEGORY}))
+                     "category" bigmler.scriptify.SCRIPTIFY-CATEGORY}))
         (if inputs
             (reduce (lambda (x y) (script-retrain-input x y mapped-ids))
                     args
