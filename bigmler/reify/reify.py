@@ -79,7 +79,6 @@ def write_nb_output(resource_id, workflow, filename, api):
                 cell_text = "args = \\\n    %s" % pprint.pformat( \
                     json.loads(cell_text)).replace("\n", "\n    ")
                 cell_type = "code"
-            cell_text = cell_text if not PYTHON3 else cell_text.encode("utf-8")
             cells.append(getattr(nbf.v4, "new_%s_cell" % cell_type)(cell_text))
     nb["cells"] = cells
     nbf.write(nb, filename)
@@ -171,7 +170,7 @@ def reify_resources(args, api, logger):
 
     reify_script = whizzml_script(args, api)
 
-    # apply the retrain script to the new resource
+    # apply the reify script to the resource
     execute_command = ['execute',
                        '--script', reify_script,
                        '--output-dir', args.output_dir]
@@ -192,6 +191,7 @@ def reify_resources(args, api, logger):
         return
     elif args.language == "whizzml":
         output = exe_output["source_code"]
+        args.output = args.output.replace(".py", ".whizzml")
         exe_output["source_code"] = args.output
         exe_output["kind"] = "script"
         with open(os.path.join(os.path.dirname(args.output),
