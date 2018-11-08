@@ -75,7 +75,9 @@ class TestReify(object):
         """
         print self.test_scenario1.__doc__
         examples = [
-            ['data/iris.csv', 'scenario_re1/reify.py', {"name": "my_source_name"}, 'check_files/reify_source.py', 'python']]
+            ['data/iris.csv', 'scenario_re1/reify.py', {"name": "my_source_name"}, 'check_files/reify_source.py', 'python'],
+            ['data/iris.csv', 'scenario_re1b/reify.ipynb', {"name": "my_source_name"}, 'check_files/reify_source.ipynb', 'nb'],
+            ['data/iris.csv', 'scenario_re1c/reify.whizzml', {"name": "my_source_name"}, 'check_files/reify_source.whizzml', 'whizzml']]
 
         for example in examples:
             print "\nTesting with:\n", example

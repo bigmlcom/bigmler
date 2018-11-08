@@ -58,8 +58,8 @@ def i_create_output(step, output=None, language=None, resource_type='source',
     world.folders.append(world.directory)
     resource_id = getattr(world, resource_type)['resource']
     try:
-        command = (u"bigmler reify --id " + resource_id +
-                   u" --store --output " + output)
+        command = (u"bigmler reify --id " + resource_id + " --language " +
+                   language + u" --store --output " + output)
         if add_fields:
             command += u' --add-fields'
         command = check_debug(command)
@@ -80,7 +80,7 @@ def i_check_output_file(step, output=None, check_file=None):
     if check_file is None or output is None:
         assert False
     check_file = res_filename(check_file)
-    output_file = os.path.join(world.directory, "reify.py")
+    output_file = os.path.join(world.directory, os.path.basename(output))
     with open(check_file, open_mode("r")) as check_file_handler:
         check_contents = check_file_handler.read().strip("\n")
     """
@@ -113,12 +113,28 @@ def i_check_output_file(step, output=None, check_file=None):
     output_file_contents = re.sub(p_str,
                                   '', output_file_contents,
                                   flags=re.S).strip("\n")
+    p_str = r'/[a-f0-9]{24}'
+    output_file_contents = re.sub(p_str,
+                                  '', output_file_contents,
+                                  flags=re.S)
+    check_contents = re.sub(p_str,
+                            '', check_contents,
+                            flags=re.S)
+    p_str = r';;.*\n'
+    output_file_contents = re.sub(p_str,
+                                  '', output_file_contents,
+                                  flags=re.S)
+    check_contents = re.sub(p_str,
+                            '', check_contents,
+                            flags=re.S)
     p_str = r'    api = .*?\n'
     output_file_contents = re.sub(p_str,
                                   '    api = BigML()\n', output_file_contents,
                                   flags=re.S).strip("\n")
     if PYTHON3:
         output_file_contents = re.sub(r'\n\s*', '\n', output_file_contents)
+
+    print check_contents, output_file_contents
     if check_contents != output_file_contents:
         if PYTHON3:
             # look for an alternative in PYTHON3

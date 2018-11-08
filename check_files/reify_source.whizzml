@@ -1,0 +1,18 @@
+;;Step 1
+;;WhizzML for resource: my_source_name
+;;(5 fields (1 categorical, 4 numeric))
+;;source
+;;created by mmartin
+(define source2
+(update-and-wait source1
+{"fields"
+{"000000" {"name" "sepal length" "optype" "numeric"}
+"000001" {"name" "sepal width" "optype" "numeric"}
+"000002" {"name" "petal length" "optype" "numeric"}
+"000003" {"name" "petal width" "optype" "numeric"}
+"000004"
+{"name" "species"
+"optype" "categorical"
+"term_analysis" {"enabled" true}}}
+"project" "project"}))
+(define output-source source2)
