@@ -138,10 +138,8 @@ def i_check_output_file(step, output=None, check_file=None):
     output_file_contents = re.sub(p_str,
                                   '    api = BigML()\n', output_file_contents,
                                   flags=re.S).strip("\n")
-    if PYTHON3:
-        output_file_contents = re.sub(r'\n\s*', '\n', output_file_contents)
-
-    print check_contents, output_file_contents
+    output_file_contents = re.sub(r'\n\s*', '\n', output_file_contents)
+    check_contents = re.sub(r'\n\s*', '\n', check_contents)
     if check_contents != output_file_contents:
         if PYTHON3:
             # look for an alternative in PYTHON3
