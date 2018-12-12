@@ -16,8 +16,7 @@ args = \
 dataset1 = api.create_dataset(source2, args)
 api.ok(dataset1)
 args = \
-{'cluster_seed': '2c249dda00fbf54ab4cdd850532a584f286af5b6',
-'critical_value': 5}
+{'cluster_seed': 'bigml', 'critical_value': 5}
 cluster1 = api.create_cluster(dataset1, args)
 api.ok(cluster1)
 args = \

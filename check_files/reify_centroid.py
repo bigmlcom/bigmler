@@ -12,20 +12,20 @@
          }
     source2 = api.create_source(source1_file, args)
     api.ok(source2)
-    
+
     args = \
         {u'objective_field': {u'id': u'000004'},
          }
     dataset1 = api.create_dataset(source2, args)
     api.ok(dataset1)
-    
+
     args = \
-        {u'cluster_seed': u'2c249dda00fbf54ab4cdd850532a584f286af5b6',
+        {u'cluster_seed': u'bigml',
          u'critical_value': 5,
          }
     cluster1 = api.create_cluster(dataset1, args)
     api.ok(cluster1)
-    
+
     args = \
         {u'input_data': {u'petal length': 0.5,
                          u'petal width': 0.5,
@@ -35,4 +35,3 @@
          }
     centroid1 = api.create_centroid(cluster1, args)
     api.ok(centroid1)
-    
