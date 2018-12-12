@@ -11,8 +11,10 @@
 ;;
 (define (reify-resource resource-id)
   (let (reify-chain (reify resource-id false)
+        tags ((fetch resource-id) "tags" [])
         script-info (whizzml-retrain-script reify-chain true)
         args (script-retrain-args script-info false)
+        args (merge args {"tags" tags})
         script (create-and-wait-script args))
     script))
 

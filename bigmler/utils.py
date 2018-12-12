@@ -732,6 +732,24 @@ def get_last_resource(resource_type, api=None, query_string=None):
     return None
 
 
+def get_first_resource(resource_type, api=None, query_string=None):
+    """Retrieves the first resource that meets the conditions in args
+
+    """
+    order = "order_by=created"
+    if query_string is None:
+        query_string = order
+    else:
+        query_string = "%s;%s" % (query_string, order)
+
+    if api is None:
+        api = bigml.api.BigML()
+    ids = list_ids(api.listers[resource_type], query_string, limit=1)
+    if ids:
+        return ids[0]
+    return None
+
+
 def last_resource_url(resource_id, api=None, query_string=None):
     """Creates the last resource URL of the given type
     that meets the conditions in args
@@ -741,8 +759,9 @@ def last_resource_url(resource_id, api=None, query_string=None):
         query_string = ""
     if api is None:
         api = bigml.api.BigML()
+    auth = "%sproject=%s;" % (api.auth, api.project) if api.project else api.auth
     resource_type = bigml.api.get_resource_type(resource_id)
-    return "%s%s%s%s" % (api.url, resource_type, api.auth, query_string)
+    return "%s%s%s%s" % (api.url, resource_type, auth, query_string)
 
 
 def get_script_id(path):
@@ -754,3 +773,16 @@ def get_script_id(path):
             return file_handler.read().strip()
     except IOError:
         return None
+
+
+def add_api_context(command_args, args):
+    """Extends the command_list with the arguments related to the api
+       credentials.
+
+    """
+    if args.org_project:
+        command_args.extend(['--org-project', args.org_project])
+    if args.username:
+        command_args.extend(['--username', args.username])
+    if args.api_key:
+        command_args.extend(['--api-key', args.api_key])

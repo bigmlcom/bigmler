@@ -215,6 +215,10 @@ def create_package(args, api, common_options, resume=False):
                 command_args.extend(["--description", desc_file])
             if metadata.get("name"):
                 command_args.extend(["--name", metadata.get("name")])
+            if args.tag:
+                for tag in args.tag:
+                    command_args.extend(["--tag", tag])
+
             # adding imports, if any
             if imports:
                 if args.embed_libs:
@@ -226,10 +230,7 @@ def create_package(args, api, common_options, resume=False):
                     # imports to be refereced by ID
                     command_args.extend(["--imports", ",".join(imports)])
             command_args.extend(["--verbosity", str(args.verbosity)])
-            if args.username:
-                command_args.extend(["--username", args.username])
-            if args.api_key:
-                command_args.extend(["--api-key", args.api_key])
+            u.add_api_context(command_args, args)
             if args.upgrade:
                 command_args.extend(["--upgrade"])
 

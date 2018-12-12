@@ -32,8 +32,8 @@ from bigmler.whizzml.dispatcher import whizzml_dispatcher
 from bigmler.execute.dispatcher import execute_whizzml
 from bigmler.execute.dispatcher import SETTINGS as EXE_SETTINGS
 from bigmler.dispatcher import SETTINGS as MAIN_SETTINGS, compute_output
-from bigmler.utils import get_last_resource, log_message, last_resource_url, \
-    get_script_id
+from bigmler.utils import get_last_resource, get_first_resource, \
+    log_message, last_resource_url, get_script_id, add_api_context
 from bigmler.reports import BIGMLER_SCRIPT, HOME
 from bigmler.command import get_context
 
@@ -92,6 +92,8 @@ def create_input(args, api, input_type, script_id):
     execute_command = ['execute',
                        '--script', script_id,
                        '--output-dir', args.output_dir]
+    add_api_context(execute_command, args)
+
     command_args, _, _, exe_session_file, _ = get_context( \
         execute_command, EXE_SETTINGS)
     command_args.arguments_ = [["%s1" % resource_type, resource_id],
@@ -116,7 +118,7 @@ def retrain_model(args, api, common_options, session_file=None):
                     getattr(args, "%s_tag" % model_type) is not None:
                 tag = getattr(args, "%s_tag" % model_type)
                 query_string = "tags=%s" % tag
-                resource_id = get_last_resource( \
+                resource_id = get_first_resource( \
                     model_type.replace("_", ""),
                     api=api,
                     query_string=query_string)
@@ -129,11 +131,14 @@ def retrain_model(args, api, common_options, session_file=None):
                 break
     # if --upgrade, we force rebuilding the scriptified script
     if args.upgrade:
-        shutil.rmtree(BIGMLER_SCRIPTS_DIRECTORY)
+        try:
+            shutil.rmtree(BIGMLER_SCRIPTS_DIRECTORY)
+        except OSError:
+            pass
         script_id = None
     else:
         # check for the last script used to retrain the model
-        query_string = "tags=retrain:%s" % resource_id
+        query_string = "tags=%s" % reference_tag
         script_id = get_last_resource( \
             "script",
             api=api,
@@ -161,17 +166,22 @@ def retrain_model(args, api, common_options, session_file=None):
             whizzml_command = ['whizzml',
                                '--package-dir', INCREMENTAL_PACKAGE_PATH,
                                '--output-dir', BIGMLER_SCRIPTS_DIRECTORY]
+            add_api_context(whizzml_command, args)
             whizzml_dispatcher(args=whizzml_command)
             reify_script = get_script_id(retrain_file)
+
 
         # new bigmler command: creating the retrain script
         execute_command = ['execute',
                            '--script', reify_script,
+                           '--tag', reference_tag,
                            '--output-dir', args.output_dir]
+        add_api_context(execute_command, args)
         command_args, _, _, exe_session_file, _ = get_context(execute_command,
                                                               EXE_SETTINGS)
         command_args.arguments_ = [["model-resource", resource_id]]
         command_args.inputs = json.dumps(command_args.arguments_)
+
         # process the command
         execute_whizzml(command_args, api, session_file)
         script_id = extract_retrain_id(command_args, api, session_file)

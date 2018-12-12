@@ -3,6 +3,12 @@
 History
 -------
 
+3.18.5 (2018-12-12)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing bigmler retrain and execute-related subcommands for organizations.
+- Fixing bigmler retrain when using a model-tag.
+
 3.18.4 (2018-11-07)
 ~~~~~~~~~~~~~~~~~~~
 
