@@ -46,28 +46,7 @@ from __future__ import absolute_import
 import sys
 
 
-from bigmler.dispatcher import main_dispatcher
-from bigmler.sample.dispatcher import sample_dispatcher
-from bigmler.analyze.dispatcher import analyze_dispatcher
-from bigmler.cluster.dispatcher import cluster_dispatcher
-from bigmler.anomaly.dispatcher import anomaly_dispatcher
-from bigmler.delete.dispatcher import delete_dispatcher
-from bigmler.report.dispatcher import report_dispatcher
-from bigmler.reify.dispatcher import reify_dispatcher
-from bigmler.project.dispatcher import project_dispatcher
-from bigmler.association.dispatcher import association_dispatcher
-from bigmler.logisticregression.dispatcher import logistic_regression_dispatcher
-try:
-    from bigmler.topicmodel.dispatcher import topic_model_dispatcher
-    no_stemmer = False
-except ImportError:
-    no_stemmer = True
-from bigmler.timeseries.dispatcher import time_series_dispatcher
-from bigmler.deepnet.dispatcher import deepnet_dispatcher
-from bigmler.execute.dispatcher import execute_dispatcher
-from bigmler.whizzml.dispatcher import whizzml_dispatcher
-from bigmler.export.dispatcher import export_dispatcher
-from bigmler.retrain.dispatcher import retrain_dispatcher
+import bigmler.dispatchers as bd
 from bigmler.parser import SUBCOMMANDS
 from bigmler.utils import SYSTEM_ENCODING
 
@@ -102,46 +81,20 @@ def main(args=sys.argv[1:]):
         new_args = check_delete_option(new_args)
         if not PYTHON3:
             new_args = [arg.decode(SYSTEM_ENCODING) for arg in new_args]
-        if new_args[0] == "main":
-            main_dispatcher(args=new_args)
-        elif new_args[0] == "analyze":
-            analyze_dispatcher(args=new_args)
-        elif new_args[0] == "cluster":
-            cluster_dispatcher(args=new_args)
-        elif new_args[0] == "anomaly":
-            anomaly_dispatcher(args=new_args)
-        elif new_args[0] == "sample":
-            sample_dispatcher(args=new_args)
-        elif new_args[0] == "report":
-            report_dispatcher(args=new_args)
-        elif new_args[0] == "reify":
-            reify_dispatcher(args=new_args)
-        elif new_args[0] == "execute":
-            execute_dispatcher(args=new_args)
-        elif new_args[0] == "delete":
-            delete_dispatcher(args=new_args)
-        elif new_args[0] == "project":
-            project_dispatcher(args=new_args)
-        elif new_args[0] == "association":
-            association_dispatcher(args=new_args)
-        elif new_args[0] == "logistic-regression":
-            logistic_regression_dispatcher(args=new_args)
-        elif new_args[0] == "topic-model":
-            if no_stemmer:
+
+        subcommand = new_args[0]
+        if subcommand == "logistic-regression":
+            bd.subcommand_dispatcher("logistic_regression", new_args)
+        elif subcommand == "topic-model":
+            if bd.NO_STEMMER:
                 sys.exit("To use the bigmler topic-model command you need the"
                          " Pystemmer library. Please, install it and"
                          " retry your command.")
-            topic_model_dispatcher(args=new_args)
-        elif new_args[0] == "time-series":
-            time_series_dispatcher(args=new_args)
-        elif new_args[0] == "deepnet":
-            deepnet_dispatcher(args=new_args)
-        elif new_args[0] == "whizzml":
-            whizzml_dispatcher(args=new_args)
-        elif new_args[0] == "export":
-            export_dispatcher(args=new_args)
-        elif new_args[0] == "retrain":
-            retrain_dispatcher(args=new_args)
+            bd.subcommand_dispatcher("topic_model", new_args)
+        elif subcommand == "time-series":
+            bd.subcommand_dispatcher("time_series", new_args)
+        else:
+            bd.subcommand_dispatcher(subcommand, new_args)
     else:
         sys.exit("BigMLer used with no arguments. Check:\nbigmler --help\n\nor"
                  "\n\nbigmler sample --help\n\n"
