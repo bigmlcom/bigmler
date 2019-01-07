@@ -247,7 +247,7 @@ under the License.""" % version
     defaults = general_defaults["BigMLer export"]
     subcommand_options["export"] = get_export_options(defaults=defaults)
     export_common_options_list = ['clear-logs', 'username', 'api-key',
-                                  'version',
+                                  'version', 'org-project',
                                   'dev', 'no-dev', 'output-dir', 'verbosity',
                                   'resume', 'stack-level', 'debug', 'store']
     export_common_options = {}
@@ -259,7 +259,7 @@ under the License.""" % version
     defaults = general_defaults["BigMLer reify"]
     subcommand_options["reify"] = get_reify_options(defaults=defaults)
     reify_common_options_list = ['clear-logs', 'username', 'api-key',
-                                 'version',
+                                 'version', 'org-project',
                                  'dev', 'no-dev', 'output-dir', 'verbosity',
                                  'resume', 'stack-level', 'debug', 'store']
     reify_common_options = {}
@@ -336,6 +336,8 @@ under the License.""" % version
             '--cross-validation-rate'],
         '--number-of-evaluations': main_options[
             '--number-of-evaluations'],
+        '--batch-prediction-attributes': main_options[
+            '--batch-prediction-attributes'],
         '--no-no-csv': main_options['--no-no-csv']})
 
     # time-series
@@ -456,6 +458,8 @@ under the License.""" % version
             '--cross-validation-rate'],
         '--number-of-evaluations': main_options[
             '--number-of-evaluations'],
+        '--batch-prediction-attributes': main_options[
+            '--batch-prediction-attributes'],
         '--no-no-csv': main_options['--no-no-csv']})
 
     subparser = subparsers.add_parser(subcommand)

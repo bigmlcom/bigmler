@@ -213,3 +213,27 @@ class TestPrediction(object):
             batch_pred.i_check_create_batch_prediction(self)
             test_pred.i_check_create_predictions(self)
             test_pred.i_check_predictions(self, example[4])
+
+    def test_scenario07(self):
+        """
+        Scenario: Successfully building batch test predictions from model with customized output
+            Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
+            And I create BigML deepnet resources using model to test "<test>" as a batch prediction with output format "<batch-output>" and log predictions in "<output>"
+            And I check that the predictions are ready
+            Then the local prediction file is like "<predictions_file>"
+
+            Examples:
+            |scenario    | kwargs                                                  | test                |batch_output    | output                        |predictions_file           |
+            | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | ../data/test_iris.csv   | ../data/batch_output.json  | ./scenario6_dn/predictions.csv   | ./check_files/predictions_iris.csv   |
+
+        """
+        print self.test_scenario07.__doc__
+        examples = [
+            ['scenario1_dn', '{"data": "data/iris.csv", "output": "scenario1_dn/predictions.csv", "test": "data/test_iris.csv"}', 'data/test_iris.csv', 'data/batch_output.json', 'scenario6_dn/predictions.csv', 'check_files/predictions_iris_dn_prob.csv']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
+            dn_pred.i_create_dn_resources_from_model_remote_with_options(self, test=example[2], output=example[4], options_file=example[3])
+            batch_pred.i_check_create_batch_prediction(self)
+            test_pred.i_check_create_predictions(self)
+            test_pred.i_check_predictions(self, example[5])

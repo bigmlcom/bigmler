@@ -3340,7 +3340,6 @@ def set_deepnet_args(args, name=None, fields=None,
         update_json_args(deepnet_args,
                          args.json_args.get('deepnet'),
                          fields)
-    print deepnet_args
     return deepnet_args
 
 

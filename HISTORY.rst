@@ -3,6 +3,12 @@
 History
 -------
 
+3.18.6 (2019-01-07)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing bigmler deepnet and logistic-regression that lacked the
+  --batch-prediction-attributes option.
+
 3.18.5 (2018-12-12)
 ~~~~~~~~~~~~~~~~~~~
 

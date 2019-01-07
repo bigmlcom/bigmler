@@ -125,6 +125,18 @@ def i_create_dn_resources_from_model_remote(step, test=None, output=None):
                output)
     shell_execute(command, output, test=test)
 
+#@step(r'I create BigML resources using model to test "(.*)" as batch prediction with output format "(.*)" and log predictions in "(.*)"')
+def i_create_dn_resources_from_model_remote_with_options(step, test=None, options_file=None, output=None):
+    ok_(test is not None and output is not None and options_file is not None)
+    test = res_filename(test)
+    options_file = res_filename(options_file)
+    command = ("bigmler deepnet --deepnet " +
+               world.deepnet['resource'] + " --test " + test +
+               " --batch-prediction-attributes " + options_file +
+               " --store --remote --output " +
+               output)
+    shell_execute(command, output, test=test)
+
 
 #@step(r'I check that the deepnet model has been created')
 def i_check_create_dn_model(step):
