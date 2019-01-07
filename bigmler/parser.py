@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2014-2018 BigML
+# Copyright 2014-2019 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -75,7 +75,7 @@ def create_parser(general_defaults={}, constants={}, subcommand=MAIN):
     version = pkg_resources.require("BigMLer")[0].version
     version_text = """\
 BigMLer %s - A Higher Level API to BigML's API
-Copyright 2012-2018 BigML
+Copyright 2012-2019 BigML
 
 Licensed under the Apache License, Version 2.0 (the \"License\"); you may
 not use this file except in compliance with the License. You may obtain
