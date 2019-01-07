@@ -89,6 +89,7 @@ DEFAULTS = {
             'replacement': [False],
             'sample_rate': [1.0],
             'seed': [None],
+            'selective_pruning': [None],
             'stat_pruning': [True],
             'balance_objective': [False],
             'weight_field': [None, ''],
@@ -101,6 +102,8 @@ DEFAULTS = {
         "create": {
             'number_of_models': [10],
             'replacement': [False],
+            'selective_pruning': [None],
+            'stat_pruning': [True],
             'seed': [None],
             'ensemble_seed': [None],
             'boosting': [False, {}]

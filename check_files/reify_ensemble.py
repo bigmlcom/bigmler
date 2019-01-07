@@ -12,17 +12,15 @@
          }
     source2 = api.create_source(source1_file, args)
     api.ok(source2)
-    
+
     args = \
         {u'objective_field': {u'id': u'000004'},
          }
     dataset1 = api.create_dataset(source2, args)
     api.ok(dataset1)
-    
+
     args = \
         {u'ensemble_sample': {u'rate': 1, u'replacement': True, u'seed': u'bigml'},
-                  u'seed': u'BigML',
-         u'stat_pruning': False}
+                  u'seed': u'BigML'}
     ensemble1 = api.create_ensemble(dataset1, args)
     api.ok(ensemble1)
-    
