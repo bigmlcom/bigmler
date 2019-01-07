@@ -2963,6 +2963,9 @@ def set_topic_model_args(args, name=None, fields=None,
         topic_model_args.update({"term_limit": args.term_limit})
     if args.top_n_terms is not None:
         topic_model_args.update({"top_n_terms": args.top_n_terms})
+    if args.minimum_name_terms is not None:
+        topic_model_args.update({"minimum_name_terms":
+                                 args.minimum_name_terms})
 
     if args.excluded_terms:
         topic_model_args.update({"excluded_terms": args.excluded_terms_})

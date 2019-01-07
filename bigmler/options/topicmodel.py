@@ -96,6 +96,14 @@ def get_topic_model_options(defaults=None):
             'default': defaults.get('number_of_topics', None),
             'help': ("Number of topics to be generated for the model.")},
 
+        # Minum number of terms to name the topic
+        '--minimum-name-terms': {
+            'action': 'store',
+            'dest': 'minimum_name_terms',
+            'type': int,
+            'default': defaults.get('minimum_name_terms', None),
+            'help': ("Number of terms to be used to name the topic.")},
+
         # The maximum number of terms used for the topic model vocabulary
         '--term-limit': {
             'action': 'store',

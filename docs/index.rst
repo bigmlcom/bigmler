@@ -305,7 +305,15 @@ dowloaded but to be stored as a new dataset remotely, add ``--no-csv`` and
 ``to-dataset`` to the command line. This can be specially helpful when
 dealing with a high number of scores or when adding to the final result
 the original dataset fields with ``--prediction-info full``, that may result
-in a large CSV to be created as output.
+in a large CSV to be created as output. Other output configurations can be
+set by using the ``--batch-prediction-attributes`` option pointing to a JSON
+file that contains the desired attributes, like:
+
+-- code-block:: json
+
+    {"probabilities": true,
+     "all_fields": true}
+
 
 
 In case you prefer BigMLer to issue
@@ -3066,7 +3074,15 @@ dowloaded but to be stored as a new dataset remotely, add ``--no-csv`` and
 ``to-dataset`` to the command line. This can be specially helpful when
 dealing with a high number of scores or when adding to the final result
 the original dataset fields with ``--prediction-info full``, that may result
-in a large CSV to be created as output.
+in a large CSV to be created as output. Other output configurations can be
+set by using the ``--batch-prediction-attributes`` option pointing to a JSON
+file that contains the desired attributes, like:
+
+-- code-block:: json
+
+    {"probabilities": true,
+     "all_fields": true}
+
 
 .. _bigmler-topic-model:
 
@@ -3148,6 +3164,11 @@ dowloaded but to be stored as a new dataset remotely, add ``--no-csv`` and
 dealing with a high number of scores or when adding to the final result
 the original dataset fields with ``--prediction-info full``, that may result
 in a large CSV to be created as output.
+
+Note that the the topics created in the Topic Model resource are now named
+after the more frequent terms that they contain. To return to the previous
+``Topic 0`` style naming you can use the ``--minimum-name-terms`` option and
+set it to ``0``.
 
 .. _bigmler-time-series:
 
@@ -3335,7 +3356,15 @@ dowloaded but to be stored as a new dataset remotely, add ``--no-csv`` and
 ``to-dataset`` to the command line. This can be specially helpful when
 dealing with a high number of scores or when adding to the final result
 the original dataset fields with ``--prediction-info full``, that may result
-in a large CSV to be created as output.
+in a large CSV to be created as output. Other output configurations can be
+set by using the ``--batch-prediction-attributes`` option pointing to a JSON
+file that contains the desired attributes, like:
+
+-- code-block:: json
+
+    {"probabilities": true,
+     "all_fields": true}
+
 
 Additional Features
 ===================
@@ -3949,7 +3978,7 @@ Data Configuration
                                           attributes described in the
                                           `developers section <https://bigml.com/api/evaluations#ev_evaluation_properties>`_ )
                                           in create evaluation calls
-``--batch_prediction-attributes`` *PATH*  Path to a file containing a JSON
+``--batch-prediction-attributes`` *PATH*  Path to a file containing a JSON
                                           expression
                                           with attributes to be used as
                                           arguments (any of the updatable
@@ -4494,6 +4523,8 @@ Topic Model Subcommand Options
 ``--excluded-terms`` *EXCLUDED_TERMS*         Comma-separated list of terms
                                               to be excluded from the analysis
 ``--use-stopwords``                           Use stopwords in the analysis.
+``--minimum-name-terms`` *NUMBER_OF_TERMS*    Number of the most frequent terms
+                                              in the topic used to name it
 ``--topic-model-attributes`` *PATH*           Path to a JSON file containing
                                               attributes (any of the updatable
                                               attributes described in the

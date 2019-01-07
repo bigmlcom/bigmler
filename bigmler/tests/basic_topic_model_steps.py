@@ -68,7 +68,8 @@ def i_create_all_td_resources_from_dataset( \
     step, test=None, options=None, output=None):
     ok_(test is not None and options is not None and output is not None)
     test = res_filename(test)
-    command = ("bigmler topic-model --dataset " +
+    command = ("bigmler topic-model " +
+               "--minimum-name-terms 0 --dataset " +
                world.dataset['resource'] + " --test " + test +
                " --store --output " + output + " " + options)
     shell_execute(command, output, test=test, options=options)
@@ -79,7 +80,8 @@ def i_create_all_td_resources_from_source( \
     step, test=None, options=None, output=None):
     ok_(test is not None and options is not None and output is not None)
     test = res_filename(test)
-    command = ("bigmler topic-model --source " +
+    command = ("bigmler topic-model " +
+               "--minimum-name-terms 0 --source " +
                world.source['resource'] + " --test " + test +
                " --store --output " + output + " " + options)
     shell_execute(command, output, test=test, options=options)
@@ -90,7 +92,8 @@ def i_create_all_td_resources_from_model( \
     step, test=None, options=None, output=None):
     ok_(test is not None and options is not None and output is not None)
     test = res_filename(test)
-    command = ("bigmler topic-model --topic-model " +
+    command = ("bigmler topic-model " +
+               "--minimum-name-terms 0 --topic-model " +
                world.topic_model['resource'] + " --test " + test +
                " --store --output " + output + " " + options)
     shell_execute(command, output, test=test, options=options)
@@ -101,7 +104,8 @@ def i_create_topic_distribution_from_model_remote( \
     step, test=None, options=None, output=None):
     ok_(test is not None and options is not None and output is not None)
     test = res_filename(test)
-    command = ("bigmler topic-model --remote --topic-model " +
+    command = ("bigmler topic-model --remote" +
+               " --minimum-name-terms 0 --topic-model " +
                world.topic_model['resource'] + " --test " + test +
                " --store --output " + output + " " + options)
     shell_execute(command, output, test=test, options=options)
@@ -199,7 +203,8 @@ def i_check_topic_distributions(step, check_file):
 def i_create_topic_model_from_dataset( \
     step, output=None):
     ok_(output is not None)
-    command = ("bigmler topic-model --dataset " +
+    command = ("bigmler topic-model " +
+               "--minimum-name-terms 0 --dataset " +
                world.dataset['resource'] +
                " --store --output " + output)
     shell_execute(command, output)

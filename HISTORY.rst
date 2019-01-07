@@ -8,6 +8,7 @@ History
 
 - Fixing bigmler deepnet and logistic-regression that lacked the
   --batch-prediction-attributes option.
+- Adding the --minimum-name-terms option to bigmler topic-model.
 
 3.18.5 (2018-12-12)
 ~~~~~~~~~~~~~~~~~~~
