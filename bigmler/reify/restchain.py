@@ -69,7 +69,7 @@ def set_pruning(opts):
     """
     if opts['selective_pruning'] and opts['stats_pruning']:
         del opts['selective_pruning']
-        del opts['stats_pruning']
+        del opts['stat_pruning']
     try:
         del opts['selective_pruning']
     except Exception:
