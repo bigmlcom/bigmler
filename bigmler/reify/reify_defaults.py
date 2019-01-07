@@ -90,7 +90,7 @@ DEFAULTS = {
             'sample_rate': [1.0],
             'seed': [None],
             'selective_pruning': [None],
-            'stat_pruning': [True],
+            'stat_pruning': [None],
             'balance_objective': [False],
             'weight_field': [None, ''],
             'objective_weights': [None, []],
@@ -103,7 +103,7 @@ DEFAULTS = {
             'number_of_models': [10],
             'replacement': [False],
             'selective_pruning': [None],
-            'stat_pruning': [True],
+            'stat_pruning': [None],
             'seed': [None],
             'ensemble_seed': [None],
             'boosting': [False, {}]

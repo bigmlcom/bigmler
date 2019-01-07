@@ -61,21 +61,6 @@ def uniquify(resource_ids):
     return unique_objects
 
 
-def set_pruning(opts):
-    """ Sets the correct pruning options. Selective_pruning must be removed
-        and stat_pruning is also removed if selective_pruning and it are
-        both on (default)
-
-    """
-    if opts['selective_pruning'] and opts['stats_pruning']:
-        del opts['selective_pruning']
-        del opts['stat_pruning']
-    try:
-        del opts['selective_pruning']
-    except Exception:
-        pass
-
-
 class RESTChain(object):
 
     """List of REST calls in reverse order leading to the resource creation
@@ -390,7 +375,6 @@ class RESTChain(object):
             child['tags'].remove(objective_field_name)
         # options common to all model types
         u.common_model_opts(child, grandparent, opts)
-        set_pruning(opts)
         # name, exclude automatic naming alternatives
         autonames = [u'']
         u.non_automatic_name(child, opts, autonames=autonames)
@@ -422,7 +406,6 @@ class RESTChain(object):
             del opts['create']['replacement']
         # create options
         u.non_default_opts(child, opts)
-        set_pruning(opts)
         calls = u.build_calls(resource_id, [parent_id], opts)
         self.add(resource_id, calls)
 
