@@ -93,3 +93,41 @@ class TestRetrain(object):
             test_pred.i_check_create_model_in_execution(self)
             test_pred.i_check_model_double(self)
             test_pred.i_check_model_is_balanced(self)
+
+    def test_scenario2(self):
+        """
+            Scenario: Successfully retraining from a model using sampled dataset
+                Given I create a BigML balanced model from "<data>" sampling 50% of data and store logs in "<output_dir>"
+                And I check that the source has been created
+                And I check that the dataset has been created
+                And I check that the model has been created
+                And I retrain the model from "<data>" and store logs in "<output_dir>"
+                And I check that the source has been created
+                And I check that the dataset has been created
+                And I check that the model has been created
+                Then I check that the model has doubled its rows
+                And I check that the model is balanced
+
+                Examples:
+                |data |output_dir  | output_dir_ret
+                |../data/iris.csv | ./scenario_rt_2 |./scenario_rt_2b |
+        """
+        print self.test_scenario2.__doc__
+        examples = [
+            ['data/iris.csv', 'scenario_rt_2', 'scenario_rt_2b'],
+            ['https://static.bigml.com/csv/iris.csv', 'scenario_rt_2c',
+             'scenario_rt_2d']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            test_pred.i_create_balanced_model_from_sample(self, data=example[0], output_dir=example[1])
+            test_pred.i_check_create_source(self)
+            test_pred.i_check_create_dataset(self, suffix=None)
+            test_pred.i_check_create_dataset(self, suffix='gen ')
+            test_pred.i_check_create_model(self)
+            test_pred.i_retrain_model(self, data=example[0], output_dir=example[2])
+            if not example[0].startswith("https"):
+                test_pred.i_check_create_source(self)
+            execute_steps.i_check_create_execution(self, number_of_executions=2)
+            test_pred.i_check_create_model_in_execution(self)
+            test_pred.i_check_model_double(self)
+            test_pred.i_check_model_is_balanced(self)

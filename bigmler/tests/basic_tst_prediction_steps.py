@@ -803,6 +803,44 @@ def i_create_balanced_model(step, data=None, output_dir=None):
     except (OSError, CalledProcessError, IOError) as exc:
         assert False, str(exc)
 
+#@step(r'I create a BigML balanced model from "(.*)" sampling 50% and store logs in "(.*)"')
+def i_create_balanced_model_from_sample(step, data=None, output_dir=None):
+    ok_(data is not None and output_dir is not None)
+    world.directory = output_dir
+    world.folders.append(world.directory)
+    if not data.startswith("https"):
+        data = res_filename(data)
+    try:
+        command = ("bigmler --train " + data +
+                   " --store --no-model --output-dir " + output_dir)
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        ok_(retcode >= 0)
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+    try:
+        command = ("bigmler --datasets " + output_dir + "/dataset" +
+                   " --store --to-dataset --sample-rate 0.5 --no-model "+
+                   " --output-dir " +
+                   output_dir)
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        ok_(retcode >= 0)
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+    try:
+        command = ("bigmler --datasets " + output_dir + "/dataset_gen" +
+                   " --store --balance  --output-dir " +
+                   output_dir)
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        ok_(retcode >= 0)
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+
+
 #@step(r'I create a BigML field weighted model from "(.*)" using field "(.*)"
 # as weight and store logs in "(.*)"')
 def i_create_weighted_field_model( \
@@ -872,8 +910,6 @@ def i_check_create_source(step):
 
 #@step(r'I check that the model has doubled its rows$')
 def i_check_model_double(step):
-    print world.model['resource']
-    print world.origin_model['resource']
     ok_(world.model['object']['rows'] == \
         2 * world.origin_model['object']['rows'])
 
