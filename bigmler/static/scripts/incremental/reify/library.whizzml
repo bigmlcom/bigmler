@@ -2359,12 +2359,12 @@
   (let (reified-id ((reify-chain "list" []) 0)
         tags (resource "tags" [])
         retrain-label (str "retrain:" reified-id)
-        tags (if (member? retrain-label tags)
-                 tags
-                 (append tags retrain-label))
-        resource (if (member? (resource-type reified-id) RETRAIN-MODELS)
-                     (update-tags resource-id tags)
-                     resource)
+        ;; only tagging the models created
+        resource (if (and (not (member? retrain-label tags))
+                      (member? (resource-type resource-id) RETRAIN-MODELS)
+                      (= resource-id reified-id))
+                      (update-tags resource-id (append tags retrain-label))
+                      resource)
         is-cv? (and (= (resource-type resource) "evaluation")
                (= (resource "type" false) 2))
         res-type (if is-cv? "cross-validation" (resource-type resource))

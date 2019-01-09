@@ -28,6 +28,8 @@ import bigml.api
 import bigmler.resources as r
 import bigmler.processing.args as a
 
+
+from bigml.api import get_resource_type
 from bigmler.whizzml.dispatcher import whizzml_dispatcher
 from bigmler.execute.dispatcher import execute_whizzml
 from bigmler.execute.dispatcher import SETTINGS as EXE_SETTINGS
@@ -41,6 +43,8 @@ from bigmler.command import get_context
 INCREMENTAL_PACKAGE_PATH = os.path.join(BIGMLER_SCRIPT, "static", "scripts",
                                         "incremental")
 BIGMLER_SCRIPTS_DIRECTORY = os.path.join(HOME, "bigmler", "scripts")
+
+UPGRADE_FILE = os.path.join(INCREMENTAL_PACKAGE_PATH, ".upgrade_version.json")
 
 
 MODEL_TYPES = ["model", "ensemble", "logistic_regression", "deepnet",
@@ -108,6 +112,29 @@ def retrain_model(args, api, common_options, session_file=None):
 
     """
 
+    retrain_file = os.path.join(BIGMLER_SCRIPTS_DIRECTORY,
+                                "retrain",
+                                "scripts")
+    try:
+        os.remove(UPGRADE_FILE)
+        reify_script = None
+        try:
+            shutil.rmtree(BIGMLER_SCRIPTS_DIRECTORY)
+        except OSError:
+            pass
+    except OSError:
+        # look for the script that creates the rebuild script.
+        reify_script = get_script_id(retrain_file)
+
+    if reify_script is None:
+        # new bigmler command: creating the scriptify scripts
+        whizzml_command = ['whizzml',
+                           '--package-dir', INCREMENTAL_PACKAGE_PATH,
+                           '--output-dir', BIGMLER_SCRIPTS_DIRECTORY]
+        add_api_context(whizzml_command, args)
+        whizzml_dispatcher(args=whizzml_command)
+        reify_script = get_script_id(retrain_file)
+
     # retrieve the modeling resource to be retrained by tag or id
     if args.resource_id:
         resource_id = args.resource_id
@@ -129,12 +156,17 @@ def retrain_model(args, api, common_options, session_file=None):
                              (model_type.replace("_", " "), tag))
                 reference_tag = tag
                 break
+    # updating the dataset that generated the model with the reference tag
+    model = api.getters[get_resource_type(resource_id)](resource_id)
+    dataset_id = model["object"]["dataset"]
+    dataset = api.get_dataset(dataset_id)
+    tags = dataset["object"]["tags"]
+    if reference_tag not in tags:
+        tags.append(reference_tag)
+        api.update_dataset(dataset_id, {"tags": tags})
+
     # if --upgrade, we force rebuilding the scriptified script
     if args.upgrade:
-        try:
-            shutil.rmtree(BIGMLER_SCRIPTS_DIRECTORY)
-        except OSError:
-            pass
         script_id = None
     else:
         # check for the last script used to retrain the model
@@ -154,22 +186,6 @@ def retrain_model(args, api, common_options, session_file=None):
             sys.exit("Failed to find the model %s. Please, check its ID and"
                      " the connection info (domain and credentials)." %
                      resource_id)
-
-        # look for the script that creates the rebuild script.
-        retrain_file = os.path.join(BIGMLER_SCRIPTS_DIRECTORY,
-                                    "retrain",
-                                    "scripts")
-        reify_script = get_script_id(retrain_file)
-
-        if reify_script is None:
-            # new bigmler command: creating the scriptify scripts
-            whizzml_command = ['whizzml',
-                               '--package-dir', INCREMENTAL_PACKAGE_PATH,
-                               '--output-dir', BIGMLER_SCRIPTS_DIRECTORY]
-            add_api_context(whizzml_command, args)
-            whizzml_dispatcher(args=whizzml_command)
-            reify_script = get_script_id(retrain_file)
-
 
         # new bigmler command: creating the retrain script
         execute_command = ['execute',

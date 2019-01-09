@@ -3,6 +3,11 @@
 History
 -------
 
+3.18.7 (2019-01-09)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing bigmler retrain for models based on transformed datasets.
+
 3.18.6 (2019-01-07)
 ~~~~~~~~~~~~~~~~~~~
 

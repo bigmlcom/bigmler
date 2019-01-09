@@ -1,5 +1,5 @@
 {
-  "name": "BigMLer: Reify - 1.0.3",
+  "name": "BigMLer: Reify - 1.0.4",
   "description": "Retrieves the steps and configurations needed to reproduce a resource",
   "kind": "library",
   "source_code": "library.whizzml"
