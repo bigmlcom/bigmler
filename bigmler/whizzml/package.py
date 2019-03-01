@@ -125,11 +125,12 @@ def get_library_code(library_ids, api):
         code.append(source_code)
 
 
-def create_package(args, api, common_options, resume=False):
+def create_package(args, api, command_obj, resume=False):
     """Creates the package whizzml resources as referred in the metadata.json
     file.
 
     """
+    common_options = command_obj.common_options
     set_subcommand_file(args.output_dir)
     if resume:
         retrieve_subcommands()
@@ -152,7 +153,7 @@ def create_package(args, api, common_options, resume=False):
             u.log_message(message, log_file=session_file,
                           console=args.verbosity)
             args.package_dir = os.path.join(package_dir, component)
-            create_package(args, api, common_options, resume=resume)
+            create_package(args, api, command_obj, resume=resume)
             args.package_dir = package_dir
     else:
         # create libraries or scripts
@@ -163,7 +164,7 @@ def create_package(args, api, common_options, resume=False):
                 args.package_dir = os.path.join(package_dir, lib_import)
                 if args.embed_libs:
                     library_ref = create_package( \
-                        args, api, common_options, resume=resume)
+                        args, api, command_obj, resume=resume)
                     u.log_created_resources("imports",
                                             output_dir, library_ref)
                 else:
@@ -173,7 +174,7 @@ def create_package(args, api, common_options, resume=False):
                             output_dir, os.path.basename(args.package_dir)))
                     except IOError:
                         library_ref = create_package( \
-                            args, api, common_options, resume=resume)
+                            args, api, command_obj, resume=resume)
                         library_ref = read_library_id(os.path.join( \
                             output_dir, os.path.basename(args.package_dir)))
                 imports.append(library_ref)
@@ -230,7 +231,8 @@ def create_package(args, api, common_options, resume=False):
                     # imports to be refereced by ID
                     command_args.extend(["--imports", ",".join(imports)])
             command_args.extend(["--verbosity", str(args.verbosity)])
-            u.add_api_context(command_args, args)
+            command_obj.propagate(command_args)
+            # u.add_api_context(command_args, args)
             if args.upgrade:
                 command_args.extend(["--upgrade"])
 

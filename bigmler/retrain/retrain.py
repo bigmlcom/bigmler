@@ -69,7 +69,7 @@ def extract_retrain_id(args, api, session_file):
     return execution['object']['execution']['result']
 
 
-def create_input(args, api, input_type, script_id):
+def create_input(args, api, input_type, script_id, command):
     """ Creates the resources used as input for the retrain script when adding
         new data.
         When remote sources are used, the input is usually the remote url.
@@ -82,6 +82,7 @@ def create_input(args, api, input_type, script_id):
         source_command = ["main", "--train", args.add,
                           "--output-dir", args.output_dir,
                           STOP_WORKFLOW[input_type]]
+        command.propagate(source_command)
         command_args, _, _, main_session_file, _ = get_context( \
             source_command, MAIN_SETTINGS)
         command_args.predictions = command_args.output
@@ -96,17 +97,17 @@ def create_input(args, api, input_type, script_id):
     execute_command = ['execute',
                        '--script', script_id,
                        '--output-dir', args.output_dir]
-    add_api_context(execute_command, args)
-
+    command.propagate(execute_command)
     command_args, _, _, exe_session_file, _ = get_context( \
         execute_command, EXE_SETTINGS)
     command_args.arguments_ = [["%s1" % resource_type, resource_id],
                                ["datasets-limit", args.window_size]]
     command_args.inputs = json.dumps(command_args.arguments_)
-    return command_args
+
+    return command_args, api, exe_session_file
 
 
-def retrain_model(args, api, common_options, session_file=None):
+def retrain_model(args, api, command, session_file=None):
     """Retrieve or create the retrain script for a model and
     execute it with the new provided data
 
@@ -192,7 +193,7 @@ def retrain_model(args, api, common_options, session_file=None):
                            '--script', reify_script,
                            '--tag', reference_tag,
                            '--output-dir', args.output_dir]
-        add_api_context(execute_command, args)
+        command.propagate(execute_command)
         command_args, _, _, exe_session_file, _ = get_context(execute_command,
                                                               EXE_SETTINGS)
         command_args.arguments_ = [["model-resource", resource_id]]
@@ -208,10 +209,12 @@ def retrain_model(args, api, common_options, session_file=None):
     if args.add:
         script_inputs = api.get_script(script_id)['object']['inputs']
         input_type = script_inputs[0]['type']
-        command_args = create_input(args, api, input_type, script_id)
+        command_args, api, exe_session_file = \
+            create_input(args, api, input_type, script_id, command)
 
         # process the command
-        execute_whizzml(command_args, api, session_file)
+        execute_whizzml(command_args, api, exe_session_file)
+
         with open("%s.json" % command_args.output) as file_handler:
             model_resource_id = json.load(file_handler)['result']
             message = (u'The new retrained model is: %s.\n'

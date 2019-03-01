@@ -74,7 +74,7 @@ def retrain_dispatcher(args=sys.argv[1:]):
 
     # --id or --model-tag, --ensemble-tag, etc. is compulsory
     if check_compulsory_options(command.flags, command_args):
-        retrain_model(command_args, api, command.common_options,
+        retrain_model(command_args, api, command,
                       session_file=session_file)
         u.log_message("_" * 80 + "\n", log_file=session_file)
     else:

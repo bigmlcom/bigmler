@@ -58,7 +58,7 @@ def whizzml_dispatcher(args=sys.argv[1:]):
     # package_dir
     if command_args.package_dir is not None:
         command_args.package_dir = os.path.expanduser(command_args.package_dir)
-        create_package(command_args, api, command.common_options,
+        create_package(command_args, api, command,
                        resume=resume)
     else:
         sys.exit("You must use the --package-dir flag pointing to the"

@@ -219,6 +219,7 @@ def compute_output(api, args):
 
     check_args_coherence(args)
     path = u.check_dir(output)
+
     session_file = "%s%s%s" % (path, os.sep, SESSIONS_LOG)
     csv_properties = {}
     # If logging is required set the file for logging

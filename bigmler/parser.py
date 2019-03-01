@@ -474,4 +474,4 @@ under the License.""" % version
         "--verbosity", "--resume", "--stack_level", "--no-balance",
         "--args-separator", "--name"]
 
-    return main_parser, chained_options
+    return main_parser, chained_options, subcommand_options

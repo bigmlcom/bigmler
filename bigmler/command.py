@@ -41,6 +41,7 @@ from bigmler.parser import create_parser
 COMMAND_LOG = u".bigmler"
 DIRS_LOG = u".bigmler_dir_stack"
 SESSIONS_LOG = u"bigmler_sessions"
+CONNECTION_OPTIONS = ["--username", "--api-key", "--org-project"]
 
 
 def tail(file_handler, window=1):
@@ -137,6 +138,9 @@ def get_context(args, settings):
     command_args, api = fill_remote_context(command_args, command,
                                             session_file, resume)
 
+    if command_args.debug:
+        print "*** BigMLer Command options: ", command.args
+
     return command_args, command, api, session_file, resume
 
 
@@ -205,6 +209,24 @@ def fill_remote_context(command_args, command, session_file,
     return command_args, api
 
 
+def args_to_dict(args):
+    """ Transforms the list of arguments received in the subcommand in
+        a dictionary of option names and values (as a list, to cope with
+        options with multiple values like --tag).
+
+    """
+    args_dict = {}
+    last_arg = None
+    for arg in args:
+        if arg.startswith("--"):
+            last_arg = arg
+            args_dict[arg] = args_dict.get(arg, [])
+        else:
+            if last_arg is not None:
+                args_dict[last_arg].append(arg)
+    return args_dict
+
+
 class Command(object):
     """Objects derived from user given command and the user defaults file
 
@@ -213,6 +235,7 @@ class Command(object):
         self.stored = (args is None and
                        isinstance(stored_command, StoredCommand))
         self.args = args if not self.stored else stored_command.args
+        self.args_dict = args_to_dict(self.args[1:])
         self.resume = not self.stored and '--resume' in self.args
         self.defaults_file = (None if not self.stored else
                               os.path.join(stored_command.output_dir,
@@ -221,13 +244,44 @@ class Command(object):
         self.command = (a.get_command_message(self.args) if not self.stored
                         else stored_command.command)
         self.subcommand = self.command.split(" ")[1]
-        self.parser, self.common_options = create_parser(
-            general_defaults=self.user_defaults,
-            constants={'NOW': a.NOW,
-                       'MAX_MODELS': MAX_MODELS,
-                       'PLURALITY': PLURALITY},
-            subcommand=self.subcommand)
+        self.parser, self.common_options, self.subcommand_options = \
+            create_parser(general_defaults=self.user_defaults,
+                          constants={'NOW': a.NOW,
+                                     'MAX_MODELS': MAX_MODELS,
+                                     'PLURALITY': PLURALITY},
+                          subcommand=self.subcommand)
         self.flags, self.train_stdin, self.test_stdin = a.get_flags(self.args)
+
+
+    def propagate(self, new_command_args, exclude=None,
+                  connection_only=False):
+        """ Propagates the arguments compatible with the new command that
+            have not been set yet.
+
+        """
+        if exclude is None:
+            exclude = []
+        new_args = [arg for arg in new_command_args if arg.startswith("--")]
+        if "--output-dir" in new_args:
+            exclude.append('--output')
+        try:
+            new_subcommand = new_command_args[0]
+        except IndexError:
+            new_subcommand = "main"
+        compatible_args = [arg for arg in self.args_dict.keys() if \
+            arg in self.subcommand_options[new_subcommand].keys()]
+        if connection_only:
+            compatible_args = [arg for arg in compatible_args if arg in
+                               CONNECTION_OPTIONS]
+        for arg in compatible_args:
+            if arg not in new_args and arg not in exclude:
+                if not self.args_dict[arg]:
+                    new_command_args.append(arg)
+                for value in self.args_dict[arg]:
+                    if value:
+                        new_command_args.append(arg)
+                        new_command_args.append(value)
+        return new_command_args
 
 
 class StoredCommand(object):

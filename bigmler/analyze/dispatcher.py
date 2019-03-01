@@ -107,22 +107,22 @@ def analyze_dispatcher(args=sys.argv[1:]):
                  "threshold, cross validation or random fields.")
     # k-fold cross-validation
     if command_args.cv and command_args.dataset is not None:
-        create_kfold_cv(command_args, api, command.common_options,
+        create_kfold_cv(command_args, api, command,
                         resume=resume)
 
     # features analysis
     elif command_args.features:
-        create_features_analysis(command_args, api, command.common_options,
+        create_features_analysis(command_args, api, command,
                                  resume=resume)
 
     # node threshold analysis
     elif command_args.nodes:
-        create_nodes_analysis(command_args, api, command.common_options,
+        create_nodes_analysis(command_args, api, command,
                               resume=resume)
 
     # random fields analysis
     elif command_args.random_fields:
-        create_candidates_analysis(command_args, api, command.common_options,
+        create_candidates_analysis(command_args, api, command,
                                    resume=resume)
     else:
         sys.exit("You must choose one of the available analysis: --features,"
