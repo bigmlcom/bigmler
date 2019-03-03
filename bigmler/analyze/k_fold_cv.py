@@ -501,14 +501,14 @@ def create_kfold_evaluations(datasets_file, args, command_obj,
     command = COMMANDS["create_cv"] % (datasets_file, output_dir, name,
                                        model_dataset)
     command_args = command.split()
-    """
+
     if model_fields:
         command_args.append("--model-fields")
         command_args.append(model_fields)
     command_args.append("--objective")
     command_args.append(args.objective_field)
     command_args = add_model_options(command_args, args)
-
+    """
     common_options_list = u.get_options_list(args, command_obj.common_options,
                                              prioritary=command_args)
     command_args.extend(common_options_list)
@@ -516,6 +516,7 @@ def create_kfold_evaluations(datasets_file, args, command_obj,
     command_obj.propagate(command_args, exclude=["--dataset",
                                                  "--datasets",
                                                  "--dataset-file"])
+    print "***eval opts", command_args
     command = rebuild_command(command_args)
     if resume:
         next_command = subcommand_list.pop()
@@ -1057,10 +1058,11 @@ def create_candidates_evaluations(datasets_file, args, command_obj,
     common_options_list = u.get_options_list(args, command_obj.common_options,
                                              prioritary=command_args)
     command_args.extend(common_options_list)
+    """
     command_args.append("--objective")
     command_args.append(args.objective_field)
     command_args = add_model_options(command_args, args)
-    """
+
     command_obj.propagate(command_args, exclude=["--dataset",
                                                  "--datasets",
                                                  "--dataset-file"])
