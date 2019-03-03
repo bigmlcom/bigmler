@@ -3,6 +3,13 @@
 History
 -------
 
+3.18.8 (2019-01-09)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing arguments that were not propagated in complex subcommands.
+- Fixing bigmler delete subcommand. Ensuring IDs uniqueness in the delete
+  list.
+
 3.18.7 (2019-01-09)
 ~~~~~~~~~~~~~~~~~~~
 

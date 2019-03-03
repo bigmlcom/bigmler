@@ -377,6 +377,8 @@ def delete_resources(command_args, api, deleted_list=None):
                                                  " " * pre_indent)))
         u.log_message(message, log_file=None,
                       console=command_args.verbosity)
+    # ensure uniqueness
+    delete_list = list(set(delete_list))
     # Partial console message. Limited number of rows
     segment = delete_list[0: ROWS_LIMIT]
     message = ("\n%s" % (" " * INDENT_IDS)).join(segment)

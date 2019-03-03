@@ -57,7 +57,7 @@ setuptools.setup(
                 'bigmler.timeseries', 'bigmler.deepnet', 'bigmler.retrain',
                 'bigmler.export', 'bigmler.export.out_model',
                 'bigmler.export.out_tree'],
-    install_requires = ['bigml>=4.19.10, <4.20.0',
+    install_requires = ['bigml>=4.20.0, <4.21.0',
                         'jsonschema==2.6.0',
                         'nbformat>=4.4.0'],
     package_data={'bigmler':['static/*.json',
