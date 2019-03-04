@@ -36,11 +36,7 @@ args = \
 model1 = api.create_model(dataset2, args)
 api.ok(model1)
 args = \
-{'fields_map': {'000001': '000001',
-'000002': '000002',
-'000003': '000003',
-'000004': '000004'},
-'operating_kind': 'probability',
+{'operating_kind': 'probability',
 }
 evaluation1 = api.create_evaluation(model1, dataset3, args)
 api.ok(evaluation1)

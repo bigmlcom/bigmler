@@ -20,12 +20,7 @@ args = \
 cluster1 = api.create_cluster(dataset1, args)
 api.ok(cluster1)
 args = \
-{'fields_map': {'000000': '000000',
-'000001': '000001',
-'000002': '000002',
-'000003': '000003',
-'000004': '000004'},
-'output_dataset': True}
+{'output_dataset': True}
 batchcentroid1 = api.create_batch_centroid(cluster1, dataset1, args)
 api.ok(batchcentroid1)
 dataset2 = api.get_dataset(batchcentroid1["object"]["output_dataset_resource"])

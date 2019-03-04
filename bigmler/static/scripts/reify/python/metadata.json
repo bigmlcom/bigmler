@@ -1,5 +1,5 @@
 {
-  "name": "Python code to scriptify - 1.0.0",
+  "name": "Python code to scriptify - 1.1.0",
   "description": "Python code and inputs needed to reproduce a resource",
   "kind": "script",
   "source_code": "script.whizzml",

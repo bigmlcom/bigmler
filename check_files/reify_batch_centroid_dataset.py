@@ -23,12 +23,7 @@
     api.ok(cluster1)
 
     args = \
-        {u'fields_map': {u'000000': u'000000',
-                         u'000001': u'000001',
-                         u'000002': u'000002',
-                         u'000003': u'000003',
-                         u'000004': u'000004'},
-         u'output_dataset': True}
+        {u'output_dataset': True}
     batchcentroid1 = api.create_batch_centroid(cluster1, dataset1, args)
     api.ok(batchcentroid1)
 

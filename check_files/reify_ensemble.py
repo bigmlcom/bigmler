@@ -21,7 +21,6 @@
 
     args = \
         {u'ensemble_sample': {u'rate': 1, u'replacement': True, u'seed': u'bigml'},
-                  u'seed': u'BigML',
-                  u'stat_pruning': True}
+                  u'seed': u'BigML'}
     ensemble1 = api.create_ensemble(dataset1, args)
     api.ok(ensemble1)

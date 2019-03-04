@@ -107,7 +107,10 @@
 
 
 (define (pythonize name)
-  (replace name "-" "_"))
+  (let (name (if (list? name)
+                 (str name)
+                 name))
+  (replace name "-" "_")))
 
 
 (define workflow (change-to-local (resource-workflow res-id true false)))

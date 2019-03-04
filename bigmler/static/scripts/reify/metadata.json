@@ -1,5 +1,5 @@
 {
-  "name": "BigMLer: Scriptify utils - 1.0.0",
+  "name": "BigMLer: Scriptify utils - 1.1.0",
   "description": "Generates strings of code or outputs to reproduce a workflow",
   "kind": "package",
   "components":[
