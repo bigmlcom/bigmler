@@ -11,23 +11,18 @@
                                  u'term_analysis': {u'enabled': True}}}}
     source2 = api.create_source(source1_file, args)
     api.ok(source2)
-    
+
     args = \
         {u'objective_field': {u'id': u'000004'}}
     dataset1 = api.create_dataset(source2, args)
     api.ok(dataset1)
-    
+
     args = \
         {u'split_candidates': 32}
     model1 = api.create_model(dataset1, args)
     api.ok(model1)
-    
+
     args = \
-        {u'fields_map': {u'000001': u'000001',
-                         u'000002': u'000002',
-                         u'000003': u'000003',
-                         u'000004': u'000004'},
-         u'operating_kind': u'probability'}
+        {u'operating_kind': u'probability'}
     batchprediction1 = api.create_batch_prediction(model1, dataset1, args)
     api.ok(batchprediction1)
-    
