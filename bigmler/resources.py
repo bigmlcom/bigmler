@@ -55,6 +55,7 @@ VALID_FIELD_ATTRIBUTES = {
     "dataset": ["name", "label", "description", "preferred", "term_analysis"]}
 BOOSTING_OPTIONS = ["iterations", "early_holdout", "learning_rate", \
     "early_out_of_bag", "step_out_of_bag"]
+DS_NAMES = "ABCDEFGHIJKLMNOPQRSTUVXYZ"
 
 def get_basic_seed(order):
     """ Builds a standard seed from a text adding the order
@@ -268,7 +269,6 @@ def set_source_args(args, name=None, multi_label_data=None,
             "user_metadata": {
                 "multi_label_data": multi_label_data}})
 
-
     # to update fields attributes or types you must have a previous fields
     # structure (at update time)
     if fields:
@@ -419,6 +419,18 @@ def set_dataset_args(args, fields, multi_label_data=None):
             sys.exit(exc)
         dataset_args.update(objective_field={'id': objective_id})
 
+    if hasattr(args, 'juxtapose') and args.juxtapose:
+        dataset_args.update({"juxtapose": args.juxtapose})
+
+    if hasattr(args, 'sql_query') and args.sql_query:
+        dataset_args.update({"sql_query": args.sql_query})
+
+    if hasattr(args, 'sql_output_fields') and args.sql_output_fields:
+        dataset_args.update({"sql_output_fields": args.sql_output_fields})
+
+    if hasattr(args, 'json_query') and args.json_query:
+        dataset_args.update({"json_query": args.json_query})
+
     if args.json_filter:
         dataset_args.update(json_filter=args.json_filter)
     elif args.lisp_filter:
@@ -479,6 +491,27 @@ def create_dataset(origin_resource, dataset_args, args, api=None,
     message = dated("Creating dataset.\n")
     log_message(message, log_file=session_file, console=args.verbosity)
     check_fields_struct(dataset_args, "dataset")
+
+    # if --json-query or --sql-query are used and no names are set for
+    # the datasets, we create default naming to A, B, C, etc. for the datasets
+    # to be used as origin
+
+    if ((hasattr(args, 'sql_query') and args.sql_query) or \
+            (hasattr(args, 'json_query') and args.sql_query)) and \
+            isinstance(origin_resource, list) and \
+            ((not isinstance(origin_resource[0], dict)) or \
+            origin_resource[0].get("name") is None):
+        for index, element in enumerate(origin_resource):
+            if index < len(DS_NAMES):
+                if isinstance(element, dict):
+                    if element.get("resource") is not None:
+                        element = {"id": element["resource"]}
+                    element.update({"name": DS_NAMES[index]})
+                    origin_resource[index] = element
+                elif isinstance(element, basestring):
+                    origin_resource[index] = {"id": element,
+                                              "name": DS_NAMES[index]}
+
     dataset = api.create_dataset(origin_resource, dataset_args, retries=None)
     suffix = "_" + dataset_type if dataset_type else ""
     log_created_resources("dataset%s" % suffix, path,

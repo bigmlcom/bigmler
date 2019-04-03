@@ -364,3 +364,82 @@ class TestDatasetAdvanced(object):
                 self, params=example[2], output_dir=example[1])
             test_pred.i_check_create_association(self)
             dataset_adv.i_check_association_params(self, params_json=example[3])
+
+    def test_scenario12(self):
+        """
+            Scenario: Successfully building dataset juxtaposing datasets
+                Given I create a BigML dataset from "<data>" and store logs in "<output_dir>"
+                And I check that the source has been created
+                And I check that the dataset has been created
+                And I create a BigML dataset from "<data>" and store logs in "<output_dir>"
+                And I check that the source has been created
+                And I check that the dataset has been created
+                And I create a new dataset juxtaposing both datasets and store
+logs in "<output_dir>"
+                And I check that the dataset has been created
+                And I check that datasets have been juxtaposed
+
+                Examples:
+                |data |output_dir |
+                |../data/iris.csv | ./scenario_d_12 |
+        """
+        print self.test_scenario12.__doc__
+        examples = [
+            ['data/iris.csv', 'scenario_d_12']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            datasets = []
+            dataset_adv.i_create_dataset(self, data=example[0],
+                                         output_dir=example[1])
+            test_pred.i_check_create_source(self)
+            test_pred.i_check_create_dataset(self, suffix=None)
+            datasets.append(world.dataset)
+            dataset_adv.i_create_dataset(self, data=example[0],
+                                         output_dir=example[1])
+            test_pred.i_check_create_source(self)
+            test_pred.i_check_create_dataset(self, suffix=None)
+            datasets.append(world.dataset)
+            dataset_adv.i_create_juxtaposed(self, output_dir=example[1])
+            test_pred.i_check_create_dataset(self, suffix="gen ")
+            dataset_adv.i_check_juxtaposed(self, datasets)
+
+
+    def test_scenario13(self):
+        """
+            Scenario: Successfully building dataset using sql transformations
+                Given I create a BigML dataset from "<data>" and store logs in "<output_dir>"
+                And I check that the source has been created
+                And I check that the dataset has been created
+                And I create a BigML dataset from "<data>" and store logs in "<output_dir>"
+                And I check that the source has been created
+                And I check that the dataset has been created
+                And I create a new dataset joining both datasets and store
+logs in "<output_dir>"
+                And I check that the dataset has been created
+                And I check that datasets have been joined
+
+                Examples:
+                |data |output_dir |
+                |../data/iris.csv | ./scenario_d_13 |
+        """
+        print self.test_scenario12.__doc__
+        examples = [
+            ['data/iris.csv', 'scenario_d_13', "select A.*,B.* from A join B "
+             "on A.\`000000\` = \`B.000000\`", 900]]
+        for example in examples:
+            print "\nTesting with:\n", example
+            datasets = []
+            dataset_adv.i_create_dataset(self, data=example[0],
+                                         output_dir=example[1])
+            test_pred.i_check_create_source(self)
+            test_pred.i_check_create_dataset(self, suffix=None)
+            datasets.append(world.dataset)
+            dataset_adv.i_create_dataset(self, data=example[0],
+                                         output_dir=example[1])
+            test_pred.i_check_create_source(self)
+            test_pred.i_check_create_dataset(self, suffix=None)
+            datasets.append(world.dataset)
+            dataset_adv.i_create_join(self, output_dir=example[1],
+                                      sql=example[2])
+            test_pred.i_check_create_dataset(self, suffix="gen ")
+            dataset_adv.i_check_joined(self, example[3])

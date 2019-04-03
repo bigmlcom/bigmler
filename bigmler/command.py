@@ -140,6 +140,7 @@ def get_context(args, settings):
 
     if command_args.debug:
         print "*** BigMLer Command options: ", command.args
+        print "*** BigMLer args object: ", command_args
 
     return command_args, command, api, session_file, resume
 

@@ -290,6 +290,54 @@ def i_create_dataset_with_summary(step, data=None, summary_file=None, output_dir
         assert False, str(exc)
 
 
+#@step(r'I create a new dataset juxtaposing both datasets')
+def i_create_juxtaposed(step, output_dir=None):
+    if output_dir is None:
+        assert False
+    world.directory = output_dir
+    world.folders.append(world.directory)
+
+    try:
+        command = (u"bigmler dataset --datasets " +
+                   os.path.join(output_dir, "dataset") +
+                   u" --juxtapose --store --output-dir " + output_dir)
+
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.output = output_dir
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+
+#@step(r'I create a new dataset joining both datasets')
+def i_create_join(step, output_dir=None, sql=None):
+    print output_dir, sql
+    if output_dir is None or sql is None:
+        assert False
+    world.directory = output_dir
+    world.folders.append(world.directory)
+
+    try:
+        command = (u"bigmler dataset --datasets " +
+                   os.path.join(output_dir, "dataset") +
+                   u" --sql-query \"" + sql + "\" --store --output-dir " +
+                   output_dir)
+
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        if retcode < 0:
+            assert False
+        else:
+            world.output = output_dir
+            assert True
+    except (OSError, CalledProcessError, IOError) as exc:
+        assert False, str(exc)
+
+
 #@step(r'I create a BigML cluster with params "(.*)" from dataset in "(.*)"')
 def i_create_cluster_with_params_from_dataset( \
     step, cluster_params=None, output_dir=None):
@@ -429,3 +477,16 @@ def i_check_association_params(step, params_json=None):
     params_dict = json.loads(params_json)
     for key, value in params_dict.items():
         eq_(value, world.association['object'].get(key))
+
+#@step(r'I check that datasets have been juxtaposed')
+def i_check_juxtaposed(step, datasets=None):
+    rows = world.dataset["object"]["rows"]
+    eq_(rows, datasets[0]["object"]["rows"])
+    number_of_fields = 0
+    for dataset in datasets:
+        number_of_fields += dataset["object"]["field_types"]["total"]
+    eq_(number_of_fields, world.dataset["object"]["field_types"]["total"])
+
+#@step(r'I check that datasets have been joined')
+def i_check_joined(step, rows=None):
+    eq_(rows, world.dataset["object"]["rows"])

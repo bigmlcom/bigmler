@@ -27,6 +27,7 @@ from bigmler.options.common import get_common_options
 from bigmler.options.delete import get_delete_options
 from bigmler.options.source import get_source_options
 from bigmler.options.dataset import get_dataset_options
+from bigmler.options.dataset_trans import get_dataset_trans_options
 from bigmler.options.test import get_test_options
 from bigmler.options.multilabel import get_multi_label_options
 from bigmler.options.main import get_main_options
@@ -48,7 +49,7 @@ from bigmler.options.execute import get_execute_options
 from bigmler.options.retrain import get_retrain_options
 
 
-SUBCOMMANDS = ["main", "analyze", "cluster", "anomaly", "sample",
+SUBCOMMANDS = ["main", "analyze", "cluster", "anomaly", "sample", "dataset",
                "delete", "report", "reify", "project", "association",
                "logistic-regression", "topic-model", "time-series",
                "execute", "whizzml", "export", "deepnet", "retrain"]
@@ -123,6 +124,21 @@ under the License.""" % version
         '--batch-prediction-tag': delete_options['--batch-prediction-tag']})
 
     main_options = subcommand_options["main"]
+
+    subcommand_options["dataset"] = dataset_options
+    subcommand_options["dataset"].update(get_dataset_trans_options( \
+        defaults=defaults))
+    subcommand_options["dataset"].update(common_options)
+    subcommand_options["dataset"].update(source_options)
+    subcommand_options["main"].update(multi_label_options)
+    subcommand_options["dataset"].update({
+        '--source-tag': delete_options['--source-tag'],
+        '--dataset-tag': delete_options['--dataset-tag'],
+        '--max-categories': subcommand_options['main']['--max-categories'],
+        '--labels': subcommand_options['main']['--labels'],
+        '--multi-label': subcommand_options['main']['--multi-label'],
+        '--objective': subcommand_options['main']['--objective'],
+        '--reports': subcommand_options['main']['--reports']})
 
     dataset_sampling_options = { \
         '--replacement': main_options['--replacement'],

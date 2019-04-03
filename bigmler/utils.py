@@ -452,9 +452,15 @@ def check_resource_error(resource, message):
     """
     if ('error' in resource and resource['error'] or
             bigml.api.get_status(resource)['code'] == bigml.api.FAULTY):
-        if ('status' in resource['error'] and
-                'message' in resource['error']['status']):
-            error_message = resource['error']['status']['message']
+        try:
+            if ('status' in resource['error'] and
+                    'message' in resource['error']['status']):
+                error_message = resource['error']['status']['message']
+        except TypeError:
+            status = bigml.api.get_status(resource)
+            print status
+            if status.get('error') is not None:
+                error_message = status["message"]
         sys.exit("%s%s" % (message, error_message))
     return bigml.api.get_resource_id(resource)
 

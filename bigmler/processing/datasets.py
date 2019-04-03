@@ -170,15 +170,17 @@ def dataset_processing(source, api, args, resume,
         dataset = r.create_dataset(source, dataset_args, args, api,
                                    path, session_file, log)
 
-    # If a dataset is provided, let's retrieve it.
-    elif args.dataset:
-        dataset = bigml.api.get_dataset_id(args.dataset)
-
     # If set of datasets is provided, let's check their ids.
     elif args.dataset_ids:
         for i in range(0, len(args.dataset_ids)):
-            datasets.append(bigml.api.get_dataset_id(args.dataset_ids[i]))
+            dataset_id = args.dataset_ids[i]
+            if isinstance(dataset_id, dict) and "id" in dataset_id:
+                dataset_id = dataset_id["id"]
+            datasets.append(bigml.api.get_dataset_id(dataset_id))
         dataset = datasets[0]
+    # If a dataset is provided, let's retrieve it.
+    elif args.dataset:
+        dataset = bigml.api.get_dataset_id(args.dataset)
 
     # If we already have a dataset, we check the status and get the fields if
     # we hadn't them yet.

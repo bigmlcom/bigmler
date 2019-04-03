@@ -3,6 +3,12 @@
 History
 -------
 
+3.19.0 (2019-04-05)
+~~~~~~~~~~~~~~~~~~~
+
+- Adding bigmler dataset subcommand to allow generating datasets using
+  transformations.
+
 3.18.8 (2019-04-04)
 ~~~~~~~~~~~~~~~~~~~
 
