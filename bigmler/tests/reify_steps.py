@@ -140,8 +140,8 @@ def i_check_output_file(step, output=None, check_file=None):
                                   flags=re.S).strip("\n")
     output_file_contents = re.sub(r'\n\s*', '\n', output_file_contents)
     check_contents = re.sub(r'\n\s*', '\n', check_contents)
-    output_file_contents = output_file_contents.strip("\n")
-    check_contents = check_contents.strip("\n")
+    output_file_contents = output_file_contents.strip("\n").strip()
+    check_contents = check_contents.strip("\n").strip()
     if check_contents != output_file_contents:
         if PYTHON3:
             # look for an alternative in PYTHON3

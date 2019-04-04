@@ -41,6 +41,7 @@
     api.ok(model1)
 
     args = \
-        {u'operating_kind': u'probability',}
+        {u'operating_kind': u'probability',
+         }
     evaluation1 = api.create_evaluation(model1, dataset3, args)
     api.ok(evaluation1)
