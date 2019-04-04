@@ -3,7 +3,7 @@
 History
 -------
 
-3.18.8 (2019-01-09)
+3.18.8 (2019-04-04)
 ~~~~~~~~~~~~~~~~~~~
 
 - Fixing arguments that were not propagated in complex subcommands.

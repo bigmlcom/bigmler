@@ -516,7 +516,6 @@ def create_kfold_evaluations(datasets_file, args, command_obj,
     command_obj.propagate(command_args, exclude=["--dataset",
                                                  "--datasets",
                                                  "--dataset-file"])
-    print "***eval opts", command_args
     command = rebuild_command(command_args)
     if resume:
         next_command = subcommand_list.pop()
