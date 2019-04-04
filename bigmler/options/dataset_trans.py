@@ -42,6 +42,13 @@ def get_dataset_trans_options(defaults=None):
                      "\\\"dataset/50a20697035d0706da0004b5\\\"}]\""
                      "]).")},
 
+        # File. The path to the data file
+        '--file': {
+            'action': 'store',
+            'dest': 'training_set',
+            'default': defaults.get('training_set', None),
+            'help': ("Path to the file containing the data.")},
+
         # Merge. Alias for multi-dataset
         '--merge': {
             'action': 'store_true',

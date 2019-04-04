@@ -340,7 +340,14 @@ FLAGS = {
     'BigMLer export': [
         {'flag': 'language', 'type': 'string'}],
     'BigMLer retrain': [
-        {'flag': 'model_type', 'type': 'string'}]}
+        {'flag': 'model_type', 'type': 'string'}],
+    'BigMLer dataset': [
+        {'flag': 'file', 'type': 'string'},
+        {'flag': 'merge', 'type': 'boolean'},
+        {'flag': 'juxtapose', 'type': 'boolean'},
+        {'flag': 'sql_query', 'type': 'string'},
+        {'flag': 'json_query', 'type': 'string'},
+        {'flag': 'sql_output_fields', 'type': 'string'}]}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):

@@ -425,11 +425,11 @@ def set_dataset_args(args, fields, multi_label_data=None):
     if hasattr(args, 'sql_query') and args.sql_query:
         dataset_args.update({"sql_query": args.sql_query})
 
-    if hasattr(args, 'sql_output_fields') and args.sql_output_fields:
-        dataset_args.update({"sql_output_fields": args.sql_output_fields})
+    if hasattr(args, 'sql_output_fields_') and args.sql_output_fields_:
+        dataset_args.update({"sql_output_fields": args.sql_output_fields_})
 
-    if hasattr(args, 'json_query') and args.json_query:
-        dataset_args.update({"json_query": args.json_query})
+    if hasattr(args, 'json_query_') and args.json_query_:
+        dataset_args.update({"json_query": args.json_query_})
 
     if args.json_filter:
         dataset_args.update(json_filter=args.json_filter)

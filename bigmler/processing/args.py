@@ -860,6 +860,26 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
+    # Parses the json_query
+    try:
+        if command_args.json_query:
+            command_args.json_query_ = u.read_json(command_args.json_query)
+        else:
+            command_args.json_query_ = None
+    except AttributeError:
+        pass
+
+    # Parses the sql_output_fields
+    try:
+        if command_args.sql_output_fields:
+            command_args.sql_output_fields_ = u.read_json( \
+                command_args.sql_output_fields)
+        else:
+            command_args.sql_output_fields_ = None
+    except AttributeError:
+        pass
+
+
     return {"api": api, "args": command_args}
 
 

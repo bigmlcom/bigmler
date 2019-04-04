@@ -1559,7 +1559,7 @@ from data files and sources or by transforming datasets.
 
 .. code-block:: bash
 
-    bigmler dataset --train iris.csv \
+    bigmler dataset --file iris.csv \
                     --output-dir my_directory
 
 will create a source and a dataset by uploading the ``iris.csv`` file to
@@ -4291,6 +4291,27 @@ Fancy Options
 ``--store``                       Stores every created or retrieved resource in
                                   your output directory
 ================================= =============================================
+
+
+Dataset subcommand Options
+--------------------------
+
+===================================== =========================================
+``--file``                            Path to the data file
+``--merge``                           Causes the datasets in the command to
+                                      be merged
+``--juxtapose``                       Causes the rows in the datasets
+                                      referenced in the command to be juxtaposed
+``--sql-query`` *QUERY*               SQL expression describing the transformation
+``--json-query`` *PATH*               Path to a JSON file that contains the
+                                      SQL query describing the transformation
+``--sql-output-fields`` *PATH*        Path to a JSON file describing the fields
+                                      types and properties created as output
+                                      of the SQL transformation created with
+                                      ``--sql-query`` or ``--json-query``
+===================================== =========================================
+
+
 
 Analyze subcommand Options
 --------------------------
