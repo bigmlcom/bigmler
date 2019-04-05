@@ -633,9 +633,6 @@ def set_model_args(args, name=None, objective_id=None, fields=None,
     model_args.update({"missing_splits": args.missing_splits})
     if objective_id is not None and fields is not None:
         model_args.update({"objective_field": objective_id})
-    if args.default_numeric_vaue is not None:
-        model_args.update( \
-            {"default_numeric_value": args.default_numeric_value})
 
     # If evaluate flag is on and no test_split flag is provided,
     # we choose a deterministic sampling with
@@ -2896,10 +2893,6 @@ def set_time_series_args(args, name=None, fields=None,
         time_series_args.update({"damped_trend": args.damped_trend})
     if args.error is not None:
         time_series_args.update({"error": args.error})
-    if args.default_numeric_value:
-        time_series_args.update({ \
-            "default_numeric_value":
-            args.default_numeric_value})
     if args.field_parameters:
         time_series_args.update({"field_parameters": args.field_parameters_})
     if args.range_:
@@ -3474,9 +3467,6 @@ def set_deepnet_args(args, name=None, fields=None,
         deepnet_args.update({"deepnet_fields": args.deepnet_fields})
     if args.batch_normalization is not None:
         deepnet_args.update({"batch_normalization": args.batch_normalization})
-    if args.default_numeric_value:
-        deepnet_args.update( \
-            {"default_numeric_value": args.default_numeric_value})
     if args.dropout_rate:
         deepnet_args.update({"dropout_rate": args.dropout_rate})
 
