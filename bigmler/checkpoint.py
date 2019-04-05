@@ -408,6 +408,30 @@ def are_logistic_regressions_created(path, number_of_logistic_regressions):
         return False, logistic_ids
 
 
+def are_linear_regressions_created(path, number_of_linear_regressions):
+    """Checks existence and reads the linear regression ids
+       from the linear regressions file in the
+       path directory
+
+    """
+    linear_ids = []
+    try:
+        with open("%s%slinear_regressions" % (path, os.sep)) as \
+            linear_file:
+            for line in linear_file:
+                linear = line.strip()
+                try:
+                    linear_id = bigml.api.get_linear_regression_id( \
+                        linear)
+                    linear_ids.append(linear_id)
+                except ValueError:
+                    return False, linear_ids
+        return len(linear_ids) == number_of_linear_regressions, \
+            linear_ids
+    except IOError:
+        return False, linear_ids
+
+
 def are_scripts_created(path, number_of_scripts):
     """Checks existence and reads the scripts ids from the scripts file in the
        path directory

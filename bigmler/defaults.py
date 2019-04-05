@@ -257,6 +257,15 @@ FLAGS = {
         {'flag': 'field_codings', 'type': 'string'},
         {'flag': 'missing_numerics', 'type': 'boolean'},
         {'flag': 'normalize', 'type': 'boolean'}],
+    'BigMLer linear regression': [
+        {'flag': 'linear_fields', 'type': 'string'},
+        {'flag': 'linear_regression', 'type': 'string'},
+        {'flag': 'linear_regression_file', 'type': 'string'},
+        {'flag': 'linear_regressions', 'type': 'string'},
+        {'flag': 'no_linear_regression', 'type': 'boolean'},
+        {'flag': 'linear_regression_attributes', 'type': 'string'},
+        {'flag': 'bias', 'type': 'boolean'},
+        {'flag': 'field_codings', 'type': 'string'}],
     'BigMLer topic model': [
         {'flag': 'topic_fields', 'type': 'string'},
         {'flag': 'topic_model', 'type': 'string'},

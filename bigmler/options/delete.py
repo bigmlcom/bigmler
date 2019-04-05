@@ -179,6 +179,12 @@ def get_delete_options(defaults=None):
             'default': defaults.get('topic_model_tag', None),
             'help': "Retrieve topic models that were tagged with tag."},
 
+        # Use it to retrieve linear regressions that were tagged with tag.
+        '--linear-regression-tag': {
+            'dest': 'linear_regression_tag',
+            'default': defaults.get('linear_regression_tag', None),
+            'help': "Retrieve linear regressions that were tagged with tag."},
+
         # Use it to retrieve topic distributions that were tagged with tag.
         '--topic-distribution-tag': {
             'dest': 'topic_distribution_tag',

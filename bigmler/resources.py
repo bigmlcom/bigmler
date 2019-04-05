@@ -227,6 +227,40 @@ def check_fields_struct(update_args, resource_type):
                     del field[attribute]
 
 
+def set_basic_args(args, name):
+    """Sets the basic arguments, common to all resources
+
+    """
+    return {
+        "name": name,
+        "description": args.description_,
+        "category": args.category,
+        "tags": args.tag}
+
+
+def set_basic_model_args(args, name):
+    """Sets the additional args common to all models
+
+    """
+    model_args = set_basic_args(args, name)
+    if args.default_numeric_value is not None:
+        model_args.update({ \
+            "default_numeric_value": args.default_numeric_value})
+    return model_args
+
+
+def set_basic_batch_args(args, name):
+    """Sets the additional args common to all batch resources
+
+    """
+    batch_args = set_basic_args(args, name)
+    batch_args.update({ \
+        "header": args.prediction_header,
+        "output_dataset": args.to_dataset
+    })
+    return batch_args
+
+
 def set_source_args(args, name=None, multi_label_data=None,
                     data_set_header=None, fields=None):
     """Returns a source arguments dict
@@ -235,11 +269,7 @@ def set_source_args(args, name=None, multi_label_data=None,
 
     if name is None:
         name = args.name
-    source_args = {
-        "name": name,
-        "description": args.description_,
-        "category": args.category,
-        "tags": args.tag}
+    source_args = set_basic_args(args, name)
     if args.project_id is not None:
         source_args.update({"project": args.project_id})
     # if header is set, use it
@@ -384,12 +414,7 @@ def set_basic_dataset_args(args, name=None):
     """
     if name is None:
         name = args.name
-    dataset_args = {
-        "name": name,
-        "description": args.description_,
-        "category": args.category,
-        "tags": args.tag
-    }
+    dataset_args = set_basic_args(args, name)
     if args.sample_rate != 1 and args.no_model:
         dataset_args.update({
             "seed": SEED if args.seed is None else args.seed,
@@ -604,15 +629,13 @@ def set_model_args(args, name=None, objective_id=None, fields=None,
     if model_fields is None:
         model_fields = args.model_fields_
 
-    model_args = {
-        "name": name,
-        "description": args.description_,
-        "category": args.category,
-        "tags": args.tag,
-        "missing_splits": args.missing_splits
-    }
+    model_args = set_basic_model_args(args, name)
+    model_args.update({"missing_splits": args.missing_splits})
     if objective_id is not None and fields is not None:
         model_args.update({"objective_field": objective_id})
+    if args.default_numeric_vaue is not None:
+        model_args.update( \
+            {"default_numeric_value": args.default_numeric_value})
 
     # If evaluate flag is on and no test_split flag is provided,
     # we choose a deterministic sampling with
@@ -929,16 +952,13 @@ def set_ensemble_args(args, name=None,
     if model_fields is None:
         model_fields = args.model_fields_
 
-    ensemble_args = {
-        "name": name,
-        "description": args.description_,
-        "category": args.category,
-        "tags": args.tag,
+    ensemble_args = set_basic_model_args(args, name)
+    ensemble_args.update({
         "missing_splits": args.missing_splits,
         "ensemble_sample": {"seed": SEED if args.ensemble_sample_seed is None \
             else args.ensemble_sample_seed},
         "seed": SEED if args.seed is None else args.seed
-    }
+    })
     if objective_id is not None and fields is not None:
         ensemble_args.update({"objective_field": objective_id})
 
@@ -1140,11 +1160,7 @@ def set_evaluation_args(args, fields=None,
     """
     if name is None:
         name = args.name
-    evaluation_args = {
-        "name": name,
-        "description": args.description_,
-        "tags": args.tag
-    }
+    evaluation_args = set_basic_args(args, name)
 
     if hasattr(args, 'method') and (args.number_of_models > 1
                                     or args.ensemble):
@@ -1369,13 +1385,7 @@ def set_batch_prediction_args(args, fields=None,
     """Return batch prediction args dict
 
     """
-    batch_prediction_args = {
-        "name": args.name,
-        "description": args.description_,
-        "tags": args.tag,
-        "header": args.prediction_header,
-        "output_dataset": args.to_dataset
-    }
+    batch_prediction_args = set_basic_batch_args(args, args.name)
 
     if hasattr(args, 'method') and args.method:
         batch_prediction_args.update({"combiner": args.method})
@@ -1418,7 +1428,7 @@ def set_batch_prediction_args(args, fields=None,
         batch_prediction_args.update(output_fields=prediction_fields)
     if hasattr(args, 'missing_strategy') and args.missing_strategy:
         batch_prediction_args.update(missing_strategy=args.missing_strategy)
-    if args.operating_point_:
+    if hasattr(args, "operating_point_") and args.operating_point_:
         batch_prediction_args.update(operating_point=args.operating_point_)
         if args.operating_point_.get("kind") == "probability":
             batch_prediction_args.update({"probability": True,
@@ -1478,15 +1488,12 @@ def set_cluster_args(args, name=None, fields=None,
     if cluster_fields is None:
         cluster_fields = args.cluster_fields_
 
-    cluster_args = {
-        "name": name,
-        "description": args.description_,
-        "category": args.category,
-        "tags": args.tag,
+    cluster_args = set_basic_model_args(args, name)
+    cluster_args.update({
         "seed": SEED if args.seed is None else args.seed,
         "cluster_seed": (SEED if args.cluster_seed is None
                          else args.cluster_seed)
-    }
+    })
 
     if args.cluster_models is not None:
         cluster_args.update({"model_clusters": True})
@@ -1598,13 +1605,7 @@ def set_batch_centroid_args(args, fields=None,
     """Return batch centroid args dict
 
     """
-    batch_centroid_args = {
-        "name": args.name,
-        "description": args.description_,
-        "tags": args.tag,
-        "header": args.prediction_header,
-        "output_dataset": args.to_dataset
-    }
+    batch_centroid_args = set_basic_batch_args(args, args.name)
 
     if args.fields_map_ and fields is not None:
         if dataset_fields is None:
@@ -1713,13 +1714,7 @@ def set_batch_anomaly_score_args(args, fields=None,
     """Return batch anomaly score args dict
 
     """
-    batch_anomaly_score_args = {
-        "name": args.name,
-        "description": args.description_,
-        "tags": args.tag,
-        "header": args.prediction_header,
-        "output_dataset": args.to_dataset
-    }
+    batch_anomaly_score_args = set_basic_batch_args(args, args.name)
 
     if args.fields_map_ and fields is not None:
         if dataset_fields is None:
@@ -1761,15 +1756,12 @@ def set_anomaly_args(args, name=None, fields=None, anomaly_fields=None):
     if anomaly_fields is None:
         anomaly_fields = args.anomaly_fields_
 
-    anomaly_args = {
-        "name": name,
-        "description": args.description_,
-        "category": args.category,
-        "tags": args.tag,
+    anomaly_args = set_basic_model_args(args, name)
+    anomaly_args.update({
         "seed": SEED if args.seed is None else args.seed,
         "anomaly_seed": (SEED if args.anomaly_seed is None
                          else args.anomaly_seed)
-    }
+    })
 
     if anomaly_fields and fields is not None:
         input_fields = configure_input_fields(fields, anomaly_fields)
@@ -1953,12 +1945,7 @@ def set_project_args(args, name=None):
     """
     if name is None:
         name = args.name
-    project_args = {
-        "name": name,
-        "description": args.description_,
-        "category": args.category,
-        "tags": args.tag
-    }
+    project_args = set_basic_args(args, name)
     if 'project' in args.json_args:
         update_json_args(project_args, args.json_args.get('project'), None)
     return project_args
@@ -2041,12 +2028,7 @@ def set_sample_args(args, name=None):
     if name is None:
         name = args.name
 
-    sample_args = {
-        "name": name,
-        "description": args.description_,
-        "category": args.category,
-        "tags": args.tag
-    }
+    sample_args = set_basic_args(args, name)
 
     if 'sample' in args.json_args:
         update_json_args(sample_args, args.json_args.get('sample'))
@@ -2186,12 +2168,7 @@ def set_association_args(args, name=None, fields=None,
     if association_fields is None:
         association_fields = args.association_fields_
 
-    association_args = {
-        "name": name,
-        "description": args.description_,
-        "category": args.category,
-        "tags": args.tag
-    }
+    association_args = set_basic_model_args(args, name)
 
     if association_fields and fields is not None:
         input_fields = configure_input_fields(fields, association_fields)
@@ -2350,11 +2327,7 @@ def set_script_args(args, name=None):
 
     if name is None:
         name = args.name
-    script_args = {
-        "name": name,
-        "description": args.description_,
-        "category": args.category,
-        "tags": args.tag}
+    script_args = set_basic_args(args, name)
     if args.project_id is not None:
         script_args.update({"project": args.project_id})
     if args.imports is not None:
@@ -2418,11 +2391,7 @@ def set_execution_args(args, name=None):
 
     if name is None:
         name = args.name
-    execution_args = {
-        "name": name,
-        "description": args.description_,
-        "category": args.category,
-        "tags": args.tag}
+    execution_args = set_basic_args(args, name)
     if args.project_id is not None:
         execution_args.update({"project": args.project_id})
     if args.arguments_:
@@ -2494,13 +2463,10 @@ def set_logistic_regression_args(args, name=None, fields=None,
     if objective_id is None:
         objective_id = args.objective_id_
 
-    logistic_regression_args = {
-        "name": name,
-        "description": args.description_,
-        "category": args.category,
-        "tags": args.tag,
+    logistic_regression_args = set_basic_model_args(args, name)
+    logistic_regression_args.update({
         "seed": SEED if args.seed is None else args.seed
-    }
+    })
 
     if objective_id is not None and fields is not None:
         logistic_regression_args.update({"objective_field": objective_id})
@@ -2636,7 +2602,7 @@ def get_logistic_regressions(logistic_regression_ids,
     logistic_regressions = logistic_regression_ids
     logistic_regression_id = logistic_regression_ids[0]
     message = dated("Retrieving %s. %s\n" %
-                    (plural("logstic regression", len(logistic_regression_ids)),
+                    (plural("logistic regression", len(logistic_regression_ids)),
                      get_url(logistic_regression_id)))
     log_message(message, log_file=session_file, console=args.verbosity)
     # only one logistic regression to predict at present
@@ -2698,6 +2664,211 @@ def update_logistic_regression(logistic_regression, logistic_regression_args,
     return logistic_regression
 
 
+def set_linear_regression_args(args, name=None, fields=None,
+                               objective_id=None,
+                               linear_regression_fields=None):
+    """Return linear regression arguments dict
+
+    """
+    if name is None:
+        name = args.name
+    if linear_regression_fields is None:
+        linear_regression_fields = args.linear_regression_fields_
+    if objective_id is None:
+        objective_id = args.objective_id_
+
+    linear_regression_args = set_basic_model_args(args, name)
+    linear_regression_args.update({
+        "seed": SEED if args.seed is None else args.seed
+    })
+
+    if objective_id is not None and fields is not None:
+        linear_regression_args.update({"objective_field": objective_id})
+    if ((args.evaluate and args.test_split == 0 and args.test_datasets is None)
+            or args.cross_validation_rate > 0):
+        linear_regression_args.update(seed=SEED)
+        if args.cross_validation_rate > 0:
+            args.sample_rate = 1 - args.cross_validation_rate
+            args.replacement = False
+        elif (args.sample_rate == 1 and args.test_datasets is None
+              and not args.dataset_off):
+            args.sample_rate = EVALUATE_SAMPLE_RATE
+    linear_regression_args.update({"sample_rate": args.sample_rate})
+    linear_regression_args.update({"bias": args.bias})
+    if args.field_codings is not None:
+        linear_regression_args.update(\
+            {"field_codings": args.field_codings_})
+
+    linear_regression_args = update_sample_parameters_args( \
+        linear_regression_args, args)
+
+    if 'linear_regression' in args.json_args:
+        update_json_args(linear_regression_args,
+                         args.json_args.get('linear_regression'),
+                         fields)
+    return linear_regression_args
+
+
+def create_linear_regressions(datasets, linear_regression_ids,
+                                linear_regression_args,
+                                args, api=None, path=None,
+                                session_file=None, log=None):
+    """Create remote linear regressions
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+
+    linear_regressions = linear_regression_ids[:]
+    existing_linear_regressions = len(linear_regressions)
+    linear_regression_args_list = []
+    datasets = datasets[existing_linear_regressions:]
+    # if resuming and all linear regressions were created,
+    # there will be no datasets left
+    if datasets:
+        if isinstance(linear_regression_args, list):
+            linear_regression_args_list = linear_regression_args
+
+        # Only one linear regression per command, at present
+        number_of_linear_regressions = 1
+        message = dated("Creating %s.\n" %
+                        plural("linear regression",
+                               number_of_linear_regressions))
+        log_message(message, log_file=session_file,
+                    console=args.verbosity)
+
+        query_string = FIELDS_QS
+        inprogress = []
+        for i in range(0, number_of_linear_regressions):
+            wait_for_available_tasks(inprogress,
+                                     args.max_parallel_linear_regressions,
+                                     api, "linearregression")
+            if linear_regression_args_list:
+                linear_regression_args = linear_regression_args_list[i]
+            if args.cross_validation_rate > 0:
+                new_seed = get_basic_seed(i + existing_linear_regressions)
+                linear_regression_args.update(seed=new_seed)
+
+            if (args.test_datasets and args.evaluate):
+                dataset = datasets[i]
+                linear_regression = api.create_linear_regression( \
+                    dataset, linear_regression_args, retries=None)
+            elif args.dataset_off and args.evaluate:
+                multi_dataset = args.test_dataset_ids[:]
+                del multi_dataset[i + existing_linear_regressions]
+                linear_regression = api.create_linear_regression( \
+                    multi_dataset, linear_regression_args, retries=None)
+            else:
+                linear_regression = api.create_linear_regression( \
+                datasets, linear_regression_args, retries=None)
+            linear_regression_id = check_resource_error( \
+                linear_regression, "Failed to create linear regression: ")
+            log_message("%s\n" % linear_regression_id, log_file=log)
+            linear_regression_ids.append(linear_regression_id)
+            inprogress.append(linear_regression_id)
+            linear_regressions.append(linear_regression)
+            log_created_resources("linear_regressions",
+                                  path,
+                                  linear_regression_id, mode='a')
+
+        if args.verbosity:
+            if bigml.api.get_status(linear_regression)['code'] != \
+                    bigml.api.FINISHED:
+                try:
+                    linear_regression = check_resource( \
+                        linear_regression, api.get_linear_regression,
+                        query_string=query_string)
+                except ValueError, exception:
+                    sys.exit("Failed to get a finished linear regression:"
+                             " %s" %
+                             str(exception))
+                linear_regressions[0] = linear_regression
+            message = dated("linear regression created: %s\n" %
+                            get_url(linear_regression))
+            log_message(message, log_file=session_file,
+                        console=args.verbosity)
+            if args.reports:
+                report(args.reports, path, linear_regression)
+
+    return linear_regressions, linear_regression_ids
+
+
+def get_linear_regressions(linear_regression_ids,
+                           args, api=None, session_file=None):
+    """Retrieves remote linear regression in its actual status
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+
+    linear_regression_id = ""
+    linear_regressions = linear_regression_ids
+    linear_regression_id = linear_regression_ids[0]
+    message = dated("Retrieving %s. %s\n" %
+                    (plural("linear regression", len(linear_regression_ids)),
+                     get_url(linear_regression_id)))
+    log_message(message, log_file=session_file, console=args.verbosity)
+    # only one linear regression to predict at present
+    try:
+        # we need the whole fields structure when exporting fields
+        query_string = FIELDS_QS if not args.export_fields else ALL_FIELDS_QS
+        linear_regression = check_resource(linear_regression_ids[0],
+                                             api.get_linear_regression,
+                                             query_string=query_string)
+    except ValueError, exception:
+        sys.exit("Failed to get a finished linear regression: %s" % \
+            str(exception))
+    linear_regressions[0] = linear_regression
+
+    return linear_regressions, linear_regression_ids
+
+
+def set_publish_linear_regression_args(args):
+    """Set args to publish linear regression
+
+    """
+    public_linear_regression = {}
+    if args.public_linear_regression:
+        public_linear_regression = {"private": False}
+        if args.model_price:
+            public_linear_regression.update(price=args.model_price)
+        if args.cpp:
+            public_linear_regression.update(credits_per_prediction=args.cpp)
+    return public_linear_regression
+
+
+def update_linear_regression(linear_regression, linear_regression_args,
+                               args, api=None, path=None, session_file=None):
+    """Updates linear regression properties
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+
+    message = dated("Updating linear regression. %s\n" %
+                    get_url(linear_regression))
+    log_message(message, log_file=session_file,
+                console=args.verbosity)
+    linear_regression = api.update_linear_regression(linear_regression, \
+        linear_regression_args)
+    check_resource_error(linear_regression,
+                         "Failed to update linear regression: %s"
+                         % linear_regression['resource'])
+    linear_regression = check_resource(linear_regression,
+                                         api.get_linear_regression,
+                                         query_string=FIELDS_QS)
+    if is_shared(linear_regression):
+        message = dated("Shared linear regression link. %s\n" %
+                        get_url(linear_regression, shared=True))
+        log_message(message, log_file=session_file, console=args.verbosity)
+        if args.reports:
+            report(args.reports, path, linear_regression)
+
+    return linear_regression
+
+
+
+
 def set_time_series_args(args, name=None, fields=None,
                          objective_id=None):
     """Return time-series arguments dict
@@ -2708,14 +2879,11 @@ def set_time_series_args(args, name=None, fields=None,
     if objective_id is None:
         objective_id = args.objective_id_
 
-    time_series_args = {
-        "name": name,
-        "description": args.description_,
-        "category": args.category,
-        "tags": args.tag,
+    time_series_args = set_basic_model_args(args, name)
+    time_series_args.update({
         "all_numeric_objectives": args.all_numeric_objectives,
         "period": args.period
-    }
+    })
 
     # if we need to evaluate and there's no previous split, use a range
     if args.evaluate and args.test_split == 0 and not args.has_test_datasets_:
@@ -2917,11 +3085,7 @@ def set_library_args(args, name=None):
 
     if name is None:
         name = args.name
-    library_args = {
-        "name": name,
-        "description": args.description_,
-        "category": args.category,
-        "tags": args.tag}
+    library_args = set_basic_args(args, name)
     if args.project_id is not None:
         library_args.update({"project": args.project_id})
     if args.imports is not None:
@@ -2978,14 +3142,11 @@ def set_topic_model_args(args, name=None, fields=None,
     if topic_model_fields is None:
         topic_model_fields = args.topic_model_fields_
 
-    topic_model_args = {
-        "name": name,
-        "description": args.description_,
-        "category": args.category,
-        "tags": args.tag,
+    topic_model_args = set_basic_args(args, name)
+    topic_model_args.update({
         "seed": SEED if args.seed is None else args.seed,
         "topicmodel_seed": SEED if args.seed is None else args.seed
-    }
+    })
 
     topic_model_args.update({"sample_rate": args.sample_rate})
     topic_model_args.update({"bigrams": args.bigrams})
@@ -3160,13 +3321,7 @@ def set_batch_topic_distribution_args( \
     """Return batch topic distribution args dict
 
     """
-    batch_topic_distribution_args = {
-        "name": args.name,
-        "description": args.description_,
-        "tags": args.tag,
-        "header": args.prediction_header,
-        "output_dataset": args.to_dataset
-    }
+    batch_topic_distribution_args = set_basic_batch_args(args, args.name)
 
     if args.fields_map_ and fields is not None:
         if dataset_fields is None:
@@ -3236,12 +3391,10 @@ def set_forecast_args(args, fields=None):
     """Return forecast dict
 
     """
-    forecast_args = {
-        "name": args.name,
-        "description": args.description_,
-        "tags": args.tag,
+    forecast_args = set_basic_args(args, args.name)
+    forecast_args.update({
         "intervals": args.intervals,
-    }
+    })
 
     if 'forecast' in args.json_args:
         update_json_args(
@@ -3298,13 +3451,10 @@ def set_deepnet_args(args, name=None, fields=None,
     if objective_id is None:
         objective_id = args.objective_id_
 
-    deepnet_args = {
-        "name": name,
-        "description": args.description_,
-        "category": args.category,
-        "tags": args.tag,
+    deepnet_args = set_basic_model_args(args, name)
+    deepnet_args.update({
         "seed": SEED if args.seed is None else args.seed
-    }
+    })
 
     if objective_id is not None and fields is not None:
         deepnet_args.update({"objective_field": objective_id})

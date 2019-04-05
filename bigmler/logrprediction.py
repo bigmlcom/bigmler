@@ -13,7 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-"""Linear regression prediction auxiliary functions
+"""Logistic regression prediction auxiliary functions
 
 """
 from __future__ import absolute_import
@@ -23,7 +23,7 @@ import sys
 
 import bigml.api
 
-from bigml.linear import LinearRegression
+from bigml.logistic import LogisticRegression
 from bigml.io import UnicodeWriter
 
 import bigmler.utils as u
@@ -58,6 +58,8 @@ def write_prediction(prediction, output=sys.stdout,
             for index in exclude:
                 del row[index]
     row.append(prediction.get('prediction'))
+    if prediction_info in [NORMAL_FORMAT, FULL_FORMAT]:
+        row.append(prediction.get('probability'))
     try:
         output.writerow(row)
     except AttributeError:
@@ -67,25 +69,27 @@ def write_prediction(prediction, output=sys.stdout,
             raise AttributeError("You should provide a writeable object")
 
 
-def local_prediction(linear_regressions, test_reader, output, args,
+def local_prediction(logistic_regressions, test_reader, output, args,
                      exclude=None):
-    """Get local linear_regression and issue prediction
+    """Get local logistic_regression and issue prediction
 
     """
-    # Only one linear_regression at present
-    local_linear = LinearRegression(linear_regressions[0],
-                                    api=args.retrieve_api_)
+    # Only one logistic_regression at present
+    local_logistic = LogisticRegression(logistic_regressions[0],
+                                        api=args.retrieve_api_)
     kwargs = {"full": True}
+    if args.operating_point_:
+        kwargs.update({"operating_point": args.operating_point_})
     for input_data in test_reader:
         input_data_dict = test_reader.dict(input_data, filtering=False)
-        prediction_info = local_linear.predict(
+        prediction_info = local_logistic.predict(
             input_data_dict, **kwargs)
         write_prediction(prediction_info, output,
                          args.prediction_info, input_data, exclude)
 
 
-def lr_prediction(linear_regressions, fields, args, session_file=None):
-    """Computes a linear regression prediction
+def lr_prediction(logistic_regressions, fields, args, session_file=None):
+    """Computes a logistic regression prediction
     for each entry in the `test_set`.
 
     """
@@ -104,12 +108,12 @@ def lr_prediction(linear_regressions, fields, args, session_file=None):
         # Local predictions: Predictions are computed locally
         message = u.dated("Creating local predictions.\n")
         u.log_message(message, log_file=session_file, console=args.verbosity)
-        local_prediction(linear_regressions, test_reader,
+        local_prediction(logistic_regressions, test_reader,
                          output, args, exclude=exclude)
     test_reader.close()
 
 
-def remote_lr_prediction(linear_regression, test_dataset,
+def remote_lr_prediction(logistic_regression, test_dataset,
                          batch_prediction_args, args,
                          api, resume, prediction_file=None, session_file=None,
                          path=None, log=None):
@@ -118,8 +122,8 @@ def remote_lr_prediction(linear_regression, test_dataset,
        Predictions are computed remotely using the batch prediction call.
     """
 
-    linear_regression_id = bigml.api.get_linear_regression_id( \
-        linear_regression)
+    logistic_regression_id = bigml.api.get_logistic_regression_id( \
+        logistic_regression)
     # if resuming, try to extract dataset form log files
     if resume:
         message = u.dated("Batch prediction not found. Resuming.\n")
@@ -128,7 +132,7 @@ def remote_lr_prediction(linear_regression, test_dataset,
             message=message, log_file=session_file, console=args.verbosity)
     if not resume:
         batch_prediction = create_batch_prediction(
-            linear_regression_id, test_dataset, batch_prediction_args,
+            logistic_regression_id, test_dataset, batch_prediction_args,
             args, api, session_file=session_file, path=path, log=log)
     if not args.no_csv:
         file_name = api.download_batch_prediction(batch_prediction,

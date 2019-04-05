@@ -30,6 +30,7 @@ from bigmler.reify.dispatcher import reify_dispatcher
 from bigmler.project.dispatcher import project_dispatcher
 from bigmler.association.dispatcher import association_dispatcher
 from bigmler.logisticregression.dispatcher import logistic_regression_dispatcher
+from bigmler.linearregression.dispatcher import linear_regression_dispatcher
 try:
     from bigmler.topicmodel.dispatcher import topic_model_dispatcher
     NO_STEMMER = False
@@ -49,4 +50,4 @@ def subcommand_dispatcher(subcommand, args):
 
     """
 
-    return globals()["%s_dispatcher" % subcommand](args)
+    return globals()["%s_dispatcher" % subcommand.replace("-", "_")](args)

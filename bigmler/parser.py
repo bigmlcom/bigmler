@@ -42,6 +42,7 @@ from bigmler.options.project import get_project_options
 from bigmler.options.export import get_export_options
 from bigmler.options.association import get_association_options
 from bigmler.options.logisticregression import get_logistic_regression_options
+from bigmler.options.linearregression import get_linear_regression_options
 from bigmler.options.topicmodel import get_topic_model_options
 from bigmler.options.timeseries import get_time_series_options
 from bigmler.options.deepnet import get_deepnet_options
@@ -52,7 +53,8 @@ from bigmler.options.retrain import get_retrain_options
 SUBCOMMANDS = ["main", "analyze", "cluster", "anomaly", "sample", "dataset",
                "delete", "report", "reify", "project", "association",
                "logistic-regression", "topic-model", "time-series",
-               "execute", "whizzml", "export", "deepnet", "retrain"]
+               "execute", "whizzml", "export", "deepnet", "retrain",
+               "linear-regression"]
 
 
 MAIN = SUBCOMMANDS[0]
@@ -207,6 +209,7 @@ under the License.""" % version
         '--prediction-info': main_options['--prediction-info'],
         '--prediction-header': main_options['--prediction-header'],
         '--prediction-fields': main_options['--prediction-fields'],
+        '--default-numeric-value': main_options['--default-numeric-value'],
         '--reports': main_options['--reports'],
         '--remote': main_options['--remote'],
         '--no-batch': main_options['--no-batch'],
@@ -234,6 +237,7 @@ under the License.""" % version
         '--prediction-info': main_options['--prediction-info'],
         '--prediction-header': main_options['--prediction-header'],
         '--prediction-fields': main_options['--prediction-fields'],
+        '--default-numeric-value': main_options['--default-numeric-value'],
         '--reports': main_options['--reports'],
         '--remote': main_options['--remote'],
         '--no-batch': main_options['--no-batch'],
@@ -312,6 +316,7 @@ under the License.""" % version
         '--source-tag': delete_options['--source-tag'],
         '--dataset-tag': delete_options['--dataset-tag'],
         '--association-tag': delete_options['--association-tag'],
+        '--default-numeric-value': main_options['--default-numeric-value'],
         '--reports': main_options['--reports'],
         '--remote': main_options['--remote'],
         '--no-batch': main_options['--no-batch'],
@@ -338,6 +343,7 @@ under the License.""" % version
         '--prediction-info': main_options['--prediction-info'],
         '--prediction-header': main_options['--prediction-header'],
         '--prediction-fields': main_options['--prediction-fields'],
+        '--default-numeric-value': main_options['--default-numeric-value'],
         '--reports': main_options['--reports'],
         '--remote': main_options['--remote'],
         '--no-batch': main_options['--no-batch'],
@@ -355,6 +361,54 @@ under the License.""" % version
         '--batch-prediction-attributes': main_options[
             '--batch-prediction-attributes'],
         '--no-no-csv': main_options['--no-no-csv']})
+
+
+
+    defaults = general_defaults["BigMLer linear regression"]
+    subcommand_options["linear-regression"] = \
+        get_linear_regression_options( \
+        defaults=defaults)
+    # general options
+    subcommand_options["linear-regression"].update(common_options)
+    subcommand_options["linear-regression"].update(source_options)
+    subcommand_options["linear-regression"].update(dataset_options)
+    subcommand_options["linear-regression"].update(test_options)
+    subcommand_options["linear-regression"].update(dataset_sampling_options)
+    subcommand_options["linear-regression"].update({
+        '--source-tag': delete_options['--source-tag'],
+        '--dataset-tag': delete_options['--dataset-tag'],
+        '--linear-regression-tag': delete_options[
+            '--linear-regression-tag'],
+        '--objective': main_options['--objective'],
+        '--evaluate': main_options['--evaluate'],
+        '--prediction-info': main_options['--prediction-info'],
+        '--prediction-header': main_options['--prediction-header'],
+        '--prediction-fields': main_options['--prediction-fields'],
+        '--default-numeric-value': main_options['--default-numeric-value'],
+        '--reports': main_options['--reports'],
+        '--remote': main_options['--remote'],
+        '--no-batch': main_options['--no-batch'],
+        '--to-dataset': main_options['--to-dataset'],
+        '--no-csv': main_options['--no-csv'],
+        '--fields-map': main_options['--fields-map'],
+        '--dataset-off': main_options['--dataset-off'],
+        '--field-codings': subcommand_options['logistic-regression'][ \
+            '--field-codings'],
+        '--bias': subcommand_options['logistic-regression'][ \
+            '--bias'],
+        '--no-bias': subcommand_options['logistic-regression'][ \
+            '--no-bias'],
+        '--max-parallel-evaluations': main_options[
+            '--max-parallel-evaluations'],
+        '--cross-validation-rate': main_options[
+            '--cross-validation-rate'],
+        '--number-of-evaluations': main_options[
+            '--number-of-evaluations'],
+        '--batch-prediction-attributes': main_options[
+            '--batch-prediction-attributes'],
+        '--no-no-csv': main_options['--no-no-csv']})
+
+
 
     # time-series
     defaults = general_defaults["BigMLer time-series"]
@@ -374,6 +428,7 @@ under the License.""" % version
         '--objective': main_options['--objective'],
         '--evaluate': main_options['--evaluate'],
         '--prediction-header': main_options['--prediction-header'],
+        '--default-numeric-value': main_options['--default-numeric-value'],
         '--reports': main_options['--reports'],
         '--remote': main_options['--remote']})
 
@@ -460,6 +515,7 @@ under the License.""" % version
         '--prediction-info': main_options['--prediction-info'],
         '--prediction-header': main_options['--prediction-header'],
         '--prediction-fields': main_options['--prediction-fields'],
+        '--default-numeric-value': main_options['--default-numeric-value'],
         '--reports': main_options['--reports'],
         '--remote': main_options['--remote'],
         '--no-batch': main_options['--no-batch'],

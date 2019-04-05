@@ -427,6 +427,16 @@ def get_main_options(defaults=None, constants=None):
                      " to next nodes is missing in the input data."
                      " Allowed values: last or proportional")},
 
+        # Default value to use for missings in numeric fields
+        '--default-numeric-value': {
+            'action': 'store',
+            'dest': 'default_numeric_value',
+            'default': defaults.get('default_numeric_value'),
+            'choices': ["mean", "median", "minimum", "maximum", "zero"],
+            'help': ("Value set by default when a numeric field is missing."
+                     " Allowed values: mean, median, minimum, maximum or"
+                     " zero.")},
+
         # Report. Additional output report formats
         '--reports': {
             'action': 'store',

@@ -14,7 +14,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-"""BigMLer - logistic regression subcommand processing dispatching
+"""BigMLer - linear regression subcommand processing dispatching
 
 """
 from __future__ import absolute_import
@@ -28,12 +28,12 @@ import bigmler.utils as u
 import bigmler.resources as r
 import bigmler.pre_model_steps as pms
 import bigmler.processing.args as a
-import bigmler.processing.logisticregressions as plr
+import bigmler.processing.linearregressions as plr
 import bigmler.processing.sources as ps
 import bigmler.processing.datasets as pd
 
 from bigmler.defaults import DEFAULTS_FILE
-from bigmler.logrprediction import lr_prediction, remote_lr_prediction
+from bigmler.lrprediction import lr_prediction, remote_lr_prediction
 from bigmler.reports import clear_reports, upload_reports
 from bigmler.command import get_context
 from bigmler.evaluation import evaluate
@@ -41,8 +41,8 @@ from bigmler.dispatcher import (SESSIONS_LOG,
                                 clear_log_files, get_test_dataset,
                                 get_objective_id)
 
-COMMAND_LOG = u".bigmler_logistic_regression"
-DIRS_LOG = u".bigmler_logistic_regression_dir_stack"
+COMMAND_LOG = u".bigmler_linear_regression"
+DIRS_LOG = u".bigmler_linear_regression_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 MINIMUM_MODEL = "full=false"
 DEFAULT_OUTPUT = u"predictions.csv"
@@ -55,7 +55,7 @@ SETTINGS = {
     "defaults_file": DEFAULTS_FILE}
 
 
-def logistic_regression_dispatcher(args=sys.argv[1:]):
+def linear_regression_dispatcher(args=sys.argv[1:]):
     """Parses command line and calls the different processing functions
 
     """
@@ -85,22 +85,22 @@ def compute_output(api, args):
 
     """
 
-    logistic_regression = None
-    logistic_regressions = None
+    linear_regression = None
+    linear_regressions = None
     # no multi-label support at present
 
     # variables from command-line options
     resume = args.resume_
-    logistic_regression_ids = args.logistic_regression_ids_
+    linear_regression_ids = args.linear_regression_ids_
     output = args.predictions
-    # there's only one logistic regression to be generated at present
-    args.max_parallel_logistic_regressions = 1
-    # logistic regressions cannot be published yet.
-    args.public_logistic_regression = False
+    # there's only one linear regression to be generated at present
+    args.max_parallel_linear_regressions = 1
+    # linear regressions cannot be published yet.
+    args.public_linear_regression = False
 
     # It is compulsory to have a description to publish either datasets or
-    # logistic regressions
-    if (not args.description_ and (args.public_logistic_regression or
+    # linear regressions
+    if (not args.description_ and (args.public_linear_regression or
                                    args.public_dataset)):
         sys.exit("You should provide a description to publish.")
 
@@ -136,65 +136,65 @@ def compute_output(api, args):
         # Now we have a dataset, let's check if there's an objective_field
         # given by the user and update it in the fields structure
         args.objective_id_ = get_objective_id(args, fields)
-    if args.logistic_file:
-        # logistic regression is retrieved from the contents of the given local
+    if args.linear_file:
+        # linear regression is retrieved from the contents of the given local
         # JSON file
-        logistic_regression, csv_properties, fields = u.read_local_resource(
-            args.logistic_file,
+        linear_regression, csv_properties, fields = u.read_local_resource(
+            args.linear_file,
             csv_properties=csv_properties)
-        logistic_regressions = [logistic_regression]
-        logistic_regression_ids = [logistic_regression['resource']]
+        linear_regressions = [linear_regression]
+        linear_regression_ids = [linear_regression['resource']]
     else:
-        # logistic regression is retrieved from the remote object
-        logistic_regressions, logistic_regression_ids, resume = \
-            plr.logistic_regressions_processing( \
-            datasets, logistic_regressions, logistic_regression_ids, \
+        # linear regression is retrieved from the remote object
+        linear_regressions, linear_regression_ids, resume = \
+            plr.linear_regressions_processing( \
+            datasets, linear_regressions, linear_regression_ids, \
             api, args, resume, fields=fields, \
             session_file=session_file, path=path, log=log)
-        if logistic_regressions:
-            logistic_regression = logistic_regressions[0]
+        if linear_regressions:
+            linear_regression = linear_regressions[0]
 
-    # We update the logistic regression's public state if needed
-    if logistic_regression:
-        if isinstance(logistic_regression, basestring):
+    # We update the linear regression's public state if needed
+    if linear_regression:
+        if isinstance(linear_regression, basestring):
             if not a.has_test(args):
                 query_string = MINIMUM_MODEL
             elif args.export_fields:
                 query_string = r.ALL_FIELDS_QS
             else:
                 query_string = ''
-            logistic_regression = u.check_resource(logistic_regression,
-                                                   api.get_logistic_regression,
-                                                   query_string=query_string)
-        logistic_regressions[0] = logistic_regression
-        if (args.public_logistic_regression or
+            linear_regression = u.check_resource(linear_regression,
+                                                 api.get_linear_regression,
+                                                 query_string=query_string)
+        linear_regressions[0] = linear_regression
+        if (args.public_linear_regression or
                 (args.shared_flag and r.shared_changed(args.shared,
-                                                       logistic_regression))):
-            logistic_regression_args = {}
+                                                       linear_regression))):
+            linear_regression_args = {}
             if args.shared_flag and r.shared_changed(args.shared,
-                                                     logistic_regression):
-                logistic_regression_args.update(shared=args.shared)
-            if args.public_logistic_regression:
-                logistic_regression_args.update( \
-                    r.set_publish_logistic_regression_args(args))
-            if logistic_regression_args:
-                logistic_regression = r.update_logistic_regression( \
-                    logistic_regression, logistic_regression_args, args,
+                                                     linear_regression):
+                linear_regression_args.update(shared=args.shared)
+            if args.public_linear_regression:
+                linear_regression_args.update( \
+                    r.set_publish_linear_regression_args(args))
+            if linear_regression_args:
+                linear_regression = r.update_linear_regression( \
+                    linear_regression, linear_regression_args, args,
                     api=api, path=path, \
                     session_file=session_file)
-                logistic_regressions[0] = logistic_regression
+                linear_regressions[0] = linear_regression
 
-    # We get the fields of the logistic_regression if we haven't got
+    # We get the fields of the linear_regression if we haven't got
     # them yet and need them
-    if logistic_regression and (args.test_set or args.export_fields):
-        fields = plr.get_logistic_fields( \
-            logistic_regression, csv_properties, args)
+    if linear_regression and (args.test_set or args.export_fields):
+        fields = plr.get_linear_fields( \
+            linear_regression, csv_properties, args)
 
     if fields and args.export_fields:
         fields.summary_csv(os.path.join(path, args.export_fields))
 
     # If predicting
-    if logistic_regressions and (a.has_test(args) or \
+    if linear_regressions and (a.has_test(args) or \
             (test_dataset and args.remote)):
         if test_dataset is None:
             test_dataset = get_test_dataset(args)
@@ -231,13 +231,13 @@ def compute_output(api, args):
                 args, fields=fields,
                 dataset_fields=test_fields)
 
-            remote_lr_prediction(logistic_regression, test_dataset, \
+            remote_lr_prediction(linear_regression, test_dataset, \
                 batch_prediction_args, args, \
                 api, resume, prediction_file=output, \
                 session_file=session_file, path=path, log=log)
 
         else:
-            lr_prediction(logistic_regressions, fields, args,
+            lr_prediction(linear_regressions, fields, args,
                           session_file=session_file)
 
     # If evaluate flag is on, create remote evaluation and save results in
@@ -258,7 +258,7 @@ def compute_output(api, args):
                                   objective_field_present=False)
             test_fields = pd.get_fields_structure(test_dataset,
                                                   csv_properties)
-            resume = evaluate(logistic_regressions, args.test_dataset_ids, api,
+            resume = evaluate(linear_regressions, args.test_dataset_ids, api,
                               args, resume,
                               fields=fields, dataset_fields=test_fields,
                               session_file=session_file, path=path,
@@ -271,7 +271,7 @@ def compute_output(api, args):
             dataset = u.check_resource(dataset, api=api,
                                        query_string=r.ALL_FIELDS_QS)
             dataset_fields = pd.get_fields_structure(dataset, None)
-            resume = evaluate(logistic_regressions, [dataset], api,
+            resume = evaluate(linear_regressions, [dataset], api,
                               args, resume,
                               fields=fields, dataset_fields=dataset_fields,
                               session_file=session_file, path=path,

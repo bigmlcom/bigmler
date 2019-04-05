@@ -49,7 +49,8 @@ RESOURCE_TYPES = ["source", "dataset", "model", "ensemble", "batch_prediction",
                   "cluster", "centroid", "batch_centroid", "anomaly",
                   "anomaly_score", "batch_anomaly_score", "project", "sample",
                   "association", "logistic_regression", "deepnet", "script",
-                  "library", "execution", "evaluation", "topic_model"]
+                  "library", "execution", "evaluation", "topic_model",
+                  "linear_regression"]
 
 STORED_MODELS = ["model_file", "ensemble_file", "logistic_file",
                  "cluster_file", "anomaly_file", "deepnet_file"]
@@ -426,6 +427,17 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
+    # Parses linear regression input fields if provided.
+    try:
+        if command_args.linear_fields:
+            linear_fields_arg = [
+                field.strip() for field in command_args.linear_fields.split(
+                    command_args.args_separator)]
+            command_args.linear_fields_ = linear_fields_arg
+        else:
+            command_args.linear_fields_ = []
+    except AttributeError:
+        pass
 
     # Parses deepnet input fields if provided.
     try:
@@ -657,6 +669,28 @@ def get_output_args(api, command_args, resume):
         command_args.logistic_regression_ids_ = logistic_regression_ids
     except AttributeError:
         pass
+
+    linear_regression_ids = []
+    try:
+        # Parses linearregression/ids if provided.
+        if command_args.linear_regressions:
+            linear_regression_ids = u.read_resources( \
+                command_args.linear_regressions)
+        command_args.linear_regression_ids_ = linear_regression_ids
+    except AttributeError:
+        pass
+
+    # Retrieve linearregression/ids if provided.
+    try:
+        if command_args.linear_regression_tag:
+            linear_regression_ids = (linear_regression_ids + \
+                u.list_ids(api.list_linear_regressions,
+                           "tags__in=%s" %
+                           command_args.linear_regression_tag))
+        command_args.linear_regression_ids_ = linear_regression_ids
+    except AttributeError:
+        pass
+
 
     deepnet_ids = []
     try:
