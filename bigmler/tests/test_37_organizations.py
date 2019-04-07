@@ -60,19 +60,11 @@ def teardown_module():
     """
 
     if not world.debug:
-        try:
-            world.delete_resources()
-        except Exception, exc:
-            print exc
         world.api = BigML(world.USERNAME, world.API_KEY, debug=world.debug,
                           organization=BIGML_ORGANIZATION)
+        world.project_id = world.project["resource"]
         project_stats = world.api.get_project( \
             world.project_id)['object']['stats']
-        for resource_type, value in project_stats.items():
-            if value['count'] != 0:
-                # assert False, ("Increment in %s: %s" % (resource_type, value))
-                print "WARNING: Increment in %s: %s" % (resource_type, value)
-
         world.api.delete_project(world.project_id)
     world.project_id = world.bck_project_id
     world.api = world.bck_api
