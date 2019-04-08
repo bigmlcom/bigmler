@@ -3231,7 +3231,7 @@ linear regression model, like the ``bias`` (intercept term)).
 with this code, the linear regression is built without using an
 independent term.
 
-Similarly to the models and datasets, the generated linear regressions
+Similarly to models and datasets, the generated linear regressions
 can be shared using the ``--shared`` option, e.g.
 
 .. code-block:: bash
@@ -3242,7 +3242,7 @@ can be shared using the ``--shared`` option, e.g.
 will generate a secret link for both the created dataset and linear
 regressions, that can be used to share the resource selectively.
 
-The linear regression can be used to assign a prediction to each new
+Linear regressions can produce a prediction for each new
 input data set. The command
 
 .. code-block:: bash
