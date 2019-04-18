@@ -53,7 +53,9 @@ RESOURCE_TYPES = ["source", "dataset", "model", "ensemble", "batch_prediction",
                   "linear_regression"]
 
 STORED_MODELS = ["model_file", "ensemble_file", "logistic_file",
-                 "cluster_file", "anomaly_file", "deepnet_file"]
+                 "cluster_file", "anomaly_file", "deepnet_file",
+                 "linear_file", "topic_model_file", "association_file",
+                 "pca_file"]
 
 def has_test(args):
     """Returns if some kind of test data is given in args.
@@ -306,6 +308,8 @@ def get_output_args(api, command_args, resume):
 
     command_args.resume_ = resume
     command_args.predictions = command_args.output
+    command_args.projections = command_args.output
+
 
     # Reads description if provided.
     try:
@@ -460,6 +464,19 @@ def get_output_args(api, command_args, resume):
             command_args.topic_model_fields_ = topic_fields_arg
         else:
             command_args.topic_model_fields_ = []
+    except AttributeError:
+        pass
+
+
+    # Parses pca fields if provided.
+    try:
+        if command_args.pca_fields:
+            pca_fields_arg = [
+                field.strip() for field in command_args.pca_fields.split(
+                    command_args.args_separator)]
+            command_args.pca_fields_ = pca_fields_arg
+        else:
+            command_args.pca_fields_ = []
     except AttributeError:
         pass
 
@@ -750,6 +767,26 @@ def get_output_args(api, command_args, resume):
                                           "tags__in=%s" %
                                           command_args.time_series_tag))
         command_args.time_series_ids_ = time_series_ids
+    except AttributeError:
+        pass
+
+    pca_ids = []
+    try:
+        # Parses pca/ids if provided.
+        if command_args.pcas:
+            pca_ids = u.read_resources(command_args.pcas)
+        command_args.pca_ids_ = pca_ids
+    except AttributeError:
+        pass
+
+    # Retrieve pca/ids if provided.
+    try:
+        if command_args.pca_tag:
+            pca_ids = (pca_ids +
+                       u.list_ids(api.pca_series,
+                                  "tags__in=%s" %
+                                  command_args.pca_tag))
+        command_args.pca_ids_ = pca_ids
     except AttributeError:
         pass
 

@@ -71,6 +71,21 @@ def i_check_create_batch_prediction(step):
         assert False, str(exc)
 
 
+#@step(r'I check that the batch projection has been created')
+def i_check_create_batch_projection(step):
+    batch_projection_file = "%s%sbatch_projection" % (world.directory, os.sep)
+    try:
+        batch_projection_file = open(batch_projection_file, "r")
+        batch_projection = check_resource(batch_projection_file.readline().strip(),
+                                          world.api.get_batch_projection)
+        world.batch_projections.append(batch_projection['resource'])
+        world.batch_projection = batch_projection
+        batch_projection_file.close()
+        assert True
+    except Exception, exc:
+        assert False, str(exc)
+
+
 #@step(r'I check that the source has been created from the test file')
 def i_check_create_test_source(step):
     test_source_file = "%s%ssource_test" % (world.directory, os.sep)

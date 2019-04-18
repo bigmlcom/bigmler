@@ -47,6 +47,8 @@ from bigmler.tests.basic_association_steps import \
     i_create_association, i_check_create_association
 from bigmler.tests.basic_logistic_r_steps import \
     i_create_all_lr_resources, i_check_create_lr_model
+from bigmler.tests.basic_pca_steps import \
+    i_create_all_pca_resources, i_check_create_pca_model
 from bigmler.tests.common_steps import check_debug
 from bigmler.reports import REPORTS_DIR
 from nose.tools import ok_, assert_equal, assert_not_equal, assert_almost_equal
@@ -1266,6 +1268,11 @@ def i_check_create_predictions(step):
         assert False, str(exc)
 
 
+#@step(r'I check that the projections are ready')
+def i_check_create_projections(step):
+    i_check_create_predictions(step)
+
+
 #@step(r'the predictions file "(.*)" is like "(.*)"')
 def i_check_predictions_file(step, predictions_file, check_file):
     world.output = predictions_file
@@ -1306,6 +1313,10 @@ def i_check_predictions(step, check_file):
                             assert_equal(check_row[index], row[index])
     except Exception, exc:
         assert False, traceback.format_exc()
+
+
+def i_check_projections(step, check_file):
+    i_check_predictions(step, check_file)
 
 
 #@step(r'local predictions for different thresholds in "(.*)" and "(.*)"
@@ -1737,7 +1748,11 @@ def i_have_previous_scenario_or_reproduce_it(step, scenario, kwargs):
                 'scenario1_lr': [(i_create_all_lr_resources, True),
                                  (i_check_create_source, False),
                                  (i_check_create_dataset, False),
-                                 (i_check_create_lr_model, False)]}
+                                 (i_check_create_lr_model, False)],
+                'scenario1_pca': [(i_create_all_pca_resources, True),
+                                  (i_check_create_source, False),
+                                  (i_check_create_dataset, False),
+                                  (i_check_create_pca_model, False)]}
     scenario_path = "%s/" % scenario
     if os.path.exists(scenario_path):
         retrieve_resources(scenario_path, step)

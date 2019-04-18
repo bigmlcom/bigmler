@@ -28,7 +28,7 @@ def get_linear_regression_options(defaults=None):
         defaults = {}
 
     options = {
-        # Input fields to include in the logistic regression.
+        # Input fields to include in the linear regression.
         '--inear-fields': {
             "action": 'store',
             "dest": 'linear_fields',
@@ -71,7 +71,7 @@ def get_linear_regression_options(defaults=None):
             'default': defaults.get('no_linear_regression', False),
             'help': "Do not create a linear regression."},
 
-        # The path to a file containing logistic regression attributes.
+        # The path to a file containing linear regression attributes.
         '--linear-regression-attributes': {
             'action': 'store',
             'dest': 'linear_regression_attributes',
@@ -84,6 +84,6 @@ def get_linear_regression_options(defaults=None):
             'action': 'store_false',
             'dest': 'no_linear_regression',
             'default': defaults.get('no_linear_regression', False),
-            'help': "Create a linear."}}
+            'help': "Create a linear regression."}}
 
     return options

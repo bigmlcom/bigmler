@@ -59,6 +59,8 @@ RESOURCE_TYPES = [
     'timeseries',
     'forecast',
     'deepnet',
+    'pca',
+    'batchprojection',
     'script',
     'library',
     'execution']
@@ -73,6 +75,7 @@ IRREGULAR_PLURALS = {
     'topicmodel': 'topic_models',
     'topicdistribution': 'topic_distributions',
     'batchtopicdistribution': 'batch_topic_distributions',
+    'batchprojection': 'batch_projections',
     'timeseries': 'time_series_set',
     'library': 'libraries'}
 TRANSLATED_RESOURCES = {
@@ -85,7 +88,8 @@ TRANSLATED_RESOURCES = {
     'topicmodel': 'topic_model',
     'topicdistribution': 'topic_distribution',
     'timeseries': 'time_series',
-    'batchtopicdistribution': 'batch_topic_distribution'}
+    'batchtopicdistribution': 'batch_topic_distribution',
+    'batchprojection': 'batch_projection'}
 
 
 def show_doc(self, examples=None):

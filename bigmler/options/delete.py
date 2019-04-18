@@ -277,6 +277,24 @@ def get_delete_options(defaults=None):
             'default': defaults.get('deepnet_tag', None),
             'help': "Retrieve deepnets that were tagged with tag."},
 
+        # Use it to retrieve PCA that were tagged with tag.
+        '--pca-tag': {
+            'dest': 'pca_tag',
+            'default': defaults.get('pca_tag', None),
+            'help': "Retrieve PCA that were tagged with tag."},
+
+        # Use it to retrieve projections that were tagged with tag.
+        '--projection-tag': {
+            'dest': 'projection_tag',
+            'default': defaults.get('projection_tag', None),
+            'help': "Retrieve projection that were tagged with tag."},
+
+        # Use it to retrieve batch projections that were tagged with tag.
+        '--batch-projection-tag': {
+            'dest': 'batch_projections_tag',
+            'default': defaults.get('batch_projections_tag', None),
+            'help': "Retrieve batch projections that were tagged with tag."},
+
         # Use it to retrieve resources filtered by a query string
         '--filter': {
             'dest': 'filter',

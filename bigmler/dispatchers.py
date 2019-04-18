@@ -42,6 +42,7 @@ from bigmler.execute.dispatcher import execute_dispatcher
 from bigmler.whizzml.dispatcher import whizzml_dispatcher
 from bigmler.export.dispatcher import export_dispatcher
 from bigmler.retrain.dispatcher import retrain_dispatcher
+from bigmler.pca.dispatcher import pca_dispatcher
 from bigmler.dataset.dispatcher import dataset_dispatcher
 
 

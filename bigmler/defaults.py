@@ -350,6 +350,15 @@ FLAGS = {
         {'flag': 'language', 'type': 'string'}],
     'BigMLer retrain': [
         {'flag': 'model_type', 'type': 'string'}],
+    'BigMLer PCA': [
+        {'flag': 'pca_fields', 'type': 'string'},
+        {'flag': 'pca', 'type': 'string'},
+        {'flag': 'pca_file', 'type': 'string'},
+        {'flag': 'pcas', 'type': 'string'},
+        {'flag': 'no_pca', 'type': 'boolean'},
+        {'flag': 'max_components', 'type': 'int'},
+        {'flag': 'variance_threshold', 'type': 'float'},
+        {'flag': 'pca_attributes', 'type': 'string'}],
     'BigMLer dataset': [
         {'flag': 'file', 'type': 'string'},
         {'flag': 'merge', 'type': 'boolean'},

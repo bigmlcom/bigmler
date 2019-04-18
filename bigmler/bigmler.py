@@ -96,25 +96,12 @@ def main(args=sys.argv[1:]):
         else:
             bd.subcommand_dispatcher(subcommand, new_args)
     else:
-        sys.exit("BigMLer used with no arguments. Check:\nbigmler --help\n\nor"
-                 "\n\nbigmler sample --help\n\n"
-                 "\n\nbigmler analyze --help\n\n"
-                 "\n\nbigmler cluster --help\n\n"
-                 "\n\nbigmler anomaly --help\n\n"
-                 "\n\nbigmler report --help\n\n"
-                 "\n\nbigmler reify --help\n\n"
-                 "\n\nbigmler project --help\n\n"
-                 "\n\nbigmler association --help\n\n"
-                 "\n\nbigmler logistic-regression --help\n\n"
-                 "\n\nbigmler topic-model --help\n\n"
-                 "\n\nbigmler time-series --help\n\n"
-                 "\n\nbigmler deepnet --help\n\n"
-                 "\n\nbigmler execute --help\n\n"
-                 "\n\nbigmler whizzml --help\n\n"
-                 "\n\nbigmler export --help\n\n"
-                 "\n\nbigmler retrain --help\n\n"
-                 "\n\nbigmler delete --help\n\n"
-                 " for a list of options")
+        subcommands = SUBCOMMANDS
+        subcommands.sort()
+        subcommands_text = "\n\n  ".join(["bigmler %s --help" % subcommand
+                                            for subcommand in subcommands])
+        sys.exit("BigMLer used with no arguments.\n\nCheck:"
+                 "\n\n  %s \n\nfor a list of options" % subcommands_text)
 
 if __name__ == '__main__':
     main(sys.argv[1:])

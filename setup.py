@@ -56,7 +56,7 @@ setuptools.setup(
                 'bigmler.execute', 'bigmler.whizzml', 'bigmler.topicmodel',
                 'bigmler.timeseries', 'bigmler.deepnet', 'bigmler.retrain',
                 'bigmler.export', 'bigmler.export.out_model',
-                'bigmler.linearregression',
+                'bigmler.linearregression', 'bigmler.pca',
                 'bigmler.dataset', 'bigmler.export.out_tree'],
     install_requires = ['bigml>=4.21.1, <4.22.0',
                         'jsonschema==2.6.0',

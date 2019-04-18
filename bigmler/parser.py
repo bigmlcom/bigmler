@@ -43,6 +43,7 @@ from bigmler.options.export import get_export_options
 from bigmler.options.association import get_association_options
 from bigmler.options.logisticregression import get_logistic_regression_options
 from bigmler.options.linearregression import get_linear_regression_options
+from bigmler.options.pca import get_pca_options
 from bigmler.options.topicmodel import get_topic_model_options
 from bigmler.options.timeseries import get_time_series_options
 from bigmler.options.deepnet import get_deepnet_options
@@ -54,7 +55,7 @@ SUBCOMMANDS = ["main", "analyze", "cluster", "anomaly", "sample", "dataset",
                "delete", "report", "reify", "project", "association",
                "logistic-regression", "topic-model", "time-series",
                "execute", "whizzml", "export", "deepnet", "retrain",
-               "linear-regression"]
+               "linear-regression", "pca"]
 
 
 MAIN = SUBCOMMANDS[0]
@@ -533,6 +534,37 @@ under the License.""" % version
         '--batch-prediction-attributes': main_options[
             '--batch-prediction-attributes'],
         '--no-no-csv': main_options['--no-no-csv']})
+
+    defaults = general_defaults["BigMLer PCA"]
+    subcommand_options["pca"] = \
+        get_pca_options( \
+        defaults=defaults)
+    # general options
+    subcommand_options["pca"].update(common_options)
+    subcommand_options["pca"].update(source_options)
+    subcommand_options["pca"].update(dataset_options)
+    subcommand_options["pca"].update(test_options)
+    subcommand_options["pca"].update(dataset_sampling_options)
+    subcommand_options["pca"].update({
+        '--source-tag': delete_options['--source-tag'],
+        '--dataset-tag': delete_options['--dataset-tag'],
+        '--pca-tag': delete_options[
+            '--pca-tag'],
+        '--projection-tag': delete_options[
+            '--projection-tag'],
+        '--batch-projection-tag': delete_options[
+            '--batch-projection-tag'],
+        '--objective': main_options['--objective'],
+        '--evaluate': main_options['--evaluate'],
+        '--reports': main_options['--reports'],
+        '--remote': main_options['--remote'],
+        '--no-batch': main_options['--no-batch'],
+        '--to-dataset': main_options['--to-dataset'],
+        '--no-csv': main_options['--no-csv'],
+        '--fields-map': main_options['--fields-map'],
+        '--dataset-off': main_options['--dataset-off'],
+        '--no-no-csv': main_options['--no-no-csv']})
+
 
     subparser = subparsers.add_parser(subcommand)
     parser_add_options(subparser, subcommand_options[subcommand])
