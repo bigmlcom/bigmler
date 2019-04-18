@@ -2876,7 +2876,8 @@ def update_linear_regression(linear_regression, linear_regression_args,
 
 
 def set_time_series_args(args, name=None, fields=None,
-                         objective_id=None):
+                         objective_id=None,
+                         time_series_fields=None):
     """Return time-series arguments dict
 
     """
@@ -2898,9 +2899,6 @@ def set_time_series_args(args, name=None, fields=None,
         time_series_args.update({"objective_field": objective_id})
     if args.objectives:
         time_series_args.update({"objective_fields": args.objective_fields_})
-    if time_series_fields and fields is not None:
-        input_fields = configure_input_fields(fields, time_series_fields)
-        time_series_args.update(input_fields=input_fields)
     if args.damped_trend is not None:
         time_series_args.update({"damped_trend": args.damped_trend})
     if args.error is not None:
