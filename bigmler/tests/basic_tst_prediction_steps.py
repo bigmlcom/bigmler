@@ -1193,10 +1193,8 @@ def i_check_node_threshold(step, node_threshold, metric, metric_value):
     except Exception, exc:
         print str(exc)
         assert False
-    print "****", content
     text = "The best node threshold is: %s \n%s = %s" % (
         node_threshold, metric.capitalize(), metric_value)
-    print "**** text:", text
     ok_(content.find(text) > -1)
 
 
