@@ -304,7 +304,7 @@ class TestAnalyze(object):
         """
         print self.test_scenario8.__doc__
         examples = [
-            ['data/iris.csv', 'scenario_a_10', 'data/new_fields2.json', u'outlier?', u'outlier?,species', '3', '14', '2', '2', 'precision', '11', '94.11%']]
+            ['data/iris.csv', 'scenario_a_10', 'data/new_fields2.json', u'outlier?', u'outlier?,species', '3', '14', '2', '2', 'precision', '11', '98.21%']]
         for example in examples:
             print "\nTesting with:\n", example
             dataset_adv.i_create_dataset(self, data=example[0], output_dir=example[1])
