@@ -33,7 +33,7 @@ import bigmler.processing.sources as ps
 import bigmler.processing.datasets as pd
 
 from bigmler.defaults import DEFAULTS_FILE
-from bigmler.logrprediction import lr_prediction, remote_lr_prediction
+from bigmler.sl_prediction import prediction, remote_prediction
 from bigmler.reports import clear_reports, upload_reports
 from bigmler.command import get_context
 from bigmler.evaluation import evaluate
@@ -231,14 +231,14 @@ def compute_output(api, args):
                 args, fields=fields,
                 dataset_fields=test_fields)
 
-            remote_lr_prediction(logistic_regression, test_dataset, \
+            remote_prediction(logistic_regression, test_dataset, \
                 batch_prediction_args, args, \
                 api, resume, prediction_file=output, \
                 session_file=session_file, path=path, log=log)
 
         else:
-            lr_prediction(logistic_regressions, fields, args,
-                          session_file=session_file)
+            prediction(logistic_regressions, fields, args,
+                       session_file=session_file)
 
     # If evaluate flag is on, create remote evaluation and save results in
     # json and human-readable format.

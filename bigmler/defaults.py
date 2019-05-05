@@ -359,6 +359,13 @@ FLAGS = {
         {'flag': 'max_components', 'type': 'int'},
         {'flag': 'variance_threshold', 'type': 'float'},
         {'flag': 'pca_attributes', 'type': 'string'}],
+    'BigMLer Fusion': [
+        {'flag': 'fusion_models', 'type': 'string'},
+        {'flag': 'fusion_models_file', 'type': 'string'},
+        {'flag': 'fusion_file', 'type': 'string'},
+        {'flag': 'fusions', 'type': 'string'},
+        {'flag': 'fusion', 'type': 'string'},
+        {'flag': 'fusion_attributes', 'type': 'string'}],
     'BigMLer dataset': [
         {'flag': 'file', 'type': 'string'},
         {'flag': 'merge', 'type': 'boolean'},

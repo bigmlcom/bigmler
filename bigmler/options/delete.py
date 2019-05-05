@@ -283,6 +283,12 @@ def get_delete_options(defaults=None):
             'default': defaults.get('pca_tag', None),
             'help': "Retrieve PCA that were tagged with tag."},
 
+        # Use it to retrieve Fusion that were tagged with tag.
+        '--fusion-tag': {
+            'dest': 'fusion_tag',
+            'default': defaults.get('fusion_tag', None),
+            'help': "Retrieve Fusion that were tagged with tag."},
+
         # Use it to retrieve projections that were tagged with tag.
         '--projection-tag': {
             'dest': 'projection_tag',

@@ -126,12 +126,6 @@ def get_context(args, settings):
     # parses the command line to get the context args and the log files to use
     command_args, command, session_file, resume = get_cmd_context(args,
                                                                   settings)
-    if command_args.dev_mode:
-        u.log_messages("Warning: Development mode has been deprecated, so"
-                       " --dev flag is no longer used."
-                       "All resources will be created in production mode",
-                       log_file=session_file)
-        command_args.dev_mode = False
 
     # Creates a remote connection and fills the part of the context that
     # needs to be retrieved from the remote service

@@ -41,6 +41,7 @@ from bigmler.options.reify import get_reify_options
 from bigmler.options.project import get_project_options
 from bigmler.options.export import get_export_options
 from bigmler.options.association import get_association_options
+from bigmler.options.fusion import get_fusion_options
 from bigmler.options.logisticregression import get_logistic_regression_options
 from bigmler.options.linearregression import get_linear_regression_options
 from bigmler.options.pca import get_pca_options
@@ -55,7 +56,7 @@ SUBCOMMANDS = ["main", "analyze", "cluster", "anomaly", "sample", "dataset",
                "delete", "report", "reify", "project", "association",
                "logistic-regression", "topic-model", "time-series",
                "execute", "whizzml", "export", "deepnet", "retrain",
-               "linear-regression", "pca"]
+               "linear-regression", "pca", "fusion"]
 
 
 MAIN = SUBCOMMANDS[0]
@@ -269,7 +270,7 @@ under the License.""" % version
     subcommand_options["export"] = get_export_options(defaults=defaults)
     export_common_options_list = ['clear-logs', 'username', 'api-key',
                                   'version', 'org-project',
-                                  'dev', 'no-dev', 'output-dir', 'verbosity',
+                                  'output-dir', 'verbosity',
                                   'resume', 'stack-level', 'debug', 'store']
     export_common_options = {}
     for option in export_common_options_list:
@@ -281,7 +282,7 @@ under the License.""" % version
     subcommand_options["reify"] = get_reify_options(defaults=defaults)
     reify_common_options_list = ['clear-logs', 'username', 'api-key',
                                  'version', 'org-project',
-                                 'dev', 'no-dev', 'output-dir', 'verbosity',
+                                 'output-dir', 'verbosity',
                                  'resume', 'stack-level', 'debug', 'store']
     reify_common_options = {}
     for option in reify_common_options_list:
@@ -567,6 +568,23 @@ under the License.""" % version
 
 
     subparser = subparsers.add_parser(subcommand)
+
+    defaults = general_defaults["BigMLer Fusion"]
+    subcommand_options["fusion"] = get_fusion_options(defaults=defaults)
+    # general options
+    subcommand_options["fusion"].update(common_options)
+    subcommand_options["fusion"].update(test_options)
+    subcommand_options["fusion"].update({
+        '--prediction-info': main_options['--prediction-info'],
+        '--prediction-header': main_options['--prediction-header'],
+        '--prediction-fields': main_options['--prediction-fields'],
+        '--operating-point': main_options['--operating-point'],
+        '--reports': main_options['--reports'],
+        '--remote': main_options['--remote'],
+        '--fusion-tag': delete_options['--fusion-tag']})
+
+    subparser = subparsers.add_parser(subcommand)
+
     parser_add_options(subparser, subcommand_options[subcommand])
 
     # options to be transmitted from analyze to main
@@ -574,7 +592,7 @@ under the License.""" % version
         "--debug", "--username", "--api-key", "--resources-log",
         "--store", "--clear-logs", "--max-parallel-models",
         "--max-parallel-evaluations", "--objective", "--tag",
-        "--no-tag", "--no-debug", "--no-dev", "--model-fields", "--balance",
+        "--no-tag", "--no-debug", "--model-fields", "--balance",
         "--verbosity", "--resume", "--stack_level", "--no-balance",
         "--args-separator", "--name"]
 

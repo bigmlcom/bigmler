@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2016-2019 BigML
+# Copyright 2019 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -24,6 +24,7 @@ import sys
 import bigml.api
 
 from bigml.supervised import SupervisedModel
+from bigml.fusion import Fusion
 from bigml.io import UnicodeWriter
 
 import bigmler.utils as u
@@ -77,10 +78,14 @@ def local_prediction(models, test_reader, output, args,
 
     """
     # Only one model at present
-    local_model = SupervisedModel(models[0],
-                                  api=args.retrieve_api_)
+    try:
+        bigml.api.get_fusion_id(models[0])
+        local_model = Fusion(models[0], api=args.retrieve_api_)
+    except ValueError:
+        local_model = SupervisedModel(models[0],
+                                      api=args.retrieve_api_)
     kwargs = {"full": True}
-    if has_value(args.operating_point_):
+    if has_value(args, "operating_point_"):
         kwargs.update({"operating_point": args.operating_point_})
     for input_data in test_reader:
         input_data_dict = test_reader.dict(input_data, filtering=False)

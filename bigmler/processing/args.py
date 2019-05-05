@@ -57,44 +57,58 @@ STORED_MODELS = ["model_file", "ensemble_file", "logistic_file",
                  "linear_file", "topic_model_file", "association_file",
                  "pca_file"]
 
+def has_value(args, attrs):
+    """Returns a list of booleans checking whether each attribute is set and
+       his value
+
+    """
+    if isinstance(attrs, list):
+        return [hasattr(args, attr) and getattr(args, attr)
+                for attr in attrs]
+    elif isinstance(attrs, basestring):
+        return hasattr(args, attrs) and getattr(args, attrs)
+    return false
+
+
 def has_test(args):
     """Returns if some kind of test data is given in args.
 
     """
-    return (args.test_set or args.test_source or args.test_dataset or
-            args.test_stdin or args.test_datasets)
+    return any(has_value(args, ["test_set", "test_source", "test_dataset",
+                                "test_stdin", "test_datasets"]))
 
 def has_ts_test(args):
     """Returns if some kind of test data for time series is given in args.
 
     """
-    return args.test_set or args.test_stdin or args.forecast or args.horizon
+    return any(has_value(args, ["test_set", "test_stdin", "forecast",
+                                "horizon"]))
 
 
 def has_train(args):
     """Returns if some kind of train data is given in args.
 
     """
-    return (args.training_set or args.source or args.dataset or
-            args.datasets or args.source_file or args.dataset_file or
-            args.train_stdin)
+    return any(has_value(args, ["training_set", "source", "dataset",
+                                "datasets", "source_file", "dataset_file",
+                                "train_stdin"]))
 
 
 def has_model(args):
     """Boolean that is set when any model option is used
 
     """
-    return (args.model or args.models or args.model_tag or args.model_file
-            or args.ensemble or args.ensembles or args.ensemble_tag
-            or args.ensemble_file)
+    return any(has_value(args, ["model", "models", "model_tag", "model_file",
+                                "ensemble", "ensembles", "ensemble_tag",
+                                "ensemble_file"]))
 
 
 def has_anomaly(args):
     """Boolean that is set when any anomaly option is used
 
     """
-    return (args.anomaly or args.anomalies or args.anomaly_tag or
-            args.anomaly_file)
+    return any(has_value(args, ["anomaly", "anomalies", "anomaly_tag",
+                                "anomaly_file"]))
 
 
 def non_compatible(args, option):
@@ -102,10 +116,10 @@ def non_compatible(args, option):
 
     """
     if option == '--cross-validation-rate':
-        return (args.test_set or args.evaluate or args.model or args.models or
-                args.model_tag or args.multi_label)
+        return has_value(args, ["test_set", "evaluate", "model",
+                                "models", "model_tag", "multi_label"])
     if option == '--max-categories':
-        return args.evaluate or args.test_split or args.remote
+        return has_value(args, ["evaluate", "test_split", "remote"])
     return False
 
 
@@ -790,6 +804,50 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
+    # Parses models list for fusions if provided.
+    try:
+        if command_args.fusion_models:
+            fusion_models_arg = [
+                model.strip() for model in command_args.fusion_models.split(
+                    command_args.args_separator)]
+            command_args.fusion_models_ = fusion_models_arg
+        else:
+            command_args.fusion_models_ = []
+    except AttributeError:
+        pass
+
+    # Parses models list for fusions if provided.
+    if not has_value(command_args, "fusion_models_"):
+        try:
+            if command_args.fusion_models_file:
+                fusion_models_arg = u.read_json(
+                    command_args.fusion_models_file)
+                command_args.fusion_models_ = fusion_models_arg
+            else:
+                command_args.fusion_models_ = []
+        except AttributeError:
+            pass
+
+    fusion_ids = []
+    try:
+        # Parses fusion/ids if provided.
+        if command_args.fusions:
+            fusion_ids = u.read_resources(command_args.fusions)
+        command_args.fusion_ids_ = fusion_ids
+    except AttributeError:
+        pass
+
+    # Retrieve fusion/ids if provided.
+    try:
+        if command_args.fusion_tag:
+            fusion_ids = (fusion_ids +
+                          u.list_ids(api.fusion_series,
+                                     "tags__in=%s" %
+                                     command_args.fusion_tag))
+        command_args.fusion_ids_ = fusion_ids
+    except AttributeError:
+        pass
+
     # Parses cluster names to generate datasets if provided
     try:
         if command_args.cluster_datasets:
@@ -937,6 +995,15 @@ def get_output_args(api, command_args, resume):
             command_args.json_query_ = u.read_json(command_args.json_query)
         else:
             command_args.json_query_ = None
+    except AttributeError:
+        pass
+
+    # Parses the models_file
+    try:
+        if command_args.models_file:
+            command_args.models_file_ = u.read_json(command_args.models_file)
+        else:
+            command_args.models_file_ = None
     except AttributeError:
         pass
 

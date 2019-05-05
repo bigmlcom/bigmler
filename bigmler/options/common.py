@@ -41,14 +41,6 @@ def get_common_options(defaults=None, constants=None):
             "default": defaults.get('debug', False),
             "help": "Activate debug level"},
 
-        # Uses BigML dev environment. Sizes must be under 16MB though.
-        '--dev': {
-            "action": 'store_true',
-            "dest": 'dev_mode',
-            "default": defaults.get('dev', False),
-            "help": ("Compute a test output using BigML FREE"
-                     " development environment.")},
-
         # BigML's username.
         '--username': {
             "action": 'store',
@@ -114,14 +106,6 @@ def get_common_options(defaults=None, constants=None):
             "dest": 'debug',
             "default": defaults.get('debug', False),
             "help": "Deactivate debug level."},
-
-        # Uses BigML standard environment.
-        '--no-dev': {
-            "action": 'store_false',
-            "dest": 'dev_mode',
-            "default": defaults.get('dev', False),
-            "help": ("Compute a test output using BigML "
-                     "standard development environment.")},
 
         # Turn on/off verbosity
         '--verbosity': {
