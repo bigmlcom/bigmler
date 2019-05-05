@@ -20,7 +20,7 @@
     api.ok(dataset1)
 
     args = \
-        {u'split_candidates': 32}
+        {}
     model1 = api.create_model(dataset1, args)
     api.ok(model1)
 

@@ -18,7 +18,7 @@ args = \
 dataset1 = api.create_dataset(source2, args)
 api.ok(dataset1)
 args = \
-{'split_candidates': 32}
+{}
 model1 = api.create_model(dataset1, args)
 api.ok(model1)
 args = \
