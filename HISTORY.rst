@@ -3,6 +3,11 @@
 History
 -------
 
+3.21.1 (2019-05-06)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing bug in bigmler whizzml when reading some options.
+
 3.21.0 (2019-04-16)
 ~~~~~~~~~~~~~~~~~~~
 

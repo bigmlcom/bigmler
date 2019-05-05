@@ -216,9 +216,16 @@ def args_to_dict(args):
         options with multiple values like --tag).
 
     """
+    full_args = []
+    for arg in args:
+        if arg.startswith("--"):
+            full_args.extend(arg.split("="))
+        else:
+            full_args.append(arg)
+
     args_dict = {}
     last_arg = None
-    for arg in args:
+    for arg in full_args:
         if arg.startswith("--"):
             last_arg = arg
             args_dict[arg] = args_dict.get(arg, [])
