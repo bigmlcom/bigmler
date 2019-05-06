@@ -17,9 +17,7 @@
     dataset1 = api.create_dataset(source2, args)
     api.ok(dataset1)
 
-    args = \
-        {}
-    model1 = api.create_model(dataset1, args)
+    model1 = api.create_model(dataset1)
     api.ok(model1)
 
     args = \
