@@ -131,6 +131,8 @@ def remote_prediction(model, test_dataset,
 
     model_id = bigml.api.get_resource_id( \
         model)
+    batch_prediction_args.update({"probability": True, "confidence": False})
+
     # if resuming, try to extract dataset form log files
     if resume:
         message = u.dated("Batch prediction not found. Resuming.\n")

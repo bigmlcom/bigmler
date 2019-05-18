@@ -37,8 +37,8 @@ def get_fusion_options(defaults=None):
             "help": ("Comma-separated list of models to be included "
                      "in the Fusion resource.")},
 
-        # If a list of BigML models is provided, the script will
-        # create a Fusion from them
+        # If a path to the JSON of model maps, the script will
+        # create a Fusion from it
         '--fusion-models-file': {
             "action": 'store',
             "dest": 'fusion_models_file',

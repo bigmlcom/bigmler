@@ -27,6 +27,8 @@ from bigmler.utils import storage_file_name, open_mode, decode2
 from bigmler.utils import PYTHON3
 from bigmler.tests.common_steps import check_debug
 from nose.tools import ok_, assert_equal, assert_not_equal
+import bigmler.tests.basic_tst_prediction_steps as test_pred
+import bigmler.tests.basic_deepnet_steps as test_dn
 
 
 def shell_execute(command, output, test=None, options=None,
@@ -62,58 +64,55 @@ def shell_execute(command, output, test=None, options=None,
         assert False, str(exc)
 
 
-
 #@step(r'I create BigML resources using model to test "(.*)" and log predictions in "(.*)"')
-def i_create_fs_resources_from_model(step, train=None, test=None, output=None):
-    ok_(train is not None and test is not None and output is not None)
+def i_create_fs_resources_from_model(step, test=None, output=None):
+    ok_(test is not None and output is not None)
     test = res_filename(test)
-    train = res_filename(train)
-    command = ("bigmler --train " +
-               train + " --store --output " +
-               output)
-    shell_execute(command, output, test=test)
-
-    command = ("bigmler deepnet --train " +
-               train + " --store --output " +
-               output)
-    shell_execute(command, output, test=test)
 
     models = [world.model["resource"], world.deepnet["resource"]]
-    command = ("bigmler fusion --models " +
-               models + " --test " +
-               test + " --store --output " +
+    command = ("bigmler fusion --fusion-models " +
+               ",".join(models) + " --test \"" +
+               test + "\" --store --output " +
                output)
     shell_execute(command, output, test=test)
 
 
 #@step(r'I create BigML resources using model to test "(.*)" as batch prediction and log predictions in "(.*)"')
-def i_create_fs_resources_from_model_remote(step, train=None, test=None, output=None):
-    ok_(train is not None and test is not None and output is not None)
+def i_create_fs_resources_from_model_remote(step, test=None, output=None):
+    ok_(test is not None and output is not None)
     test = res_filename(test)
-    setup_for_fusion(step, train, test, output)
 
     models = [world.model["resource"], world.deepnet["resource"]]
-    command = ("bigmler fusion --models " +
-               models + " --test " + test +
-               " --store --remote --output " +
+    command = ("bigmler fusion --fusion-models " +
+               ",".join(models) + " --test \"" + test +
+               "\" --store --remote --output " +
                output)
     shell_execute(command, output, test=test)
 
 #@step(r'I create BigML resources using model to test "(.*)" as batch prediction with output format "(.*)" and log predictions in "(.*)"')
-def i_create_fs_resources_from_model_remote_with_options(step, train=None, test=None, options_file=None, output=None):
-    ok_(train is not None and test is not None and output is not None and options_file is not None)
+def i_create_fs_resources_from_model_remote_with_options(step, test=None, output=None, options_file=None):
+    ok_(test is not None and output is not None and options_file is not None)
     test = res_filename(test)
     options_file = res_filename(options_file)
-    setup_for_fusion(step, train, test, output)
 
     models = [world.model["resource"], world.deepnet["resource"]]
-    command = ("bigmler fusion --models " +
-               models + " --test " + test +
-               " --batch-prediction-attributes " + options_file +
+    command = ("bigmler fusion --fusion-models " +
+               ",".join(models) + " --test \"" + test +
+               "\" --batch-prediction-attributes " + options_file +
                " --store --remote --output " +
                output)
     shell_execute(command, output, test=test)
 
+#@step(r'I create BigML resources using model to test "(.*)" and an evaluation and log predictions in "(.*)"')
+def i_create_fs_resources_from_mode_and_evaluate(step, output=None):
+    ok_(output is not None)
+    models = [world.model["resource"], world.deepnet["resource"]]
+    command = ("bigmler fusion --fusion-models " +
+               ",".join(models) + " --test-dataset \"" +
+               world.dataset["resource"] +
+               "\" --evaluate --store --remote --output " +
+               output)
+    shell_execute(command, output)
 
 #@step(r'I check that the fusion model has been created')
 def i_check_create_fusion(step):
@@ -128,26 +127,28 @@ def i_check_create_fusion(step):
     except Exception, exc:
         assert False, str(exc)
 
-def setup_for_fusion(step, train=None, test=None, output=None):
-    ok_(train is not None and test is not None and output is not None)
+def setup_for_fusion(step, train=None, output_dir=None):
     train = res_filename(train)
-    command = ("bigmler --train " +
-               train + " --store --output " +
-               output)
-    shell_execute(command, output, test=test)
+    command = ("bigmler --train \"" +
+               train + "\" --store --output-dir " +
+               output_dir)
+    shell_execute(command, "%s/predictions" % output_dir)
+    test_pred.i_check_create_source(step)
+    test_pred.i_check_create_dataset(step)
+    test_pred.i_check_create_model(step)
 
-    command = ("bigmler deepnet --train " +
-               train + " --store --output " +
-               output)
-    shell_execute(command, output, test=test)
-
+    command = ("bigmler deepnet --dataset \"" +
+               world.dataset["resource"] + "\" --store --output-dir " +
+               output_dir)
+    shell_execute(command, "%s/predictions" % output_dir)
+    test_dn.i_check_create_dn_model(step)
 
 #@step(r'I create BigML fusion resources uploading train "(.*)" file to evaluate and log evaluation in "([^"]*)"$')
 def i_create_all_fs_resources_to_evaluate(step, train=None, test=None, output=None):
-    setup_for_fusion(step, train, test, output)
     models = [world.model["resource"], world.deepnet["resource"]]
-    command = ("bigmler fusion --models " + models + " --test " +
+    command = ("bigmler fusion --fusion-models " + ",".join(models) +
+               " --test \"" +
                test +
-               " --evaluate" +
+               "\" --evaluate" +
                " --store --output " + output)
     shell_execute(command, output)

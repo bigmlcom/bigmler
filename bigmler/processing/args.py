@@ -50,7 +50,7 @@ RESOURCE_TYPES = ["source", "dataset", "model", "ensemble", "batch_prediction",
                   "anomaly_score", "batch_anomaly_score", "project", "sample",
                   "association", "logistic_regression", "deepnet", "script",
                   "library", "execution", "evaluation", "topic_model",
-                  "linear_regression"]
+                  "linear_regression", "fusion", "prediction", "pca"]
 
 STORED_MODELS = ["model_file", "ensemble_file", "logistic_file",
                  "cluster_file", "anomaly_file", "deepnet_file",

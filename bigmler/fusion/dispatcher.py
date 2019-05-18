@@ -35,6 +35,7 @@ from bigmler.defaults import DEFAULTS_FILE
 from bigmler.sl_prediction import prediction, remote_prediction
 from bigmler.reports import clear_reports, upload_reports
 from bigmler.command import get_context
+from bigmler.evaluation import evaluate
 from bigmler.dispatcher import (SESSIONS_LOG,
                                 clear_log_files, get_test_dataset,
                                 get_objective_id)
@@ -64,6 +65,8 @@ def fusion_dispatcher(args=sys.argv[1:]):
 
     settings = {}
     settings.update(SETTINGS)
+    if '--evaluate' in args:
+        settings.update({"default_output": "evaluation"})
 
     command_args, command, api, session_file, resume = get_context(args,
                                                                    settings)
@@ -116,7 +119,6 @@ def compute_output(api, args):
         fusion_ids = [fusion]
     else:
         # fusion is retrieved from the remote object or created
-        print "create fusion"
         fusion, resume = \
             pf.fusion_processing( \
             fusion, fusion_ids, \
@@ -153,7 +155,7 @@ def compute_output(api, args):
 
     # We get the fields of the fusion if we haven't got
     # them yet and need them
-    if fusion and args.test_set:
+    if fusion and (args.test_set or args.evaluate):
         fields = pf.get_fusion_fields( \
             fusion, csv_properties, args)
 
@@ -191,18 +193,41 @@ def compute_output(api, args):
                                   objective_field_present=False)
             test_fields = pd.get_fields_structure(test_dataset,
                                                   csv_properties)
-            batch_prediction_args = r.set_batch_prediction_args(
-                args, fields=fields,
-                dataset_fields=test_fields)
+            if not args.evaluate:
+                batch_prediction_args = r.set_batch_prediction_args(
+                    args, fields=fields,
+                    dataset_fields=test_fields)
 
-            remote_prediction(fusion, test_dataset, \
-                batch_prediction_args, args, \
-                api, resume, prediction_file=output, \
-                session_file=session_file, path=path, log=log)
+                remote_prediction(fusion, test_dataset, \
+                    batch_prediction_args, args, \
+                    api, resume, prediction_file=output, \
+                    session_file=session_file, path=path, log=log)
 
         else:
             prediction([fusion], fields, args,
                        session_file=session_file)
+
+
+    # If evaluate flag is on, create remote evaluation and save results in
+    # json and human-readable format.
+    if args.evaluate:
+        # When we resume evaluation and models were already completed, we
+        # should use the datasets array as test datasets
+        args.max_parallel_evaluations = 1 # only one evaluation at present
+        args.cross_validation_rate = 0 # no cross-validation
+        args.number_of_evaluations = 1 # only one evaluation
+        if args.has_test_datasets_:
+            test_dataset = get_test_dataset(args)
+            dataset = test_dataset
+            dataset = u.check_resource(dataset, api=api,
+                                       query_string=r.ALL_FIELDS_QS)
+            dataset_fields = pd.get_fields_structure(dataset, None)
+            resume = evaluate([fusion], [dataset], api,
+                              args, resume,
+                              fields=fields, dataset_fields=dataset_fields,
+                              session_file=session_file, path=path,
+                              log=log,
+                              objective_field=args.objective_field)
 
 
     u.print_generated_files(path, log_file=session_file,

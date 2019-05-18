@@ -36,6 +36,7 @@ from subprocess import check_call
 MAX_RETRIES = 10
 RESOURCE_TYPES = [
     'cluster',
+    'fusion',
     'source',
     'dataset',
     'model',
@@ -165,10 +166,14 @@ class World(object):
         self.api = BigML(self.USERNAME, self.API_KEY, debug=self.api_debug)
         print self.api.connection_info()
         output_dir = "./last_run"
+        dirs = []
         for _, subFolders, _ in os.walk("./"):
             for folder in subFolders:
                 if folder.startswith("scenario"):
-                    bigmler_delete(folder, output_dir=output_dir)
+                    dirs.append(folder)
+        dirs.reverse()
+        for folder in dirs:
+            bigmler_delete(folder, output_dir=output_dir)
         if os.path.exists(output_dir):
             shutil.rmtree(output_dir)
 
@@ -218,7 +223,7 @@ class World(object):
 
         """
         for resource_type in RESOURCE_TYPES:
-            object_list = getattr(self, plural(resource_type))
+            object_list = set(getattr(self, plural(resource_type)))
             if object_list:
                 print "Deleting %s %s" % (len(object_list),
                                           plural(resource_type))

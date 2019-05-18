@@ -1195,7 +1195,7 @@ def set_evaluation_args(args, fields=None,
     # Two cases to use out_of_bag and sample_rate: standard evaluations where
     # only the training set is provided, and cross_validation
     # [--dataset|--test] [--model|--models|--model-tag|--ensemble] --evaluate
-    if ((args.dataset or args.test_set)
+    if (((hasattr(args, "dataset") and args.dataset) or args.test_set)
             and args.has_supervised_):
         return evaluation_args
     # [--train|--dataset] --test-split --evaluate
@@ -1404,7 +1404,8 @@ def set_batch_prediction_args(args, fields=None,
                                      fields, dataset_fields)})
 
     if args.prediction_info in [NORMAL_FORMAT, FULL_FORMAT]:
-        if hasattr(args, 'boosting') and args.boosting:
+        if (hasattr(args, 'boosting') and args.boosting) or \
+                (hasattr(args, 'probability') and args.probability):
             batch_prediction_args.update(probability=True)
         else:
             batch_prediction_args.update(confidence=True)

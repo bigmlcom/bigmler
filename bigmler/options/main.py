@@ -270,6 +270,20 @@ def get_main_options(defaults=None, constants=None):
             'default': defaults.get('prediction_fields', None),
             'help': "Fields added to the prediction file."},
 
+        # Probability: Includes the probability associated to the prediction
+        '--probability': {
+            'action': 'store_true',
+            'dest': 'probability',
+            'default': defaults.get('probability', False),
+            'help': ("Adding the probability to predictions.")},
+
+        # Probability: Includes the probability associated to the prediction
+        '--no-probability': {
+            'action': 'store_false',
+            'dest': 'probability',
+            'default': defaults.get('probability', False),
+            'help': ("Predictions don't include probability.")},
+
         # Max number of ensembles to create in parallel.
         '--max-parallel-ensembles': {
             'action': 'store',
@@ -399,6 +413,14 @@ def get_main_options(defaults=None, constants=None):
             'dest': 'batch_prediction_attributes',
             'default': defaults.get('batch_prediction_attributes', None),
             'help': ("Path to a json file describing batch prediction"
+                     " attributes.")},
+
+        # The path to a file containing prediction attributes.
+        '--prediction-attributes': {
+            'action': 'store',
+            'dest': 'prediction_attributes',
+            'default': defaults.get('prediction_attributes', None),
+            'help': ("Path to a json file describing prediction"
                      " attributes.")},
 
         # Weight-field. Use the contents of the given field as weights.

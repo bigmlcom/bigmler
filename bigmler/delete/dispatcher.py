@@ -44,6 +44,8 @@ RESOURCES_LOG_FILES = set(['project', 'source', 'dataset', 'dataset_train',
                            'clusters', 'batch_prediction', 'batch_centroid',
                            'anomalies', 'batch_anomaly_score', 'sample',
                            'associations', 'time_series', "deepnets",
+                           'fusions', 'pcas', 'batch_projection',
+                           'linear_regressions', 'logistic_regressions',
                            'scripts', 'library', 'execution'])
 STATUS_CODES = {
     "finished": bigml.api.FINISHED,
@@ -59,6 +61,7 @@ STATUS_CODES = {
 }
 
 GROUP_RESOURCES = ["project", "execution"]
+COMPOSED_RESOURCES = ["cluster", "ensemble", "fusion"]
 
 
 def retrieve_resources(directory):
@@ -161,25 +164,38 @@ def get_date(reference, api):
 
 
 def resources_by_type(resources_list, bulk_deletion=False):
-    """Sorts resources by type. Datasets are shifted to the bottom of the
-       list to avoid problems deleting cluster-related datasets, if possible.
+    """Sorts resources by type. Projects and executions are deleted first.
+       Then clusters, fusions and ensembles and finally the rest of resources
        Returns aggregations by type.
        If bulk_deletion is set, then only projects or executions are kept
     """
     type_summary = {}
-    resources_list.sort()
-    if bulk_deletion:
-        new_resources_list = []
+    groups = []
+    composed = []
+    simple = []
     for resource in resources_list:
         resource_type = bigml.api.get_resource_type(resource)
-        if not bulk_deletion or resource_type in GROUP_RESOURCES:
-            if not resource_type in type_summary:
-                type_summary[resource_type] = 0
-            type_summary[resource_type] += 1
-            if bulk_deletion:
-                new_resources_list.append(resource)
-    if bulk_deletion:
-        resources_list = new_resources_list
+        if resource_type in GROUP_RESOURCES:
+            groups.append(resource)
+        elif resource_type in COMPOSED_RESOURCES:
+            composed.append(resource)
+        else:
+            simple.append(resource)
+
+    new_resources_list = []
+    groups.sort()
+    resources_list = groups
+    if not bulk_deletion:
+        composed.sort()
+        simple.sort()
+        resources_list.extend(composed)
+        resources_list.extend(simple)
+
+    for resource in resources_list:
+        resource_type = bigml.api.get_resource_type(resource)
+        if not resource_type in type_summary:
+            type_summary[resource_type] = 0
+        type_summary[resource_type] += 1
     return type_summary, resources_list
 
 
@@ -236,6 +252,12 @@ def filtered_selectors(args, api):
         ("timeseries", args.time_series_tag, api.list_time_series, None),
         ("forecast", args.forecast_tag, api.list_forecasts, None),
         ("deepnet", args.deepnet_tag, api.list_deepnets, None),
+        ("fusion", args.fusion_tag, api.list_fusions, None),
+        ("pca", args.pca_tag, api.list_pcas, None),
+        ("projection", args.projection_tag, api.list_projections, None),
+        ("batch_projection", args.batch_projections_tag, api.list_batch_projections, None),
+        ("linearregression", args.linear_regression_tag,
+         api.list_linear_regressions, None),
         ("script", args.script_tag, api.list_scripts, None),
         ("library", args.library_tag, api.list_libraries, None)]
 

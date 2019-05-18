@@ -110,6 +110,14 @@ def get_pca_options(defaults=None):
             'help': ("Path to a json file describing batch projection"
                      " attributes.")},
 
+        # The path to a file containing projection attributes.
+        '--projection-attributes': {
+            'action': 'store',
+            'dest': 'projection_attributes',
+            'default': defaults.get('projection_attributes', None),
+            'help': ("Path to a json file describing projection"
+                     " attributes.")},
+
         # Projection header. If set, headers are added to the projection file.
         '--projection-header': {
             'action': 'store_true',

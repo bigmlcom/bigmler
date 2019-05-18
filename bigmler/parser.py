@@ -362,6 +362,10 @@ under the License.""" % version
             '--number-of-evaluations'],
         '--batch-prediction-attributes': main_options[
             '--batch-prediction-attributes'],
+        '--prediction-attributes': main_options[
+            '--prediction-attributes'],
+        '--prediction-tag': delete_options['--prediction-tag'],
+        '--batch-prediction-tag': delete_options['--batch-prediction-tag'],
         '--no-no-csv': main_options['--no-no-csv']})
 
 
@@ -408,6 +412,10 @@ under the License.""" % version
             '--number-of-evaluations'],
         '--batch-prediction-attributes': main_options[
             '--batch-prediction-attributes'],
+        '--prediction-attributes': main_options[
+            '--prediction-attributes'],
+        '--prediction-tag': delete_options['--prediction-tag'],
+        '--batch-prediction-tag': delete_options['--batch-prediction-tag'],
         '--no-no-csv': main_options['--no-no-csv']})
 
 
@@ -534,6 +542,10 @@ under the License.""" % version
             '--number-of-evaluations'],
         '--batch-prediction-attributes': main_options[
             '--batch-prediction-attributes'],
+        '--prediction-attributes': main_options[
+            '--prediction-attributes'],
+        '--prediction-tag': delete_options['--prediction-tag'],
+        '--batch-prediction-tag': delete_options['--batch-prediction-tag'],
         '--no-no-csv': main_options['--no-no-csv']})
 
     defaults = general_defaults["BigMLer PCA"]
@@ -574,13 +586,38 @@ under the License.""" % version
     # general options
     subcommand_options["fusion"].update(common_options)
     subcommand_options["fusion"].update(test_options)
+    subcommand_options["fusion"].update(source_options)
+    subcommand_options["fusion"].update(dataset_options)
+    del(subcommand_options["fusion"]["--train"])
+    del(subcommand_options["fusion"]["--source"])
+    del(subcommand_options["fusion"]["--source-file"])
+    del(subcommand_options["fusion"]["--dataset"])
+    del(subcommand_options["fusion"]["--datasets"])
+    del(subcommand_options["fusion"]["--dataset-file"])
     subcommand_options["fusion"].update({
         '--prediction-info': main_options['--prediction-info'],
         '--prediction-header': main_options['--prediction-header'],
         '--prediction-fields': main_options['--prediction-fields'],
         '--operating-point': main_options['--operating-point'],
         '--reports': main_options['--reports'],
+         '--project-id': source_options['--project-id'],
+         '--project': source_options['--project'],
         '--remote': main_options['--remote'],
+        '--batch-prediction-attributes': main_options[
+            '--batch-prediction-attributes'],
+        '--prediction-attributes': main_options[
+            '--prediction-attributes'],
+        '--prediction-tag': delete_options['--prediction-tag'],
+        '--batch-prediction-tag': delete_options['--batch-prediction-tag'],
+        '--no-batch': main_options['--no-batch'],
+        '--evaluate': main_options['--evaluate'],
+        '--to-dataset': main_options['--to-dataset'],
+        '--no-csv': main_options['--no-csv'],
+        '--fields-map': main_options['--fields-map'],
+        '--dataset-off': main_options['--dataset-off'],
+        '--no-no-csv': main_options['--no-no-csv'],
+        '--locale': main_options['--locale'],
+        '--training-separator': main_options['--training-separator'],
         '--fusion-tag': delete_options['--fusion-tag']})
 
     subparser = subparsers.add_parser(subcommand)
