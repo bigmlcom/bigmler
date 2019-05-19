@@ -116,10 +116,10 @@ def non_compatible(args, option):
 
     """
     if option == '--cross-validation-rate':
-        return has_value(args, ["test_set", "evaluate", "model",
-                                "models", "model_tag", "multi_label"])
+        return any(has_value(args, ["test_set", "evaluate", "model",
+                                    "models", "model_tag", "multi_label"]))
     if option == '--max-categories':
-        return has_value(args, ["evaluate", "test_split", "remote"])
+        return any(has_value(args, ["evaluate", "test_split", "remote"]))
     return False
 
 

@@ -75,7 +75,7 @@ def get_fusion_options(defaults=None):
             'default': defaults.get('fusion_file', None),
             'help': "BigML Fusion JSON structure file."},
 
-        # The path to a file containing PCA attributes.
+        # The path to a file containing Fusion attributes.
         '--fusion-attributes': {
             'action': 'store',
             'dest': 'fusion_attributes',

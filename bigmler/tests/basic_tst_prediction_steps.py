@@ -747,6 +747,7 @@ def i_create_cross_validation_from_dataset( \
         ok_(retcode >= 0)
         world.output = output
     except (OSError, CalledProcessError, IOError) as exc:
+        print "command: ", command
         assert False, str(exc)
 
 
@@ -766,6 +767,7 @@ def i_find_predictions_files( \
         world.test_lines = file_number_of_lines("%s%spredictions.csv" % (directory1, os.sep))
         world.output = output
     except (OSError, CalledProcessError, IOError) as exc:
+        print "command: ", command
         assert False, str(exc)
 
 
@@ -787,6 +789,7 @@ def i_find_predictions_files_with_method( \
             directory1, os.sep))
         world.output = output
     except (OSError, CalledProcessError, IOError) as exc:
+        print "command: ", command
         assert False, str(exc)
 
 #@step(r'I create a BigML balanced model from "(.*)" and store logs in "(.*)"')
@@ -803,6 +806,7 @@ def i_create_balanced_model(step, data=None, output_dir=None):
         retcode = check_call(command, shell=True)
         ok_(retcode >= 0)
     except (OSError, CalledProcessError, IOError) as exc:
+        print "command: ", command
         assert False, str(exc)
 
 #@step(r'I create a BigML balanced model from "(.*)" sampling 50% and store logs in "(.*)"')
@@ -819,6 +823,7 @@ def i_create_balanced_model_from_sample(step, data=None, output_dir=None):
         retcode = check_call(command, shell=True)
         ok_(retcode >= 0)
     except (OSError, CalledProcessError, IOError) as exc:
+        print "command: ", command
         assert False, str(exc)
     try:
         command = ("bigmler --datasets " + output_dir + "/dataset" +
@@ -839,6 +844,7 @@ def i_create_balanced_model_from_sample(step, data=None, output_dir=None):
         retcode = check_call(command, shell=True)
         ok_(retcode >= 0)
     except (OSError, CalledProcessError, IOError) as exc:
+        print "command: ", command
         assert False, str(exc)
 
 
@@ -859,6 +865,7 @@ def i_create_weighted_field_model( \
         retcode = check_call(command, shell=True)
         ok_(retcode >= 0)
     except (OSError, CalledProcessError, IOError) as exc:
+        print "command: ", command
         assert False, str(exc)
 
 
@@ -895,6 +902,7 @@ def i_retrain_model(step, data=None, output_dir=None):
         retcode = check_call(command, shell=True)
         ok_(retcode >= 0)
     except (OSError, CalledProcessError, IOError) as exc:
+        print "command: ", command
         assert False, str(exc)
 
 #@step(r'I check that the source has been created$')

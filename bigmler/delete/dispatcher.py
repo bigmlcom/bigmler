@@ -61,7 +61,7 @@ STATUS_CODES = {
 }
 
 GROUP_RESOURCES = ["project", "execution"]
-COMPOSED_RESOURCES = ["cluster", "ensemble", "fusion"]
+COMPOSED_RESOURCES = ["cluster", "ensemble", "fusion", "composites"]
 
 
 def retrieve_resources(directory):
