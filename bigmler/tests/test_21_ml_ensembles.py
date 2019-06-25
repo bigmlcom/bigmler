@@ -23,7 +23,7 @@ from __future__ import absolute_import
 
 
 from bigmler.tests.world import (world, common_setup_module,
-                                 common_teardown_module, teardown_class)
+                                 common_teardown_module, teardown_class, PY3)
 
 import bigmler.tests.basic_tst_prediction_steps as test_pred
 import bigmler.tests.ml_tst_prediction_steps as ml_pred
@@ -76,7 +76,7 @@ class TestMLEnsembles(object):
         """
         print self.setup_scenario1.__doc__
         examples = [
-            ['my_multilabel_1', ':', '7', 'data/multilabel.csv', ',', '10', 'data/test_multilabel.csv', 'scenario_mle_1/predictions.csv']]
+            ['my_multilabel_1%s' % PY3, ':', '7', 'data/multilabel.csv', ',', '10', 'data/test_multilabel.csv', 'scenario_mle_1/predictions.csv']]
         for example in examples:
             print "\nTesting with:\n", example
             ml_pred.i_create_all_ml_resources_and_ensembles(self, tag=example[0], label_separator=example[1], number_of_labels=example[2], data=example[3], training_separator=example[4], number_of_models=example[5], test=example[6], output=example[7])
@@ -100,7 +100,7 @@ class TestMLEnsembles(object):
         """
         print self.test_scenario2.__doc__
         examples = [
-            ['scenario_mle_1', '{"tag": "my_multilabel_1", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_mle_1/predictions.csv", "test": "data/test_multilabel.csv", "number_of_models": 10}', '10', 'data/test_multilabel.csv', 'scenario_mle_2/predictions.csv']]
+            ['scenario_mle_1', '{"tag": "my_multilabel_1%s", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_mle_1/predictions.csv", "test": "data/test_multilabel.csv", "number_of_models": 10}' % PY3, '10', 'data/test_multilabel.csv', 'scenario_mle_2/predictions.csv']]
         for example in examples:
             print "\nTesting with:\n", example
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
@@ -123,7 +123,7 @@ class TestMLEnsembles(object):
         """
         print self.test_scenario3.__doc__
         examples = [
-            ['scenario_mle_1', '{"tag": "my_multilabel_1", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_mle_1/predictions.csv", "test": "data/test_multilabel.csv", "number_of_models": 10}', '10', 'data/test_multilabel.csv', 'scenario_mle_3/predictions.csv']]
+            ['scenario_mle_1', '{"tag": "my_multilabel_1%s", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_mle_1/predictions.csv", "test": "data/test_multilabel.csv", "number_of_models": 10}' % PY3, '10', 'data/test_multilabel.csv', 'scenario_mle_3/predictions.csv']]
         for example in examples:
             print "\nTesting with:\n", example
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
