@@ -277,7 +277,7 @@ def get_main_options(defaults=None, constants=None):
             'default': defaults.get('probability', False),
             'help': ("Adding the probability to predictions.")},
 
-        # Probability: Includes the probability associated to the prediction
+        # No_probability: Does not include the probability of the prediction
         '--no-probability': {
             'action': 'store_false',
             'dest': 'probability',

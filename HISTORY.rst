@@ -3,6 +3,11 @@
 History
 -------
 
+3.23.0 (2019-06-26)
+~~~~~~~~~~~~~~~~~~~
+
+- Changing the underlying Python bindings version.
+
 3.22.0 (2019-05-14)
 ~~~~~~~~~~~~~~~~~~~
 

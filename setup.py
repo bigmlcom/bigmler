@@ -58,7 +58,7 @@ setuptools.setup(
                 'bigmler.export', 'bigmler.export.out_model',
                 'bigmler.linearregression', 'bigmler.pca', 'bigmler.fusion',
                 'bigmler.dataset', 'bigmler.export.out_tree'],
-    install_requires = ['bigml>=4.22.0, <4.23.0',
+    install_requires = ['bigml>=4.23.1, <4.24.0',
                         'jsonschema==2.6.0',
                         'nbformat>=4.4.0'],
     package_data={'bigmler':['static/*.json',
