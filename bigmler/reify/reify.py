@@ -93,8 +93,12 @@ def python_output(resource_id, workflow, api):
     for step in workflow:
         for (cell_type, cell_text) in step.items():
             if cell_type == "args":
+                args = json.loads(cell_text)
+                if "all_fields" in args and args["all_fields"] and \
+                    "new_fields" not in args:
+                    del args["all_fields"]
                 cell_text = "args = \\\n    %s" % pprint.pformat( \
-                    json.loads(cell_text)).replace("\n", "\n    ")
+                    args).replace("\n", "\n    ")
                 cell_type = "code"
             if cell_type != "markdown":
                 cell_text = "    %s" % cell_text.replace("\n", "\n    ")

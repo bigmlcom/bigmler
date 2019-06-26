@@ -24,8 +24,7 @@ args = \
 dataset2 = api.create_dataset(dataset1, args)
 api.ok(dataset2)
 args = \
-{'input_fields': ['000000', '000001', '000002', '000003', '000004'],
-'objective_field': {'id': '000004'},
+{'objective_field': {'id': '000004'},
 'out_of_bag': True,
 'sample_rate': 0.7,
 'seed': 'BigML'}

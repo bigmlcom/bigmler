@@ -12,23 +12,21 @@
          }
     source2 = api.create_source(source1_file, args)
     api.ok(source2)
-    
+
     args = \
-        {u'input_fields': [u'000000', u'000001', u'000002', u'000003', u'000004'],
-         u'objective_field': {u'id': u'000004'},
+        {u'objective_field': {u'id': u'000004'},
          }
     dataset1 = api.create_dataset(source2, args)
     api.ok(dataset1)
-    
+
     args = \
         {u'objective_field': {u'id': u'000004'},
          }
     dataset2 = api.create_dataset(source2, args)
     api.ok(dataset2)
-    
+
     args = \
         {u'objective_field': {u'id': u'000004'},
          }
     dataset3 = api.create_dataset([dataset2 dataset1], args)
     api.ok(dataset3)
-    

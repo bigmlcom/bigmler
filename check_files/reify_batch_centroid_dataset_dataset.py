@@ -37,9 +37,8 @@
     api.ok(dataset3)
 
     args = \
-        {u'all_fields': False,
-         u'new_fields': [{u'field': u'(all)', u'names': [u'cluster']},
-                         {u'field': u'( integer ( replace ( field "cluster" ) "Cluster " "" ) )',
+        {u'all_fields': True,
+         u'new_fields': [{u'field': u'( integer ( replace ( field "cluster" ) "Cluster " "" ) )',
                           u'names': [u'Cluster']}],
          u'objective_field': {u'id': u'100000'}}
     dataset4 = api.create_dataset(dataset3, args)

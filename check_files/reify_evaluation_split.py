@@ -27,8 +27,7 @@
     api.ok(dataset2)
 
     args = \
-        {u'input_fields': [u'000000', u'000001', u'000002', u'000003', u'000004'],
-         u'objective_field': {u'id': u'000004'},
+        {u'objective_field': {u'id': u'000004'},
          u'out_of_bag': True,
                   u'sample_rate': 0.7,
          u'seed': u'BigML'}

@@ -13,8 +13,7 @@ args = \
 source2 = api.create_source(source1_file, args)
 api.ok(source2)
 args = \
-{'input_fields': ['000000', '000001', '000002', '000003', '000004'],
-'objective_field': {'id': '000004'},
+{'objective_field': {'id': '000004'},
 }
 dataset1 = api.create_dataset(source2, args)
 api.ok(dataset1)

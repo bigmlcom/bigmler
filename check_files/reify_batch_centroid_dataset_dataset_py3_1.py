@@ -31,9 +31,8 @@ args = \
 dataset3 = api.update_dataset(dataset2, args)
 api.ok(dataset3)
 args = \
-{'all_fields': False,
-'new_fields': [{'field': '(all)', 'names': ['cluster']},
-{'field': '( integer ( replace ( field "cluster" ) "Cluster " '
+{'all_fields': True,
+'new_fields': [{'field': '( integer ( replace ( field "cluster" ) "Cluster " '
 '"" ) )',
 'names': ['Cluster']}],
 'objective_field': {'id': '100000'}}
