@@ -458,7 +458,6 @@ def check_resource_error(resource, message):
                 error_message = resource['error']['status']['message']
         except TypeError:
             status = bigml.api.get_status(resource)
-            print status
             if status.get('error') is not None:
                 error_message = status["message"]
         sys.exit("%s%s" % (message, error_message))

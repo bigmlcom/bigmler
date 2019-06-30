@@ -177,7 +177,7 @@ class TestML(object):
         """
         print self.test_scenario5.__doc__
         examples = [
-            ['scenario_ml_6', '{"tag": "my_multilabel_5%s", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_ml_6/predictions.csv", "test": "data/test_multilabel.csv"}' % PY3, 'my_multilabel_5', 'data/test_multilabel.csv', 'scenario_ml_5/predictions.csv', 'check_files/predictions_ml_comma.csv']]
+            ['scenario_ml_6', '{"tag": "my_multilabel_5%s", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_ml_6/predictions.csv", "test": "data/test_multilabel.csv"}' % PY3, 'my_multilabel_5%s' % PY3, 'data/test_multilabel.csv', 'scenario_ml_5/predictions.csv', 'check_files/predictions_ml_comma.csv']]
         for example in examples:
             print "\nTesting with:\n", example
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
@@ -200,7 +200,7 @@ class TestML(object):
         """
         print self.test_scenario6.__doc__
         examples = [
-            ['scenario_ml_6', '{"tag": "my_multilabel_5%s", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_ml_6/predictions.csv", "test": "data/test_multilabel.csv"}' % PY3, 'Adult,Student', 'my_multilabel_5', 'data/test_multilabel.csv', 'scenario_ml_7/predictions.csv', 'check_files/predictions_ml_labels.csv']]
+            ['scenario_ml_6', '{"tag": "my_multilabel_5%s", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_ml_6/predictions.csv", "test": "data/test_multilabel.csv"}' % PY3, 'Adult,Student', 'my_multilabel_5%s' % PY3, 'data/test_multilabel.csv', 'scenario_ml_7/predictions.csv', 'check_files/predictions_ml_labels.csv']]
         for example in examples:
             print "\nTesting with:\n", example
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
