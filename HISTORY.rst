@@ -3,6 +3,12 @@
 History
 -------
 
+3.23.1 (2019-08-08)
+~~~~~~~~~~~~~~~~~~~
+
+- Changing the underlying Python bindings version to fix local linear
+  regression predictions when `scipy` is not installed.
+
 3.23.0 (2019-06-26)
 ~~~~~~~~~~~~~~~~~~~
 
