@@ -125,13 +125,29 @@ def i_create_resources_in_mode_from_ensemble( \
 #@step(r'I create BigML resources uploading train "(.*?)" file with
 # split field "(.*?)" and log in "([^"]*)"$')
 def i_create_all_resources_with_split_field(step, data=None,
-                                       split_field=None,
-                                       objective=None,
-                                       output_dir=None):
+                                            split_field=None,
+                                            objective=None,
+                                            output_dir=None):
     ok_(data is not None and split_field is not None
         and objective is not None and output_dir is not None)
     command = ("bigmler --train " + res_filename(data) +
                " --split-field \"" + split_field +
+               "\" --objective \"" + objective +
+               "\" --store --output-dir " + output_dir +
+               " --max-batch-models 1 --no-fast")
+    shell_execute(command, "%s/xxx" % output_dir)
+
+
+#@step(r'I create BigML resources uploading train "(.*?)" file with
+# focus field "(.*?)" and log in "([^"]*)"$')
+def i_create_all_resources_with_focus_field(step, data=None,
+                                            focus_field=None,
+                                            objective=None,
+                                            output_dir=None):
+    ok_(data is not None and focus_field is not None
+        and objective is not None and output_dir is not None)
+    command = ("bigmler --train " + res_filename(data) +
+               " --focus-field \"" + focus_field +
                "\" --objective \"" + objective +
                "\" --store --output-dir " + output_dir +
                " --max-batch-models 1 --no-fast")

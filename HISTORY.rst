@@ -6,7 +6,7 @@ History
 3.24.0 (2019-09-20)
 ~~~~~~~~~~~~~~~~~~~
 
-- Adding --split-field option to bigmler.
+- Adding --split-field and --focus-field options to bigmler.
 
 3.23.1 (2019-08-08)
 ~~~~~~~~~~~~~~~~~~~

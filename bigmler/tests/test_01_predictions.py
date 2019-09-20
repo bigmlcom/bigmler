@@ -768,3 +768,29 @@ class TestPrediction(object):
             test_pred.i_check_create_dataset(self, suffix=None)
             test_pred.i_check_create_model(self)
             test_pred.i_check_first_node_children(self, example[4])
+
+
+    def test_scenario28(self):
+        """
+        Scenario: Successfully building test predictions from start with focus field:
+            Given I create BigML resources uploading train "<data>" file with focus field "<focus_field>" and objective "<objeciive>" and log in "<output-dir>"
+            And I check that the source has been created
+            And I check that the dataset has been created
+            And I check that the model has been created
+            And I check that the first node has <children> branches
+
+            Examples:
+            | data               | split-field           |objective  | output-dir               |children           |
+
+        """
+
+        examples = [
+            ['data/iris.csv', 'sepal length', 'species', 'scenario27', 2]]
+        show_doc(self.test_scenario28, examples)
+        for example in examples:
+            print "\nTesting with:\n", example
+            test_pred.i_create_all_resources_with_focus_field(self, example[0], example[2], example[1], example[3])
+            test_pred.i_check_create_source(self)
+            test_pred.i_check_create_dataset(self, suffix=None)
+            test_pred.i_check_create_model(self)
+            test_pred.i_check_first_node_children(self, example[4])

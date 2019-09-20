@@ -487,6 +487,16 @@ def get_main_options(defaults=None, constants=None):
                      " split of the model. One branch per category will"
                      " be created.")},
 
+        # Set it to use the fields and the first node will split in one
+        # branch per category using binary splits (only for categorical fields)
+        '--focus-field': {
+            'action': 'store',
+            'dest': 'focus_field',
+            'default': defaults.get('focus_field', False),
+            'help': ("Name of the field that should be used in the first"
+                     " split of the model. One branch per category will"
+                     " be created.")},
+
         # Random candidates: Number of fields to be selected at random in
         # ensembles construction
         '--random-candidates': {

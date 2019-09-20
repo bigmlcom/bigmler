@@ -668,6 +668,9 @@ def set_model_args(args, name=None, objective_id=None, fields=None,
     if args.split_field:
         model_args.update(split_field=args.split_field)
 
+    if args.focus_field:
+        model_args.update(focus_field=args.focus_field)
+
     if args.weight_field:
         try:
             weight_field = fields.field_id(args.weight_field)
