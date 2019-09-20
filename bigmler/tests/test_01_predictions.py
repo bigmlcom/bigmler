@@ -759,7 +759,7 @@ class TestPrediction(object):
         """
 
         examples = [
-            ['data/iris.csv', 'sepal length', 'species', 'scenario27', 3]]
+            ['data/iris.csv', 'sepal length', '000004', 'scenario27', 3]]
         show_doc(self.test_scenario27, examples)
         for example in examples:
             print "\nTesting with:\n", example
@@ -767,8 +767,7 @@ class TestPrediction(object):
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
             test_pred.i_check_create_model(self)
-            test_pred.i_check_first_node_children(self, example[4])
-
+            test_pred.i_check_first_node_children(self, example[4], example[2])
 
     def test_scenario28(self):
         """
@@ -780,12 +779,12 @@ class TestPrediction(object):
             And I check that the first node has <children> branches
 
             Examples:
-            | data               | split-field           |objective  | output-dir               |children           |
+            | data               | focus-field           |objective  | output-dir               |children           |
 
         """
 
         examples = [
-            ['data/iris.csv', 'sepal length', 'species', 'scenario27', 2]]
+            ['data/iris.csv', 'sepal length', '000004', 'scenario28', 2]]
         show_doc(self.test_scenario28, examples)
         for example in examples:
             print "\nTesting with:\n", example
@@ -793,4 +792,4 @@ class TestPrediction(object):
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
             test_pred.i_check_create_model(self)
-            test_pred.i_check_first_node_children(self, example[4])
+            test_pred.i_check_first_node_children(self, example[4], example[2])

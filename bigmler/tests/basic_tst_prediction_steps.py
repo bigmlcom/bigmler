@@ -1088,13 +1088,15 @@ def i_check_weighted_model(step, field=None):
             world.model['object']['weight_field'] == field)
 
 
-#@step(r'I check that the model uses as weight "(.*)"')
-def i_check_first_node_children(step, children=None):
-    if children is None:
+#@step(r'I check that the first node has (.*) branches')
+def i_check_first_node_children(step, children=None, field=None):
+    if children is None or field is None:
         assert False
     root_children = world.model['object'] and \
         len(world.model['object']['model']['root']['children'])
-    assert (root_children == children)
+    root_field = world.model['object']['model']['root']['children'][0]['predicate']['field']
+    assert_equal(root_children, children)
+    assert_equal(root_field, field)
 
 
 #@step(r'I check that the model uses as objective weights "(.*)"')
