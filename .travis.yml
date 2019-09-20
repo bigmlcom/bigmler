@@ -14,7 +14,8 @@ env:
 install:
   - pip install pystemmer
   - pip install scipy
-  - python setup.py develop
+  - pip install bigml
+  - pip install .
 # command to run tests
 script:
   - export TESTS=$(for t in $BML_TESTS; do ls bigmler/tests/*$t*.py;done|sed 's/\//./g'| sed 's/\.py//g'|paste -sd ",")
