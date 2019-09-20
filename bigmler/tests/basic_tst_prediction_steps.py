@@ -122,6 +122,22 @@ def i_create_resources_in_mode_from_ensemble( \
     world.number_of_models = int(number_of_models)
     shell_execute(command, output, test=test)
 
+#@step(r'I create BigML resources uploading train "(.*?)" file with
+# split field "(.*?)" and log in "([^"]*)"$')
+def i_create_all_resources_with_split_field(step, data=None,
+                                       split_field=None,
+                                       objective=None,
+                                       output_dir=None):
+    ok_(data is not None and split_field is not None
+        and objective is not None and output_dir is not None)
+    command = ("bigmler --train " + res_filename(data) +
+               " --split-field \"" + split_field +
+               "\" --objective \"" + objective +
+               "\" --store --output-dir " + output_dir +
+               " --max-batch-models 1 --no-fast")
+    shell_execute(command, "%s/xxx" % output_dir)
+
+
 #@step(r'I create BigML resources uploading train "(.*?)" file using the
 # median to test "(.*?)" and log predictions in "([^"]*)"$')
 def i_create_all_resources_with_median(step, data=None,
@@ -1054,6 +1070,15 @@ def i_check_weighted_model(step, field=None):
         assert False
     assert ('weight_field' in world.model['object'] and
             world.model['object']['weight_field'] == field)
+
+
+#@step(r'I check that the model uses as weight "(.*)"')
+def i_check_first_node_children(step, children=None):
+    if children is None:
+        assert False
+    root_children = world.model['object'] and \
+        len(world.model['object']['model']['root']['children'])
+    assert (root_children == children)
 
 
 #@step(r'I check that the model uses as objective weights "(.*)"')

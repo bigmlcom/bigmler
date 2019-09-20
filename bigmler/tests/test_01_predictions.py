@@ -743,3 +743,28 @@ class TestPrediction(object):
                 test=example[6], output=example[7], operating_point=example[9])
             test_pred.i_check_create_predictions(self)
             test_pred.i_check_predictions(self, example[8])
+
+    def test_scenario27(self):
+        """
+        Scenario: Successfully building test predictions from start with split field:
+            Given I create BigML resources uploading train "<data>" file with split field "<split_field>" and objective "<objeciive>" and log in "<output-dir>"
+            And I check that the source has been created
+            And I check that the dataset has been created
+            And I check that the model has been created
+            And I check that the first node has <children> branches
+
+            Examples:
+            | data               | split-field           |objective  | output-dir               |children           |
+
+        """
+
+        examples = [
+            ['data/iris.csv', 'sepal length', 'species', 'scenario27', 3]]
+        show_doc(self.test_scenario27, examples)
+        for example in examples:
+            print "\nTesting with:\n", example
+            test_pred.i_create_all_resources_with_split_field(self, example[0], example[2], example[1], example[3])
+            test_pred.i_check_create_source(self)
+            test_pred.i_check_create_dataset(self, suffix=None)
+            test_pred.i_check_create_model(self)
+            test_pred.i_check_first_node_children(self, example[4])

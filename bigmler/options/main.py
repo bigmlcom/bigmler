@@ -477,6 +477,16 @@ def get_main_options(defaults=None, constants=None):
             'help': ("Accept missing values as valid in some branches of the"
                      "tree.")},
 
+        # Set it to use the fields and the first node will split in one
+        # branch per category (only for categorical fields)
+        '--split-field': {
+            'action': 'store',
+            'dest': 'split_field',
+            'default': defaults.get('split_field', False),
+            'help': ("Name of the field that should be used in the first"
+                     " split of the model. One branch per category will"
+                     " be created.")},
+
         # Random candidates: Number of fields to be selected at random in
         # ensembles construction
         '--random-candidates': {

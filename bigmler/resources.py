@@ -665,6 +665,9 @@ def set_model_args(args, name=None, objective_id=None, fields=None,
     if args.balance:
         model_args.update(balance_objective=True)
 
+    if args.split_field:
+        model_args.update(split_field=args.split_field)
+
     if args.weight_field:
         try:
             weight_field = fields.field_id(args.weight_field)
