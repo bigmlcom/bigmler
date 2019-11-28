@@ -652,7 +652,7 @@ class TestReify(object):
                 | data | output | params |check_file | language
                 | data/iris.csv | scenario_re2/reify.py | {"name": "my_dataset_name"}|../check_files/reify_dataset.py | python
         """
-        print self.test_scenario2.__doc__
+        print self.test_scenario21.__doc__
         examples = [
             ['data/iris.csv', 'scenario_re21/reify.py', {"name": "my_dataset_name"}, 'check_files/reify_dataset_datasets.py', 'python', 'scenario_re21']]
 

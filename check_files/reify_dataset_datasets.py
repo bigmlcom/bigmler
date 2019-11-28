@@ -26,7 +26,11 @@
     api.ok(dataset2)
 
     args = \
-        {u'objective_field': {u'id': u'000004'},
-         }
+        {}
     dataset3 = api.create_dataset([dataset2 dataset1], args)
     api.ok(dataset3)
+
+    args = \
+        {u'objective_field': {u'id': u'000004'}}
+    dataset4 = api.update_dataset(dataset3, args)
+    api.ok(dataset4)
