@@ -62,6 +62,20 @@ def create_connection(api):
     return "BigML(%s)" % ", ".join(args)
 
 
+def clean_args_references(args):
+    """ Removes the information used as reference for the scripts
+
+    """
+    if "all_fields" in args and args["all_fields"] and \
+            "new_fields" not in args:
+        del args["all_fields"]
+    if "objective_field" in args and \
+            isinstance(args["objective_field"], dict) and \
+            "name" in args["objective_field"]:
+        del args["objective_field"]["name"]
+    return args
+
+
 def write_nb_output(resource_id, workflow, filename, api):
     """ Write the output to a file in jupyter notebook format
 
@@ -76,8 +90,9 @@ def write_nb_output(resource_id, workflow, filename, api):
     for step in workflow:
         for (cell_type, cell_text) in step.items():
             if cell_type == "args":
+                args  = clean_args_references(json.loads(cell_text))
                 cell_text = "args = \\\n    %s" % pprint.pformat( \
-                    json.loads(cell_text)).replace("\n", "\n    ")
+                    args).replace("\n", "\n    ")
                 cell_type = "code"
             cells.append(getattr(nbf.v4, "new_%s_cell" % cell_type)(cell_text))
     nb["cells"] = cells
@@ -94,9 +109,7 @@ def python_output(resource_id, workflow, api):
         for (cell_type, cell_text) in step.items():
             if cell_type == "args":
                 args = json.loads(cell_text)
-                if "all_fields" in args and args["all_fields"] and \
-                    "new_fields" not in args:
-                    del args["all_fields"]
+                args  = clean_args_references(args)
                 cell_text = "args = \\\n    %s" % pprint.pformat( \
                     args).replace("\n", "\n    ")
                 cell_type = "code"
