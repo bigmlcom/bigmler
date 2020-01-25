@@ -3,6 +3,13 @@
 History
 -------
 
+3.26.0 (2020-01-26)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing problem in bigmler fusion predictions.
+- Fixing problems for windows users with particular stdout encodings.
+- Dependendy version bump.
+
 3.25.0 (2019-11-27)
 ~~~~~~~~~~~~~~~~~~~
 
