@@ -3,6 +3,11 @@
 History
 -------
 
+3.26.1 (2020-03-16)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing bug in the --output option when no directory is used in the file path.
+
 3.26.0 (2020-01-26)
 ~~~~~~~~~~~~~~~~~~~
 

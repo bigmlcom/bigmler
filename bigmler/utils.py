@@ -345,10 +345,13 @@ def check_dir(path):
 
     """
     directory = os.path.dirname(path)
+    if directory == "":
+        directory = "."
     if len(directory) > 0 and not os.path.exists(directory):
         os.makedirs(directory)
         sys_log_message(u"%s\n" % os.path.abspath(directory),
                         log_file=NEW_DIRS_LOG)
+
     return directory
 
 
