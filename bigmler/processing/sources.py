@@ -138,7 +138,7 @@ def source_processing(api, args, resume,
     elif args.source:
         source = bigml.api.get_source_id(args.source)
 
-    # If we already have source, we check that is finished, extract the
+    # If we already have source, we check that is finished , extract the
     # fields, and update them if needed.
     if source:
         source = r.get_source(source, api, args.verbosity, session_file)

@@ -494,9 +494,10 @@ def check_resource(*args, **kwargs):
 
     """
     try:
+        kwargs.update({"raise_on_error": True})
         result = bigml.api.check_resource(*args, **kwargs)
         return result
-    except ValueError, exc:
+    except Exception, exc:
         sys.exit("\nFailed to obtain a finished resource:\n%s." % str(exc))
 
 

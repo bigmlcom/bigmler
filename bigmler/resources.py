@@ -343,8 +343,9 @@ def create_source(data_set, source_args, args, api=None, path=None,
     source_id = check_resource_error(source, "Failed to create source: ")
     try:
         source = check_resource(source, api.get_source,
-                                query_string=ALL_FIELDS_QS)
-    except ValueError, exception:
+                                query_string=ALL_FIELDS_QS,
+                                raise_on_error=True)
+    except Exception, exception:
         sys.exit("Failed to get a finished source: %s" % str(exception))
     message = dated("Source created: %s\n" % get_url(source))
     log_message(message, log_file=session_file, console=args.verbosity)
@@ -387,9 +388,11 @@ def get_source(source, api=None, verbosity=True,
                     console=verbosity)
         try:
             source = check_resource(source, api.get_source,
-                                    query_string=ALL_FIELDS_QS)
-        except ValueError, exception:
+                                    query_string=ALL_FIELDS_QS,
+                                    raise_on_error=True)
+        except Exception, exception:
             sys.exit("Failed to get a finished source: %s" % str(exception))
+
     return source
 
 
@@ -546,8 +549,9 @@ def create_dataset(origin_resource, dataset_args, args, api=None,
     dataset_id = check_resource_error(dataset, "Failed to create dataset: ")
     try:
         dataset = check_resource(dataset, api.get_dataset,
-                                 query_string=ALL_FIELDS_QS)
-    except ValueError, exception:
+                                 query_string=ALL_FIELDS_QS,
+                                 raise_on_error=True)
+    except Exception, exception:
         sys.exit("Failed to get a finished dataset: %s" % str(exception))
     message = dated("Dataset created: %s\n" % get_url(dataset))
     log_message(message, log_file=session_file, console=args.verbosity)
@@ -795,8 +799,9 @@ def create_models(datasets, model_ids, model_args,
                 if bigml.api.get_status(model)['code'] != bigml.api.FINISHED:
                     try:
                         model = check_resource(model, api.get_model,
-                                               query_string=query_string)
-                    except ValueError, exception:
+                                               query_string=query_string,
+                                               raise_on_error=True)
+                    except Exception, exception:
                         sys.exit("Failed to get a finished model: %s" %
                                  str(exception))
                     models[0] = model
@@ -826,8 +831,9 @@ def create_model(cluster, model_args, args, api=None,
     model_id = check_resource_error(model, "Failed to create model: ")
     try:
         model = check_resource(model, api.get_model,
-                               query_string=ALL_FIELDS_QS)
-    except ValueError, exception:
+                               query_string=ALL_FIELDS_QS,
+                               raise_on_error=True)
+    except Exception, exception:
         sys.exit("Failed to get a finished model: %s" % str(exception))
     message = dated("Model created: %s\n" % get_url(model))
     log_message(message, log_file=session_file, console=args.verbosity)
@@ -851,7 +857,8 @@ def update_model(model, model_args, args,
     model = api.update_model(model, model_args)
     check_resource_error(model, "Failed to update model: %s"
                          % model['resource'])
-    model = check_resource(model, api.get_model, query_string=ALL_FIELDS_QS)
+    model = check_resource(model, api.get_model, query_string=ALL_FIELDS_QS,
+                           raise_on_error=True)
     if is_shared(model):
         message = dated("Shared model link. %s\n" %
                         get_url(model, shared=True))
@@ -890,8 +897,9 @@ def get_models(model_ids, args, api=None, session_file=None):
                         not args.test_header)
                     else FIELDS_QS)
                 model = check_resource(model, api.get_model,
-                                       query_string=query_string)
-            except ValueError, exception:
+                                       query_string=query_string,
+                                       raise_on_error=True)
+            except Exception, exception:
                 sys.exit("Failed to get a finished model: %s" %
                          str(exception))
             models.append(model)
@@ -902,8 +910,9 @@ def get_models(model_ids, args, api=None, session_file=None):
                             not args.test_header
                             else FIELDS_QS)
             model = check_resource(model_ids[0], api.get_model,
-                                   query_string=query_string)
-        except ValueError, exception:
+                                   query_string=query_string,
+                                   raise_on_error=True)
+        except Exception, exception:
             sys.exit("Failed to get a finished model: %s" % str(exception))
         models[0] = model
 
@@ -1094,9 +1103,10 @@ def retrieve_ensembles_models(ensembles, api, path=None):
         if (isinstance(ensemble, basestring) or
                 bigml.api.get_status(ensemble)['code'] != bigml.api.FINISHED):
             try:
-                ensemble = check_resource(ensemble, api.get_ensemble)
+                ensemble = check_resource(ensemble, api.get_ensemble,
+                                          raise_on_error=True)
                 ensembles[index] = ensemble
-            except ValueError, exception:
+            except Exception, exception:
                 sys.exit("Failed to get a finished ensemble: %s" %
                          str(exception))
         model_ids.extend(ensemble['object']['models'])
@@ -1105,7 +1115,8 @@ def retrieve_ensembles_models(ensembles, api, path=None):
             log_created_resources("models", path, model_id, mode='a')
     models = model_ids[:]
     models[0] = check_resource(models[0], api.get_model,
-                               query_string=ALL_FIELDS_QS)
+                               query_string=ALL_FIELDS_QS,
+                               raise_on_error=True)
     return models, model_ids
 
 
@@ -1121,7 +1132,8 @@ def get_ensemble(ensemble, api=None, verbosity=True, session_file=None):
                         get_url(ensemble))
         log_message(message, log_file=session_file,
                     console=verbosity)
-        ensemble = check_resource(ensemble, api.get_ensemble)
+        ensemble = check_resource(ensemble, api.get_ensemble,
+                                  raise_on_error=True)
         check_resource_error(ensemble, "Failed to get ensemble: ")
     return ensemble
 
@@ -1305,8 +1317,9 @@ def create_evaluations(model_or_ensemble_ids, datasets, evaluation_args,
         evaluation = evaluations[0]
         if bigml.api.get_status(evaluation)['code'] != bigml.api.FINISHED:
             try:
-                evaluation = check_resource(evaluation, api.get_evaluation)
-            except ValueError, exception:
+                evaluation = check_resource(evaluation, api.get_evaluation,
+                                            raise_on_error=True)
+            except Exception, exception:
                 sys.exit("Failed to get a finished evaluation: %s" %
                          str(exception))
             evaluations[0] = evaluation
@@ -1330,8 +1343,9 @@ def get_evaluation(evaluation, api=None, verbosity=True, session_file=None):
                     get_url(evaluation))
     log_message(message, log_file=session_file, console=verbosity)
     try:
-        evaluation = check_resource(evaluation, api.get_evaluation)
-    except ValueError, exception:
+        evaluation = check_resource(evaluation, api.get_evaluation,
+                                    raise_on_error=True)
+    except Exception, exception:
         sys.exit("Failed to get a finished evaluation: %s" % str(exception))
     return evaluation
 
@@ -1350,7 +1364,8 @@ def update_evaluation(evaluation, evaluation_args, args,
     evaluation = api.update_evaluation(evaluation, evaluation_args)
     check_resource_error(evaluation, "Failed to update evaluation: %s"
                          % evaluation['resource'])
-    evaluation = check_resource(evaluation, api.get_evaluation)
+    evaluation = check_resource(evaluation, api.get_evaluation,
+                                raise_on_error=True)
     if is_shared(evaluation):
         message = dated("Shared evaluation link. %s\n" %
                         get_url(evaluation, shared=True))
@@ -1471,8 +1486,9 @@ def create_batch_prediction(model_or_ensemble, test_dataset,
         batch_prediction, "Failed to create batch prediction: ")
     try:
         batch_prediction = check_resource(batch_prediction,
-                                          api.get_batch_prediction)
-    except ValueError, exception:
+                                          api.get_batch_prediction,
+                                          raise_on_error=True)
+    except Exception, exception:
         sys.exit("Failed to get a finished batch prediction: %s"
                  % str(exception))
     message = dated("Batch prediction created: %s\n"
@@ -1565,8 +1581,9 @@ def create_clusters(datasets, cluster_ids, cluster_args,
             if bigml.api.get_status(cluster)['code'] != bigml.api.FINISHED:
                 try:
                     cluster = check_resource(cluster, api.get_cluster,
-                                             query_string=query_string)
-                except ValueError, exception:
+                                             query_string=query_string,
+                                             raise_on_error=True)
+                except Exception, exception:
                     sys.exit("Failed to get a finished cluster: %s" %
                              str(exception))
                 clusters[0] = cluster
@@ -1598,8 +1615,9 @@ def get_clusters(cluster_ids, args, api=None, session_file=None):
         # we need the whole fields structure when exporting fields
         query_string = FIELDS_QS if not args.export_fields else ALL_FIELDS_QS
         cluster = check_resource(cluster_ids[0], api.get_cluster,
-                                 query_string=query_string)
-    except ValueError, exception:
+                                 query_string=query_string,
+                                 raise_on_error=True)
+    except Exception, exception:
         sys.exit("Failed to get a finished cluster: %s" % str(exception))
     clusters[0] = cluster
 
@@ -1663,8 +1681,9 @@ def create_batch_centroid(cluster, test_dataset,
         batch_centroid, "Failed to create batch prediction: ")
     try:
         batch_centroid = check_resource(batch_centroid,
-                                        api.get_batch_centroid)
-    except ValueError, exception:
+                                        api.get_batch_centroid,
+                                        raise_on_error=True)
+    except Exception, exception:
         sys.exit("Failed to get a finished batch centroid: %s"
                  % str(exception))
     message = dated("Batch centroid created: %s\n"
@@ -1704,7 +1723,8 @@ def update_cluster(cluster, cluster_args, args,
     cluster = api.update_cluster(cluster, cluster_args)
     check_resource_error(cluster, "Failed to update cluster: %s"
                          % cluster['resource'])
-    cluster = check_resource(cluster, api.get_cluster, query_string=FIELDS_QS)
+    cluster = check_resource(cluster, api.get_cluster, query_string=FIELDS_QS,
+                             raise_on_error=True)
     if is_shared(cluster):
         message = dated("Shared cluster link. %s\n" %
                         get_url(cluster, shared=True))
@@ -1847,8 +1867,9 @@ def create_anomalies(datasets, anomaly_ids, anomaly_args,
             if bigml.api.get_status(anomaly)['code'] != bigml.api.FINISHED:
                 try:
                     anomaly = api.check_resource(anomaly,
-                                                 query_string=query_string)
-                except ValueError, exception:
+                                                 query_string=query_string,
+                                                 raise_on_error=True)
+                except Exception, exception:
                     sys.exit("Failed to get a finished anomaly: %s" %
                              str(exception))
                 anomalies[0] = anomaly
@@ -1880,8 +1901,9 @@ def get_anomalies(anomaly_ids, args, api=None, session_file=None):
         # we need the whole fields structure when exporting fields
         query_string = FIELDS_QS if not args.export_fields else ALL_FIELDS_QS
         anomaly = api.check_resource(anomaly_ids[0],
-                                     query_string=query_string)
-    except ValueError, exception:
+                                     query_string=query_string,
+                                     raise_on_error=True)
+    except Exception, exception:
         sys.exit("Failed to get a finished anomaly: %s" % str(exception))
     anomalies[0] = anomaly
 
@@ -1908,8 +1930,9 @@ def create_batch_anomaly_score(anomaly, test_dataset,
     batch_anomaly_score_id = check_resource_error(
         batch_anomaly_score, "Failed to create batch prediction: ")
     try:
-        batch_anomaly_score = api.check_resource(batch_anomaly_score)
-    except ValueError, exception:
+        batch_anomaly_score = api.check_resource(batch_anomaly_score,
+                                                 raise_on_error=True)
+    except Exception, exception:
         sys.exit("Failed to get a finished batch anomaly score: %s"
                  % str(exception))
     message = dated("Batch anomaly score created: %s\n"
@@ -1934,7 +1957,8 @@ def update_anomaly(anomaly, anomaly_args, args,
     anomaly = api.update_anomaly(anomaly, anomaly_args)
     check_resource_error(anomaly, "Failed to update anomaly: %s"
                          % anomaly['resource'])
-    anomaly = api.check_resource(anomaly, query_string=FIELDS_QS)
+    anomaly = api.check_resource(anomaly, query_string=FIELDS_QS,
+                                 raise_on_error=True)
     if is_shared(anomaly):
         message = dated("Shared anomaly link. %s\n" %
                         get_url(anomaly, shared=True))
@@ -1971,8 +1995,8 @@ def create_project(project_args, args, api=None,
                           bigml.api.get_project_id(project), mode='a')
     project_id = check_resource_error(project, "Failed to create project: ")
     try:
-        project = check_resource(project, api=api)
-    except ValueError, exception:
+        project = check_resource(project, api=api, raise_on_error=True)
+    except Exception, exception:
         sys.exit("Failed to get a finished project: %s" % str(exception))
     message = dated("Project \"%s\" has been created.\n" %
                     project['object']['name'])
@@ -2086,8 +2110,9 @@ def create_samples(datasets, sample_ids, sample_args,
         if args.verbosity:
             if bigml.api.get_status(sample)['code'] != bigml.api.FINISHED:
                 try:
-                    sample = check_resource(sample, api.get_sample)
-                except ValueError, exception:
+                    sample = check_resource(sample, api.get_sample,
+                                            raise_on_error=True)
+                except Exception, exception:
                     sys.exit("Failed to get a finished sample: %s" %
                              str(exception))
                 samples[0] = sample
@@ -2115,7 +2140,7 @@ def update_sample(sample, sample_args, args,
     sample = api.update_sample(sample, sample_args)
     check_resource_error(sample, "Failed to update sample: %s"
                          % sample['resource'])
-    sample = check_resource(sample, api.get_sample)
+    sample = check_resource(sample, api.get_sample, raise_on_error=True)
     if is_shared(sample):
         message = dated("Shared sample link. %s\n" %
                         get_url(sample, shared=True))
@@ -2146,8 +2171,9 @@ def get_samples(sample_ids, args,
                                 query_string=query_string)
         check_resource_error(sample, "Failed to create sample: %s"
                              % sample['resource'])
-        sample = check_resource(sample, api=api, query_string=query_string)
-    except ValueError, exception:
+        sample = check_resource(sample, api=api, query_string=query_string,
+                                raise_on_error=True)
+    except Exception, exception:
         sys.exit("Failed to get a finished sample: %s" % str(exception))
     samples[0] = sample
 
@@ -2244,8 +2270,9 @@ def create_associations(datasets, association_ids, association_args,
                 try:
                     association = check_resource( \
                         association, api.get_association,
-                        query_string=query_string)
-                except ValueError, exception:
+                        query_string=query_string,
+                        raise_on_error=True)
+                except Exception, exception:
                     sys.exit("Failed to get a finished association: %s" %
                              str(exception))
                 associations[0] = association
@@ -2277,8 +2304,9 @@ def get_associations(association_ids, args, api=None, session_file=None):
     try:
         query_string = FIELDS_QS
         association = check_resource(association_ids[0], api.get_association,
-                                     query_string=query_string)
-    except ValueError, exception:
+                                     query_string=query_string,
+                                     raise_on_error=True)
+    except Exception, exception:
         sys.exit("Failed to get a finished association: %s" % str(exception))
     associations[0] = association
 
@@ -2315,7 +2343,8 @@ def update_association(association, association_args, args,
     check_resource_error(association, "Failed to update association: %s"
                          % association['resource'])
     association = check_resource(association,
-                                 api.get_association, query_string=FIELDS_QS)
+                                 api.get_association, query_string=FIELDS_QS,
+                                 raise_on_error=True)
     if is_shared(association):
         message = dated("Shared association link. %s\n" %
                         get_url(association, shared=True))
@@ -2361,8 +2390,8 @@ def create_script(source_code, script_args, args, api=None, path=None,
                           bigml.api.get_script_id(script), mode='a')
     script_id = check_resource_error(script, "Failed to create script: ")
     try:
-        script = check_resource(script, api.get_script)
-    except ValueError, exception:
+        script = check_resource(script, api.get_script, raise_on_error=True)
+    except Exception, exception:
         sys.exit("Failed to get a compiled script: %s" % str(exception))
     message = dated("Script created: %s\n" % get_url(script))
     log_message(message, log_file=session_file, console=args.verbosity)
@@ -2384,8 +2413,9 @@ def get_script(script, api=None, verbosity=True,
         log_message(message, log_file=session_file,
                     console=verbosity)
         try:
-            script = check_resource(script, api.get_script)
-        except ValueError, exception:
+            script = check_resource(script, api.get_script,
+                                    raise_on_error=True)
+        except Exception, exception:
             sys.exit("Failed to get a compiled script: %s" % str(exception))
     return script
 
@@ -2426,8 +2456,9 @@ def create_execution(execution_args, args, api=None, path=None,
     execution_id = check_resource_error(execution,
                                         "Failed to create execution: ")
     try:
-        execution = check_resource(execution, api.get_execution)
-    except ValueError, exception:
+        execution = check_resource(execution, api.get_execution,
+                                   raise_on_error=True)
+    except Exception, exception:
         sys.exit("Failed to get a finished execution: %s" % str(exception))
     message = dated("Execution created: %s\n" % get_url(execution))
     log_message(message, log_file=session_file, console=args.verbosity)
@@ -2450,8 +2481,9 @@ def get_execution(execution, api=None, verbosity=True,
         log_message(message, log_file=session_file,
                     console=verbosity)
         try:
-            execution = check_resource(execution, api.get_execution)
-        except ValueError, exception:
+            execution = check_resource(execution, api.get_execution,
+                                       raise_on_error=True)
+        except Exception, exception:
             sys.exit("Failed to get a finished execution: %s" % str(exception))
     return execution
 
@@ -2584,8 +2616,8 @@ def create_logistic_regressions(datasets, logistic_regression_ids,
                 try:
                     logistic_regression = check_resource( \
                         logistic_regression, api.get_logistic_regression,
-                        query_string=query_string)
-                except ValueError, exception:
+                        query_string=query_string, raise_on_error=True)
+                except Exception, exception:
                     sys.exit("Failed to get a finished logistic regression:"
                              " %s" %
                              str(exception))
@@ -2621,8 +2653,9 @@ def get_logistic_regressions(logistic_regression_ids,
         query_string = FIELDS_QS if not args.export_fields else ALL_FIELDS_QS
         logistic_regression = check_resource(logistic_regression_ids[0],
                                              api.get_logistic_regression,
-                                             query_string=query_string)
-    except ValueError, exception:
+                                             query_string=query_string,
+                                             raise_on_error=True)
+    except Exception, exception:
         sys.exit("Failed to get a finished logistic regression: %s" % \
             str(exception))
     logistic_regressions[0] = logistic_regression
@@ -2663,7 +2696,8 @@ def update_logistic_regression(logistic_regression, logistic_regression_args,
                          % logistic_regression['resource'])
     logistic_regression = check_resource(logistic_regression,
                                          api.get_logistic_regression,
-                                         query_string=FIELDS_QS)
+                                         query_string=FIELDS_QS,
+                                         raise_on_error=True)
     if is_shared(logistic_regression):
         message = dated("Shared logistic regression link. %s\n" %
                         get_url(logistic_regression, shared=True))
@@ -2790,8 +2824,9 @@ def create_linear_regressions(datasets, linear_regression_ids,
                 try:
                     linear_regression = check_resource( \
                         linear_regression, api.get_linear_regression,
-                        query_string=query_string)
-                except ValueError, exception:
+                        query_string=query_string,
+                        raise_on_error=True)
+                except Exception, exception:
                     sys.exit("Failed to get a finished linear regression:"
                              " %s" %
                              str(exception))
@@ -2827,8 +2862,9 @@ def get_linear_regressions(linear_regression_ids,
         query_string = FIELDS_QS if not args.export_fields else ALL_FIELDS_QS
         linear_regression = check_resource(linear_regression_ids[0],
                                              api.get_linear_regression,
-                                             query_string=query_string)
-    except ValueError, exception:
+                                             query_string=query_string,
+                                             raise_on_error=True)
+    except Exception, exception:
         sys.exit("Failed to get a finished linear regression: %s" % \
             str(exception))
     linear_regressions[0] = linear_regression
@@ -2869,7 +2905,8 @@ def update_linear_regression(linear_regression, linear_regression_args,
                          % linear_regression['resource'])
     linear_regression = check_resource(linear_regression,
                                          api.get_linear_regression,
-                                         query_string=FIELDS_QS)
+                                         query_string=FIELDS_QS,
+                                         raise_on_error=True)
     if is_shared(linear_regression):
         message = dated("Shared linear regression link. %s\n" %
                         get_url(linear_regression, shared=True))
@@ -2998,8 +3035,9 @@ def create_time_series(datasets, time_series_ids,
                 try:
                     time_series = check_resource( \
                         time_series, api.get_time_series,
-                        query_string=query_string)
-                except ValueError, exception:
+                        query_string=query_string,
+                        raise_on_error=True)
+                except Exception, exception:
                     sys.exit("Failed to get a finished time-series:"
                              " %s" %
                              str(exception))
@@ -3035,8 +3073,9 @@ def get_time_series(time_series_ids,
         query_string = FIELDS_QS if not args.export_fields else ALL_FIELDS_QS
         time_series = check_resource(time_series_ids[0],
                                      api.get_time_series,
-                                     query_string=query_string)
-    except ValueError, exception:
+                                     query_string=query_string,
+                                     raise_on_error=True)
+    except Exception, exception:
         sys.exit("Failed to get a finished time-series: %s" % \
             str(exception))
     time_series_set[0] = time_series
@@ -3077,7 +3116,8 @@ def update_time_series(time_series, time_series_args,
                          % time_series['resource'])
     time_series = check_resource(time_series,
                                  api.get_time_series,
-                                 query_string=FIELDS_QS)
+                                 query_string=FIELDS_QS,
+                                 raise_on_error=True)
     if is_shared(time_series):
         message = dated("Shared time-series link. %s\n" %
                         get_url(time_series, shared=True))
@@ -3119,8 +3159,8 @@ def create_library(source_code, library_args, args, api=None, path=None,
                           bigml.api.get_library_id(library), mode='a')
     library_id = check_resource_error(library, "Failed to create library: ")
     try:
-        library = check_resource(library, api.get_library)
-    except ValueError, exception:
+        library = check_resource(library, api.get_library, raise_on_error=True)
+    except Exception, exception:
         sys.exit("Failed to get a compiled library: %s" % str(exception))
     message = dated("Library created: %s\n" % get_url(library))
     log_message(message, log_file=session_file, console=args.verbosity)
@@ -3240,8 +3280,9 @@ def create_topic_models(datasets, topic_model_ids, topic_model_args,
                 try:
                     topic_model = check_resource( \
                         topic_model, api.get_topic_model,
-                        query_string=query_string)
-                except ValueError, exception:
+                        query_string=query_string,
+                        raise_on_error=True)
+                except Exception, exception:
                     sys.exit("Failed to get a finished topic model: %s" %
                              str(exception))
                 topic_models[0] = topic_model
@@ -3276,8 +3317,9 @@ def get_topic_models(topic_model_ids,
         query_string = FIELDS_QS if not args.export_fields else ALL_FIELDS_QS
         topic_model = check_resource(topic_model_ids[0],
                                      api.get_topic_model,
-                                     query_string=query_string)
-    except ValueError, exception:
+                                     query_string=query_string,
+                                     raise_on_error=True)
+    except Exception, exception:
         sys.exit("Failed to get a finished topic model: %s" % \
             str(exception))
     topic_models[0] = topic_model
@@ -3318,7 +3360,8 @@ def update_topic_model(topic_model, topic_model_args,
                          % topic_model['resource'])
     topic_model = check_resource(topic_model,
                                  api.get_topic_model,
-                                 query_string=FIELDS_QS)
+                                 query_string=FIELDS_QS,
+                                 raise_on_error=True)
     if is_shared(topic_model):
         message = dated("Shared topic model link. %s\n" %
                         get_url(topic_model, shared=True))
@@ -3353,7 +3396,7 @@ def set_batch_topic_distribution_args( \
             if not field in dataset_fields.fields:
                 try:
                     field = dataset_fields.field_id(field)
-                except ValueError, exc:
+                except Exception, exc:
                     sys.exit(exc)
             prediction_fields.append(field)
         batch_topic_distribution_args.update(output_fields=prediction_fields)
@@ -3387,8 +3430,9 @@ def create_batch_topic_distribution(topic_model, test_dataset,
         "Failed to create batch topic distribution: ")
     try:
         batch_topic_distribution = check_resource( \
-            batch_topic_distribution, api.get_batch_topic_distribution)
-    except ValueError, exception:
+            batch_topic_distribution, api.get_batch_topic_distribution,
+            raise_on_error=True)
+    except Exception, exception:
         sys.exit("Failed to get a finished batch topic distribution: %s"
                  % str(exception))
     message = dated("Batch topic distribution created: %s\n"
@@ -3438,8 +3482,9 @@ def create_forecast(time_series, input_data, forecast_args, args,
     forecast_id = check_resource_error(
         forecast, "Failed to create forecast: ")
     try:
-        forecast = check_resource(forecast, api.get_forecast)
-    except ValueError, exception:
+        forecast = check_resource(forecast, api.get_forecast,
+                                  raise_on_error=True)
+    except Exception, exception:
         sys.exit("Failed to get a finished forecast: %s"
                  % str(exception))
     message = dated("Forecast created: %s\n"
@@ -3608,8 +3653,9 @@ def create_deepnets(datasets, deepnet_ids,
                 try:
                     deepnet = check_resource( \
                         deepnet, api.get_deepnet,
-                        query_string=query_string)
-                except ValueError, exception:
+                        query_string=query_string,
+                        raise_on_error=True)
+                except Exception, exception:
                     sys.exit("Failed to get a finished deepnet:"
                              " %s" %
                              str(exception))
@@ -3644,8 +3690,9 @@ def get_deepnets(deepnet_ids, args, api=None, session_file=None):
         query_string = FIELDS_QS if not args.export_fields else ALL_FIELDS_QS
         deepnet = check_resource(deepnet_ids[0],
                                  api.get_deepnet,
-                                 query_string=query_string)
-    except ValueError, exception:
+                                 query_string=query_string,
+                                 raise_on_error=True)
+    except Exception, exception:
         sys.exit("Failed to get a finished deepnet: %s" % \
             str(exception))
     deepnets[0] = deepnet
@@ -3671,7 +3718,8 @@ def update_deepnets(deepnet, deepnet_args,
                          % deepnet['resource'])
     deepnet = check_resource(deepnet,
                              api.get_deepnet,
-                             query_string=FIELDS_QS)
+                             query_string=FIELDS_QS,
+                             raise_on_error=True)
     if is_shared(deepnet):
         message = dated("Shared deepnet link. %s\n" %
                         get_url(deepnet, shared=True))
@@ -3774,8 +3822,9 @@ def create_pca(datasets, pca, pca_args,
                 try:
                     pca = check_resource( \
                         pca, api.get_pca,
-                        query_string=query_string)
-                except ValueError, exception:
+                        query_string=query_string,
+                        raise_on_error=True)
+                except Exception, exception:
                     sys.exit("Failed to get a finished pca: %s" %
                              str(exception))
                 pcas[0] = pca
@@ -3806,8 +3855,9 @@ def get_pca(pca,
         query_string = FIELDS_QS if not args.export_fields else ALL_FIELDS_QS
         pca = check_resource(pca,
                              api.get_pca,
-                             query_string=query_string)
-    except ValueError, exception:
+                             query_string=query_string,
+                             raise_on_error=True)
+    except Exception, exception:
         sys.exit("Failed to get a finished pca: %s" % \
             str(exception))
 
@@ -3846,7 +3896,8 @@ def update_pca(pca, pca_args,
                          % pca['resource'])
     pca = check_resource(pca,
                          api.get_pca,
-                         query_string=FIELDS_QS)
+                         query_string=FIELDS_QS,
+                         raise_on_error=True)
     if is_shared(pca):
         message = dated("Shared PCA link. %s\n" %
                         get_url(pca, shared=True))
@@ -3917,8 +3968,9 @@ def create_batch_projection(pca, test_dataset,
         "Failed to create batch projection: ")
     try:
         batch_projection = check_resource( \
-            batch_projection, api.get_batch_projection)
-    except ValueError, exception:
+            batch_projection, api.get_batch_projection,
+            raise_on_error=True)
+    except Exception, exception:
         sys.exit("Failed to get a finished batch projection: %s"
                  % str(exception))
     message = dated("Batch projection created: %s\n"
@@ -3996,8 +4048,9 @@ def create_fusion(models, fusion, fusion_args,
                 try:
                     fusion = check_resource( \
                         fusion, api.get_fusion,
-                        query_string=query_string)
-                except ValueError, exception:
+                        query_string=query_string,
+                        raise_on_error=True)
+                except Exception, exception:
                     sys.exit("Failed to get a finished fusion: %s" %
                              str(exception))
                 fusions[0] = fusion
@@ -4027,8 +4080,9 @@ def get_fusion(fusion,
         # we need the whole fields structure when exporting fields
         fusion = check_resource(fusion,
                                 api.get_fusion,
-                                query_string=ALL_FIELDS_QS)
-    except ValueError, exception:
+                                query_string=ALL_FIELDS_QS,
+                                raise_on_error=True)
+    except Exception, exception:
         sys.exit("Failed to get a finished fusion: %s" % \
             str(exception))
 
@@ -4067,7 +4121,8 @@ def update_fusion(fusion, fusion_args, args,
                          % fusion['resource'])
     fusion = check_resource(fusion,
                             api.get_fusion,
-                            query_string=FIELDS_QS)
+                            query_string=FIELDS_QS,
+                            raise_on_error=True)
     if is_shared(fusion):
         message = dated("Shared Fusion link. %s\n" %
                         get_url(fusion, shared=True))
