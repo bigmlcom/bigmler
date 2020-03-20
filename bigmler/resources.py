@@ -1866,9 +1866,9 @@ def create_anomalies(datasets, anomaly_ids, anomaly_args,
         if args.verbosity:
             if bigml.api.get_status(anomaly)['code'] != bigml.api.FINISHED:
                 try:
-                    anomaly = api.check_resource(anomaly,
-                                                 query_string=query_string,
-                                                 raise_on_error=True)
+                    anomaly = check_resource(anomaly, api.get_anomaly,
+                                             query_string=query_string,
+                                             raise_on_error=True)
                 except Exception, exception:
                     sys.exit("Failed to get a finished anomaly: %s" %
                              str(exception))
@@ -1900,9 +1900,9 @@ def get_anomalies(anomaly_ids, args, api=None, session_file=None):
     try:
         # we need the whole fields structure when exporting fields
         query_string = FIELDS_QS if not args.export_fields else ALL_FIELDS_QS
-        anomaly = api.check_resource(anomaly_ids[0],
-                                     query_string=query_string,
-                                     raise_on_error=True)
+        anomaly = check_resource(anomaly_ids[0], api.get_anomaly,
+                                 query_string=query_string,
+                                 raise_on_error=True)
     except Exception, exception:
         sys.exit("Failed to get a finished anomaly: %s" % str(exception))
     anomalies[0] = anomaly
@@ -1930,8 +1930,9 @@ def create_batch_anomaly_score(anomaly, test_dataset,
     batch_anomaly_score_id = check_resource_error(
         batch_anomaly_score, "Failed to create batch prediction: ")
     try:
-        batch_anomaly_score = api.check_resource(batch_anomaly_score,
-                                                 raise_on_error=True)
+        batch_anomaly_score = check_resource(batch_anomaly_score,
+                                             api.get_batch_anomaly_score,
+                                             raise_on_error=True)
     except Exception, exception:
         sys.exit("Failed to get a finished batch anomaly score: %s"
                  % str(exception))
@@ -1957,8 +1958,9 @@ def update_anomaly(anomaly, anomaly_args, args,
     anomaly = api.update_anomaly(anomaly, anomaly_args)
     check_resource_error(anomaly, "Failed to update anomaly: %s"
                          % anomaly['resource'])
-    anomaly = api.check_resource(anomaly, query_string=FIELDS_QS,
-                                 raise_on_error=True)
+    anomaly = check_resource(anomaly, api.get_anomaly,
+                             query_string=FIELDS_QS,
+                            raise_on_error=True)
     if is_shared(anomaly):
         message = dated("Shared anomaly link. %s\n" %
                         get_url(anomaly, shared=True))
