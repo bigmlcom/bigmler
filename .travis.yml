@@ -12,6 +12,7 @@ env:
   - BML_TESTS="37"
 # command to install dependencies
 install:
+  - pip install cython
   - pip install pystemmer
   - pip install scipy
   - pip install bigml
