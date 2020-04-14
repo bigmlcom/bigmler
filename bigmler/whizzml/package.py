@@ -51,6 +51,7 @@ NAME_MAX_LENGTH = 127
 METADATA_FILE = "metadata.json"
 WHIZZML_LIBRARY = "library"
 WHIZZML_RESOURCES = [WHIZZML_LIBRARY, "script"]
+DFT_CATEGORY = 0 # Miscellaneous
 
 
 subcommand_list = []
@@ -158,6 +159,7 @@ def create_package(args, api, command_obj, resume=False):
     else:
         # create libraries or scripts
         imports = []
+        category = str(metadata.get("category", DFT_CATEGORY))
         if metadata.get("imports") is not None:
             lib_imports = metadata.get("imports")
             for lib_import in lib_imports:
@@ -219,6 +221,7 @@ def create_package(args, api, command_obj, resume=False):
             if args.tag:
                 for tag in args.tag:
                     command_args.extend(["--tag", tag])
+            command_args.extend(["--category", category])
 
             # adding imports, if any
             if imports:

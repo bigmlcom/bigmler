@@ -3,6 +3,12 @@
 History
 -------
 
+3.26.2 (2020-04-15)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing bigmler whizzml subcommand. Categories were not retrieved from
+  metadata file.
+
 3.26.1 (2020-03-16)
 ~~~~~~~~~~~~~~~~~~~
 
