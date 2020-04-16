@@ -37,7 +37,7 @@ from bigmler.lrprediction import write_prediction
 
 
 def local_prediction(deepnets, test_reader, output, args,
-                     exclude=None):
+                     exclude=None, quality=None):
     """Get local deepnet and issue prediction
 
     """
@@ -52,7 +52,8 @@ def local_prediction(deepnets, test_reader, output, args,
         prediction_info = local_deepnet.predict(
             input_data_dict, **kwargs)
         write_prediction(prediction_info, output,
-                         args.prediction_info, input_data, exclude)
+                         args.prediction_info, input_data, exclude,
+                         quality=quality)
 
 
 def dn_prediction(deepnets, fields, args, session_file=None):
@@ -66,17 +67,22 @@ def dn_prediction(deepnets, fields, args, session_file=None):
     test_reader = TestReader(test_set, test_set_header, fields,
                              None,
                              test_separator=args.test_separator)
+    quality = "probability" if fields.fields[ \
+        fields.field_id(fields.objective_field)]["optype"] == "categorical" \
+        else None
+    objective_field = fields.objective_field if fields.objective_field is not \
+        None else args.objective_field
     with UnicodeWriter(output, lineterminator="\n") as output:
         # columns to exclude if input_data is added to the prediction field
         exclude = use_prediction_headers(
             args.prediction_header, output, test_reader, fields, args,
-            args.objective_field, quality="probability")
+            objective_field, quality=quality)
 
         # Local predictions: Predictions are computed locally
         message = u.dated("Creating local predictions.\n")
         u.log_message(message, log_file=session_file, console=args.verbosity)
         local_prediction(deepnets, test_reader,
-                         output, args, exclude=exclude)
+                         output, args, exclude=exclude, quality=quality)
     test_reader.close()
 
 

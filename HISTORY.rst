@@ -3,6 +3,11 @@
 History
 -------
 
+3.26.3 (2020-04-17)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing local deepnet predictions headers for regressions.
+
 3.26.2 (2020-04-15)
 ~~~~~~~~~~~~~~~~~~~
 

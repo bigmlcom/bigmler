@@ -73,7 +73,8 @@ def use_prediction_headers(prediction_headers, output, test_reader,
         sys.exit(exc)
     headers = [objective_name]
 
-    if args.prediction_info in [NORMAL_FORMAT, FULL_FORMAT]:
+    if args.prediction_info in [NORMAL_FORMAT, FULL_FORMAT] and \
+            quality is not None:
         headers.append(quality)
     if (args.prediction_info == FULL_FORMAT or
             args.prediction_fields is not None):

@@ -102,5 +102,7 @@ def get_deepnet_fields(deepnet, csv_properties, args):
         args.user_locale = deepnet['object'].get('locale', None)
     csv_properties.update(data_locale=args.user_locale)
     csv_properties.update(missing_tokens=DEFAULT_MISSING_TOKENS)
+    csv_properties.update(objective_field=deepnet['object'].get( \
+        'objective_field'))
     return Fields(deepnet['object'][ \
         'deepnet']['fields'], **csv_properties)

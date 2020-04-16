@@ -37,7 +37,7 @@ from bigmler.prediction import use_prediction_headers
 
 def write_prediction(prediction, output=sys.stdout,
                      prediction_info=NORMAL_FORMAT, input_data=None,
-                     exclude=None):
+                     exclude=None, quality=None):
     """Writes the final prediction to the required output
 
        The format of the output depends on the `prediction_info` value.
@@ -58,6 +58,9 @@ def write_prediction(prediction, output=sys.stdout,
             for index in exclude:
                 del row[index]
     row.append(prediction.get('prediction'))
+    if prediction_info in [NORMAL_FORMAT, FULL_FORMAT] and \
+        quality is not None:
+        row.append(prediction[quality])
     try:
         output.writerow(row)
     except AttributeError:
