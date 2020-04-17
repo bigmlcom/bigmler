@@ -81,6 +81,16 @@ def i_create_all_dn_resources(step, data=None, test=None, output=None):
                " --store --output " + output)
     shell_execute(command, output, test=test)
 
+#@step(r'I create BigML resources uploading train "(.*?)" file to test "(.*?)" with headers and log predictions in "([^"]*)"$')
+def i_create_all_dn_resources_headers(step, data=None, test=None, output=None):
+    ok_(data is not None and test is not None and output is not None)
+    test = res_filename(test)
+    command = ("bigmler deepnet --train " + res_filename(data) +
+               " --test " + test +
+               " --store --prediction-header --prediction-info full" +
+               " --output " + output)
+    shell_execute(command, output, test=test, options='--prediction-header')
+
 
 #@step(r'I create BigML (multi-label\s)?resources using source to test "(.*)" and log predictions in "(.*)"')
 def i_create_dn_resources_from_source(step, multi_label=None, test=None, output=None):

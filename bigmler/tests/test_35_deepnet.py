@@ -105,7 +105,8 @@ class TestPrediction(object):
         """
         print self.setup_scenario02.__doc__
         examples = [
-            ['data/iris.csv', 'data/test_iris.csv', 'scenario1_dn/predictions.csv', 'check_files/predictions_iris_dn.csv']]
+            ['data/iris.csv', 'data/test_iris.csv', 'scenario1_dn/predictions.csv', 'check_files/predictions_iris_dn.csv'],
+            ['data/grades.csv', 'data/test_grades.csv', 'scenario1_r_dn/predictions.csv', 'check_files/predictions_grades_dn.csv']]
         for example in examples:
             print "\nTesting with:\n", example
             dn_pred.i_create_all_dn_resources(self, example[0], example[1], example[2])
@@ -237,3 +238,30 @@ class TestPrediction(object):
             batch_pred.i_check_create_batch_prediction(self)
             test_pred.i_check_create_predictions(self)
             test_pred.i_check_predictions(self, example[5])
+
+    def test_scenario08(self):
+        """
+        Scenario: Successfully building test predictions from start:
+            Given I create BigML deepnet resources uploading train "<data>" file to test "<test>" with headers and log predictions in "<output>"
+            And I check that the source has been created
+            And I check that the dataset has been created
+            And I check that the model has been created
+            And I check that the predictions are ready
+            Then the local prediction file is like "<predictions_file>"
+
+            Examples:
+            | data               | test                    | output                        |predictions_file           |
+            | ../data/iris.csv   | ../data/test_iris.csv   | ./scenario1_dn/predictions.csv   | ./check_files/predictions_iris_dn.csv   |
+        """
+        print self.test_scenario08.__doc__
+        examples = [
+            ['data/iris.csv', 'data/test_iris.csv', 'scenario8_dn/predictions.csv', 'check_files/predictions_iris_dn_h.csv'],
+            ['data/grades.csv', 'data/test_grades.csv', 'scenario8_r_dn/predictions.csv', 'check_files/predictions_grades_dn_h.csv']]
+        for example in examples:
+            print "\nTesting with:\n", example
+            dn_pred.i_create_all_dn_resources_headers(self, example[0], example[1], example[2])
+            test_pred.i_check_create_source(self)
+            test_pred.i_check_create_dataset(self, suffix=None)
+            dn_pred.i_check_create_dn_model(self)
+            test_pred.i_check_create_predictions(self)
+            test_pred.i_check_predictions(self, example[3])
