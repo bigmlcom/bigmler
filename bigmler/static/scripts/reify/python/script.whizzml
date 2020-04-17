@@ -19,10 +19,7 @@
 
 
 (define (change-to-local workflow)
-  (let (inputs (workflow "inputs")
-        steps (workflow "steps")
-        mapped-ids (workflow "mapped-ids")
-        input-vars (map (lambda (x) (last (mapped-ids x))) inputs)
+  (let (steps (workflow "steps")
         local-inputs (iterate (acc {} step steps)
                        (if (contains? step "file-name")
                            (assoc acc (step "origin") (step "file-name"))
@@ -37,6 +34,7 @@
 
 (define (py-inputs workflow)
   (let (inputs (workflow "inputs")
+        inputs (filter (lambda (x) (not (matches? "^<.*?>$" x))) inputs)
         mapped-ids (workflow "mapped-ids")
         input-vars (map (lambda (x) (head (mapped-ids x))) inputs)
         local-inputs (workflow "local-inputs")
