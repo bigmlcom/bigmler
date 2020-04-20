@@ -7,6 +7,7 @@ History
 ~~~~~~~~~~~~~~~~~~~
 
 - Fixing local deepnet predictions headers for regressions.
+- Fixing output for bigml reify into Python when using multidatasets.
 
 3.26.2 (2020-04-15)
 ~~~~~~~~~~~~~~~~~~~

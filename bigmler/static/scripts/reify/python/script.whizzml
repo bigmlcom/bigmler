@@ -106,7 +106,7 @@
 
 (define (pythonize name)
   (let (name (if (list? name)
-                 (str name)
+                 (replace (json-str name) "\"" "")
                  name))
   (replace name "-" "_")))
 

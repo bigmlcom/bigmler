@@ -25,5 +25,5 @@ api.ok(dataset2)
 args = \
 {'objective_field': {'id': '000004'},
 }
-dataset3 = api.create_dataset([dataset2 dataset1], args)
+dataset3 = api.create_dataset([dataset1,dataset2], args)
 api.ok(dataset3)
