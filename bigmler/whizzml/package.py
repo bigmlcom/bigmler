@@ -211,8 +211,7 @@ def create_package(args, api, command_obj, resume=False):
                 command_args.extend(["--declare-outputs", outputs_file])
             if "description" in metadata:
                 desc_file = os.path.join(args.output_dir, "description.txt")
-                u.write_to_utf8(desc_file, json.dumps( \
-                    metadata.get("description")))
+                u.write_to_utf8(desc_file, metadata.get("description"))
                 command_args.extend(["--description", desc_file])
             if metadata.get("name"):
                 command_args.extend(["--name", metadata.get("name")])
