@@ -54,9 +54,8 @@ RESOURCE_URL = ("https://%s/dashboard/" % BIGML_DASHBOARD_DOMAIN
 RESOURCE_SHARED_URL = "%s/shared/" % "/".join(RESOURCE_URL.split('/')[:-2])
 RESOURCE_EMBEDDED_URL = ("%s/embedded/%%s/tree" %
                          "/".join(RESOURCE_URL.split('/')[:-2]))
-
-
-SYSTEM_ENCODING = 'cp1252' if sys.platform == 'win32' else 'utf-8'
+BIGML_SYS_ENCODING = os.environ.get('BIGML_SYS_ENCODING', \
+    sys.getfilesystemencoding() if sys.platform == 'win32' else 'utf-8')
 FILE_ENCODING = 'utf-8'
 
 
@@ -429,15 +428,15 @@ def log_message(message, log_file=None, console=False):
             log_file.write(message)
 
 
-def sys_log_message(message, log_file=None):
+def sys_log_message(message, log_file=None, mode='ab'):
     """Logs a message in a file using the system encoding
 
        If log_file is set, logs the message in the file.
     """
-    if isinstance(message, unicode):
-        message = message.encode(SYSTEM_ENCODING)
+    if PYTHON3 or isinstance(message, unicode):
+        message = message.encode(BIGML_SYS_ENCODING)
     if log_file is not None:
-        with open(log_file, 'ab', 0) as log_file:
+        with open(log_file, mode, 0) as log_file:
             log_file.write(message)
 
 
@@ -475,16 +474,12 @@ def log_created_resources(file_name, path, resource_id, mode='w',
     if path is not None:
         file_name = "%s%s%s" % (path, os.sep, file_name)
         try:
-            with open(file_name, "%sb" % mode, 0) as resource_file:
-                if resource_id is not None:
-                    message = "%s\n" % resource_id
-                    if PYTHON3 or isinstance(message, unicode):
-                        message = message.encode(SYSTEM_ENCODING)
-                    resource_file.write(message)
-                if comment is not None:
-                    if PYTHON3 or isinstance(comment, unicode):
-                        comment = comment.encode(SYSTEM_ENCODING)
-                    resource_file.write(comment)
+            message = ""
+            if resource_id is not None
+                message = u"%s\n" % resource_id
+            if comment is not None:
+                message = u"%s%s" % (message, comment)
+            sys_log_message(message, file_name, "w")
         except IOError, exc:
             print "Failed to write %s: %s" % (file_name, str(exc))
 
