@@ -4135,6 +4135,22 @@ permanently stored in your system, use
 Remember that ``setx`` will not change the environment variables of your actual
 console, so you will need to open a new one to start using them.
 
+BigMLer encodings and locale
+============================
+
+All data uploaded to BigML (and used in BigMLer) is expected to be ``UTF-8``
+encoded. The data itself, besides its encoding,
+can contain information in different languages. English is the one used by
+default, but the ``--locale`` option can be used to use a different convention
+that will be important to parse, for instance, decimal numbers.
+
+Also, BigMLer will write information to your console and local files.
+Most Operative Systems will also accept ``UTF-8`` output, which is used
+by default. Windows systems may need
+a different encoding to be used. We allow the user to provide this enconding
+as an environment variable ``BIGML_SYS_ENCODING``. When absent, BigMLer will
+try to guess the system encoding in this case.
+
 BigML Development Mode
 ======================
 
