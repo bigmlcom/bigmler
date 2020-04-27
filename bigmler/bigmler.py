@@ -48,7 +48,7 @@ import sys
 
 import bigmler.dispatchers as bd
 from bigmler.parser import SUBCOMMANDS
-from bigmler.utils import SYSTEM_ENCODING
+from bigmler.utils import BIGML_SYS_ENCODING
 
 
 PYTHON3 = sys.version_info[0] == 3
@@ -80,7 +80,7 @@ def main(args=sys.argv[1:]):
         # checks if the old --delete syntax is used
         new_args = check_delete_option(new_args)
         if not PYTHON3:
-            new_args = [arg.decode(SYSTEM_ENCODING) for arg in new_args]
+            new_args = [arg.decode(BIGML_SYS_ENCODING) for arg in new_args]
 
         subcommand = new_args[0]
         if subcommand == "logistic-regression":

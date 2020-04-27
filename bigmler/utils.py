@@ -475,7 +475,7 @@ def log_created_resources(file_name, path, resource_id, mode='w',
         file_name = "%s%s%s" % (path, os.sep, file_name)
         try:
             message = ""
-            if resource_id is not None
+            if resource_id is not None:
                 message = u"%s\n" % resource_id
             if comment is not None:
                 message = u"%s%s" % (message, comment)
@@ -790,3 +790,15 @@ def add_api_context(command_args, args):
         command_args.extend(['--username', args.username])
     if args.api_key:
         command_args.extend(['--api-key', args.api_key])
+
+
+def write_to_utf8(path, text):
+    """Encoded UTF-8 text write
+
+    """
+    if PYTHON3:
+        with open(path, "w", encoding="utf-8") as file_handler:
+            file_handler.write(text)
+    else:
+        with open(path, "w") as file_handler:
+            file_handler.write(text.encode("utf-8"))

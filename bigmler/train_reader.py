@@ -28,7 +28,7 @@ from bigml.io import UnicodeReader
 
 from bigmler.checkpoint import file_number_of_lines
 from bigmler.labels import get_label_field
-from bigmler.utils import PYTHON3, SYSTEM_ENCODING, FILE_ENCODING
+from bigmler.utils import PYTHON3, BIGML_SYS_ENCODING, FILE_ENCODING
 from bigmler.utils import encode2, decode2
 from bigmler.utf8recoder import UTF8Recoder
 

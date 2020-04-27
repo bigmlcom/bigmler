@@ -31,7 +31,8 @@ import re
 from bigml.resourcehandler import get_resource_id
 from bigml.api import check_resource
 
-from bigmler.utils import PYTHON3, get_last_resource, get_script_id
+from bigmler.utils import PYTHON3, get_last_resource, get_script_id, \
+    write_to_utf8
 from bigmler.reports import BIGMLER_SCRIPT, HOME
 from bigmler.command import get_context
 from bigmler.whizzml.dispatcher import whizzml_dispatcher
@@ -237,12 +238,7 @@ if __name__ == "__main__":
         output = "%s%s\n%s" % (prefix, output, suffix)
 
 
-    if PYTHON3:
-        with open(args.output, "w", encoding="utf-8") as reify_file:
-            reify_file.write(output)
-    else:
-        with open(args.output, "w") as reify_file:
-            reify_file.write(output.encode("utf-8"))
+    u.write_to_utf8(args.output, output)
 
     sts = os.stat(args.output)
     os.chmod(args.output, sts.st_mode | stat.S_IEXEC)

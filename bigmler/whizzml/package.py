@@ -203,18 +203,16 @@ def create_package(args, api, command_obj, resume=False):
             # getting inputs and outputs for the script from metadata
             if "inputs" in metadata:
                 inputs_file = os.path.join(args.output_dir, "inputs.json")
-                with open(inputs_file, "w") as inputs_handler:
-                    json.dump(metadata.get("inputs"), inputs_handler)
+                u.write_to_utf8(inputs_file, json.dumps(metadata.get("inputs")))
                 command_args.extend(["--declare-inputs", inputs_file])
             if "outputs" in metadata:
                 outputs_file = os.path.join(args.output_dir, "outputs.json")
-                with open(outputs_file, "w") as outputs_handler:
-                    json.dump(metadata.get("outputs"), outputs_handler)
+                u.write_to_utf8(outputs_file, json.dumps(metadata.get("outputs")))
                 command_args.extend(["--declare-outputs", outputs_file])
             if "description" in metadata:
                 desc_file = os.path.join(args.output_dir, "description.txt")
-                with open(desc_file, "w") as desc_handler:
-                    desc_handler.write(metadata.get("description"))
+                u.write_to_utf8(desc_file, json.dumps( \
+                    metadata.get("description")))
                 command_args.extend(["--description", desc_file])
             if metadata.get("name"):
                 command_args.extend(["--name", metadata.get("name")])
