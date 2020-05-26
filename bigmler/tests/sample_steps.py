@@ -22,7 +22,7 @@ import json
 from bigmler.tests.world import world, res_filename
 from subprocess import check_call, CalledProcessError
 from bigmler.checkpoint import file_number_of_lines
-from bigmler.utils import SYSTEM_ENCODING, PYTHON3, open_mode
+from bigmler.utils import BIGML_SYS_ENCODING, PYTHON3, open_mode
 from bigml.api import check_resource
 from bigmler.tests.common_steps import check_debug
 
