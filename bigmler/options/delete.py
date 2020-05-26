@@ -281,19 +281,25 @@ def get_delete_options(defaults=None):
         '--pca-tag': {
             'dest': 'pca_tag',
             'default': defaults.get('pca_tag', None),
-            'help': "Retrieve PCA that were tagged with tag."},
+            'help': "Retrieve PCAs that were tagged with tag."},
 
         # Use it to retrieve Fusion that were tagged with tag.
         '--fusion-tag': {
             'dest': 'fusion_tag',
             'default': defaults.get('fusion_tag', None),
-            'help': "Retrieve Fusion that were tagged with tag."},
+            'help': "Retrieve Fusions that were tagged with tag."},
 
         # Use it to retrieve projections that were tagged with tag.
         '--projection-tag': {
             'dest': 'projection_tag',
             'default': defaults.get('projection_tag', None),
-            'help': "Retrieve projection that were tagged with tag."},
+            'help': "Retrieve projections that were tagged with tag."},
+
+        # Use it to retrieve projections that were tagged with tag.
+        '--external-connector-tag': {
+            'dest': 'external_connector_tag',
+            'default': defaults.get('external_connector_tag', None),
+            'help': "Retrieve external connectors that were tagged with tag."},
 
         # Use it to retrieve batch projections that were tagged with tag.
         '--batch-projection-tag': {

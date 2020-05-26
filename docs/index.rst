@@ -21,6 +21,13 @@ functionality, there are some additional subcommands:
 Usual workflows' subcommands
 ----------------------------
 
+``bigmler connector``:
+
+
+Used to generate external connectors to databases. See
+:ref:`bigmler-connector`.
+
+
 ``bigmler dataset``:
 
 
@@ -350,6 +357,32 @@ one-by-one remote prediction calls, you can use the ``--no-batch`` flag
     bigmler --train data/iris.csv --test data/test_iris.csv \
             --remote --no-batch
 
+External Connectors
+-------------------
+
+Data can be uploaded from local and remote public files in BigML as you will
+see in the `sources <#remote-sources>`_ section. It also can be extracted
+from an external database manager like PostgreSQL, MySQL, Elasticsearch or
+SQL Server. An ``externalconnector`` resource can be created in BigML to use it
+as data feed.
+
+.. code-block:: bash
+
+    bigmler connector --host my_data.hostname.com
+                      --port 1234
+                      --source postgresql
+                      --user my_username
+                      --password my_password
+                      --database my_database
+                      --output-dir out
+
+This command will generate the ``externalconnector`` and teh corresponding
+external connector ID will be stored in the ``external_connector`` file of
+your ``out`` directory. Using this ID as reference and the query of choice
+when creating a ``source`` in BigML, you will be able to connect and upload
+data to the platform.
+
+
 Remote Sources
 --------------
 
@@ -367,6 +400,23 @@ BigML recognizes a growing list of schemas (**http**, **https**, **s3**,
     bigmler --train azure://csv/diabetes.csv?AccountName=bigmlpublic
 
     bigmler --train odata://api.datamarket.azure.com/www.bcn.cat/BCNOFFERING0005/v1/CARRegistration?$top=100
+
+Also, you can use an existing connector to an external source (see the
+`external connectors section <#external-connectors>`_). The connector
+ID and the particular query must be placed in a JSON file:
+
+.. code-block:: bash
+
+    bigmler --train my_connector.json
+
+where the JSON file should contain the following structure:
+
+.. code-block:: bash
+
+    {"source": "postgresql",
+     "externalconnector_id": "51901f4337203f3a9a000215",
+     "query": "select * from my_table"}
+
 
 Can you imagine how powerful this feature is? You can create predictive
 models for huge
@@ -1579,6 +1629,39 @@ and their predictions would be combined in a final predictions file.
 Advanced subcommands in BigMLer
 ===============================
 
+.. _bigmler-connector:
+
+Connector subcommand
+--------------------
+
+Connections to external databases can be used to upload data to BigML. The
+``bigmler connector`` subcommand can be used to create such connections in the
+platform. The result will be an ``externalconnector`` object, that can be
+reused to perform queries on the database and upload the results to create
+the corresponding ``source`` in BigML.
+
+.. code-block:: bash
+
+    bigmler connector --host my_data.hostname.com
+                      --port 1234
+                      --source postgresql
+                      --user my_username
+                      --password my_password
+                      --database my_database
+                      --output-dir out
+
+As you can see, the options needed to create an external connector are:
+
+- the host that publishes the database manager
+- the port that listens to the requests
+- the type of database manager: PostgreSQL, MySQL, Elasticsearch or
+SQL Server.
+- the user and password needed to grant the access to the database
+
+With this information, the command will create an ``externalconnector`` object
+that will be assigned an ID. This ID will be the reference to be used when
+querying the database for new data. Please, check the `remote sources
+<#remote-sources>`_ section to see an example of that.
 
 .. _bigmler-dataset:
 
@@ -3658,8 +3741,6 @@ file that contains the desired attributes, like:
     {"probabilities": true,
      "all_fields": true}
 
-
-
 .. _bigmler-pca:
 
 PCA subcommand
@@ -4013,7 +4094,7 @@ Requirements
 
 Python 2.7 and 3 are currently supported by BigMLer.
 
-BigMLer requires `bigml 4.30.1 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 4.32.0 <https://github.com/bigmlcom/python>`_  or
 higher. Using proportional missing strategy will additionally request
 the use of the `numpy <http://www.numpy.org/>`_ and
 `scipy <http://www.scipy.org/>`_ libraries. They are not
@@ -5527,6 +5608,30 @@ Project Specific Subcommand Options
 ``--project-attributes``              Path to a JSON file containing
                                       attributes for the project
 ===================================== =========================================
+
+
+External Connector Specific Subcommand Options
+----------------------------------------------
+
+============================================ =================================
+``--external-connector-id`` *CONNECTOR_ID*   external connector ID used as
+                                             reference to create sources from
+                                             database queries
+``--host`` *HOST*                            Database host name
+``--hosts`` *HOSTS*                          Comma-separated list of database
+                                             host names (elasticsearch only)
+``--port`` *PORT*                            Database port number
+``--source`` *TYPE*                          Type of database manager: mysql,
+                                             postgresql, elasticsearch, sqlserver
+``--database`` *DATABASE*                    Database name
+``--user`` *USER*                            Database user name
+``--password`` *PWD*                         Database user password
+``--connection-json`` *FILE*                 Path to a JSON file containing
+                                             the map of attributes to create a
+                                             connection as described in
+                                             the `API documentation
+                                             <https://bigml.com/api/sources#sr_creating_a_source_using_external_data>`_
+============================================ =================================
 
 
 Association Specific Subcommand Options

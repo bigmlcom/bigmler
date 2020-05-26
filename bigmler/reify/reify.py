@@ -238,7 +238,7 @@ if __name__ == "__main__":
         output = "%s%s\n%s" % (prefix, output, suffix)
 
 
-    u.write_to_utf8(args.output, output)
+    write_to_utf8(args.output, output)
 
     sts = os.stat(args.output)
     os.chmod(args.output, sts.st_mode | stat.S_IEXEC)

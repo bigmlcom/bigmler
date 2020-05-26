@@ -27,7 +27,7 @@
 
     args = \
         {}
-    dataset3 = api.create_dataset([dataset1,dataset2], args)
+    dataset3 = api.create_dataset([dataset2,dataset1], args)
     api.ok(dataset3)
 
     args = \

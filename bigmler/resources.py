@@ -30,6 +30,8 @@ import bigml.api
 
 from bigml.util import bigml_locale
 from bigml.multivote import THRESHOLD_CODE
+from bigml.constants import EXTERNAL_CONNECTION_ATTRS
+from bigml.externalconnectorhandler import get_env_connection_info
 
 from bigmler.utils import (dated, get_url, log_message, plural, check_resource,
                            check_resource_error, log_created_resources,
@@ -56,6 +58,7 @@ VALID_FIELD_ATTRIBUTES = {
 BOOSTING_OPTIONS = ["iterations", "early_holdout", "learning_rate", \
     "early_out_of_bag", "step_out_of_bag"]
 DS_NAMES = "ABCDEFGHIJKLMNOPQRSTUVXYZ"
+
 
 def get_basic_seed(order):
     """ Builds a standard seed from a text adding the order
@@ -369,6 +372,16 @@ def data_to_source(args):
           and not args.source):
         data_set = args.test_set
         data_set_header = args.test_header
+    if data_set is not None:
+        try:
+            with open(data_set, 'r') as data_handler:
+                content = json.load(data_handler)
+                if isinstance(content, dict) and \
+                        "externalconnector_id" in content \
+                        and "query" in content:
+                    data_set = content
+        except (IOError, ValueError, TypeError):
+            pass
 
     return data_set, data_set_header
 
@@ -4133,3 +4146,98 @@ def update_fusion(fusion, fusion_args, args,
             report(args.reports, path, fusion)
 
     return fusion
+
+
+def set_external_connector_args(args, name=None):
+    """Return external connector arguments dict
+
+    """
+    if name is None:
+        name = args.name
+    external_connector_args = set_basic_args(args, name)
+
+    source = "postgresql" if args.source is None else args.source
+    external_connector_args.update({"source": source})
+
+    connection_keys = EXTERNAL_CONNECTION_ATTRS.values()
+    connection_keys.remove("source")
+
+    connection_info = {}
+    for key in connection_keys:
+        if hasattr(args, key) and getattr(args, key):
+            connection_info.update({key: getattr(args, key)})
+    if not connection_info:
+        # try to read environment variables
+        connection_info = get_env_connection_info()
+    args.connection_info = connection_info
+
+    if args.hosts:
+        args.connection_info.update({"hosts": args.hosts.split(",")})
+
+    # rare arguments must be provided in a JSON file
+    if args.connection_json_:
+        args.connection_info.update(args.connection_json_)
+
+    if 'external_connector' in args.json_args:
+        update_json_args(external_connector_args,
+                         args.json_args.get('external_connector'), None)
+
+    return external_connector_args
+
+
+def create_external_connector(external_connector_args, args, api=None,
+                              session_file=None, path=None, log=None):
+    """Creates remote external connector
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+    message = dated("Creating external connector.\n")
+    log_message(message, log_file=session_file, console=args.verbosity)
+    external_connector = api.create_external_connector( \
+        args.connection_info, external_connector_args)
+    log_created_resources( \
+        "external_connector", path,
+        bigml.api.get_external_connector_id(external_connector),
+        mode='a')
+    external_connector_id = check_resource_error( \
+        external_connector,
+        "Failed to create external connector: ")
+    try:
+        external_connector = check_resource( \
+            external_connector, api=api, raise_on_error=True)
+    except Exception, exception:
+        sys.exit("Failed to get a finished external connector: %s" % \
+            str(exception))
+    message = dated("External connector \"%s\" has been created.\n" %
+                    external_connector['object']['name'])
+    log_message(message, log_file=session_file, console=args.verbosity)
+    log_message("%s\n" % external_connector_id, log_file=log)
+    try:
+        if args.reports:
+            report(args.reports, path, external_connector)
+    except AttributeError:
+        pass
+    return external_connector
+
+
+def update_external_connector(external_connector_args, args,
+                              api=None, session_file=None, log=None):
+    """Updates external connector properties
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+    message = dated("Updating external connector attributes.\n")
+    log_message(message, log_file=session_file,
+                console=args.verbosity)
+    external_connector = api.update_external_connector( \
+        args.external_connector_id, external_connector_args)
+    check_resource_error(external_connector,
+                         "Failed to update external connector: %s"
+                         % external_connector['resource'])
+    message = dated("External connector \"%s\" has been updated.\n" %
+                    external_connector['resource'])
+    log_message(message, log_file=session_file, console=args.verbosity)
+    log_message("%s\n" % args.external_connector_id, log_file=log)
+    return external_connector

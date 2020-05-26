@@ -937,6 +937,30 @@ def i_retrain_model(step, data=None, output_dir=None):
         print "command: ", command
         assert False, str(exc)
 
+
+#@step(r'I create source from external connector')
+def i_create_source_from_connector(step, data=None, output_dir=None,
+                                   query=None):
+    ok_(data is not None and output_dir is not None and query is not None)
+    world.directory = output_dir
+    world.folders.append(world.directory)
+    connector_id = world.external_connector["resource"].replace( \
+        "externalconnector/", "")
+
+    with open(data, 'w+') as file_handler:
+        json.dump({"source": "postgresql",
+                   "externalconnector_id": connector_id,
+                   "query": query}, file_handler)
+    try:
+        command = ("bigmler --train " + os.path.abspath(data) +
+                   " --store --no-dataset --output-dir " + output_dir)
+        command = check_debug(command)
+        retcode = check_call(command, shell=True)
+        ok_(retcode >= 0)
+    except (OSError, CalledProcessError, IOError) as exc:
+        print "command: ", command
+        assert False, str(exc)
+
 #@step(r'I check that the source has been created$')
 def i_check_create_source(step):
     source_file = "%s%ssource" % (world.directory, os.sep)

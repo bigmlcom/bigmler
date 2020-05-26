@@ -32,6 +32,7 @@ except ImportError:
     import json
 
 import bigml.api
+from bigml.constants import EXTERNAL_CONNECTION_ATTRS
 from bigml.util import console_log, empty_resource
 from bigml.fields import get_fields_structure, Fields
 from bigml.io import UnicodeReader
@@ -479,7 +480,7 @@ def log_created_resources(file_name, path, resource_id, mode='w',
                 message = u"%s\n" % resource_id
             if comment is not None:
                 message = u"%s%s" % (message, comment)
-            sys_log_message(message, file_name, "w")
+            sys_log_message(message, file_name)
         except IOError, exc:
             print "Failed to write %s: %s" % (file_name, str(exc))
 
@@ -802,3 +803,25 @@ def write_to_utf8(path, text):
     else:
         with open(path, "w") as file_handler:
             file_handler.write(text.encode("utf-8"))
+
+
+def has_connection_info(args):
+    """Checks the information needed to create a connector
+
+    """
+    check = True
+    connection_env_vars = EXTERNAL_CONNECTION_ATTRS.keys()
+
+    for key in connection_env_vars:
+        value = EXTERNAL_CONNECTION_ATTRS[key]
+        # source has a default
+        if value == "source":
+            continue
+        check = check and hasattr(args, value) and getattr(args, value)
+        if not check:
+            # try environment variables
+            check = os.environ.get(key) is not None
+            if not check:
+                break
+
+    return check
