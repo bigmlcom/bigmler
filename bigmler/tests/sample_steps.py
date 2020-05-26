@@ -39,7 +39,7 @@ def i_create_sample(step, options=None, output_dir=None):
                    u" " + options)
         command = check_debug(command)
         if not PYTHON3:
-            command.encode(SYSTEM_ENCODING)
+            command.encode(BIGML_SYS_ENCODING)
         retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
