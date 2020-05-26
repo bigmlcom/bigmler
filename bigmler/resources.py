@@ -4171,10 +4171,6 @@ def set_external_connector_args(args, name=None):
         connection_info = get_env_connection_info()
     args.connection_info = connection_info
 
-    # arguments reserved to spark or elasticsearch
-    if args.master:
-        args.connection_info.update({"master": args.master})
-
     if args.hosts:
         args.connection_info.update({"hosts": args.hosts.split(",")})
 
