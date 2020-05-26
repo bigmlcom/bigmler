@@ -380,7 +380,7 @@ def data_to_source(args):
                         "externalconnector_id" in content \
                         and "query" in content:
                     data_set = content
-        except (IOError, ValueError):
+        except (IOError, ValueError, TypeError):
             pass
 
     return data_set, data_set_header

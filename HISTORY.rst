@@ -8,10 +8,6 @@ History
 
 - Adding bigmler connector subcommand.
 - Fixing issues with --resources-log and --clear-logs in Python 3.X.
-
-3.26.4 (2020-04-27)
-~~~~~~~~~~~~~~~~~~~
-
 - Fixing encoding issues when using non-ascii characters in paths.
 
 3.26.3 (2020-04-17)
