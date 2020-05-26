@@ -23,7 +23,7 @@ import sys
 from bigmler.tests.world import world, res_filename
 from subprocess import check_call, CalledProcessError
 from bigmler.checkpoint import file_number_of_lines
-from bigmler.utils import SYSTEM_ENCODING, PYTHON3
+from bigmler.utils import BIGML_SYS_ENCODING, PYTHON3
 from bigml.api import check_resource
 from bigmler.tests.common_steps import check_debug
 from nose.tools import ok_, eq_
@@ -85,7 +85,7 @@ def i_create_filtered_dataset_from_dataset(step, filter_exp=None, output_dir=Non
                    filter_exp + u' > ' +
                    output_dir + u"/filter.lisp")
         if not PYTHON3:
-            command = command.encode(SYSTEM_ENCODING)
+            command = command.encode(BIGML_SYS_ENCODING)
         retcode = check_call(command, shell=True)
         command = ((u"bigmler --dataset %s" % world.dataset['resource']) +
                    u" --no-model --store --output-dir " + output_dir +
