@@ -480,7 +480,7 @@ def log_created_resources(file_name, path, resource_id, mode='w',
                 message = u"%s\n" % resource_id
             if comment is not None:
                 message = u"%s%s" % (message, comment)
-            sys_log_message(message, file_name, "w")
+            sys_log_message(message, file_name)
         except IOError, exc:
             print "Failed to write %s: %s" % (file_name, str(exc))
 
