@@ -372,14 +372,16 @@ def data_to_source(args):
           and not args.source):
         data_set = args.test_set
         data_set_header = args.test_header
-    try:
-        with open(data_set, 'r') as data_handler:
-            content = json.load(data_handler)
-            if isinstance(content, dict) and "externalconnector_id" in content \
-                    and "query" in content:
-                data_set = content
-    except (IOError, ValueError):
-        pass
+    if data_set is not None:
+        try:
+            with open(data_set, 'r') as data_handler:
+                content = json.load(data_handler)
+                if isinstance(content, dict) and \
+                        "externalconnector_id" in content \
+                        and "query" in content:
+                    data_set = content
+        except (IOError, ValueError):
+            pass
 
     return data_set, data_set_header
 
