@@ -19,7 +19,7 @@ from __future__ import absolute_import
 import os
 
 from bigmler.tests.world import world
-from bigmler.utils import SYSTEM_ENCODING, PYTHON3
+from bigmler.utils import BIGML_SYS_ENCODING, PYTHON3
 
 from bigml.api import HTTP_OK, HTTP_UNAUTHORIZED
 
@@ -47,7 +47,7 @@ def check_debug(command, project=True):
     if command.find("bigmler report") < 0:
         command = u"%s --verbosity %s%s" % (command, verbosity, extend_cmd)
     if not PYTHON3:
-        command = command.encode(SYSTEM_ENCODING)
+        command = command.encode(BIGML_SYS_ENCODING)
     if debug:
         print command
     return command

@@ -102,7 +102,7 @@ def clear_log_files(log_files):
     """
     for log_file in log_files:
         try:
-            open(log_file, 'w', 0).close()
+            open(log_file, 'wb', 0).close()
         except IOError:
             pass
 

@@ -145,7 +145,7 @@ def get_source_options(defaults=None):
             'action': 'store',
             'dest': 'project_id',
             'default': defaults.get('project_id', None),
-            'help': ("Id of the project to be used in"
+            'help': ("Id of the project to be used in "
                      "resource creation.")},
 
         # The path to a file containing the fields information available in

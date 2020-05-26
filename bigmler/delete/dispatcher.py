@@ -46,7 +46,8 @@ RESOURCES_LOG_FILES = set(['project', 'source', 'dataset', 'dataset_train',
                            'associations', 'time_series', "deepnets",
                            'fusions', 'pcas', 'batch_projection',
                            'linear_regressions', 'logistic_regressions',
-                           'scripts', 'library', 'execution'])
+                           'scripts', 'library', 'execution',
+                           'external_connector'])
 STATUS_CODES = {
     "finished": bigml.api.FINISHED,
     "faulty": bigml.api.FAULTY,
@@ -258,6 +259,8 @@ def filtered_selectors(args, api):
         ("batch_projection", args.batch_projections_tag, api.list_batch_projections, None),
         ("linearregression", args.linear_regression_tag,
          api.list_linear_regressions, None),
+        ("externalconnector", args.external_connector_tag,
+         api.list_external_connectors, None),
         ("script", args.script_tag, api.list_scripts, None),
         ("library", args.library_tag, api.list_libraries, None)]
 

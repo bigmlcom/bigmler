@@ -577,3 +577,23 @@ def are_deepnets_created(path, number_of_deepnets):
             deepnet_ids
     except IOError:
         return False, deepnet_ids
+
+
+def is_external_connector_created(path):
+    """Checks existence and reads external connector id from the
+       external_connector file in the path directory
+
+    """
+    external_connector_id = None
+    try:
+        with open("%s%sexternal_connector"
+                  % (path, os.sep)) as connector_file:
+            external_connector_id = connector_file.readline().strip()
+            try:
+                external_connector_id = bigml.api.get_external_connector_id(
+                    external_connector_id)
+                return True, external_connector_id
+            except ValueError:
+                return False, None
+    except IOError:
+        return False, None

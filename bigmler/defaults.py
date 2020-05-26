@@ -374,7 +374,15 @@ FLAGS = {
         {'flag': 'juxtapose', 'type': 'boolean'},
         {'flag': 'sql_query', 'type': 'string'},
         {'flag': 'json_query', 'type': 'string'},
-        {'flag': 'sql_output_fields', 'type': 'string'}]}
+        {'flag': 'sql_output_fields', 'type': 'string'}],
+    'BigMLer connector': [
+        {'flag': 'connector_attributes', 'type': 'string'},
+        {'flag': 'source', 'type': 'string'},
+        {'flag': 'host', 'type': 'string'},
+        {'flag': 'port', 'type': 'int'},
+        {'flag': 'user', 'type': 'string'},
+        {'flag': 'password', 'type': 'string'},
+        {'flag': 'database', 'type': 'string'}],}
 
 
 def get_user_defaults(defaults_file=DEFAULTS_FILE):

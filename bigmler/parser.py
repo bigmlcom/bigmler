@@ -50,13 +50,13 @@ from bigmler.options.timeseries import get_time_series_options
 from bigmler.options.deepnet import get_deepnet_options
 from bigmler.options.execute import get_execute_options
 from bigmler.options.retrain import get_retrain_options
-
+from bigmler.options.externalconnector import get_external_connector_options
 
 SUBCOMMANDS = ["main", "analyze", "cluster", "anomaly", "sample", "dataset",
                "delete", "report", "reify", "project", "association",
                "logistic-regression", "topic-model", "time-series",
                "execute", "whizzml", "export", "deepnet", "retrain",
-               "linear-regression", "pca", "fusion"]
+               "linear-regression", "pca", "fusion", "connector"]
 
 
 MAIN = SUBCOMMANDS[0]
@@ -304,6 +304,23 @@ under the License.""" % version
         option = '--%s' % option
         project_common_options.update({option: common_options[option]})
     subcommand_options["project"].update(project_common_options)
+
+    defaults = general_defaults["BigMLer connector"]
+    subcommand_options["connector"] = get_external_connector_options( \
+        defaults=defaults)
+    subcommand_options["connector"].update({
+        '--name': common_options['--name'],
+        '--description': common_options['--description'],
+        '--category': common_options['--category'],
+        '--tag': common_options['--tag'],
+        '--project-id': source_options['--project-id'],
+        '--resources-file': main_options['--resources-log']})
+    connector_common_options = {}
+    for option in reify_common_options_list:
+        option = '--%s' % option
+        connector_common_options.update({option: common_options[option]})
+    subcommand_options["connector"].update(connector_common_options)
+
 
     defaults = general_defaults["BigMLer association"]
     subcommand_options["association"] = get_association_options( \
@@ -577,9 +594,6 @@ under the License.""" % version
         '--fields-map': main_options['--fields-map'],
         '--dataset-off': main_options['--dataset-off'],
         '--no-no-csv': main_options['--no-no-csv']})
-
-
-    subparser = subparsers.add_parser(subcommand)
 
     defaults = general_defaults["BigMLer Fusion"]
     subcommand_options["fusion"] = get_fusion_options(defaults=defaults)

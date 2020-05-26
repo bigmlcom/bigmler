@@ -245,7 +245,7 @@ class Command(object):
         self.user_defaults = get_user_defaults(self.defaults_file)
         self.command = (a.get_command_message(self.args) if not self.stored
                         else stored_command.command)
-        self.subcommand = self.command.split(" ")[1]
+        self.subcommand = self.command.split(" ")[1].lower().strip("\n")
         self.parser, self.common_options, self.subcommand_options = \
             create_parser(general_defaults=self.user_defaults,
                           constants={'NOW': a.NOW,

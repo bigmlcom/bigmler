@@ -72,7 +72,7 @@ def main(args=sys.argv[1:]):
 
     """
     if args:
-        if not args[0].lower() in SUBCOMMANDS:
+        if not args[0].lower().strip("\n") in SUBCOMMANDS:
             new_args = ["main"]
             new_args.extend(args)
         else:
@@ -82,7 +82,7 @@ def main(args=sys.argv[1:]):
         if not PYTHON3:
             new_args = [arg.decode(BIGML_SYS_ENCODING) for arg in new_args]
 
-        subcommand = new_args[0]
+        subcommand = new_args[0].lower().strip("\n")
         if subcommand == "logistic-regression":
             bd.subcommand_dispatcher("logistic_regression", new_args)
         elif subcommand == "topic-model":
