@@ -240,7 +240,6 @@ def remote_predict_models(models, test_reader, prediction_file, api, args,
                 for input_data in raw_input_data_list:
                     input_data_dict = test_reader.dict(input_data)
                     prediction = api.create_prediction(model, input_data_dict,
-                                                       wait_time=0,
                                                        args=prediction_args)
                     u.check_resource_error(prediction,
                                            "Failed to create prediction: ")

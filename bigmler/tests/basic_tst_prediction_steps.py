@@ -947,7 +947,7 @@ def i_create_source_from_connector(step, data=None, output_dir=None,
     connector_id = world.external_connector["resource"].replace( \
         "externalconnector/", "")
 
-    with open(data, 'wb+') as file_handler:
+    with open(data, 'w+') as file_handler:
         json.dump({"source": "postgresql",
                    "externalconnector_id": connector_id,
                    "query": query}, file_handler)
