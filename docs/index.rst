@@ -368,12 +368,12 @@ as data feed.
 
 .. code-block:: bash
 
-    bigmler connector --host my_data.hostname.com
-                      --port 1234
-                      --source postgresql
-                      --user my_username
-                      --password my_password
-                      --database my_database
+    bigmler connector --host my_data.hostname.com \
+                      --port 1234                 \
+                      --engine postgresql         \
+                      --user my_username          \
+                      --password my_password      \
+                      --database my_database      \
                       --output-dir out
 
 This command will generate the ``externalconnector`` and the corresponding
@@ -1642,12 +1642,12 @@ the corresponding ``source`` in BigML.
 
 .. code-block:: bash
 
-    bigmler connector --host my_data.hostname.com
-                      --port 1234
-                      --source postgresql
-                      --user my_username
-                      --password my_password
-                      --database my_database
+    bigmler connector --host my_data.hostname.com \
+                      --port 1234                 \
+                      --engine postgresql         \
+                      --user my_username          \
+                      --password my_password      \
+                      --database my_database      \
                       --output-dir out
 
 As you can see, the options needed to create an external connector are:
@@ -5622,8 +5622,9 @@ External Connector Specific Subcommand Options
 ``--hosts`` *HOSTS*                          Comma-separated list of database
                                              host names (elasticsearch only)
 ``--port`` *PORT*                            Database port number
-``--source`` *TYPE*                          Type of database manager: mysql,
-                                             postgresql, elasticsearch, sqlserver
+``--engine`` *KIND*                          Kind of database manager engine:
+                                             mysql, postgresql, elasticsearch,
+                                             sqlserver
 ``--database`` *DATABASE*                    Database name
 ``--user`` *USER*                            Database user name
 ``--password`` *PWD*                         Database user password

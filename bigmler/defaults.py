@@ -377,8 +377,9 @@ FLAGS = {
         {'flag': 'sql_output_fields', 'type': 'string'}],
     'BigMLer connector': [
         {'flag': 'connector_attributes', 'type': 'string'},
-        {'flag': 'source', 'type': 'string'},
+        {'flag': 'engine', 'type': 'string'},
         {'flag': 'host', 'type': 'string'},
+        {'flag': 'hosts', 'type': 'string'},
         {'flag': 'port', 'type': 'int'},
         {'flag': 'user', 'type': 'string'},
         {'flag': 'password', 'type': 'string'},

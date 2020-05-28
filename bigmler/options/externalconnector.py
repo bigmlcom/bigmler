@@ -44,12 +44,12 @@ def get_external_connector_options(defaults=None):
             'help': ("ID of an existing external connector.")},
 
         # The kind of database manager
-        '--source': {
+        '--engine': {
             'action': 'store',
             'dest': 'source',
             'default': defaults.get('source', None),
             'choices': ["mysql", "postgresql", "elasticsearch", "sqlserver"],
-            'help': ("Kind of database manager.")},
+            'help': ("Database manager engine.")},
 
         # The host where the database manager is
         '--host': {

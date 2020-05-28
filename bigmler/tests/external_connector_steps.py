@@ -73,6 +73,7 @@ def i_create_external_connector(step, name=None, source=None, host=None,
                " --database " +  database +
                " --user " + user +
                " --password " + password +
+               " --engine " + source +
                " --store --output-dir " + output_dir)
     shell_execute(command, "%s/x" % output_dir)
 
