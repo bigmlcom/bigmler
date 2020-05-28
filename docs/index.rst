@@ -361,7 +361,7 @@ External Connectors
 -------------------
 
 Data can be uploaded from local and remote public files in BigML as you will
-see in the `sources <#remote-sources>`_ section. It also can be extracted
+see in the `sources <#remote-sources>`_ section. It can also be extracted
 from an external database manager like PostgreSQL, MySQL, Elasticsearch or
 SQL Server. An ``externalconnector`` resource can be created in BigML to use it
 as data feed.
@@ -376,7 +376,7 @@ as data feed.
                       --database my_database
                       --output-dir out
 
-This command will generate the ``externalconnector`` and teh corresponding
+This command will generate the ``externalconnector`` and the corresponding
 external connector ID will be stored in the ``external_connector`` file of
 your ``out`` directory. Using this ID as reference and the query of choice
 when creating a ``source`` in BigML, you will be able to connect and upload
@@ -4221,16 +4221,17 @@ BigMLer encodings and locale
 
 All data uploaded to BigML (and used in BigMLer) is expected to be ``UTF-8``
 encoded. The data itself, besides its encoding,
-can contain information in different languages. English is the one used by
-default, but the ``--locale`` option can be used to use a different convention
-that will be important to parse, for instance, decimal numbers.
+can contain information in different languages. English is the default
+language, but that can be set to a different value using --locale. Setting
+the language determines the conventions for parsing number literals
+(decimal separator), dates, etc.
 
 Also, BigMLer will write information to your console and local files.
-Most Operative Systems will also accept ``UTF-8`` output, which is used
-by default. Windows systems may need
-a different encoding to be used. We allow the user to provide this enconding
-as an environment variable ``BIGML_SYS_ENCODING``. When absent, BigMLer will
-try to guess the system encoding in this case.
+Most Operating Systems will also accept ``UTF-8`` output, which is used
+by default. However, Windows systems may need a different encoding.
+We allow the user to specify this enconding
+as an environment variable ``BIGML_SYS_ENCODING``. In this case, BigMLer will
+try to guess the system encoding when absent.
 
 BigML Development Mode
 ======================
