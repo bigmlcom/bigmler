@@ -24,10 +24,13 @@ import sys
 
 import bigml.api
 import bigmler.utils as u
-import bigmler.resources as r
+import bigmler.resourcesapi.scripts as rs
+import bigmler.resourcesapi.libraries as rl
+import bigmler.resourcesapi.executions as re
 import bigmler.checkpoint as c
 import bigmler.processing.projects as pp
 
+from bigmler.resourcesapi.common import log_created_resources
 
 def build_query_string(args):
     """Builds the query string that selects the script or library id for
@@ -100,18 +103,18 @@ def script_processing(api, args,
                 script = u.get_last_resource("script",
                                              api,
                                              build_query_string(args))
-                r.log_created_resources("script", path,
-                                        script, mode='a')
+                log_created_resources("script", path,
+                                      script, mode='a')
                 message = u.dated("Script found: %s"
                                   "\n    (script ID: %s)\n" %
                                   (args.name, script))
                 u.log_message(message, log_file=session_file,
                               console=args.verbosity)
             if script is None:
-                script_args = r.set_script_args(args)
+                script_args = rs.set_script_args(args)
                 add_version_tag(script_args, args.name)
-                script = r.create_script(source_code, script_args, args, api,
-                                         path, session_file, log)
+                script = rs.create_script(source_code, script_args, args, api,
+                                          path, session_file, log)
 
             args.script = script if isinstance(script, basestring) else \
                 script.get('resource')
@@ -151,9 +154,9 @@ def execution_processing(api, args,
             args.project_id = pp.project_processing(
                 api, args, resume, session_file=session_file, path=path,
                 log=log)
-            execution_args = r.set_execution_args(args)
-            execution = r.create_execution(execution_args, args, api,
-                                           path, session_file, log)
+            execution_args = re.set_execution_args(args)
+            execution = re.create_execution(execution_args, args, api,
+                                            path, session_file, log)
 
     # If a source is provided either through the command line or in resume
     # steps, we use it.
@@ -199,16 +202,16 @@ def library_processing(api, args,
                 library = u.get_last_resource("library",
                                               api,
                                               build_query_string(args))
-                r.log_created_resources("library", path,
-                                        library, mode='a')
+                log_created_resources("library", path,
+                                      library, mode='a')
                 message = u.dated("Library found: %s \n"
                                   "    (library ID: %s)\n" %
                                   (args.name, library))
                 u.log_message(message, log_file=session_file,
                               console=args.verbosity)
             if library is None:
-                library_args = r.set_library_args(args)
+                library_args = rl.set_library_args(args)
                 add_version_tag(library_args, args.name)
-                library = r.create_library(source_code, library_args, args, api,
-                                           path, session_file, log)
+                library = rl.create_library(source_code, library_args, args,
+                                            api, path, session_file, log)
     return library

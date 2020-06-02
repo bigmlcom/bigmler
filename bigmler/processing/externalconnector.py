@@ -21,7 +21,7 @@ connectors
 from __future__ import absolute_import
 
 import bigml.api
-import bigmler.resources as r
+import bigmler.resourcesapi.external_connectors as r
 import bigmler.utils as u
 import bigmler.checkpoint as c
 

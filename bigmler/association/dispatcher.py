@@ -21,11 +21,11 @@ from __future__ import absolute_import
 
 import sys
 import os
-import shutil
 
 
 import bigmler.utils as u
-import bigmler.resources as r
+import bigmler.resourcesapi.common as r
+import bigmler.resourcesapi.associations as ras
 import bigmler.pre_model_steps as pms
 import bigmler.processing.args as a
 import bigmler.processing.associations as pa
@@ -58,8 +58,7 @@ def association_dispatcher(args=sys.argv[1:]):
     if "--clear-logs" in args:
         clear_log_files(LOG_FILES)
 
-    command_args, command, api, session_file, resume = get_context(args,
-                                                                   SETTINGS)
+    command_args, _, api, session_file, resume = get_context(args, SETTINGS)
 
     # Selects the action to perform
     if a.has_train(command_args) or a.has_test(command_args):
@@ -154,9 +153,9 @@ def compute_output(api, args):
                     r.shared_changed(args.shared, association):
                 association_args.update(shared=args.shared)
             if args.public_association:
-                association_args.update(r.set_publish_association_args(args))
+                association_args.update(ras.set_publish_association_args(args))
             if association_args:
-                association = r.update_association( \
+                association = ras.update_association( \
                     association, association_args, args,
                     api=api, path=path,
                     session_file=session_file)
@@ -178,45 +177,9 @@ def compute_output(api, args):
         # not supported yet
         if args.remote and not args.no_batch:
             sys.exit("Batch association sets are currently not supported.")
-            """
-            # create test source from file
-            test_name = "%s - test" % args.name
-            if args.test_source is None:
-                test_properties = ps.test_source_processing(
-                    api, args, resume, name=test_name,
-                    session_file=session_file, path=path, log=log)
-                (test_source, resume,
-                 csv_properties, test_fields) = test_properties
-            else:
-                test_source_id = bigml.api.get_source_id(args.test_source)
-                test_source = api.check_resource(test_source_id)
-            if test_dataset is None:
-                # create test dataset from test source
-                dataset_args = r.set_basic_dataset_args(args, name=test_name)
-                test_dataset, resume = pd.alternative_dataset_processing(
-                    test_source, "test", dataset_args, api, args,
-                    resume, session_file=session_file, path=path, log=log)
-            else:
-                test_dataset_id = bigml.api.get_dataset_id(test_dataset)
-                test_dataset = api.check_resource(test_dataset_id)
-            test_fields = pd.get_fields_structure(test_dataset,
-                                                  csv_properties)
-            batch_association_args = r.set_batch_association_args(
-                args, fields=fields,
-                dataset_fields=test_fields)
-
-            remote_association( \
-                association, test_dataset, batch_association_args,
-                args, api, resume, prediction_file=output,
-                session_file=session_file, path=path, log=log)
-            """
         else:
             sys.exit("Local prediction of association sets is currently"
                      " not supported.")
-            """
-            association_set(associations, fields, args,
-                            session_file=session_file)
-            """
     u.print_generated_files(path, log_file=session_file,
                             verbosity=args.verbosity)
     if args.reports:

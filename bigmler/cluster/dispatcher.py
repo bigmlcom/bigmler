@@ -21,17 +21,21 @@ from __future__ import absolute_import
 
 import sys
 import os
-import shutil
 
 import bigml.api
 import bigmler.utils as u
-import bigmler.resources as r
+import bigmler.resourcesapi.common as r
+import bigmler.resourcesapi.clusters as rcl
+import bigmler.resourcesapi.batch_centroids as rbc
 import bigmler.pre_model_steps as pms
 import bigmler.processing.args as a
 import bigmler.processing.clusters as pc
 import bigmler.processing.sources as ps
 import bigmler.processing.datasets as pd
 
+from bigmler.resourcesapi.datasets import create_dataset, \
+    set_basic_dataset_args
+from bigmler.resourcesapi.models import create_model
 from bigmler.defaults import DEFAULTS_FILE
 from bigmler.centroid import centroid, remote_centroid
 from bigmler.reports import clear_reports, upload_reports
@@ -61,8 +65,7 @@ def cluster_dispatcher(args=sys.argv[1:]):
     if "--clear-logs" in args:
         clear_log_files(LOG_FILES)
 
-    command_args, command, api, session_file, resume = get_context(args,
-                                                                   SETTINGS)
+    command_args, _, api, session_file, resume = get_context(args, SETTINGS)
 
     # Selects the action to perform
     if (a.has_train(command_args) or a.has_test(command_args)
@@ -155,11 +158,11 @@ def compute_output(api, args):
             if args.shared_flag and r.shared_changed(args.shared, cluster):
                 cluster_args.update(shared=args.shared)
             if args.public_cluster:
-                cluster_args.update(r.set_publish_cluster_args(args))
+                cluster_args.update(rcl.set_publish_cluster_args(args))
             if cluster_args:
-                cluster = r.update_cluster(cluster, cluster_args, args,
-                                           api=api, path=path,
-                                           session_file=session_file)
+                cluster = rcl.update_cluster(cluster, cluster_args, args,
+                                             api=api, path=path,
+                                             session_file=session_file)
                 clusters[0] = cluster
 
     # We get the fields of the cluster if we haven't got
@@ -192,7 +195,7 @@ def compute_output(api, args):
                 test_source = api.check_resource(test_source_id)
             if test_dataset is None:
                 # create test dataset from test source
-                dataset_args = r.set_basic_dataset_args(args, name=test_name)
+                dataset_args = set_basic_dataset_args(args, name=test_name)
                 test_dataset, resume = pd.alternative_dataset_processing(
                     test_source, "test", dataset_args, api, args,
                     resume, session_file=session_file, path=path, log=log)
@@ -201,7 +204,7 @@ def compute_output(api, args):
                 test_dataset = api.check_resource(test_dataset_id)
             test_fields = pd.get_fields_structure(test_dataset,
                                                   csv_properties)
-            batch_centroid_args = r.set_batch_centroid_args(
+            batch_centroid_args = rbc.set_batch_centroid_args(
                 args, fields=fields,
                 dataset_fields=test_fields)
 
@@ -228,9 +231,9 @@ def compute_output(api, args):
 
         for centroid_id in centroid_ids:
             dataset_args = {'centroid': centroid_id}
-            r.create_dataset(cluster, dataset_args, args, api=api, path=path,
-                             session_file=session_file, log=log,
-                             dataset_type='cluster')
+            create_dataset(cluster, dataset_args, args, api=api, path=path,
+                           session_file=session_file, log=log,
+                           dataset_type='cluster')
 
     if cluster and args.cluster_models is not None:
         cluster = api.check_resource(cluster)
@@ -247,9 +250,9 @@ def compute_output(api, args):
 
         for centroid_id in centroid_ids:
             model_args = {'centroid': centroid_id}
-            r.create_model(cluster, model_args, args, api=api, path=path,
-                           session_file=session_file, log=log,
-                           model_type='cluster')
+            create_model(cluster, model_args, args, api=api, path=path,
+                         session_file=session_file, log=log,
+                         model_type='cluster')
 
     if fields and args.export_fields:
         fields.summary_csv(os.path.join(path, args.export_fields))

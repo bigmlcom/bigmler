@@ -21,12 +21,12 @@ from __future__ import absolute_import
 
 import sys
 import os
-import shutil
 
 import bigml.api
+from bigml.fields import Fields
+
 import bigmler.utils as u
-import bigmler.resources as r
-import bigmler.pre_model_steps as pms
+import bigmler.labels as l
 import bigmler.processing.args as a
 import bigmler.processing.sources as ps
 import bigmler.processing.datasets as pd
@@ -35,7 +35,7 @@ from bigmler.defaults import DEFAULTS_FILE
 from bigmler.reports import clear_reports, upload_reports
 from bigmler.command import get_context
 from bigmler.prediction import OTHER
-from bigmler.dispatcher import SESSIONS_LOG, clear_log_files, get_test_dataset
+from bigmler.dispatcher import SESSIONS_LOG, clear_log_files
 
 COMMAND_LOG = u".bigmler_dataset"
 DIRS_LOG = u".bigmler_dataset_dir_stack"
@@ -60,8 +60,8 @@ def dataset_dispatcher(args=sys.argv[1:]):
     if "--clear-logs" in args:
         clear_log_files(LOG_FILES)
 
-    command_args, command, api, session_file, resume = get_context(args,
-                                                                   SETTINGS)
+    command_args, _, api, session_file, resume = get_context(args,
+                                                             SETTINGS)
 
     # Selects the action to perform
     if (a.has_train(command_args)
@@ -138,7 +138,6 @@ def compute_output(api, args):
     # variables from command-line options
     resume = args.resume_
     output = args.output
-    dataset_fields = args.dataset_fields_
 
     check_args_coherence(args)
     path = u.check_dir(output)
@@ -231,7 +230,7 @@ def compute_output(api, args):
     # If test_split is used, split the dataset in a training and a test dataset
     # according to the given split
     if args.test_split > 0:
-        dataset, test_dataset, resume = pd.split_processing(
+        dataset, _, resume = pd.split_processing(
             dataset, api, args, resume,
             multi_label_data=multi_label_data,
             session_file=session_file, path=path, log=log)
@@ -268,7 +267,7 @@ def compute_output(api, args):
     # generate a new dataset with the specified field structure. Also
     # if the --to-dataset flag is used to clone or sample the original dataset
     if args.new_fields or args.sample_rate != 1 or \
-            (args.lisp_filter or args.json_filter) and not has_source(args):
+            (args.lisp_filter or args.json_filter) and not a.has_source(args):
         if fields is None:
             if isinstance(dataset, basestring):
                 dataset = u.check_resource(dataset, api=api)

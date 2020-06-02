@@ -21,23 +21,21 @@ from __future__ import absolute_import
 
 import sys
 import os
-import shutil
 
 
-import bigmler.processing.args as a
 import bigmler.utils as u
 
 
 from bigml.ensemble import Ensemble
+try:
+    from bigml.out_model.pythonmodel import PythonModel
+except ImportError:
+    from bigml.model import Model as PythonModel
 
 from bigmler.defaults import DEFAULTS_FILE
 from bigmler.command import get_context
 from bigmler.dispatcher import SESSIONS_LOG, clear_log_files
 from bigmler.export.out_model.jsmodel import JsModel
-try:
-    from bigml.out_model.pythonmodel import PythonModel
-except:
-    from bigml.model import Model as PythonModel
 from bigmler.export.out_model.tableaumodel import TableauModel
 from bigmler.export.out_model.mysqlmodel import MySQLModel
 from bigmler.export.out_model.rmodel import RModel
@@ -62,7 +60,7 @@ EXTENSIONS = {
     "mysql": "sql",
     "r": "R"}
 
-LR_EXPORTS   = {
+LR_EXPORTS = {
     "python": PythonLR
 }
 
@@ -84,8 +82,7 @@ def export_dispatcher(args=sys.argv[1:]):
     if "--clear-logs" in args:
         clear_log_files(LOG_FILES)
 
-    command_args, command, api, session_file, resume = get_context(args,
-                                                                   SETTINGS)
+    command_args, _, api, session_file, _ = get_context(args, SETTINGS)
     # Creates the corresponding api instance
     resource = command_args.ensemble or command_args.model
     message = "Generating %s code for %s\n\n" % (command_args.language,
@@ -111,7 +108,7 @@ def generate_output(local_model, args, model_type="model", attr="confidence"):
     if args.language in SEPARATE_OUTPUT:
         with open(os.path.join(args.output_dir, \
             "%s_confidence.%s") % (getattr(args, model_type).replace("/", "_"),
-                        EXTENSIONS[args.language]), "w") as handler:
+                                   EXTENSIONS[args.language]), "w") as handler:
             local_model.plug_in(out=handler, attr=attr)
 
 
@@ -136,15 +133,3 @@ def export_code(args, api=None):
                 fields=local_ensemble.fields,
                 boosting=local_ensemble.boosting)
             generate_output(local_model, args, model_type="model")
-
-
-    """
-    if args.logistic_regression is not None:
-        if args.language not in LR_EXPORTS:
-            sys.exit("Exporting to %s is not yet supported for this kind of "
-                     "models." % args.language)
-        local_logistic = LR_EXPORTS[args.language]( \
-            args.logistic_regression, api=api)
-        generate_output(local_logistic, args, model_type="logistic_regression",
-                        attr="probability")
-    """

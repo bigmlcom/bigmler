@@ -20,11 +20,11 @@ of Fusions
 """
 from __future__ import absolute_import
 
-import bigmler.utils as u
-import bigmler.resources as r
-import bigmler.checkpoint as c
-
 from bigml.fields import Fields, DEFAULT_MISSING_TOKENS
+
+import bigmler.utils as u
+import bigmler.resourcesapi.fusions as r
+import bigmler.checkpoint as c
 
 
 def has_fusion(args):
@@ -47,7 +47,6 @@ def fusion_processing(fusion, \
     # flag hasn't been set up.
     if args.fusion_models_ is not None and not has_fusion(args):
         fusion_ids = []
-        fusions = []
 
         # Only 1 fusion per bigmler command at present
         number_of_fusions = 1
@@ -63,9 +62,13 @@ def fusion_processing(fusion, \
                 u.log_message(message, log_file=session_file,
                               console=args.verbosity)
 
-            first_model = api.getters[models[0]](model[0])
+            fusion = fusion_ids[0]
+            first_model_id = api.get_fusion(fusion)[ \
+                "object"]["fusion"]["models"][0]["id"]
+            first_model_kind = api.get_fusion(fusion)[ \
+                "object"]["fusion"]["models"][0]["kind"]
+            first_model = api.getters[first_model_kind](first_model_id)
             fields = Fields(first_model)
-            fusions = fusion_ids
             number_of_fusions -= len(fusion_ids)
 
         fusion_args = r.set_fusion_args( \

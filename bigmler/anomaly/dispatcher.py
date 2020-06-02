@@ -21,20 +21,23 @@ from __future__ import absolute_import
 
 import sys
 import os
-import shutil
 
 import bigml.api
 
 from bigml.anomaly import Anomaly
 
 import bigmler.utils as u
-import bigmler.resources as r
+import bigmler.resourcesapi.common as r
+import bigmler.resourcesapi.anomalies as ra
 import bigmler.pre_model_steps as pms
 import bigmler.processing.args as a
 import bigmler.processing.anomalies as pa
 import bigmler.processing.sources as ps
 import bigmler.processing.datasets as pd
 
+from bigmler.resourcesapi.datasets import set_basic_dataset_args
+from bigmler.resourcesapi.batch_anomaly_scores import \
+    set_batch_anomaly_score_args
 from bigmler.defaults import DEFAULTS_FILE
 from bigmler.anomaly_score import anomaly_score, remote_anomaly_score
 from bigmler.reports import clear_reports, upload_reports
@@ -66,8 +69,8 @@ def anomaly_dispatcher(args=sys.argv[1:]):
     if "--clear-logs" in args:
         clear_log_files(LOG_FILES)
 
-    command_args, command, api, session_file, resume = get_context(args,
-                                                                   SETTINGS)
+    command_args, _, api, session_file, resume = get_context(args,
+                                                             SETTINGS)
     # Selects the action to perform
     if (a.has_train(command_args) or a.has_test(command_args) or
             command_args.score or
@@ -165,11 +168,11 @@ def compute_output(api, args):
             if args.shared_flag and r.shared_changed(args.shared, anomaly):
                 anomaly_args.update(shared=args.shared)
             if args.public_anomaly:
-                anomaly_args.update(r.set_publish_anomaly_args(args))
+                anomaly_args.update(ra.set_publish_anomaly_args(args))
             if anomaly_args:
-                anomaly = r.update_anomaly(anomaly, anomaly_args, args,
-                                           api=api, path=path,
-                                           session_file=session_file)
+                anomaly = ra.update_anomaly(anomaly, anomaly_args, args,
+                                            api=api, path=path,
+                                            session_file=session_file)
                 anomalies[0] = anomaly
 
     # We get the fields of the anomaly detector if we haven't got
@@ -214,7 +217,7 @@ def compute_output(api, args):
                 test_source = api.check_resource(test_source_id)
             if test_dataset is None:
                 # create test dataset from test source
-                dataset_args = r.set_basic_dataset_args(args, name=test_name)
+                dataset_args = set_basic_dataset_args(args, name=test_name)
                 test_dataset, resume = pd.alternative_dataset_processing(
                     test_source, "test", dataset_args, api, args,
                     resume, session_file=session_file, path=path, log=log)
@@ -223,7 +226,7 @@ def compute_output(api, args):
                 test_dataset = api.check_resource(test_dataset_id)
             test_fields = pd.get_fields_structure(test_dataset,
                                                   csv_properties)
-            batch_anomaly_score_args = r.set_batch_anomaly_score_args(
+            batch_anomaly_score_args = set_batch_anomaly_score_args(
                 args, fields=fields,
                 dataset_fields=test_fields)
 

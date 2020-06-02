@@ -21,7 +21,7 @@ from __future__ import absolute_import
 
 
 import bigmler.utils as u
-import bigmler.resources as r
+import bigmler.resourcesapi.ensembles as r
 import bigmler.checkpoint as c
 
 

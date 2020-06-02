@@ -23,16 +23,16 @@ import sys
 
 import bigml.api
 
-import bigmler.utils as u
-import bigmler.checkpoint as c
-
-
 from bigml.topicmodel import TopicModel
 from bigml.io import UnicodeWriter
 
+import bigmler.utils as u
+import bigmler.checkpoint as c
+
 from bigmler.tst_reader import TstReader as TestReader
-from bigmler.resources import NORMAL_FORMAT, FULL_FORMAT
-from bigmler.resources import create_batch_topic_distribution
+from bigmler.resourcesapi.common import NORMAL_FORMAT, FULL_FORMAT
+from bigmler.resourcesapi.batch_topic_distributions import \
+    create_batch_topic_distribution
 
 # symbol used in failing topic distribution
 NO_DISTRIBUTION = "-"

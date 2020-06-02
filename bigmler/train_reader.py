@@ -60,7 +60,7 @@ class TrainReader(object):
 
         if training_set.__class__.__name__ == "StringIO":
             self.encode = None
-            self.training_set = UTF8Recoder(training_set, SYSTEM_ENCODING)
+            self.training_set = UTF8Recoder(training_set, BIGML_SYS_ENCODING)
         else:
             self.encode = None if PYTHON3 else FILE_ENCODING
         self.training_set_header = training_set_header
@@ -253,8 +253,8 @@ class TrainReader(object):
             new_labels = [decode2(label).strip()
                           for label in new_labels]
             # TODO: clean user given missing tokens
-            for label_index in range(0, len(new_labels)):
-                if new_labels[label_index] == '':
+            for label_index, label in enumerate(new_labels):
+                if label == '':
                     del new_labels[label_index]
             if new_labels != []:
                 if (self.objective and field_column == self.objective_column
@@ -311,6 +311,7 @@ class TrainReader(object):
                 "generated_fields": self.new_fields_info(),
                 "objective_name": self.objective_name,
                 "objective_column": self.objective_column}
+        return {}
 
     def close(self):
         """Closing file handler

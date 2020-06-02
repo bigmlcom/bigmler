@@ -23,16 +23,15 @@ import sys
 
 import bigml.api
 
-import bigmler.utils as u
-import bigmler.checkpoint as c
-
-
 from bigml.cluster import Cluster
 from bigml.io import UnicodeWriter
 
+import bigmler.utils as u
+import bigmler.checkpoint as c
+
 from bigmler.tst_reader import TstReader as TestReader
-from bigmler.resources import NORMAL_FORMAT, FULL_FORMAT
-from bigmler.resources import create_batch_centroid
+from bigmler.resourcesapi.common import NORMAL_FORMAT, FULL_FORMAT
+from bigmler.resourcesapi.batch_centroids import create_batch_centroid
 
 # symbol used in failing centroid predictions
 NO_CENTROID = "-"

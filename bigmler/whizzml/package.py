@@ -77,7 +77,7 @@ def retrieve_subcommands():
     global subcommand_list
     subcommand_list = open(subcommand_file, u.open_mode("r")).readlines()
     if not u.PYTHON3:
-        subcommand_list = [subcommand.decode(u.SYSTEM_ENCODING)
+        subcommand_list = [subcommand.decode(u.BIGML_SYS_ENCODING)
                            for subcommand in subcommand_list]
     subcommand_list.reverse()
 
@@ -131,7 +131,6 @@ def create_package(args, api, command_obj, resume=False):
     file.
 
     """
-    common_options = command_obj.common_options
     set_subcommand_file(args.output_dir)
     if resume:
         retrieve_subcommands()
@@ -250,3 +249,4 @@ def create_package(args, api, command_obj, resume=False):
                 execute_dispatcher(args=command_args)
             args.output_dir = output_dir
             return whizzml_code
+    return ""

@@ -20,11 +20,11 @@ of linear regressiom
 """
 from __future__ import absolute_import
 
-import bigmler.utils as u
-import bigmler.resources as r
-import bigmler.checkpoint as c
-
 from bigml.fields import Fields, DEFAULT_MISSING_TOKENS
+
+import bigmler.utils as u
+import bigmler.resourcesapi.linear_regressions as r
+import bigmler.checkpoint as c
 
 
 def has_linear_regression(args):

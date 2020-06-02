@@ -18,6 +18,7 @@
 """Options for BigMLer time series
 
 """
+import sys
 
 
 def int_or_none(value):

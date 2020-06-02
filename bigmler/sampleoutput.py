@@ -23,7 +23,7 @@ import json
 import os
 
 from bigml.io import UnicodeWriter
-import bigmler.resources as r
+import bigmler.resourcesapi.samples as r
 
 
 STAT_KEYS = ["spearman_correlation", "pearson_correlation", "slope",
@@ -59,6 +59,7 @@ def translate_to_id(value, fields):
                 print ("WARNING: Failed to find \"%s\" in the sample fields"
                        " structure")
         return ids
+    return None
 
 
 def sample_query_string(args, fields):

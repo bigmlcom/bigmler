@@ -40,7 +40,7 @@ import bigmler.utils as u
 
 from bigmler.dispatcher import main_dispatcher
 from bigmler.options.analyze import ACCURACY, MINIMIZE_OPTIONS
-from bigmler.resources import ALL_FIELDS_QS
+from bigmler.resourcesapi.common import ALL_FIELDS_QS
 
 AVG_PREFIX = "average_%s"
 R_SQUARED = "r_squared"

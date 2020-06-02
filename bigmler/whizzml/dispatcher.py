@@ -25,7 +25,6 @@ from __future__ import absolute_import
 import sys
 import os
 
-import bigmler.processing.args as a
 import bigmler.utils as u
 
 from bigmler.whizzml.package import create_package
@@ -52,8 +51,7 @@ def whizzml_dispatcher(args=sys.argv[1:]):
     if "--clear-logs" in args:
         clear_log_files(LOG_FILES)
 
-    command_args, command, api, session_file, resume = get_context(args,
-                                                                   SETTINGS)
+    command_args, command, api, _, resume = get_context(args, SETTINGS)
 
     # package_dir
     if command_args.package_dir is not None:

@@ -21,10 +21,8 @@ of time-series
 from __future__ import absolute_import
 
 import bigmler.utils as u
-import bigmler.resources as r
+import bigmler.resourcesapi.time_series as r
 import bigmler.checkpoint as c
-
-from bigml.fields import Fields, DEFAULT_MISSING_TOKENS
 
 
 def has_time_series(args):
@@ -35,7 +33,7 @@ def has_time_series(args):
         args.time_series_file
 
 
-def time_series_processing(datasets, time_series, \
+def time_series_processing(datasets, time_series_set, \
     time_series_ids, api, args, resume, fields=None, \
     session_file=None, path=None, log=None):
     """Creates or retrieves time_series from the input data

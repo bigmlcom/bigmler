@@ -36,9 +36,9 @@ import bigmler.utils as u
 import bigmler.checkpoint as c
 
 from bigmler.tst_reader import TstReader as TestReader
-from bigmler.resources import (FIELDS_QS, ALL_FIELDS_QS, BRIEF_FORMAT,
-                               NORMAL_FORMAT, FULL_FORMAT)
-from bigmler.resources import create_batch_prediction
+from bigmler.resourcesapi.common import FIELDS_QS, ALL_FIELDS_QS, \
+    BRIEF_FORMAT, NORMAL_FORMAT, FULL_FORMAT
+from bigmler.resourcesapi.batch_predictions import create_batch_prediction
 from bigmler.utils import (log_created_resources, check_resource_error, dated,
                            get_url, log_message)
 
@@ -416,10 +416,10 @@ def aggregate_multivote(multivote, options, labels, models_per_label, ordered,
                 method=AGGREGATION, full=True, options=options)
             predictions.append({'prediction': prediction_info["prediction"],
                                 'confidence': prediction_info["confidence"]})
-    for vote_index in range(0, len(predictions)):
-        if ast.literal_eval(predictions[vote_index]['prediction']):
+    for vote_index, vote_prediction in enumerate(predictions):
+        if ast.literal_eval(vote_prediction['prediction']):
             prediction_list.append(labels[vote_index])
-            confidence = str(predictions[vote_index]['confidence'])
+            confidence = str(vote_prediction['confidence'])
             confidence_list.append(confidence)
     prediction = [label_separator.join(prediction_list),
                   label_separator.join(confidence_list)]
@@ -540,9 +540,9 @@ def local_batch_predict(models, test_reader, prediction_file, api, args,
                 draw_progress_bar(models_count, models_total)
 
             if total_votes:
-                for index in range(0, len(votes)):
+                for index, vote in enumerate(votes):
                     predictions = total_votes[index]
-                    predictions.extend(votes[index].predictions)
+                    predictions.extend(vote.predictions)
             else:
                 total_votes = votes
 
@@ -551,7 +551,7 @@ def local_batch_predict(models, test_reader, prediction_file, api, args,
         u.log_message(message, log_file=session_file, console=args.verbosity)
 
     # combining the votes to issue the final prediction for each input data
-    for index in range(0, len(total_votes)):
+    for index, multivote in enumerate(total_votes):
         multivote = total_votes[index]
         input_data = raw_input_data_list[index]
 

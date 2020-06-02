@@ -21,24 +21,25 @@ from __future__ import absolute_import
 
 import sys
 import os
-import shutil
 
 import bigml.api
 import bigmler.utils as u
-import bigmler.resources as r
+import bigmler.resourcesapi.common as r
+import bigmler.resourcesapi.fusion as rfus
 import bigmler.processing.args as a
 import bigmler.processing.sources as ps
 import bigmler.processing.datasets as pd
 import bigmler.processing.fusion as pf
 
+from bigmler.resourcesapi.datasets import set_basic_dataset_args
+from bigmler.resourcesapi.batch_prediction import set_batch_prediction_args
 from bigmler.defaults import DEFAULTS_FILE
 from bigmler.sl_prediction import prediction, remote_prediction
 from bigmler.reports import clear_reports, upload_reports
 from bigmler.command import get_context
 from bigmler.evaluation import evaluate
 from bigmler.dispatcher import (SESSIONS_LOG,
-                                clear_log_files, get_test_dataset,
-                                get_objective_id)
+                                clear_log_files, get_test_dataset)
 
 COMMAND_LOG = u".bigmler_fusion"
 DIRS_LOG = u".bigmler_fusion_dir_stack"
@@ -68,8 +69,7 @@ def fusion_dispatcher(args=sys.argv[1:]):
     if '--evaluate' in args:
         settings.update({"default_output": "evaluation"})
 
-    command_args, command, api, session_file, resume = get_context(args,
-                                                                   settings)
+    command_args, _, api, session_file, _ = get_context(args, settings)
 
     # Selects the action to perform
     if a.has_value(command_args, "fusion_models_") or a.has_test(command_args):
@@ -146,9 +146,9 @@ def compute_output(api, args):
                 fusion_args.update(shared=args.shared)
             if args.public_fusion:
                 fusion_args.update( \
-                    r.set_publish_fusion_args(args))
+                    rfus.set_publish_fusion_args(args))
             if fusion_args:
-                fusion = r.update_fusion( \
+                fusion = rfus.update_fusion( \
                     fusion, fusion_args, args,
                     api=api, path=path, \
                     session_file=session_file)
@@ -181,7 +181,7 @@ def compute_output(api, args):
                 test_source = api.check_resource(test_source_id)
             if test_dataset is None:
                 # create test dataset from test source
-                dataset_args = r.set_basic_dataset_args(args, name=test_name)
+                dataset_args = set_basic_dataset_args(args, name=test_name)
                 test_dataset, resume = pd.alternative_dataset_processing(
                     test_source, "test", dataset_args, api, args,
                     resume, session_file=session_file, path=path, log=log)
@@ -194,7 +194,7 @@ def compute_output(api, args):
             test_fields = pd.get_fields_structure(test_dataset,
                                                   csv_properties)
             if not args.evaluate:
-                batch_prediction_args = r.set_batch_prediction_args(
+                batch_prediction_args = set_batch_prediction_args(
                     args, fields=fields,
                     dataset_fields=test_fields)
 

@@ -30,8 +30,7 @@ import bigmler.utils as u
 import bigmler.checkpoint as c
 
 from bigmler.tst_reader import TstReader as TestReader
-from bigmler.resources import NORMAL_FORMAT, FULL_FORMAT
-from bigmler.resources import create_batch_projection
+from bigmler.resourcesapi.batch_projections import create_batch_projection
 
 
 def use_projection_headers(projection_headers, output, test_reader,
@@ -49,8 +48,6 @@ def use_projection_headers(projection_headers, output, test_reader,
     headers = []
 
     input_headers = []
-
-
 
     if args.projection_fields:
 

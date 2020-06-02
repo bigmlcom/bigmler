@@ -31,7 +31,7 @@ from bigml.tree import LAST_PREDICTION, PROPORTIONAL
 
 import bigmler.utils as u
 
-from bigmler.resources import ADD_REMOVE_PREFIX
+from bigmler.resourcesapi.common import ADD_REMOVE_PREFIX
 from bigmler.prediction import FULL_FORMAT, COMBINATION, COMBINATION_LABEL
 from bigmler.train_reader import AGGREGATES
 from bigmler.utils import PYTHON3, check_dir
@@ -68,7 +68,7 @@ def has_value(args, attrs):
                 for attr in attrs]
     elif isinstance(attrs, basestring):
         return hasattr(args, attrs) and getattr(args, attrs)
-    return false
+    return False
 
 
 def has_test(args):
@@ -92,7 +92,15 @@ def has_train(args):
     """
     return any(has_value(args, ["training_set", "source", "dataset",
                                 "datasets", "source_file", "dataset_file",
-                                "train_stdin"]))
+                                "train_stdin", "source_tag", "dataset_tag"]))
+
+
+def has_source(args):
+    """Returns if some kind of source is given in args.
+
+    """
+    return any(has_value(args, ["source", "sources", "source_file",
+                                "source_tag"]))
 
 
 def has_model(args):
@@ -132,14 +140,14 @@ def get_flags(args):
     train_stdin = False
     test_stdin = False
     flags = []
-    for i in range(0, len(args)):
-        if args[i].startswith("--"):
+    for i, arg in enumerate(args):
+        if arg.startswith("--"):
             flag = args[i]
             # syntax --flag=value
             value = None
             if "=" in flag:
-                value = args[i][flag.index("="):]
-                args[i] = args[i][0: flag.index("=")]
+                value = arg[flag.index("="):]
+                args[i] = arg[0: flag.index("=")]
             args[i] = args[i].replace("_", "-")
             flag = args[i]
             if value:
@@ -737,7 +745,7 @@ def get_output_args(api, command_args, resume):
     # Retrieve deepnet/ids if provided.
     try:
         if command_args.deepnet_tag:
-            deepnet_regression_ids = (deepnet_ids + \
+            deepnet_ids = (deepnet_ids + \
                 u.list_ids(api.list_deepnets,
                            "tags__in=%s" % command_args.deepnet_tag))
         command_args.deepnet_ids_ = deepnet_ids
@@ -1236,13 +1244,13 @@ def transform_args(command_args, flags, api):
 
     command_args.new_dataset = (
         (hasattr(command_args, 'datasets_json') and
-        command_args.datasets_json) or
+         command_args.datasets_json) or
         (hasattr(command_args, 'multi_dataset') and
-        command_args.multi_dataset) or
+         command_args.multi_dataset) or
         (hasattr(command_args, 'juxtapose') and command_args.juxtapose) or
         (hasattr(command_args, 'sql_query') and command_args.sql_query) or
         (hasattr(command_args, 'sql_output_fields') and
-        command_args.sql_output_fields) or
+         command_args.sql_output_fields) or
         (hasattr(command_args, 'json_query') and
          command_args.json_query))
 
@@ -1259,7 +1267,7 @@ def transform_dataset_options(command_args, api):
         # Parses dataset/id if provided.
         if command_args.datasets:
             dataset_ids = u.read_datasets(command_args.datasets)
-            if len(dataset_ids) > 0:
+            if dataset_ids:
                 command_args.dataset = dataset_ids[-1]
             command_args.dataset_ids = dataset_ids
     except Exception:
@@ -1273,7 +1281,7 @@ def transform_dataset_options(command_args, api):
             dataset_ids = dataset_ids.extend(
                 u.list_ids(api.list_datasets,
                            "tags__in=%s" % command_args.dataset_tag))
-            if len(dataset_ids) > 0:
+            if dataset_ids:
                 command_args.dataset = dataset_ids[-1]
             command_args.dataset_ids = dataset_ids
     except Exception:
@@ -1284,7 +1292,7 @@ def transform_dataset_options(command_args, api):
         if hasattr(command_args, 'datasets_json') \
                 and command_args.datasets_json:
             command_args.dataset_ids = json.loads(command_args.datasets_json)
-            if len(dataset_ids) > 0:
+            if dataset_ids:
                 command_args.dataset = command_args.dataset_ids[-1]
     except AttributeError:
         pass

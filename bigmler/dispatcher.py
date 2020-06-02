@@ -23,7 +23,6 @@ import sys
 import os
 import re
 import gc
-import shutil
 
 import bigml.api
 
@@ -32,7 +31,11 @@ from bigml.basemodel import retrieve_resource
 from bigml.fields import Fields
 
 import bigmler.utils as u
-import bigmler.resources as r
+import bigmler.resourcesapi.common as r
+import bigmler.resourcesapi.datasets as rds
+import bigmler.resourcesapi.ensembles as rens
+import bigmler.resourcesapi.models as rmod
+import bigmler.resourcesapi.batch_predictions as rbp
 import bigmler.labels as l
 import bigmler.processing.args as a
 import bigmler.processing.sources as ps
@@ -75,6 +78,7 @@ def get_ensemble_id(model):
     """
     if 'object' in model and 'ensemble_id' in model['object']:
         return "ensemble/%s" % model['object']['ensemble_id']
+    return None
 
 
 def get_metadata(resource, key, default_value):
@@ -184,8 +188,7 @@ def main_dispatcher(args=sys.argv[1:]):
     if '--evaluate' in args:
         settings.update({"default_output": "evaluation"})
 
-    command_args, command, api, session_file, resume = get_context(args,
-                                                                   settings)
+    command_args, _, api, session_file, _ = get_context(args, settings)
     # the predictions flag prevails to store the results
     if (a.has_train(command_args) or a.has_test(command_args)
             or command_args.votes_dirs):
@@ -414,13 +417,13 @@ def compute_output(api, args):
     # info is extracted from the user_metadata. If models belong to an
     # ensemble, the ensemble must be retrieved to get the user_metadata.
     if model and args.multi_label and multi_label_data is None:
-        if len(ensemble_ids) > 0 and isinstance(ensemble_ids[0], dict):
+        if ensemble_ids and isinstance(ensemble_ids[0], dict):
             resource = ensemble_ids[0]
         elif belongs_to_ensemble(model):
             ensemble_id = get_ensemble_id(model)
-            resource = r.get_ensemble(ensemble_id, api=api,
-                                      verbosity=args.verbosity,
-                                      session_file=session_file)
+            resource = rens.get_ensemble(ensemble_id, api=api,
+                                         verbosity=args.verbosity,
+                                         session_file=session_file)
         else:
             resource = model
         multi_label_data = l.get_multi_label_data(resource)
@@ -445,11 +448,11 @@ def compute_output(api, args):
             if args.shared_flag and r.shared_changed(args.shared, model):
                 model_args.update(shared=args.shared)
             if args.black_box or args.white_box:
-                model_args.update(r.set_publish_model_args(args))
+                model_args.update(rmod.set_publish_model_args(args))
             if model_args:
-                model = r.update_model(model, model_args, args,
-                                       api=api, path=path,
-                                       session_file=session_file)
+                model = rmod.update_model(model, model_args, args,
+                                          api=api, path=path,
+                                          session_file=session_file)
                 models[0] = model
 
     # We get the fields of the model if we haven't got
@@ -462,7 +465,7 @@ def compute_output(api, args):
         # If more than one model, use the full field structure
         if (not single_model and not args.multi_label and
                 belongs_to_ensemble(model)):
-            if len(ensemble_ids) > 0:
+            if ensemble_ids:
                 ensemble_id = ensemble_ids[0]
                 args.ensemble_ids_ = ensemble_ids
             else:
@@ -529,7 +532,7 @@ def compute_output(api, args):
                 test_source = api.check_resource(test_source_id)
             if test_dataset is None:
             # create test dataset from test source
-                dataset_args = r.set_basic_dataset_args(args, name=test_name)
+                dataset_args = rds.set_basic_dataset_args(args, name=test_name)
                 test_dataset, resume = pd.alternative_dataset_processing(
                     test_source, "test", dataset_args, api, args,
                     resume, session_file=session_file, path=path, log=log)
@@ -551,7 +554,7 @@ def compute_output(api, args):
                 if objective_field_name in test_fields.fields_by_name.keys():
                     args.prediction_name = "%s (predicted)" % \
                         objective_field_name
-            batch_prediction_args = r.set_batch_prediction_args(
+            batch_prediction_args = rbp.set_batch_prediction_args(
                 args, fields=fields,
                 dataset_fields=test_fields)
 
@@ -560,7 +563,7 @@ def compute_output(api, args):
                            session_file=session_file, path=path, log=log)
         else:
             models_per_label = args.number_of_models
-            if (args.multi_label and len(ensemble_ids) > 0
+            if (args.multi_label and ensemble_ids
                     and args.number_of_models == 1):
                 # use case where ensembles are read from a file
                 models_per_label = len(models) / len(ensemble_ids)

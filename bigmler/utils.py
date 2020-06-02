@@ -347,7 +347,7 @@ def check_dir(path):
     directory = os.path.dirname(path)
     if directory == "":
         directory = "."
-    if len(directory) > 0 and not os.path.exists(directory):
+    if directory and not os.path.exists(directory):
         os.makedirs(directory)
         sys_log_message(u"%s\n" % os.path.abspath(directory),
                         log_file=NEW_DIRS_LOG)
@@ -368,8 +368,7 @@ def print_tree(directory, padding):
     files = []
     files = os.listdir(directory)
     count = 0
-    for i in range(0, len(files)):
-        file_name = files[i]
+    for i, file_name in enumerate(files):
         count += 1
         path = directory + os.sep + file_name
         if os.path.isdir(path):
@@ -425,8 +424,8 @@ def log_message(message, log_file=None, console=False):
     if log_file is not None:
         if PYTHON3:
             message = message.encode(FILE_ENCODING)
-        with open(log_file, 'ab', 0) as log_file:
-            log_file.write(message)
+        with open(log_file, 'ab', 0) as log_handler:
+            log_handler.write(message)
 
 
 def sys_log_message(message, log_file=None, mode='ab'):
@@ -437,8 +436,8 @@ def sys_log_message(message, log_file=None, mode='ab'):
     if PYTHON3 or isinstance(message, unicode):
         message = message.encode(BIGML_SYS_ENCODING)
     if log_file is not None:
-        with open(log_file, mode, 0) as log_file:
-            log_file.write(message)
+        with open(log_file, mode, 0) as log_handler:
+            log_handler.write(message)
 
 
 def plural(text, num):
@@ -467,7 +466,7 @@ def check_resource_error(resource, message):
     return bigml.api.get_resource_id(resource)
 
 
-def log_created_resources(file_name, path, resource_id, mode='w',
+def log_created_resources(file_name, path, resource_id, mode='ab',
                           comment=None):
     """Logs the created resources ids in the given file
 
@@ -480,7 +479,7 @@ def log_created_resources(file_name, path, resource_id, mode='w',
                 message = u"%s\n" % resource_id
             if comment is not None:
                 message = u"%s%s" % (message, comment)
-            sys_log_message(message, file_name)
+            sys_log_message(message, file_name, mode)
         except IOError, exc:
             print "Failed to write %s: %s" % (file_name, str(exc))
 

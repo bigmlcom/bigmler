@@ -449,8 +449,7 @@ def are_scripts_created(path, number_of_scripts):
                     return False, script_ids
         if len(script_ids) == number_of_scripts:
             return True, script_ids
-        else:
-            return False, script_ids
+        return False, script_ids
     except IOError:
         return False, script_ids
 
@@ -597,3 +596,88 @@ def is_external_connector_created(path):
                 return False, None
     except IOError:
         return False, None
+
+
+def is_batch_projection_created(path):
+    """Checks existence and reads the batch projection id from the
+       batch_projection file in the path directory
+
+    """
+    batch_projection_id = None
+    try:
+        with open("%s%sbatch_projection"
+                  % (path, os.sep)) as batch_prediction_file:
+            batch_projection_id = batch_prediction_file.readline().strip()
+            try:
+                batch_projection_id = bigml.api.get_batch_projection_id(
+                    batch_projection_id)
+                return True, batch_projection_id
+            except ValueError:
+                return False, None
+    except IOError:
+        return False, None
+
+def is_forecast_created(path):
+    """Checks existence and reads the forecast id from the forecast file
+       in the path directory
+
+    """
+    forecast_id = None
+    try:
+        with open("%s%sforecast" % (path, os.sep)) as forecast_file:
+            forecast_id = forecast_file.readline().strip()
+            try:
+                forecast_id = bigml.api.get_forecast_id(forecast_id)
+                return True, forecast_id
+            except ValueError:
+                return False, None
+    except IOError:
+        return False, None
+
+
+def are_fusions_created(path, number_of_fusions):
+    """Checks existence and reads the fusion ids
+       from the fusions file in the
+       path directory
+
+    """
+    fusion_ids = []
+    try:
+        with open("%s%sfusions" % (path, os.sep)) as \
+            fusions_file:
+            for line in fusions_file:
+                fusion = line.strip()
+                try:
+                    fusion_id = bigml.api.get_fusion_id( \
+                        fusion)
+                    fusion_ids.append(fusion_id)
+                except ValueError:
+                    return False, fusion_ids
+        return len(fusion_ids) == number_of_fusions, \
+            fusion_ids
+    except IOError:
+        return False, fusion_ids
+
+
+def are_pcas_created(path, number_of_pcas):
+    """Checks existence and reads the PCA ids
+       from the PCAs file in the
+       path directory
+
+    """
+    pca_ids = []
+    try:
+        with open("%s%spcas" % (path, os.sep)) as \
+            pcas_file:
+            for line in pcas_file:
+                pca = line.strip()
+                try:
+                    pca_id = bigml.api.get_pca_id( \
+                        pca)
+                    pca_ids.append(pca_id)
+                except ValueError:
+                    return False, pca_ids
+        return len(pca_ids) == number_of_pcas, \
+            pca_ids
+    except IOError:
+        return False, pca_ids

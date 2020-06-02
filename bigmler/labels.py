@@ -61,6 +61,7 @@ def get_multi_label_data(resource):
                      "resource cannot be found. Try "
                      "creating it anew." % resource['resource'])
         return multi_label_data
+    return {}
 
 
 def get_all_labels(multi_label_data):

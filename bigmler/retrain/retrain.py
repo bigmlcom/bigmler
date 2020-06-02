@@ -24,12 +24,13 @@ import sys
 import json
 import shutil
 
+from bigml.api import get_resource_type
+
 import bigml.api
-import bigmler.resources as r
+import bigmler.resourcesapi.executions as r
 import bigmler.processing.args as a
 
 
-from bigml.api import get_resource_type
 from bigmler.whizzml.dispatcher import whizzml_dispatcher
 from bigmler.execute.dispatcher import execute_whizzml
 from bigmler.execute.dispatcher import SETTINGS as EXE_SETTINGS
@@ -83,7 +84,7 @@ def create_input(args, api, input_type, script_id, command):
                           "--output-dir", args.output_dir,
                           STOP_WORKFLOW[input_type]]
         command.propagate(source_command)
-        command_args, _, _, main_session_file, _ = get_context( \
+        command_args, _, _, _, _ = get_context( \
             source_command, MAIN_SETTINGS)
         command_args.predictions = command_args.output
         a.get_output_args(api, command_args, False)
@@ -183,7 +184,7 @@ def retrain_model(args, api, command, session_file=None):
         # check whether the model exists
         try:
             bigml.api.check_resource(resource_id, raise_on_error=True, api=api)
-        except Exception, exc:
+        except Exception:
             sys.exit("Failed to find the model %s. Please, check its ID and"
                      " the connection info (domain and credentials)." %
                      resource_id)

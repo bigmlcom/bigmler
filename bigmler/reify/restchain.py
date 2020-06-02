@@ -294,7 +294,7 @@ class RESTChain(object):
         objective_id = child['objective_field']['id']
         preferred_fields = resource_fields.preferred_fields()
         # if there's no preferred fields, use the fields structure
-        if len(preferred_fields.keys()) == 0:
+        if preferred_fields.keys():
             preferred_fields = resource_fields.fields
         max_column = sorted([field['column_number']
                              for _, field in preferred_fields.items()

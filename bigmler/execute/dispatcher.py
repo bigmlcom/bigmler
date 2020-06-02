@@ -20,18 +20,15 @@
 from __future__ import absolute_import
 
 import sys
-import os
-import shutil
 
 import bigmler.utils as u
-import bigmler.processing.args as a
 import bigmler.processing.whizzml as pw
-import bigmler.resources as r
+import bigmler.resourcesapi.common as r
 
+from bigmler.resourcesapi.executions import get_execution
 from bigmler.defaults import DEFAULTS_FILE
-from bigmler.command import get_context, command_handling
-from bigmler.dispatcher import (SESSIONS_LOG,
-                                clear_log_files)
+from bigmler.command import get_context
+from bigmler.dispatcher import SESSIONS_LOG, clear_log_files
 
 COMMAND_LOG = u".bigmler_execute"
 DIRS_LOG = u".bigmler_execute_dir_stack"
@@ -56,8 +53,7 @@ def execute_dispatcher(args=sys.argv[1:]):
     if "--clear-logs" in args:
         clear_log_files(LOG_FILES)
 
-    command_args, command, api, session_file, resume = get_context(args,
-                                                                   SETTINGS)
+    command_args, _, api, session_file, _ = get_context(args, SETTINGS)
 
     # process the command
     execute_whizzml(command_args, api, session_file)
@@ -96,7 +92,7 @@ def execute_whizzml(args, api, session_file):
         if (args.script or args.scripts) and not args.no_execute:
             execution = pw.execution_processing( \
                 api, args, session_file=session_file, path=path, log=log)
-            execution = r.get_execution( \
+            execution = get_execution( \
                 execution, api, args.verbosity, session_file)
             r.save_txt_and_json(execution['object']['execution'],
                                 args.output, api=api)

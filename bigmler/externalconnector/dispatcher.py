@@ -20,11 +20,8 @@
 from __future__ import absolute_import
 
 import sys
-import os
-import shutil
 
 import bigmler.utils as u
-import bigmler.processing.args as a
 import bigmler.processing.externalconnector as pec
 
 from bigmler.defaults import DEFAULTS_FILE
@@ -48,8 +45,7 @@ def connector_dispatcher(args=sys.argv[1:]):
 
     """
 
-    command_args, command, api, session_file, resume = get_context(args,
-                                                                   SETTINGS)
+    command_args, _, api, session_file, _ = get_context(args, SETTINGS)
 
     path = u.check_dir(command_args.output)
     log = None

@@ -32,8 +32,8 @@ import bigmler.checkpoint as c
 
 from bigmler.processing.args import has_value
 from bigmler.tst_reader import TstReader as TestReader
-from bigmler.resources import NORMAL_FORMAT, FULL_FORMAT
-from bigmler.resources import create_batch_prediction
+from bigmler.resourcesapi.common import NORMAL_FORMAT, FULL_FORMAT
+from bigmler.resourcesapi.batch_predictions import create_batch_prediction
 from bigmler.prediction import use_prediction_headers
 
 

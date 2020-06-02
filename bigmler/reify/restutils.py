@@ -72,8 +72,7 @@ def get_origin_info(resource):
         sys.exit("Failed to find the complete origin information.")
     if len(found_origins) == 1:
         return found_origins[0]
-    else:
-        return found_origins
+    return found_origins
 
 
 def get_fields_changes(resource, referrer=None,
@@ -271,8 +270,7 @@ def inherit_setting(relative, child, key, default):
         default = [default, relative.get(key, default)]
     if not child.get(key, default) in default:
         return {key: child.get(key)}
-    else:
-        return {}
+    return {}
 
 
 def default_setting(child, key, *defaults):
@@ -285,8 +283,7 @@ def default_setting(child, key, *defaults):
     if child.get(key) is not None and \
             not child.get(key, defaults[0]) in defaults:
         return {key: child[key]}
-    else:
-        return {}
+    return {}
 
 
 def non_automatic_name(resource, opts, autonames=None, autoname=None,

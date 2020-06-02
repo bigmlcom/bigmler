@@ -24,11 +24,13 @@ import json
 import numbers
 import math
 
+from bigml.util import slugify
+
 import bigmler.utils as u
-import bigmler.resources as r
+import bigmler.resourcesapi.evaluations as r
 import bigmler.checkpoint as c
 
-from bigml.util import slugify
+from bigmler.resourcesapi.common import shared_changed
 
 
 def evaluate(models_or_ensembles, datasets, api, args, resume,
@@ -49,11 +51,10 @@ def evaluate(models_or_ensembles, datasets, api, args, resume,
     if hasattr(args, 'multi_label') and args.multi_label:
         file_labels = [slugify(name) for name in
                        u.objective_field_names(models_or_ensembles, api)]
-    for index in range(0, len(evaluations)):
-        evaluation = evaluations[index]
+    for index, evaluation in enumerate(evaluations):
         evaluation = r.get_evaluation(evaluation, api, args.verbosity,
                                       session_file)
-        if r.shared_changed(args.shared, evaluation):
+        if shared_changed(args.shared, evaluation):
             evaluation_args = {"shared": args.shared}
             evaluation = r.update_evaluation(evaluation, evaluation_args,
                                              args, api=api, path=path,
@@ -147,8 +148,7 @@ def standard_deviation(points, mean):
     if total > 0:
         return math.sqrt(sum([(point - mean) ** 2 for point in points]) /
                          total)
-    else:
-        return float('nan')
+    return float('nan')
 
 
 def traverse_for_std_dev(tree):
@@ -221,7 +221,7 @@ def avg_evaluation(total, component, number_of_evaluations):
                         total[(sd_key, new_key)] = []
                     total[(sd_key, new_key)].append(value)
                 # Handle grouping keys
-                elif isinstance(value, list) or isinstance(value, dict):
+                elif isinstance(value, (dict, list)):
                     if not key in total:
                         total[key] = [] if isinstance(value, list) else {}
                     avg_evaluation(total[key], value,

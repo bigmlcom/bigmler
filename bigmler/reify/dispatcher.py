@@ -20,11 +20,8 @@
 from __future__ import absolute_import
 
 import sys
-import os
-import shutil
 
 import bigmler.utils as u
-import bigmler.processing.args as a
 
 from bigmler.defaults import DEFAULTS_FILE
 from bigmler.command import get_context
@@ -53,8 +50,7 @@ def reify_dispatcher(args=sys.argv[1:]):
     if "--clear-logs" in args:
         clear_log_files(LOG_FILES)
 
-    command_args, command, api, session_file, resume = get_context(args,
-                                                                   SETTINGS)
+    command_args, _, api, session_file, _ = get_context(args, SETTINGS)
 
     def logger(message):
         """Partial to log messages according to args.verbosity
@@ -66,7 +62,7 @@ def reify_dispatcher(args=sys.argv[1:]):
     message = "Starting reification for %s\n\n" % command_args.resource_id
     u.log_message(message, \
         log_file=session_file, console=command_args.verbosity)
-    reify_resources(command_args, api, logger)
+    reify_resources(command_args, api)
     message = "\nReification complete. See the results in %s\n\n" % \
         command_args.output
     u.log_message(message, \

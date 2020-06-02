@@ -21,17 +21,19 @@ from __future__ import absolute_import
 
 import sys
 import os
-import shutil
 
 import bigml.api
 import bigmler.utils as u
-import bigmler.resources as r
+import bigmler.resourcesapi.linear_regressions as r
 import bigmler.pre_model_steps as pms
 import bigmler.processing.args as a
 import bigmler.processing.linearregressions as plr
 import bigmler.processing.sources as ps
 import bigmler.processing.datasets as pd
 
+from bigmler.resourcesapi.common import shared_changed
+from bigmler.resourcesapi.datasets import set_basic_dataset_args
+from bigmler.resourcesapi.batch_predictions import set_batch_prediction_args
 from bigmler.defaults import DEFAULTS_FILE
 from bigmler.sl_prediction import prediction, remote_prediction
 from bigmler.reports import clear_reports, upload_reports
@@ -69,8 +71,7 @@ def linear_regression_dispatcher(args=sys.argv[1:]):
     if '--evaluate' in args:
         settings.update({"default_output": "evaluation"})
 
-    command_args, command, api, session_file, resume = get_context(args,
-                                                                   settings)
+    command_args, _, api, session_file, _ = get_context(args, settings)
 
     # Selects the action to perform
     if (a.has_train(command_args) or a.has_test(command_args)
@@ -168,11 +169,11 @@ def compute_output(api, args):
                                                  query_string=query_string)
         linear_regressions[0] = linear_regression
         if (args.public_linear_regression or
-                (args.shared_flag and r.shared_changed(args.shared,
-                                                       linear_regression))):
+                (args.shared_flag and shared_changed(args.shared,
+                                                     linear_regression))):
             linear_regression_args = {}
-            if args.shared_flag and r.shared_changed(args.shared,
-                                                     linear_regression):
+            if args.shared_flag and shared_changed(args.shared,
+                                                   linear_regression):
                 linear_regression_args.update(shared=args.shared)
             if args.public_linear_regression:
                 linear_regression_args.update( \
@@ -215,7 +216,7 @@ def compute_output(api, args):
                 test_source = api.check_resource(test_source_id)
             if test_dataset is None:
                 # create test dataset from test source
-                dataset_args = r.set_basic_dataset_args(args, name=test_name)
+                dataset_args = set_basic_dataset_args(args, name=test_name)
                 test_dataset, resume = pd.alternative_dataset_processing(
                     test_source, "test", dataset_args, api, args,
                     resume, session_file=session_file, path=path, log=log)
@@ -227,7 +228,7 @@ def compute_output(api, args):
                                   objective_field_present=False)
             test_fields = pd.get_fields_structure(test_dataset,
                                                   csv_properties)
-            batch_prediction_args = r.set_batch_prediction_args(
+            batch_prediction_args = set_batch_prediction_args(
                 args, fields=fields,
                 dataset_fields=test_fields)
 

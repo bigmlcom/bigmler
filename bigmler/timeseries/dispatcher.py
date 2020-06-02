@@ -21,17 +21,17 @@ from __future__ import absolute_import
 
 import sys
 import os
-import shutil
 
 import bigml.api
 import bigmler.utils as u
-import bigmler.resources as r
+import bigmler.resourcesapi.common as r
+import bigmler.resourcesapi.time_series as rts
 import bigmler.pre_model_steps as pms
 import bigmler.processing.args as a
 import bigmler.processing.timeseries as pts
-import bigmler.processing.sources as ps
 import bigmler.processing.datasets as pd
 
+from bigmler.resourcesapi.forecasts import set_forecast_args
 from bigmler.defaults import DEFAULTS_FILE
 from bigmler.forecast import forecast, remote_forecast
 from bigmler.reports import clear_reports, upload_reports
@@ -63,8 +63,7 @@ def time_series_dispatcher(args=sys.argv[1:]):
     if "--clear-logs" in args:
         clear_log_files(LOG_FILES)
 
-    command_args, command, api, session_file, resume = get_context(args,
-                                                                   SETTINGS)
+    command_args, _, api, session_file, resume = get_context(args, SETTINGS)
 
     # Selects the action to perform
     if (a.has_train(command_args) or a.has_ts_test(command_args)
@@ -174,9 +173,9 @@ def compute_output(api, args):
                 time_series_args.update(shared=args.shared)
             if args.public_time_series:
                 time_series_args.update( \
-                    r.set_publish_time_series_args(args))
+                    rts.set_publish_time_series_args(args))
             if time_series_args:
-                time_series = r.time_series( \
+                time_series = rts.update_time_series( \
                     time_series, time_series_args, args,
                     api=api, path=path, \
                     session_file=session_file)
@@ -196,11 +195,11 @@ def compute_output(api, args):
     # If forecasting
     if time_series_set and a.has_ts_test(args):
         if args.remote:
-            forecast_args = r.set_forecast_args(
+            forecast_args = set_forecast_args(
                 args, fields=fields)
 
             remote_forecast(time_series, forecast_args, args, \
-                api, resume, prediction_file=output, \
+                api, resume, \
                 session_file=session_file, path=path, log=log)
 
         else:
@@ -245,8 +244,7 @@ def compute_output(api, args):
                               args, resume,
                               fields=fields, dataset_fields=dataset_fields,
                               session_file=session_file, path=path,
-                              log=log,
-                              objective_field=args.objective_field)
+                              log=log)
 
 
     u.print_generated_files(path, log_file=session_file,

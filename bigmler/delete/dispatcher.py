@@ -102,7 +102,7 @@ def time_interval_qs(args, api):
     return query_string_list
 
 
-def filter_qs(args, api):
+def filter_qs(args):
     """Building the query string from the filter.
 
     """
@@ -183,7 +183,6 @@ def resources_by_type(resources_list, bulk_deletion=False):
         else:
             simple.append(resource)
 
-    new_resources_list = []
     groups.sort()
     resources_list = groups
     if not bulk_deletion:
@@ -364,7 +363,7 @@ def delete_resources(command_args, api, deleted_list=None):
     delete_list.extend(get_delete_list(command_args, api, time_qs_list))
 
     # by filter expression (plus filtered resource_types)
-    filter_qs_list = filter_qs(command_args, api)
+    filter_qs_list = filter_qs(command_args)
     delete_list.extend(get_delete_list(command_args, api, filter_qs_list))
 
     delete_list = [resource_id for resource_id in delete_list \

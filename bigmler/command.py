@@ -25,12 +25,11 @@ import shlex
 import shutil
 
 
-import bigmler.processing.args as a
-import bigmler.utils as u
-
 
 from bigml.multivote import PLURALITY
 
+import bigmler.processing.args as a
+import bigmler.utils as u
 
 from bigmler.defaults import DEFAULTS_FILE
 from bigmler.defaults import get_user_defaults
@@ -79,7 +78,7 @@ def get_log_reversed(file_name, stack_level):
 
     """
     lines_list = tail(open(file_name, "r"), window=(stack_level + 1))
-    return lines_list[0].decode(u.SYSTEM_ENCODING)
+    return lines_list[0].decode(u.BIGML_SYS_ENCODING)
 
 
 def get_stored_command(args, debug=False, command_log=COMMAND_LOG,
@@ -172,7 +171,7 @@ def get_cmd_context(args, settings):
         if not hasattr(command_args, "output") or command_args.output is None:
             command_args.output = os.path.join(command_args.output_dir,
                                                settings['default_output'])
-        if len(os.path.dirname(command_args.output).strip()) == 0:
+        if not os.path.dirname(command_args.output).strip():
             command_args.output = os.path.join(command_args.output_dir,
                                                command_args.output)
         directory = u.check_dir(command_args.output)
@@ -270,8 +269,8 @@ class Command(object):
             new_subcommand = new_command_args[0]
         except IndexError:
             new_subcommand = "main"
-        compatible_args = [arg for arg in self.args_dict.keys() if \
-            arg in self.subcommand_options[new_subcommand].keys()]
+        compatible_args = [arg for arg in self.args_dict if \
+            arg in self.subcommand_options[new_subcommand]]
         if connection_only:
             compatible_args = [arg for arg in compatible_args if arg in
                                CONNECTION_OPTIONS]
@@ -301,8 +300,8 @@ class StoredCommand(object):
         self.command = get_log_reversed(command_log, stack_level)
         self.output_dir = get_log_reversed(dirs_log, stack_level)
         self.defaults_file = os.path.join(self.output_dir, DEFAULTS_FILE)
-        self.args = [arg.decode(u.SYSTEM_ENCODING) for arg in
-                     shlex.split(self.command.encode(u.SYSTEM_ENCODING))[1:]]
+        self.args = [arg.decode(u.BIGML_SYS_ENCODING) for arg in
+                     shlex.split(self.command.encode(u.BIGML_SYS_ENCODING))[1:]]
         if not ("--output" in self.args or "--output-dir" in self.args):
             current_directory = u"%s%s" % (os.getcwd(), os.sep)
             if self.output_dir.startswith(current_directory):

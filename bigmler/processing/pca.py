@@ -20,11 +20,11 @@ of PCAs
 """
 from __future__ import absolute_import
 
-import bigmler.utils as u
-import bigmler.resources as r
-import bigmler.checkpoint as c
-
 from bigml.fields import Fields, DEFAULT_MISSING_TOKENS
+
+import bigmler.utils as u
+import bigmler.resourcesapi.pcas as r
+import bigmler.checkpoint as c
 
 
 def has_pca(args):
@@ -47,7 +47,6 @@ def pca_processing(datasets, pca, \
     if datasets and not (has_pca(args) or \
             args.no_pca):
         pca_ids = []
-        pcas = []
 
         # Only 1 pca per bigmler command at present
         number_of_pcas = 1
@@ -63,7 +62,6 @@ def pca_processing(datasets, pca, \
                 u.log_message(message, log_file=session_file,
                               console=args.verbosity)
 
-            pcas = pca_ids
             number_of_pcas -= len(pca_ids)
 
         args.exclude_fields = []

@@ -19,37 +19,27 @@
 """
 from __future__ import absolute_import
 
-import os
-import json
-import numbers
-import math
-
 import bigmler.utils as u
-import bigmler.resources as r
+import bigmler.resourcesapi.evaluations as r
 import bigmler.checkpoint as c
 
-from bigml.util import slugify
-
+from bigmler.resourcesapi.common import shared_changed
 
 def evaluate(time_series_set, datasets, api, args, resume,
              session_file=None, path=None, log=None,
-             fields=None, dataset_fields=None,
-             objective_field=None):
+             fields=None, dataset_fields=None):
     """Evaluates a list of time-series with the given dataset
 
     """
     output = args.predictions
-    evaluation_files = []
     evaluations, resume = evaluations_process(
         time_series_set, datasets, fields,
         dataset_fields, api, args, resume,
-        session_file=session_file, path=path, log=log,
-        objective_field=objective_field)
-    for index in range(0, len(evaluations)):
-        evaluation = evaluations[index]
+        session_file=session_file, path=path, log=log)
+    for evaluation in evaluations:
         evaluation = r.get_evaluation(evaluation, api, args.verbosity,
                                       session_file)
-        if r.shared_changed(args.shared, evaluation):
+        if shared_changed(args.shared, evaluation):
             evaluation_args = {"shared": args.shared}
             evaluation = r.update_evaluation(evaluation, evaluation_args,
                                              args, api=api, path=path,
@@ -61,8 +51,7 @@ def evaluate(time_series_set, datasets, api, args, resume,
 
 def evaluations_process(time_series_set, datasets,
                         fields, dataset_fields, api, args, resume,
-                        session_file=None, path=None, log=None,
-                        objective_field=None):
+                        session_file=None, path=None, log=None):
     """Evaluates time-series against datasets
 
     """

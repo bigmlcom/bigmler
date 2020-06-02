@@ -30,8 +30,9 @@ import bigmler.utils as u
 import bigmler.checkpoint as c
 
 from bigmler.tst_reader import TstReader as TestReader
-from bigmler.resources import NORMAL_FORMAT, FULL_FORMAT
-from bigmler.resources import create_batch_anomaly_score
+from bigmler.resourcesapi.common import NORMAL_FORMAT, FULL_FORMAT
+from bigmler.resourcesapi.batch_anomaly_scores import \
+    create_batch_anomaly_score
 
 # symbol used in failing anomaly score predictions
 NO_ANOMALY_SCORE = "NaN"

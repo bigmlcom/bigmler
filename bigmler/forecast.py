@@ -29,9 +29,7 @@ from bigml.io import UnicodeWriter
 import bigmler.utils as u
 import bigmler.checkpoint as c
 
-from bigmler.resources import NORMAL_FORMAT, FULL_FORMAT
-from bigmler.resources import create_forecast
-from bigmler.prediction import use_prediction_headers
+from bigmler.resourcesapi.forecasts import create_forecast
 
 
 def write_forecasts(forecast, output):
@@ -80,7 +78,7 @@ def forecast(time_series, args, session_file=None):
 
 def remote_forecast(time_series,
                     forecast_args, args,
-                    api, resume, prediction_file=None, session_file=None,
+                    api, resume, session_file=None,
                     path=None, log=None):
     """Computes a remote forecast.
 

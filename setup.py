@@ -56,6 +56,7 @@ setuptools.setup(
                 'bigmler.execute', 'bigmler.whizzml', 'bigmler.topicmodel',
                 'bigmler.timeseries', 'bigmler.deepnet', 'bigmler.retrain',
                 'bigmler.export', 'bigmler.export.out_model',
+                'bigmler.resourcesapi',
                 'bigmler.linearregression', 'bigmler.pca', 'bigmler.fusion',
                 'bigmler.dataset', 'bigmler.externalconnector',
                 'bigmler.export.out_tree'],

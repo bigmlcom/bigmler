@@ -23,10 +23,7 @@
 from __future__ import absolute_import
 
 import sys
-import os
-import shutil
 
-import bigmler.processing.args as a
 import bigmler.utils as u
 
 
@@ -69,8 +66,7 @@ def retrain_dispatcher(args=sys.argv[1:]):
         clear_log_files(LOG_FILES)
 
     # parses the command line to get the context args and the log files to use
-    command_args, command, api, session_file, resume = get_context(args,
-                                                                   SETTINGS)
+    command_args, command, api, session_file, _ = get_context(args, SETTINGS)
 
     # --id or --model-tag, --ensemble-tag, etc. is compulsory
     if check_compulsory_options(command.flags, command_args):

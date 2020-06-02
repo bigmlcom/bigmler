@@ -22,23 +22,21 @@ from __future__ import absolute_import
 import sys
 import os
 import stat
-import nbformat as nbf
-import pprint
 import json
 import shutil
-import re
+import pprint
+import nbformat as nbf
 
 from bigml.resourcehandler import get_resource_id
 from bigml.api import check_resource
 
-from bigmler.utils import PYTHON3, get_last_resource, get_script_id, \
+from bigmler.utils import get_last_resource, get_script_id, \
     write_to_utf8
 from bigmler.reports import BIGMLER_SCRIPT, HOME
 from bigmler.command import get_context
 from bigmler.whizzml.dispatcher import whizzml_dispatcher
 from bigmler.execute.dispatcher import execute_whizzml
 from bigmler.execute.dispatcher import SETTINGS as EXE_SETTINGS
-from bigmler.dispatcher import SETTINGS as MAIN_SETTINGS, compute_output
 
 
 REIFY_PACKAGE_PATH = os.path.join(BIGMLER_SCRIPT, "static", "scripts",
@@ -87,11 +85,11 @@ def write_nb_output(resource_id, workflow, filename, api):
                                       " in the BIGML_USERNAME and"
                                       " BIGML_API_KEY environment variables."),
              nbf.v4.new_code_cell("from bigml.api import BigML\napi = %s" %
-                      create_connection(api))]
+                                  create_connection(api))]
     for step in workflow:
         for (cell_type, cell_text) in step.items():
             if cell_type == "args":
-                args  = clean_args_references(json.loads(cell_text))
+                args = clean_args_references(json.loads(cell_text))
                 cell_text = "args = \\\n    %s" % pprint.pformat( \
                     args).replace("\n", "\n    ")
                 cell_type = "code"
@@ -100,7 +98,7 @@ def write_nb_output(resource_id, workflow, filename, api):
     nbf.write(nb, filename)
 
 
-def python_output(resource_id, workflow, api):
+def python_output(workflow, api):
     """ Content for the script in Python
 
     """
@@ -110,7 +108,7 @@ def python_output(resource_id, workflow, api):
         for (cell_type, cell_text) in step.items():
             if cell_type == "args":
                 args = json.loads(cell_text)
-                args  = clean_args_references(args)
+                args = clean_args_references(args)
                 cell_text = "args = \\\n    %s" % pprint.pformat( \
                     args).replace("\n", "\n    ")
                 cell_type = "code"
@@ -146,12 +144,12 @@ def whizzml_script(args, api):
 
     # create or retrieve the script to generate the output
     # if --upgrade, we force rebuilding the scriptified script
-    if reify_script is None :
+    if reify_script is None:
         try:
             shutil.rmtree(os.path.join(BIGMLER_SCRIPTS_DIRECTORY,
                                        SCRIPT_FILE.get(args.language,
                                                        args.language)))
-        except Exception, exc:
+        except Exception:
             pass
 
     if reify_script is None:
@@ -167,7 +165,7 @@ def whizzml_script(args, api):
     return reify_script
 
 
-def reify_resources(args, api, logger):
+def reify_resources(args, api):
     """ Extracts the properties of the created resources and generates
         code to rebuild them
 
@@ -181,7 +179,7 @@ def reify_resources(args, api, logger):
     # check whether the resource exists
     try:
         check_resource(resource_id, raise_on_error=True, api=api)
-    except Exception, exc:
+    except Exception:
         sys.exit("Failed to find the resource %s. Please, check its ID and"
                  " the connection info (domain and credentials)." %
                  resource_id)
@@ -192,7 +190,7 @@ def reify_resources(args, api, logger):
     execute_command = ['execute',
                        '--script', reify_script,
                        '--output-dir', args.output_dir]
-    command_args, _, _, exe_session_file, _ = get_context( \
+    command_args, _, _, _, _ = get_context( \
         execute_command, EXE_SETTINGS)
     command_args.arguments_ = [["res-id", resource_id]]
     command_args.inputs = json.dumps(command_args.arguments_)
@@ -216,8 +214,7 @@ def reify_resources(args, api, logger):
                                "metadata.json"), "w") as meta_handler:
             meta_handler.write(json.dumps(exe_output))
     else:
-        output = python_output(resource_id,
-                               exe_output,
+        output = python_output(exe_output,
                                api)
         prefix = u"""\
 #!/usr/bin/env python

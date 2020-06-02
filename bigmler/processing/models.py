@@ -26,9 +26,10 @@ import bigml.api
 from bigml.fields import Fields, DEFAULT_MISSING_TOKENS
 
 import bigmler.utils as u
-import bigmler.resources as r
+import bigmler.resourcesapi.models as r
 import bigmler.checkpoint as c
 
+from bigmler.resourcesapi.ensembles import get_ensemble
 from bigmler.processing.ensembles import (ensemble_processing,
                                           ensemble_per_label)
 
@@ -162,8 +163,8 @@ def models_processing(datasets, models, model_ids,
         if not args.ensemble in ensemble_ids:
             ensemble_ids.append(args.ensemble)
         if not args.evaluate:
-            ensemble = r.get_ensemble(args.ensemble, api, args.verbosity,
-                                      session_file)
+            ensemble = get_ensemble(args.ensemble, api, args.verbosity,
+                                    session_file)
             model_ids = ensemble['object']['models']
             models = model_ids[:]
 
@@ -178,7 +179,7 @@ def models_processing(datasets, models, model_ids,
         else:
             ensemble_ids = u.read_resources(args.ensembles)
         for ensemble_id in ensemble_ids:
-            ensemble = r.get_ensemble(ensemble_id, api)
+            ensemble = get_ensemble(ensemble_id, api)
             if args.ensemble is None:
                 args.ensemble = ensemble_id
             model_ids.extend(ensemble['object']['models'])

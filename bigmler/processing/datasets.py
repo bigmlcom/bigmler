@@ -29,9 +29,10 @@ from bigml.fields import Fields
 from bigml.predicate import TM_FULL_TERM
 
 import bigmler.utils as u
-import bigmler.resources as r
+import bigmler.resourcesapi.datasets as r
 import bigmler.checkpoint as c
 
+from bigmler.resourcesapi.common import shared_changed
 from bigmler.prediction import OTHER
 
 
@@ -133,7 +134,7 @@ def check_dataset_update(args, dataset):
     """
     return (args.dataset_attributes or
             args.import_fields or
-            (args.shared_flag and r.shared_changed(args.shared, dataset)) or
+            (args.shared_flag and shared_changed(args.shared, dataset)) or
             (((hasattr(args, 'max_categories') and args.max_categories > 0) or
               (hasattr(args, 'multi_label') and args.multi_label)) and
              args.objective_field))
@@ -211,7 +212,7 @@ def dataset_processing(source, api, args, resume,
         #  the --impor-fields flag is used
         if check_dataset_update(args, dataset):
             dataset_args = r.set_dataset_args(args, fields)
-            if args.shared_flag and r.shared_changed(args.shared, dataset):
+            if args.shared_flag and shared_changed(args.shared, dataset):
                 dataset_args.update(shared=args.shared)
             dataset = r.update_dataset(dataset, dataset_args, args,
                                        api=api, path=path,

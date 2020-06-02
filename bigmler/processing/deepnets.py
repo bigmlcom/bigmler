@@ -20,11 +20,11 @@ of deepnets
 """
 from __future__ import absolute_import
 
-import bigmler.utils as u
-import bigmler.resources as r
-import bigmler.checkpoint as c
-
 from bigml.fields import Fields, DEFAULT_MISSING_TOKENS
+
+import bigmler.utils as u
+import bigmler.resourcesapi.deepnets as r
+import bigmler.checkpoint as c
 
 
 def has_deepnet(args):
@@ -70,7 +70,7 @@ def deepnets_processing(datasets, deepnets, \
             args, fields=fields, \
             deepnet_fields=args.deepnet_fields_,
             objective_id=args.objective_id_)
-        deepnets, deepnets_ids = \
+        deepnets, deepnet_ids = \
             r.create_deepnets( \
             datasets, deepnets, deepnet_args, \
             args, api, path, session_file, log)

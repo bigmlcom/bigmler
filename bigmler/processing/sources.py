@@ -29,7 +29,7 @@ from bigml.fields import Fields
 from bigml.util import bigml_locale
 
 import bigmler.utils as u
-import bigmler.resources as r
+import bigmler.resourcesapi.sources as r
 import bigmler.checkpoint as c
 import bigmler.processing.projects as pp
 

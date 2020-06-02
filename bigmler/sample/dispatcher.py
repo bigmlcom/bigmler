@@ -21,14 +21,14 @@ from __future__ import absolute_import
 
 import sys
 import os
-import shutil
 
 import bigmler.utils as u
-import bigmler.resources as r
+import bigmler.resourcesapi.samples as r
 import bigmler.pre_model_steps as pms
 import bigmler.processing.args as a
 import bigmler.processing.samples as psa
 
+from bigmler.resourcesapi.common import shared_changed
 from bigmler.defaults import DEFAULTS_FILE
 from bigmler.command import get_context
 from bigmler.dispatcher import SESSIONS_LOG, clear_log_files
@@ -65,8 +65,7 @@ def sample_dispatcher(args=sys.argv[1:]):
     if "--clear-logs" in args:
         clear_log_files(LOG_FILES)
 
-    command_args, command, api, session_file, resume = get_context(args,
-                                                                   SETTINGS)
+    command_args, _, api, session_file, resume = get_context(args, SETTINGS)
 
     # Selects the action to perform
     if a.has_train(command_args) or has_sample(command_args):
@@ -144,9 +143,9 @@ def compute_output(api, args):
             sample = u.check_resource(sample, api.get_sample)
         samples[0] = sample
         if (args.public_sample or
-                (args.shared_flag and r.shared_changed(args.shared, sample))):
+                (args.shared_flag and shared_changed(args.shared, sample))):
             sample_args = {}
-            if args.shared_flag and r.shared_changed(args.shared, sample):
+            if args.shared_flag and shared_changed(args.shared, sample):
                 sample_args.update(shared=args.shared)
             if args.public_sample:
                 sample_args.update(r.set_publish_sample_args(args))

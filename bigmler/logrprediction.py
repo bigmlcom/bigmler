@@ -31,8 +31,8 @@ import bigmler.checkpoint as c
 
 from bigmler.processing.args import has_value
 from bigmler.tst_reader import TstReader as TestReader
-from bigmler.resources import NORMAL_FORMAT, FULL_FORMAT
-from bigmler.resources import create_batch_prediction
+from bigmler.resourcesapi.common import NORMAL_FORMAT, FULL_FORMAT
+from bigmler.resourcesapi.batch_predictions import create_batch_prediction
 from bigmler.prediction import use_prediction_headers
 
 
@@ -80,7 +80,7 @@ def local_prediction(models, test_reader, output, args,
     local_model = SupervisedModel(models[0],
                                   api=args.retrieve_api_)
     kwargs = {"full": True}
-    if has_value(args.operating_point_):
+    if has_value(args, "operating_point_"):
         kwargs.update({"operating_point": args.operating_point_})
     for input_data in test_reader:
         input_data_dict = test_reader.dict(input_data, filtering=False)

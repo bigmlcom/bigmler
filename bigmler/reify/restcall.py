@@ -56,6 +56,7 @@ def resource_alias(resource_id, alias):
             alias_names.append(
                 alias.get(resource_id_id, '"%s"' % resource_id_id))
         return repr(alias_names)
+    return resource_id
 
 
 def to_whizzml(args):
@@ -122,13 +123,13 @@ class RESTCall(object):
             out += "args: %s\n" % self.args
             out += "input data: %s\n" % self.input_data
             return out
-        else:
-            try:
-                reify_handler = getattr(self, "reify_%s" % language)
-            except AttributeError:
-                reify_handler = self.reify
-            return reify_handler(
-                alias=alias)
+
+        try:
+            reify_handler = getattr(self, "reify_%s" % language)
+        except AttributeError:
+            reify_handler = self.reify
+        return reify_handler(
+            alias=alias)
 
     def reify_python(self, alias=None):
         """REST call command line in python. See ``reify`` method.
@@ -275,3 +276,4 @@ class RESTCall(object):
             args.update({origin_types[0]: self.origins[0],
                          "input_data": self.input_data})
             return args
+        return args
