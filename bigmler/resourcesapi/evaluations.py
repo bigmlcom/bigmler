@@ -36,7 +36,7 @@ from bigmler.utils import (dated, get_url, log_message, check_resource,
 from bigmler.reports import report
 
 from bigmler.resourcesapi.common import set_basic_args, map_fields, \
-    update_json_args, get_basic_seed, wait_for_available_tasks, utf8,
+    update_json_args, get_basic_seed, wait_for_available_tasks, utf8, \
     save_txt_and_json
 from bigmler.labels import label_model_args
 from bigmler.resourcesapi.common import EVALUATE_SAMPLE_RATE, \
