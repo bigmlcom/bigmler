@@ -25,14 +25,14 @@ import os
 import bigml.api
 import bigmler.utils as u
 import bigmler.resourcesapi.common as r
-import bigmler.resourcesapi.fusion as rfus
+import bigmler.resourcesapi.fusions as rfus
 import bigmler.processing.args as a
 import bigmler.processing.sources as ps
 import bigmler.processing.datasets as pd
 import bigmler.processing.fusion as pf
 
 from bigmler.resourcesapi.datasets import set_basic_dataset_args
-from bigmler.resourcesapi.batch_prediction import set_batch_prediction_args
+from bigmler.resourcesapi.batch_predictions import set_batch_prediction_args
 from bigmler.defaults import DEFAULTS_FILE
 from bigmler.sl_prediction import prediction, remote_prediction
 from bigmler.reports import clear_reports, upload_reports
