@@ -436,7 +436,7 @@ def sys_log_message(message, log_file=None, mode='ab'):
     if PYTHON3 or isinstance(message, unicode):
         message = message.encode(BIGML_SYS_ENCODING)
     if log_file is not None:
-        with open(log_file, mode, 0) as log_handler:
+        with open(log_file, mode) as log_handler:
             log_handler.write(message)
 
 
