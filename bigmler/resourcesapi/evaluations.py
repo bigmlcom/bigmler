@@ -36,7 +36,8 @@ from bigmler.utils import (dated, get_url, log_message, check_resource,
 from bigmler.reports import report
 
 from bigmler.resourcesapi.common import set_basic_args, map_fields, \
-    update_json_args, get_basic_seed, wait_for_available_tasks, utf8
+    update_json_args, get_basic_seed, wait_for_available_tasks, utf8,
+    save_txt_and_json
 from bigmler.labels import label_model_args
 from bigmler.resourcesapi.common import EVALUATE_SAMPLE_RATE, \
     SEED
@@ -256,17 +257,3 @@ def save_evaluation(evaluation, output, api=None):
         api = bigml.api.BigML()
     evaluation = evaluation.get('object', evaluation).get('result', evaluation)
     save_txt_and_json(evaluation, output, api=api)
-
-
-def save_txt_and_json(object_dict, output, api=None):
-    """Saves in txt and JSON format the contents of a dict object
-
-    """
-    open_mode = 'wt' if PYTHON3 else 'wb'
-    message = json.dumps(object_dict)
-    if not PYTHON3:
-        message = utf8(message)
-    with open(output + '.json', open_mode) as dict_json:
-        dict_json.write(message)
-    with open(output + '.txt', open_mode) as dict_txt:
-        api.pprint(object_dict, dict_txt)

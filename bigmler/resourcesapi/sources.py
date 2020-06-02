@@ -111,8 +111,8 @@ def create_source(data_set, source_args, args, api=None, path=None,
         suffix = "_" + source_type if source_type else ""
         log_created_resources(
             "source%s" % suffix, path,
-            source['resource'], mode='a',
-            comment=("%s\n" % source['object']['name']))
+            source['resource'], mode='ab',
+            comment=(u"%s\n" % source['object']['name']))
     source_id = check_resource_error(source, "Failed to create source: ")
     try:
         source = check_resource(source, api.get_source,
