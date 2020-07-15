@@ -3003,6 +3003,14 @@ to delete other resources, you can select them by choosing their status:
 
 would remove all failed resources created more than two days ago.
 
+Also, you can apply a filter based on the filters used in the API list
+query strings (see the `API documentation <https://bigml.com/api>`_).
+
+
+.. code-block:: bash
+
+    bigmler delete --filter "name__icontains=iris"
+
 
 .. _bigmler-export:
 
@@ -5591,6 +5599,8 @@ Delete Subcommand Options
                                       model, ensemble, prediction,
                                       batch_prediction,
                                       cluster, centroid, batch_centroid, etc.
+``--filter`` *FILTER EXPRESSION*      Filter expression as used in the API
+                                      list calls query string
 ``--dry-run``                         Delete simulation. No removal.
 ``--status``                          Status codes used in the filter to
                                       retrieved the resources to be delete. The
