@@ -308,7 +308,7 @@ def list_ids(api_function, query_string, status_code=bigml.api.FINISHED,
            (resources['meta']['total_count'] > (resources['meta']['offset'] +
                                                 resources['meta']['limit']))):
         offset = resources['meta']['offset'] + PAGE_LENGTH
-        q_s = 'status.code=%s;offset=%s;limit=%s;%s' % (
+        q_s = 'status.code=%s;offset=%s;%s;%s' % (
             status_code, offset, limit_s, query_string)
         resources = api_function(q_s)
         if resources['objects']:
