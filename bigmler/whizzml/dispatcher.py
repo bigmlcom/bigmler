@@ -20,7 +20,7 @@
 
 
 """
-from __future__ import absolute_import
+
 
 import sys
 import os
@@ -32,8 +32,8 @@ from bigmler.dispatcher import SESSIONS_LOG, clear_log_files
 from bigmler.command import get_context
 
 
-COMMAND_LOG = u".bigmler_whizzml"
-DIRS_LOG = u".bigmler_whizzml_dir_stack"
+COMMAND_LOG = ".bigmler_whizzml"
+DIRS_LOG = ".bigmler_whizzml_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 
 SETTINGS = {

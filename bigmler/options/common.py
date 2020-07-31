@@ -16,7 +16,7 @@
 """Common options for the BigMLer parser
 
 """
-from __future__ import absolute_import
+
 
 import datetime
 

@@ -46,14 +46,14 @@ class JsTree(Tree):
         """Builds the code to predict when the field is missing
 
         """
-        code = u"%sif (%s%s == null) {\n" % \
+        code = "%sif (%s%s == null) {\n" % \
             (INDENT * depth,
              prefix,
              self.fields[field]['camelCase'])
         value = value_to_print(self.output,
                                self.fields[self.objective_id]['optype'])
-        code += u"%sreturn {prediction: %s," \
-            u" %s: %s}}\n" % \
+        code += "%sreturn {prediction: %s," \
+            " %s: %s}}\n" % \
             (INDENT * (depth + 1), value, metric, self.confidence)
         cmv.append(self.fields[field]['camelCase'])
         return code
@@ -64,11 +64,11 @@ class JsTree(Tree):
 
         """
 
-        operator = u"==" if self.predicate.missing else u"!="
-        connection = u"||" if self.predicate.missing else u"&&"
+        operator = "==" if self.predicate.missing else "!="
+        connection = "||" if self.predicate.missing else "&&"
         if not self.predicate.missing:
             cmv.append(self.fields[field]['camelCase'])
-        return u"%s%s %s null %s " % (prefix,
+        return "%s%s %s null %s " % (prefix,
                                       self.fields[field]['camelCase'],
                                       operator,
                                       connection)
@@ -93,7 +93,7 @@ class JsTree(Tree):
                                              self.predicate.term))
                 matching_function = "itemMatches"
 
-            return u"%sif (%s%s(%s%s, %s, %s) %s %s) {\n" % \
+            return "%sif (%s%s(%s%s, %s, %s) %s %s) {\n" % \
                 (INDENT * depth,
                  pre_condition,
                  matching_function,
@@ -106,7 +106,7 @@ class JsTree(Tree):
                  value)
         if self.predicate.value is None:
             cmv.append(self.fields[field]['camelCase'])
-        return u"%sif (%s%s%s %s %s) {\n" % \
+        return "%sif (%s%s%s %s %s) {\n" % \
             (INDENT * depth, pre_condition,
              prefix,
              self.fields[field]['camelCase'],
@@ -124,14 +124,14 @@ class JsTree(Tree):
         metric = "error" if self.regression else "confidence"
         if cmv is None:
             cmv = []
-        body = u""
+        body = ""
         term_analysis_fields = []
         item_analysis_fields = []
-        prefix = u""
+        prefix = ""
         field_obj = self.fields[self.objective_id]
 
         if len(self.fields) > MAX_ARGS_LENGTH:
-            prefix = u"data."
+            prefix = "data."
         children = filter_nodes(self.children, ids=ids_path,
                                 subtree=subtree)
 
@@ -154,7 +154,7 @@ class JsTree(Tree):
 
                 field = child.predicate.field
 
-                pre_condition = u""
+                pre_condition = ""
                 # code when missing_splits has been used
                 if has_missing_branch and child.predicate.value is not None:
                     pre_condition = self.missing_prefix_code(child, field,
@@ -170,14 +170,14 @@ class JsTree(Tree):
                                                 ids_path=ids_path,
                                                 subtree=subtree)
                 body += next_level[0]
-                body += u"%s}\n" % (INDENT * depth)
+                body += "%s}\n" % (INDENT * depth)
                 term_analysis_fields.extend(next_level[1])
                 item_analysis_fields.extend(next_level[2])
 
         else:
             value = value_to_print(self.output,
                                    self.fields[self.objective_id]['optype'])
-            body = u"%sreturn {prediction: %s, %s: %s};\n" % ( \
+            body = "%sreturn {prediction: %s, %s: %s};\n" % ( \
                 INDENT * depth,
                 value,
                 metric,

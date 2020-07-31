@@ -93,7 +93,7 @@ def multi_label_sync(objective_field, labels, multi_label_data, fields,
         try:
             objective_id = fields.field_id(objective_field)
             objective_name = fields.field_name(objective_id)
-        except ValueError, exc:
+        except ValueError as exc:
             sys.exit(exc)
         objective_column = fields.field_column_number(objective_id)
         multi_label_data['objective_name'] = objective_name

@@ -218,9 +218,9 @@ def retrain_model(args, api, command, session_file=None):
 
         with open("%s.json" % command_args.output) as file_handler:
             model_resource_id = json.load(file_handler)['result']
-            message = (u'The new retrained model is: %s.\n'
-                       u'You can use the\n\n%s\n\nquery to retrieve the latest'
-                       u' retrained model.\n\n') % \
+            message = ('The new retrained model is: %s.\n'
+                       'You can use the\n\n%s\n\nquery to retrieve the latest'
+                       ' retrained model.\n\n') % \
                 (model_resource_id, last_resource_url( \
                 resource_id, api, \
                 "limit=1;full=yes;tags=%s" % reference_tag))

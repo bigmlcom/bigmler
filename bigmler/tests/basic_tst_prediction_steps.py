@@ -13,7 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from __future__ import absolute_import
+
 
 import os
 import time
@@ -468,9 +468,9 @@ def i_create_resources_from_dataset_objective_model( \
     ok_(objective is not None and fields is not None and test is not None \
         and output is not None)
     test = res_filename(test)
-    command = (u"bigmler --dataset " + world.dataset['resource'] +
-               u" --objective " + objective + u" --model-fields " +
-               fields + u" --test " + test + u" --store --output " + output)
+    command = ("bigmler --dataset " + world.dataset['resource'] +
+               " --objective " + objective + " --model-fields " +
+               fields + " --test " + test + " --store --output " + output)
     shell_execute(command, output, test=test)
 
 
@@ -779,7 +779,7 @@ def i_create_cross_validation_from_dataset( \
         ok_(retcode >= 0)
         world.output = output
     except (OSError, CalledProcessError, IOError) as exc:
-        print "command: ", command
+        print("command: ", command)
         assert False, str(exc)
 
 
@@ -799,7 +799,7 @@ def i_find_predictions_files( \
         world.test_lines = file_number_of_lines("%s%spredictions.csv" % (directory1, os.sep))
         world.output = output
     except (OSError, CalledProcessError, IOError) as exc:
-        print "command: ", command
+        print("command: ", command)
         assert False, str(exc)
 
 
@@ -821,7 +821,7 @@ def i_find_predictions_files_with_method( \
             directory1, os.sep))
         world.output = output
     except (OSError, CalledProcessError, IOError) as exc:
-        print "command: ", command
+        print("command: ", command)
         assert False, str(exc)
 
 #@step(r'I create a BigML balanced model from "(.*)" and store logs in "(.*)"')
@@ -838,7 +838,7 @@ def i_create_balanced_model(step, data=None, output_dir=None):
         retcode = check_call(command, shell=True)
         ok_(retcode >= 0)
     except (OSError, CalledProcessError, IOError) as exc:
-        print "command: ", command
+        print("command: ", command)
         assert False, str(exc)
 
 #@step(r'I create a BigML balanced model from "(.*)" sampling 50% and store logs in "(.*)"')
@@ -855,7 +855,7 @@ def i_create_balanced_model_from_sample(step, data=None, output_dir=None):
         retcode = check_call(command, shell=True)
         ok_(retcode >= 0)
     except (OSError, CalledProcessError, IOError) as exc:
-        print "command: ", command
+        print("command: ", command)
         assert False, str(exc)
     try:
         command = ("bigmler --datasets " + output_dir + "/dataset" +
@@ -876,7 +876,7 @@ def i_create_balanced_model_from_sample(step, data=None, output_dir=None):
         retcode = check_call(command, shell=True)
         ok_(retcode >= 0)
     except (OSError, CalledProcessError, IOError) as exc:
-        print "command: ", command
+        print("command: ", command)
         assert False, str(exc)
 
 
@@ -897,7 +897,7 @@ def i_create_weighted_field_model( \
         retcode = check_call(command, shell=True)
         ok_(retcode >= 0)
     except (OSError, CalledProcessError, IOError) as exc:
-        print "command: ", command
+        print("command: ", command)
         assert False, str(exc)
 
 
@@ -934,7 +934,7 @@ def i_retrain_model(step, data=None, output_dir=None):
         retcode = check_call(command, shell=True)
         ok_(retcode >= 0)
     except (OSError, CalledProcessError, IOError) as exc:
-        print "command: ", command
+        print("command: ", command)
         assert False, str(exc)
 
 
@@ -958,7 +958,7 @@ def i_create_source_from_connector(step, data=None, output_dir=None,
         retcode = check_call(command, shell=True)
         ok_(retcode >= 0)
     except (OSError, CalledProcessError, IOError) as exc:
-        print "command: ", command
+        print("command: ", command)
         assert False, str(exc)
 
 #@step(r'I check that the source has been created$')
@@ -972,7 +972,7 @@ def i_check_create_source(step):
             world.sources.append(source['resource'])
         world.source = source
         source_file.close()
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 #@step(r'I check that the model has doubled its rows$')
@@ -998,7 +998,7 @@ def i_check_create_dataset(step, suffix=None):
             world.datasets.append(dataset['resource'])
         world.dataset = dataset
         dataset_file.close()
-    except Exception, exc:
+    except Exception as exc:
         assert False, traceback.format_exc()
 
 
@@ -1013,7 +1013,7 @@ def i_check_create_new_dataset(step):
         world.datasets.append(dataset['resource'])
         world.dataset = dataset
         dataset_file.close()
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -1033,7 +1033,7 @@ def i_check_create_model(step):
         world.models.append(model['resource'])
         world.model = model
         model_file.close()
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -1048,7 +1048,7 @@ def i_check_create_model_in_execution(step):
                 world.models.append(model['resource'])
                 world.model = model
                 break
-        except Exception, exc:
+        except Exception as exc:
             continue
 
 
@@ -1064,12 +1064,12 @@ def i_check_create_kfold_models(step, kfolds):
             model_file = os.path.join(directory, "models")
             try:
                 with open(model_file, "r") as models_file:
-                    models_list = map(str.strip, models_file.readlines())
+                    models_list = list(map(str.strip, models_file.readlines()))
 
                 world.models.extend(models_list)
                 world.model = models_list[-1]
                 assert_equal(int(kfolds), len(models_list))
-            except Exception, exc:
+            except Exception as exc:
                 assert False, str(exc)
 
 
@@ -1085,11 +1085,11 @@ def i_check_create_kfold_ensembles(step, kfolds):
             model_file = os.path.join(directory, "ensembles")
             try:
                 with open(model_file, "r") as models_file:
-                    models_list = map(str.strip, models_file.readlines())
+                    models_list = list(map(str.strip, models_file.readlines()))
                 world.ensembles.extend(models_list)
                 world.ensemble = models_list[-1]
                 assert_equal(int(kfolds), len(models_list))
-            except Exception, exc:
+            except Exception as exc:
                 assert False, str(exc)
 
 #@step(r'I check that the model has been created and shared$')
@@ -1141,7 +1141,7 @@ def i_check_create_ensemble(step):
         world.ensembles.append(ensemble['resource'])
         world.ensemble = ensemble
         ensemble_file.close()
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 #@step(r'I check that the models have been created')
@@ -1178,7 +1178,7 @@ def i_check_create_models_in_ensembles(step, in_ensemble=True):
                     world.ensembles.append(ensemble_id)
             else:
                 world.models.append(model_id)
-        except Exception, exc:
+        except Exception as exc:
             assert False, str(exc)
 
 
@@ -1200,7 +1200,7 @@ def check_create_kfold_cross_validation(step, kfolds, directory):
     evaluations_file = os.path.join(directory, "evaluations")
     try:
         with open(evaluations_file, "r") as evaluations_file:
-            evaluations_list = map(str.strip, evaluations_file.readlines())
+            evaluations_list = list(map(str.strip, evaluations_file.readlines()))
         world.evaluations.extend(evaluations_list)
         world.evaluation = evaluations_list[-1]
         assert_equal(int(kfolds), len(evaluations_list))
@@ -1232,7 +1232,7 @@ def i_check_create_kfold_datasets(step, kfolds):
         "dataset_gen")
     try:
         with open(datasets_file, "r") as datasets_file:
-            datasets_list = map(str.strip, datasets_file.readlines())
+            datasets_list = list(map(str.strip, datasets_file.readlines()))
         world.datasets.extend(datasets_list)
         world.dataset = datasets_list[-1]
         assert_equal(int(kfolds), len(datasets_list))
@@ -1253,7 +1253,7 @@ def i_check_feature_selection(step, selection, metric, metric_value):
         text = "The best feature subset is: %s \n%s = %s" % (
             selection, metric.capitalize(), metric_value)
         ok_(content.find(text) > -1)
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -1267,8 +1267,8 @@ def i_check_node_threshold(step, node_threshold, metric, metric_value):
             content = sessions_file.read()
             if not PYTHON3:
                 content = decode2(content)
-    except Exception, exc:
-        print str(exc)
+    except Exception as exc:
+        print(str(exc))
         assert False
     text = "The best node threshold is: %s \n%s = %s" % (
         node_threshold, metric.capitalize(), metric_value)
@@ -1293,7 +1293,7 @@ def i_check_gazibit_reports(step, shared=''):
         ok_(content.find('%START_BIGML_') < 0 and
             content.find('%END_BIGML_') < 0 and
             content.find('%BIGML_') < 0)
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -1325,7 +1325,7 @@ def i_check_create_evaluations(step, number_of_evaluations=None):
             evaluation = check_resource(evaluation_id,
                                         world.api.get_evaluation)
             world.evaluations.append(evaluation_id)
-        except Exception, exc:
+        except Exception as exc:
             assert False, str(exc)
 
 
@@ -1341,7 +1341,7 @@ def i_check_create_predictions(step):
             predictions_lines += 1
         assert_equal(predictions_lines, world.test_lines)
         predictions_file.close()
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -1365,7 +1365,7 @@ def i_check_predictions(step, check_file):
         with UnicodeReader(predictions_file) as predictions_file:
             with UnicodeReader(check_file) as check_file:
                 for row in predictions_file:
-                    check_row = check_file.next()
+                    check_row = next(check_file)
                     assert_equal(len(check_row), len(row))
                     for index in range(len(row)):
                         dot = row[index].find(".")
@@ -1388,7 +1388,7 @@ def i_check_predictions(step, check_file):
                                                 places=(decimal_places - 1))
                         else:
                             assert_equal(check_row[index], row[index])
-    except Exception, exc:
+    except Exception as exc:
         assert False, traceback.format_exc()
 
 
@@ -1402,7 +1402,7 @@ def i_check_predictions_with_different_thresholds(step, output2, output3):
     try:
         predictions_file = open(output2, "U").read()
         predictions_file_k = open(output3, "U").read()
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
     assert_not_equal(predictions_file, predictions_file_k)
 
@@ -1416,7 +1416,7 @@ def i_check_cross_validation(step, check_file):
             cv_content = json.loads(cv_handler.read())
         with open(check_file, "U") as check_handler:
             check_content = json.loads(check_handler.read())
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
     assert_equal(cv_content['model'], check_content['model'])
 
@@ -1434,7 +1434,7 @@ def i_check_stored_source(step):
                 world.source = json.loads(storage_source_file.read().strip())
         else:
             assert False
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -1443,7 +1443,7 @@ def i_check_source_locale(step, bigml_locale):
     try:
         locale = world.source['object']["source_parser"]["locale"]
         assert_equal(bigml_locale, locale)
-    except KeyError, exc:
+    except KeyError as exc:
         assert False, str(exc)
 
 
@@ -1452,7 +1452,7 @@ def i_check_source_type(step, field_id, field_type):
     try:
         type = world.source['object']["fields"][field_id]['optype']
         assert_equal(type, field_type)
-    except KeyError, exc:
+    except KeyError as exc:
         assert False, str(exc)
 
 
@@ -1461,7 +1461,7 @@ def i_check_source_label(step, field_id, field_label):
     try:
         label = world.source['object']["fields"][field_id]['label']
         assert_equal(label, field_label)
-    except KeyError, exc:
+    except KeyError as exc:
         assert False, str(exc)
 
 
@@ -1837,8 +1837,8 @@ def i_have_previous_scenario_or_reproduce_it(step, scenario, kwargs):
     else:
         try:
             kwargs = json.loads(kwargs)
-        except Exception, exc:
-            print str(exc)
+        except Exception as exc:
+            print(str(exc))
         for function, with_args in scenarios[scenario]:
             if with_args:
                 function(step, **kwargs)
@@ -1875,12 +1875,12 @@ def i_check_create_kfold_random_forest(step, kfolds):
         ensembles_file = os.path.join(directory, "ensembles")
         try:
             with open(ensembles_file, "r") as ensembles_file:
-                ensembles_list = map(str.strip, ensembles_file.readlines())
+                ensembles_list = list(map(str.strip, ensembles_file.readlines()))
 
             world.ensembles.extend(ensembles_list)
             world.ensemble = ensembles_list[-1]
             assert_equal(int(kfolds), len(ensembles_list))
-        except Exception, exc:
+        except Exception as exc:
             assert False, str(exc)
 
 

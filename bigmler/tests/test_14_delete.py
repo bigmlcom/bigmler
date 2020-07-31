@@ -19,7 +19,7 @@
 """ Testing delete subcommand
 
 """
-from __future__ import absolute_import
+
 
 
 from bigmler.tests.world import (world, common_setup_module,
@@ -48,14 +48,14 @@ class TestDelete(object):
         """Calling generic teardown for every method
 
         """
-        print "\nEnd of tests in: %s\n-------------------\n" % __name__
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
         teardown_class()
 
     def setup(self):
         """
             Debug information
         """
-        print "\n-------------------\nTests in: %s\n" % __name__
+        print("\n-------------------\nTests in: %s\n" % __name__)
 
     def test_scenario1(self):
         """
@@ -69,11 +69,11 @@ class TestDelete(object):
                 | data               | output_dir       |
                 | ../data/iris.csv   | ./scenario_del_1 |
         """
-        print self.test_scenario1.__doc__
+        print(self.test_scenario1.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_del_1']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_delete.i_create_source_from_file(self, data=example[0], output_dir=example[1])
             test_delete.i_check_source_exists(self)
             test_delete.i_delete_source_by_ids(self, output_dir=example[1])
@@ -91,11 +91,11 @@ class TestDelete(object):
                 | data               | output_dir       |
                 | ../data/iris.csv   | ./scenario_del_2 |
         """
-        print self.test_scenario2.__doc__
+        print(self.test_scenario2.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_del_2']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_delete.i_create_source_from_file(self, data=example[0], output_dir=example[1])
             test_pred.i_check_create_source(self)
             test_delete.i_delete_source_by_ids_dry(self, output_dir=example[1])
@@ -113,11 +113,11 @@ class TestDelete(object):
                 | data               | output_dir       | resource_types
                 | ../data/iris.csv   | ./scenario_del_3 | dataset,model
         """
-        print self.test_scenario3.__doc__
+        print(self.test_scenario3.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_del_3', 'dataset,model']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_delete.i_create_source_from_file(self, data=example[0], output_dir=example[1])
             test_pred.i_check_create_source(self)
             test_delete.i_delete_source_by_ids_filtered(self, resource_types=example[2], output_dir=example[1])
@@ -135,11 +135,11 @@ class TestDelete(object):
                 | data               | output_dir       |
                 | ../data/iris.csv   | ./scenario_del_4 |
         """
-        print self.test_scenario4.__doc__
+        print(self.test_scenario4.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_del_4']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_delete.i_create_source_from_file(self, data=example[0], output_dir=example[1])
             test_delete.i_check_source_exists(self)
             test_delete.i_delete_source_by_file(self, output_dir=example[1])
@@ -157,11 +157,11 @@ class TestDelete(object):
                 | data               | output_dir       | resource_types
                 | ../data/iris.csv   | ./scenario_del_5 | dataset,model
         """
-        print self.test_scenario5.__doc__
+        print(self.test_scenario5.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_del_5', 'dataset,model']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_delete.i_create_source_from_file(self, data=example[0], output_dir=example[1])
             test_pred.i_check_create_source(self)
             test_delete.i_delete_source_by_file_filtered(self, resource_types=example[2], output_dir=example[1])
@@ -186,11 +186,11 @@ class TestDelete(object):
                 | data               | output_dir | output_dir2 | output_dir3
                 | ../data/iris.csv   | ./scenario_del_6 | ./scenario_del_6_2 | ./scenario_del_6_3
         """
-        print self.test_scenario6.__doc__
+        print(self.test_scenario6.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_del_6', 'scenario_del_6_2', 'scenario_del_6_3']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_delete.i_create_source_from_file(self, data=example[0], output_dir=example[1])
             test_pred.i_check_create_source(self)
             test_delete.i_store_source_id_as_bound(self, which='lower')
@@ -222,11 +222,11 @@ class TestDelete(object):
                 | data               | output_dir       | resource_types| output_dir2        | output_dir3
                 | ../data/iris.csv   | ./scenario_del_7 | dataset,model | ./scenario_del_7_2 | ./scenario_del_7_3
         """
-        print self.test_scenario7.__doc__
+        print(self.test_scenario7.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_del_7', 'dataset,model', 'scenario_del_7_2', 'scenario_del_7_3']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_delete.i_create_source_from_file(self, data=example[0], output_dir=example[1])
             test_pred.i_check_create_source(self)
             test_delete.i_store_source_id_as_bound(self, which='lower')
@@ -259,11 +259,11 @@ class TestDelete(object):
                 | data               | output_dir       | tag1    | tag2 | output_dir2       | output_dir3
                 | ../data/iris.csv   | ./scenario_del_8 | my_tag1 | my_tag2 | ./scenario_del_8_2 | ./scenario_del_8_3
         """
-        print self.test_scenario8.__doc__
+        print(self.test_scenario8.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_del_8', 'my_tag1', 'my_tag2', 'scenario_del_8_2', 'scenario_del_8_3']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_delete.i_create_source_from_file(self, data=example[0], output_dir=example[1])
             test_pred.i_check_create_source(self)
             test_delete.i_store_source_id_as_bound(self, which='lower')
@@ -295,11 +295,11 @@ class TestDelete(object):
                 | data               | output_dir       | tag1 | output_dir2       | output_dir3
                 | ../data/iris.csv   | ./scenario_del_9 | my_tag1 | ./scenario_del_9_2  | ./scenario_del_9_3
         """
-        print self.test_scenario9.__doc__
+        print(self.test_scenario9.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_del_9', 'my_tag1', 'scenario_del_9_2', 'scenario_del_9_3']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_delete.i_create_source_from_file(self, data=example[0], output_dir=example[1])
             test_pred.i_check_create_source(self)
             test_delete.i_store_source_id_as_bound(self, which='lower')
@@ -332,11 +332,11 @@ class TestDelete(object):
                 | data               | output_dir       | data2      | tag1    | tag2 | output_dir2       | output_dir3
                 | ../data/iris.csv   | ./scenario_del_8 | ../data/faulty.csv |my_tag1 | my_tag2 | ./scenario_del_8_2 | ./scenario_del_8_3
         """
-        print self.test_scenario10.__doc__
+        print(self.test_scenario10.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_del_10', 'my_tag1', 'my_tag2', 'scenario_del_10_2', 'scenario_del_10_3', 'data/faulty.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_delete.i_create_source_from_file(self, data=example[0], output_dir=example[1])
             test_pred.i_check_create_source(self)
             test_delete.i_store_source_id_as_bound(self, which='lower')

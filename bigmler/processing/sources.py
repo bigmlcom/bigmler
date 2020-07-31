@@ -17,7 +17,7 @@
 """BigMLer - Resources processing: creation, update and retrieval of sources
 
 """
-from __future__ import absolute_import
+
 
 import os
 import csv

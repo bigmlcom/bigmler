@@ -17,7 +17,7 @@
 """BigMLer report utilities
 
 """
-from __future__ import absolute_import
+
 
 
 import os
@@ -134,7 +134,7 @@ def add_gazibit_links(resource, output_dir=None, shared=False):
                 report_output.write(content)
         os.remove(input_file)
         os.rename(output_file.name, input_file)
-    except IOError, exc:
+    except IOError as exc:
         os.remove(output_file.name)
         sys.exit("Failed to generate the gazibit output report. %s" % str(exc))
 
@@ -162,7 +162,7 @@ def clear_reports(output_dir):
                     report_output.write(content)
             os.remove(input_file)
             os.rename(output_file.name, input_file)
-        except IOError, exc:
+        except IOError as exc:
             os.remove(output_file.name)
             sys.exit("Failed to generate the output report. %s" % str(exc))
 
@@ -204,13 +204,13 @@ def gazibit_upload(output_file, exit_flag=False):
             sys.exit("Failed to find the report file")
     except ValueError:
         sys.exit("Malformed response")
-    except requests.ConnectionError, exc:
+    except requests.ConnectionError as exc:
         sys.exit("Connection error: %s" % str(exc))
     except requests.Timeout:
         sys.exit("Request timed out")
     except requests.RequestException:
         sys.exit("Ambiguous exception occurred")
-    except IOError, excio:
+    except IOError as excio:
         sys.exit("ERROR: failed to read report file: %s" % str(excio))
 
 

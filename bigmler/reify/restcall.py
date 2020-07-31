@@ -18,7 +18,7 @@
 
 """
 
-from __future__ import absolute_import
+
 
 import pprint
 import json
@@ -35,7 +35,7 @@ def sort_lists(dict_structure):
 
     """
     if dict_structure is not None and isinstance(dict_structure, dict):
-        for key, value in dict_structure.items():
+        for key, value in list(dict_structure.items()):
             if value is not None:
                 if isinstance(value, list):
                     dict_structure[key] = sorted(value)
@@ -48,7 +48,7 @@ def resource_alias(resource_id, alias):
     """Returns the alias if found
 
     """
-    if isinstance(resource_id, basestring):
+    if isinstance(resource_id, str):
         return alias.get(resource_id, '"%s"' % resource_id)
     elif isinstance(resource_id, list):
         alias_names = []
@@ -67,7 +67,7 @@ def to_whizzml(args):
     if isinstance(args, list):
         return "[%s]" % " ".join([to_whizzml(arg) for arg in args])
     if isinstance(args, dict):
-        for arg, value in args.items():
+        for arg, value in list(args.items()):
             whizzml_args.append("%s %s" % (json.dumps(arg), to_whizzml(value)))
         return  "{%s}" % " ".join(whizzml_args)
     return json.dumps(args)
@@ -172,7 +172,7 @@ class RESTCall(object):
             self.resource_id, alias)
         args = self.origin_attributes()
         arguments = to_whizzml(args)
-        for resource_id, name in alias.items():
+        for resource_id, name in list(alias.items()):
             arguments = arguments.replace('"%s"' % resource_id, name)
 
         command = "(%s-and-wait-%s %s)" % ( \
@@ -186,7 +186,7 @@ class RESTCall(object):
         args = {}
         args.update(self.args)
         origin_types = []
-        if isinstance(self.origins, basestring):
+        if isinstance(self.origins, str):
             origin_types.append(bigml.api.get_resource_type(self.origins))
         else:
             for origin in self.origins:

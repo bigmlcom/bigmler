@@ -17,7 +17,7 @@
 """BigMLer - cluster subcommand processing dispatching
 
 """
-from __future__ import absolute_import
+
 
 import sys
 import os
@@ -42,11 +42,11 @@ from bigmler.reports import clear_reports, upload_reports
 from bigmler.command import get_context
 from bigmler.dispatcher import SESSIONS_LOG, clear_log_files, get_test_dataset
 
-COMMAND_LOG = u".bigmler_cluster"
-DIRS_LOG = u".bigmler_cluster_dir_stack"
+COMMAND_LOG = ".bigmler_cluster"
+DIRS_LOG = ".bigmler_cluster_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 MINIMUM_MODEL = "full=false"
-DEFAULT_OUTPUT = u"centroids.csv"
+DEFAULT_OUTPUT = "centroids.csv"
 
 SETTINGS = {
     "command_log": COMMAND_LOG,
@@ -108,7 +108,7 @@ def compute_output(api, args):
                  " to generate the new dataset from it.")
 
     path = u.check_dir(output)
-    session_file = u"%s%s%s" % (path, os.sep, SESSIONS_LOG)
+    session_file = "%s%s%s" % (path, os.sep, SESSIONS_LOG)
     csv_properties = {}
     # If logging is required set the file for logging
     log = None
@@ -144,7 +144,7 @@ def compute_output(api, args):
 
     # We update the cluster's public state if needed
     if cluster:
-        if isinstance(cluster, basestring):
+        if isinstance(cluster, str):
             if args.cluster_datasets is None and not a.has_test(args):
                 query_string = MINIMUM_MODEL
             else:
@@ -222,7 +222,7 @@ def compute_output(api, args):
                      for centroid in centroids_info}
         cluster_datasets = cluster['object']['cluster_datasets']
         if args.cluster_datasets == '':
-            centroid_ids = centroids.values()
+            centroid_ids = list(centroids.values())
         else:
             centroid_ids = [centroids[cluster_name] for cluster_name in
                             args.cluster_datasets_
@@ -242,7 +242,7 @@ def compute_output(api, args):
                      for centroid in centroids_info}
         models = cluster['object']['cluster_models']
         if args.cluster_models == '':
-            centroid_ids = centroids.values()
+            centroid_ids = list(centroids.values())
         else:
             centroid_ids = [centroids[cluster_name] for cluster_name in
                             args.cluster_models_

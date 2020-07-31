@@ -19,7 +19,7 @@
 """ Testing time series forecast creation
 
 """
-from __future__ import absolute_import
+
 
 from bigmler.tests.world import (world, common_setup_module,
                                  common_teardown_module,
@@ -51,14 +51,14 @@ class TestPrediction(object):
         """
             Debug information
         """
-        print "\n-------------------\nTests in: %s\n" % __name__
+        print("\n-------------------\nTests in: %s\n" % __name__)
 
     def teardown(self):
         """Calling generic teardown for every method
 
         """
         self.world = teardown_class()
-        print "\nEnd of tests in: %s\n-------------------\n" % __name__
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
 
     def test_scenario01(self):
         """
@@ -75,11 +75,11 @@ class TestPrediction(object):
 
 
         """
-        print self.test_scenario01.__doc__
+        print(self.test_scenario01.__doc__)
         examples = [
             ['data/grades_nh.csv', 'scenario1_ts_nh/forecast', 'check_files/forecasts_grades_final.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             ts_pred.i_create_all_ts_resources_with_no_headers(self, example[0], example[1])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -99,11 +99,11 @@ class TestPrediction(object):
             | data               | test                    | output                        |forecasts_file
             | ../data/grades.csv   | ./data/test_grades.json   | ./scenario1_ts/forecasts
         """
-        print self.setup_scenario02.__doc__
+        print(self.setup_scenario02.__doc__)
         examples = [
             ['data/grades.csv', 'data/test_grades.json', 'scenario1_ts/forecasts', 'check_files/forecasts_grades_final.csv', 'scenario1_ts/forecasts_000005.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             ts_pred.i_create_all_ts_resources(self, example[0], example[1], example[2])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)

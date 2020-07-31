@@ -16,7 +16,7 @@
 """Resources management functions
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -93,7 +93,7 @@ def set_model_args(args, name=None, objective_id=None, fields=None,
     if args.weight_field:
         try:
             weight_field = fields.field_id(args.weight_field)
-        except ValueError, exc:
+        except ValueError as exc:
             sys.exit(exc)
         model_args.update(weight_field=weight_field)
 
@@ -128,7 +128,7 @@ def set_label_model_args(args, fields, labels, multi_label_data):
     try:
         objective_id = fields.field_id(objective_field)
         objective_field = fields.field_name(objective_id)
-    except ValueError, exc:
+    except ValueError as exc:
         sys.exit(exc)
     all_labels = get_all_labels(multi_label_data)
     model_args_list = []
@@ -216,7 +216,7 @@ def create_models(datasets, model_ids, model_args,
                         model = check_resource(model, api.get_model,
                                                query_string=query_string,
                                                raise_on_error=True)
-                    except Exception, exception:
+                    except Exception as exception:
                         sys.exit("Failed to get a finished model: %s" %
                                  str(exception))
                     models[0] = model
@@ -248,7 +248,7 @@ def create_model(cluster, model_args, args, api=None,
         model = check_resource(model, api.get_model,
                                query_string=ALL_FIELDS_QS,
                                raise_on_error=True)
-    except Exception, exception:
+    except Exception as exception:
         sys.exit("Failed to get a finished model: %s" % str(exception))
     message = dated("Model created: %s\n" % get_url(model))
     log_message(message, log_file=session_file, console=args.verbosity)
@@ -314,7 +314,7 @@ def get_models(model_ids, args, api=None, session_file=None):
                 model = check_resource(model, api.get_model,
                                        query_string=query_string,
                                        raise_on_error=True)
-            except Exception, exception:
+            except Exception as exception:
                 sys.exit("Failed to get a finished model: %s" %
                          str(exception))
             models.append(model)
@@ -327,7 +327,7 @@ def get_models(model_ids, args, api=None, session_file=None):
             model = check_resource(model_ids[0], api.get_model,
                                    query_string=query_string,
                                    raise_on_error=True)
-        except Exception, exception:
+        except Exception as exception:
             sys.exit("Failed to get a finished model: %s" % str(exception))
         models[0] = model
 

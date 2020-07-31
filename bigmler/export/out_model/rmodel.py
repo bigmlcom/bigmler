@@ -80,18 +80,18 @@ class RModel(Model):
         if item_analysis_predicates:
             items_body = self.r_item_analysis_body(item_analysis_predicates)
 
-        predictor_definition = (u"predict%s <- function" %
+        predictor_definition = ("predict%s <- function" %
                                 camelcase)
         depth = len(predictor_definition) + 1
-        predictor = u"%s(%s){\n" % (predictor_definition,
+        predictor = "%s(%s){\n" % (predictor_definition,
                                    (",\n" + " " * depth).join(args))
         join_str = "\n#"
         docstring = join_str.join(self.docstring().split("\n"))
-        predictor_doc = (u"# " + docstring +
-                         u"\n" + u"#\n")
+        predictor_doc = ("# " + docstring +
+                         "\n" + "#\n")
         output = predictor_doc + predictor
         output += terms_body + items_body + body
-        output += u"%sreturn(NA)\n}\n" % INDENT
+        output += "%sreturn(NA)\n}\n" % INDENT
         if not PY3:
             output = output.encode("utf8")
         out.write(output)
@@ -101,11 +101,10 @@ class RModel(Model):
         """ Writes auxiliary functions to handle the term analysis fields
 
         """
-        term_analysis_options = set(map(lambda x: x[0],
-                                        term_analysis_predicates))
+        term_analysis_options = set([x[0] for x in term_analysis_predicates])
         term_analysis_predicates = set(term_analysis_predicates)
 
-        body = u""
+        body = ""
         # static content
         body += """
     TERM_ANALYSIS <- list("""
@@ -158,8 +157,8 @@ class RModel(Model):
         \"%s\"=list(""" % field)
                 terms = sorted(term_forms[field].keys())
                 for term in terms:
-                    terms_list = u"list(\"" + \
-                        u"\", \"".join(term_forms[field][term])
+                    terms_list = "list(\"" + \
+                        "\", \"".join(term_forms[field][term])
                     terms_list += "\")"
                     inner_lines.append("""\
             \"%s\"=%s""" % (term,
@@ -185,11 +184,10 @@ class RModel(Model):
         """ Writes auxiliary functions to handle the item analysis fields
 
         """
-        item_analysis_options = set(map(lambda x: x[0],
-                                        item_analysis_predicates))
+        item_analysis_options = set([x[0] for x in item_analysis_predicates])
         item_analysis_predicates = set(item_analysis_predicates)
 
-        body = u""
+        body = ""
         # static content
         body += """
     ITEM_ANALYSIS <- list("""

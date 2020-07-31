@@ -17,12 +17,12 @@
 """BigMLer - reports processing dispatching
 
 """
-from __future__ import absolute_import
+
 
 import sys
 import os
-import SimpleHTTPServer
-import thread
+import http.server
+import _thread
 import webbrowser
 import socket
 
@@ -35,7 +35,7 @@ from bigmler.reports import (evaluations_report, SERVER_DIRECTORY,
 from bigmler.report.httpserver import StoppableHTTPServer
 from bigmler.options.report import DEFAULT_PORT
 
-COMMAND_LOG = u".bigmler_report"
+COMMAND_LOG = ".bigmler_report"
 
 DEFAULT_HOST = "127.0.0.1"
 
@@ -77,15 +77,15 @@ def report_dispatcher(args=sys.argv[1:]):
         try:
             httpd = StoppableHTTPServer(\
                 (DEFAULT_HOST, port),
-                SimpleHTTPServer.SimpleHTTPRequestHandler)
-            thread.start_new_thread(httpd.serve, ())
-        except socket.error, exc:
-            print exc
+                http.server.SimpleHTTPRequestHandler)
+            _thread.start_new_thread(httpd.serve, ())
+        except socket.error as exc:
+            print(exc)
         # Open URL in new browser window
         webbrowser.open_new(absolute_report_url)
         # opens in default browser
         if httpd:
-            raw_input("*********************************\n"
+            input("*********************************\n"
                       "Press <RETURN> to stop the server\n"
                       "*********************************\n")
         os.chdir(current_directory)

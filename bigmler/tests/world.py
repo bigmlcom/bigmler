@@ -20,7 +20,7 @@
 
 """
 
-from __future__ import absolute_import
+
 
 import os
 import shutil
@@ -101,12 +101,12 @@ def show_doc(self, examples=None):
     """ Shows the name and documentation of the method passed as argument
 
     """
-    print "%s:\n%s" % (self.__name__, self.__doc__)
+    print("%s:\n%s" % (self.__name__, self.__doc__))
     if examples:
-        print "                |%s" % \
+        print("                |%s" % \
             "\n                |".join(["|".join([str(item)
                                                   for item in example]) for
-                                        example in examples])
+                                        example in examples]))
 
 
 def plural(resource_type):
@@ -168,7 +168,7 @@ class World(object):
         else:
             assert True
         self.api = BigML(self.USERNAME, self.API_KEY, debug=self.api_debug)
-        print self.api.connection_info()
+        print(self.api.connection_info())
         output_dir = "./last_run"
         dirs = []
         for _, subFolders, _ in os.walk("./"):
@@ -186,7 +186,7 @@ class World(object):
            If changed is set to True, only resources that are logged as
            changed are listed.
         """
-        print "Counting resources (%s)." % time_tag
+        print("Counting resources (%s)." % time_tag)
         for resource_type in RESOURCE_TYPES:
             resource_type = plural(resource_type)
             if resource_type == "time_series_set":
@@ -229,15 +229,15 @@ class World(object):
         for resource_type in RESOURCE_TYPES:
             object_list = set(getattr(self, plural(resource_type)))
             if object_list:
-                print "Deleting %s %s" % (len(object_list),
-                                          plural(resource_type))
+                print("Deleting %s %s" % (len(object_list),
+                                          plural(resource_type)))
                 delete_method = self.api.deleters[resource_type]
                 for obj_id in object_list:
                     counter = 0
                     result = delete_method(obj_id)
                     while (result['code'] != HTTP_NO_CONTENT and
                            counter < MAX_RETRIES):
-                        print "Delete failed for %s. Retrying" % obj_id
+                        print("Delete failed for %s. Retrying" % obj_id)
                         time.sleep(3)
                         counter += 1
                         result = delete_method(obj_id)
@@ -287,9 +287,9 @@ def common_teardown_module():
         world.delete_resources()
         project_stats = world.api.get_project( \
             world.project_id)['object']['stats']
-        for resource_type, value in project_stats.items():
+        for resource_type, value in list(project_stats.items()):
             if value['count'] != 0:
-                print "WARNING: Increment in %s: %s" % (resource_type, value)
+                print("WARNING: Increment in %s: %s" % (resource_type, value))
         world.api.delete_project(world.project_id)
         world.project_id = None
 

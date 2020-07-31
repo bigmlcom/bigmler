@@ -17,7 +17,7 @@
 """BigMLer dispatcher for subcommands
 
 """
-from __future__ import absolute_import
+
 
 from bigmler.dispatcher import main_dispatcher
 from bigmler.sample.dispatcher import sample_dispatcher

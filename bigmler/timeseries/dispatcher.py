@@ -17,7 +17,7 @@
 """BigMLer - cluster subcommand processing dispatching
 
 """
-from __future__ import absolute_import
+
 
 import sys
 import os
@@ -40,11 +40,11 @@ from bigmler.tsevaluation import evaluate
 from bigmler.dispatcher import SESSIONS_LOG, clear_log_files, \
     get_test_dataset, get_objective_id
 
-COMMAND_LOG = u".bigmler_time_series"
-DIRS_LOG = u".bigmler_time_series_dir_stack"
+COMMAND_LOG = ".bigmler_time_series"
+DIRS_LOG = ".bigmler_time_series_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 MINIMUM_MODEL = "full=false"
-DEFAULT_OUTPUT = u"forecast"
+DEFAULT_OUTPUT = "forecast"
 
 SETTINGS = {
     "command_log": COMMAND_LOG,
@@ -109,7 +109,7 @@ def compute_output(api, args):
                  " to generate the new dataset from it.")
 
     path = u.check_dir(output)
-    session_file = u"%s%s%s" % (path, os.sep, SESSIONS_LOG)
+    session_file = "%s%s%s" % (path, os.sep, SESSIONS_LOG)
     csv_properties = {}
     if args.objective_field:
         csv_properties.update({'objective_field': args.objective_field})
@@ -158,7 +158,7 @@ def compute_output(api, args):
 
     # We update the time-series' public state if needed
     if time_series:
-        if isinstance(time_series, basestring):
+        if isinstance(time_series, str):
             query_string = r.ALL_FIELDS_QS
             time_series = u.check_resource(time_series,
                                            api.get_time_series,

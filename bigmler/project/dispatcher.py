@@ -17,7 +17,7 @@
 """BigMLer - project creation and update
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -28,8 +28,8 @@ from bigmler.defaults import DEFAULTS_FILE
 from bigmler.command import get_context
 from bigmler.dispatcher import SESSIONS_LOG, clear_log_files
 
-COMMAND_LOG = u".bigmler_project"
-DIRS_LOG = u".bigmler_project_dir_stack"
+COMMAND_LOG = ".bigmler_project"
+DIRS_LOG = ".bigmler_project_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 
 SETTINGS = {

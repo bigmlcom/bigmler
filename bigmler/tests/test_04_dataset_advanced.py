@@ -49,14 +49,14 @@ class TestDatasetAdvanced(object):
         """Calling generic teardown for every method
 
         """
-        print "\nEnd of tests in: %s\n-------------------\n" % __name__
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
         teardown_class()
 
     def setup(self):
         """
             Debug information
         """
-        print "\n-------------------\nTests in: %s\n" % __name__
+        print("\n-------------------\nTests in: %s\n" % __name__)
 
     def test_scenario1(self):
         """
@@ -73,11 +73,11 @@ class TestDatasetAdvanced(object):
                 |data |output_dir  |new_fields | field | model_fields
                 |../data/iris.csv | ./scenario_d_1 |../data/new_fields.json| outlier? |petal length,outlier?,species
         """
-        print self.test_scenario1.__doc__
+        print(self.test_scenario1.__doc__)
         examples = [
-            ['data/iris.csv', 'scenario_d_1', 'data/new_fields.json', u'outlier?', u'petal length,outlier?,species']]
+            ['data/iris.csv', 'scenario_d_1', 'data/new_fields.json', 'outlier?', 'petal length,outlier?,species']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             dataset_adv.i_create_dataset(self, data=example[0], output_dir=example[1])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -100,13 +100,13 @@ class TestDatasetAdvanced(object):
                 |../data/iris.csv | ./scenario_d_2 |../data/attributes.json| preferred | 000001 | false | boolean
                 |../data/iris.csv | ./scenario_d_2_b |../data/attributes_col.json| preferred | 000001 | false | boolean
         """
-        print self.test_scenario2.__doc__
+        print(self.test_scenario2.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_d_2', 'data/attributes.json', 'preferred', '000001', 'false', 'boolean'],
             ['data/iris.csv', 'scenario_d_2_b', 'data/attributes_col.json', 'preferred', '000001', 'false', 'boolean']
         ]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             dataset_adv.i_create_dataset(self, data=example[0], output_dir=example[1])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -126,11 +126,11 @@ class TestDatasetAdvanced(object):
                 |data |output_dir  |csv_file |
                 |../data/iris.csv | ./scenario_d_3 |dataset.csv
         """
-        print self.test_scenario3.__doc__
+        print(self.test_scenario3.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_d_3', 'dataset.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             dataset_adv.i_create_dataset(self, data=example[0], output_dir=example[1])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -153,11 +153,11 @@ class TestDatasetAdvanced(object):
                 |data |output_dir  |output_dir2 |
                 |../data/iris.csv | ./scenario_d_4 | ./scenario_d_4a|
         """
-        print self.test_scenario4.__doc__
+        print(self.test_scenario4.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_d_4', 'scenario_d_4a']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             dataset_adv.i_create_dataset(self, data=example[0], output_dir=example[1])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -181,11 +181,11 @@ class TestDatasetAdvanced(object):
                 |data |output_dir | filtered_records | filter_exp
                 |../data/iris.csv | ./scenario_d_5 | 50 | (= (f "000004") "Iris-setosa")
         """
-        print self.test_scenario5.__doc__
+        print(self.test_scenario5.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_d_5', '50', '(= (f "000004") "Iris-setosa")']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             dataset_adv.i_create_dataset(self, data=example[0], output_dir=example[1])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -206,11 +206,11 @@ class TestDatasetAdvanced(object):
                 |data |output_dir | summary_file | expected_file
                 |../data/iris.csv | ./scenario_d_6 | fields_summary.csv | check_files/fields_summary.csv
         """
-        print self.test_scenario6.__doc__
+        print(self.test_scenario6.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_d_6', 'fields_summary.csv', 'check_files/fields_summary.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             dataset_adv.i_create_dataset_with_summary(self, data=example[0], summary_file=example[2], output_dir=example[1])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -230,11 +230,11 @@ class TestDatasetAdvanced(object):
                 |data |output_dir | summary_file | field_id | attribute | attribute_value
                 |../data/iris.csv | ./scenario_d_7 | fields_summary_modified.csv |  000000 | name | sepal_length
         """
-        print self.test_scenario7.__doc__
+        print(self.test_scenario7.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_d_7', 'data/fields_summary_modified.csv', '000000', 'name', 'sepal_length']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             dataset_adv.i_create_dataset(self, data=example[0], output_dir=example[1])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -256,13 +256,13 @@ class TestDatasetAdvanced(object):
                 |data |output_dir | params | params_json
                 |../data/iris.csv | ./scenario_d_8 | "--sample-rate 0.2 --replacement" | {"sample-rate": 0.2, "replacement": true}
         """
-        print self.test_scenario8.__doc__
+        print(self.test_scenario8.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_d_8',
              '--sample-rate 0.2 --replacement',
              '{"sample_rate": 0.2, "replacement": true}']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             dataset_adv.i_create_dataset(self, data=example[0],
                                          output_dir=example[1])
             test_pred.i_check_create_source(self)
@@ -287,13 +287,13 @@ class TestDatasetAdvanced(object):
                 |data |output_dir | params | params_json
                 |../data/iris.csv | ./scenario_d_9 | "--sample-rate 0.2 --replacement" | {"sample-rate": 0.2, "replacement": true}
         """
-        print self.test_scenario9.__doc__
+        print(self.test_scenario9.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_d_9',
              '--sample-rate 0.2 --replacement',
              '{"sample_rate": 0.2, "replacement": true}']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             dataset_adv.i_create_dataset(self, data=example[0],
                                          output_dir=example[1])
             test_pred.i_check_create_source(self)
@@ -318,13 +318,13 @@ class TestDatasetAdvanced(object):
                 |data |output_dir | params | params_json
                 |../data/iris.csv | ./scenario_d_10 | "--sample-rate 0.2 --replacement" | {"sample-rate": 0.2, "replacement": true}
         """
-        print self.test_scenario10.__doc__
+        print(self.test_scenario10.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_d_10',
              '--sample-rate 0.2 --replacement',
              '{"sample_rate": 0.2, "replacement": true}']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             dataset_adv.i_create_dataset(self, data=example[0],
                                          output_dir=example[1])
             test_pred.i_check_create_source(self)
@@ -349,13 +349,13 @@ class TestDatasetAdvanced(object):
                 |data |output_dir | params | params_json
                 |../data/iris.csv | ./scenario_d_11 | "--sample-rate 0.2 --replacement" | {"sample-rate": 0.2, "replacement": true}
         """
-        print self.test_scenario11.__doc__
+        print(self.test_scenario11.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_d_11',
              '--sample-rate 0.2 --replacement',
              '{"sample_rate": 0.2, "replacement": true}']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             dataset_adv.i_create_dataset(self, data=example[0],
                                          output_dir=example[1])
             test_pred.i_check_create_source(self)
@@ -383,11 +383,11 @@ logs in "<output_dir>"
                 |data |output_dir |
                 |../data/iris.csv | ./scenario_d_12 |
         """
-        print self.test_scenario12.__doc__
+        print(self.test_scenario12.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_d_12']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             datasets = []
             dataset_adv.i_create_dataset(self, data=example[0],
                                          output_dir=example[1])
@@ -422,12 +422,12 @@ logs in "<output_dir>"
                 |data |output_dir |
                 |../data/iris.csv | ./scenario_d_13 |
         """
-        print self.test_scenario12.__doc__
+        print(self.test_scenario12.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_d_13', "select A.*,B.* from A join B "
              "on A.\`000000\` = \`B.000000\`", 900]]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             datasets = []
             dataset_adv.i_create_dataset(self, data=example[0],
                                          output_dir=example[1])

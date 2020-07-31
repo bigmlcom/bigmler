@@ -16,7 +16,7 @@
 """Resources management functions
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -129,7 +129,7 @@ def create_anomalies(datasets, anomaly_ids, anomaly_args,
                     anomaly = check_resource(anomaly, api.get_anomaly,
                                              query_string=query_string,
                                              raise_on_error=True)
-                except Exception, exception:
+                except Exception as exception:
                     sys.exit("Failed to get a finished anomaly: %s" %
                              str(exception))
                 anomalies[0] = anomaly
@@ -163,7 +163,7 @@ def get_anomalies(anomaly_ids, args, api=None, session_file=None):
         anomaly = check_resource(anomaly_ids[0], api.get_anomaly,
                                  query_string=query_string,
                                  raise_on_error=True)
-    except Exception, exception:
+    except Exception as exception:
         sys.exit("Failed to get a finished anomaly: %s" % str(exception))
     anomalies[0] = anomaly
 

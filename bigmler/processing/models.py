@@ -17,7 +17,7 @@
 """BigMLer - Resources processing: creation, update and retrieval of models
 
 """
-from __future__ import absolute_import
+
 
 import copy
 
@@ -205,7 +205,7 @@ def get_model_fields(model, csv_properties, args, single_model=True,
     csv_properties.update(data_locale=args.user_locale)
     if (single_model and 'model_fields' in model['object']['model'] and
             args.test_header):
-        model_fields = model['object']['model']['model_fields'].keys()
+        model_fields = list(model['object']['model']['model_fields'].keys())
         csv_properties.update(include=model_fields)
     else:
         csv_properties.update(include=None)

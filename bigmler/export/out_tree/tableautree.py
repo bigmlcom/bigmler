@@ -41,7 +41,7 @@ def value_to_print(value, optype):
         return "NULL"
     if (optype == 'numeric'):
         return value
-    return u"'%s'" % value.replace("'", '\\\'')
+    return "'%s'" % value.replace("'", '\\\'')
 
 
 class TableauTree(Tree):
@@ -51,14 +51,14 @@ class TableauTree(Tree):
 
         """
         conditions.append("ISNULL([%s])" % self.fields[field]['name'])
-        code = u"%s %s THEN " % \
+        code = "%s %s THEN " % \
             (alternate, " AND ".join(conditions))
         if attr is None:
             value = value_to_print( \
                 self.output, self.fields[self.objective_id]['optype'])
         else:
             value = getattr(self, attr)
-        code += (u"%s\n" % value)
+        code += ("%s\n" % value)
         cmv.append(self.fields[field]['name'])
         del conditions[-1]
 
@@ -70,11 +70,11 @@ class TableauTree(Tree):
 
         """
 
-        negation = u"" if self.predicate.missing else u"NOT "
-        connection = u"OR" if self.predicate.missing else u"AND"
+        negation = "" if self.predicate.missing else "NOT "
+        connection = "OR" if self.predicate.missing else "AND"
         if not self.predicate.missing:
             cmv.append(self.fields[field]['name'])
-        return u"(%sISNULL([%s]) %s " % ( \
+        return "(%sISNULL([%s]) %s " % ( \
             negation, self.fields[field]['name'],
             connection)
 
@@ -99,7 +99,7 @@ class TableauTree(Tree):
             value,
             post_condition))
 
-    def plug_in_body(self, body=u"", conditions=None, cmv=None,
+    def plug_in_body(self, body="", conditions=None, cmv=None,
                      ids_path=None, subtree=True, attr=None):
         """Translate the model into a set of "if" statemets in tableau syntax
 
@@ -112,11 +112,11 @@ class TableauTree(Tree):
             cmv = []
 
         if body:
-             alternate = u"ELSEIF"
+             alternate = "ELSEIF"
         else:
             if conditions is None:
                 conditions = []
-            alternate = u"IF"
+            alternate = "IF"
 
         children = filter_nodes(self.children, ids=ids_path,
                                 subtree=subtree)
@@ -133,14 +133,14 @@ class TableauTree(Tree):
                     not self.fields[field]['name'] in cmv):
                 body += self.missing_check_code(field, alternate, cmv,
                                                 conditions, attr=attr)
-                alternate = u"ELSEIF"
+                alternate = "ELSEIF"
 
             for child in children:
-                pre_condition = u""
-                post_condition = u""
+                pre_condition = ""
+                post_condition = ""
                 if has_missing_branch and child.predicate.value is not None:
                     pre_condition = self.missing_prefix_code(child, field, cmv)
-                    post_condition = u")"
+                    post_condition = ")"
 
                 child.split_condition_code(field, conditions,
                                            pre_condition, post_condition)
@@ -155,7 +155,7 @@ class TableauTree(Tree):
                     self.output, self.fields[self.objective_id]['optype'])
             else:
                 value = getattr(self, attr)
-            body += u"%s %s THEN" % (alternate, " AND ".join(conditions))
-            body += u" %s\n" % value
+            body += "%s %s THEN" % (alternate, " AND ".join(conditions))
+            body += " %s\n" % value
 
         return body

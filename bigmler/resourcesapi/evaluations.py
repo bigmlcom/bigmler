@@ -16,7 +16,7 @@
 """Resources management functions
 
 """
-from __future__ import absolute_import
+
 
 
 import sys
@@ -112,7 +112,7 @@ def set_label_evaluation_args(args, labels, all_labels,
     if objective_field is None:
         try:
             objective_id = fields.field_id(fields.objective_field)
-        except ValueError, exc:
+        except ValueError as exc:
             sys.exit(exc)
         objective_field = fields.fields[objective_id]['name']
     evaluation_args_list = []
@@ -192,7 +192,7 @@ def create_evaluations(model_or_ensemble_ids, datasets, evaluation_args,
             try:
                 evaluation = check_resource(evaluation, api.get_evaluation,
                                             raise_on_error=True)
-            except Exception, exception:
+            except Exception as exception:
                 sys.exit("Failed to get a finished evaluation: %s" %
                          str(exception))
             evaluations[0] = evaluation
@@ -218,7 +218,7 @@ def get_evaluation(evaluation, api=None, verbosity=True, session_file=None):
     try:
         evaluation = check_resource(evaluation, api.get_evaluation,
                                     raise_on_error=True)
-    except Exception, exception:
+    except Exception as exception:
         sys.exit("Failed to get a finished evaluation: %s" % str(exception))
     return evaluation
 

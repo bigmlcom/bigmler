@@ -16,7 +16,7 @@
 """Resources management functions
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -55,7 +55,7 @@ def set_pca_args(args, name=None, fields=None,
     pca_args = update_sample_parameters_args( \
         pca_args, args)
     if fields is not None:
-        input_fields = fields.fields.keys()
+        input_fields = list(fields.fields.keys())
     if pca_fields and fields is not None:
         input_fields = configure_input_fields(fields, pca_fields)
     if args.exclude_objective:
@@ -129,7 +129,7 @@ def create_pca(datasets, pca, pca_args,
                         pca, api.get_pca,
                         query_string=query_string,
                         raise_on_error=True)
-                except Exception, exception:
+                except Exception as exception:
                     sys.exit("Failed to get a finished pca: %s" %
                              str(exception))
                 pcas[0] = pca
@@ -162,7 +162,7 @@ def get_pca(pca,
                              api.get_pca,
                              query_string=query_string,
                              raise_on_error=True)
-    except Exception, exception:
+    except Exception as exception:
         sys.exit("Failed to get a finished pca: %s" % \
             str(exception))
 

@@ -16,7 +16,7 @@
 """Resources management functions
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -151,7 +151,7 @@ def create_time_series(datasets, time_series_ids,
                         time_series, api.get_time_series,
                         query_string=query_string,
                         raise_on_error=True)
-                except Exception, exception:
+                except Exception as exception:
                     sys.exit("Failed to get a finished time-series:"
                              " %s" %
                              str(exception))
@@ -189,7 +189,7 @@ def get_time_series(time_series_ids,
                                      api.get_time_series,
                                      query_string=query_string,
                                      raise_on_error=True)
-    except Exception, exception:
+    except Exception as exception:
         sys.exit("Failed to get a finished time-series: %s" % \
             str(exception))
     time_series_set[0] = time_series

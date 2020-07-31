@@ -17,7 +17,7 @@
 """BigMLer - generates code to use models locally
 
 """
-from __future__ import absolute_import
+
 
 import sys
 import os
@@ -42,8 +42,8 @@ from bigmler.export.out_model.rmodel import RModel
 from bigmler.export.out_model.pythonlr import PythonLR
 
 
-COMMAND_LOG = u".bigmler_export"
-DIRS_LOG = u".bigmler_export_dir_stack"
+COMMAND_LOG = ".bigmler_export"
+DIRS_LOG = ".bigmler_export_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 
 EXPORTS = {

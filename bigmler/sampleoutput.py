@@ -16,7 +16,7 @@
 """Sample output auxiliary functions
 
 """
-from __future__ import absolute_import
+
 
 
 import json
@@ -38,13 +38,13 @@ def translate_to_id(value, fields):
     """
     try:
         prefix = ""
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             if value.startswith("-"):
                 value = value[1:]
                 prefix = "-"
             return "%s%s" % (prefix, fields.field_id(value))
     except ValueError:
-        print "WARNING: Failed to find \"%s\" in the sample fields structure"
+        print("WARNING: Failed to find \"%s\" in the sample fields structure")
         return None
     if isinstance(value, list):
         ids = []

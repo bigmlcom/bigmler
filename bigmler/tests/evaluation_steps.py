@@ -13,7 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from __future__ import absolute_import
+
 
 
 import os
@@ -202,7 +202,7 @@ def then_the_evaluation_file_is_like(step, check_file_json):
             assert_equal(check, evaluation)
         evaluation_file_json.close()
         check_file_json.close()
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 #@step(r'I check that the (.*) dataset has been created$')
@@ -215,7 +215,7 @@ def i_check_create_dataset(step, dataset_type=None):
         world.datasets.append(dataset['resource'])
         world.dataset = dataset
         dataset_file.close()
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -231,7 +231,7 @@ def i_check_evaluation_key(step, key=None, value=None):
             "model key: %s, expected >: %s" % ( \
             model_evaluation[key], float(value)))
         evaluation_file_json.close()
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 

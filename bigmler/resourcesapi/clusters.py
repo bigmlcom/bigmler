@@ -16,7 +16,7 @@
 """Resources management functions
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -118,7 +118,7 @@ def create_clusters(datasets, cluster_ids, cluster_args,
                     cluster = check_resource(cluster, api.get_cluster,
                                              query_string=query_string,
                                              raise_on_error=True)
-                except Exception, exception:
+                except Exception as exception:
                     sys.exit("Failed to get a finished cluster: %s" %
                              str(exception))
                 clusters[0] = cluster
@@ -152,7 +152,7 @@ def get_clusters(cluster_ids, args, api=None, session_file=None):
         cluster = check_resource(cluster_ids[0], api.get_cluster,
                                  query_string=query_string,
                                  raise_on_error=True)
-    except Exception, exception:
+    except Exception as exception:
         sys.exit("Failed to get a finished cluster: %s" % str(exception))
     clusters[0] = cluster
 

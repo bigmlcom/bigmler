@@ -16,7 +16,7 @@
 """Resources management functions
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -65,7 +65,7 @@ def create_script(source_code, script_args, args, api=None, path=None,
     script_id = check_resource_error(script, "Failed to create script: ")
     try:
         script = check_resource(script, api.get_script, raise_on_error=True)
-    except Exception, exception:
+    except Exception as exception:
         sys.exit("Failed to get a compiled script: %s" % str(exception))
     message = dated("Script created: %s\n" % get_url(script))
     log_message(message, log_file=session_file, console=args.verbosity)
@@ -80,7 +80,7 @@ def get_script(script, api=None, verbosity=True,
     """
     if api is None:
         api = bigml.api.BigML()
-    if (isinstance(script, basestring) or
+    if (isinstance(script, str) or
             bigml.api.get_status(script)['code'] != bigml.api.FINISHED):
         message = dated("Retrieving script. %s\n" %
                         get_url(script))
@@ -89,6 +89,6 @@ def get_script(script, api=None, verbosity=True,
         try:
             script = check_resource(script, api.get_script,
                                     raise_on_error=True)
-        except Exception, exception:
+        except Exception as exception:
             sys.exit("Failed to get a compiled script: %s" % str(exception))
     return script

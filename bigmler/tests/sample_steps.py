@@ -13,7 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from __future__ import absolute_import
+
 
 
 import os
@@ -34,9 +34,9 @@ def i_create_sample(step, options=None, output_dir=None):
     world.directory = output_dir
     world.folders.append(world.directory)
     try:
-        command = (u"bigmler sample --dataset " + world.dataset['resource'] +
-                   u" --store --output-dir " + output_dir +
-                   u" " + options)
+        command = ("bigmler sample --dataset " + world.dataset['resource'] +
+                   " --store --output-dir " + output_dir +
+                   " " + options)
         command = check_debug(command)
         if not PYTHON3:
             command.encode(BIGML_SYS_ENCODING)
@@ -61,7 +61,7 @@ def i_check_create_sample(step):
         world.sample = sample
         sample_file.close()
         assert True
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -81,7 +81,7 @@ def i_check_sample_stat(step, check_sample_json=None):
         else:
             assert False, ("File contents:\n%s\nExpected contents:\n%s" %
                            (sample_file_contents, check_sample_contents))
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -101,7 +101,7 @@ def i_check_sample_file(step, check_sample_file=None):
         else:
             assert False, ("File contents:\n%s\nExpected contents:\n%s" %
                            (sample_file_contents, check_sample_contents))
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -123,5 +123,5 @@ def i_check_sample_json(step, check_sample_file=None):
         else:
             assert False, ("File contents:\n%s\nExpected contents:\n%s" %
                            (sample_file_json, check_sample_json))
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)

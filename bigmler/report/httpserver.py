@@ -8,13 +8,13 @@
 # is distributed on an "AS IS" BASIS, WITHOUT
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
-import BaseHTTPServer
+import http.server
 import socket
 
-class StoppableHTTPServer(BaseHTTPServer.HTTPServer):
+class StoppableHTTPServer(http.server.HTTPServer):
 
     def server_bind(self):
-        BaseHTTPServer.HTTPServer.server_bind(self)
+        http.server.HTTPServer.server_bind(self)
         self.socket.settimeout(1)
         self.run = True
 

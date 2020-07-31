@@ -13,7 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from __future__ import absolute_import
+
 
 import os
 import time
@@ -37,8 +37,8 @@ def i_create_dataset(step, data=None, output_dir=None):
     world.folders.append(world.directory)
 
     try:
-        command = (u"bigmler --train " + res_filename(data) +
-                   u" --no-model --store --output-dir " + output_dir)
+        command = ("bigmler --train " + res_filename(data) +
+                   " --no-model --store --output-dir " + output_dir)
 
         command = check_debug(command)
         retcode = check_call(command, shell=True)
@@ -59,8 +59,8 @@ def i_create_dataset_from_source(step, output_dir=None):
     world.folders.append(world.directory)
     try:
 
-        command = ((u"bigmler --source %s" % world.source['resource']) +
-                   u" --no-model --store --output-dir " + output_dir)
+        command = (("bigmler --source %s" % world.source['resource']) +
+                   " --no-model --store --output-dir " + output_dir)
         command = check_debug(command)
         retcode = check_call(command, shell=True)
         if retcode < 0:
@@ -80,16 +80,16 @@ def i_create_filtered_dataset_from_dataset(step, filter_exp=None, output_dir=Non
     world.folders.append(world.directory)
     try:
         if not sys.platform == 'win32':
-            filter_exp = u'"%s"' % filter_exp.replace('"', '\\"')
-        command = (u'echo ' +
-                   filter_exp + u' > ' +
-                   output_dir + u"/filter.lisp")
+            filter_exp = '"%s"' % filter_exp.replace('"', '\\"')
+        command = ('echo ' +
+                   filter_exp + ' > ' +
+                   output_dir + "/filter.lisp")
         if not PYTHON3:
             command = command.encode(BIGML_SYS_ENCODING)
         retcode = check_call(command, shell=True)
-        command = ((u"bigmler --dataset %s" % world.dataset['resource']) +
-                   u" --no-model --store --output-dir " + output_dir +
-                   u" --lisp-filter " + output_dir + "/filter.lisp")
+        command = (("bigmler --dataset %s" % world.dataset['resource']) +
+                   " --no-model --store --output-dir " + output_dir +
+                   " --lisp-filter " + output_dir + "/filter.lisp")
         command = check_debug(command)
         retcode = check_call(command, shell=True)
         if retcode < 0:
@@ -238,7 +238,7 @@ def i_check_create_multi_dataset(step):
         world.datasets.append(dataset['resource'])
         world.dataset = dataset
         assert True
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -275,9 +275,9 @@ def i_create_dataset_with_summary(step, data=None, summary_file=None, output_dir
     world.folders.append(world.directory)
 
     try:
-        command = (u"bigmler --train " + res_filename(data) +
-                   u" --no-model --store --output-dir " + output_dir +
-                   u" --export-fields " + summary_file)
+        command = ("bigmler --train " + res_filename(data) +
+                   " --no-model --store --output-dir " + output_dir +
+                   " --export-fields " + summary_file)
 
         command = check_debug(command)
         retcode = check_call(command, shell=True)
@@ -298,9 +298,9 @@ def i_create_juxtaposed(step, output_dir=None):
     world.folders.append(world.directory)
 
     try:
-        command = (u"bigmler dataset --datasets " +
+        command = ("bigmler dataset --datasets " +
                    os.path.join(output_dir, "dataset") +
-                   u" --juxtapose --store --output-dir " + output_dir)
+                   " --juxtapose --store --output-dir " + output_dir)
 
         command = check_debug(command)
         retcode = check_call(command, shell=True)
@@ -315,16 +315,16 @@ def i_create_juxtaposed(step, output_dir=None):
 
 #@step(r'I create a new dataset joining both datasets')
 def i_create_join(step, output_dir=None, sql=None):
-    print output_dir, sql
+    print(output_dir, sql)
     if output_dir is None or sql is None:
         assert False
     world.directory = output_dir
     world.folders.append(world.directory)
 
     try:
-        command = (u"bigmler dataset --datasets " +
+        command = ("bigmler dataset --datasets " +
                    os.path.join(output_dir, "dataset") +
-                   u" --sql-query \"" + sql + "\" --store --output-dir " +
+                   " --sql-query \"" + sql + "\" --store --output-dir " +
                    output_dir)
 
         command = check_debug(command)
@@ -345,9 +345,9 @@ def i_create_cluster_with_params_from_dataset( \
     world.directory = output_dir
     world.folders.append(world.directory)
     try:
-        command = (u"bigmler cluster --dataset " + world.dataset['resource'] +
-                   u" --store --output-dir " + output_dir +
-                   u" " + cluster_params)
+        command = ("bigmler cluster --dataset " + world.dataset['resource'] +
+                   " --store --output-dir " + output_dir +
+                   " " + cluster_params)
 
         command = check_debug(command)
         retcode = check_call(command, shell=True)
@@ -367,9 +367,9 @@ def i_create_anomaly_with_params_from_dataset( \
     world.directory = output_dir
     world.folders.append(world.directory)
     try:
-        command = (u"bigmler anomaly --dataset " + world.dataset['resource'] +
-                   u" --store --output-dir " + output_dir +
-                   u" " + params)
+        command = ("bigmler anomaly --dataset " + world.dataset['resource'] +
+                   " --store --output-dir " + output_dir +
+                   " " + params)
 
         command = check_debug(command)
         retcode = check_call(command, shell=True)
@@ -389,10 +389,10 @@ def i_create_logistic_with_params_from_dataset( \
     world.directory = output_dir
     world.folders.append(world.directory)
     try:
-        command = (u"bigmler logistic-regression --dataset " +
+        command = ("bigmler logistic-regression --dataset " +
                    world.dataset['resource'] +
-                   u" --store --output-dir " + output_dir +
-                   u" " + params)
+                   " --store --output-dir " + output_dir +
+                   " " + params)
 
         command = check_debug(command)
         retcode = check_call(command, shell=True)
@@ -412,10 +412,10 @@ def i_create_association_with_params_from_dataset( \
     world.directory = output_dir
     world.folders.append(world.directory)
     try:
-        command = (u"bigmler association --dataset " +
+        command = ("bigmler association --dataset " +
                    world.dataset['resource'] +
-                   u" --store --output-dir " + output_dir +
-                   u" " + params)
+                   " --store --output-dir " + output_dir +
+                   " " + params)
 
         command = check_debug(command)
         retcode = check_call(command, shell=True)
@@ -454,28 +454,28 @@ def field_attribute_value(step, field=None, attribute=None,
 #@step(r'the cluster params are "(.*)"$')
 def i_check_cluster_params(step, params_json=None):
     params_dict = json.loads(params_json)
-    for key, value in params_dict.items():
+    for key, value in list(params_dict.items()):
         eq_(value, world.cluster['object'].get(key))
 
 
 #@step(r'the anomaly params are "(.*)"$')
 def i_check_anomaly_params(step, params_json=None):
     params_dict = json.loads(params_json)
-    for key, value in params_dict.items():
+    for key, value in list(params_dict.items()):
         eq_(value, world.anomaly['object'].get(key))
 
 
 #@step(r'the logistic params are "(.*)"$')
 def i_check_logistic_params(step, params_json=None):
     params_dict = json.loads(params_json)
-    for key, value in params_dict.items():
+    for key, value in list(params_dict.items()):
         eq_(value, world.logistic_regression['object'].get(key))
 
 
 #@step(r'the association params are "(.*)"$')
 def i_check_association_params(step, params_json=None):
     params_dict = json.loads(params_json)
-    for key, value in params_dict.items():
+    for key, value in list(params_dict.items()):
         eq_(value, world.association['object'].get(key))
 
 #@step(r'I check that datasets have been juxtaposed')

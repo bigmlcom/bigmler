@@ -16,7 +16,7 @@
 """Resources management functions
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -56,7 +56,7 @@ def set_batch_centroid_args(args, fields=None,
             if not field in dataset_fields.fields:
                 try:
                     field = dataset_fields.field_id(field)
-                except ValueError, exc:
+                except ValueError as exc:
                     sys.exit(exc)
             prediction_fields.append(field)
         batch_centroid_args.update(output_fields=prediction_fields)
@@ -91,7 +91,7 @@ def create_batch_centroid(cluster, test_dataset,
         batch_centroid = check_resource(batch_centroid,
                                         api.get_batch_centroid,
                                         raise_on_error=True)
-    except Exception, exception:
+    except Exception as exception:
         sys.exit("Failed to get a finished batch centroid: %s"
                  % str(exception))
     message = dated("Batch centroid created: %s\n"

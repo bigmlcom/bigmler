@@ -51,11 +51,11 @@ class MySQLModel(Model):
         length = self.mysql(out, ids_path=ids_path, subtree=subtree,
                             attr=attr)
         if length > 0:
-            out.write(u"\n\n")
+            out.write("\n\n")
         else:
-            sys.exit(u"\nFailed to represent this model "
-                     u"in MySQL syntax. Currently only models with "
-                     u"categorical and numeric fields can be generated.\n")
+            sys.exit("\nFailed to represent this model "
+                     "in MySQL syntax. Currently only models with "
+                     "categorical and numeric fields can be generated.\n")
         out.flush()
 
     def mysql(self, out, ids_path=None, subtree=True, attr=None):

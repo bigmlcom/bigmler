@@ -19,7 +19,7 @@
 """ Bigmler retrain
 
 """
-from __future__ import absolute_import
+
 
 import os
 
@@ -48,7 +48,7 @@ def setup_module():
     world.bck_api = world.api
     world.api = BigML(world.USERNAME, world.API_KEY, debug=world.debug,
                       organization=BIGML_ORGANIZATION)
-    print world.api.connection_info()
+    print(world.api.connection_info())
     world.bck_project_id = world.project_id
     world.project_id = None
     world.clear()
@@ -68,7 +68,7 @@ def teardown_module():
         world.api.delete_project(world.project_id)
     world.project_id = world.bck_project_id
     world.api = world.bck_api
-    print world.api.connection_info()
+    print(world.api.connection_info())
 
 
 class TestProjectOrg(object):
@@ -77,14 +77,14 @@ class TestProjectOrg(object):
         """Calling generic teardown for every method
 
         """
-        print "\nEnd of tests in: %s\n-------------------\n" % __name__
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
         teardown_class()
 
     def setup(self):
         """
             Debug information
         """
-        print "\n-------------------\nTests in: %s\n" % __name__
+        print("\n-------------------\nTests in: %s\n" % __name__)
 
     def test_scenario1(self):
         """
@@ -99,11 +99,11 @@ class TestProjectOrg(object):
                 | data             | project         | output_dir
                 | ../data/iris.csv | My new project  | ./scenario_org_1
         """
-        print self.test_scenario1.__doc__
+        print(self.test_scenario1.__doc__)
         examples = [
             ['data/iris.csv', 'My new project', 'scenario_org_1']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_project.i_create_project_in_org(self, name=example[1], output_dir=example[2], organization=BIGML_ORGANIZATION)
             test_project.i_check_create_project(self, organization=True)
             test_project.i_create_source_with_org_project(self, data=example[0], output_dir=example[2])

@@ -13,7 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from __future__ import absolute_import
+
 
 import os
 import time
@@ -122,7 +122,7 @@ def i_check_create_topic_model(step):
         world.topic_model = topic_model
         topic_model_file.close()
         assert True
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -141,7 +141,7 @@ def i_check_create_topic_distribution(step):
         world.batch_topic_distribution = batch_topic_distribution
         batch_topic_distribution_file.close()
         assert True
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -161,7 +161,7 @@ def i_check_create_topic_distributions(step):
             assert False, "topic distribution lines: %s, test lines: %s" % (
                 predictions_lines, world.test_lines)
         predictions_file.close()
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -174,7 +174,7 @@ def i_check_topic_distributions(step, check_file):
         with UnicodeReader(predictions_file) as predictions_file:
             with UnicodeReader(check_file) as check_file:
                 for row in predictions_file:
-                    check_row = check_file.next()
+                    check_row = next(check_file)
                     assert len(check_row) == len(row)
                     for index in range(len(row)):
                         dot = row[index].find(".")
@@ -195,7 +195,7 @@ def i_check_topic_distributions(step, check_file):
                                                 places=(decimal_places - 1))
                         else:
                             assert_equal(check_row[index], row[index])
-    except Exception, exc:
+    except Exception as exc:
         assert False, traceback.format_exc()
 
 

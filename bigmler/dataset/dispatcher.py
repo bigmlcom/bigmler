@@ -17,7 +17,7 @@
 """BigMLer - cluster subcommand processing dispatching
 
 """
-from __future__ import absolute_import
+
 
 import sys
 import os
@@ -37,11 +37,11 @@ from bigmler.command import get_context
 from bigmler.prediction import OTHER
 from bigmler.dispatcher import SESSIONS_LOG, clear_log_files
 
-COMMAND_LOG = u".bigmler_dataset"
-DIRS_LOG = u".bigmler_dataset_dir_stack"
+COMMAND_LOG = ".bigmler_dataset"
+DIRS_LOG = ".bigmler_dataset_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 MINIMUM_MODEL = "full=false"
-DEFAULT_OUTPUT = u"dataset.csv"
+DEFAULT_OUTPUT = "dataset.csv"
 
 SETTINGS = {
     "command_log": COMMAND_LOG,
@@ -114,7 +114,7 @@ def get_objective_id(args, fields):
             objective_id = u.get_objective_id(fields, args.objective_field)
             fields.update_objective_field(
                 fields.field_column_number(objective_id), True)
-        except (KeyError, ValueError), exc:
+        except (KeyError, ValueError) as exc:
             sys.exit(exc)
     else:
         return fields.field_id(fields.objective_field)
@@ -269,7 +269,7 @@ def compute_output(api, args):
     if args.new_fields or args.sample_rate != 1 or \
             (args.lisp_filter or args.json_filter) and not a.has_source(args):
         if fields is None:
-            if isinstance(dataset, basestring):
+            if isinstance(dataset, str):
                 dataset = u.check_resource(dataset, api=api)
             fields = Fields(dataset, csv_properties)
         args.objective_id_ = get_objective_id(args, fields)

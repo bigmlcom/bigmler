@@ -18,7 +18,7 @@
 """Defaults parser for BigMLer
 
 """
-import ConfigParser
+import configparser
 
 DEFAULTS_FILE = 'bigmler.ini'
 
@@ -394,7 +394,7 @@ def get_user_defaults(defaults_file=DEFAULTS_FILE):
         defaults_file = DEFAULTS_FILE
     try:
         open(defaults_file).close()
-        config = ConfigParser.ConfigParser()
+        config = configparser.ConfigParser()
         config.read(defaults_file)
         defaults = parse_user_defaults(config)
     except IOError:
@@ -420,6 +420,6 @@ def parse_user_defaults(config):
                 value = config_get[argument['type']](section,
                                                      argument['flag'])
                 defaults[section].update({argument['flag']: value})
-            except ConfigParser.Error:
+            except configparser.Error:
                 pass
     return defaults

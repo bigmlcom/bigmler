@@ -20,7 +20,7 @@
 
 
 """
-from __future__ import absolute_import
+
 
 
 import os
@@ -42,8 +42,8 @@ COMMANDS = {"script":
                  " --store --to-library")}
 
 #subcommands
-SUBCOMMAND_LOG = u".bigmler_subcmd"
-SESSIONS_LOG = u"bigmler_sessions"
+SUBCOMMAND_LOG = ".bigmler_subcmd"
+SESSIONS_LOG = "bigmler_sessions"
 
 #name max length
 NAME_MAX_LENGTH = 127
@@ -86,7 +86,7 @@ def rebuild_command(args):
     """Rebuilds a unicode command string prepared to be stored in a file
 
     """
-    return "%s\n" % (u" ".join(args)).replace("\\", "\\\\")
+    return "%s\n" % (" ".join(args)).replace("\\", "\\\\")
 
 
 def different_command(next_command, command):

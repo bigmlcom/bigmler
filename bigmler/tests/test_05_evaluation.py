@@ -19,7 +19,7 @@
 """ Testing evaluations' creation
 
 """
-from __future__ import absolute_import
+
 
 
 from bigmler.tests.world import (world, common_setup_module,
@@ -54,14 +54,14 @@ class TestEvaluation(object):
         """Calling generic teardown for every method
 
         """
-        print "\nEnd of tests in: %s\n-------------------\n" % __name__
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
         teardown_class()
 
     def setup(self):
         """
             Debug information
         """
-        print "\n-------------------\nTests in: %s\n" % __name__
+        print("\n-------------------\nTests in: %s\n" % __name__)
 
     def setup_scenario1(self):
         """
@@ -77,11 +77,11 @@ class TestEvaluation(object):
                 | data             | output                   | json_evaluation_file    |
                 | ../data/iris.csv | ./scenario_e1/evaluation | ./check_files/evaluation_iris.json |
         """
-        print self.setup_scenario1.__doc__
+        print(self.setup_scenario1.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_e1/evaluation', 'check_files/evaluation_iris.json']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_create_all_resources_to_evaluate(self, data=example[0], output=example[1])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -103,11 +103,11 @@ class TestEvaluation(object):
                 |scenario    | kwargs                                                  | output                   | json_evaluation_file    |
                 | scenario_e1| {"data": "../data/iris.csv", "output": "./scenario_e1/predictions.csv"}   |./scenario_e2/evaluation | ./check_files/evaluation_iris.json |
         """
-        print self.test_scenario2.__doc__
+        print(self.test_scenario2.__doc__)
         examples = [
             ['scenario_e1', '{"data": "data/iris.csv", "output": "scenario_e1/predictions.csv"}', 'scenario_e2/evaluation', 'check_files/evaluation_iris.json']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             evaluation.given_i_create_bigml_resources_using_source_to_evaluate(self, output=example[2])
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -129,11 +129,11 @@ class TestEvaluation(object):
                 | scenario_e1| {"data": "../data/iris.csv", "output": "./scenario_e1/predictions.csv"}   |./scenario_e3/evaluation | ./check_files/evaluation_iris.json |
 
         """
-        print self.test_scenario3.__doc__
+        print(self.test_scenario3.__doc__)
         examples = [
             ['scenario_e1', '{"data": "data/iris.csv", "output": "scenario_e1/predictions.csv"}', 'scenario_e3/evaluation', 'check_files/evaluation_iris.json']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             evaluation.given_i_create_bigml_resources_using_dataset_to_evaluate(self, output=example[2])
             test_pred.i_check_create_model(self)
@@ -154,11 +154,11 @@ class TestEvaluation(object):
                 |scenario    | kwargs                                                   | test             | output                   | json_evaluation_file     |
                 | scenario_e1| {"data": "../data/iris.csv", "output": "./scenario_e1/predictions.csv"}   | ../data/iris.csv | ./scenario_e4/evaluation | ./check_files/evaluation_iris2.json |
         """
-        print self.test_scenario4.__doc__
+        print(self.test_scenario4.__doc__)
         examples = [
             ['scenario_e1', '{"data": "data/iris.csv", "output": "scenario_e1/predictions.csv"}', 'data/iris.csv', 'scenario_e4/evaluation', 'check_files/evaluation_iris2.json']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             evaluation.i_create_all_resources_to_evaluate_with_model(self, data=example[2], output=example[3])
             test_pred.i_check_create_source(self)
@@ -180,11 +180,11 @@ class TestEvaluation(object):
                 |scenario    | kwargs                                                                   | test             | fields_map | output                   | json_evaluation_file     |
                 | scenario_e1| {"data": "../data/iris.csv", "output": "./scenario_e1/predictions.csv"}  | ../data/iris_permuted.csv | ../data/fields_map.csv | ./scenario_e7/evaluation | ./check_files/evaluation_iris2.json |
         """
-        print self.test_scenario5.__doc__
+        print(self.test_scenario5.__doc__)
         examples = [
             ['scenario_e1', '{"data": "data/iris.csv", "output": "scenario_e1/predictions.csv"}', 'data/iris_permuted.csv', 'data/fields_map.csv', 'scenario_e7/evaluation', 'check_files/evaluation_iris2.json']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             evaluation.i_create_all_resources_to_evaluate_with_model_and_map(self, data=example[2], fields_map=example[3], output=example[4])
             test_pred.i_check_create_source(self)
@@ -208,11 +208,11 @@ class TestEvaluation(object):
                 | data             | output                   | split    | key         | value |
                 | ../data/iris.csv | ./scenario_e6/evaluation | 0.2      | average_phi | 0.85  |
         """
-        print self.test_scenario6.__doc__
+        print(self.test_scenario6.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_e6/evaluation', '0.2', 'average_phi', '0.85']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             evaluation.i_create_with_split_to_evaluate(self, data=example[0], split=example[2], output=example[1])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -242,11 +242,11 @@ class TestEvaluation(object):
                 | data             | output                   | split    | number_of_models | key         | value | directory      | output2
                 | ../data/iris.csv | ./scenario_e8/evaluation | 0.2      | 5                | average_phi | 0.94  | ./scenario_e8/ | ./scenario_e9/evaluation
         """
-        print self.test_scenario7.__doc__
+        print(self.test_scenario7.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_e8/evaluation', '0.2', '5', 'average_phi', '0.94', 'scenario_e8', 'scenario_e9/evaluation']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             evaluation.i_create_with_split_to_evaluate_ensemble(self, data=example[0], number_of_models=example[3], split=example[2], output=example[1])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -274,11 +274,11 @@ class TestEvaluation(object):
                 | data             | output                   | json_evaluation_file    |
                 | ../data/iris.csv | ./scenario_e8/evaluation | ./check_files/evaluation_iris_lr.json |
         """
-        print self.test_scenario8.__doc__
+        print(self.test_scenario8.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_e8/evaluation', 'check_files/evaluation_iris_lr.json']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             lr_pred.i_create_all_lr_resources_to_evaluate(self, data=example[0], output=example[1])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -306,11 +306,11 @@ class TestEvaluation(object):
                 | data             | output                   | split    | number_of_models | key         | value | directory      | output2
                 | ../data/iris.csv | ./scenario_e8/evaluation | 0.2      | 5                | average_phi | 0.8985  | ./scenario_e9/ | ./scenario_e9/evaluation
         """
-        print self.test_scenario9.__doc__
+        print(self.test_scenario9.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_e9/evaluation', '0.2', '5', 'average_phi', '0.89', 'scenario_e9', 'scenario_e9/evaluation', "--method threshold --threshold 5 --class Iris-virginica"]]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             evaluation.i_create_with_split_to_evaluate_ensemble( \
                 self, data=example[0], number_of_models=example[3],
                 split=example[2], output=example[1])
@@ -343,11 +343,11 @@ class TestEvaluation(object):
                 | data             | output                   | json_evaluation_file    |
                 | ../data/grades.csv | ./scenario_e10/evaluation | ./check_files/evaluation_grades_ts.json |
         """
-        print self.test_scenario10.__doc__
+        print(self.test_scenario10.__doc__)
         examples = [
             ['data/grades.csv', 'scenario_e10/evaluation', 'check_files/evaluation_grades_ts.json']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             ts_pred.i_create_all_ts_resources_to_evaluate(self, data=example[0], output=example[1])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -370,11 +370,11 @@ class TestEvaluation(object):
                 | data             | output                   | json_evaluation_file    |
                 | ../data/iris.csv | ./scenario_e11/evaluation | ./check_files/evaluation_iris_dn.json |
         """
-        print self.test_scenario11.__doc__
+        print(self.test_scenario11.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_e11/evaluation', 'check_files/evaluation_iris_dn.json']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             dn_pred.i_create_all_dn_resources_to_evaluate(self, data=example[0], output=example[1])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)

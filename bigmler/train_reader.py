@@ -19,7 +19,7 @@
    field is a multi-label field
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -176,7 +176,7 @@ class TrainReader(object):
         except IOError:
             sys.exit("Error: cannot read training %s" % self.training_set)
 
-    def next(self):
+    def __next__(self):
         """Iterator method for next item
 
         """
@@ -189,7 +189,7 @@ class TrainReader(object):
            reopened and pointer starts at the beginning of the file.
 
         """
-        row = self.training_reader.next()
+        row = next(self.training_reader)
         row = [value.strip() for value in row]
         if extended:
             if self.multi_label and self.fields_labels is None:

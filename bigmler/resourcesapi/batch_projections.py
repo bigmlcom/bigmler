@@ -16,7 +16,7 @@
 """Resources management functions
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -57,7 +57,7 @@ def set_batch_projection_args( \
                 if not field in dataset_fields.fields:
                     try:
                         field = dataset_fields.field_id(field)
-                    except ValueError, exc:
+                    except ValueError as exc:
                         sys.exit(exc)
                 projection_fields.append(field)
             batch_projection_args.update(output_fields=projection_fields)
@@ -92,7 +92,7 @@ def create_batch_projection(pca, test_dataset,
         batch_projection = check_resource( \
             batch_projection, api.get_batch_projection,
             raise_on_error=True)
-    except Exception, exception:
+    except Exception as exception:
         sys.exit("Failed to get a finished batch projection: %s"
                  % str(exception))
     message = dated("Batch projection created: %s\n"

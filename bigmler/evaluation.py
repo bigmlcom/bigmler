@@ -17,7 +17,7 @@
 """Evaluation related functions for BigMLer
 
 """
-from __future__ import absolute_import
+
 
 import os
 import json
@@ -156,7 +156,7 @@ def traverse_for_std_dev(tree):
 
     """
     if isinstance(tree, dict):
-        keys = tree.keys()
+        keys = list(tree.keys())
         for key in keys:
             if (isinstance(key, tuple) and
                     key[0].endswith('_standard_deviation')):
@@ -190,7 +190,7 @@ def avg_evaluation(total, component, number_of_evaluations):
 
     """
     if number_of_evaluations > 0:
-        for key, value in component.items():
+        for key, value in list(component.items()):
             # Handle the non-averageable values in
             # classifications' evaluation data
             if key == "class_names":
@@ -233,7 +233,7 @@ def add_matrices(matrix_a, matrix_b):
 
     """
     return [[x + y  for x, y in zip(matrix_a[i], matrix_b[i])]
-            for i in xrange(len(matrix_a))]
+            for i in range(len(matrix_a))]
 
 
 def avg_class_statistics(total, component, number_of_evaluations):
@@ -297,7 +297,7 @@ def avg_class_statistics(total, component, number_of_evaluations):
             class_info['occurrences'] = int(number_of_evaluations)
             if not flag:
                 class_info['occurrences'] -= 1
-            keys = class_info.keys()
+            keys = list(class_info.keys())
             for key in keys:
                 try:
                     if not key in special_keys:

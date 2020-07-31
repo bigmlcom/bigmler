@@ -19,7 +19,7 @@
 """ Testing samples
 
 """
-from __future__ import absolute_import
+
 
 
 from bigmler.tests.world import (world, common_setup_module,
@@ -48,14 +48,14 @@ class TestSamples(object):
         """Calling generic teardown for every method
 
         """
-        print "\nEnd of tests in: %s\n-------------------\n" % __name__
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
         teardown_class()
 
     def setup(self):
         """
             Debug information
         """
-        print "\n-------------------\nTests in: %s\n" % __name__
+        print("\n-------------------\nTests in: %s\n" % __name__)
 
     def test_scenario1(self):
         """
@@ -73,13 +73,13 @@ class TestSamples(object):
                 |../data/iris.csv | ./scenario_smp_2 | --precision 0 --rows 10 --row-offset 10 --unique | ./check_files/sample_iris2.csv
                 |../data/iris.csv | ./scenario_smp_3 | --row-order-by="-petal length" --row-fields "petal length,petal width" --mode linear | ./check_files/sample_iris3.csv
         """
-        print self.test_scenario1.__doc__
+        print(self.test_scenario1.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_smp_1', '--occurrence --sample-header --row-index', 'check_files/sample_iris.csv'],
             ['data/iris.csv', 'scenario_smp_2', '--precision 0 --rows 10 --row-offset 10 --unique', 'check_files/sample_iris2.csv'],
             ['data/iris.csv', 'scenario_smp_3', '--row-order-by="-petal length" --row-fields "petal length,petal width" --mode linear', 'check_files/sample_iris3.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             dataset.i_create_dataset(self, data=example[0], output_dir=example[1])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self)
@@ -101,11 +101,11 @@ class TestSamples(object):
                 |data |output_dir  |sample_options | sample_JSON
                 |../data/iris.csv | ./scenario_smp_4 | --stat-field "petal length"| ./check_files/stat_info.json
         """
-        print self.test_scenario2.__doc__
+        print(self.test_scenario2.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_smp_4', '--stat-field "petal length"', 'check_files/stat_info.json']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             dataset.i_create_dataset(self, data=example[0], output_dir=example[1])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self)

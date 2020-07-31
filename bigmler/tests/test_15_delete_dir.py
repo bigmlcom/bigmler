@@ -43,14 +43,14 @@ class TestDeleteDir(object):
         """Calling generic teardown for every method
 
         """
-        print "\nEnd of tests in: %s\n-------------------\n" % __name__
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
         teardown_class()
 
     def setup(self):
         """
             Debug information
         """
-        print "\n-------------------\nTests in: %s\n" % __name__
+        print("\n-------------------\nTests in: %s\n" % __name__)
 
     def test_scenario1(self):
         """
@@ -65,11 +65,11 @@ class TestDeleteDir(object):
                 | data               | output_dir
                 | ../data/iris.csv   | ./scenario_del_10
         """
-        print self.test_scenario1.__doc__
+        print(self.test_scenario1.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_del_10']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_delete.i_store_the_number_of_resources(self)
             test_delete.i_create_source_from_file(self, data=example[0], output_dir=example[1])
             test_delete.i_check_changed_number_of_resources(self)

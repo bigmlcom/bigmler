@@ -16,7 +16,7 @@
 """Resources management functions
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -98,7 +98,7 @@ def create_fusion(models, fusion, fusion_args,
                         fusion, api.get_fusion,
                         query_string=query_string,
                         raise_on_error=True)
-                except Exception, exception:
+                except Exception as exception:
                     sys.exit("Failed to get a finished fusion: %s" %
                              str(exception))
                 fusions[0] = fusion
@@ -130,7 +130,7 @@ def get_fusion(fusion,
                                 api.get_fusion,
                                 query_string=ALL_FIELDS_QS,
                                 raise_on_error=True)
-    except Exception, exception:
+    except Exception as exception:
         sys.exit("Failed to get a finished fusion: %s" % \
             str(exception))
 

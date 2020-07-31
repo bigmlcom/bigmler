@@ -16,7 +16,7 @@
 """Anomaly score auxiliary functions
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -64,8 +64,8 @@ def use_prediction_headers(prediction_headers, output, test_reader,
                              fields.fields_columns]
 
         if args.prediction_fields is not None:
-            prediction_fields = map(str.strip,
-                                    args.prediction_fields.split(','))
+            prediction_fields = list(map(str.strip,
+                                    args.prediction_fields.split(',')))
             # Filter input_headers adding only those chosen by the user
             number_of_headers = len(input_headers)
             for index in range(0, number_of_headers):

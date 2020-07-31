@@ -19,7 +19,7 @@
 """ Testing topic model predictions creation
 
 """
-from __future__ import absolute_import
+
 
 from bigmler.tests.world import (world, common_setup_module,
                                  common_teardown_module,
@@ -52,14 +52,14 @@ class TestTopicModel(object):
         """
             Debug information
         """
-        print "\n-------------------\nTests in: %s\n" % __name__
+        print("\n-------------------\nTests in: %s\n" % __name__)
 
     def teardown(self):
         """Calling generic teardown for every method
 
         """
         self.world = teardown_class()
-        print "\nEnd of tests in: %s\n-------------------\n" % __name__
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
 
     def test_scenario01(self):
         """
@@ -76,14 +76,14 @@ class TestTopicModel(object):
 
 
         """
-        print self.test_scenario01.__doc__
+        print(self.test_scenario01.__doc__)
         examples = [
             ['data/spam.csv', '--test-separator="\t" --prediction-header',
              'scenario1_td/topic_distributions.csv',
              'check_files/topic_distributions_spam.csv',
              './check_files/topic_distributions_spam.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             topic_pred.i_create_all_td_resources_from_dataset( \
                 self, example[0], example[1], example[2])
             topic_pred.i_check_create_topic_model(self)
@@ -102,11 +102,11 @@ class TestTopicModel(object):
             | data               | attributes                     | output                 |
             | ../data/spam.csv   | ../data/spam_attributes.json   |  scenario2_td/topic_distributions.csv  |
         """
-        print self.setup_scenario02.__doc__
+        print(self.setup_scenario02.__doc__)
         examples = [
             ['data/spam.csv', 'data/spam_attributes.json', 'scenario2_td/topic_distributions.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_create_dataset_with_attributes( \
                 self, data=example[0], attributes=example[1], output=example[2])
             test_pred.i_check_create_source(self)
@@ -130,14 +130,14 @@ class TestTopicModel(object):
 
 
         """
-        print self.test_scenario03.__doc__
+        print(self.test_scenario03.__doc__)
         examples = [
             ['data/spam.csv', '--test-separator="\t" --prediction-header',
              'scenario3_td/topic_distributions.csv',
              'check_files/topic_distributions_spam.csv',
              './check_files/topic_distributions_spam.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             topic_pred.i_create_all_td_resources_from_source( \
                 self, example[0], example[1], example[2])
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -162,14 +162,14 @@ class TestTopicModel(object):
 
 
         """
-        print self.test_scenario04.__doc__
+        print(self.test_scenario04.__doc__)
         examples = [
             ['data/spam.csv', '--test-separator="\t" --prediction-header',
              'scenario4_td/topic_distributions.csv',
              'check_files/topic_distributions_spam.csv',
              './check_files/topic_distributions_spam.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             topic_pred.i_create_topic_model_from_dataset(self, example[2])
             topic_pred.i_check_create_topic_model(self)
             topic_pred.i_create_all_td_resources_from_model( \
@@ -193,14 +193,14 @@ class TestTopicModel(object):
 
 
         """
-        print self.test_scenario05.__doc__
+        print(self.test_scenario05.__doc__)
         examples = [
             ['data/spam.csv', '--test-separator="\t" --prediction-header',
              'scenario5_td/topic_distributions.csv',
              'check_files/topic_distributions_spam.csv',
              './check_files/topic_distributions_spam.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             topic_pred.i_create_topic_model_from_dataset(self, example[2])
             topic_pred.i_check_create_topic_model(self)
             topic_pred.i_create_topic_distribution_from_model_remote(self, test=example[0], options=example[1], output=example[2])

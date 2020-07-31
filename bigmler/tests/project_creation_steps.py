@@ -13,7 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from __future__ import absolute_import
+
 
 
 import os
@@ -38,15 +38,15 @@ def i_create_source_with_project(step, data=None, project=None, output_dir=None)
     #Check if the project already exists
     previous_projects = world.api.list_projects('name=%s' % project)
     while previous_projects['meta']['total_count'] > 0:
-        print "the project %s already exists, trying with:" % project
+        print("the project %s already exists, trying with:" % project)
         project += " " + project
-        print project
+        print(project)
         previous_projects = world.api.list_projects('name=%s' % project)
     try:
-        command = (u"bigmler --train " + res_filename(data) +
-                   u" --no-model --no-dataset --store --output-dir " +
+        command = ("bigmler --train " + res_filename(data) +
+                   " --no-model --no-dataset --store --output-dir " +
                    output_dir +
-                   u" --project=\"" + project + "\"")
+                   " --project=\"" + project + "\"")
         if not PYTHON3:
             command = command.encode(BIGML_SYS_ENCODING)
         command = check_debug(command)
@@ -65,9 +65,9 @@ def i_create_project_in_org(step, name=None, output_dir=None, organization=None)
     world.directory = output_dir
     world.folders.append(world.directory)
     try:
-        command = (u"bigmler project --name \"" + name +
+        command = ("bigmler project --name \"" + name +
                    "\" --organization " + organization +
-                   u" --output-dir " + output_dir)
+                   " --output-dir " + output_dir)
         if not PYTHON3:
             command = command.encode(BIGML_SYS_ENCODING)
         command = check_debug(command)
@@ -86,10 +86,10 @@ def i_create_source_with_org_project(step, data=None, output_dir=None):
     world.directory = output_dir
     world.folders.append(world.directory)
     try:
-        command = (u"bigmler --train " + res_filename(data) +
-                   u" --no-model --no-dataset --store --output-dir " +
+        command = ("bigmler --train " + res_filename(data) +
+                   " --no-model --no-dataset --store --output-dir " +
                    output_dir +
-                   u" --org-project " + world.project["resource"])
+                   " --org-project " + world.project["resource"])
         if not PYTHON3:
             command = command.encode(BIGML_SYS_ENCODING)
         command = check_debug(command)
@@ -108,10 +108,10 @@ def i_create_source_with_project_id(step, data=None, output_dir=None):
     world.directory = output_dir
     world.folders.append(world.directory)
     try:
-        command = (u"bigmler --train " + res_filename(data) +
-                   u" --no-model --no-dataset --store --output-dir " +
+        command = ("bigmler --train " + res_filename(data) +
+                   " --no-model --no-dataset --store --output-dir " +
                    output_dir +
-                   u" --project-id " + world.project['resource'])
+                   " --project-id " + world.project['resource'])
         if not PYTHON3:
             command = command.encode(BIGML_SYS_ENCODING)
         command = check_debug(command)
@@ -139,12 +139,12 @@ def i_check_create_project(step, organization=False):
         world.projects.append(project['resource'])
         world.project = project
         project_file.close()
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
     if organization:
         world.api = BigML(world.USERNAME, world.API_KEY, debug=world.debug,
                           project=world.project["resource"])
-        print world.api.connection_info()
+        print(world.api.connection_info())
 
 
 
@@ -158,8 +158,8 @@ def i_create_project(step, project=None, output_dir=None):
     world.directory = output_dir
     world.folders.append(world.directory)
     try:
-        command = (u"bigmler project --name \"" + project +
-                   u"\" --store --output-dir " +
+        command = ("bigmler project --name \"" + project +
+                   "\" --store --output-dir " +
                    output_dir)
         if not PYTHON3:
             command = command.encode(BIGML_SYS_ENCODING)
@@ -176,13 +176,13 @@ def i_create_project(step, project=None, output_dir=None):
 def i_update_project(step, params=None, values=None):
     ok_(params is not None and values is not None)
     try:
-        command = (u"bigmler project --project-id " +
+        command = ("bigmler project --project-id " +
                    world.project['resource'] +
-                   u" --store --output-dir " +
+                   " --store --output-dir " +
                    world.directory)
         for index, param in enumerate(params):
             value = values[index]
-            command += u" --%s %s" % (param, value)
+            command += " --%s %s" % (param, value)
 
         if not PYTHON3:
             command = command.encode(BIGML_SYS_ENCODING)

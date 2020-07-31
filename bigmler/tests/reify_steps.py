@@ -13,7 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from __future__ import absolute_import
+
 
 
 import os
@@ -58,10 +58,10 @@ def i_create_output(step, output=None, language=None, resource_type='source',
     world.folders.append(world.directory)
     resource_id = getattr(world, resource_type)['resource']
     try:
-        command = (u"bigmler reify --id " + resource_id + " --language " +
-                   language + u" --store --output " + output)
+        command = ("bigmler reify --id " + resource_id + " --language " +
+                   language + " --store --output " + output)
         if add_fields:
-            command += u' --add-fields'
+            command += ' --add-fields'
         command = check_debug(command)
         if not PYTHON3:
             command.encode(BIGML_SYS_ENCODING)

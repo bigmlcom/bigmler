@@ -17,7 +17,7 @@
 """ Testing batch prediction creation
 
 """
-from __future__ import absolute_import
+
 
 
 from bigmler.tests.world import (world, common_setup_module,
@@ -51,13 +51,13 @@ class TestBatchPrediction(object):
 
         """
         teardown_class()
-        print "\nEnd of tests in: %s\n-------------------\n" % __name__
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
 
     def setup(self):
         """Debug information
 
         """
-        print "\n-------------------\nTests in: %s\n" % __name__
+        print("\n-------------------\nTests in: %s\n" % __name__)
 
     def test_scenario1(self):
         """
@@ -76,11 +76,11 @@ class TestBatchPrediction(object):
                 | data               | test                    | fields_map | output                        |predictions_file           |
                 | ../data/grades.csv | ../data/test_grades.csv | ../data/grades_fields_map.csv | ./scenario_r1_r/predictions.csv | ./check_files/predictions_grades.csv |
         """
-        print self.test_scenario1.__doc__
+        print(self.test_scenario1.__doc__)
         examples = [
             ['data/grades.csv', 'data/test_grades.csv', 'data/grades_fields_map.csv', 'scenario_r1_r/predictions.csv', 'check_files/predictions_grades.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_create_all_resources_batch_map(self, data=example[0], test=example[1], fields_map=example[2], output=example[3])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -109,11 +109,11 @@ class TestBatchPrediction(object):
                 | data               | test                    | output                        |predictions_file           |
                 | ../data/iris.csv   | ../data/test_iris.csv   | ./scenario_r1/predictions.csv   | ./check_files/predictions_iris.csv   |
         """
-        print self.setup_scenario2.__doc__
+        print(self.setup_scenario2.__doc__)
         examples = [
             ['data/iris.csv', 'data/test_iris.csv', 'scenario_r1/predictions.csv', 'check_files/predictions_iris.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_create_all_resources_batch(self, data=example[0], test=example[1], output=example[2])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -141,11 +141,11 @@ class TestBatchPrediction(object):
                 | scenario_r1| {"data": "../data/iris.csv", "output": "./scenario_r1/predictions.csv", "test": "../data/test_iris.csv"}   |./scenario_r2/predictions.csv   | ./check_files/predictions_iris.csv   |
         """
 
-        print self.test_scenario3.__doc__
+        print(self.test_scenario3.__doc__)
         examples = [
             ['scenario_r1', '{"data": "data/iris.csv", "output": "scenario_r1/predictions.csv", "test": "data/test_iris.csv"}', 'scenario_r2/predictions.csv', 'check_files/predictions_iris.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_pred.i_create_resources_from_source_batch(self, output=example[2])
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -171,11 +171,11 @@ class TestBatchPrediction(object):
 
         """
 
-        print self.test_scenario4.__doc__
+        print(self.test_scenario4.__doc__)
         examples = [
             ['scenario_r1', '{"data": "data/iris.csv", "output": "scenario_r1/predictions.csv", "test": "data/test_iris.csv"}', 'scenario_r3/predictions.csv', 'check_files/predictions_iris.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_pred.i_create_resources_from_dataset_batch(self, output=example[2])
             test_pred.i_check_create_model(self)
@@ -198,11 +198,11 @@ class TestBatchPrediction(object):
 
         """
 
-        print self.test_scenario5.__doc__
+        print(self.test_scenario5.__doc__)
         examples = [
             ['scenario_r1', '{"data": "data/iris.csv", "output": "scenario_r1/predictions.csv", "test": "data/test_iris.csv"}', 'sepal length,sepal width', 'scenario_r4/predictions.csv', 'check_files/predictions_iris_format.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_pred.i_create_resources_from_model_batch(self, fields=example[2], output=example[3])
             test_batch_pred.i_check_create_batch_prediction(self)
@@ -227,11 +227,11 @@ class TestBatchPrediction(object):
                 | ../data/iris.csv   | ../data/test_iris.csv   | ./scenario_r5   |
         """
 
-        print self.test_scenario6.__doc__
+        print(self.test_scenario6.__doc__)
         examples = [
             ['data/iris.csv', 'data/test_iris.csv', 'scenario_r5']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_create_all_resources_batch_to_dataset(self, data=example[0], test=example[1], output_dir=example[2])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -259,9 +259,9 @@ class TestBatchPrediction(object):
             ['scenario_r1', '{"data": "data/iris.csv", "output": "scenario_r1/predictions.csv", "test": "data/test_iris.csv"}', 'data/test_iris.csv', 'scenario_r7/predictions_p.csv', 'check_files/predictions_iris_op_prob.csv', "data/operating_point_prob.json"],
             ['scenario_r1', '{"data": "data/iris.csv", "output": "scenario_r1/predictions.csv", "test": "data/test_iris.csv"}', 'data/test_iris.csv', 'scenario_r7/predictions_c.csv', 'check_files/predictions_iris_op_conf.csv', "data/operating_point_conf.json"]]
 
-        print self.test_scenario7.__doc__
+        print(self.test_scenario7.__doc__)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_batch_pred.i_create_resources_from_model_with_op_remote(self, operating_point=example[5], test=example[2], output=example[3])
             test_batch_pred.i_check_create_batch_prediction(self)
@@ -285,9 +285,9 @@ class TestBatchPrediction(object):
         examples = [
             ['scenario_r1', '{"data": "data/iris.csv", "output": "scenario_r1/predictions.csv", "test": "data/test_iris.csv"}', 'data/test_iris.csv', 'scenario_r8/predictions.csv', 'check_files/predictions_iris.csv']]
 
-        print self.test_scenario8.__doc__
+        print(self.test_scenario8.__doc__)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it( \
                 self, example[0], example[1])
             test_batch_pred.i_create_resources_from_model_remote_no_batch( \

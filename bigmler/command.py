@@ -17,7 +17,7 @@
 """BigMLer - Command  and Stored Command class for command retrieval
 
 """
-from __future__ import absolute_import
+
 
 
 import os
@@ -37,9 +37,9 @@ from bigmler.prediction import MAX_MODELS
 from bigmler.parser import create_parser
 
 
-COMMAND_LOG = u".bigmler"
-DIRS_LOG = u".bigmler_dir_stack"
-SESSIONS_LOG = u"bigmler_sessions"
+COMMAND_LOG = ".bigmler"
+DIRS_LOG = ".bigmler_dir_stack"
+SESSIONS_LOG = "bigmler_sessions"
 CONNECTION_OPTIONS = ["--username", "--api-key", "--org-project"]
 
 
@@ -132,8 +132,8 @@ def get_context(args, settings):
                                             session_file, resume)
 
     if command_args.debug:
-        print "*** BigMLer Command options: ", command.args
-        print "*** BigMLer args object: ", command_args
+        print("*** BigMLer Command options: ", command.args)
+        print("*** BigMLer args object: ", command_args)
 
     return command_args, command, api, session_file, resume
 
@@ -183,7 +183,7 @@ def get_cmd_context(args, settings):
                             os.path.join(directory, settings['defaults_file']))
             except IOError:
                 pass
-        u.sys_log_message(u"%s\n" % os.path.abspath(directory),
+        u.sys_log_message("%s\n" % os.path.abspath(directory),
                           log_file=settings['dirs_log'])
     return command_args, command, session_file, resume
 
@@ -303,7 +303,7 @@ class StoredCommand(object):
         self.args = [arg.decode(u.BIGML_SYS_ENCODING) for arg in
                      shlex.split(self.command.encode(u.BIGML_SYS_ENCODING))[1:]]
         if not ("--output" in self.args or "--output-dir" in self.args):
-            current_directory = u"%s%s" % (os.getcwd(), os.sep)
+            current_directory = "%s%s" % (os.getcwd(), os.sep)
             if self.output_dir.startswith(current_directory):
                 self.output_dir = self.output_dir.replace(current_directory,
                                                           "", 1)
@@ -315,12 +315,12 @@ class StoredCommand(object):
 
         """
         u.log_message(self.resume_command, log_file=session_file)
-        message = u"\nResuming command:\n%s\n\n" % self.command
+        message = "\nResuming command:\n%s\n\n" % self.command
         u.log_message(message, log_file=session_file, console=True)
         try:
             with open(self.defaults_file, 'r') as defaults_handler:
                 contents = defaults_handler.read()
-            message = u"\nUsing the following defaults:\n%s\n\n" % contents
+            message = "\nUsing the following defaults:\n%s\n\n" % contents
             u.log_message(message, log_file=session_file, console=True)
         except IOError:
             pass

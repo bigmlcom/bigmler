@@ -16,7 +16,7 @@
 """Resources management functions
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -164,7 +164,7 @@ def create_logistic_regressions(datasets, logistic_regression_ids,
                     logistic_regression = check_resource( \
                         logistic_regression, api.get_logistic_regression,
                         query_string=query_string, raise_on_error=True)
-                except Exception, exception:
+                except Exception as exception:
                     sys.exit("Failed to get a finished logistic regression:"
                              " %s" %
                              str(exception))
@@ -202,7 +202,7 @@ def get_logistic_regressions(logistic_regression_ids,
                                              api.get_logistic_regression,
                                              query_string=query_string,
                                              raise_on_error=True)
-    except Exception, exception:
+    except Exception as exception:
         sys.exit("Failed to get a finished logistic regression: %s" % \
             str(exception))
     logistic_regressions[0] = logistic_regression

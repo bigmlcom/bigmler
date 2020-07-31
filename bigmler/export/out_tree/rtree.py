@@ -45,13 +45,13 @@ class RTree(Tree):
 
         """
 
-        code = u"%sif (is.na(%s)){\n" % \
+        code = "%sif (is.na(%s)){\n" % \
                (INDENT * depth,
                 self.fields[field]['dotted'])
         value = value_to_print(self.output,
                                self.fields[self.objective_id]['optype'])
         indent_depth = INDENT * (depth + 1)
-        code += u"%sreturn(list(prediction=%s, %s=%s))\n%s}\n" % \
+        code += "%sreturn(list(prediction=%s, %s=%s))\n%s}\n" % \
                (indent_depth,
                 value, metric, self.confidence, INDENT * depth)
         cmv.append(self.fields[field]['dotted'])
@@ -63,11 +63,11 @@ class RTree(Tree):
 
         """
 
-        operator = u"==" if self.predicate.missing else u"!="
-        connection = u"||" if self.predicate.missing else u"&&"
+        operator = "==" if self.predicate.missing else "!="
+        connection = "||" if self.predicate.missing else "&&"
         if not self.predicate.missing:
             cmv.append(self.fields[field]['dotted'])
-        return u"%s%s %s NA %s " % (self.fields[field]['dotted'],
+        return "%s%s %s NA %s " % (self.fields[field]['dotted'],
                                     operator,
                                     connection)
 
@@ -91,7 +91,7 @@ class RTree(Tree):
                                              self.predicate.term))
                 matching_function = "itemMatches"
 
-            return u"%sif (%s%s(%s, %s, %s)%s%s) {\n" % \
+            return "%sif (%s%s(%s, %s, %s)%s%s) {\n" % \
                 (INDENT * depth, pre_condition, matching_function,
                  self.fields[field]['dotted'],
                  value_to_print(self.fields[field]['dotted'], 'categorical'),
@@ -100,7 +100,7 @@ class RTree(Tree):
                  value)
         if self.predicate.value is None:
             cmv.append(self.fields[field]['dotted'])
-        return u"%sif (%s%s %s %s) {\n" % \
+        return "%sif (%s%s %s %s) {\n" % \
             (INDENT * depth, pre_condition,
              self.fields[field]['dotted'],
              operator,
@@ -118,7 +118,7 @@ class RTree(Tree):
         metric = "error" if self.regression else "confidence"
         if cmv is None:
             cmv = []
-        body = u""
+        body = ""
         term_analysis_fields = []
         item_analysis_fields = []
         field_obj = self.fields[self.objective_id]
@@ -141,7 +141,7 @@ class RTree(Tree):
 
             for child in self.children:
                 field = child.predicate.field
-                pre_condition = u""
+                pre_condition = ""
                 # code when missing_splits has been used
                 if has_missing_branch and field not in COMPOSED_FIELDS \
                         and child.predicate.value is not None:
@@ -157,13 +157,13 @@ class RTree(Tree):
                                                 ids_path=ids_path,
                                                 subtree=subtree)
                 body += next_level[0]
-                body += u"%s}\n" % (INDENT * depth)
+                body += "%s}\n" % (INDENT * depth)
                 term_analysis_fields.extend(next_level[1])
                 item_analysis_fields.extend(next_level[2])
         else:
             value = value_to_print(self.output,
                                    self.fields[self.objective_id]['optype'])
-            body = u"%sreturn(list(prediction=%s, %s=%s))\n" % \
+            body = "%sreturn(list(prediction=%s, %s=%s))\n" % \
                   (INDENT * depth,
                    value, metric, self.confidence)
         return body, term_analysis_fields, item_analysis_fields

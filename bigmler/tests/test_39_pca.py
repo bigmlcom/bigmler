@@ -19,7 +19,7 @@
 """ Testing PCA projections creation
 
 """
-from __future__ import absolute_import
+
 
 from bigmler.tests.world import (world, common_setup_module,
                                  common_teardown_module,
@@ -52,14 +52,14 @@ class TestProjection(object):
         """
             Debug information
         """
-        print "\n-------------------\nTests in: %s\n" % __name__
+        print("\n-------------------\nTests in: %s\n" % __name__)
 
     def teardown(self):
         """Calling generic teardown for every method
 
         """
         self.world = teardown_class()
-        print "\nEnd of tests in: %s\n-------------------\n" % __name__
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
 
     def test_scenario01(self):
         """
@@ -77,11 +77,11 @@ class TestProjection(object):
 
 
         """
-        print self.test_scenario01.__doc__
+        print(self.test_scenario01.__doc__)
         examples = [
             ['data/grades_nh.csv', 'data/test_grades_nh.csv', 'scenario1_pca_nh/projections.csv', 'check_files/projections_grades_pca.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             pca_proj.i_create_all_pca_resources_with_no_headers(self, example[0], example[1], example[2])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -104,11 +104,11 @@ class TestProjection(object):
             | data               | test                    | output                        |projections_file           |
             | ../data/grades.csv   | ../data/test_grades.csv   | ./scenario1_pca/projections.csv   | ./check_files/projections_grades_pca.csv   |
         """
-        print self.setup_scenario02.__doc__
+        print(self.setup_scenario02.__doc__)
         examples = [
             ['data/grades.csv', 'data/test_grades_no_missings.csv', 'scenario1_pca/projections.csv', 'check_files/projections_grades_pca.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             pca_proj.i_create_all_pca_resources(self, example[0], example[1], example[2])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -130,11 +130,11 @@ class TestProjection(object):
             |scenario    | kwargs                                                  | test                    | output                        |projections_file           |
             | scenario1| {"data": "../data/grades.csv", "output": "./scenario1_lrr/projections.csv", "test": "../data/test_grades.csv"}   | ../data/test_grades.csv   | ./scenario2/projections.csv   | ./check_files/projections_grades.csv   |
         """
-        print self.test_scenario03.__doc__
+        print(self.test_scenario03.__doc__)
         examples = [
             ['scenario1_pca', '{"data": "data/grades.csv", "output": "scenario1_pca/projections.csv", "test": "data/test_grades_no_missings.csv"}', 'data/test_grades_no_missings.csv', 'scenario2_pca/projections.csv', 'check_files/projections_grades_pca.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             pca_proj.i_create_pca_resources_from_source(self, test=example[2], output=example[3])
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -157,11 +157,11 @@ class TestProjection(object):
 
 
         """
-        print self.test_scenario04.__doc__
+        print(self.test_scenario04.__doc__)
         examples = [
             ['scenario1_pca', '{"data": "data/grades.csv", "output": "scenario1_pca/projections.csv", "test": "data/test_grades_no_missings.csv"}', 'data/test_grades_no_missings.csv', 'scenario3_pca/projections.csv', 'check_files/projections_grades_pca.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             pca_proj.i_create_pca_resources_from_dataset(self, test=example[2], output=example[3])
             pca_proj.i_check_create_pca_model(self)
@@ -182,11 +182,11 @@ class TestProjection(object):
             |scenario    | kwargs                                                  | test                    | output                        |projections_file           |
 
         """
-        print self.test_scenario05.__doc__
+        print(self.test_scenario05.__doc__)
         examples = [
             ['scenario1_pca', '{"data": "data/grades.csv", "output": "scenario1_pca/projections.csv", "test": "data/test_grades_no_missings.csv"}', 'data/test_grades_no_missings.csv', 'scenario4_pca/projections.csv', 'check_files/projections_grades_pca.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             pca_proj.i_create_pca_resources_from_model(self, test=example[2], output=example[3])
             test_pred.i_check_create_projections(self)
@@ -205,11 +205,11 @@ class TestProjection(object):
 
 
         """
-        print self.test_scenario06.__doc__
+        print(self.test_scenario06.__doc__)
         examples = [
             ['scenario1_pca', '{"data": "data/grades.csv", "output": "scenario1_pca/projections.csv", "test": "data/test_grades_no_missings.csv"}', 'data/test_grades_no_missings.csv', 'scenario5_pca/projections.csv', 'check_files/projections_grades_pca.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             pca_proj.i_create_pca_resources_from_model_remote(self, test=example[2], output=example[3])
             batch_pred.i_check_create_batch_projection(self)

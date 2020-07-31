@@ -17,7 +17,7 @@
 """BigMLer - Resource processing: creation, update and retrieval of projects
 
 """
-from __future__ import absolute_import
+
 
 import bigml.api
 import bigmler.resourcesapi.projects as r

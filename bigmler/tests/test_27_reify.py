@@ -19,7 +19,7 @@
 """ Testing reify subcommand
 
 """
-from __future__ import absolute_import
+
 
 
 import json
@@ -52,14 +52,14 @@ class TestReify(object):
         """Calling generic teardown for every method
 
         """
-        print "\nEnd of tests in: %s\n-------------------\n" % __name__
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
         teardown_class()
 
     def setup(self):
         """
             Debug information
         """
-        print "\n-------------------\nTests in: %s\n" % __name__
+        print("\n-------------------\nTests in: %s\n" % __name__)
 
     def test_scenario1(self):
         """
@@ -73,14 +73,14 @@ class TestReify(object):
                 | data | output | params |check_file | language
                 | data/iris.csv | scenario_re1/reify.py | {"name": "my_source_name"}|../check_files/reify_source.py | python
         """
-        print self.test_scenario1.__doc__
+        print(self.test_scenario1.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_re1/reify.py', {"name": "my_source_name"}, 'check_files/reify_source.py', 'python'],
             ['data/iris.csv', 'scenario_re1b/reify.ipynb', {"name": "my_source_name"}, 'check_files/reify_source.ipynb', 'nb'],
             ['data/iris.csv', 'scenario_re1c/reify.whizzml', {"name": "my_source_name"}, 'check_files/reify_source.whizzml', 'whizzml']]
 
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_reify.create_source(example[0], output=example[1],
                                      args=example[2])
             test_reify.i_create_output(self, example[1], example[4])
@@ -100,12 +100,12 @@ class TestReify(object):
                 | data | output | params |check_file | language
                 | data/iris.csv | scenario_re2/reify.py | {"name": "my_dataset_name"}|../check_files/reify_dataset.py | python
         """
-        print self.test_scenario2.__doc__
+        print(self.test_scenario2.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_re2/reify.py', {"name": "my_dataset_name"}, 'check_files/reify_dataset.py', 'python']]
 
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_reify.create_dataset(example[0], output=example[1],
                                       args=example[2])
             test_reify.i_create_output(self, example[1], example[4], resource_type='dataset')
@@ -126,12 +126,12 @@ class TestReify(object):
                 | data | output | params |check_file | language
                 | data/iris.csv | scenario_re3/reify.py | {"name": "my_model_name"}|../check_files/reify_model.py | python
         """
-        print self.test_scenario3.__doc__
+        print(self.test_scenario3.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_re3/reify.py', {"name": "my_model_name"}, 'check_files/reify_model.py', 'python']]
 
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_reify.create_model(example[0], output=example[1],
                                     args=example[2])
             test_reify.i_create_output(self, example[1], example[4], resource_type='model')
@@ -153,12 +153,12 @@ class TestReify(object):
                 | data | output | params |check_file | language | input_data
                 | data/iris.csv | scenario_re4/reify.py | {"name": "my_prediction_name"}|../check_files/reify_prediction.py | python | {'petal length': 0.5}
         """
-        print self.test_scenario4.__doc__
+        print(self.test_scenario4.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_re4/reify.py', {"name": "my_prediction_name"}, 'check_files/reify_prediction.py', 'python', {'petal length': 0.5}]]
 
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_reify.create_prediction(example[0], input_data=example[5],
                                          output=example[1],
                                          args=example[2])
@@ -181,12 +181,12 @@ class TestReify(object):
                 | data | output | params |check_file | language
                 | data/iris.csv | scenario_re5/reify.py | {"name": "my_cluster_name"}|../check_files/reify_cluster.py | python
         """
-        print self.test_scenario5.__doc__
+        print(self.test_scenario5.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_re5/reify.py', {"name": "my_cluster_name"}, 'check_files/reify_cluster.py', 'python']]
 
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_reify.create_cluster(example[0],
                                       output=example[1],
                                       args=example[2])
@@ -209,12 +209,12 @@ class TestReify(object):
                 | data | output | params |check_file | language
                 | data/iris.csv | scenario_re6/reify.py | {"name": "my_anomaly_name"}|../check_files/reify_anomaly.py | python
         """
-        print self.test_scenario6.__doc__
+        print(self.test_scenario6.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_re6/reify.py', {"name": "my_anomaly_name"}, 'check_files/reify_anomaly.py', 'python']]
 
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_reify.create_anomaly(example[0],
                                       output=example[1],
                                       args=example[2])
@@ -238,12 +238,12 @@ class TestReify(object):
                 | data | output | params |check_file | language | input_data
                 | data/iris.csv | scenario_re7/reify.py | {"name": "my_centroid_name"}|../check_files/reify_anomaly.py | python | {"petal length": 0.5, "sepal length": 1, "petal width": 0.5, "sepal width": 1, "species": "Iris-setosa"}
         """
-        print self.test_scenario7.__doc__
+        print(self.test_scenario7.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_re7/reify.py', {"name": "my_centroid_name"}, 'check_files/reify_centroid.py', 'python', {"petal length": 0.5, "sepal length": 1, "petal width": 0.5, "sepal width": 1, "species": "Iris-setosa"}]]
 
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_reify.create_centroid(example[0],
                                        input_data=example[5],
                                        output=example[1],
@@ -268,12 +268,12 @@ class TestReify(object):
                 | data | output | params |check_file | language | input_data
                 | data/iris.csv | scenario_re8/reify.py | {"name": "my_anomaly_score_name"}|../check_files/reify_anomaly_score.py | python | {"petal length": 0.5, "sepal length": 1, "petal width": 0.5, "sepal width": 1, "species": "Iris-setosa"}
         """
-        print self.test_scenario8.__doc__
+        print(self.test_scenario8.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_re8/reify.py', {"name": "my_anomaly_score_name"}, 'check_files/reify_anomaly_score.py', 'python', {"petal length": 0.5, "sepal length": 1, "petal width": 0.5, "sepal width": 1, "species": "Iris-setosa"}]]
 
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_reify.create_anomaly_score(example[0],
                                             input_data=example[5],
                                             output=example[1],
@@ -298,12 +298,12 @@ class TestReify(object):
                 | data | output | params |check_file | language
                 | data/iris.csv | scenario_re9/reify.py | {"name": "my_batch_prediction_name"}|../check_files/reify_batch_prediction.py | python
         """
-        print self.test_scenario9.__doc__
+        print(self.test_scenario9.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_re9/reify.py', {"name": "my_batch_prediction_name"}, 'check_files/reify_batch_prediction.py', 'python']]
 
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_reify.create_batch_prediction(example[0],
                                                output=example[1],
                                                args=example[2])
@@ -327,12 +327,12 @@ class TestReify(object):
                 | data | output | params |check_file | language
                 | data/iris.csv | scenario_re10/reify.py | {"name": "my_batch_centroid_name"}|../check_files/reify_batch_centroid.py | python
         """
-        print self.test_scenario10.__doc__
+        print(self.test_scenario10.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_re10/reify.py', {"name": "my_batch_centroid_name"}, 'check_files/reify_batch_centroid.py', 'python']]
 
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_reify.create_batch_centroid(example[0],
                                              output=example[1],
                                              args=example[2])
@@ -356,12 +356,12 @@ class TestReify(object):
                 | data | output | params |check_file | language
                 | data/iris.csv | scenario_re11/reify.py | {"name": "my_batch_anomaly_score_name"}|../check_files/reify_batch_anomaly_score.py | python
         """
-        print self.test_scenario11.__doc__
+        print(self.test_scenario11.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_re11/reify.py', {"name": "my_batch_anomaly_score_name"}, 'check_files/reify_batch_anomaly_score.py', 'python']]
 
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_reify.create_batch_anomaly_score(example[0],
                                                   output=example[1],
                                                   args=example[2])
@@ -385,12 +385,12 @@ class TestReify(object):
                 | data | output | params |check_file | language
                 | data/iris.csv | scenario_re12/reify.py | {"name": "my_evaluation_name"}|../check_files/reify_evaluation.py | python
         """
-        print self.test_scenario12.__doc__
+        print(self.test_scenario12.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_re12/reify.py', {"name": "my_evaluation_name"}, 'check_files/reify_evaluation.py', 'python']]
 
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_reify.create_evaluation(example[0],
                                          output=example[1],
                                          args=example[2])
@@ -413,12 +413,12 @@ class TestReify(object):
                 | data | output | params |check_file | language
                 | data/iris.csv | scenario_re13/reify.py | {"name": "my_ensemble_name"}|../check_files/reify_ensemble.py | python
         """
-        print self.test_scenario13.__doc__
+        print(self.test_scenario13.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_re13/reify.py', {"name": "my_ensemble_name"}, 'check_files/reify_ensemble.py', 'python']]
 
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_reify.create_ensemble(example[0], output=example[1],
                                        args=example[2])
             test_reify.i_create_output(self, example[1], example[4],
@@ -438,12 +438,12 @@ class TestReify(object):
                 | data | output | params |check_file | language
                 | data/iris_sp_chars.csv | scenario_re14/reify.py | {"name": "my_sóurcè_sp_name"}|../check_files/reify_source_sp.py | python
         """
-        print self.test_scenario14.__doc__
+        print(self.test_scenario14.__doc__)
         examples = [
             ['data/iris_sp_chars.csv', 'scenario_re14/reify.py', {"name": "my_sóurcè_sp_name"}, 'check_files/reify_source_sp.py', 'python']]
 
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_reify.create_source(example[0], output=example[1],
                                      args=example[2])
             test_reify.i_create_output(self, example[1], example[4],
@@ -466,12 +466,12 @@ class TestReify(object):
                 | data | output | params |check_file | language
                 | data/iris.csv | scenario_re15/reify.py | {"name": "my_evaluation_name"}|../check_files/reify_evaluation_split.py | python
         """
-        print self.test_scenario15.__doc__
+        print(self.test_scenario15.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_re15/reify.py', {"name": "my_evaluation_name"}, 'check_files/reify_evaluation_split.py', 'python']]
 
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_reify.create_evaluation_split(example[0],
                                                output=example[1],
                                                args=example[2])
@@ -497,12 +497,12 @@ class TestReify(object):
                 | data | output | params |check_file | language
                 | data/iris.csv | scenario_re16/reify.py | {"name": "my_dataset_from_batch_prediction_name"}|../check_files/reify_batch_prediction_dataset.py | python
         """
-        print self.test_scenario16.__doc__
+        print(self.test_scenario16.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_re16/reify.py', {"name": "my_dataset_from_batch_prediction_name"}, 'check_files/reify_batch_prediction_dataset.py', 'python']]
 
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_reify.create_dataset_from_batch_prediction(example[0],
                                                             output=example[1],
                                                             args=example[2])
@@ -529,12 +529,12 @@ class TestReify(object):
                 | data | output | params |check_file | language
                 | data/iris.csv | scenario_re17/reify.py | {"name": "my_dataset_from_batch_centroid_name"}|../check_files/reify_batch_centroid_dataset.py | python
         """
-        print self.test_scenario17.__doc__
+        print(self.test_scenario17.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_re17/reify.py', {"name": "my_dataset_from_batch_centroid_name"}, 'check_files/reify_batch_centroid_dataset.py', 'python']]
 
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_reify.create_dataset_from_batch_centroid(example[0],
                                                           output=example[1],
                                                           args=example[2])
@@ -560,12 +560,12 @@ class TestReify(object):
                 | data | output | params |check_file | language
                 | data/iris.csv | scenario_re18/reify.py | {"name": "my_dataset_from_batch_anomaly_score_name"}|../check_files/reify_batch_anomaly_score_dataset.py | python
         """
-        print self.test_scenario18.__doc__
+        print(self.test_scenario18.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_re18/reify.py', {"name": "my_dataset_from_batch_anomaly_score_name"}, 'check_files/reify_batch_anomaly_score_dataset.py', 'python']]
 
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_reify.create_dataset_from_batch_anomaly(example[0],
                                                          output=example[1],
                                                          args=example[2])
@@ -590,12 +590,12 @@ class TestReify(object):
                 | data | output | params |check_file | language
                 | data/iris.csv | scenario_re19/reify.py | {"name": "my_dataset_from_dataset_name", 'all_but': [u'000001'], 'all_fields': False, 'input_fields': [u'000004', u'000002', u'000003', u'000000', u'000001'], 'new_fields': [{u'description': u'', 'field': u'2', u'label': u'', u'name': u'new'}], 'objective_field': {'id': u'100004'}}|../check_files/reify_dataset_dataset.py | python
         """
-        print self.test_scenario19.__doc__
+        print(self.test_scenario19.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_re19/reify.py', {"name": "my_dataset_from_dataset_name", 'all_but': ['000001'], 'all_fields': False, 'input_fields': ['000000', '000001', '000002', '000003', '000004'], 'new_fields': [{'description': '', 'field': '2', 'label': '', 'name': 'new'}], 'objective_field': {'id': '100004'}}, 'check_files/reify_dataset_dataset.py', 'python']]
 
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_reify.create_dataset_from_dataset(example[0],
                                                    output=example[1],
                                                    args=example[2])
@@ -622,12 +622,12 @@ class TestReify(object):
                 | data | output | params |check_file | language
                 | data/iris.csv | scenario_re20/reify.py | {"name": "my_dataset_from_dataset_from_batch_centroid_name"}|../check_files/reify_batch_centroid_dataset_dataset.py | python
         """
-        print self.test_scenario20.__doc__
+        print(self.test_scenario20.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_re20/reify.py', {"name": "my_dataset_from_dataset_from_batch_centroid_name", "new_fields": [{"field": "( integer ( replace ( field \"cluster\" ) \"Cluster \" \"\" ) )", "name": "Cluster"}]}, 'check_files/reify_batch_centroid_dataset_dataset.py', 'python']]
 
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_reify.create_dataset_from_dataset_from_batch_centroid(
                 example[0], output=example[1], args=example[2])
             test_reify.i_create_output(
@@ -652,12 +652,12 @@ class TestReify(object):
                 | data | output | params |check_file | language
                 | data/iris.csv | scenario_re2/reify.py | {"name": "my_dataset_name"}|../check_files/reify_dataset.py | python
         """
-        print self.test_scenario21.__doc__
+        print(self.test_scenario21.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_re21/reify.py', {"name": "my_dataset_name"}, 'check_files/reify_dataset_datasets.py', 'python', 'scenario_re21']]
 
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_reify.create_dataset_from_datasets( \
                 example[0], output=example[1], args=example[2])
             test_reify.i_create_output(self, example[1], example[4],

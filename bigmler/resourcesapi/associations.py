@@ -16,7 +16,7 @@
 """Resources management functions
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -116,7 +116,7 @@ def create_associations(datasets, association_ids, association_args,
                         association, api.get_association,
                         query_string=query_string,
                         raise_on_error=True)
-                except Exception, exception:
+                except Exception as exception:
                     sys.exit("Failed to get a finished association: %s" %
                              str(exception))
                 associations[0] = association
@@ -150,7 +150,7 @@ def get_associations(association_ids, args, api=None, session_file=None):
         association = check_resource(association_ids[0], api.get_association,
                                      query_string=query_string,
                                      raise_on_error=True)
-    except Exception, exception:
+    except Exception as exception:
         sys.exit("Failed to get a finished association: %s" % str(exception))
     associations[0] = association
 

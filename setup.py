@@ -60,7 +60,7 @@ setuptools.setup(
                 'bigmler.linearregression', 'bigmler.pca', 'bigmler.fusion',
                 'bigmler.dataset', 'bigmler.externalconnector',
                 'bigmler.export.out_tree'],
-    install_requires = ['bigml>=4.32.0, <4.33.0',
+    install_requires = ['bigml>=5.0.0, <6.0.0',
                         'jsonschema==2.6.0',
                         'nbformat>=4.4.0'],
     package_data={'bigmler':['static/*.json',
@@ -80,13 +80,10 @@ setuptools.setup(
         'Natural Language :: English',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     test_suite='bigmler.tests',
-    use_2to3=True,
     entry_points={
         'console_scripts': [
             'bigmler = bigmler.bigmler:main',

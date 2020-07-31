@@ -13,7 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from __future__ import absolute_import
+
 
 
 import os
@@ -36,20 +36,20 @@ def check_debug(command, project=True):
     # adding project id as source creation parameter
     if (project and
         all([command.find(string) < 0 for string in non_project_commands])):
-        command = u"%s --project-id %s" % (command, world.project_id)
+        command = "%s --project-id %s" % (command, world.project_id)
     debug = os.environ.get('BIGMLER_DEBUG', False)
     verbosity = 0
     extend_cmd = ''
     if debug == '1':
         verbosity = 1
     elif debug == '2':
-        extend_cmd = u' --debug'
+        extend_cmd = ' --debug'
     if command.find("bigmler report") < 0:
-        command = u"%s --verbosity %s%s" % (command, verbosity, extend_cmd)
+        command = "%s --verbosity %s%s" % (command, verbosity, extend_cmd)
     if not PYTHON3:
         command = command.encode(BIGML_SYS_ENCODING)
     if debug:
-        print command
+        print(command)
     return command
 
 

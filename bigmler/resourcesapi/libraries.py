@@ -16,7 +16,7 @@
 """Resources management functions
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -62,7 +62,7 @@ def create_library(source_code, library_args, args, api=None, path=None,
     library_id = check_resource_error(library, "Failed to create library: ")
     try:
         library = check_resource(library, api.get_library, raise_on_error=True)
-    except Exception, exception:
+    except Exception as exception:
         sys.exit("Failed to get a compiled library: %s" % str(exception))
     message = dated("Library created: %s\n" % get_url(library))
     log_message(message, log_file=session_file, console=args.verbosity)

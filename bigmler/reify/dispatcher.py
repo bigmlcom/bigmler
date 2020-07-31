@@ -17,7 +17,7 @@
 """BigMLer - reify processing dispatching
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -28,8 +28,8 @@ from bigmler.command import get_context
 from bigmler.dispatcher import SESSIONS_LOG, clear_log_files
 from bigmler.reify.reify import reify_resources
 
-COMMAND_LOG = u".bigmler_reify"
-DIRS_LOG = u".bigmler_reify_dir_stack"
+COMMAND_LOG = ".bigmler_reify"
+DIRS_LOG = ".bigmler_reify_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 DEFAULT_OUTPUT = "reify.py"
 

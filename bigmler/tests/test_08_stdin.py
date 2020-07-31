@@ -19,7 +19,7 @@
 """ Testing predictions uploading from stdin
 
 """
-from __future__ import absolute_import
+
 
 
 from bigmler.tests.world import (world, common_setup_module,
@@ -48,14 +48,14 @@ class TestStdin(object):
         """Calling generic teardown for every method
 
         """
-        print "\nEnd of tests in: %s\n-------------------\n" % __name__
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
         teardown_class()
 
     def setup(self):
         """
             Debug information
         """
-        print "\n-------------------\nTests in: %s\n" % __name__
+        print("\n-------------------\nTests in: %s\n" % __name__)
 
     def test_scenario1(self):
         """
@@ -67,11 +67,11 @@ class TestStdin(object):
                 | data               | output_dir      |
                 | ../data/iris.csv   | ./scenario_st_1 |
         """
-        print self.test_scenario1.__doc__
+        print(self.test_scenario1.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_st_1']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             stdin.i_create_source_from_stdin(self, data=example[0], output_dir=example[1])
             test_pred.i_check_create_source(self)
 
@@ -89,11 +89,11 @@ class TestStdin(object):
                 | data               | test                    | output                            |predictions_file           | name |
                 | ../data/iris.csv   | ../data/test_iris.csv   | ./scenario_st_2/predictions.csv   | ./check_files/predictions_iris.csv   | Source name: áéí |
         """
-        print self.test_scenario2.__doc__
+        print(self.test_scenario2.__doc__)
         examples = [
             ['data/iris.csv', 'data/test_iris.csv', 'scenario_st_2/predictions.csv', 'check_files/predictions_iris.csv', 'Source name: áéí']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             stdin.i_create_all_resources_to_test_from_stdin(self, data=example[0], test=example[1], name=example[4], output=example[2])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)

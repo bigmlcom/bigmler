@@ -19,7 +19,7 @@
 """ Testing analyze subcommand
 
 """
-from __future__ import absolute_import
+
 
 
 from bigmler.tests.world import (world, common_setup_module,
@@ -49,14 +49,14 @@ class TestAnalyze(object):
         """Calling generic teardown for every method
 
         """
-        print "\nEnd of tests in: %s\n-------------------\n" % __name__
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
         teardown_class()
 
     def setup(self):
         """
             Debug information
         """
-        print "\n-------------------\nTests in: %s\n" % __name__
+        print("\n-------------------\nTests in: %s\n" % __name__)
 
     def test_scenario1(self):
         """
@@ -74,11 +74,11 @@ class TestAnalyze(object):
                 | data             | output                    | kfold | json_evaluation_file               |
                 | ../data/iris.csv | ./scenario_a_1/evaluation | 2     | ./check_files/evaluation_kfold.json |
         """
-        print self.test_scenario1.__doc__
+        print(self.test_scenario1.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_a_1/evaluation', '2', 'check_files/evaluation_kfold.json']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_create_dataset(self, data=example[0], output=example[1])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self)
@@ -108,12 +108,12 @@ class TestAnalyze(object):
                 | ../data/iris_2f.csv | ./scenario_a_2/evaluation | 2     | accuracy | petal width | 100.00%
                 | ../data/iris_2f.csv | ./scenario_a_3/evaluation | 2     | phi      | petal width | 1
         """
-        print self.test_scenario2.__doc__
+        print(self.test_scenario2.__doc__)
         examples = [
             ['data/iris_2f.csv', 'scenario_a_2/evaluation', '2', 'accuracy', 'petal width', '100.00%'],
             ['data/iris_2f.csv', 'scenario_a_3/evaluation', '2', 'phi', 'petal width', '1']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_create_dataset(self, data=example[0], output=example[1])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self)
@@ -142,12 +142,12 @@ class TestAnalyze(object):
                 | ../data/iris_2f.csv | 0             |./scenario_a_5/evaluation | 2     | r_squared| species              | 0.352845     |
                 | ../data/iris_2f.csv | 0             |./scenario_a_8/evaluation | 2     | mean_squared_error| species     | 0.475200     |
         """
-        print self.test_scenario3.__doc__
+        print(self.test_scenario3.__doc__)
         examples = [
             ['data/iris_2f.csv', '0', 'scenario_a_5/evaluation', '2', 'r_squared', 'species', '0.352845'],
             ['data/iris_2f.csv', '0', 'scenario_a_8/evaluation', '2', 'mean_squared_error', 'species', '0.475200']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_create_dataset(self, data=example[0], output=example[2])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self)
@@ -175,11 +175,11 @@ class TestAnalyze(object):
                 | data                 | field               | objective     |output                    | output_dir | kfold | metric   | selection   | metric_value |
                 | ../data/iris_2fd.csv | sepal length        | species         |./scenario_a_6/evaluation |./scenario_a_6 | 2     | recall   | petal width | 100.00%     |
         """
-        print self.test_scenario4.__doc__
+        print(self.test_scenario4.__doc__)
         examples = [
             ['data/iris_2fd.csv', 'sepal length', 'species', 'scenario_a_6/evaluation', 'scenario_a_6', '2', 'recall', 'petal width', '100.00%']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_create_dataset(self, data=example[0], output=example[3])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self)
@@ -207,11 +207,11 @@ class TestAnalyze(object):
                 | data                | output                  | min_nodes | max_nodes | nodes_step | kfold | metric   | node_threshold   | metric_value
                 | ../data/iris.csv | ./scenario_a_4/evaluation | 3         | 14        | 2         |2     | precision  | 9                | 94.71%
         """
-        print self.test_scenario5.__doc__
+        print(self.test_scenario5.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_a_4/evaluation', '3', '14', '2', '2', 'precision', '9', '94.71%']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_create_dataset(self, data=example[0], output=example[1])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self)
@@ -239,11 +239,11 @@ class TestAnalyze(object):
                 | data                | output                    | kfold | features              | args_separator | metric   | selection   | metric_value |
                 | ../data/iris.csv | ./scenario_a_7/evaluation | 2     | petal length!sepal width | !              | accuracy | petal width | 95.33%      |
         """
-        print self.test_scenario6.__doc__
+        print(self.test_scenario6.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_a_7/evaluation', '2', 'petal length!sepal width', '!', 'accuracy', 'petal width', '95.33%']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_create_dataset(self, data=example[0], output=example[1])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self)
@@ -269,11 +269,11 @@ class TestAnalyze(object):
                 | data                | attributes | output                    | kfold | metric   | category | selection   | metric_value
                 | ../data/spam.csv    | ../data/spam_attributes.json |./scenario_a_9/evaluation | 2     | recall   | spam     | Message     | 58.69%
         """
-        print self.test_scenario7.__doc__
+        print(self.test_scenario7.__doc__)
         examples = [
             ['data/spam.csv', 'data/spam_attributes.json', 'scenario_a_9/evaluation', '2', 'recall', 'spam', 'Message', '58.69%']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_create_dataset_with_attributes(self, data=example[0], attributes=example[1], output=example[2])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self)
@@ -302,11 +302,11 @@ class TestAnalyze(object):
                 |data |output_dir  |new_fields | field | model_fields| min_nodes | max_nodes | nodes_step | kfold | metric   | node_threshold   | metric_value |
                 |../data/iris.csv | ./scenario_a_10 |../data/new_fields.json| outlier? |petal length,outlier?,species| 3         | 14        | 2         |2     | precision  | 9                | 94.71%         |
         """
-        print self.test_scenario8.__doc__
+        print(self.test_scenario8.__doc__)
         examples = [
-            ['data/iris.csv', 'scenario_a_10', 'data/new_fields2.json', u'outlier?', u'outlier?,species', '3', '14', '2', '2', 'precision', '5', '98.21%']]
+            ['data/iris.csv', 'scenario_a_10', 'data/new_fields2.json', 'outlier?', 'outlier?,species', '3', '14', '2', '2', 'precision', '5', '98.21%']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             dataset_adv.i_create_dataset(self, data=example[0], output_dir=example[1])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -335,11 +335,11 @@ class TestAnalyze(object):
                 | data                | output                  | kfold | metric   | random_candidates | metric_value |
                 | ../data/iris.csv | ./scenario_a_11/evaluation |2     | precision  | 4               | 96.09%         |
         """
-        print self.test_scenario9.__doc__
+        print(self.test_scenario9.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_a_11/evaluation', '2', 'precision', '4', '96.09%']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_create_dataset(self, data=example[0], output=example[1])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self)
@@ -368,12 +368,12 @@ class TestAnalyze(object):
                 | ../data/iris.csv |./scenario_a_13/evaluation | 2     | --exclude-features="species,petal length" --predictions.csv --objective 0| scenario_a_13/kfold6_pred/predictions.csv | check_files/analyze_predictions_iris_2.csv
                 | ../data/iris.csv |./scenario_a_14/evaluation | 2     | --exclude-features="species,petal length" --predictions.csv --number-of-models 2| scenario_a_14/kfold2_pred/predictions.csv | check_files/analyze_predictions_iris_2.csv
         """
-        print self.test_scenario10.__doc__
+        print(self.test_scenario10.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_a_12/evaluation', '2', ' --exclude-features="petal length,sepal length" --predictions-csv','scenario_a_12/test/kfold2_pred/predictions.csv', 'check_files/analyze_predictions_iris.csv'],
             ['data/iris.csv', 'scenario_a_13/evaluation', '2', ' --exclude-features="species,sepal length" --predictions-csv --objective 0','scenario_a_13/test/kfold6_pred/predictions.csv', 'check_files/analyze_predictions_iris2.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_create_dataset(self, data=example[0], output=example[1])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self)
@@ -400,11 +400,11 @@ class TestAnalyze(object):
                 | data              |output                    | kfold | options   | predictions_file | estimated_file
                 | ../data/iris.csv |./scenario_a_14/evaluation | 2     | --exclude-features="species,petal length" --predictions.csv --number-of-models 2| scenario_a_14/kfold2_pred/predictions.csv | check_files/analyze_predictions_iris_e.csv
         """
-        print self.test_scenario11.__doc__
+        print(self.test_scenario11.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_a_14/evaluation', '2', ' --exclude-features="petal length,sepal length" --predictions-csv --number-of-models 2','scenario_a_14/test/kfold2_pred/predictions.csv', 'check_files/analyze_predictions_iris_e.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_create_dataset(self, data=example[0], output=example[1])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self)

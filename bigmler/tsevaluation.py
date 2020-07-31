@@ -17,7 +17,7 @@
 """Evaluation related functions for BigMLer
 
 """
-from __future__ import absolute_import
+
 
 import bigmler.utils as u
 import bigmler.resourcesapi.evaluations as r

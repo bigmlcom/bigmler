@@ -13,7 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from __future__ import absolute_import
+
 
 import os
 import time
@@ -104,7 +104,7 @@ def i_check_create_time_series(step):
         world.time_series_set.append(ts['resource'])
         world.time_series = ts
         ts_file.close()
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 #@step(r'the local forecasts file is like "(.*)"')
@@ -117,7 +117,7 @@ def i_check_forecasts(step, check_file):
         with UnicodeReader(forecasts_file) as forecasts_file:
             with UnicodeReader(check_file) as check_file:
                 for row in forecasts_file:
-                    check_row = check_file.next()
+                    check_row = next(check_file)
                     assert_equal(len(check_row), len(row))
                     for index in range(len(row)):
                         dot = row[index].find(".")
@@ -138,5 +138,5 @@ def i_check_forecasts(step, check_file):
                                                 places=(decimal_places - 1))
                         else:
                             assert_equal(check_row[index], row[index])
-    except Exception, exc:
+    except Exception as exc:
         assert False, traceback.format_exc()

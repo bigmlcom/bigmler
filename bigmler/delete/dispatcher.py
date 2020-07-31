@@ -17,7 +17,7 @@
 """BigMLer - delete processing dispatching
 
 """
-from __future__ import absolute_import
+
 
 import sys
 import os
@@ -32,8 +32,8 @@ from bigmler.defaults import DEFAULTS_FILE
 from bigmler.command import get_stored_command, command_handling
 from bigmler.dispatcher import SESSIONS_LOG, clear_log_files
 
-COMMAND_LOG = u".bigmler_delete"
-DIRS_LOG = u".bigmler_delete_dir_stack"
+COMMAND_LOG = ".bigmler_delete"
+DIRS_LOG = ".bigmler_delete_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 ROWS_LIMIT = 15
 INDENT_IDS = 26
@@ -300,7 +300,7 @@ def delete_dispatcher(args=sys.argv[1:]):
             shutil.copy(DEFAULTS_FILE, os.path.join(directory, DEFAULTS_FILE))
         except IOError:
             pass
-        u.sys_log_message(u"%s\n" % os.path.abspath(directory),
+        u.sys_log_message("%s\n" % os.path.abspath(directory),
                           log_file=DIRS_LOG)
 
     # If --clear-logs the log files are cleared
@@ -381,7 +381,7 @@ def delete_resources(command_args, api, deleted_list=None):
     message = u.dated("Deleting %s objects%s.\n" % (len(delete_list), aprox))
     u.log_message(message, log_file=session_file,
                   console=command_args.verbosity)
-    for resource_type, instances in types_summary.items():
+    for resource_type, instances in list(types_summary.items()):
         message = "%s%ss: %s\n" % (" " * INDENT_IDS, resource_type,
                                    instances)
         u.log_message(message, log_file=session_file,

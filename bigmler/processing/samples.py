@@ -17,7 +17,7 @@
 """BigMLer - Resources processing: creation, update and retrieval of samples
 
 """
-from __future__ import absolute_import
+
 
 from bigml.fields import Fields, DEFAULT_MISSING_TOKENS
 

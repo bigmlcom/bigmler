@@ -16,7 +16,7 @@
 """Resources management functions
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -47,7 +47,7 @@ def set_label_ensemble_args(args, labels, multi_label_data,
         args.objective_field = fields.objective_field
     try:
         objective_id = fields.field_id(args.objective_field)
-    except ValueError, exc:
+    except ValueError as exc:
         sys.exit(exc)
     objective_field = fields.fields[objective_id]['name']
     ensemble_args_list = []
@@ -124,7 +124,7 @@ def set_ensemble_args(args, name=None,
     if args.weight_field:
         try:
             weight_field = fields.field_id(args.weight_field)
-        except ValueError, exc:
+        except ValueError as exc:
             sys.exit(exc)
         ensemble_args.update(weight_field=weight_field)
     if args.objective_weights:
@@ -215,13 +215,13 @@ def retrieve_ensembles_models(ensembles, api, path=None):
     models = []
     model_ids = []
     for index, ensemble in enumerate(ensembles):
-        if (isinstance(ensemble, basestring) or
+        if (isinstance(ensemble, str) or
                 bigml.api.get_status(ensemble)['code'] != bigml.api.FINISHED):
             try:
                 ensemble = check_resource(ensemble, api.get_ensemble,
                                           raise_on_error=True)
                 ensembles[index] = ensemble
-            except Exception, exception:
+            except Exception as exception:
                 sys.exit("Failed to get a finished ensemble: %s" %
                          str(exception))
         model_ids.extend(ensemble['object']['models'])
@@ -241,7 +241,7 @@ def get_ensemble(ensemble, api=None, verbosity=True, session_file=None):
     """
     if api is None:
         api = bigml.api.BigML()
-    if (isinstance(ensemble, basestring) or
+    if (isinstance(ensemble, str) or
             bigml.api.get_status(ensemble)['code'] != bigml.api.FINISHED):
         message = dated("Retrieving ensemble. %s\n" %
                         get_url(ensemble))

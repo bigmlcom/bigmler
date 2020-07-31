@@ -13,7 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from __future__ import absolute_import
+
 
 import os
 import time
@@ -170,7 +170,7 @@ def i_check_create_anomaly(step):
         world.anomaly = anomaly
         anomaly_file.close()
         assert True
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -190,7 +190,7 @@ def i_check_create_anomaly_scores(step):
         else:
             assert False, "predictions lines: %s, test lines: %s" % (predictions_lines, world.test_lines)
         predictions_file.close()
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -202,7 +202,7 @@ def i_check_anomaly_scores(step, check_file):
         predictions_file = csv.reader(open(predictions_file, "U"), lineterminator="\n")
         check_file = csv.reader(open(check_file, "U"), lineterminator="\n")
         for row in predictions_file:
-            check_row = check_file.next()
+            check_row = next(check_file)
             if len(check_row) != len(row):
                 assert False
             for index in range(len(row)):
@@ -216,10 +216,10 @@ def i_check_anomaly_scores(step, check_file):
                     except ValueError:
                         pass
                 if check_row[index] != row[index]:
-                    print row, check_row
+                    print(row, check_row)
                     assert False
         assert True
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -264,7 +264,7 @@ def i_check_create_batch_anomaly_score_dataset(step):
         world.datasets.append(dataset['resource'])
         dataset_file.close()
         assert True
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 #@step(r'the top anomalies in the anomaly detector are <top_anomalies>')

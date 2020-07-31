@@ -19,7 +19,7 @@
 """ Testing fusion predictions creation
 
 """
-from __future__ import absolute_import
+
 
 import os
 
@@ -65,14 +65,14 @@ class TestExternalConnector(object):
         """
             Debug information
         """
-        print "\n-------------------\nTests in: %s\n" % __name__
+        print("\n-------------------\nTests in: %s\n" % __name__)
 
     def teardown(self):
         """Calling generic teardown for every method
 
         """
         self.world = teardown_class()
-        print "\nEnd of tests in: %s\n-------------------\n" % __name__
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
 
 
     def test_scenario01(self):
@@ -86,14 +86,14 @@ class TestExternalConnector(object):
             And I check that the source is ready
 
         """
-        print self.test_scenario01.__doc__
+        print(self.test_scenario01.__doc__)
         examples = [
             ['my connection', 'postgresql', HOST,
             PORT, USER, PASSWORD, DATABASE, 'scenario_41',
             'my new connection', 'scenario_41/my_connector.json',
             'select * from rnacen.auth_group']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             external_connection.i_create_external_connector( \
                 self, name=example[0], source=example[1], host=example[2],
                 port=example[3], user=example[4], password=example[5],

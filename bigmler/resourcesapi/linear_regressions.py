@@ -16,7 +16,7 @@
 """Resources management functions
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -153,7 +153,7 @@ def create_linear_regressions(datasets, linear_regression_ids,
                         linear_regression, api.get_linear_regression,
                         query_string=query_string,
                         raise_on_error=True)
-                except Exception, exception:
+                except Exception as exception:
                     sys.exit("Failed to get a finished linear regression:"
                              " %s" %
                              str(exception))
@@ -191,7 +191,7 @@ def get_linear_regressions(linear_regression_ids,
                                            api.get_linear_regression,
                                            query_string=query_string,
                                            raise_on_error=True)
-    except Exception, exception:
+    except Exception as exception:
         sys.exit("Failed to get a finished linear regression: %s" % \
             str(exception))
     linear_regressions[0] = linear_regression

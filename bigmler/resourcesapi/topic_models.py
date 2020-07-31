@@ -16,7 +16,7 @@
 """Resources management functions
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -135,7 +135,7 @@ def create_topic_models(datasets, topic_model_ids, topic_model_args,
                         topic_model, api.get_topic_model,
                         query_string=query_string,
                         raise_on_error=True)
-                except Exception, exception:
+                except Exception as exception:
                     sys.exit("Failed to get a finished topic model: %s" %
                              str(exception))
                 topic_models[0] = topic_model
@@ -172,7 +172,7 @@ def get_topic_models(topic_model_ids,
                                      api.get_topic_model,
                                      query_string=query_string,
                                      raise_on_error=True)
-    except Exception, exception:
+    except Exception as exception:
         sys.exit("Failed to get a finished topic model: %s" % \
             str(exception))
     topic_models[0] = topic_model

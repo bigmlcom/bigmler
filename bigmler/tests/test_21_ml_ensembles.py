@@ -19,7 +19,7 @@
 """ Testing Multi-label ensembles
 
 """
-from __future__ import absolute_import
+
 
 
 from bigmler.tests.world import (world, common_setup_module,
@@ -52,14 +52,14 @@ class TestMLEnsembles(object):
         """Calling generic teardown for every method
 
         """
-        print "\nEnd of tests in: %s\n-------------------\n" % __name__
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
         teardown_class()
 
     def setup(self):
         """
             Debug information
         """
-        print "\n-------------------\nTests in: %s\n" % __name__
+        print("\n-------------------\nTests in: %s\n" % __name__)
 
     def setup_scenario1(self):
         """
@@ -74,11 +74,11 @@ class TestMLEnsembles(object):
                 |tag |label_separator |number_of_labels | data                   |training_separator |number_of_models | test                        | output                                   |
                 |my_multilabel_1|:|7| ../data/multilabel.csv |,|10| ../data/test_multilabel.csv | ./scenario_mle_1/predictions.csv
         """
-        print self.setup_scenario1.__doc__
+        print(self.setup_scenario1.__doc__)
         examples = [
             ['my_multilabel_1%s' % PY3, ':', '7', 'data/multilabel.csv', ',', '10', 'data/test_multilabel.csv', 'scenario_mle_1/predictions.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             ml_pred.i_create_all_ml_resources_and_ensembles(self, tag=example[0], label_separator=example[1], number_of_labels=example[2], data=example[3], training_separator=example[4], number_of_models=example[5], test=example[6], output=example[7])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self)
@@ -98,11 +98,11 @@ class TestMLEnsembles(object):
                 |scenario    | kwargs                                                  |number_of_models |test                    | output                               |
                 | scenario_mle_1| {"tag": "my_multilabel_1", "data": "../data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "./scenario_mle_1/predictions.csv", "test": "../data/test_multilabel.csv", "number_of_models": 10}   |10| ../data/test_multilabel.csv   | ./scenario_mle_2/predictions.csv
         """
-        print self.test_scenario2.__doc__
+        print(self.test_scenario2.__doc__)
         examples = [
             ['scenario_mle_1', '{"tag": "my_multilabel_1%s", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_mle_1/predictions.csv", "test": "data/test_multilabel.csv", "number_of_models": 10}' % PY3, '10', 'data/test_multilabel.csv', 'scenario_mle_2/predictions.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             ml_pred.i_create_resources_and_ensembles_from_source(self, multi_label='multi-label ', number_of_models=example[2], test=example[3], output=example[4])
             test_pred.i_check_create_dataset(self)
@@ -121,11 +121,11 @@ class TestMLEnsembles(object):
                 |scenario    | kwargs                                                  | number_of_models |test                    | output                                   |
                 | scenario_mle_1| {"tag": "my_multilabel_1", "data": "../data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "./scenario_mle_1/predictions.csv", "test": "../data/test_multilabel.csv", "number_of_models": 10}    |10| ../data/test_multilabel.csv   | ./scenario_mle_3/predictions.csv
         """
-        print self.test_scenario3.__doc__
+        print(self.test_scenario3.__doc__)
         examples = [
             ['scenario_mle_1', '{"tag": "my_multilabel_1%s", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_mle_1/predictions.csv", "test": "data/test_multilabel.csv", "number_of_models": 10}' % PY3, '10', 'data/test_multilabel.csv', 'scenario_mle_3/predictions.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             ml_pred.i_create_resources_and_ensembles_from_source(self, multi_label='multi-label', number_of_models=example[2], test=example[3], output=example[4])
             test_pred.i_check_create_dataset(self)

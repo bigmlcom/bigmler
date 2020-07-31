@@ -13,7 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from __future__ import absolute_import
+
 
 
 import os
@@ -103,7 +103,7 @@ def i_check_create_script(step):
         world.scripts.append(script['resource'])
         world.script = script
         script_file.close()
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -118,7 +118,7 @@ def i_check_create_execution(step, number_of_executions=1):
             world.executions.append(execution['resource'])
             world.execution = execution
         execution_file.close()
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -130,7 +130,7 @@ def i_check_create_result(step):
         world.results = json.load(result_file)
         del world.results["sources"]
         result_file.close()
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 #@step(r'the result is like "(.*)"')
@@ -141,7 +141,7 @@ def i_check_result_is(step, check_file=None):
         del results["sources"]
         assert_equal(results, world.results)
         check_file.close()
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -155,7 +155,7 @@ def i_check_create_library(step):
         world.libraries.append(library['resource'])
         world.library = library
         library_file.close()
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -170,7 +170,7 @@ def i_check_create_package_script(step, package_dir=None):
         world.scripts.append(script['resource'])
         world.script = script
         script_file.close()
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 

@@ -17,7 +17,7 @@
 """BigMLer - main processing dispatching
 
 """
-from __future__ import absolute_import
+
 
 import sys
 import os
@@ -137,7 +137,7 @@ def get_objective_id(args, fields):
             objective_id = u.get_objective_id(fields, args.objective_field)
             fields.update_objective_field(
                 fields.field_column_number(objective_id), True)
-        except (KeyError, ValueError), exc:
+        except (KeyError, ValueError) as exc:
             sys.exit(exc)
     else:
         return fields.field_id(fields.objective_field)
@@ -349,7 +349,7 @@ def compute_output(api, args):
     if args.new_fields or (args.sample_rate != 1 and args.no_model) or \
             (args.lisp_filter or args.json_filter) and not has_source(args):
         if fields is None:
-            if isinstance(dataset, basestring):
+            if isinstance(dataset, str):
                 dataset = u.check_resource(dataset, api=api)
             fields = Fields(dataset, csv_properties)
         args.objective_id_ = get_objective_id(args, fields)
@@ -430,7 +430,7 @@ def compute_output(api, args):
 
     # We update the model's public state if needed
     if model:
-        if (isinstance(model, basestring) or
+        if (isinstance(model, str) or
                 bigml.api.get_status(model)['code'] != bigml.api.FINISHED):
             if not args.evaluate and not a.has_train(args) and \
                     not a.has_test(args):
@@ -551,7 +551,7 @@ def compute_output(api, args):
                 model_fields = Fields(model)
                 objective_field_name = model_fields.field_name( \
                     model_fields.objective_field)
-                if objective_field_name in test_fields.fields_by_name.keys():
+                if objective_field_name in list(test_fields.fields_by_name.keys()):
                     args.prediction_name = "%s (predicted)" % \
                         objective_field_name
             batch_prediction_args = rbp.set_batch_prediction_args(
@@ -579,7 +579,7 @@ def compute_output(api, args):
                           r'\1', args.votes_files_[0]).replace("_", "/")
         try:
             model = u.check_resource(model_id, api.get_model)
-        except ValueError, exception:
+        except ValueError as exception:
             sys.exit("Failed to get model %s: %s" % (model_id, str(exception)))
 
         local_model = Model(model)

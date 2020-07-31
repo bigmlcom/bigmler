@@ -19,7 +19,7 @@
 """ Testing clusters
 
 """
-from __future__ import absolute_import
+
 
 
 from bigmler.tests.world import (world, common_setup_module,
@@ -48,14 +48,14 @@ class TestCluster(object):
         """Calling generic teardown for every method
 
         """
-        print "\nEnd of tests in: %s\n-------------------\n" % __name__
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
         teardown_class()
 
     def setup(self):
         """
             Debug information
         """
-        print "\n-------------------\nTests in: %s\n" % __name__
+        print("\n-------------------\nTests in: %s\n" % __name__)
 
     def test_scenario1(self):
         """
@@ -72,12 +72,12 @@ class TestCluster(object):
                 | ../data/grades.csv | ../data/grades.csv | ./scenario_c_1_r/centroids.csv | ./check_files/centroids_grades.csv |
                 | ../data/diabetes.csv   | ../data/diabetes.csv   | ./scenario_c_1/centroids.csv   | ./check_files/centroids_diabetes.csv   |
         """
-        print self.test_scenario1.__doc__
+        print(self.test_scenario1.__doc__)
         examples = [
             ['data/grades.csv', 'data/grades.csv', 'scenario_c_1_r/centroids.csv', 'check_files/centroids_grades.csv'],
             ['data/diabetes.csv', 'data/diabetes.csv', 'scenario_c_1/centroids.csv', 'check_files/centroids_diabetes.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_cluster.i_create_all_cluster_resources(self, data=example[0], test=example[1], output=example[2])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -99,11 +99,11 @@ class TestCluster(object):
                 |scenario    | kwargs                                                  | test                    | output                        |predictions_file           |
                 | scenario_c_1| {"data": "../data/diabetes.csv", "output": "./scenario_c_1/centroids.csv", "test": "../data/diabetes.csv"}   | ../data/diabetes.csv   | ./scenario_c_2/centroids.csv   | ./check_files/centroids_diabetes.csv   |
         """
-        print self.test_scenario2.__doc__
+        print(self.test_scenario2.__doc__)
         examples = [
             ['scenario_c_1', '{"data": "data/diabetes.csv", "output": "scenario_c_1/centroids.csv", "test": "data/diabetes.csv"}', 'data/diabetes.csv', 'scenario_c_2/centroids.csv', 'check_files/centroids_diabetes.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_cluster.i_create_cluster_resources_from_source(self, test=example[2], output=example[3])
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -125,11 +125,11 @@ class TestCluster(object):
                 | scenario_c_1| {"data": "../data/diabetes.csv", "output": "./scenario_c_1/centroids.csv", "test": "../data/diabetes.csv"}   | ../data/diabetes.csv   | ./scenario_c_3/centroids.csv   | ./check_files/centroids_diabetes.csv   |
 
         """
-        print self.test_scenario3.__doc__
+        print(self.test_scenario3.__doc__)
         examples = [
             ['scenario_c_1', '{"data": "data/diabetes.csv", "output": "scenario_c_1/centroids.csv", "test": "data/diabetes.csv"}', 'data/diabetes.csv', 'scenario_c_3/centroids.csv', 'check_files/centroids_diabetes.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_cluster.i_create_cluster_resources_from_dataset(self, test=example[2], output=example[3])
             test_pred.i_check_create_cluster(self)
@@ -149,11 +149,11 @@ class TestCluster(object):
                 | scenario_c_1| {"data": "../data/diabetes.csv", "output": "./scenario_c_1/centroids.csv", "test": "../data/diabetes.csv"}   | ../data/diabetes.csv   | ./scenario_c_4/centroids.csv   | ./check_files/centroids_diabetes.csv   |
 
         """
-        print self.test_scenario4.__doc__
+        print(self.test_scenario4.__doc__)
         examples = [
             ['scenario_c_1', '{"data": "data/diabetes.csv", "output": "scenario_c_1/centroids.csv", "test": "data/diabetes.csv"}', 'data/diabetes.csv', 'scenario_c_4/centroids.csv', 'check_files/centroids_diabetes.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_cluster.i_create_cluster_resources_from_cluster(self, test=example[2], output=example[3])
             test_cluster.i_check_create_centroids(self)
@@ -172,11 +172,11 @@ class TestCluster(object):
                 | scenario_c_1| {"data": "../data/diabetes.csv", "output": "./scenario_c_1/centroids.csv", "test": "../data/diabetes.csv"}   | ./scenario_c_1/clusters | ../data/diabetes.csv | ./scenario_c_5/centroids.csv | ./check_files/centroids_diabetes.csv |
 
         """
-        print self.test_scenario5.__doc__
+        print(self.test_scenario5.__doc__)
         examples = [
             ['scenario_c_1', '{"data": "data/diabetes.csv", "output": "scenario_c_1/centroids.csv", "test": "data/diabetes.csv"}', 'scenario_c_1/clusters', 'data/diabetes.csv', 'scenario_c_5/centroids.csv', 'check_files/centroids_diabetes.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_cluster.i_create_cluster_resources_from_clusters_file(self, clusters_file=example[2], test=example[3], output=example[4])
             test_cluster.i_check_create_centroids(self)
@@ -195,11 +195,11 @@ class TestCluster(object):
                 | scenario_c_1| {"data": "../data/diabetes.csv", "output": "./scenario_c_1/centroids.csv", "test": "../data/diabetes.csv"}   | Cluster 1,Cluster 2 | ./scenario_c_6/centroids.csv | 2 |
 
         """
-        print self.test_scenario6.__doc__
+        print(self.test_scenario6.__doc__)
         examples = [
             ['scenario_c_1', '{"data": "data/diabetes.csv", "output": "scenario_c_1/centroids.csv", "test": "data/diabetes.csv"}', 'Cluster 1,Cluster 2', 'scenario_c_6/centroids.csv', '2']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_cluster.i_create_datasets_from_cluster(self, centroids=example[2], output=example[3])
             test_cluster.i_check_cluster_datasets(self, datasets_number=example[4])
@@ -216,11 +216,11 @@ class TestCluster(object):
                 |scenario    | kwargs                                                  | test                    | output                        |predictions_file           |
                 | scenario_c_1| {"data": "../data/diabetes.csv", "output": "./scenario_c_1/centroids.csv", "test": "../data/diabetes.csv"}   | ../data/diabetes.csv   | ./scenario_c_7/centroids.csv   | ./check_files/centroids_diabetes.csv   |
         """
-        print self.test_scenario7.__doc__
+        print(self.test_scenario7.__doc__)
         examples = [
             ['scenario_c_1', '{"data": "data/diabetes.csv", "output": "scenario_c_1/centroids.csv", "test": "data/diabetes.csv"}', 'data/diabetes.csv', 'scenario_c_7/centroids.csv', 'check_files/centroids_diabetes.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_cluster.i_create_cluster_resources_from_local_cluster(self, directory=example[0], test=example[2], output=example[3])
             test_cluster.i_check_create_centroids(self)
@@ -238,11 +238,11 @@ class TestCluster(object):
                 | scenario_c_1| {"data": "../data/diabetes.csv", "output": "./scenario_c_1/centroids.csv", "test": "../data/diabetes.csv"}   | Cluster 1,Cluster 2 | ./scenario_c_8/centroids.csv | 2 |
 
         """
-        print self.test_scenario8.__doc__
+        print(self.test_scenario8.__doc__)
         examples = [
             ['scenario_c_1', '{"data": "data/diabetes.csv", "output": "scenario_c_1/centroids.csv", "test": "data/diabetes.csv"}', 'Cluster 1,Cluster 2', 'scenario_c_8/centroids.csv', '2']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_cluster.i_create_models_from_cluster(self, centroids=example[2], output=example[3])
             test_cluster.i_check_create_cluster(self)
@@ -261,11 +261,11 @@ class TestCluster(object):
                 | scenario_c_1| {"data": "../data/diabetes.csv", "output": "./scenario_c_1/centroids.csv", "test": "../data/diabetes.csv"}   | scenario_c_9/   | diabetes,age
 
         """
-        print self.test_scenario9.__doc__
+        print(self.test_scenario9.__doc__)
         examples = [
             ['scenario_c_1', '{"data": "data/diabetes.csv", "output": "scenario_c_1/centroids.csv", "test": "data/diabetes.csv"}', 'scenario_c_9', '000008,000007']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_cluster.i_create_cluster_from_dataset_with_summary_fields(self, summary_fields=example[3], output_dir=example[2])
             test_pred.i_check_create_cluster(self)

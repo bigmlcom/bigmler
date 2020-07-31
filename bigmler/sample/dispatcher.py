@@ -17,7 +17,7 @@
 """BigMLer - sample subcommand processing dispatching
 
 """
-from __future__ import absolute_import
+
 
 import sys
 import os
@@ -35,11 +35,11 @@ from bigmler.dispatcher import SESSIONS_LOG, clear_log_files
 from bigmler.sampleoutput import sample_file
 from bigmler.reports import clear_reports, upload_reports
 
-COMMAND_LOG = u".bigmler_sample"
-DIRS_LOG = u".bigmler_sample_dir_stack"
+COMMAND_LOG = ".bigmler_sample"
+DIRS_LOG = ".bigmler_sample_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 MINIMUM_MODEL = "full=false"
-DEFAULT_OUTPUT = u"sample.csv"
+DEFAULT_OUTPUT = "sample.csv"
 
 SETTINGS = {
     "command_log": COMMAND_LOG,
@@ -102,7 +102,7 @@ def compute_output(api, args):
                  " to generate the new dataset from it.")
 
     path = u.check_dir(output)
-    session_file = u"%s%s%s" % (path, os.sep, SESSIONS_LOG)
+    session_file = "%s%s%s" % (path, os.sep, SESSIONS_LOG)
     csv_properties = {}
     # If logging is required set the file for logging
     log = None
@@ -138,7 +138,7 @@ def compute_output(api, args):
 
     # We update the sample's public state if needed
     if sample:
-        if isinstance(sample, basestring):
+        if isinstance(sample, str):
             # build the query string from the sample options
             sample = u.check_resource(sample, api.get_sample)
         samples[0] = sample

@@ -19,7 +19,7 @@
 """ Testing prediction creation
 
 """
-from __future__ import absolute_import
+
 
 from bigmler.tests.world import world, common_setup_module, \
     common_teardown_module, teardown_class, show_doc
@@ -50,14 +50,14 @@ class TestPrediction(object):
         """
             Debug information
         """
-        print "\n-------------------\nTests in: %s\n" % __name__
+        print("\n-------------------\nTests in: %s\n" % __name__)
 
     def teardown(self):
         """Calling generic teardown for every method
 
         """
         self.world = teardown_class()
-        print "\nEnd of tests in: %s\n-------------------\n" % __name__
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
 
     def test_scenario01(self):
         """
@@ -78,7 +78,7 @@ class TestPrediction(object):
             ['data/iris_nh.csv', 'data/test_iris_nh.csv', 'scenario1_nh/predictions.csv', 'check_files/predictions_iris.csv']]
         show_doc(self.test_scenario01, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_create_all_resources_with_no_headers(self, example[0], example[1], example[2])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -104,7 +104,7 @@ class TestPrediction(object):
             ['data/iris.csv', 'data/test_iris.csv', 'scenario1/predictions.csv', 'check_files/predictions_iris.csv']]
         show_doc(self.setup_scenario02, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_create_all_resources(self, example[0], example[1], example[2])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -129,7 +129,7 @@ class TestPrediction(object):
             ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}', 'data/test_iris.csv', 'scenario2/predictions.csv', 'check_files/predictions_iris.csv']]
         show_doc(self.test_scenario03, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_pred.i_create_resources_from_source(self, None, test=example[2], output=example[3])
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -155,7 +155,7 @@ class TestPrediction(object):
             ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}', 'data/test_iris.csv', 'scenario3/predictions.csv', 'check_files/predictions_iris.csv']]
         show_doc(self.test_scenario04, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_pred.i_create_resources_from_dataset(self, None, test=example[2], output=example[3])
             test_pred.i_check_create_model(self)
@@ -178,7 +178,7 @@ class TestPrediction(object):
             ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}', 'data/test_iris.csv', 'scenario4/predictions.csv', 'check_files/predictions_iris.csv']]
         show_doc(self.test_scenario05, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_pred.i_create_resources_from_model(self, test=example[2], output=example[3])
             test_pred.i_check_create_predictions(self)
@@ -200,7 +200,7 @@ class TestPrediction(object):
             ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}', '10', 'data/test_iris.csv', 'scenario5/predictions.csv', 'check_files/predictions_iris.csv']]
         show_doc(self.setup_scenario06, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_pred.i_create_resources_from_ensemble(self, number_of_models=example[2], test=example[3], output=example[4])
             test_pred.i_check_create_ensemble(self)
@@ -220,14 +220,14 @@ class TestPrediction(object):
             |scenario    | kwargs                                                  |scenario2    | kwargs2                                                  | models_file        | test                  | output                      |predictions_file                    |
 
         """
-        print self.test_scenario07.__doc__
+        print(self.test_scenario07.__doc__)
         examples = [
             ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}',
              'scenario5', '{"number_of_models": 10, "test": "data/test_iris.csv", "output": "scenario5/predictions.csv"}',
              'scenario5/models', 'data/test_iris.csv', 'scenario6/predictions.csv', 'check_files/predictions_iris.csv']]
         show_doc(self.test_scenario07, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[2], example[3])
             test_pred.i_create_resources_from_models_file(self, multi_label=None, models_file=example[4], test=example[5], output=example[6])
@@ -251,7 +251,7 @@ class TestPrediction(object):
             ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}', 'scenario1/dataset', 'data/test_iris.csv', 'scenario7/predictions.csv', 'check_files/predictions_iris.csv']]
         show_doc(self.test_scenario08, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_pred.i_create_resources_from_dataset_file(self, dataset_file=example[2], test=example[3], output=example[4])
             test_pred.i_check_create_model(self)
@@ -277,7 +277,7 @@ class TestPrediction(object):
              'scenario1', 'scenario5', 'scenario8/predictions.csv', 'check_files/predictions_iris.csv']]
         show_doc(self.test_scenario09, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[2], example[3])
             test_pred.i_find_predictions_files(self, directory1=example[4], directory2=example[5], output=example[6])
@@ -310,7 +310,7 @@ class TestPrediction(object):
              'scenario1_r', 'scenario1_r', 'scenario10/predictions_p.csv', 'check_files/predictions_grades_p.csv', '"probability weighted"']]
         show_doc(self.test_scenario10, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[2], example[3])
             test_pred.i_find_predictions_files_with_method(self, directory1=example[4], directory2=example[5], output=example[6], method=example[8])
@@ -333,7 +333,7 @@ class TestPrediction(object):
             ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}', 'data/test_iris.csv', 'scenario11/predictions.csv', 'check_files/predictions_iris_b.csv', '0', '"petal length","petal width"']]
         show_doc(self.test_scenario11, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_pred.i_create_resources_from_dataset_objective_model(self, objective=example[5], fields=example[6], test=example[2], output=example[3])
             test_pred.i_check_create_model(self)
@@ -357,7 +357,7 @@ class TestPrediction(object):
             ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}', '0.05', 'scenario1/dataset', 'scenario12/cross-validation', 'check_files/cross_validation.json']]
         show_doc(self.test_scenario12, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_pred.i_create_cross_validation_from_dataset(self, rate=example[2], dataset_file=example[3], output=example[4])
             test_pred.i_check_create_models(self)
@@ -381,7 +381,7 @@ class TestPrediction(object):
             ['data/iris.csv', 'es_ES.UTF-8', 'data/field_attributes.txt', 'data/types.txt', 'scenario13/store_file', 'es_ES', '000004', 'text', 'species label']]
         show_doc(self.test_scenario13, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_create_source_with_locale(self, data=example[0], locale=example[1], field_attributes=example[2], types=example[3], output=example[4])
             test_pred.i_check_stored_source(self)
             test_pred.i_check_source_locale(self, example[5])
@@ -406,7 +406,7 @@ class TestPrediction(object):
             ['data/iris.csv', 'data/test_iris.tsv', '"\t"', 'scenario14/predictions.csv', 'check_files/predictions_iris.csv']]
         show_doc(self.test_scenario14, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_create_all_resources_with_separator(self, data=example[0], test=example[1], output=example[3], separator=example[2])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -432,7 +432,7 @@ class TestPrediction(object):
             ['data/iris.csv', 'data/test_iris.csv', 'scenario15/predictions.csv', '--prediction-header --prediction-fields \'petal length,petal width\' --prediction-info full', 'check_files/predictions_iris_h.csv']]
         show_doc(self.test_scenario15, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_create_all_resources_with_options(self, data=example[0], test=example[1], output=example[2], options=example[3])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -457,7 +457,7 @@ class TestPrediction(object):
             ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}', '10', 'data/test_iris.csv', 'scenario16/predictions.csv', 'scenario16/predictions2.csv', 'scenario16/predictions3.csv']]
         show_doc(self.test_scenario16, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_pred.i_create_resources_from_ensemble_with_replacement(self, number_of_models=example[2], test=example[3], output=example[4])
             test_pred.i_check_create_ensemble(self)
@@ -481,7 +481,7 @@ class TestPrediction(object):
             ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}', 'data/test_iris.csv', 'scenario17/predictions.csv', 'check_files/predictions_iris.csv']]
         show_doc(self.test_scenario17, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_pred.i_create_resources_from_local_model(self, directory=example[0], test=example[2], output=example[3])
             test_pred.i_check_create_predictions(self)
@@ -508,7 +508,7 @@ class TestPrediction(object):
              '10', 'scenario5', 'data/test_iris.csv', 'scenario18/predictions.csv', 'check_files/predictions_iris.csv']]
         show_doc(self.test_scenario18, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[2], example[3])
             test_pred.i_create_resources_from_local_ensemble(self, number_of_models=example[4], directory=example[5], test=example[6], output=example[7])
@@ -532,7 +532,7 @@ class TestPrediction(object):
             ['data/grades.csv', 'data/test_grades.csv', 'scenario19/predictions.csv', 'check_files/predictions_grades_median.csv']]
         show_doc(self.test_scenario19, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_create_all_resources_with_median(self, data=example[0], test=example[1], output=example[2])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -559,7 +559,7 @@ class TestPrediction(object):
             ['data/grades.csv', '5', 'data/test_grades.csv', 'scenario20/predictions.csv', 'check_files/predictions_grades_median_e.csv']]
         show_doc(self.test_scenario20, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_create_resources_from_ensemble_using_median(self, data=example[0], number_of_models=example[1], test=example[2], output=example[3])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -587,7 +587,7 @@ class TestPrediction(object):
             ['data/grades.csv', '5', 'data/test_grades.csv', 'scenario21/predictions.csv', 'check_files/predictions_grades_e.csv']]
         show_doc(self.test_scenario21, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_create_resources_in_prod_from_ensemble( \
                 self, data=example[0], number_of_models=example[1],
                 test=example[2], output=example[3])
@@ -618,7 +618,7 @@ class TestPrediction(object):
             ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}', '10', 'data/test_iris.csv', 'scenario22/predictions.csv', 'scenario22/predictions2.csv', 'scenario22/predictions3.csv', 'Iris-virginica']]
         show_doc(self.test_scenario22, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it( \
                 self, example[0], example[1])
             test_pred.i_create_resources_from_ensemble_with_replacement( \
@@ -649,7 +649,7 @@ class TestPrediction(object):
             ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}', '10', 'data/test_iris.csv', 'scenario23/predictions.csv', 'check_files/predictions_iris_boost.csv']]
         show_doc(self.test_scenario23, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_pred.i_create_resources_from_boosted_ensemble(self, iterations=example[2], test=example[3], output=example[4])
             test_pred.i_check_create_ensemble(self)
@@ -676,7 +676,7 @@ class TestPrediction(object):
             ['scenario1', '{"data": "data/iris.csv", "output": "scenario1/predictions.csv", "test": "data/test_iris.csv"}', '10', 'data/test_iris.csv', 'scenario24/predictions.csv', 'check_files/predictions_iris_boost.csv']]
         show_doc(self.test_scenario24, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it( \
                 self, example[0], example[1])
             test_pred.i_create_resources_remotely_from_boosted_ensemble( \
@@ -706,7 +706,7 @@ class TestPrediction(object):
 
         show_doc(self.test_scenario25, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_pred.i_create_resources_from_model_with_op(self, operating_point=example[5], test=example[2], output=example[3])
             test_pred.i_check_create_predictions(self)
@@ -735,7 +735,7 @@ class TestPrediction(object):
              '10', 'scenario5', 'data/test_iris.csv', 'scenario26/predictions_c.csv', 'check_files/predictions_iris_e_op_conf.csv', 'data/operating_point_conf.json']]
         show_doc(self.test_scenario26, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[2], example[3])
             test_pred.i_create_resources_from_local_ensemble_with_op( \
@@ -762,7 +762,7 @@ class TestPrediction(object):
             ['data/iris.csv', 'sepal length', '000004', 'scenario27', 3]]
         show_doc(self.test_scenario27, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_create_all_resources_with_split_field(self, example[0], example[2], example[1], example[3])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -787,7 +787,7 @@ class TestPrediction(object):
             ['data/iris.csv', 'sepal length', '000004', 'scenario28', 2]]
         show_doc(self.test_scenario28, examples)
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_create_all_resources_with_focus_field(self, example[0], example[2], example[1], example[3])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)

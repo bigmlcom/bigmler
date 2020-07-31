@@ -16,7 +16,7 @@
 """Common Resource management functions
 
 """
-from __future__ import absolute_import
+
 
 import sys
 import time
@@ -96,7 +96,7 @@ def configure_input_fields(fields, user_given_fields, by_name=False):
     # case of adding and removing fields to the dataset preferred field set
     if all([name[0] in ADD_REMOVE_PREFIX for name in user_given_fields]):
         preferred_fields = fields.preferred_fields()
-        input_fields = preferred_fields.keys()
+        input_fields = list(preferred_fields.keys())
         if by_name:
             input_fields = [fields.field_name(field_id) for field_id in
                             input_fields]
@@ -108,7 +108,7 @@ def configure_input_fields(fields, user_given_fields, by_name=False):
             else:
                 try:
                     field_id = fields.field_id(field_name)
-                except ValueError, exc:
+                except ValueError as exc:
                     sys.exit(exc)
                 modify_input_fields(prefix, field_id, input_fields)
     # case of user given entire list of fields
@@ -120,7 +120,7 @@ def configure_input_fields(fields, user_given_fields, by_name=False):
             for name in user_given_fields:
                 try:
                     input_fields.append(fields.field_id(name))
-                except ValueError, exc:
+                except ValueError as exc:
                     sys.exit(exc)
     return input_fields
 
@@ -144,10 +144,10 @@ def update_attributes(updatable_attributes, new_attributes, by_column=False,
         fields_substructure = updatable_attributes.get("fields", {})
         field_attributes = new_attributes.get("fields", {})
         if field_attributes and (not by_column or fields):
-            for field_key, value in field_attributes.items():
+            for field_key, value in list(field_attributes.items()):
                 field_id = (field_key if not by_column
                             else fields.field_id(field_key))
-                if not field_id in fields_substructure.keys():
+                if not field_id in list(fields_substructure.keys()):
                     fields_substructure.update({field_id: {}})
                 fields_substructure[field_id].update(value)
             updatable_attributes.update({"fields": fields_substructure})
@@ -175,14 +175,14 @@ def relative_input_fields(fields, user_given_fields):
         return user_given_fields
 
     preferred_fields = fields.preferred_fields()
-    for field_id in preferred_fields.keys():
+    for field_id in list(preferred_fields.keys()):
         name = fields.fields[field_id]['name']
         if not name in user_given_fields:
             input_fields.append("%s%s" % (REMOVE_PREFIX, name))
     for name in user_given_fields:
         try:
             field_id = fields.field_id(name)
-        except ValueError, exc:
+        except ValueError as exc:
             sys.exit(exc)
         input_fields.append("%s%s" % (ADD_PREFIX, name))
 
@@ -210,7 +210,7 @@ def wait_for_available_tasks(inprogress, max_parallel, api,
                     return
                 elif status['code'] == bigml.api.FAULTY:
                     raise ValueError(status['message'])
-            except ValueError, exception:
+            except ValueError as exception:
                 sys.exit("Failed to get a finished %s: %s" %
                          (resource_type, str(exception)))
         time.sleep(max_parallel * wait_step)
@@ -223,8 +223,8 @@ def check_fields_struct(update_args, resource_type):
     """
     if "fields" in update_args:
         fields_substr = update_args.get("fields")
-        for _, field in fields_substr.items():
-            attributes = field.keys()
+        for _, field in list(fields_substr.items()):
+            attributes = list(field.keys())
             for attribute in attributes:
                 if not attribute in VALID_FIELD_ATTRIBUTES.get(resource_type):
                     del field[attribute]
@@ -271,12 +271,12 @@ def map_fields(fields_map, model_fields, dataset_fields):
 
     """
     update_map = {}
-    for (model_column, dataset_column) in fields_map.iteritems():
+    for (model_column, dataset_column) in fields_map.items():
         try:
             update_map.update({
                 model_fields.field_id(model_column):
                 dataset_fields.field_id(dataset_column)})
-        except ValueError, exc:
+        except ValueError as exc:
             sys.exit(exc)
 
     return update_map

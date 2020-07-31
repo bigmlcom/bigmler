@@ -17,7 +17,7 @@
 """BigMLer - logistic regression subcommand processing dispatching
 
 """
-from __future__ import absolute_import
+
 
 import sys
 import os
@@ -43,11 +43,11 @@ from bigmler.dispatcher import (SESSIONS_LOG,
                                 clear_log_files, get_test_dataset,
                                 get_objective_id)
 
-COMMAND_LOG = u".bigmler_logistic_regression"
-DIRS_LOG = u".bigmler_logistic_regression_dir_stack"
+COMMAND_LOG = ".bigmler_logistic_regression"
+DIRS_LOG = ".bigmler_logistic_regression_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 MINIMUM_MODEL = "full=false"
-DEFAULT_OUTPUT = u"predictions.csv"
+DEFAULT_OUTPUT = "predictions.csv"
 
 SETTINGS = {
     "command_log": COMMAND_LOG,
@@ -112,7 +112,7 @@ def compute_output(api, args):
                  " to generate the new dataset from it.")
 
     path = u.check_dir(output)
-    session_file = u"%s%s%s" % (path, os.sep, SESSIONS_LOG)
+    session_file = "%s%s%s" % (path, os.sep, SESSIONS_LOG)
     csv_properties = {}
     if args.objective_field:
         csv_properties.update({'objective_field': args.objective_field})
@@ -157,7 +157,7 @@ def compute_output(api, args):
 
     # We update the logistic regression's public state if needed
     if logistic_regression:
-        if isinstance(logistic_regression, basestring):
+        if isinstance(logistic_regression, str):
             if not a.has_test(args):
                 query_string = MINIMUM_MODEL
             elif args.export_fields:

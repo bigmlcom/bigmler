@@ -13,7 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from __future__ import absolute_import
+
 
 import os
 import time
@@ -124,7 +124,7 @@ def i_check_create_fusion(step):
         world.fusions.append(fs['resource'])
         world.fusion = fs
         fs_file.close()
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 def setup_for_fusion(step, train=None, output_dir=None):

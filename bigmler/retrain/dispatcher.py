@@ -20,7 +20,7 @@
 
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -34,8 +34,8 @@ from bigmler.dispatcher import (SESSIONS_LOG,
 from bigmler.command import get_context
 
 
-COMMAND_LOG = u".bigmler_retrain"
-DIRS_LOG = u".bigmler_retrain_dir_stack"
+COMMAND_LOG = ".bigmler_retrain"
+DIRS_LOG = ".bigmler_retrain_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 
 DEFAULT_OUTPUT = "retrain_script"

@@ -41,7 +41,7 @@ python bigmler.py \
     --no-test-header
 
 """
-from __future__ import absolute_import
+
 
 import sys
 

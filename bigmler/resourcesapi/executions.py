@@ -16,7 +16,7 @@
 """Resources management functions
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -67,7 +67,7 @@ def create_execution(execution_args, args, api=None, path=None,
     try:
         execution = check_resource(execution, api.get_execution,
                                    raise_on_error=True)
-    except Exception, exception:
+    except Exception as exception:
         sys.exit("Failed to get a finished execution: %s" % str(exception))
     message = dated("Execution created: %s\n" % get_url(execution))
     log_message(message, log_file=session_file, console=args.verbosity)
@@ -83,7 +83,7 @@ def get_execution(execution, api=None, verbosity=True,
     if api is None:
         api = bigml.api.BigML()
 
-    if (isinstance(execution, basestring) or
+    if (isinstance(execution, str) or
             bigml.api.get_status(execution)['code'] != bigml.api.FINISHED):
         message = dated("Retrieving execution. %s\n" %
                         get_url(execution))
@@ -92,6 +92,6 @@ def get_execution(execution, api=None, verbosity=True,
         try:
             execution = check_resource(execution, api.get_execution,
                                        raise_on_error=True)
-        except Exception, exception:
+        except Exception as exception:
             sys.exit("Failed to get a finished execution: %s" % str(exception))
     return execution

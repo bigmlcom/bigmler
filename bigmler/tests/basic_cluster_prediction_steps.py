@@ -13,7 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from __future__ import absolute_import
+
 
 
 import os
@@ -80,7 +80,7 @@ def i_check_create_cluster(step):
         world.cluster = cluster
         cluster_file.close()
         assert True
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -107,15 +107,15 @@ def i_check_centroids(step, check_file):
         predictions_file = csv.reader(open(predictions_file, "U"), lineterminator="\n")
         check_file = csv.reader(open(check_file, "U"), lineterminator="\n")
         for row in predictions_file:
-            check_row = check_file.next()
+            check_row = next(check_file)
             if len(check_row) != len(row):
                 assert False
             for index in range(len(row)):
                 if check_row[index] != row[index]:
-                    print row, check_row
+                    print(row, check_row)
                     assert False
         assert True
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -238,7 +238,7 @@ def i_check_cluster_datasets(step, datasets_number=None):
         else:
             assert False, "generated datasets %s, expected %s" % (
                 len(dataset_ids), datasets_number)
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -255,7 +255,7 @@ def i_check_cluster_models(step, models_number=None):
         else:
             assert False, "generated models %s, expected %s" % (
                 len(model_ids), models_number)
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 

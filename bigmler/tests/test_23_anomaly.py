@@ -19,7 +19,7 @@
 """ Testing Anomaly Detector scores
 
 """
-from __future__ import absolute_import
+
 
 
 from bigmler.tests.world import (world, common_setup_module,
@@ -50,14 +50,14 @@ class TestAnomaly(object):
         """Calling generic teardown for every method
 
         """
-        print "\nEnd of tests in: %s\n-------------------\n" % __name__
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
         teardown_class()
 
     def setup(self):
         """
             Debug information
         """
-        print "\n-------------------\nTests in: %s\n" % __name__
+        print("\n-------------------\nTests in: %s\n" % __name__)
 
     def setup_scenario1(self):
         """
@@ -73,11 +73,11 @@ class TestAnomaly(object):
                 | data                 | test               | output                           |predictions_file           |
                 | ../data/tiny_kdd.csv | ../data/test_kdd.csv | ./scenario_an_1/anomaly_scores.csv | ./check_files/anomaly_scores_kdd.csv |
         """
-        print self.setup_scenario1.__doc__
+        print(self.setup_scenario1.__doc__)
         examples = [
             ['data/tiny_kdd.csv', 'data/test_kdd.csv', 'scenario_an_1/anomaly_scores.csv', 'check_files/anomaly_scores_kdd.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_anomaly.i_create_all_anomaly_resources(self, data=example[0], test=example[1], output=example[2])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self)
@@ -100,11 +100,11 @@ class TestAnomaly(object):
                 | scenario_an_1| {"data": "../data/tiny_kdd.csv", "output": "./scenario_an_1/anomaly_scores.csv", "test": "../data/test_kdd.csv"}   | ../data/test_kdd.csv   | ./scenario_an_2/anomaly_scores.csv   | ./check_files/anomaly_scores_kdd.csv   |
 
         """
-        print self.test_scenario2.__doc__
+        print(self.test_scenario2.__doc__)
         examples = [
             ['scenario_an_1', '{"data": "data/tiny_kdd.csv", "output": "scenario_an_1/anomaly_scores.csv", "test": "data/test_kdd.csv"}', 'data/test_kdd.csv', 'scenario_an_2/anomaly_scores.csv', 'check_files/anomaly_scores_kdd.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_anomaly.i_create_anomaly_resources_from_source(self, test=example[2], output=example[3])
             test_pred.i_check_create_dataset(self)
@@ -126,11 +126,11 @@ class TestAnomaly(object):
                 | scenario_an_1| {"data": "../data/tiny_kdd.csv", "output": "./scenario_an_1/anomaly_scores.csv", "test": "../data/test_kdd.csv"}   | ../data/test_kdd.csv   | ./scenario_an_3/anomaly_scores.csv   | ./check_files/anomaly_scores_kdd.csv   |
 
         """
-        print self.test_scenario3.__doc__
+        print(self.test_scenario3.__doc__)
         examples = [
             ['scenario_an_1', '{"data": "data/tiny_kdd.csv", "output": "scenario_an_1/anomaly_scores.csv", "test": "data/test_kdd.csv"}', 'data/test_kdd.csv', 'scenario_an_3/anomaly_scores.csv', 'check_files/anomaly_scores_kdd.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_anomaly.i_create_anomaly_resources_from_dataset(self, test=example[2], output=example[3])
             test_anomaly.i_check_create_anomaly(self)
@@ -150,11 +150,11 @@ class TestAnomaly(object):
                 | scenario_an_1| {"data": "../data/tiny_kdd.csv", "output": "./scenario_an_1/anomaly_scores.csv", "test": "../data/test_kdd.csv"}   | ../data/test_kdd.csv   | ./scenario_an_4/anomaly_scores.csv   | ./check_files/anomaly_scores_kdd.csv   |
 
         """
-        print self.test_scenario4.__doc__
+        print(self.test_scenario4.__doc__)
         examples = [
             ['scenario_an_1', '{"data": "data/tiny_kdd.csv", "output": "scenario_an_1/anomaly_scores.csv", "test": "data/test_kdd.csv"}', 'data/test_kdd.csv', 'scenario_an_4/anomaly_scores.csv', 'check_files/anomaly_scores_kdd.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_anomaly.i_create_anomaly_resources_from_anomaly_detector(self, test=example[2], output=example[3])
             test_anomaly.i_check_create_anomaly_scores(self)
@@ -173,11 +173,11 @@ class TestAnomaly(object):
                 | scenario_an_1| {"data": "../data/tiny_kdd.csv", "output": "./scenario_an_1/anomaly_scores.csv", "test": "../data/test_kdd.csv"}   | ./scenario_an_1/anomalies | ../data/test_kdd.csv | ./scenario_an_5/anomaly_scores.csv | ./check_files/anomaly_scores_kdd.csv |
 
         """
-        print self.test_scenario5.__doc__
+        print(self.test_scenario5.__doc__)
         examples = [
             ['scenario_an_1', '{"data": "data/tiny_kdd.csv", "output": "scenario_an_1/anomaly_scores.csv", "test": "data/test_kdd.csv"}', 'scenario_an_1/anomalies',  'data/test_kdd.csv', 'scenario_an_5/anomaly_scores.csv', 'check_files/anomaly_scores_kdd.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_anomaly.i_create_anomaly_resources_from_anomaly_file(self, anomaly_file=example[2], test=example[3], output=example[4])
             test_anomaly.i_check_create_anomaly_scores(self)
@@ -196,11 +196,11 @@ class TestAnomaly(object):
                 | scenario_an_1| {"data": "../data/tiny_kdd.csv", "output": "./scenario_an_1/anomaly_scores.csv", "test": "../data/test_kdd.csv"}   | ../data/test_kdd.csv   | ./scenario_an_6/anomaly_scores.csv   | ./check_files/anomaly_scores_kdd.csv   |
 
         """
-        print self.test_scenario6.__doc__
+        print(self.test_scenario6.__doc__)
         examples = [
             ['scenario_an_1', '{"data": "data/tiny_kdd.csv", "output": "scenario_an_1/anomaly_scores.csv", "test": "data/test_kdd.csv"}', 'data/test_kdd.csv', 'scenario_an_6/anomaly_scores.csv', 'check_files/anomaly_scores_kdd.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_anomaly.i_create_anomaly_resources_from_local_anomaly_detector(self, example[0], test=example[2], output=example[3])
             test_anomaly.i_check_create_anomaly_scores(self)
@@ -223,11 +223,11 @@ class TestAnomaly(object):
                 | data/tiny_kdd.csv" | --top-anomalies 15 --forest-size 40 | scenario_an_7  | 15            | 40          |
 
         """
-        print self.test_scenario7.__doc__
+        print(self.test_scenario7.__doc__)
         examples = [
             ['data/tiny_kdd.csv', '--top-n 15 --forest-size 40 ', 'scenario_an_7', '15', '40']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_anomaly.i_create_anomaly_resources_with_options(self, example[0], example[1], output_dir=example[2])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self)

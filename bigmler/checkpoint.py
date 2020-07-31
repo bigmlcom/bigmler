@@ -17,7 +17,7 @@
 """Checkpoint functions for BigMLer
 
 """
-from __future__ import absolute_import
+
 
 import os
 
@@ -185,7 +185,7 @@ def checkpoint(function, *args, **kwargs):
     log_file = kwargs.get('log_file', None)
     console = kwargs.get('console', False)
 
-    f_kwargs = {key: value for key, value in kwargs.items()
+    f_kwargs = {key: value for key, value in list(kwargs.items())
                 if not key in common_parms}
 
     result = function(*args, **f_kwargs)

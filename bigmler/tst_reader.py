@@ -19,7 +19,7 @@
    model fields data to build the dict input_data.
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -58,7 +58,7 @@ class TstReader(object):
                 not objective_field in fields.fields):
             try:
                 objective_field = fields.field_id(objective_field)
-            except ValueError, exc:
+            except ValueError as exc:
                 sys.exit(exc)
         self.objective_field = objective_field
         if test_separator and not PYTHON3:
@@ -79,7 +79,7 @@ class TstReader(object):
         self.raw_headers = None
         self.exclude = []
         if test_set_header:
-            self.headers = self.test_reader.next()
+            self.headers = next(self.test_reader)
             # validate headers against model fields excluding objective_field,
             # that may be present or not
             if objective_field is not None:
@@ -90,7 +90,7 @@ class TstReader(object):
                                 sorted(fields.fields_by_column_number.keys())
                                 if objective_field is None or
                                 i != objective_field]
-            except ValueError, exc:
+            except ValueError as exc:
                 sys.exit(exc)
             self.raw_headers = self.headers[:]
 
@@ -103,14 +103,14 @@ class TstReader(object):
                     for index in self.exclude:
                         del self.headers[index]
                 else:
-                    raise Exception((u"No test field matches the model fields."
-                                     u"\nThe expected fields are:\n\n%s\n\n"
-                                     u"while "
-                                     u"the headers found in the test file are:"
-                                     u"\n\n%s\n\n"
-                                     u"Use --no-test-header flag if first li"
-                                     u"ne should not be interpreted as"
-                                     u" headers." %
+                    raise Exception(("No test field matches the model fields."
+                                     "\nThe expected fields are:\n\n%s\n\n"
+                                     "while "
+                                     "the headers found in the test file are:"
+                                     "\n\n%s\n\n"
+                                     "Use --no-test-header flag if first li"
+                                     "ne should not be interpreted as"
+                                     " headers." %
                                      (",".join(fields_names),
                                       ",".join(self.headers))).encode("utf-8"))
         else:
@@ -128,11 +128,11 @@ class TstReader(object):
         """
         return self
 
-    def next(self):
+    def __next__(self):
         """Returns the next row
 
         """
-        row = self.test_reader.next()
+        row = next(self.test_reader)
         return row
 
     def dict(self, row, filtering=True):
@@ -146,7 +146,7 @@ class TstReader(object):
             else:
                 headers = [self.fields.fields_by_column_number[column] for
                            column in self.fields.fields_columns]
-            return dict(zip(headers, new_row))
+            return dict(list(zip(headers, new_row)))
         for index in self.exclude:
             del new_row[index]
         return self.fields.pair(new_row, self.headers, self.objective_field)

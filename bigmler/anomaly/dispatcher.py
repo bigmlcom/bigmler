@@ -17,7 +17,7 @@
 """BigMLer - anomaly subcommand processing dispatching
 
 """
-from __future__ import absolute_import
+
 
 import sys
 import os
@@ -45,12 +45,12 @@ from bigmler.command import get_context
 from bigmler.dispatcher import SESSIONS_LOG, clear_log_files, get_test_dataset
 from bigmler.options.anomaly import ANOMALIES_IN
 
-COMMAND_LOG = u".bigmler_anomaly"
-DIRS_LOG = u".bigmler_anomaly_dir_stack"
+COMMAND_LOG = ".bigmler_anomaly"
+DIRS_LOG = ".bigmler_anomaly_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 MINIMUM_MODEL = "full=false"
 EXCLUDE_TREES = "exclude=trees"
-DEFAULT_OUTPUT = u"anomaly_scores.csv"
+DEFAULT_OUTPUT = "anomaly_scores.csv"
 
 SETTINGS = {
     "command_log": COMMAND_LOG,
@@ -113,7 +113,7 @@ def compute_output(api, args):
                  " to generate the new dataset from it.")
 
     path = u.check_dir(output)
-    session_file = u"%s%s%s" % (path, os.sep, SESSIONS_LOG)
+    session_file = "%s%s%s" % (path, os.sep, SESSIONS_LOG)
     csv_properties = {}
     # If logging is required set the file for logging
     log = None

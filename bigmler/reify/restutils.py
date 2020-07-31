@@ -18,7 +18,7 @@
 
 """
 
-from __future__ import absolute_import
+
 
 import sys
 
@@ -90,7 +90,7 @@ def get_fields_changes(resource, referrer=None,
     # for sources, extract all the updatable attributes
     if resource_type == 'source':
         updatable_attrs = SOURCE_UPDATABLE
-        for field_id in resource_fields.keys():
+        for field_id in list(resource_fields.keys()):
             field_opts = {}
             field = resource_fields[field_id]
             for attribute in updatable_attrs:
@@ -103,9 +103,9 @@ def get_fields_changes(resource, referrer=None,
     if referrer:
         referrer_fields = Fields(
             {'resource': referrer['resource'], 'object': referrer}).fields
-        for field_id in resource_fields.keys():
+        for field_id in list(resource_fields.keys()):
             field_opts = {}
-            if not field_id in referrer_fields.keys():
+            if not field_id in list(referrer_fields.keys()):
                 continue
             field = resource_fields[field_id]
 
@@ -129,7 +129,7 @@ def get_input_fields(resource, referrer=None):
     if referrer:
         referrer_fields = Fields(
             {'resource': referrer['resource'], 'object': referrer})
-        referrer_fields_ids = referrer_fields.fields.keys()
+        referrer_fields_ids = list(referrer_fields.fields.keys())
         # case where objective field is not in input fields
         # check whether the resource has an objective field not included in
         # the input fields list
@@ -151,7 +151,7 @@ def non_inherited_opts(resource, referrer, opts, call="create"):
     """Stores the options that have not been inherited from origin resources
 
     """
-    for attribute, default_value in COMMON_DEFAULTS[call].items():
+    for attribute, default_value in list(COMMON_DEFAULTS[call].items()):
         opts[call].update(
             inherit_setting(
                 referrer, resource, attribute, default_value))
@@ -163,7 +163,7 @@ def non_default_opts(resource, opts, call="create"):
     """
     resource_type = get_resource_type(resource)
     defaults = DEFAULTS[resource_type].get(call, {})
-    for attribute, default_value in defaults.items():
+    for attribute, default_value in list(defaults.items()):
         opts[call].update(
             default_setting(resource, attribute, *default_value))
 
@@ -195,7 +195,7 @@ def range_opts(resource, referrer, opts, call="create"):
     # inherited row range
     if resource.get('ranges'):
         rows = sum([row_range[1][1] for
-                    row_range in resource.get('ranges').items()])
+                    row_range in list(resource.get('ranges').items())])
     else:
         rows = referrer.get('rows')
     if resource.get('range') not in \
@@ -235,8 +235,8 @@ def fields_map_options(resource, referrer1, referrer2, opts, call="create"):
     if resource_type == 'model':
         fields = referrer1['model']['model_fields']
     else:
-        fields = referrer2['fields'].keys()
-    default_map = dict(zip(fields, fields))
+        fields = list(referrer2['fields'].keys())
+    default_map = dict(list(zip(fields, fields)))
 
     opts[call].update(
         default_setting(resource, 'fields_map', default_map))
@@ -278,7 +278,7 @@ def default_setting(child, key, *defaults):
 
     """
 
-    if isinstance(defaults, basestring):
+    if isinstance(defaults, str):
         defaults = [defaults]
     if child.get(key) is not None and \
             not child.get(key, defaults[0]) in defaults:
@@ -293,7 +293,7 @@ def non_automatic_name(resource, opts, autonames=None, autoname=None,
 
     """
     if autonames is None:
-        autonames = [u'']
+        autonames = ['']
     if autoname is not None:
         autonames.append(autoname)
     if not resource.get('name', '') in autonames:

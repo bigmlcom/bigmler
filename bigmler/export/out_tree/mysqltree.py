@@ -44,7 +44,7 @@ def value_to_print(value, optype):
         return "NULL"
     if (optype == 'numeric'):
         return value
-    return u"'%s'" % value.replace("'", '\\\'')
+    return "'%s'" % value.replace("'", '\\\'')
 
 
 class MySQLTree(Tree):
@@ -57,7 +57,7 @@ class MySQLTree(Tree):
 
 
         condition = "ISNULL(`%s`)" % self.fields[field]['name']
-        code = (u"%s (%s)" %
+        code = ("%s (%s)" %
                  (alternate, condition))
 
         # used when printing the confidence metric
@@ -68,7 +68,7 @@ class MySQLTree(Tree):
                 self.output,
                 self.fields[self.objective_id]['optype'])
 
-        code += (u", %s" % value)
+        code += (", %s" % value)
         cmv.append(self.fields[field]['name'])
 
         return code
@@ -79,11 +79,11 @@ class MySQLTree(Tree):
 
         """
 
-        negation = u"" if child.predicate.missing else u"NOT "
-        connection = u"OR" if child.predicate.missing else u"AND"
+        negation = "" if child.predicate.missing else "NOT "
+        connection = "OR" if child.predicate.missing else "AND"
         if not child.predicate.missing:
             cmv.append(self.fields[field]['name'])
-        return u"(%sISNULL(`%s`) %s " % ( \
+        return "(%sISNULL(`%s`) %s " % ( \
             negation, self.fields[field]['name'],
             connection)
 
@@ -93,28 +93,28 @@ class MySQLTree(Tree):
 
         """
 
-        post_condition = u""
+        post_condition = ""
         optype = self.fields[field]['optype']
         value = value_to_print(self.predicate.value, optype)
         operator = ("" if self.predicate.value is None else
                     MYSQL_OPERATOR.get(self.predicate.operator,
                                        self.predicate.operator))
         if self.predicate.value is None:
-            value = u""
+            value = ""
             pre_condition = (
                 T_MISSING_OPERATOR[self.predicate.operator])
             post_condition = ")"
 
-        condition = u"%s`%s`%s%s%s" % ( \
+        condition = "%s`%s`%s%s%s" % ( \
             pre_condition,
             self.fields[self.predicate.field]['name'],
             operator,
             value,
             post_condition)
-        return u"%s (%s)" % (alternate, condition)
+        return "%s (%s)" % (alternate, condition)
 
     def plug_in_body(self, depth=0, cmv=None,
-                     ids_path=None, subtree=True, body=u"", attr=None):
+                     ids_path=None, subtree=True, body="", attr=None):
         """Translate the model into a mysql function
 
         `depth` controls the size of indentation. As soon as a value is missing
@@ -129,10 +129,10 @@ class MySQLTree(Tree):
             cmv = []
 
         if body:
-            alternate = u",\n%sIF (" % (depth * INDENT)
+            alternate = ",\n%sIF (" % (depth * INDENT)
         else:
-            alternate = u"IF ("
-        post_missing_body = u""
+            alternate = "IF ("
+        post_missing_body = ""
 
 
         children = filter_nodes(self.children, ids=ids_path,
@@ -150,11 +150,11 @@ class MySQLTree(Tree):
                     not self.fields[field]['name'] in cmv):
                 body += self.missing_check_code(field, alternate, cmv, attr)
                 depth += 1
-                alternate = u",\n%sIF (" % (depth * INDENT)
-                post_missing_body += u")"
+                alternate = ",\n%sIF (" % (depth * INDENT)
+                post_missing_body += ")"
 
             for child in children:
-                pre_condition = u""
+                pre_condition = ""
                 # code when missing splits has been used
                 if has_missing_branch and child.predicate.value is not None:
                     pre_condition = self.missing_prefix_code(child, field, cmv)
@@ -164,18 +164,18 @@ class MySQLTree(Tree):
                     field, alternate, pre_condition)
 
                 depth += 1
-                alternate = u",\n%sIF (" % (depth * INDENT)
+                alternate = ",\n%sIF (" % (depth * INDENT)
                 body = child.plug_in_body(depth, cmv=cmv[:],
                                           ids_path=ids_path, subtree=subtree,
                                           body=body, attr=attr)
-            body += u", NULL))" + post_missing_body
-            post_missing_body = u""
+            body += ", NULL))" + post_missing_body
+            post_missing_body = ""
         else:
             if attr is None:
                 value = value_to_print( \
                     self.output, self.fields[self.objective_id]['optype'])
             else:
                 value = getattr(self, attr)
-            body += u", %s" % (value)
+            body += ", %s" % (value)
 
         return body

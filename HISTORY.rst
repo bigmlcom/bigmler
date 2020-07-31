@@ -3,10 +3,16 @@
 History
 -------
 
+4.0.0 (2020-08-01)
+~~~~~~~~~~~~~~~~~~~
+
+- Python 3 only version. Deprecating Python 2.X compatibility.
+
+
 3.27.2 (2020-07-15)
 ~~~~~~~~~~~~~~~~~~~
 
-- Fixing bulk delete pagination
+- Fixing bulk delete pagination.
 
 3.27.1 (2020-05-26)
 ~~~~~~~~~~~~~~~~~~~

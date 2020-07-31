@@ -16,7 +16,7 @@
 """Prediction auxiliary functions
 
 """
-from __future__ import absolute_import
+
 
 import sys
 import ast
@@ -69,7 +69,7 @@ def use_prediction_headers(prediction_headers, output, test_reader,
         if not objective_field in fields.fields:
             objective_field = fields.field_id(objective_field)
         objective_name = fields.field_name(objective_field)
-    except ValueError, exc:
+    except ValueError as exc:
         sys.exit(exc)
     headers = [objective_name]
 
@@ -317,7 +317,7 @@ def local_predict(models, test_reader, output, args, options=None,
         kwargs.update({"operating_point": args.operating_point_})
 
     for input_data in test_reader:
-        input_data_dict = dict(zip(test_reader.raw_headers, input_data))
+        input_data_dict = dict(list(zip(test_reader.raw_headers, input_data)))
         prediction = local_model.predict(
             input_data_dict, **kwargs)
         if single_model and args.median and local_model.tree.regression:
@@ -341,12 +341,12 @@ def retrieve_models_split(models_split, api, query_string=FIELDS_QS,
     if models_order is None:
         models_order = []
     for model in models_split:
-        if (isinstance(model, basestring) or
+        if (isinstance(model, str) or
                 bigml.api.get_status(model)['code'] != bigml.api.FINISHED):
             try:
                 model = u.check_resource(model, api.get_model,
                                          query_string)
-            except ValueError, exception:
+            except ValueError as exception:
                 sys.exit("Failed to get model: %s. %s" % (model,
                                                           str(exception)))
 
@@ -760,7 +760,7 @@ def remote_predict(model, test_dataset, batch_prediction_args, args,
                                           "Failed to create dataset: ")
         try:
             multi_dataset = api.check_resource(multi_dataset)
-        except ValueError, exception:
+        except ValueError as exception:
             sys.exit("Failed to get a finished dataset: %s" % str(exception))
         message = dated("Predictions dataset created: %s\n" %
                         get_url(multi_dataset))

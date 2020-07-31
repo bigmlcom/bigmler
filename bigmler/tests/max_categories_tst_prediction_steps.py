@@ -13,7 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from __future__ import absolute_import
+
 
 
 import os
@@ -172,5 +172,5 @@ def i_check_create_max_categories_datasets(step):
         world.number_of_models = number_of_datasets
         dataset_file.close()
         assert True
-    except Exception, exc:
+    except Exception as exc:
         assert False, traceback.format_exc()

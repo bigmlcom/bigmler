@@ -47,12 +47,12 @@ class TableauModel(Model):
         length = self.tableau(out, ids_path=ids_path,
                               subtree=subtree, attr=attr)
         if length > 0:
-            out.write(u"END\n")
+            out.write("END\n")
         else:
-            sys.exit(u"\nFailed to represent this model in "
-                     u"in Tableau syntax. Currently, only "
-                     u"models with categorical and numeric fields "
-                     u"can be generated.\n")
+            sys.exit("\nFailed to represent this model in "
+                     "in Tableau syntax. Currently, only "
+                     "models with categorical and numeric fields "
+                     "can be generated.\n")
         out.flush()
 
     def tableau(self, out, ids_path=None, subtree=True, attr=None):

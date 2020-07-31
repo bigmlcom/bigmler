@@ -19,7 +19,7 @@
 """ Testing splitting models according to max categories
 
 """
-from __future__ import absolute_import
+
 
 
 from bigmler.tests.world import (world, common_setup_module,
@@ -52,14 +52,14 @@ class TestMaxCategories(object):
         """Calling generic teardown for every method
 
         """
-        print "\nEnd of tests in: %s\n-------------------\n" % __name__
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
         teardown_class()
 
     def setup(self):
         """
             Debug information
         """
-        print "\n-------------------\nTests in: %s\n" % __name__
+        print("\n-------------------\nTests in: %s\n" % __name__)
 
     def setup_scenario1(self):
         """
@@ -76,11 +76,11 @@ class TestMaxCategories(object):
                 |data |max_categories | objective | test                        | output                          |predictions_file           |
                 |../data/iris.csv |1| species |../data/test_iris.csv | ./scenario_mc_1/predictions.csv | ./check_files/predictions_mc.csv |
         """
-        print self.setup_scenario1.__doc__
+        print(self.setup_scenario1.__doc__)
         examples = [
             ['data/iris.csv', '1', 'species', 'data/test_iris.csv', 'scenario_mc_1/predictions.csv', 'check_files/predictions_mc.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             max_cat.i_create_all_mc_resources(self, example[0], max_categories=example[1], objective=example[2], test=example[3], output=example[4])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -104,11 +104,11 @@ class TestMaxCategories(object):
                 |scenario    | kwargs                                                  |max_categories| objective | test                    | output                        |predictions_file           |
                 | scenario_mc_1| {"data": "../data/iris.csv", "max_categories": "1", "objective": "species", "output": "./scenario_mc_1/predictions.csv", "test": "../data/test_iris.csv"}   |1| species | ../data/test_iris.csv   | ./scenario_mc_2/predictions.csv   | ./check_files/predictions_mc.csv   |
         """
-        print self.test_scenario2.__doc__
+        print(self.test_scenario2.__doc__)
         examples = [
             ['scenario_mc_1', '{"data": "data/iris.csv", "max_categories": "1", "objective": "species", "output": "scenario_mc_1/predictions.csv", "test": "data/test_iris.csv"}', '1', 'species', 'data/test_iris.csv', 'scenario_mc_2/predictions.csv', 'check_files/predictions_mc.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             max_cat.i_create_all_mc_resources_from_source(self, max_categories=example[2], objective=example[3], test=example[4], output=example[5])
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -131,11 +131,11 @@ class TestMaxCategories(object):
                 |scenario    | kwargs                                                  |max_categories|objective | test                    | output                        |predictions_file           |
                 | scenario_mc_1| {"data": "../data/iris.csv", "max_categories": "1", "objective": "species", "output": "./scenario_mc_1/predictions.csv", "test": "../data/test_iris.csv"}   |1| species |../data/test_iris.csv   | ./scenario_mc_3/predictions.csv   | ./check_files/predictions_mc.csv   |
         """
-        print self.test_scenario3.__doc__
+        print(self.test_scenario3.__doc__)
         examples = [
             ['scenario_mc_1', '{"data": "data/iris.csv", "max_categories": "1", "objective": "species", "output": "scenario_mc_1/predictions.csv", "test": "data/test_iris.csv"}', '1', 'species', 'data/test_iris.csv', 'scenario_mc_3/predictions.csv', 'check_files/predictions_mc.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             max_cat.i_create_all_mc_resources_from_dataset(self, max_categories=example[2], objective=example[3], test=example[4], output=example[5])
             max_cat.i_check_create_max_categories_datasets(self)
@@ -155,11 +155,11 @@ class TestMaxCategories(object):
                 |scenario    | kwargs                                                  |models_file| test                    | output                        |predictions_file           |
                 | scenario_mc_1| {"data": "../data/iris.csv", "max_categories": "1", "objective": "species", "output": "./scenario_mc_1/predictions.csv", "test": "../data/test_iris.csv"}   | scenario_mc_1/models | ../data/test_iris.csv   | ./scenario_mc_4/predictions.csv   | ./check_files/predictions_mc.csv   |
         """
-        print self.test_scenario4.__doc__
+        print(self.test_scenario4.__doc__)
         examples = [
             ['scenario_mc_1', '{"data": "data/iris.csv", "max_categories": "1", "objective": "species", "output": "scenario_mc_1/predictions.csv", "test": "data/test_iris.csv"}', 'scenario_mc_1/models', 'data/test_iris.csv', 'scenario_mc_4/predictions.csv', 'check_files/predictions_mc.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             max_cat.i_create_all_mc_resources_from_models(self, models_file=example[2], test=example[3], output=example[4])
             test_pred.i_check_create_predictions(self)
@@ -180,11 +180,11 @@ class TestMaxCategories(object):
                 | scenario_mc_1| {"data": "../data/iris.csv", "max_categories": "1", "objective": "species", "output": "./scenario_mc_1/predictions.csv", "test": "../data/test_iris.csv"}   |1| species |sepal length,sepal width |../data/test_iris.csv   | ./scenario_mc_5/predictions.csv   | ./check_files/predictions_mc2.csv   |
 
         """
-        print self.test_scenario5.__doc__
+        print(self.test_scenario5.__doc__)
         examples = [
             ['scenario_mc_1', '{"data": "data/iris.csv", "max_categories": "1", "objective": "species", "output": "scenario_mc_1/predictions.csv", "test": "data/test_iris.csv"}', '1', 'species', 'sepal length,sepal width', 'data/test_iris.csv', 'scenario_mc_5/predictions.csv', 'check_files/predictions_mc2.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             max_cat.i_create_all_mc_resources_from_dataset_with_model_fields(self, max_categories=example[2], objective=example[3], model_fields=example[4], test=example[5], output=example[6])
             max_cat.i_check_create_max_categories_datasets(self)

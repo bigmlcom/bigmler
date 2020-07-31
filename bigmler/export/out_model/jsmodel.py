@@ -59,7 +59,7 @@ class JsModel(Model):
         """
         docstring = self.js_comment()
         output = \
-u"""
+"""
 /**
 *  %s
 *  %s
@@ -68,7 +68,7 @@ u"""
        self.description.replace('\n', '\n *  '))
 
         output += self.js_signature(input_map=input_map)
-        output += u" {\n"
+        output += " {\n"
         return output
 
     def plug_in(self, out=sys.stdout, hadoop=False,
@@ -97,7 +97,7 @@ u"""
             items_body = self.js_item_analysis_body(item_analysis_predicates)
         output = self.js_pre_body()
         output += terms_body + items_body + body
-        output += u"%sreturn null;\n}\n" % INDENT
+        output += "%sreturn null;\n}\n" % INDENT
         if not PY3:
             output = output.encode("utf8")
         out.write(output)
@@ -112,7 +112,7 @@ u"""
             camelcase = to_camel_js(unidecode(objective_field['name']), False)
             objective_field['CamelCase'] = camelcase
 
-        output = u"function predict%s(" % objective_field['CamelCase']
+        output = "function predict%s(" % objective_field['CamelCase']
 
         args = []
         if len(self.tree.fields) > MAX_ARGS_LENGTH or input_map:
@@ -125,9 +125,9 @@ u"""
                     field_obj['camelCase'] = to_camel_js( \
                         unidecode(field_obj['name']))
                 if field[0] != self.tree.objective_id:
-                    args.append(u"%s" % field_obj['camelCase'])
-        args_string = u", ".join(args)
-        output += args_string + u")"
+                    args.append("%s" % field_obj['camelCase'])
+        args_string = ", ".join(args)
+        output += args_string + ")"
 
         return output
 
@@ -136,11 +136,10 @@ u"""
             auxiliary functions to handle the term analysis fields
 
         """
-        term_analysis_options = set(map(lambda x: x[0],
-                                        term_analysis_predicates))
+        term_analysis_options = set([x[0] for x in term_analysis_predicates])
         term_analysis_predicates = set(term_analysis_predicates)
 
-        body = u""
+        body = ""
         # static content
         body += """
     var TERM_ANALYSIS = {"""
@@ -188,8 +187,8 @@ u"""
         \"%s\": {""" % field
                 terms = sorted(term_forms[field].keys())
                 for term in terms:
-                    terms_list = u"[\"" + \
-                        u"\", \"".join(term_forms[field][term]) + u"\"]"
+                    terms_list = "[\"" + \
+                        "\", \"".join(term_forms[field][term]) + "\"]"
                     body += """
             \"%s\": %s,""" % (term, terms_list)
                 body += """
@@ -207,11 +206,10 @@ u"""
         """ Writes auxiliary functions to handle the item analysis fields
 
         """
-        item_analysis_options = set(map(lambda x: x[0],
-                                        item_analysis_predicates))
+        item_analysis_options = set([x[0] for x in item_analysis_predicates])
         item_analysis_predicates = set(item_analysis_predicates)
 
-        body = u""
+        body = ""
         # static content
         body += """
     var ITEM_ANALYSIS = {"""

@@ -17,7 +17,7 @@
 """BigMLer - association subcommand processing dispatching
 
 """
-from __future__ import absolute_import
+
 
 import sys
 import os
@@ -35,11 +35,11 @@ from bigmler.reports import clear_reports, upload_reports
 from bigmler.command import get_context
 from bigmler.dispatcher import SESSIONS_LOG, clear_log_files, get_test_dataset
 
-COMMAND_LOG = u".bigmler_association"
-DIRS_LOG = u".bigmler_association_dir_stack"
+COMMAND_LOG = ".bigmler_association"
+DIRS_LOG = ".bigmler_association_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 MINIMUM_MODEL = "full=false"
-DEFAULT_OUTPUT = u"association_sets.csv"
+DEFAULT_OUTPUT = "association_sets.csv"
 
 SETTINGS = {
     "command_log": COMMAND_LOG,
@@ -99,7 +99,7 @@ def compute_output(api, args):
                  " to generate the new dataset from it.")
 
     path = u.check_dir(output)
-    session_file = u"%s%s%s" % (path, os.sep, SESSIONS_LOG)
+    session_file = "%s%s%s" % (path, os.sep, SESSIONS_LOG)
     csv_properties = {}
     # If logging is required set the file for logging
     log = None
@@ -137,7 +137,7 @@ def compute_output(api, args):
 
     # We update the association's public state if needed
     if association:
-        if isinstance(association, basestring):
+        if isinstance(association, str):
             if not a.has_test(args):
                 query_string = MINIMUM_MODEL
             else:

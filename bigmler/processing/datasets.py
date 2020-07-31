@@ -17,7 +17,7 @@
 """BigMLer - Resources processing: creation, update and retrieval of datasets
 
 """
-from __future__ import absolute_import
+
 
 import sys
 import re
@@ -109,7 +109,7 @@ def get_new_objective(fields, objective):
         return None
     try:
         objective_id = fields.field_id(objective)
-    except ValueError, exc:
+    except ValueError as exc:
         sys.exit(exc)
     if fields.objective_field == fields.field_column_number(objective_id):
         return None
@@ -364,7 +364,7 @@ def create_categories_datasets(dataset, distribution,
                     "user_metadata":
                     {"max_categories": args.max_categories,
                      "other_label": other_label}}
-            except ValueError, exc:
+            except ValueError as exc:
                 sys.exit(exc)
             new_dataset = r.create_dataset(
                 dataset, dataset_args, args, api=api, path=path,
@@ -382,7 +382,7 @@ def create_new_dataset(datasets, api, args, resume, fields=None,
 
     """
     origin_resource = datasets
-    if not isinstance(datasets, basestring) and args.multi_dataset:
+    if not isinstance(datasets, str) and args.multi_dataset:
         suffix = "multi"
     else:
         datasets = []

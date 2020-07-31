@@ -16,7 +16,7 @@
 """Resources management functions
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -77,7 +77,7 @@ def set_batch_prediction_args(args, fields=None,
             if not field in dataset_fields.fields:
                 try:
                     field = dataset_fields.field_id(field)
-                except ValueError, exc:
+                except ValueError as exc:
                     sys.exit(exc)
             prediction_fields.append(field)
         batch_prediction_args.update(output_fields=prediction_fields)
@@ -122,7 +122,7 @@ def create_batch_prediction(model_or_ensemble, test_dataset,
         batch_prediction = check_resource(batch_prediction,
                                           api.get_batch_prediction,
                                           raise_on_error=True)
-    except Exception, exception:
+    except Exception as exception:
         sys.exit("Failed to get a finished batch prediction: %s"
                  % str(exception))
     message = dated("Batch prediction created: %s\n"

@@ -16,7 +16,7 @@
 """Resources management functions
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -56,7 +56,7 @@ def set_batch_topic_distribution_args( \
             if not field in dataset_fields.fields:
                 try:
                     field = dataset_fields.field_id(field)
-                except Exception, exc:
+                except Exception as exc:
                     sys.exit(exc)
             prediction_fields.append(field)
         batch_topic_distribution_args.update(output_fields=prediction_fields)
@@ -92,7 +92,7 @@ def create_batch_topic_distribution(topic_model, test_dataset,
         batch_topic_distribution = check_resource( \
             batch_topic_distribution, api.get_batch_topic_distribution,
             raise_on_error=True)
-    except Exception, exception:
+    except Exception as exception:
         sys.exit("Failed to get a finished batch topic distribution: %s"
                  % str(exception))
     message = dated("Batch topic distribution created: %s\n"

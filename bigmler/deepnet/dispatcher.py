@@ -17,7 +17,7 @@
 """BigMLer - deepnet subcommand processing dispatching
 
 """
-from __future__ import absolute_import
+
 
 import sys
 import os
@@ -43,11 +43,11 @@ from bigmler.evaluation import evaluate
 from bigmler.dispatcher import SESSIONS_LOG, clear_log_files, \
     get_test_dataset, get_objective_id
 
-COMMAND_LOG = u".bigmler_deepnet"
-DIRS_LOG = u".bigmler_deepnet_dir_stack"
+COMMAND_LOG = ".bigmler_deepnet"
+DIRS_LOG = ".bigmler_deepnet_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 MINIMUM_MODEL = "full=false"
-DEFAULT_OUTPUT = u"predictions.csv"
+DEFAULT_OUTPUT = "predictions.csv"
 
 SETTINGS = {
     "command_log": COMMAND_LOG,
@@ -111,7 +111,7 @@ def compute_output(api, args):
                  " to generate the new dataset from it.")
 
     path = u.check_dir(output)
-    session_file = u"%s%s%s" % (path, os.sep, SESSIONS_LOG)
+    session_file = "%s%s%s" % (path, os.sep, SESSIONS_LOG)
     csv_properties = {}
     if args.objective_field:
         csv_properties.update({'objective_field': args.objective_field})
@@ -156,7 +156,7 @@ def compute_output(api, args):
 
     # We update the deepnet's public state if needed
     if deepnet:
-        if isinstance(deepnet, basestring) or \
+        if isinstance(deepnet, str) or \
                 api.status(deepnet) != bigml.api.FINISHED:
             if not a.has_test(args):
                 query_string = MINIMUM_MODEL

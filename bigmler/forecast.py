@@ -16,7 +16,7 @@
 """Time-series forecast auxiliary functions
 
 """
-from __future__ import absolute_import
+
 
 
 import sys
@@ -40,7 +40,7 @@ def write_forecasts(forecast, output):
     parameter.
     """
 
-    for objective_id, forecast_value in forecast.items():
+    for objective_id, forecast_value in list(forecast.items()):
         headers = [f["model"] for f in forecast_value]
         points = []
         if not forecast_value:

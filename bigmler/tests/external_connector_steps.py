@@ -13,7 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from __future__ import absolute_import
+
 
 import os
 import time
@@ -88,7 +88,7 @@ def i_check_external_connector(step):
         world.external_connectors.append(connector['resource'])
         world.external_connector = connector
         connector_file.close()
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 

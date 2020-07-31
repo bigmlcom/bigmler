@@ -16,7 +16,7 @@
 """Resources management functions
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -194,7 +194,7 @@ def create_deepnets(datasets, deepnet_ids,
                         deepnet, api.get_deepnet,
                         query_string=query_string,
                         raise_on_error=True)
-                except Exception, exception:
+                except Exception as exception:
                     sys.exit("Failed to get a finished deepnet:"
                              " %s" %
                              str(exception))
@@ -231,7 +231,7 @@ def get_deepnets(deepnet_ids, args, api=None, session_file=None):
                                  api.get_deepnet,
                                  query_string=query_string,
                                  raise_on_error=True)
-    except Exception, exception:
+    except Exception as exception:
         sys.exit("Failed to get a finished deepnet: %s" % \
             str(exception))
     deepnets[0] = deepnet

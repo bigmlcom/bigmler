@@ -17,7 +17,7 @@
 """BigMLer - Resources processing: creation, update and retrieval of ensembles
 
 """
-from __future__ import absolute_import
+
 
 
 import bigmler.utils as u

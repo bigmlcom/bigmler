@@ -17,7 +17,7 @@
 """Utilities for BigMLer
 
 """
-from __future__ import absolute_import
+
 
 import fileinput
 import ast
@@ -40,7 +40,7 @@ from bigml.io import UnicodeReader
 PYTHON3 = sys.version_info[0] == 3
 PAGE_LENGTH = 200
 ATTRIBUTE_NAMES = ['name', 'label', 'description']
-NEW_DIRS_LOG = u".bigmler_dirs"
+NEW_DIRS_LOG = ".bigmler_dirs"
 BRIEF_MODEL_QS = "exclude=root,fields"
 
 # Base Domain
@@ -349,7 +349,7 @@ def check_dir(path):
         directory = "."
     if directory and not os.path.exists(directory):
         os.makedirs(directory)
-        sys_log_message(u"%s\n" % os.path.abspath(directory),
+        sys_log_message("%s\n" % os.path.abspath(directory),
                         log_file=NEW_DIRS_LOG)
 
     return directory
@@ -359,12 +359,12 @@ def print_tree(directory, padding):
     """Returns a graphical directory tree structure as a string
 
     """
-    if padding != u' ':
-        output = padding[:-1] + u'├─'
+    if padding != ' ':
+        output = padding[:-1] + '├─'
     else:
         output = padding
-    output += os.path.basename(os.path.abspath(directory)) + u'\n'
-    padding = padding + u' '
+    output += os.path.basename(os.path.abspath(directory)) + '\n'
+    padding = padding + ' '
     files = []
     files = os.listdir(directory)
     count = 0
@@ -373,14 +373,14 @@ def print_tree(directory, padding):
         path = directory + os.sep + file_name
         if os.path.isdir(path):
             if count == len(files):
-                output += print_tree(path, padding + u' ')
+                output += print_tree(path, padding + ' ')
             else:
-                output += print_tree(path, padding + u'|')
+                output += print_tree(path, padding + '|')
         else:
             if i < (len(files) - 1):
-                output += padding + u'├─' + file_name + u'\n'
+                output += padding + '├─' + file_name + '\n'
             else:
-                output += padding + u'└─' + file_name + u'\n'
+                output += padding + '└─' + file_name + '\n'
     return output
 
 
@@ -417,7 +417,7 @@ def log_message(message, log_file=None, console=False):
        If console is True, sends the message to console.
     """
 
-    if isinstance(message, unicode) and not PYTHON3:
+    if isinstance(message, str) and not PYTHON3:
         message = message.encode(FILE_ENCODING)
     if console:
         console_log(message)
@@ -433,7 +433,7 @@ def sys_log_message(message, log_file=None, mode='ab'):
 
        If log_file is set, logs the message in the file.
     """
-    if PYTHON3 or isinstance(message, unicode):
+    if PYTHON3 or isinstance(message, str):
         message = message.encode(BIGML_SYS_ENCODING)
         if PYTHON3 and not mode.endswith("b"):
             mode = "%sb" % mode
@@ -478,12 +478,12 @@ def log_created_resources(file_name, path, resource_id, mode='ab',
         try:
             message = ""
             if resource_id is not None:
-                message = u"%s\n" % resource_id
+                message = "%s\n" % resource_id
             if comment is not None:
-                message = u"%s%s" % (message, comment)
+                message = "%s%s" % (message, comment)
             sys_log_message(message, file_name, mode)
-        except IOError, exc:
-            print "Failed to write %s: %s" % (file_name, str(exc))
+        except IOError as exc:
+            print("Failed to write %s: %s" % (file_name, str(exc)))
 
 
 def check_resource(*args, **kwargs):
@@ -494,7 +494,7 @@ def check_resource(*args, **kwargs):
         kwargs.update({"raise_on_error": True})
         result = bigml.api.check_resource(*args, **kwargs)
         return result
-    except Exception, exc:
+    except Exception as exc:
         sys.exit("\nFailed to obtain a finished resource:\n%s." % str(exc))
 
 
@@ -517,7 +517,7 @@ def objective_field_names(models_or_ensembles, api):
                     try:
                         model = check_resource(model_id, api.get_model,
                                                query_string=BRIEF_MODEL_QS)
-                    except ValueError, exception:
+                    except ValueError as exception:
                         sys.exit("Failed to get a finished model: %s" %
                                  str(exception))
                     name = objective_field_name(model, api)
@@ -527,7 +527,7 @@ def objective_field_names(models_or_ensembles, api):
                     try:
                         ensemble = check_resource(
                             ensemble_id, api.get_ensemble)
-                    except ValueError, exception:
+                    except ValueError as exception:
                         sys.exit("Failed to get a finished ensemble: %s" %
                                  str(exception))
                     name = objective_field_name(ensemble, api)
@@ -624,7 +624,7 @@ def get_options_list(args, options, prioritary=None):
     for option in filtered_options:
         try:
             flag = option[2:].replace("-", "_")
-            if flag in non_equivalent_options.keys():
+            if flag in list(non_equivalent_options.keys()):
                 flag = non_equivalent_options[flag]
             value = getattr(args, flag)
             if value is not None:
@@ -636,7 +636,7 @@ def get_options_list(args, options, prioritary=None):
                         options_list.append("%s=%s" %
                                             (option, ",".join(value)))
                 else:
-                    if not isinstance(value, basestring):
+                    if not isinstance(value, str):
                         value = str(value)
                     options_list.append("%s=%s" % (option, value))
         except AttributeError:
@@ -648,8 +648,8 @@ def print_generated_files(path, log_file=None, verbosity=1):
     """Prints the file structure generated while running bigmler
 
     """
-    message = (u"\nGenerated files:\n\n" +
-               print_tree(path, u" ") + u"\n")
+    message = ("\nGenerated files:\n\n" +
+               print_tree(path, " ") + "\n")
     log_message(message, log_file=log_file, console=verbosity)
 
 
@@ -687,7 +687,7 @@ def encode2(value, encoding=FILE_ENCODING):
     """Conditional encoding only for Python2
 
     """
-    if isinstance(value, basestring) and not PYTHON3:
+    if isinstance(value, str) and not PYTHON3:
         return value.encode(encoding)
     return value
 
@@ -696,7 +696,7 @@ def decode2(value, encoding=FILE_ENCODING):
     """Conditional decoding only for Python2
 
     """
-    if isinstance(value, basestring) and not PYTHON3:
+    if isinstance(value, str) and not PYTHON3:
         return value.decode(encoding)
     return value
 
@@ -709,8 +709,8 @@ def transform_fields_keys(json_attributes, fields):
     fields_structure = {}
     if fields is None:
         return json_attributes
-    if "fields" in json_attributes.keys():
-        old_keys = json_attributes["fields"].keys()
+    if "fields" in list(json_attributes.keys()):
+        old_keys = list(json_attributes["fields"].keys())
         for old_key in old_keys:
             try:
                 if not old_key in fields.fields:
@@ -811,7 +811,7 @@ def has_connection_info(args):
 
     """
     check = True
-    connection_env_vars = EXTERNAL_CONNECTION_ATTRS.keys()
+    connection_env_vars = list(EXTERNAL_CONNECTION_ATTRS.keys())
 
     for key in connection_env_vars:
         value = EXTERNAL_CONNECTION_ATTRS[key]

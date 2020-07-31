@@ -17,7 +17,7 @@
 """Utilities to parse and transform input args structures
 
 """
-from __future__ import absolute_import
+
 
 import sys
 import os
@@ -39,7 +39,7 @@ from bigmler.utils import PYTHON3, check_dir
 if PYTHON3:
     from io import StringIO
 else:
-    from StringIO import StringIO
+    from io import StringIO
 
 # Date and time in format SunNov0412_120510 to name and tag resources
 NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
@@ -66,7 +66,7 @@ def has_value(args, attrs):
     if isinstance(attrs, list):
         return [hasattr(args, attr) and getattr(args, attr)
                 for attr in attrs]
-    elif isinstance(attrs, basestring):
+    elif isinstance(attrs, str):
         return hasattr(args, attrs) and getattr(args, attrs)
     return False
 
@@ -177,7 +177,7 @@ def get_command_message(args):
                 prefix = args[i][0]
                 literal = args[i][1:]
             literal_args[i] = '"%s%s"' % (prefix, literal)
-    return u"bigmler %s\n" % u" ".join(literal_args)
+    return "bigmler %s\n" % " ".join(literal_args)
 
 
 def parse_and_check(command):
@@ -1136,11 +1136,11 @@ def transform_args(command_args, flags, api):
     # Checks combined votes method
     try:
         if (command_args.method and command_args.method != COMBINATION_LABEL
-                and not command_args.method in COMBINATION_WEIGHTS.keys()):
+                and not command_args.method in list(COMBINATION_WEIGHTS.keys())):
             command_args.method = 0
         else:
             combiner_methods = dict(
-                [[value, key] for key, value in COMBINER_MAP.items()])
+                [[value, key] for key, value in list(COMBINER_MAP.items())])
             combiner_methods[COMBINATION_LABEL] = COMBINATION
             command_args.method = combiner_methods.get(command_args.method, 0)
     except AttributeError:
@@ -1150,7 +1150,7 @@ def transform_args(command_args, flags, api):
     try:
         if (command_args.missing_strategy and
                 not (command_args.missing_strategy in
-                     MISSING_STRATEGIES.keys())):
+                     list(MISSING_STRATEGIES.keys()))):
             command_args.missing_strategy = 0
         else:
             command_args.missing_strategy = MISSING_STRATEGIES.get(

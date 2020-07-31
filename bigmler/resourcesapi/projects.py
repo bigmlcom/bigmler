@@ -16,7 +16,7 @@
 """Resources management functions
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -57,7 +57,7 @@ def create_project(project_args, args, api=None,
     project_id = check_resource_error(project, "Failed to create project: ")
     try:
         project = check_resource(project, api=api, raise_on_error=True)
-    except Exception, exception:
+    except Exception as exception:
         sys.exit("Failed to get a finished project: %s" % str(exception))
     message = dated("Project \"%s\" has been created.\n" %
                     project['object']['name'])
@@ -99,7 +99,7 @@ def get_project_by_name(project, api=None, verbosity=True, session_file=None):
         api = bigml.api.BigML()
     project_id = None
 
-    if (isinstance(project, basestring) or
+    if (isinstance(project, str) or
             bigml.api.get_status(project)['code'] != bigml.api.FINISHED):
         message = dated("Retrieving project info.\n")
         log_message(message, log_file=session_file,

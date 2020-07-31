@@ -19,7 +19,7 @@
 """ Testing fusion predictions creation
 
 """
-from __future__ import absolute_import
+
 
 from bigmler.tests.world import (world, common_setup_module,
                                  common_teardown_module,
@@ -54,7 +54,7 @@ class TestPrediction(object):
         """
             Debug information
         """
-        print "\n-------------------\nTests in: %s\n" % __name__
+        print("\n-------------------\nTests in: %s\n" % __name__)
         self.setup_scenario01()
 
     def teardown(self):
@@ -62,7 +62,7 @@ class TestPrediction(object):
 
         """
         self.world = teardown_class()
-        print "\nEnd of tests in: %s\n-------------------\n" % __name__
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
 
 
     def setup_scenario01(self):
@@ -70,11 +70,11 @@ class TestPrediction(object):
         Scenario: Successfully building a model and deepnet
 
         """
-        print self.setup_scenario01.__doc__
+        print(self.setup_scenario01.__doc__)
         examples = [
             ['data/iris.csv', 'scenario1_fs']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             fs_pred.setup_for_fusion(self, train=example[0],
                                      output_dir=example[1])
 
@@ -86,11 +86,11 @@ class TestPrediction(object):
             Then the local prediction file is like "<predictions_file>"
 
         """
-        print self.test_scenario01.__doc__
+        print(self.test_scenario01.__doc__)
         examples = [
             ['data/test_iris.csv', 'scenario1_fs/predictions.csv', 'check_files/predictions_iris_fs.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             fs_pred.i_create_fs_resources_from_model(self, test=example[0], output=example[1])
             fs_pred.i_check_create_fusion(self)
             test_pred.i_check_create_predictions(self)
@@ -105,11 +105,11 @@ class TestPrediction(object):
             Then the local prediction file is like "<predictions_file>"
 
         """
-        print self.test_scenario02.__doc__
+        print(self.test_scenario02.__doc__)
         examples = [
             ['data/test_iris.csv', 'scenario2_fs/predictions.csv', 'check_files/predictions_iris_fs.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             fs_pred.i_create_fs_resources_from_model_remote(self, test=example[0], output=example[1])
             fs_pred.i_check_create_fusion(self)
             batch_pred.i_check_create_batch_prediction(self)
@@ -125,11 +125,11 @@ class TestPrediction(object):
             Then the local prediction file is like "<predictions_file>"
 
         """
-        print self.test_scenario03.__doc__
+        print(self.test_scenario03.__doc__)
         examples = [
             ['data/test_iris.csv', 'data/batch_output.json', 'scenario3_fs/predictions.csv', 'check_files/predictions_iris_fs_prob.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             fs_pred.i_create_fs_resources_from_model_remote_with_options(self, test=example[0], output=example[2], options_file=example[1])
             fs_pred.i_check_create_fusion(self)
             batch_pred.i_check_create_batch_prediction(self)
@@ -150,11 +150,11 @@ class TestPrediction(object):
                 | data             | output                   | json_evaluation_file    |
                 | ../data/iris.csv | ./scenario_fs_e1/evaluation | ./check_files/evaluation_iris_dn.json |
         """
-        print self.test_scenario04.__doc__
+        print(self.test_scenario04.__doc__)
         examples = [
             ['scenario_fs_e1/evaluation', 'check_files/evaluation_iris_fs.json']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             fs_pred.i_create_fs_resources_from_mode_and_evaluate(self, output=example[0])
             fs_pred.i_check_create_fusion(self)
             test_pred.i_check_create_evaluation(self)

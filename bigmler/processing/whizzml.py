@@ -18,7 +18,7 @@
              and executions
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -116,7 +116,7 @@ def script_processing(api, args,
                 script = rs.create_script(source_code, script_args, args, api,
                                           path, session_file, log)
 
-            args.script = script if isinstance(script, basestring) else \
+            args.script = script if isinstance(script, str) else \
                 script.get('resource')
         scripts = [script]
 

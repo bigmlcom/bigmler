@@ -13,7 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from __future__ import absolute_import
+
 
 import os
 import time
@@ -67,7 +67,7 @@ def i_check_create_batch_prediction(step):
         world.batch_prediction = batch_prediction
         batch_prediction_file.close()
         assert True
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -82,7 +82,7 @@ def i_check_create_batch_projection(step):
         world.batch_projection = batch_projection
         batch_projection_file.close()
         assert True
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -97,7 +97,7 @@ def i_check_create_test_source(step):
         world.test_source = test_source
         test_source_file.close()
         assert True
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -114,7 +114,7 @@ def i_check_create_test_dataset(step):
         world.test_dataset = test_dataset
         test_dataset_file.close()
         assert True
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -129,7 +129,7 @@ def i_check_create_batch_centroid(step):
         world.batch_centroid = batch_centroid
         batch_prediction_file.close()
         assert True
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -144,7 +144,7 @@ def i_check_create_batch_anomaly_scores(step):
         world.batch_anomaly_score = batch_anomaly_score
         batch_prediction_file.close()
         assert True
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -158,7 +158,7 @@ def i_check_create_batch_predictions_dataset(step):
         world.datasets.append(dataset['resource'])
         dataset_file.close()
         assert True
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 
@@ -172,7 +172,7 @@ def i_check_create_batch_centroids_dataset(step):
         world.datasets.append(dataset['resource'])
         dataset_file.close()
         assert True
-    except Exception, exc:
+    except Exception as exc:
         assert False, str(exc)
 
 #@step(r'I create BigML resources using model with operating point "(.*)"

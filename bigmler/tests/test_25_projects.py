@@ -45,14 +45,14 @@ class TestProjects(object):
         """Calling generic teardown for every method
 
         """
-        print "\nEnd of tests in: %s\n-------------------\n" % __name__
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
         teardown_class()
 
     def setup(self):
         """
             Debug information
         """
-        print "\n-------------------\nTests in: %s\n" % __name__
+        print("\n-------------------\nTests in: %s\n" % __name__)
 
     def test_scenario1(self):
         """
@@ -66,11 +66,11 @@ class TestProjects(object):
                 | data             | project         | output_dir
                 | ../data/iris.csv | My new project  | ./scenario_p_1
         """
-        print self.test_scenario1.__doc__
+        print(self.test_scenario1.__doc__)
         examples = [
             ['data/iris.csv', 'My new project', 'scenario_p_1']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_project.i_create_source_with_project(self, data=example[0], project=example[1], output_dir=example[2])
             test_project.i_check_create_project(self)
             test_pred.i_check_create_source(self)
@@ -89,11 +89,11 @@ class TestProjects(object):
                 | data             | project         | output_dir     | output_dir2
                 | ../data/iris.csv | My new project  | ./scenario_p_2 | ./scenario_p_2_1
         """
-        print self.test_scenario2.__doc__
+        print(self.test_scenario2.__doc__)
         examples = [
             ['data/iris.csv', 'My new project', 'scenario_p_2', 'scenario_p_2_1']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_project.i_create_source_with_project(self, data=example[0], project=example[1], output_dir=example[2])
             test_project.i_check_create_project(self)
             test_pred.i_check_create_source(self)
@@ -111,11 +111,11 @@ class TestProjects(object):
                 | data             | output_dir
                 | ../data/iris.csv | ./scenario_p_3
         """
-        print self.test_scenario3.__doc__
+        print(self.test_scenario3.__doc__)
         examples = [
             ['data/iris.csv', 'scenario_p_3']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             delete.i_create_source_from_file(self, data=example[0], output_dir=example[1])
             test_pred.i_check_create_source(self)
             test_project.check_source_in_no_project(self)
@@ -133,11 +133,11 @@ class TestProjects(object):
                 | project         | output_dir       | params         | values
                 | My new project  | ./scenario_p_4   | name, category | my_project_name, 1
         """
-        print self.test_scenario4.__doc__
+        print(self.test_scenario4.__doc__)
         examples = [
             ['My new project', 'scenario_p_4', ['name', 'category'], ['my_project_name', 1]]]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_project.i_create_project(self, project=example[0], output_dir=example[1])
             test_project.i_check_create_project(self)
             test_project.i_update_project(self, params=example[2], values=example[3])

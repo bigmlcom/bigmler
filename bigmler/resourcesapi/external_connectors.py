@@ -16,7 +16,7 @@
 """Resources management functions
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -43,7 +43,7 @@ def set_external_connector_args(args, name=None):
     source = "postgresql" if args.source is None else args.source
     external_connector_args.update({"source": source})
 
-    connection_keys = EXTERNAL_CONNECTION_ATTRS.values()
+    connection_keys = list(EXTERNAL_CONNECTION_ATTRS.values())
     connection_keys.remove("source")
 
     connection_info = {}
@@ -90,7 +90,7 @@ def create_external_connector(external_connector_args, args, api=None,
     try:
         external_connector = check_resource( \
             external_connector, api=api, raise_on_error=True)
-    except Exception, exception:
+    except Exception as exception:
         sys.exit("Failed to get a finished external connector: %s" % \
             str(exception))
     message = dated("External connector \"%s\" has been created.\n" %

@@ -18,7 +18,7 @@
 connectors
 
 """
-from __future__ import absolute_import
+
 
 import bigml.api
 import bigmler.resourcesapi.external_connectors as r

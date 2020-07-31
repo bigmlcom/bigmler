@@ -16,7 +16,7 @@
 """Resources management functions
 
 """
-from __future__ import absolute_import
+
 
 import sys
 import json
@@ -112,13 +112,13 @@ def create_source(data_set, source_args, args, api=None, path=None,
         log_created_resources(
             "source%s" % suffix, path,
             source['resource'], mode='ab',
-            comment=(u"%s\n" % source['object']['name']))
+            comment=("%s\n" % source['object']['name']))
     source_id = check_resource_error(source, "Failed to create source: ")
     try:
         source = check_resource(source, api.get_source,
                                 query_string=ALL_FIELDS_QS,
                                 raise_on_error=True)
-    except Exception, exception:
+    except Exception as exception:
         sys.exit("Failed to get a finished source: %s" % str(exception))
     message = dated("Source created: %s\n" % get_url(source))
     log_message(message, log_file=session_file, console=args.verbosity)
@@ -163,7 +163,7 @@ def get_source(source, api=None, verbosity=True,
     """
     if api is None:
         api = bigml.api.BigML()
-    if (isinstance(source, basestring) or
+    if (isinstance(source, str) or
             bigml.api.get_status(source)['code'] != bigml.api.FINISHED):
         message = dated("Retrieving source. %s\n" %
                         get_url(source))
@@ -173,7 +173,7 @@ def get_source(source, api=None, verbosity=True,
             source = check_resource(source, api.get_source,
                                     query_string=ALL_FIELDS_QS,
                                     raise_on_error=True)
-        except Exception, exception:
+        except Exception as exception:
             sys.exit("Failed to get a finished source: %s" % str(exception))
 
     return source

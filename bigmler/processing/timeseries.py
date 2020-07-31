@@ -18,7 +18,7 @@
 of time-series
 
 """
-from __future__ import absolute_import
+
 
 import bigmler.utils as u
 import bigmler.resourcesapi.time_series as r

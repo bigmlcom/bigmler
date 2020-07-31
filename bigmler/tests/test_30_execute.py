@@ -19,7 +19,7 @@
 """ Testing logistic regression predictions creation
 
 """
-from __future__ import absolute_import
+
 
 from bigmler.tests.world import (world, common_setup_module,
                                  common_teardown_module,
@@ -48,14 +48,14 @@ class TestExecute(object):
         """
             Debug information
         """
-        print "\n-------------------\nTests in: %s\n" % __name__
+        print("\n-------------------\nTests in: %s\n" % __name__)
 
     def teardown(self):
         """Calling generic teardown for every method
 
         """
         self.world = teardown_class()
-        print "\nEnd of tests in: %s\n-------------------\n" % __name__
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
 
     def test_scenario01(self):
         """
@@ -71,11 +71,11 @@ class TestExecute(object):
             | (+ 1 1)   | scenario1_exe    | check_files/results_s1exe.json
 
         """
-        print self.test_scenario01.__doc__
+        print(self.test_scenario01.__doc__)
         examples = [
             ['(+ 1 1)', 'scenario1_exe', 'check_files/results_s1exe.json' ]]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             execute.i_create_all_execution_resources(self, example[0], example[1])
             execute.i_check_create_script(self)
             execute.i_check_create_execution(self)
@@ -94,11 +94,11 @@ class TestExecute(object):
             | code_lib.whizzml      | scenario2_exe
 
         """
-        print self.test_scenario02.__doc__
+        print(self.test_scenario02.__doc__)
         examples = [
             ['data/whizzml_lib/lib/code_lib.whizzml', 'scenario2_exe']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             execute.i_create_all_library_resources(self, example[0], example[1])
             execute.i_check_create_library(self)
 
@@ -117,11 +117,11 @@ class TestExecute(object):
             | code.whizzml   | scenario3_exe    | data/inputs_dec.json | data/outputs_dec.json | data/inputs.json | check_files/results_s3exe.json
 
         """
-        print self.test_scenario03.__doc__
+        print(self.test_scenario03.__doc__)
         examples = [
             ['data/whizzml/code.whizzml', 'scenario3_exe', 'data/inputs_dec.json', 'data/outputs_dec.json', 'data/inputs.json', 'check_files/results_s3exe.json']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             execute.i_create_all_execution_with_io_resources(self, example[0], example[1], example[2], example[3], example[4])
             execute.i_check_create_script(self)
             execute.i_check_create_execution(self)
@@ -140,11 +140,11 @@ class TestExecute(object):
             | data              | scenario4_pck    |
 
         """
-        print self.test_scenario04.__doc__
+        print(self.test_scenario04.__doc__)
         examples = [
             ['data/whizzml', 'scenario4_pck']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             execute.i_create_from_whizzml_package(self, example[0], example[1])
             execute.i_check_create_package_script(self, example[0])
 
@@ -160,10 +160,10 @@ class TestExecute(object):
             | data/whizzml_lib              | scenario5_pck    |
 
         """
-        print self.test_scenario04.__doc__
+        print(self.test_scenario04.__doc__)
         examples = [
             ['data/whizzml_lib', 'scenario5_pck']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             execute.i_create_from_whizzml_package_embedding(self, example[0], example[1])
             execute.i_check_create_package_script(self, example[0])

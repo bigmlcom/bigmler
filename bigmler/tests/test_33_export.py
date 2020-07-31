@@ -19,7 +19,7 @@
 """ Testing export model generation
 
 """
-from __future__ import absolute_import
+
 
 
 from bigmler.tests.world import (world, common_setup_module,
@@ -46,14 +46,14 @@ class TestExport(object):
         """Calling generic teardown for every method
 
         """
-        print "\nEnd of tests in: %s\n-------------------\n" % __name__
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
         teardown_class()
 
     def setup(self):
         """
             Debug information
         """
-        print "\n-------------------\nTests in: %s\n" % __name__
+        print("\n-------------------\nTests in: %s\n" % __name__)
 
     def test_scenario1(self):
         """
@@ -70,7 +70,7 @@ class TestExport(object):
                 | ../data/movies.csv   | data/movies_source_attrs.json | ./scenario_exp_1/model | python         | model_function.py
 
         """
-        print self.test_scenario1.__doc__
+        print(self.test_scenario1.__doc__)
         examples = [
             ['data/movies.csv', 'data/movies_source_attrs.json', 'scenario_exp_1_a/model', 'python', 'check_files/export/model_function.py'],
             ['data/movies.csv', 'data/movies_source_attrs.json', 'scenario_exp_1_b/model', 'javascript', 'check_files/export/model_function.js'],
@@ -81,7 +81,7 @@ class TestExport(object):
             ['data/libros.csv', 'data/libros_source_attrs.json', 'scenario_exp_1_g/model', 'r', 'check_files/export/model_function_utf8.R'],
             ['data/libros.csv', 'data/libros_source_attrs.json', 'scenario_exp_1_h/model', 'javascript', 'check_files/export/model_function_utf8.js']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             export.i_create_all_resources_to_model_with_source_attrs( \
                 self, data=example[0], source_attributes=example[1], output=example[2])
             test_pred.i_check_create_source(self)

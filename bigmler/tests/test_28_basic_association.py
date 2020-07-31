@@ -19,7 +19,7 @@
 """ Testing associations
 
 """
-from __future__ import absolute_import
+
 
 
 from bigmler.tests.world import (world, common_setup_module,
@@ -48,14 +48,14 @@ class TestAssociation(object):
         """Calling generic teardown for every method
 
         """
-        print "\nEnd of tests in: %s\n-------------------\n" % __name__
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
         teardown_class()
 
     def setup(self):
         """
             Debug information
         """
-        print "\n-------------------\nTests in: %s\n" % __name__
+        print("\n-------------------\nTests in: %s\n" % __name__)
 
     def test_scenario1(self):
         """
@@ -70,13 +70,13 @@ class TestAssociation(object):
                 | ../data/grades.csv |  ./scenario_ass_1_r
                 | ../data/diabetes.csv   | ./scenario_ass_1
         """
-        print self.test_scenario1.__doc__
+        print(self.test_scenario1.__doc__)
         examples = [
             ['data/spam.csv', 'scenario_ass_1_r'],
             ['data/movies.csv', 'scenario_ass_1_i'],
             ['data/iris.csv', 'scenario_ass_1']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_association.i_create_association(self, data=example[0], output_dir=example[1])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -94,11 +94,11 @@ class TestAssociation(object):
                 |scenario    | kwargs                                                  | output_dir
                 | scenario_ass_1| {"data": "../data/iris.csv", "output_dir": "./scenario_ass_1/}   | ./scenario_ass_2   |
         """
-        print self.test_scenario2.__doc__
+        print(self.test_scenario2.__doc__)
         examples = [
             ['scenario_ass_1', '{"data": "data/iris.csv", "output_dir": "scenario_ass_1"}', 'scenario_ass_2']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_association.i_create_association_from_source(self, output_dir=example[2])
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -116,11 +116,11 @@ class TestAssociation(object):
                 | scenario_ass_1| {"data": "../data/iris.csv", "output_dir": "./scenario_c_1"}   | ../data/diabetes.csv   | ./scenario_c_3/centroids.csv   | ./check_files/centroids_diabetes.csv   |
 
         """
-        print self.test_scenario3.__doc__
+        print(self.test_scenario3.__doc__)
         examples = [
             ['scenario_ass_1', '{"data": "data/iris.csv", "output_dir": "scenario_ass_1"}', 'scenario_ass_3']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
             test_association.i_create_association_from_dataset(self, output_dir=example[2])
             test_pred.i_check_create_association(self)

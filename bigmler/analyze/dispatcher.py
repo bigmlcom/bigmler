@@ -20,7 +20,7 @@
 
 
 """
-from __future__ import absolute_import
+
 
 import sys
 import os
@@ -36,8 +36,8 @@ from bigmler.dispatcher import SESSIONS_LOG, clear_log_files
 from bigmler.command import get_stored_command, command_handling
 
 
-COMMAND_LOG = u".bigmler_analyze"
-DIRS_LOG = u".bigmler_analyze_dir_stack"
+COMMAND_LOG = ".bigmler_analyze"
+DIRS_LOG = ".bigmler_analyze_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 
 
@@ -79,7 +79,7 @@ def analyze_dispatcher(args=sys.argv[1:]):
                                           for model_field in model_fields]
         else:
             command_args.model_fields_ = {}
-        u.sys_log_message(u"%s\n" % os.path.abspath(command_args.output_dir),
+        u.sys_log_message("%s\n" % os.path.abspath(command_args.output_dir),
                           log_file=DIRS_LOG)
         session_file = os.path.join(command_args.output_dir, SESSIONS_LOG)
     # create api instance form args

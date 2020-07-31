@@ -16,7 +16,7 @@
 """Resources management functions
 
 """
-from __future__ import absolute_import
+
 
 
 import sys
@@ -68,7 +68,7 @@ def set_dataset_args(args, fields, multi_label_data=None):
     if objective_field is not None and fields is not None:
         try:
             objective_id = fields.field_id(objective_field)
-        except ValueError, exc:
+        except ValueError as exc:
             sys.exit(exc)
         dataset_args.update(objective_field={'id': objective_id})
 
@@ -161,7 +161,7 @@ def create_dataset(origin_resource, dataset_args, args, api=None,
                         element = {"id": element["resource"]}
                     element.update({"name": DS_NAMES[index]})
                     origin_resource[index] = element
-                elif isinstance(element, basestring):
+                elif isinstance(element, str):
                     origin_resource[index] = {"id": element,
                                               "name": DS_NAMES[index]}
 
@@ -174,7 +174,7 @@ def create_dataset(origin_resource, dataset_args, args, api=None,
         dataset = check_resource(dataset, api.get_dataset,
                                  query_string=ALL_FIELDS_QS,
                                  raise_on_error=True)
-    except Exception, exception:
+    except Exception as exception:
         sys.exit("Failed to get a finished dataset: %s" % str(exception))
     message = dated("Dataset created: %s\n" % get_url(dataset))
     log_message(message, log_file=session_file, console=args.verbosity)
@@ -190,7 +190,7 @@ def get_dataset(dataset, api=None, verbosity=True, session_file=None):
     """
     if api is None:
         api = bigml.api.BigML()
-    if (isinstance(dataset, basestring) or
+    if (isinstance(dataset, str) or
             bigml.api.get_status(dataset)['code'] != bigml.api.FINISHED):
         message = dated("Retrieving dataset. %s\n" %
                         get_url(dataset))

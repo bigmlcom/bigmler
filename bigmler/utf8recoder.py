@@ -13,7 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from __future__ import absolute_import
+
 
 
 import codecs
@@ -39,7 +39,7 @@ class UTF8Recoder:
         """
         return self
 
-    def next(self):
+    def __next__(self):
         """Iterator next method
 
         """

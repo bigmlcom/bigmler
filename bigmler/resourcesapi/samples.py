@@ -16,7 +16,7 @@
 """Resources management functions
 
 """
-from __future__ import absolute_import
+
 
 
 import sys
@@ -93,7 +93,7 @@ def create_samples(datasets, sample_ids, sample_args,
                 try:
                     sample = check_resource(sample, api.get_sample,
                                             raise_on_error=True)
-                except Exception, exception:
+                except Exception as exception:
                     sys.exit("Failed to get a finished sample: %s" %
                              str(exception))
                 samples[0] = sample
@@ -154,7 +154,7 @@ def get_samples(sample_ids, args,
                              % sample['resource'])
         sample = check_resource(sample, api=api, query_string=query_string,
                                 raise_on_error=True)
-    except Exception, exception:
+    except Exception as exception:
         sys.exit("Failed to get a finished sample: %s" % str(exception))
     samples[0] = sample
 

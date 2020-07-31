@@ -17,7 +17,7 @@
 """BigMLer - execute processing dispatching
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -30,8 +30,8 @@ from bigmler.defaults import DEFAULTS_FILE
 from bigmler.command import get_context
 from bigmler.dispatcher import SESSIONS_LOG, clear_log_files
 
-COMMAND_LOG = u".bigmler_execute"
-DIRS_LOG = u".bigmler_execute_dir_stack"
+COMMAND_LOG = ".bigmler_execute"
+DIRS_LOG = ".bigmler_execute_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 
 DEFAULT_OUTPUT = 'whizzml_results'
@@ -85,7 +85,7 @@ def execute_whizzml(args, api, session_file):
         elif args.code_file or args.code:
             script, scripts = pw.script_processing( \
                 api, args, session_file=session_file, path=path, log=log)
-            args.script = script if isinstance(script, basestring) else \
+            args.script = script if isinstance(script, str) else \
                 script.get('resource')
             args.script_ids = scripts
 

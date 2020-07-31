@@ -17,7 +17,7 @@
 """BigMLer - Fusion subcommand processing dispatching
 
 """
-from __future__ import absolute_import
+
 
 import sys
 import os
@@ -41,11 +41,11 @@ from bigmler.evaluation import evaluate
 from bigmler.dispatcher import (SESSIONS_LOG,
                                 clear_log_files, get_test_dataset)
 
-COMMAND_LOG = u".bigmler_fusion"
-DIRS_LOG = u".bigmler_fusion_dir_stack"
+COMMAND_LOG = ".bigmler_fusion"
+DIRS_LOG = ".bigmler_fusion_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 MINIMUM_MODEL = "full=false"
-DEFAULT_OUTPUT = u"predictions.csv"
+DEFAULT_OUTPUT = "predictions.csv"
 
 SETTINGS = {
     "command_log": COMMAND_LOG,
@@ -100,7 +100,7 @@ def compute_output(api, args):
         sys.exit("You should provide a description to publish.")
 
     path = u.check_dir(output)
-    session_file = u"%s%s%s" % (path, os.sep, SESSIONS_LOG)
+    session_file = "%s%s%s" % (path, os.sep, SESSIONS_LOG)
     csv_properties = {}
     # If logging is required set the file for logging
     log = None
@@ -127,7 +127,7 @@ def compute_output(api, args):
 
     # We update the fusion public state if needed
     if fusion:
-        if isinstance(fusion, basestring):
+        if isinstance(fusion, str):
             if not a.has_test(args):
                 query_string = MINIMUM_MODEL
             elif args.export_fields:

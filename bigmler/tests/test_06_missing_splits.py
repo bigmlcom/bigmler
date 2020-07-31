@@ -19,7 +19,7 @@
 """ Testing predictions with missing splits
 
 """
-from __future__ import absolute_import
+
 
 
 from bigmler.tests.world import (world, common_setup_module,
@@ -47,14 +47,14 @@ class TestMissingSplits(object):
         """Calling generic teardown for every method
 
         """
-        print "\nEnd of tests in: %s\n-------------------\n" % __name__
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
         teardown_class()
 
     def setup(self):
         """
             Debug information
         """
-        print "\n-------------------\nTests in: %s\n" % __name__
+        print("\n-------------------\nTests in: %s\n" % __name__)
 
     def test_scenario1(self):
         """
@@ -70,11 +70,11 @@ class TestMissingSplits(object):
                 | data               | test                          | output                            |predictions_file           |
                 | ../data/iris_missing.csv   | ../data/test_iris_missing.csv   | ./scenario_mspl_1/predictions.csv | ./check_files/predictions_iris_missing.csv   |
         """
-        print self.test_scenario1.__doc__
+        print(self.test_scenario1.__doc__)
         examples = [
             ['data/iris_missing.csv', 'data/test_iris_missing.csv', 'scenario_mspl_1/predictions.csv', 'check_files/predictions_iris_missing.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_create_all_resources_missing_splits(self, data=example[0], test=example[1], output=example[2])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
@@ -99,11 +99,11 @@ class TestMissingSplits(object):
                 | data               | test                    | output                        |predictions_file           |
                 | ../data/iris_missing.csv   | ../data/test_iris_missing.csv   | ./scenario_mspl_2/predictions.csv   | ./check_files/predictions_iris_missing.csv
         """
-        print self.test_scenario2.__doc__
+        print(self.test_scenario2.__doc__)
         examples = [
             ['data/iris_missing.csv', 'data/test_iris_missing.csv', 'scenario_mspl_2/predictions.csv', 'check_files/predictions_iris_missing.csv']]
         for example in examples:
-            print "\nTesting with:\n", example
+            print("\nTesting with:\n", example)
             test_pred.i_create_all_resources_remote_missing_splits(self, data=example[0], test=example[1], output=example[2])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)

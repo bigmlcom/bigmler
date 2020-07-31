@@ -16,7 +16,7 @@
 """Resources management functions
 
 """
-from __future__ import absolute_import
+
 
 import sys
 
@@ -69,7 +69,7 @@ def create_forecast(time_series, input_data, forecast_args, args,
     try:
         forecast = check_resource(forecast, api.get_forecast,
                                   raise_on_error=True)
-    except Exception, exception:
+    except Exception as exception:
         sys.exit("Failed to get a finished forecast: %s"
                  % str(exception))
     message = dated("Forecast created: %s\n"
