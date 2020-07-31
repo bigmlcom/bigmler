@@ -23,7 +23,7 @@
 
 
 from bigmler.tests.world import (world, common_setup_module,
-                                 common_teardown_module, teardown_class, PY3)
+                                 common_teardown_module, teardown_class)
 
 import bigmler.tests.basic_tst_prediction_steps as test_pred
 import bigmler.tests.ml_tst_prediction_steps as ml_pred
@@ -78,7 +78,7 @@ class TestML(object):
         """
         print(self.setup_scenario1.__doc__)
         examples = [
-            ['my_multilabel_1%s' % PY3, ':', '7', 'data/multilabel.csv', ',', 'data/test_multilabel.csv', 'scenario_ml_1/predictions.csv', 'check_files/predictions_ml.csv']]
+            ['my_multilabel_1', ':', '7', 'data/multilabel.csv', ',', 'data/test_multilabel.csv', 'scenario_ml_1/predictions.csv', 'check_files/predictions_ml.csv']]
         for example in examples:
             print("\nTesting with:\n", example)
             ml_pred.i_create_all_ml_resources(self, tag=example[0], label_separator=example[1], number_of_labels=example[2], data=example[3], training_separator=example[4], test=example[5], output=example[6])
@@ -104,7 +104,7 @@ class TestML(object):
         """
         print(self.test_scenario2.__doc__)
         examples = [
-            ['scenario_ml_1', '{"tag": "my_multilabel_1%s", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_ml_1/predictions.csv", "test": "data/test_multilabel.csv"}' % PY3, 'data/test_multilabel.csv', 'scenario_ml_2/predictions.csv', 'check_files/predictions_ml_comma.csv']]
+            ['scenario_ml_1', '{"tag": "my_multilabel_1", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_ml_1/predictions.csv", "test": "data/test_multilabel.csv"}', 'data/test_multilabel.csv', 'scenario_ml_2/predictions.csv', 'check_files/predictions_ml_comma.csv']]
         for example in examples:
             print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
@@ -130,7 +130,7 @@ class TestML(object):
         """
         print(self.test_scenario3.__doc__)
         examples = [
-            ['scenario_ml_1', '{"tag": "my_multilabel_1%s", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_ml_1/predictions.csv", "test": "data/test_multilabel.csv"}' % PY3, 'data/test_multilabel.csv', 'scenario_ml_3/predictions.csv', 'check_files/predictions_ml_comma.csv']]
+            ['scenario_ml_1', '{"tag": "my_multilabel_1", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_ml_1/predictions.csv", "test": "data/test_multilabel.csv"}', 'data/test_multilabel.csv', 'scenario_ml_3/predictions.csv', 'check_files/predictions_ml_comma.csv']]
         for example in examples:
             print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
@@ -154,7 +154,7 @@ class TestML(object):
         """
         print(self.test_scenario4.__doc__)
         examples = [
-            ['scenario_ml_1', '{"tag": "my_multilabel_1%s", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_ml_1/predictions.csv", "test": "data/test_multilabel.csv"}' % PY3, 'scenario_ml_1/models', 'data/test_multilabel.csv', 'scenario_ml_4/predictions.csv', 'check_files/predictions_ml_comma.csv']]
+            ['scenario_ml_1', '{"tag": "my_multilabel_1", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_ml_1/predictions.csv", "test": "data/test_multilabel.csv"}', 'scenario_ml_1/models', 'data/test_multilabel.csv', 'scenario_ml_4/predictions.csv', 'check_files/predictions_ml_comma.csv']]
         for example in examples:
             print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
@@ -177,7 +177,7 @@ class TestML(object):
         """
         print(self.test_scenario5.__doc__)
         examples = [
-            ['scenario_ml_6', '{"tag": "my_multilabel_5%s", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_ml_6/predictions.csv", "test": "data/test_multilabel.csv"}' % PY3, 'my_multilabel_5%s' % PY3, 'data/test_multilabel.csv', 'scenario_ml_5/predictions.csv', 'check_files/predictions_ml_comma.csv']]
+            ['scenario_ml_6', '{"tag": "my_multilabel_5", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_ml_6/predictions.csv", "test": "data/test_multilabel.csv"}', 'my_multilabel_5', 'data/test_multilabel.csv', 'scenario_ml_5/predictions.csv', 'check_files/predictions_ml_comma.csv']]
         for example in examples:
             print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
@@ -200,7 +200,7 @@ class TestML(object):
         """
         print(self.test_scenario6.__doc__)
         examples = [
-            ['scenario_ml_6', '{"tag": "my_multilabel_5%s", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_ml_6/predictions.csv", "test": "data/test_multilabel.csv"}' % PY3, 'Adult,Student', 'my_multilabel_5%s' % PY3, 'data/test_multilabel.csv', 'scenario_ml_7/predictions.csv', 'check_files/predictions_ml_labels.csv']]
+            ['scenario_ml_6', '{"tag": "my_multilabel_5", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_ml_6/predictions.csv", "test": "data/test_multilabel.csv"}', 'Adult,Student', 'my_multilabel_5', 'data/test_multilabel.csv', 'scenario_ml_7/predictions.csv', 'check_files/predictions_ml_labels.csv']]
         for example in examples:
             print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])

@@ -28,8 +28,6 @@ from bigml.tree_utils import (
     TM_TOKENS, TM_FULL_TERM, TM_ALL)
 
 from bigml.model import Model
-from bigml.util import PY3
-
 from bigmler.export.out_tree.rtree import RTree
 from bigmler.reports import BIGMLER_SCRIPT
 
@@ -92,8 +90,6 @@ class RModel(Model):
         output = predictor_doc + predictor
         output += terms_body + items_body + body
         output += "%sreturn(NA)\n}\n" % INDENT
-        if not PY3:
-            output = output.encode("utf8")
         out.write(output)
         out.flush()
 

@@ -34,12 +34,9 @@ import bigmler.utils as u
 from bigmler.resourcesapi.common import ADD_REMOVE_PREFIX
 from bigmler.prediction import FULL_FORMAT, COMBINATION, COMBINATION_LABEL
 from bigmler.train_reader import AGGREGATES
-from bigmler.utils import PYTHON3, check_dir
+from bigmler.utils import check_dir
 
-if PYTHON3:
-    from io import StringIO
-else:
-    from io import StringIO
+from io import StringIO
 
 # Date and time in format SunNov0412_120510 to name and tag resources
 NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")

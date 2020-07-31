@@ -76,9 +76,6 @@ def retrieve_subcommands():
     """
     global subcommand_list
     subcommand_list = open(subcommand_file, u.open_mode("r")).readlines()
-    if not u.PYTHON3:
-        subcommand_list = [subcommand.decode(u.BIGML_SYS_ENCODING)
-                           for subcommand in subcommand_list]
     subcommand_list.reverse()
 
 

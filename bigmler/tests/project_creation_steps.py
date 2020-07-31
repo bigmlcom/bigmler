@@ -24,7 +24,7 @@ import json
 from bigmler.tests.world import world, res_filename
 from subprocess import check_call, CalledProcessError
 from bigmler.checkpoint import file_number_of_lines
-from bigmler.utils import BIGML_SYS_ENCODING, PYTHON3
+from bigmler.utils import BIGML_SYS_ENCODING
 from bigml.api import check_resource, BigML
 from bigmler.tests.common_steps import check_debug
 from nose.tools import assert_equal, assert_not_equal, ok_
@@ -47,8 +47,6 @@ def i_create_source_with_project(step, data=None, project=None, output_dir=None)
                    " --no-model --no-dataset --store --output-dir " +
                    output_dir +
                    " --project=\"" + project + "\"")
-        if not PYTHON3:
-            command = command.encode(BIGML_SYS_ENCODING)
         command = check_debug(command)
         retcode = check_call(command, shell=True)
         if retcode < 0:
@@ -68,8 +66,6 @@ def i_create_project_in_org(step, name=None, output_dir=None, organization=None)
         command = ("bigmler project --name \"" + name +
                    "\" --organization " + organization +
                    " --output-dir " + output_dir)
-        if not PYTHON3:
-            command = command.encode(BIGML_SYS_ENCODING)
         command = check_debug(command)
         retcode = check_call(command, shell=True)
         if retcode < 0:
@@ -90,8 +86,6 @@ def i_create_source_with_org_project(step, data=None, output_dir=None):
                    " --no-model --no-dataset --store --output-dir " +
                    output_dir +
                    " --org-project " + world.project["resource"])
-        if not PYTHON3:
-            command = command.encode(BIGML_SYS_ENCODING)
         command = check_debug(command)
         retcode = check_call(command, shell=True)
         if retcode < 0:
@@ -112,8 +106,6 @@ def i_create_source_with_project_id(step, data=None, output_dir=None):
                    " --no-model --no-dataset --store --output-dir " +
                    output_dir +
                    " --project-id " + world.project['resource'])
-        if not PYTHON3:
-            command = command.encode(BIGML_SYS_ENCODING)
         command = check_debug(command)
         retcode = check_call(command, shell=True)
         if retcode < 0:
@@ -161,8 +153,6 @@ def i_create_project(step, project=None, output_dir=None):
         command = ("bigmler project --name \"" + project +
                    "\" --store --output-dir " +
                    output_dir)
-        if not PYTHON3:
-            command = command.encode(BIGML_SYS_ENCODING)
         command = check_debug(command)
         retcode = check_call(command, shell=True)
         if retcode < 0:
@@ -184,8 +174,6 @@ def i_update_project(step, params=None, values=None):
             value = values[index]
             command += " --%s %s" % (param, value)
 
-        if not PYTHON3:
-            command = command.encode(BIGML_SYS_ENCODING)
         command = check_debug(command)
         retcode = check_call(command, shell=True)
         assert retcode >= 0

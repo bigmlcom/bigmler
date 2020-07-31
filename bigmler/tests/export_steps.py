@@ -28,7 +28,6 @@ from bigml.api import check_resource
 from bigmler.checkpoint import file_number_of_lines
 from bigmler.tests.common_steps import check_debug
 from bigmler.export.dispatcher import EXTENSIONS
-from bigml.util import PY3
 
 
 def extract_content(file_handler):
@@ -107,7 +106,7 @@ def i_check_if_the_output_is_like_expected_file(step, language, expected_file):
              EXTENSIONS[language]))) \
             as file_handler:
         output = extract_content(file_handler)
-    if PY3 and output.strip() != expected_content.strip():
+    if output.strip() != expected_content.strip():
         try:
             name, extension = expected_file.split(".")
             expected_file = "%s_p3.%s" % (name, extension)

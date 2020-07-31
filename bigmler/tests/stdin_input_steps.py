@@ -29,7 +29,6 @@ from bigml.api import check_resource
 from bigmler.checkpoint import file_number_of_lines
 from bigmler.tests.common_steps import check_debug
 from bigmler.tests.basic_tst_prediction_steps import shell_execute
-from bigmler.utils import PYTHON3
 
 CAT = "type " if sys.platform == "win32" else "cat "
 
@@ -39,8 +38,6 @@ def i_create_all_resources_to_test_from_stdin(step, data=None, test=None, name=N
         assert False
 
     test = res_filename(test)
-    if not PYTHON3:
-        name = name.decode("utf-8")
 
     command = (CAT + test + "|bigmler --train " + res_filename(data) +
                " --test --store --output " + output + " --name \"" +

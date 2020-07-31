@@ -30,7 +30,6 @@ import datetime
 
 from bigml.api import BigML
 from bigml.api import HTTP_OK, HTTP_NO_CONTENT, HTTP_UNAUTHORIZED
-from bigml.util import PY3
 
 from subprocess import check_call
 
@@ -263,7 +262,7 @@ class World(object):
 world = World()
 
 def res_filename(file):
-    return pkg_resources.resource_filename('bigmler', "../../../%s" % file)
+    return pkg_resources.resource_filename('bigmler', "../%s" % file)
 
 
 def common_setup_module():

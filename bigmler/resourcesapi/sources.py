@@ -26,8 +26,7 @@ import bigml.api
 from bigml.util import bigml_locale
 
 from bigmler.utils import (dated, get_url, log_message, check_resource,
-                           check_resource_error, log_created_resources,
-                           decode2)
+                           check_resource_error, log_created_resources)
 
 from bigmler.resourcesapi.common import set_basic_args, check_fields_struct, \
     update_attributes, update_json_args
@@ -63,8 +62,7 @@ def set_source_args(args, name=None, multi_label_data=None,
         source_args["source_parser"].update({'locale': source_locale})
     # If user has set a training separator, use it.
     if args.training_separator is not None:
-        training_separator = decode2(args.training_separator,
-                                     encoding="string_escape")
+        training_separator = args.training_separator
         source_args["source_parser"].update({'separator': training_separator})
     # If uploading a multi-label file, add the user_metadata info needed to
     # manage the multi-label fields

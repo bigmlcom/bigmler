@@ -28,8 +28,7 @@ from bigml.io import UnicodeReader
 
 from bigmler.checkpoint import file_number_of_lines
 from bigmler.labels import get_label_field
-from bigmler.utils import PYTHON3, BIGML_SYS_ENCODING, FILE_ENCODING
-from bigmler.utils import encode2, decode2
+from bigmler.utils import BIGML_SYS_ENCODING
 from bigmler.utf8recoder import UTF8Recoder
 
 
@@ -59,10 +58,8 @@ class TrainReader(object):
         self.training_set = training_set
 
         if training_set.__class__.__name__ == "StringIO":
-            self.encode = None
             self.training_set = UTF8Recoder(training_set, BIGML_SYS_ENCODING)
         else:
-            self.encode = None if PYTHON3 else FILE_ENCODING
         self.training_set_header = training_set_header
         self.training_reader = None
         self.multi_label = multi_label
@@ -70,16 +67,14 @@ class TrainReader(object):
         if label_aggregates is None:
             label_aggregates = []
         self.label_aggregates = label_aggregates
-        self.training_separator = (decode2(training_separator,
-                                           encoding="string_escape")
+        self.training_separator = (training_separator
                                    if training_separator is not None
                                    else get_csv_delimiter())
         if len(self.training_separator) > 1:
             sys.exit("Only one character can be used as test data separator.")
         # opening csv reader
         self.reset()
-        self.label_separator = (decode2(label_separator,
-                                        encoding="string_escape")
+        self.label_separator = (label_separator
                                 if label_separator is not None
                                 else get_csv_delimiter())
 
@@ -124,8 +119,6 @@ class TrainReader(object):
             for aggregate in self.label_aggregates:
                 new_headers.append(get_label_field(
                     self.headers[field_column], aggregate))
-        if not PYTHON3:
-            new_headers = [encode2(header) for header in new_headers]
         return new_headers
 
     def _get_columns(self, fields_list):
@@ -153,8 +146,7 @@ class TrainReader(object):
                                  " it cannot be found in the headers row: \n"
                                  " %s" %
                                  (field,
-                                  ", ".join([encode2(header)
-                                             for header in self.headers])))
+                                  ", ".join(self.headers)))
                     else:
                         column = None
             if column is not None:
@@ -210,8 +202,6 @@ class TrainReader(object):
                     row.append(AGGREGATES[aggregate](field_values))
         if reset:
             self.reset()
-        if not PYTHON3:
-            row = [encode2(item) for item in row]
         return row
 
     def number_of_rows(self):
@@ -250,7 +240,7 @@ class TrainReader(object):
         field_value = row[field_column]
         if self.multi_label:
             new_labels = field_value.split(separator)
-            new_labels = [decode2(label).strip()
+            new_labels = [label.strip()
                           for label in new_labels]
             # TODO: clean user given missing tokens
             for label_index, label in enumerate(new_labels):

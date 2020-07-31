@@ -24,8 +24,7 @@ from bigml.api import check_resource
 from bigml.io import UnicodeReader
 from bigmler.processing.models import MONTECARLO_FACTOR
 from bigmler.checkpoint import file_number_of_lines
-from bigmler.utils import storage_file_name, open_mode, decode2
-from bigmler.utils import PYTHON3
+from bigmler.utils import storage_file_name, open_mode
 from bigmler.tests.ml_tst_prediction_steps import \
     i_create_all_ml_resources
 from bigmler.tests.ml_tst_prediction_steps import \
@@ -1248,8 +1247,6 @@ def i_check_feature_selection(step, selection, metric, metric_value):
     try:
         with open(sessions_file, open_mode("r")) as sessions_file:
             content = sessions_file.read()
-            if not PYTHON3:
-                content = decode2(content)
         text = "The best feature subset is: %s \n%s = %s" % (
             selection, metric.capitalize(), metric_value)
         ok_(content.find(text) > -1)
@@ -1265,8 +1262,6 @@ def i_check_node_threshold(step, node_threshold, metric, metric_value):
     try:
         with open(sessions_file, open_mode("r")) as sessions_file:
             content = sessions_file.read()
-            if not PYTHON3:
-                content = decode2(content)
     except Exception as exc:
         print(str(exc))
         assert False
@@ -1892,8 +1887,6 @@ def i_check_random_candidates(step, random_candidates, metric, metric_value):
     try:
         with open(sessions_file, open_mode("r")) as sessions_file:
             content = sessions_file.read()
-            if not PYTHON3:
-                content = decode2(content)
         text = "The best random candidates number is: %s \n%s = %s" % (
             random_candidates, metric.capitalize(), metric_value)
         ok_(content.find(text) > -1)

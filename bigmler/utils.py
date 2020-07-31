@@ -37,7 +37,6 @@ from bigml.util import console_log, empty_resource
 from bigml.fields import get_fields_structure, Fields
 from bigml.io import UnicodeReader
 
-PYTHON3 = sys.version_info[0] == 3
 PAGE_LENGTH = 200
 ATTRIBUTE_NAMES = ['name', 'label', 'description']
 NEW_DIRS_LOG = ".bigmler_dirs"
@@ -249,8 +248,7 @@ def read_votes_files(dirs_list, path):
             predictions_files.append("%s%s%s" % (os.getcwd(),
                                                  os.sep, predictions_file))
             message = "%s\n" % predictions_file
-            if PYTHON3:
-                message = message.encode(FILE_ENCODING)
+            message = message.encode(FILE_ENCODING)
             group_predictions.write(message)
         os.chdir(current_directory)
     group_predictions.close()
@@ -417,13 +415,10 @@ def log_message(message, log_file=None, console=False):
        If console is True, sends the message to console.
     """
 
-    if isinstance(message, str) and not PYTHON3:
-        message = message.encode(FILE_ENCODING)
     if console:
         console_log(message)
     if log_file is not None:
-        if PYTHON3:
-            message = message.encode(FILE_ENCODING)
+        message = message.encode(FILE_ENCODING)
         with open(log_file, 'ab', 0) as log_handler:
             log_handler.write(message)
 
@@ -433,10 +428,9 @@ def sys_log_message(message, log_file=None, mode='ab'):
 
        If log_file is set, logs the message in the file.
     """
-    if PYTHON3 or isinstance(message, str):
-        message = message.encode(BIGML_SYS_ENCODING)
-        if PYTHON3 and not mode.endswith("b"):
-            mode = "%sb" % mode
+    message = message.encode(BIGML_SYS_ENCODING)
+    if not mode.endswith("b"):
+        mode = "%sb" % mode
     if log_file is not None:
         with open(log_file, mode) as log_handler:
             log_handler.write(message)
@@ -680,25 +674,7 @@ def open_mode(mode):
     """Python 3 compatible open mode
 
     """
-    return "%st" % mode if PYTHON3 else "%s" % mode
-
-
-def encode2(value, encoding=FILE_ENCODING):
-    """Conditional encoding only for Python2
-
-    """
-    if isinstance(value, str) and not PYTHON3:
-        return value.encode(encoding)
-    return value
-
-
-def decode2(value, encoding=FILE_ENCODING):
-    """Conditional decoding only for Python2
-
-    """
-    if isinstance(value, str) and not PYTHON3:
-        return value.decode(encoding)
-    return value
+    return "%st" % mode
 
 
 def transform_fields_keys(json_attributes, fields):
@@ -798,12 +774,8 @@ def write_to_utf8(path, text):
     """Encoded UTF-8 text write
 
     """
-    if PYTHON3:
-        with open(path, "w", encoding="utf-8") as file_handler:
-            file_handler.write(text)
-    else:
-        with open(path, "w") as file_handler:
-            file_handler.write(text.encode("utf-8"))
+    with open(path, "w", encoding="utf-8") as file_handler:
+        file_handler.write(text)
 
 
 def has_connection_info(args):

@@ -27,7 +27,7 @@ import shutil
 import pprint
 import nbformat as nbf
 
-from bigml.resourcehandler import get_resource_id
+from bigml.api_handlers.resourcehandler import get_resource_id
 from bigml.api import check_resource
 
 from bigmler.utils import get_last_resource, get_script_id, \

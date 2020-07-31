@@ -20,7 +20,7 @@
 
 """
 from bigmler.tests.world import (world, common_setup_module,
-                                 common_teardown_module, teardown_class, PY3)
+                                 common_teardown_module, teardown_class)
 
 import bigmler.tests.basic_tst_prediction_steps as test_pred
 import bigmler.tests.ml_tst_prediction_steps as ml_pred
@@ -74,7 +74,11 @@ class TestMLM(object):
             ['my_multilabelm_1', ':', '7', 'data/multilabel_multi.csv', ',', 'type,class', '-type,-type - W,-type - A,-type - C,-type - S,-type - R,-type - T,-type - P', 'class', 'data/test_multilabel.csv', 'scenario_mlm_1/predictions.csv', 'check_files/predictions_ml.csv']]
         for example in examples:
             print("\nTesting with:\n", example)
-            ml_pred.i_create_all_mlm_resources(self, tag=("%s_%s" % (example[0], PY3)), label_separator=example[1], number_of_labels=example[2], data=example[3], training_separator=example[4], ml_fields=example[5], model_fields=example[6], objective=example[7], test=example[8], output=example[9])
+            ml_pred.i_create_all_mlm_resources(self, tag=example[0], \
+                label_separator=example[1], number_of_labels=example[2], \
+                data=example[3], training_separator=example[4], \
+                ml_fields=example[5], model_fields=example[6], \
+                objective=example[7], test=example[8], output=example[9])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self)
             test_pred.i_check_create_models(self)
@@ -170,8 +174,11 @@ class TestMLM(object):
             ['scenario_mlm_1', '{"tag": "my_multilabelm_1", "data": "data/multilabel_multi.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_mlm_1/predictions.csv", "test": "data/test_multilabel.csv", "ml_fields": "type,class", "model_fields": "-type,-type - W,-type - A,-type - C,-type - S,-type - R,-type - T,-type - P", "objective": "class"}', 'Adult,Student', 'class', 'my_multilabelm_1', 'data/test_multilabel.csv', 'scenario_mlm_5/predictions.csv', 'check_files/predictions_ml_labels.csv']]
         for example in examples:
             print("\nTesting with:\n", example)
-            test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
-            ml_pred.i_predict_ml_from_model_tag_with_labels_with_objective(self, labels=example[2], objective=example[3], tag=("%s_%s" % (example[4], PY3)), test=example[5], output=example[6])
+            test_pred.i_have_previous_scenario_or_reproduce_it( \
+                self, example[0], example[1])
+            ml_pred.i_predict_ml_from_model_tag_with_labels_with_objective( \
+                self, labels=example[2], objective=example[3], \
+                tag=example[4], test=example[5], output=example[6])
             test_pred.i_check_create_predictions(self)
             test_pred.i_check_predictions(self, example[7])
 

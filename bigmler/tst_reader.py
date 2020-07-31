@@ -26,8 +26,7 @@ import sys
 from bigml.util import get_csv_delimiter
 from bigml.io import UnicodeReader
 
-from bigmler.utils import PYTHON3, FILE_ENCODING, BIGML_SYS_ENCODING
-from bigmler.utils import decode2
+from bigmler.utils import FILE_ENCODING, BIGML_SYS_ENCODING
 from bigmler.checkpoint import file_number_of_lines
 from bigmler.utf8recoder import UTF8Recoder
 
@@ -48,10 +47,7 @@ class TstReader(object):
         """
         self.test_set = test_set
         if test_set.__class__.__name__ == "StringIO":
-            self.encode = None
             self.test_set = UTF8Recoder(test_set, BIGML_SYS_ENCODING)
-        else:
-            self.encode = None if PYTHON3 else FILE_ENCODING
         self.test_set_header = test_set_header
         self.fields = fields
         if (objective_field is not None and
@@ -61,8 +57,6 @@ class TstReader(object):
             except ValueError as exc:
                 sys.exit(exc)
         self.objective_field = objective_field
-        if test_separator and not PYTHON3:
-            test_separator = decode2(test_separator, encoding="string_escape")
         self.test_separator = (test_separator
                                if test_separator is not None
                                else get_csv_delimiter())

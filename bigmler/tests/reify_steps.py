@@ -25,7 +25,7 @@ from nose.tools import eq_
 from bigmler.tests.world import world, res_filename
 from subprocess import check_call, CalledProcessError
 from bigmler.checkpoint import file_number_of_lines
-from bigmler.utils import BIGML_SYS_ENCODING, PYTHON3, open_mode
+from bigmler.utils import BIGML_SYS_ENCODING,  open_mode
 from bigml.api import check_resource
 from bigmler.tests.common_steps import check_debug
 
@@ -63,8 +63,6 @@ def i_create_output(step, output=None, language=None, resource_type='source',
         if add_fields:
             command += ' --add-fields'
         command = check_debug(command)
-        if not PYTHON3:
-            command.encode(BIGML_SYS_ENCODING)
         retcode = check_call(command, shell=True)
         if retcode < 0:
             assert False
@@ -90,12 +88,10 @@ def i_check_output_file(step, output=None, check_file=None):
                 check_contents_lines[index] = INDENT + line
         check_contents = "\n".join(check_contents_lines)
     """
-    # remove unicode mark for strings if Python3
-    if PYTHON3:
-        check_contents = check_contents.replace( \
-            " u'", " '").replace("{u'", "{'").replace( \
-            ' u"', ' "').replace('u\\\'', '\\\'')
-        check_contents = re.sub(r'\n\s*', '\n', check_contents)
+    check_contents = check_contents.replace( \
+        " u'", " '").replace("{u'", "{'").replace( \
+        ' u"', ' "').replace('u\\\'', '\\\'')
+    check_contents = re.sub(r'\n\s*', '\n', check_contents)
     with open(output_file, open_mode("r")) as output_file:
         output_file_contents = output_file.read()
 
@@ -107,9 +103,7 @@ def i_check_output_file(step, output=None, check_file=None):
         '\nif __name__ == "__main__":\n    main()', '')
 
     #strip internally added project id information
-    prefix = "" if PYTHON3 else "u"
-    p_str = r'%s\'project\':\s%s\'project/[a-f0-9]{24}\',?\s?' \
-        % (prefix, prefix)
+    p_str = r'\'project\':\s\'project/[a-f0-9]{24}\',?\s?'
     output_file_contents = re.sub(p_str,
                                   '', output_file_contents,
                                   flags=re.S).strip("\n")
@@ -143,13 +137,12 @@ def i_check_output_file(step, output=None, check_file=None):
     output_file_contents = output_file_contents.strip("\n").strip()
     check_contents = check_contents.strip("\n").strip()
     if check_contents != output_file_contents:
-        if PYTHON3:
-            # look for an alternative in PYTHON3
-            check_contents = python3_contents( \
-                check_file, check_contents)
-            if check_contents != output_file_contents:
-                check_contents = python3_contents(
-                    check_file, check_contents, alternative="_1")
+        # look for an alternative in PYTHON3
+        check_contents = python3_contents( \
+            check_file, check_contents)
+        if check_contents != output_file_contents:
+            check_contents = python3_contents(
+                check_file, check_contents, alternative="_1")
         with open("%s_bck" % check_file, "w") as bck_file:
             bck_file.write(output_file_contents)
         eq_(check_contents, output_file_contents)

@@ -24,8 +24,7 @@ from bigml.api import check_resource
 from bigml.io import UnicodeReader
 from bigmler.processing.models import MONTECARLO_FACTOR
 from bigmler.checkpoint import file_number_of_lines
-from bigmler.utils import storage_file_name, open_mode, decode2
-from bigmler.utils import PYTHON3
+from bigmler.utils import storage_file_name, open_mode
 from bigmler.tests.common_steps import check_debug
 from nose.tools import ok_, assert_equal, assert_not_equal, assert_almost_equal
 

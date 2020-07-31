@@ -31,12 +31,11 @@ import bigml.api
 from bigml.util import bigml_locale
 from bigml.multivote import THRESHOLD_CODE
 from bigml.constants import EXTERNAL_CONNECTION_ATTRS
-from bigml.externalconnectorhandler import get_env_connection_info
+from bigml.api_handlers.externalconnectorhandler import get_env_connection_info
 
 from bigmler.utils import (dated, get_url, log_message, plural, check_resource,
                            check_resource_error, log_created_resources,
-                           decode2, transform_fields_keys,
-                           is_shared, FILE_ENCODING, PYTHON3)
+                           transform_fields_keys, is_shared, FILE_ENCODING)
 from bigmler.labels import label_model_args, get_all_labels
 from bigmler.reports import report
 
@@ -301,10 +300,8 @@ def save_txt_and_json(object_dict, output, api=None):
     """Saves in txt and JSON format the contents of a dict object
 
     """
-    open_mode = 'wt' if PYTHON3 else 'wb'
+    open_mode = 'wt'
     message = json.dumps(object_dict)
-    if not PYTHON3:
-        message = utf8(message)
     with open(output + '.json', open_mode) as dict_json:
         dict_json.write(message)
     with open(output + '.txt', open_mode) as dict_txt:
