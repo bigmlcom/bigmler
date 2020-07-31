@@ -59,7 +59,6 @@ class TrainReader(object):
 
         if training_set.__class__.__name__ == "StringIO":
             self.training_set = UTF8Recoder(training_set, BIGML_SYS_ENCODING)
-        else:
         self.training_set_header = training_set_header
         self.training_reader = None
         self.multi_label = multi_label
