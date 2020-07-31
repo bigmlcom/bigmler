@@ -32,7 +32,7 @@ from bigml.multivote import THRESHOLD_CODE
 
 from bigmler.utils import (dated, get_url, log_message, check_resource,
                            check_resource_error, log_created_resources,
-                           PYTHON3, is_shared)
+                           is_shared)
 from bigmler.reports import report
 
 from bigmler.resourcesapi.common import set_basic_args, map_fields, \

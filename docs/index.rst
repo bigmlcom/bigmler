@@ -2763,7 +2763,81 @@ to one directory where a new script or library (with its corresponding
 ``metadata.json`` descriptor) is stored. Then, using ``bigmler whizzml``
 for this composite package will create each of the component scripts or
 libraries. It will also handle dependencies, using the IDs of the created
-libraries as imports for the scripts when needed.
+libraries as imports for the scripts when needed. The ``metadata.json``
+that corresponds to a library is simpler than the one used for the script,
+the difference being that ``kind`` in this case will be set to ``library``
+and no inputs or outputs are provided.
+
+
+.. code-block:: json
+
+    {
+      "name": "Best K-Means",
+      "description": "Best K-Means Clustering using the Pham, Dimov, and Nguyen Algorithm",
+      "kind": "library",
+      "source_code": "library.whizzml"
+    }
+
+To include a library in the list of imports of a script, the ``imports``
+attribute is used in the script's ``metadata.json``. The imports
+should be the list of folders that contain each library source code and
+metadata.
+
+.. code-block:: json
+
+    {
+      "name": "Compute Best K-means Batchcentroid",
+      "description": "Basic script to use the best-kmeans library",
+      "kind": "script",
+      "source_code": "script.whizzml",
+      "imports": ["../best-k-means"],
+      "inputs": [
+        {
+          "name": "dataset",
+          "type": "dataset-id",
+          "description": "Dataset ID"
+        },
+        {
+          "name": "cluster-args",
+          "type": "map",
+          "description": "Map of args for clustering (excluding dataset and k) for k search",
+          "default": {}
+        },
+        {
+          "name": "k-min",
+          "type": "number",
+          "description": "Minimum value of k for search"
+        },
+        {
+          "name": "k-max",
+          "type": "number",
+          "description": "Maximum value of k for search"
+        },
+        {
+          "name": "bestcluster-args",
+          "type": "map",
+          "description": "Map of args for clustering (excluding dataset and k) for optimal k",
+          "default": {}
+        },
+        {
+          "name": "clean",
+          "type": "boolean",
+          "description": "Delete intermediate objects created during computation"
+        },
+        {
+          "name": "logf",
+          "type": "boolean",
+          "description": "Generate log entries"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "best-batchcentroid",
+          "type": "string",
+          "description": "Batchcentroid ID"
+        }
+      ]
+    }
 
 
 .. _bigmler-retrain:
