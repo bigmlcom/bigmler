@@ -1,6 +1,6 @@
 language: python
 python:
-  - "3.7"
+  - "3.8"
 env:
   - BML_TESTS="01 02 03 04 05"
   - BML_TESTS="06 07 08 09 10 11 12 13 14 15 16"
@@ -13,7 +13,6 @@ env:
 install:
   - pip install cython
   - pip install pystemmer
-  - pip install scipy
   - pip install bigml
   - pip install .
 # command to run tests
