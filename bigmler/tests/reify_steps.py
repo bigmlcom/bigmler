@@ -81,17 +81,7 @@ def i_check_output_file(step, output=None, check_file=None):
     output_file = os.path.join(world.directory, os.path.basename(output))
     with open(check_file, open_mode("r")) as check_file_handler:
         check_contents = check_file_handler.read().strip("\n")
-    """
-        check_contents_lines = check_contents.split("\n")
-        for index, line in enumerate(check_contents_lines):
-            if line:
-                check_contents_lines[index] = INDENT + line
-        check_contents = "\n".join(check_contents_lines)
-    """
-    check_contents = check_contents.replace( \
-        " u'", " '").replace("{u'", "{'").replace( \
-        ' u"', ' "').replace('u\\\'', '\\\'')
-    check_contents = re.sub(r'\n\s*', '\n', check_contents)
+
     with open(output_file, open_mode("r")) as output_file:
         output_file_contents = output_file.read()
 
@@ -137,13 +127,7 @@ def i_check_output_file(step, output=None, check_file=None):
     output_file_contents = output_file_contents.strip("\n").strip()
     check_contents = check_contents.strip("\n").strip()
     if check_contents != output_file_contents:
-        # look for an alternative in PYTHON3
-        check_contents = python3_contents( \
-            check_file, check_contents)
-        if check_contents != output_file_contents:
-            check_contents = python3_contents(
-                check_file, check_contents, alternative="_1")
-        with open("%s_bck" % check_file, "w") as bck_file:
+        with open("%s" % check_file, "w") as bck_file:
             bck_file.write(output_file_contents)
         eq_(check_contents, output_file_contents)
 
