@@ -4174,10 +4174,10 @@ in our `Campfire chatroom <https://bigmlinc.campfirenow.com/f20a0>`_.
 Requirements
 ============
 
-Python 3 is currently supported by BigMLer. Support for Python 2.X was
+BigMLer needs Python 3.X versions to work. Compatibility with Python 2.X was
 discontinued in version 3.27.2.
 
-BigMLer requires `bigml 5.0.0 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 6.0.0 <https://github.com/bigmlcom/python>`_  or
 higher. Using proportional missing strategy will additionally request
 the use of the `numpy <http://www.numpy.org/>`_ and
 `scipy <http://www.scipy.org/>`_ libraries. They are not
@@ -4789,12 +4789,6 @@ Fancy Options
 -------------
 
 ================================= =============================================
-``--progress-bar``                Shows an update on the bytes uploaded when
-                                  creating
-                                  a new source. This option might run into
-                                  issues
-                                  depending on the locale
-                                  settings of your OS
 ``--no-dataset``                  Does not create a model. BigMLer will only
                                   create a source
 ``--no-model``                    Does not create a model. BigMLer will only

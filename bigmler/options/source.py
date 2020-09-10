@@ -94,13 +94,6 @@ def get_source_options(defaults=None):
             'default': defaults.get('train_header', True),
             'help': "The train set file has a header."},
 
-        # Shows progress information when uploading a file.
-        '--progress-bar': {
-            'action': 'store_true',
-            'dest': 'progress_bar',
-            'default': defaults.get('progress_bar', False),
-            'help': "Show progress details when creating a source."},
-
         # Locale settings.
         '--locale': {
             'action': 'store',
@@ -115,14 +108,6 @@ def get_source_options(defaults=None):
             'default': defaults.get('source_attributes', None),
             'help': ("Path to a json file describing source"
                      " attributes.")},
-
-        # Hides progress information when uploading a file. (opposed to
-        # --progress-bar)
-        '--no-progress-bar': {
-            'action': 'store_false',
-            'dest': 'progress_bar',
-            'default': defaults.get('progress_bar', False),
-            'help': "Show progress details when creating a source."},
 
         # Training set field separator. Defaults to the locale csv
         # separator.

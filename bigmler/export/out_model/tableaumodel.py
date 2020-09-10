@@ -22,7 +22,7 @@ predictions
 """
 import sys
 
-from bigmler.export.out_tree.tableautree import TableauTree
+from bigmler.export.out_tree.tableautree import plug_in_body
 
 from bigml.model import Model
 
@@ -33,7 +33,6 @@ class TableauModel(Model):
         """Empty attributes to be overriden
 
         """
-        self.tree_class = TableauTree
         Model.__init__(self, model, api, fields)
 
     def plug_in(self, out=sys.stdout,
@@ -59,8 +58,8 @@ class TableauModel(Model):
         """Writes a Tableau function that implements the model.
 
         """
-        body = self.tree.plug_in_body(ids_path=ids_path, subtree=subtree,
-                                      attr=attr)
+        body = plug_in_body(ids_path=ids_path, subtree=subtree,
+                            attr=attr)
         out.write(body)
         out.flush()
         return len(body)

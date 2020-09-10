@@ -26,7 +26,7 @@ from bigml.tree_utils import slugify, INDENT, sort_fields, docstring_comment, \
     MAX_ARGS_LENGTH, TERM_OPTIONS
 from bigml.model import Model
 
-from bigmler.export.out_tree.mysqltree import MySQLTree
+from bigmler.export.out_tree.mysqltree import plug_in_body
 
 class MySQLModel(Model):
 
@@ -88,8 +88,8 @@ class MySQLModel(Model):
             return_type = 'NUMERIC'
         definition = definition % (function_name, ", ".join(args), return_type)
         out.write(definition)
-        body = self.tree.plug_in_body(ids_path=ids_path, subtree=subtree,
-                                      attr=attr)
+        body = plug_in_body(ids_path=ids_path, subtree=subtree,
+                            attr=attr)
 
         out.write(body)
         out.flush()

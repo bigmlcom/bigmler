@@ -24,7 +24,7 @@ import json
 import numbers
 import math
 
-from bigml.util import slugify
+from bigml.tree_utils import slugify
 
 import bigmler.utils as u
 import bigmler.resourcesapi.evaluations as r

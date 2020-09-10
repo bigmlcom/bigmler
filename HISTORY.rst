@@ -3,11 +3,16 @@
 History
 -------
 
+4.1.0 (2020-09-11)
+~~~~~~~~~~~~~~~~~~
+
+- Updating the underlying Python bindings version to use minized models in
+  local predictions.
+
 4.0.0 (2020-08-01)
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 - Python 3 only version. Deprecating Python 2.X compatibility.
-
 
 3.27.2 (2020-07-15)
 ~~~~~~~~~~~~~~~~~~~

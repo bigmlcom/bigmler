@@ -27,10 +27,8 @@ import bigmler.utils as u
 
 
 from bigml.ensemble import Ensemble
-try:
-    from bigml.out_model.pythonmodel import PythonModel
-except ImportError:
-    from bigml.model import Model as PythonModel
+
+from bigml.model import Model as PythonModel
 
 from bigmler.defaults import DEFAULTS_FILE
 from bigmler.command import get_context

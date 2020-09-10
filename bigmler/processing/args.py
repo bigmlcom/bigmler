@@ -27,7 +27,7 @@ import json
 import bigml.api
 
 from bigml.multivote import COMBINATION_WEIGHTS, COMBINER_MAP
-from bigml.tree import LAST_PREDICTION, PROPORTIONAL
+from bigml.constants import LAST_PREDICTION, PROPORTIONAL
 
 import bigmler.utils as u
 

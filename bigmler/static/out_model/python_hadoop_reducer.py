@@ -11,7 +11,7 @@ def print_result(values, prediction, count):
 
     """
     result = "[%s, %s]" % (values, prediction)
-    print u"%s\\t%s" % (result, count)
+    print("%s\\t%s" % (result, count))
 
 for line in sys.stdin:
     values, prediction = line.strip().split('\\t')
