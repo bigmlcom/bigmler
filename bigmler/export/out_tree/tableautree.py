@@ -21,13 +21,13 @@ This module defines functions that generate tableau code to make local
 predictions
 """
 
-from bigml.tree_utils import (filter_nodes, split, ruby_string,
-                              missing_branch, none_value,
-                              one_branch, PYTHON_OPERATOR, COMPOSED_FIELDS)
+from bigml.tree_utils import (ruby_string, PYTHON_OPERATOR, COMPOSED_FIELDS)
 
-from bigml.predict_utils.common import mintree_split, get_predicate, get_node
+from bigml.predict_utils.common import mintree_split, get_predicate, get_node, \
+    missing_branch, none_value
 from bigml.predict_utils.common import OPERATION_OFFSET, FIELD_OFFSET, \
     VALUE_OFFSET, TERM_OFFSET, MISSING_OFFSET
+from bigml.generators.tree_common import filter_nodes
 
 
 T_MISSING_OPERATOR = {
@@ -128,7 +128,7 @@ def plug_in_body(tree, offsets, fields, objective_id,
     node = get_node(tree)
 
     children = filter_nodes([] if node[offsets["children#"]] == 0 \
-        else node[offsets["children"]], ids=ids_path, subtree=subtree)
+        else node[offsets["children"]], offsets, ids=ids_path, subtree=subtree)
 
     if children:
 
@@ -141,7 +141,7 @@ def plug_in_body(tree, offsets, fields, objective_id,
             fields[field]['optype'] in COMPOSED_FIELDS
         if (one_branch and
                 not fields[field]['name'] in cmv):
-            body += missing_check_code(child, offsets, fields, objective_id,
+            body += missing_check_code(tree, offsets, fields, objective_id,
                                        field, alternate, cmv,
                                        conditions, attr=attr)
             alternate = "ELSEIF"
@@ -149,16 +149,19 @@ def plug_in_body(tree, offsets, fields, objective_id,
         for child in children:
             pre_condition = ""
             post_condition = ""
-            if has_missing_branch and child.predicate.value is not None:
+            predicate = get_predicate(child)
+            [_, field, value, _, _] = predicate
+            if has_missing_branch and value is not None:
                 pre_condition = missing_prefix_code(child, fields, field, cmv)
                 post_condition = ")"
 
-            child.split_condition_code(field, conditions,
-                                       pre_condition, post_condition)
+            split_condition_code(child, fields, field, conditions,
+                                 pre_condition, post_condition)
 
-            body = child.plug_in_body(body, conditions[:], cmv=cmv[:],
-                                      ids_path=ids_path, subtree=subtree,
-                                      attr=attr)
+            body = plug_in_body(child, offsets, fields, objective_id,
+                                body, conditions[:], cmv=cmv[:],
+                                ids_path=ids_path, subtree=subtree,
+                                attr=attr)
             del conditions[-1]
     else:
         if attr is None:

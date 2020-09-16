@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 def predict_rating(gender=None,
                    occupation=None,
@@ -78,8 +77,8 @@ def predict_rating(gender=None,
     }
     term_forms = {
         "title": {
-            u"beauty": ['beauty', 'beautiful'],
-            u"day": ['day', 'days'],
+            "beauty": ['beauty', 'beautiful'],
+            "day": ['day', 'days'],
         },
     }
 

@@ -28,6 +28,7 @@ from unidecode import unidecode
 from bigml.tree_utils import (
     to_camel_js, sort_fields, docstring_comment,
     INDENT, MAX_ARGS_LENGTH, TERM_OPTIONS)
+from bigml.generators.model import get_ids_path
 
 ITEM_OPTIONS = ["separator", "separator_regexp"]
 
@@ -43,7 +44,7 @@ ITEMS_TEMPLATE = "%s/static/out_model/items_analysis.js" % BIGMLER_SCRIPT
 class JsModel(Model):
 
     def __init__(self, model, api=None, fields=None):
-        self.tree_class = JsTree
+
         Model.__init__(self, model, api, fields)
 
     def js_comment(self):
@@ -86,9 +87,10 @@ class JsModel(Model):
             field_obj = self.fields[field[0]]
             field_obj['camelCase'] = to_camel_js(unidecode(field_obj['name']))
 
+        ids_path = get_ids_path(self, filter_id)
         body, term_analysis_predicates, item_analysis_predicates = \
             plug_in_body(self.tree, self.offsets, self.fields,
-                         self.objective_id)
+                         self.objective_id, ids_path=ids_path, subtree=subtree)
         terms_body = ""
         items_body = ""
         if term_analysis_predicates:

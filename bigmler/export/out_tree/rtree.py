@@ -20,12 +20,15 @@
 This module defines functions that generate R output for the tree
 """
 
-from bigml.tree_utils import (sort_fields, filter_nodes, missing_branch,
-                              split, INDENT, PYTHON_OPERATOR, COMPOSED_FIELDS,
+from bigml.tree_utils import (sort_fields,
+                              INDENT, PYTHON_OPERATOR, COMPOSED_FIELDS,
                               NUMERIC_VALUE_FIELDS)
-from bigml.predict_utils.common import mintree_split, get_predicate, get_node
+from bigml.predict_utils.common import mintree_split, get_predicate, get_node, \
+    missing_branch
 from bigml.predict_utils.common import OPERATION_OFFSET, FIELD_OFFSET, \
     VALUE_OFFSET, TERM_OFFSET, MISSING_OFFSET
+from bigml.generators.tree_common import filter_nodes
+from bigml.util import NUMERIC
 
 
 def value_to_print(value, optype):
@@ -102,7 +105,7 @@ def split_condition_code(tree, fields, field, depth,
              value_to_print(predicate[TERM_OFFSET], 'categorical'),
              operator,
              value)
-    if self.predicate.value is None:
+    if value is None:
         cmv.append(fields[field]['dotted'])
     return "%sif (%s%s %s %s) {\n" % \
         (INDENT * depth, pre_condition,
@@ -130,7 +133,7 @@ def plug_in_body(tree, offsets, fields, objective_id,
     item_analysis_fields = []
     field_obj = fields[objective_id]
     children = filter_nodes([] if node[offsets["children#"]] == 0 \
-        else node[offsets["children"]], ids=ids_path, subtree=subtree)
+        else node[offsets["children"]], offsets, ids=ids_path, subtree=subtree)
 
     if children:
         # field used in the split
@@ -143,10 +146,10 @@ def plug_in_body(tree, offsets, fields, objective_id,
             fields[field]['optype'] in COMPOSED_FIELDS)
         if (one_branch and
                 not fields[field]['dotted'] in cmv):
-            body += missing_check_code(tree, fields, field, depth, cmv,
-                                       metric)
+            body += missing_check_code(tree, offsets, fields, objective_id,
+                                       field, depth, cmv, metric)
 
-        for child in self.children:
+        for child in children:
             [operation, field, value, term, missing] = get_predicate(child)
 
             pre_condition = ""
@@ -156,7 +159,7 @@ def plug_in_body(tree, offsets, fields, objective_id,
                 pre_condition = missing_prefix_code(child, fields, field, cmv)
 
             # complete split condition code
-            body += child.split_condition_code( \
+            body += split_condition_code( \
                 child, fields, field, depth, pre_condition,
                 term_analysis_fields, item_analysis_fields)
 

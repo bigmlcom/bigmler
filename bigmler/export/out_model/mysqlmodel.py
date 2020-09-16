@@ -25,6 +25,7 @@ import sys
 from bigml.tree_utils import slugify, INDENT, sort_fields, docstring_comment, \
     MAX_ARGS_LENGTH, TERM_OPTIONS
 from bigml.model import Model
+from bigml.generators.model import get_ids_path
 
 from bigmler.export.out_tree.mysqltree import plug_in_body
 
@@ -35,7 +36,6 @@ class MySQLModel(Model):
         """Empty attributes to be overriden
 
         """
-        self.tree_class = MySQLTree
         Model.__init__(self, model, api, fields)
 
     def plug_in(self, out=sys.stdout, filter_id=None, subtree=True, attr=None):
@@ -47,7 +47,7 @@ class MySQLModel(Model):
                than the output
 
         """
-        ids_path = self.get_ids_path(filter_id)
+        ids_path = get_ids_path(self, filter_id)
         length = self.mysql(out, ids_path=ids_path, subtree=subtree,
                             attr=attr)
         if length > 0:
@@ -88,7 +88,9 @@ class MySQLModel(Model):
             return_type = 'NUMERIC'
         definition = definition % (function_name, ", ".join(args), return_type)
         out.write(definition)
-        body = plug_in_body(ids_path=ids_path, subtree=subtree,
+        body = plug_in_body(self.tree, self.offsets, self.fields,
+                            self.objective_id,
+                            ids_path=ids_path, subtree=subtree,
                             attr=attr)
 
         out.write(body)

@@ -22,12 +22,15 @@ predictions
 """
 
 from bigml.tree_utils import (
-    filter_nodes, missing_branch, java_string, none_value,
+    java_string,
     INDENT, PYTHON_OPERATOR, MAX_ARGS_LENGTH, COMPOSED_FIELDS,
     NUMERIC_VALUE_FIELDS)
-from bigml.predict_utils.common import mintree_split, get_predicate, get_node
+from bigml.predict_utils.common import mintree_split, get_predicate, get_node, \
+    missing_branch
 from bigml.predict_utils.common import OPERATION_OFFSET, FIELD_OFFSET, \
     VALUE_OFFSET, TERM_OFFSET, MISSING_OFFSET
+from bigml.generators.tree_common import filter_nodes
+from bigml.util import NUMERIC
 
 
 
@@ -57,7 +60,7 @@ def missing_check_code(tree, offsets, fields, objective_id,
     code += "%sreturn {prediction: %s," \
         " %s: %s}}\n" % \
         (INDENT * (depth + 1), value, metric, node[offsets["confidence"]])
-    cmv.append(self.fields[field]['camelCase'])
+    cmv.append(fields[field]['camelCase'])
     return code
 
 
@@ -111,7 +114,7 @@ def split_condition_code(tree, fields, field, depth, prefix,
              value_to_print(predicate[TERM_OFFSET], 'categorical'),
              operator,
              value)
-    if predicate.value is None:
+    if value is None:
         cmv.append(fields[field]['camelCase'])
     return "%sif (%s%s%s %s %s) {\n" % \
         (INDENT * depth, pre_condition,
@@ -146,7 +149,7 @@ def plug_in_body(tree, offsets, fields, objective_id,
 
     node = get_node(tree)
     children = filter_nodes([] if node[offsets["children#"]] == 0 else \
-                            node[offsets["children"]], ids=ids_path,
+                            node[offsets["children"]], offsets, ids=ids_path,
                             subtree=subtree)
 
     if children:
@@ -182,9 +185,9 @@ def plug_in_body(tree, offsets, fields, objective_id,
                 term_analysis_fields, item_analysis_fields)
 
             # value to be determined in next node
-            next_level = child.plug_in_body(depth + 1, cmv=cmv[:],
-                                            ids_path=ids_path,
-                                            subtree=subtree)
+            next_level = plug_in_body(child, offsets, fields, objective_id,
+                                      depth + 1, cmv=cmv[:],
+                                      ids_path=ids_path, subtree=subtree)
             body += next_level[0]
             body += "%s}\n" % (INDENT * depth)
             term_analysis_fields.extend(next_level[1])

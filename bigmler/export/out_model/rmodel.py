@@ -28,8 +28,10 @@ from bigml.tree_utils import (
     TM_TOKENS, TM_FULL_TERM, TM_ALL)
 
 from bigml.model import Model
+from bigml.generators.model import docstring
 from bigmler.export.out_tree.rtree import plug_in_body
 from bigmler.reports import BIGMLER_SCRIPT
+from bigml.generators.model import get_ids_path
 
 
 # templates for static javascript
@@ -68,8 +70,11 @@ class RModel(Model):
             field_obj['dotted'] = dot(field_obj['name'])
             args.append("%s=%s" % (field_obj['dotted'], default))
 
+        ids_path = get_ids_path(self, filter_id)
         body, term_analysis_predicates, item_analysis_predicates = \
-            plug_in_body()
+            plug_in_body(self.tree, self.offsets, self.fields,
+                         self.objective_id, ids_path=ids_path,
+                         subtree=subtree)
         terms_body = ""
         items_body = ""
         if term_analysis_predicates:
@@ -83,8 +88,8 @@ class RModel(Model):
         predictor = "%s(%s){\n" % (predictor_definition,
                                    (",\n" + " " * depth).join(args))
         join_str = "\n#"
-        docstring = join_str.join(self.docstring().split("\n"))
-        predictor_doc = ("# " + docstring +
+        docstring_str = join_str.join(docstring(self).split("\n"))
+        predictor_doc = ("# " + docstring_str +
                          "\n" + "#\n")
         output = predictor_doc + predictor
         output += terms_body + items_body + body

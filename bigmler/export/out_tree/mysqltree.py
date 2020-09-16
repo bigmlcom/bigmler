@@ -21,13 +21,13 @@ This module defines functions that generate MySQL SQL code to make local
 predictions
 """
 
-from bigml.tree_utils import (filter_nodes, split, ruby_string,
-                              missing_branch, none_value,
-                              one_branch, INDENT)
-from bigml.generators.model import PYTHON_OPERATOR
+from bigml.tree_utils import (split, ruby_string, INDENT)
+from bigml.generators.model import PYTHON_OPERATOR, missing_branch, \
+    none_value
 from bigml.predict_utils.common import mintree_split, get_predicate, get_node
 from bigml.predict_utils.common import OPERATION_OFFSET, FIELD_OFFSET, \
     VALUE_OFFSET, TERM_OFFSET, MISSING_OFFSET
+from bigml.generators.tree_common import filter_nodes
 
 T_MISSING_OPERATOR = {
     "=": "ISNULL(",
@@ -127,7 +127,7 @@ def plug_in_body(tree, offsets, fields, objective_id, depth=0, cmv=None,
     name of an attribute (e.g. 'confidence') this attribute is returned
 
     """
-
+    print("*** offsets", offsets)
     if cmv is None:
         cmv = []
 
@@ -139,7 +139,7 @@ def plug_in_body(tree, offsets, fields, objective_id, depth=0, cmv=None,
 
     node = get_node(tree)
     children = filter_nodes([] if node[offsets["children#"]] == 0 \
-        else node[offsets["children"]], ids=ids_path, subtree=subtree)
+        else node[offsets["children"]], offsets, ids=ids_path, subtree=subtree)
 
     if children:
 
@@ -152,8 +152,8 @@ def plug_in_body(tree, offsets, fields, objective_id, depth=0, cmv=None,
         # no missing branch in the children list
         if (not has_missing_branch and
                 not fields[field]['name'] in cmv):
-            body += missing_check_code(tree, fields, field, alternate,
-                                       cmv, attr)
+            body += missing_check_code(tree, offsets, fields, objective_id,
+                                       field, alternate, cmv, attr)
             depth += 1
             alternate = ",\n%sIF (" % (depth * INDENT)
             post_missing_body += ")"
@@ -182,7 +182,10 @@ def plug_in_body(tree, offsets, fields, objective_id, depth=0, cmv=None,
             value = value_to_print( \
                 node[offsets["output"]], fields[objective_id]['optype'])
         else:
-            value = node.get(offsets.get(attr))
+            try:
+                value = node[offsets[attr]]
+            except KeyError:
+                value = "NULL"
         body += ", %s" % (value)
 
     return body

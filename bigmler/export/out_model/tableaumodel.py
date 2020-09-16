@@ -25,6 +25,7 @@ import sys
 from bigmler.export.out_tree.tableautree import plug_in_body
 
 from bigml.model import Model
+from bigml.generators.model import get_ids_path
 
 class TableauModel(Model):
 
@@ -42,7 +43,7 @@ class TableauModel(Model):
         `out` is file descriptor to write the tableau code.
 
         """
-        ids_path = self.get_ids_path(filter_id)
+        ids_path = get_ids_path(self, filter_id)
         length = self.tableau(out, ids_path=ids_path,
                               subtree=subtree, attr=attr)
         if length > 0:
@@ -58,8 +59,9 @@ class TableauModel(Model):
         """Writes a Tableau function that implements the model.
 
         """
-        body = plug_in_body(ids_path=ids_path, subtree=subtree,
-                            attr=attr)
+        body = plug_in_body(self.tree, self.offsets, self.fields,
+                            self.objective_id, ids_path=ids_path,
+                            subtree=subtree, attr=attr)
         out.write(body)
         out.flush()
         return len(body)
