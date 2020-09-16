@@ -21,7 +21,6 @@
 
 import sys
 import os
-import shutil
 
 import bigml.api
 import bigmler.utils as u

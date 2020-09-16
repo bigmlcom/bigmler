@@ -22,9 +22,11 @@ import sys
 import ast
 import gc
 
+from functools import partial
+
 import bigml.api
 
-from bigml.model import Model
+from bigml.model import Model, to_prediction
 from bigml.multimodel import MultiModel, read_votes
 from bigml.ensemble import Ensemble
 from bigml.util import localize, console_log, get_predictions_file_name
@@ -255,7 +257,7 @@ def remote_predict_models(models, test_reader, prediction_file, api, args,
         prediction_file.close_writer()
     else:
         combine_votes(predictions_files,
-                      Model(models[0]).to_prediction,
+                      partial(Model(models[0]), to_prediction),
                       prediction_file, args.method,
                       args.prediction_info, raw_input_data_list, exclude)
 

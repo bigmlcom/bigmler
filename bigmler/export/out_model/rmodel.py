@@ -23,15 +23,15 @@ predictions
 import sys
 
 from bigml.tree_utils import (
-    to_camel_js, sort_fields, docstring_comment, slugify,
-    INDENT, MAX_ARGS_LENGTH, TERM_OPTIONS, ITEM_OPTIONS,
+    to_camel_js, sort_fields, slugify,
+    INDENT, TERM_OPTIONS, ITEM_OPTIONS,
     TM_TOKENS, TM_FULL_TERM, TM_ALL)
-
 from bigml.model import Model
 from bigml.generators.model import docstring
+from bigml.generators.model import get_ids_path
+
 from bigmler.export.out_tree.rtree import plug_in_body
 from bigmler.reports import BIGMLER_SCRIPT
-from bigml.generators.model import get_ids_path
 
 
 # templates for static javascript
@@ -64,8 +64,7 @@ class RModel(Model):
         objective_field['CamelCase'] = camelcase
         default = "NA"
         args = []
-        for field in [(key, val) for key, val in
-                      sort_fields(self.fields)]:
+        for field in sort_fields(self.fields):
             field_obj = self.fields[field[0]]
             field_obj['dotted'] = dot(field_obj['name'])
             args.append("%s=%s" % (field_obj['dotted'], default))
@@ -101,7 +100,7 @@ class RModel(Model):
         """ Writes auxiliary functions to handle the term analysis fields
 
         """
-        term_analysis_options = set([x[0] for x in term_analysis_predicates])
+        term_analysis_options = {x[0] for x in term_analysis_predicates}
         term_analysis_predicates = set(term_analysis_predicates)
 
         body = ""

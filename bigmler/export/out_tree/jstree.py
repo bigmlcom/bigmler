@@ -22,7 +22,6 @@ predictions
 """
 
 from bigml.tree_utils import (
-    java_string,
     INDENT, PYTHON_OPERATOR, MAX_ARGS_LENGTH, COMPOSED_FIELDS,
     NUMERIC_VALUE_FIELDS)
 from bigml.predict_utils.common import mintree_split, get_predicate, get_node, \
@@ -84,7 +83,7 @@ def missing_prefix_code(tree, fields, field, prefix, cmv):
 
 def split_condition_code(tree, fields, field, depth, prefix,
                          pre_condition, term_analysis_fields,
-                         item_analysis_fields):
+                         item_analysis_fields, cmv):
     """Condition code for the split
 
     """
@@ -182,7 +181,7 @@ def plug_in_body(tree, offsets, fields, objective_id,
             body += split_condition_code( \
                 child, fields,
                 field, depth, prefix, pre_condition,
-                term_analysis_fields, item_analysis_fields)
+                term_analysis_fields, item_analysis_fields, cmv)
 
             # value to be determined in next node
             next_level = plug_in_body(child, offsets, fields, objective_id,

@@ -205,7 +205,7 @@ def reify_resources(args, api):
         write_nb_output(resource_id, \
             exe_output, args.output.replace(".py", ".ipynb"), api)
         return
-    elif args.language == "whizzml":
+    if args.language == "whizzml":
         output = exe_output["source_code"]
         args.output = args.output.replace(".py", ".whizzml")
         exe_output["source_code"] = args.output

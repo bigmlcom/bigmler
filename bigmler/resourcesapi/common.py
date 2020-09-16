@@ -114,13 +114,12 @@ def configure_input_fields(fields, user_given_fields, by_name=False):
     else:
         if by_name:
             return user_given_fields
-        else:
-            input_fields = []
-            for name in user_given_fields:
-                try:
-                    input_fields.append(fields.field_id(name))
-                except ValueError as exc:
-                    sys.exit(exc)
+        input_fields = []
+        for name in user_given_fields:
+            try:
+                input_fields.append(fields.field_id(name))
+            except ValueError as exc:
+                sys.exit(exc)
     return input_fields
 
 
@@ -200,14 +199,14 @@ def wait_for_available_tasks(inprogress, max_parallel, api,
 
     check_kwargs = {"retries": 0, "query_string": "full=false", "api": api}
     while len(inprogress) == max_parallel:
-        for j in range(0, len(inprogress)):
+        for j, resource_id in enumerate(inprogress):
             try:
-                ready = check_resource(inprogress[j], **check_kwargs)
+                ready = check_resource(resource_id, **check_kwargs)
                 status = bigml.api.get_status(ready)
                 if status['code'] == bigml.api.FINISHED:
                     del inprogress[j]
                     return
-                elif status['code'] == bigml.api.FAULTY:
+                if status['code'] == bigml.api.FAULTY:
                     raise ValueError(status['message'])
             except ValueError as exception:
                 sys.exit("Failed to get a finished %s: %s" %

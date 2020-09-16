@@ -22,10 +22,11 @@ predictions
 """
 import sys
 
-from bigmler.export.out_tree.tableautree import plug_in_body
-
 from bigml.model import Model
 from bigml.generators.model import get_ids_path
+
+from bigmler.export.out_tree.tableautree import plug_in_body
+
 
 class TableauModel(Model):
 

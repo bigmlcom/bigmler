@@ -21,12 +21,12 @@ This module defines functions that generate MySQL SQL code to make local
 predictions
 """
 
-from bigml.tree_utils import (split, ruby_string, INDENT)
+from bigml.tree_utils import INDENT
 from bigml.generators.model import PYTHON_OPERATOR, missing_branch, \
     none_value
 from bigml.predict_utils.common import mintree_split, get_predicate, get_node
 from bigml.predict_utils.common import OPERATION_OFFSET, FIELD_OFFSET, \
-    VALUE_OFFSET, TERM_OFFSET, MISSING_OFFSET
+    VALUE_OFFSET, MISSING_OFFSET
 from bigml.generators.tree_common import filter_nodes
 
 T_MISSING_OPERATOR = {
@@ -42,9 +42,9 @@ def value_to_print(value, optype):
     """String of code that represents a value according to its type
 
     """
-    if (value is None):
+    if value is None:
         return "NULL"
-    if (optype == 'numeric'):
+    if optype == 'numeric':
         return value
     return "'%s'" % value.replace("'", '\\\'')
 
@@ -60,7 +60,7 @@ def missing_check_code(tree, offsets, fields, objective_id,
              (alternate, condition))
 
     # used when printing the confidence metric
-    if attr != None:
+    if attr is not None:
         value = node[offsets[attr]]
     else:
         value = value_to_print( \
@@ -127,7 +127,6 @@ def plug_in_body(tree, offsets, fields, objective_id, depth=0, cmv=None,
     name of an attribute (e.g. 'confidence') this attribute is returned
 
     """
-    print("*** offsets", offsets)
     if cmv is None:
         cmv = []
 

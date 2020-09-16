@@ -77,13 +77,12 @@ def get_categories_distribution(dataset, objective_id):
                 if 'categories' in summary:
                     distribution = summary['categories']
             return distribution
-        elif dataset_info['objective_field']['optype'] == 'text':
+        if dataset_info['objective_field']['optype'] == 'text':
             summary = dataset_info['fields'][objective_id]['summary']
             if 'tag_cloud' in summary:
                 distribution = summary['tag_cloud']
             return distribution
-        else:
-            return []
+        return []
     except KeyError:
         return []
 

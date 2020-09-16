@@ -24,9 +24,9 @@ import os
 import re
 import gc
 
-import bigml.api
-
 from functools import partial
+
+import bigml.api
 
 from bigml.model import Model, to_prediction
 from bigml.basemodel import retrieve_resource
@@ -240,7 +240,7 @@ def compute_output(api, args):
               [label.strip() for label in
                args.labels.split(args.args_separator)])
     if labels is not None:
-        labels = sorted([label for label in labels])
+        labels = sorted(labels)
 
     # multi_label file must be preprocessed to obtain a new extended file
     if args.multi_label and args.training_set is not None:

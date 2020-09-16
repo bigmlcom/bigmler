@@ -20,12 +20,11 @@
 This module defines functions that generate R output for the tree
 """
 
-from bigml.tree_utils import (sort_fields,
-                              INDENT, PYTHON_OPERATOR, COMPOSED_FIELDS,
-                              NUMERIC_VALUE_FIELDS)
+from bigml.tree_utils import (
+    INDENT, PYTHON_OPERATOR, COMPOSED_FIELDS, NUMERIC_VALUE_FIELDS)
 from bigml.predict_utils.common import mintree_split, get_predicate, get_node, \
     missing_branch
-from bigml.predict_utils.common import OPERATION_OFFSET, FIELD_OFFSET, \
+from bigml.predict_utils.common import OPERATION_OFFSET, \
     VALUE_OFFSET, TERM_OFFSET, MISSING_OFFSET
 from bigml.generators.tree_common import filter_nodes
 from bigml.util import NUMERIC
@@ -79,7 +78,7 @@ def missing_prefix_code(tree, fields, field, cmv):
 
 def split_condition_code(tree, fields, field, depth,
                          pre_condition, term_analysis_fields,
-                         item_analysis_fields):
+                         item_analysis_fields, cmv):
     """Condition code for the split
 
     """
@@ -150,7 +149,7 @@ def plug_in_body(tree, offsets, fields, objective_id,
                                        field, depth, cmv, metric)
 
         for child in children:
-            [operation, field, value, term, missing] = get_predicate(child)
+            [_, field, value, _, _] = get_predicate(child)
 
             pre_condition = ""
             # code when missing_splits has been used
@@ -161,7 +160,7 @@ def plug_in_body(tree, offsets, fields, objective_id,
             # complete split condition code
             body += split_condition_code( \
                 child, fields, field, depth, pre_condition,
-                term_analysis_fields, item_analysis_fields)
+                term_analysis_fields, item_analysis_fields, cmv)
 
             # value to be determined in next node
             next_level = plug_in_body(child, offsets, fields, objective_id,
@@ -174,7 +173,7 @@ def plug_in_body(tree, offsets, fields, objective_id,
             item_analysis_fields.extend(next_level[2])
     else:
         value = value_to_print(node[offsets["output"]],
-                               fields[objective_id]['optype'])
+                               field_obj['optype'])
         body = "%sreturn(list(prediction=%s, %s=%s))\n" % \
               (INDENT * depth,
                value, metric, node[offsets["confidence"]])

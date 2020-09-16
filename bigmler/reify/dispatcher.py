@@ -52,13 +52,6 @@ def reify_dispatcher(args=sys.argv[1:]):
 
     command_args, _, api, session_file, _ = get_context(args, SETTINGS)
 
-    def logger(message):
-        """Partial to log messages according to args.verbosity
-
-        """
-        u.log_message(u.dated(message), \
-            log_file=session_file, console=command_args.verbosity)
-
     message = "Starting reification for %s\n\n" % command_args.resource_id
     u.log_message(message, \
         log_file=session_file, console=command_args.verbosity)

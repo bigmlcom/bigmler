@@ -22,8 +22,7 @@ predictions
 """
 import sys
 
-from bigml.tree_utils import slugify, INDENT, sort_fields, docstring_comment, \
-    MAX_ARGS_LENGTH, TERM_OPTIONS
+from bigml.tree_utils import sort_fields
 from bigml.model import Model
 from bigml.generators.model import get_ids_path
 

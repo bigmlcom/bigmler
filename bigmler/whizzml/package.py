@@ -89,14 +89,13 @@ def rebuild_command(args):
 def different_command(next_command, command):
     if next_command == command:
         return False
-    else:
-        if 'name=BigMLer_' in command:
-            # the difference may be due to the timestamp of default name
-            # parameter
-            pattern = re.compile(r'name=Bigmler_[^\s]+')
-            return re.sub(pattern, "", next_command) == re.sub(pattern,
-                                                               "", command)
-        return False
+    if 'name=BigMLer_' in command:
+        # the difference may be due to the timestamp of default name
+        # parameter
+        pattern = re.compile(r'name=Bigmler_[^\s]+')
+        return re.sub(pattern, "", next_command) == re.sub(pattern,
+                                                           "", command)
+    return False
 
 
 def read_library_id(path):

@@ -16,8 +16,15 @@
 # under the License.
 
 import inspect
-import json
 import pprint
+
+
+from bigml.util import cast, NUMERIC
+from bigml.predicate import TM_FULL_TERM, TM_ALL
+from bigml.cluster import parse_terms, parse_items
+from bigml.logistic import LogisticRegression, balance_input
+from bigml.modelfields import get_unique_terms
+
 
 COPYRIGHT = """\
 # -*- coding: utf-8 -*-
@@ -43,12 +50,6 @@ import math
 import re
 
 """
-
-from bigml.util import cast, NUMERIC
-from bigml.predicate import TM_FULL_TERM, TM_ALL
-from bigml.cluster import parse_terms, parse_items
-from bigml.logistic import LogisticRegression, balance_input
-from bigml.modelfields import get_unique_terms
 
 CONSTANTS = """
 EXPANSION_ATTRIBUTES = {"categorical": "categories", "text": "tag_cloud",

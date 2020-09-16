@@ -126,7 +126,7 @@ def script_processing(api, args,
         script = bigml.api.get_script_id(args.script)
         scripts = [script]
     elif args.scripts:
-        scripts = [script for script in args.script_ids]
+        scripts = args.script_ids[:]
         script = scripts[0]
     return script, scripts
 

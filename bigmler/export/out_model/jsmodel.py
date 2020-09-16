@@ -29,13 +29,13 @@ from bigml.tree_utils import (
     to_camel_js, sort_fields, docstring_comment,
     INDENT, MAX_ARGS_LENGTH, TERM_OPTIONS)
 from bigml.generators.model import get_ids_path
-
-ITEM_OPTIONS = ["separator", "separator_regexp"]
-
 from bigml.model import Model
 
 from bigmler.export.out_tree.jstree import plug_in_body
 from bigmler.reports import BIGMLER_SCRIPT
+
+
+ITEM_OPTIONS = ["separator", "separator_regexp"]
 
 # templates for static javascript
 TERM_TEMPLATE = "%s/static/out_model/term_analysis.js" % BIGMLER_SCRIPT
@@ -78,12 +78,13 @@ class JsModel(Model):
         `out` is file descriptor to write the javascript code.
 
         """
+        if hadoop:
+            raise ValueError("No JS Hadoop implementation.")
         # fill the camelcase variable names with the JS_KEYWORDS restrictions
         objective_field = self.fields[self.objective_id]
         camelcase = to_camel_js(unidecode(objective_field['name']), False)
         objective_field['CamelCase'] = camelcase
-        for field in [(key, val) for key, val in
-                      sort_fields(self.fields)]:
+        for field in sort_fields(self.fields):
             field_obj = self.fields[field[0]]
             field_obj['camelCase'] = to_camel_js(unidecode(field_obj['name']))
 
@@ -118,8 +119,7 @@ class JsModel(Model):
         if len(self.fields) > MAX_ARGS_LENGTH or input_map:
             args.append("data")
         else:
-            for field in [(key, val) for key, val in
-                          sort_fields(self.fields)]:
+            for field in sort_fields(self.fields):
                 field_obj = self.fields[field[0]]
                 if not 'camelCase' in field_obj:
                     field_obj['camelCase'] = to_camel_js( \
@@ -136,7 +136,7 @@ class JsModel(Model):
             auxiliary functions to handle the term analysis fields
 
         """
-        term_analysis_options = set([x[0] for x in term_analysis_predicates])
+        term_analysis_options = {x[0] for x in term_analysis_predicates}
         term_analysis_predicates = set(term_analysis_predicates)
 
         body = ""
@@ -206,7 +206,7 @@ class JsModel(Model):
         """ Writes auxiliary functions to handle the item analysis fields
 
         """
-        item_analysis_options = set([x[0] for x in item_analysis_predicates])
+        item_analysis_options = {x[0] for x in item_analysis_predicates}
         item_analysis_predicates = set(item_analysis_predicates)
 
         body = ""

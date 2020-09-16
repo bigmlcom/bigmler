@@ -21,12 +21,12 @@ This module defines functions that generate tableau code to make local
 predictions
 """
 
-from bigml.tree_utils import (ruby_string, PYTHON_OPERATOR, COMPOSED_FIELDS)
+from bigml.tree_utils import PYTHON_OPERATOR, COMPOSED_FIELDS
 
 from bigml.predict_utils.common import mintree_split, get_predicate, get_node, \
     missing_branch, none_value
 from bigml.predict_utils.common import OPERATION_OFFSET, FIELD_OFFSET, \
-    VALUE_OFFSET, TERM_OFFSET, MISSING_OFFSET
+    VALUE_OFFSET, MISSING_OFFSET
 from bigml.generators.tree_common import filter_nodes
 
 
@@ -40,9 +40,9 @@ def value_to_print(value, optype):
     """String of code that represents a value according to its type
 
     """
-    if (value is None):
+    if value is None:
         return "NULL"
-    if (optype == 'numeric'):
+    if optype == 'numeric':
         return value
     return "'%s'" % value.replace("'", '\\\'')
 
@@ -119,7 +119,7 @@ def plug_in_body(tree, offsets, fields, objective_id,
         cmv = []
 
     if body:
-         alternate = "ELSEIF"
+        alternate = "ELSEIF"
     else:
         if conditions is None:
             conditions = []

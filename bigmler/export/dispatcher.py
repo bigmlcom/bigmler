@@ -23,13 +23,12 @@ import sys
 import os
 
 
-import bigmler.utils as u
-
-
 from bigml.ensemble import Ensemble
 
 from bigml.model import Model as PythonModel
 from bigml.generators.model import python
+
+import bigmler.utils as u
 
 from bigmler.defaults import DEFAULTS_FILE
 from bigmler.command import get_context
@@ -109,12 +108,10 @@ def generate_output(local_model, args, model_type="model", attr="confidence"):
     # creating a separate file to predict confidence
     if args.language in SEPARATE_OUTPUT:
         with open(os.path.join(args.output_dir, \
-            "%s_confidence.%s") % (getattr(args, model_type).replace("/", "_"),
-                                   EXTENSIONS[args.language]), "w") as handler:
-            if args.language == "python":
-                python(local_model, out=handler, attr=attr)
-            else:
-                local_model.plug_in(out=handler, attr=attr)
+            "%s_%s.%s") % (getattr(args, model_type).replace("/", "_"),
+                           attr,
+                           EXTENSIONS[args.language]), "w") as handler:
+            local_model.plug_in(out=handler, attr=attr)
 
 
 def export_code(args, api=None):
