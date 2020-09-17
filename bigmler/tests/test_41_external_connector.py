@@ -91,7 +91,7 @@ class TestExternalConnector(object):
             ['my connection', 'postgresql', HOST,
             PORT, USER, PASSWORD, DATABASE, 'scenario_41',
             'my new connection', 'scenario_41/my_connector.json',
-            'select * from rnacen.auth_group']]
+            'select * from iris']]
         for example in examples:
             print("\nTesting with:\n", example)
             external_connection.i_create_external_connector( \

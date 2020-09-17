@@ -1,6 +1,8 @@
 language: python
 python:
   - "3.8"
+services:
+  - postgresql
 env:
   - BML_TESTS="01 02 03 04 05"
   - BML_TESTS="06 07 08 09 10 11 12 13 14 15 16"
@@ -9,6 +11,14 @@ env:
   - BML_TESTS="23 24 25 26 27 36 38 39 40"
   - BML_TESTS="28 29 30 31 32 33 41"
   - BML_TESTS="37"
+
+before_script:
+  - psql -c 'create database $BIGML_EXTERNAL_CONN_DB;' -U postgres
+  - psql -c 'CREATE ROLE $BIGML_EXTERNAL_CONN_USER LOGIN $BIGML_EXTERNAL_CONN_PWD'; -U postgres
+  - psql -c 'GRANT SELECT ON DATABASE $BIGML_EXTERNAL_CONN_DB TO $BIGML_EXTERNAL_CONN_USER;' -U postgres
+  - psql -c 'CREATE TABLE iris(petal_length DECIMAL(10,2), petal_width DECIMAL(10,2), sepal_length DECIMAL(10,2), sepal_width DECIMAL(10,2), species varchar(255));'
+  - psql -c 'INSERT INTO iris(petal_length, petal_width, sepal_length, sepal_width, species) VALUES (5.1,3.5,1.4,0.2,"Iris-setosa");'
+
 # command to install dependencies
 install:
   - pip install cython
