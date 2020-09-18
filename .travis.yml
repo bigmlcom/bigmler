@@ -17,9 +17,6 @@ env:
   - BML_TESTS="23 24 25 26 27 36 38 39 40"
   - BML_TESTS="28 29 30 31 32 33 41"
   - BML_TESTS="37"
-  global:
-    - PGUSER=postgres
-    - PGPORT=5432
 # command to install dependencies
 install:
   - pip install cython
