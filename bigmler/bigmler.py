@@ -48,7 +48,6 @@ import sys
 
 import bigmler.dispatchers as bd
 from bigmler.parser import SUBCOMMANDS
-from bigmler.utils import BIGML_SYS_ENCODING
 
 
 def check_delete_option(args):

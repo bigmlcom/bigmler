@@ -23,12 +23,14 @@ predictions
 import sys
 
 from bigml.tree_utils import (
-    to_camel_js, sort_fields, docstring_comment, slugify,
-    INDENT, MAX_ARGS_LENGTH, TERM_OPTIONS, ITEM_OPTIONS,
+    to_camel_js, sort_fields, slugify,
+    INDENT, TERM_OPTIONS, ITEM_OPTIONS,
     TM_TOKENS, TM_FULL_TERM, TM_ALL)
-
 from bigml.model import Model
-from bigmler.export.out_tree.rtree import RTree
+from bigml.generators.model import docstring
+from bigml.generators.model import get_ids_path
+
+from bigmler.export.out_tree.rtree import plug_in_body
 from bigmler.reports import BIGMLER_SCRIPT
 
 
@@ -50,7 +52,6 @@ class RModel(Model):
         """Empty attributes to be overriden
 
         """
-        self.tree_class = RTree
         Model.__init__(self, model, api, fields)
 
     def plug_in(self, out=sys.stdout, filter_id=None, subtree=True):
@@ -58,19 +59,21 @@ class RModel(Model):
 
         """
         # fill the dotted variable names with the R_KEYWORDS restrictions
-        objective_field = self.tree.fields[self.tree.objective_id]
+        objective_field = self.fields[self.objective_id]
         camelcase = to_camel_js(objective_field['name'], False)
         objective_field['CamelCase'] = camelcase
         default = "NA"
         args = []
-        for field in [(key, val) for key, val in
-                      sort_fields(self.tree.fields)]:
-            field_obj = self.tree.fields[field[0]]
+        for field in sort_fields(self.fields):
+            field_obj = self.fields[field[0]]
             field_obj['dotted'] = dot(field_obj['name'])
             args.append("%s=%s" % (field_obj['dotted'], default))
 
+        ids_path = get_ids_path(self, filter_id)
         body, term_analysis_predicates, item_analysis_predicates = \
-            self.tree.plug_in_body()
+            plug_in_body(self.tree, self.offsets, self.fields,
+                         self.objective_id, ids_path=ids_path,
+                         subtree=subtree)
         terms_body = ""
         items_body = ""
         if term_analysis_predicates:
@@ -84,8 +87,8 @@ class RModel(Model):
         predictor = "%s(%s){\n" % (predictor_definition,
                                    (",\n" + " " * depth).join(args))
         join_str = "\n#"
-        docstring = join_str.join(self.docstring().split("\n"))
-        predictor_doc = ("# " + docstring +
+        docstring_str = join_str.join(docstring(self).split("\n"))
+        predictor_doc = ("# " + docstring_str +
                          "\n" + "#\n")
         output = predictor_doc + predictor
         output += terms_body + items_body + body
@@ -97,7 +100,7 @@ class RModel(Model):
         """ Writes auxiliary functions to handle the term analysis fields
 
         """
-        term_analysis_options = set([x[0] for x in term_analysis_predicates])
+        term_analysis_options = {x[0] for x in term_analysis_predicates}
         term_analysis_predicates = set(term_analysis_predicates)
 
         body = ""
@@ -107,7 +110,7 @@ class RModel(Model):
         lines = []
         for field_id in term_analysis_options:
             inner_lines = []
-            field = self.tree.fields[field_id]
+            field = self.fields[field_id]
             lines.append("""
         \"%s\"=list(""" % field['dotted'])
             options = sorted(field['term_analysis'].keys())
@@ -130,7 +133,7 @@ class RModel(Model):
 
         if term_analysis_predicates:
             term_forms = {}
-            fields = self.tree.fields
+            fields = self.fields
             for field_id, term in term_analysis_predicates:
                 alternatives = []
                 field = fields[field_id]
@@ -190,7 +193,7 @@ class RModel(Model):
         lines = []
         for field_id in item_analysis_options:
             inner_lines = []
-            field = self.tree.fields[field_id]
+            field = self.fields[field_id]
             lines.append("""
         \"%s\"=list(""" % field['dotted'])
             for option in field['item_analysis']:

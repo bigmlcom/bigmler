@@ -24,10 +24,12 @@ import os
 import datetime
 import json
 
+from io import StringIO
+
 import bigml.api
 
 from bigml.multivote import COMBINATION_WEIGHTS, COMBINER_MAP
-from bigml.tree import LAST_PREDICTION, PROPORTIONAL
+from bigml.constants import LAST_PREDICTION, PROPORTIONAL
 
 import bigmler.utils as u
 
@@ -36,7 +38,6 @@ from bigmler.prediction import FULL_FORMAT, COMBINATION, COMBINATION_LABEL
 from bigmler.train_reader import AGGREGATES
 from bigmler.utils import check_dir
 
-from io import StringIO
 
 # Date and time in format SunNov0412_120510 to name and tag resources
 NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
@@ -63,7 +64,7 @@ def has_value(args, attrs):
     if isinstance(attrs, list):
         return [hasattr(args, attr) and getattr(args, attr)
                 for attr in attrs]
-    elif isinstance(attrs, str):
+    if isinstance(attrs, str):
         return hasattr(args, attrs) and getattr(args, attrs)
     return False
 
@@ -164,15 +165,15 @@ def get_command_message(args):
 
     """
     literal_args = args[:]
-    for i in range(0, len(args)):
+    for i, arg in enumerate(args):
         # quoting literals with blanks: 'petal length'
-        if ' ' in args[i]:
+        if ' ' in arg:
             prefix = ""
-            literal = args[i]
+            literal = arg
             # literals with blanks after "+" or "-": +'petal length'
-            if args[i][0] in ADD_REMOVE_PREFIX:
-                prefix = args[i][0]
-                literal = args[i][1:]
+            if arg[0] in ADD_REMOVE_PREFIX:
+                prefix = arg[0]
+                literal = arg[1:]
             literal_args[i] = '"%s%s"' % (prefix, literal)
     return "bigmler %s\n" % " ".join(literal_args)
 

@@ -22,9 +22,11 @@ import sys
 import ast
 import gc
 
+from functools import partial
+
 import bigml.api
 
-from bigml.model import Model
+from bigml.model import Model, to_prediction
 from bigml.multimodel import MultiModel, read_votes
 from bigml.ensemble import Ensemble
 from bigml.util import localize, console_log, get_predictions_file_name
@@ -255,7 +257,7 @@ def remote_predict_models(models, test_reader, prediction_file, api, args,
         prediction_file.close_writer()
     else:
         combine_votes(predictions_files,
-                      Model(models[0]).to_prediction,
+                      partial(Model(models[0]), to_prediction),
                       prediction_file, args.method,
                       args.prediction_info, raw_input_data_list, exclude)
 
@@ -320,7 +322,7 @@ def local_predict(models, test_reader, output, args, options=None,
         input_data_dict = dict(list(zip(test_reader.raw_headers, input_data)))
         prediction = local_model.predict(
             input_data_dict, **kwargs)
-        if single_model and args.median and local_model.tree.regression:
+        if single_model and args.median and local_model.regression:
             # only single models' predictions can be based on the median value
             # predict
             prediction["prediction"] = prediction["median"]
@@ -636,7 +638,7 @@ def predict(models, fields, args, api=None, log=None,
                 # objective summary of each model becaus model are built with
                 # sampling
                 objective_field = local_model.objective_id
-                distribution = local_model.tree.fields[objective_field][ \
+                distribution = local_model.fields[objective_field][ \
                     "summary"]["categories"]
                 args.threshold_class = distribution[0][0]
             options.update(category=args.threshold_class)

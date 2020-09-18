@@ -28,13 +28,14 @@ from unidecode import unidecode
 from bigml.tree_utils import (
     to_camel_js, sort_fields, docstring_comment,
     INDENT, MAX_ARGS_LENGTH, TERM_OPTIONS)
-
-ITEM_OPTIONS = ["separator", "separator_regexp"]
-
+from bigml.generators.model import get_ids_path
 from bigml.model import Model
 
-from bigmler.export.out_tree.jstree import JsTree
+from bigmler.export.out_tree.jstree import plug_in_body
 from bigmler.reports import BIGMLER_SCRIPT
+
+
+ITEM_OPTIONS = ["separator", "separator_regexp"]
 
 # templates for static javascript
 TERM_TEMPLATE = "%s/static/out_model/term_analysis.js" % BIGMLER_SCRIPT
@@ -43,7 +44,7 @@ ITEMS_TEMPLATE = "%s/static/out_model/items_analysis.js" % BIGMLER_SCRIPT
 class JsModel(Model):
 
     def __init__(self, model, api=None, fields=None):
-        self.tree_class = JsTree
+
         Model.__init__(self, model, api, fields)
 
     def js_comment(self):
@@ -77,17 +78,20 @@ class JsModel(Model):
         `out` is file descriptor to write the javascript code.
 
         """
+        if hadoop:
+            raise ValueError("No JS Hadoop implementation.")
         # fill the camelcase variable names with the JS_KEYWORDS restrictions
-        objective_field = self.tree.fields[self.tree.objective_id]
+        objective_field = self.fields[self.objective_id]
         camelcase = to_camel_js(unidecode(objective_field['name']), False)
         objective_field['CamelCase'] = camelcase
-        for field in [(key, val) for key, val in
-                      sort_fields(self.tree.fields)]:
-            field_obj = self.tree.fields[field[0]]
+        for field in sort_fields(self.fields):
+            field_obj = self.fields[field[0]]
             field_obj['camelCase'] = to_camel_js(unidecode(field_obj['name']))
 
+        ids_path = get_ids_path(self, filter_id)
         body, term_analysis_predicates, item_analysis_predicates = \
-            self.tree.plug_in_body()
+            plug_in_body(self.tree, self.offsets, self.fields,
+                         self.objective_id, ids_path=ids_path, subtree=subtree)
         terms_body = ""
         items_body = ""
         if term_analysis_predicates:
@@ -104,7 +108,7 @@ class JsModel(Model):
         """Returns a the javascript signature for a prediction method.
 
         """
-        objective_field = self.tree.fields[self.tree.objective_id]
+        objective_field = self.fields[self.objective_id]
         if not 'CamelCase' in objective_field:
             camelcase = to_camel_js(unidecode(objective_field['name']), False)
             objective_field['CamelCase'] = camelcase
@@ -112,16 +116,15 @@ class JsModel(Model):
         output = "function predict%s(" % objective_field['CamelCase']
 
         args = []
-        if len(self.tree.fields) > MAX_ARGS_LENGTH or input_map:
+        if len(self.fields) > MAX_ARGS_LENGTH or input_map:
             args.append("data")
         else:
-            for field in [(key, val) for key, val in
-                          sort_fields(self.tree.fields)]:
-                field_obj = self.tree.fields[field[0]]
+            for field in sort_fields(self.fields):
+                field_obj = self.fields[field[0]]
                 if not 'camelCase' in field_obj:
                     field_obj['camelCase'] = to_camel_js( \
                         unidecode(field_obj['name']))
-                if field[0] != self.tree.objective_id:
+                if field[0] != self.objective_id:
                     args.append("%s" % field_obj['camelCase'])
         args_string = ", ".join(args)
         output += args_string + ")"
@@ -133,7 +136,7 @@ class JsModel(Model):
             auxiliary functions to handle the term analysis fields
 
         """
-        term_analysis_options = set([x[0] for x in term_analysis_predicates])
+        term_analysis_options = {x[0] for x in term_analysis_predicates}
         term_analysis_predicates = set(term_analysis_predicates)
 
         body = ""
@@ -141,7 +144,7 @@ class JsModel(Model):
         body += """
     var TERM_ANALYSIS = {"""
         for field_id in term_analysis_options:
-            field = self.tree.fields[field_id]
+            field = self.fields[field_id]
             body += """
         \"%s\": {""" % field['camelCase']
             options = sorted(field['term_analysis'].keys())
@@ -163,7 +166,7 @@ class JsModel(Model):
 
         if term_analysis_predicates:
             term_forms = {}
-            fields = self.tree.fields
+            fields = self.fields
             for field_id, term in term_analysis_predicates:
                 alternatives = []
                 field = fields[field_id]
@@ -203,7 +206,7 @@ class JsModel(Model):
         """ Writes auxiliary functions to handle the item analysis fields
 
         """
-        item_analysis_options = set([x[0] for x in item_analysis_predicates])
+        item_analysis_options = {x[0] for x in item_analysis_predicates}
         item_analysis_predicates = set(item_analysis_predicates)
 
         body = ""
@@ -211,7 +214,7 @@ class JsModel(Model):
         body += """
     var ITEM_ANALYSIS = {"""
         for field_id in item_analysis_options:
-            field = self.tree.fields[field_id]
+            field = self.fields[field_id]
             body += """
         \"%s\": {""" % field['camelCase']
             for option in field['item_analysis']:

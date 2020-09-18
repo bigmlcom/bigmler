@@ -228,8 +228,7 @@ def compute_output(api, args):
                               args, resume,
                               fields=fields, dataset_fields=test_fields,
                               session_file=session_file, path=path,
-                              log=log,
-                              objective_field=args.objective_field)
+                              log=log)
         else:
             dataset = datasets[0]
             if args.test_split > 0 or args.has_test_datasets_:

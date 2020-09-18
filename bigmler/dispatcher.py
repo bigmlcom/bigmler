@@ -24,9 +24,11 @@ import os
 import re
 import gc
 
+from functools import partial
+
 import bigml.api
 
-from bigml.model import Model
+from bigml.model import Model, to_prediction
 from bigml.basemodel import retrieve_resource
 from bigml.fields import Fields
 
@@ -238,7 +240,7 @@ def compute_output(api, args):
               [label.strip() for label in
                args.labels.split(args.args_separator)])
     if labels is not None:
-        labels = sorted([label for label in labels])
+        labels = sorted(labels)
 
     # multi_label file must be preprocessed to obtain a new extended file
     if args.multi_label and args.training_set is not None:
@@ -587,7 +589,7 @@ def compute_output(api, args):
         u.log_message(message, log_file=session_file,
                       console=args.verbosity)
 
-        combine_votes(args.votes_files_, local_model.to_prediction,
+        combine_votes(args.votes_files_, partial(to_prediction, local_model),
                       output, method=args.method)
 
     # If evaluate flag is on, create remote evaluation and save results in

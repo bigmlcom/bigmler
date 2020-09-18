@@ -228,7 +228,7 @@ def args_to_dict(args):
     return args_dict
 
 
-class Command(object):
+class Command():
     """Objects derived from user given command and the user defaults file
 
     """
@@ -285,7 +285,7 @@ class Command(object):
         return new_command_args
 
 
-class StoredCommand(object):
+class StoredCommand():
     """Objects derived from a stored bigmler command
 
     """

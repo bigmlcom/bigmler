@@ -26,12 +26,12 @@ import sys
 from bigml.util import get_csv_delimiter
 from bigml.io import UnicodeReader
 
-from bigmler.utils import FILE_ENCODING, BIGML_SYS_ENCODING
+from bigmler.utils import BIGML_SYS_ENCODING
 from bigmler.checkpoint import file_number_of_lines
 from bigmler.utf8recoder import UTF8Recoder
 
 
-class TstReader(object):
+class TstReader():
     """Retrieves csv info and builds a input data dict
 
     """

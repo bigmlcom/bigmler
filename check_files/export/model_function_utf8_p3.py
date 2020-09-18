@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 def predict_imagen(titulo=None,
                    grados=None,
@@ -77,8 +76,8 @@ def predict_imagen(titulo=None,
     }
     term_forms = {
         "titulo": {
-            u"fantásticos": ['fantásticos', 'fantásticas'],
-            u"gigante": ['gigante', 'gigantes'],
+            "fantásticos": ['fantásticos', 'fantásticas'],
+            "gigante": ['gigante', 'gigantes'],
         },
     }
 

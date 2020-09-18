@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 def predict_rating(gender=None,
                    occupation=None,
@@ -73,13 +72,13 @@ def predict_rating(gender=None,
     term_analysis = {
         "title": {
             "case_sensitive": False,
-            "token_mode": u'all',
+            "token_mode": 'all',
         },
     }
     term_forms = {
         "title": {
-            u"beauty": [u'beauty', u'beautiful'],
-            u"day": [u'day', u'days'],
+            "beauty": ['beauty', 'beautiful'],
+            "day": ['day', 'days'],
         },
     }
 
@@ -106,7 +105,7 @@ def predict_rating(gender=None,
 
     item_analysis = {
         "genres": {
-            "separator": u'$',
+            "separator": '$',
         },
     }
 

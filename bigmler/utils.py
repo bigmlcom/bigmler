@@ -397,15 +397,14 @@ def get_url(resource, shared=False, embedded=False):
     if shared:
         return (RESOURCE_SHARED_URL + bigml.api.get_resource_type(resource)
                 + os.sep + resource['object']['shared_hash'])
-    elif embedded:
+    if embedded:
         return (RESOURCE_EMBEDDED_URL % (bigml.api.get_resource_type(resource)
                                          + os.sep +
                                          resource['object']['shared_hash']))
-    else:
-        resource_id = bigml.api.get_resource_id(resource)
-        if not resource_id:
-            return ""
-        return RESOURCE_URL + resource_id
+    resource_id = bigml.api.get_resource_id(resource)
+    if not resource_id:
+        return ""
+    return RESOURCE_URL + resource_id
 
 
 def log_message(message, log_file=None, console=False):

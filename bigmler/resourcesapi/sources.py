@@ -103,8 +103,7 @@ def create_source(data_set, source_args, args, api=None, path=None,
     message = dated("Creating %ssource.\n" % suffix)
     log_message(message, log_file=session_file, console=args.verbosity)
     check_fields_struct(source_args, "source")
-    source = api.create_source(data_set, source_args,
-                               progress_bar=args.progress_bar)
+    source = api.create_source(data_set, source_args)
     if path is not None:
         suffix = "_" + source_type if source_type else ""
         log_created_resources(

@@ -22,9 +22,11 @@ predictions
 """
 import sys
 
-from bigmler.export.out_tree.tableautree import TableauTree
-
 from bigml.model import Model
+from bigml.generators.model import get_ids_path
+
+from bigmler.export.out_tree.tableautree import plug_in_body
+
 
 class TableauModel(Model):
 
@@ -33,7 +35,6 @@ class TableauModel(Model):
         """Empty attributes to be overriden
 
         """
-        self.tree_class = TableauTree
         Model.__init__(self, model, api, fields)
 
     def plug_in(self, out=sys.stdout,
@@ -43,7 +44,7 @@ class TableauModel(Model):
         `out` is file descriptor to write the tableau code.
 
         """
-        ids_path = self.get_ids_path(filter_id)
+        ids_path = get_ids_path(self, filter_id)
         length = self.tableau(out, ids_path=ids_path,
                               subtree=subtree, attr=attr)
         if length > 0:
@@ -59,8 +60,9 @@ class TableauModel(Model):
         """Writes a Tableau function that implements the model.
 
         """
-        body = self.tree.plug_in_body(ids_path=ids_path, subtree=subtree,
-                                      attr=attr)
+        body = plug_in_body(self.tree, self.offsets, self.fields,
+                            self.objective_id, ids_path=ids_path,
+                            subtree=subtree, attr=attr)
         out.write(body)
         out.flush()
         return len(body)

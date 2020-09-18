@@ -39,7 +39,7 @@ AGGREGATES = {
 }
 
 
-class TrainReader(object):
+class TrainReader():
     """Retrieves csv info and manages objective fields and multi-labels
 
     """
