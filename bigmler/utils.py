@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2012-2020 BigML
+# Copyright 2012-2021 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -357,8 +357,9 @@ def print_tree(directory, padding):
     """Returns a graphical directory tree structure as a string
 
     """
+    connectors = ['+--', '\--'] if sys.platform == 'win32' else ['├─', '└─']
     if padding != ' ':
-        output = padding[:-1] + '├─'
+        output = padding[:-1] + connectors[0]
     else:
         output = padding
     output += os.path.basename(os.path.abspath(directory)) + '\n'
@@ -376,9 +377,9 @@ def print_tree(directory, padding):
                 output += print_tree(path, padding + '|')
         else:
             if i < (len(files) - 1):
-                output += padding + '├─' + file_name + '\n'
+                output += padding + connectors[0] + file_name + '\n'
             else:
-                output += padding + '└─' + file_name + '\n'
+                output += padding + connectors[1] + file_name + '\n'
     return output
 
 

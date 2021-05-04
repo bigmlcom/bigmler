@@ -3,6 +3,13 @@
 History
 -------
 
+4.1.1 (2021-05-04)
+~~~~~~~~~~~~~~~~~~
+
+- Changing the ascii used in output to console to avoid problems with
+  Windows encodings.
+- Updating copyright
+
 4.1.0 (2020-09-11)
 ~~~~~~~~~~~~~~~~~~
 
