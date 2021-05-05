@@ -104,6 +104,12 @@ def i_check_output_file(step, output=None, check_file=None):
     check_contents = re.sub(p_str,
                             '', check_contents,
                             flags=re.S)
+    #strip ids added in jupyter notebook transformation
+    # e.g.: ,\n"id": "3185730b"
+    p_str = r',"id": ".{8}"'
+    output_file_contents = re.sub(p_str,
+                                  '', output_file_contents,
+                                  flags=re.S)
     p_str = r';;.*\n'
     output_file_contents = re.sub(p_str,
                                   '', output_file_contents,
