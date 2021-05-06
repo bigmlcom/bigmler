@@ -104,12 +104,6 @@ def i_check_output_file(step, output=None, check_file=None):
     check_contents = re.sub(p_str,
                             '', check_contents,
                             flags=re.S)
-    #strip ids added in jupyter notebook transformation
-    # e.g.: ,\n"id": "3185730b"
-    p_str = r',"id": ".{8}"'
-    output_file_contents = re.sub(p_str,
-                                  '', output_file_contents,
-                                  flags=re.S)
     p_str = r';;.*\n'
     output_file_contents = re.sub(p_str,
                                   '', output_file_contents,
@@ -132,9 +126,18 @@ def i_check_output_file(step, output=None, check_file=None):
     check_contents = re.sub(r'\n\s*', '\n', check_contents)
     output_file_contents = output_file_contents.strip("\n").strip()
     check_contents = check_contents.strip("\n").strip()
+    #strip ids added in jupyter notebook transformation
+    # e.g.: ,\n"id": "3185730b"
+    p_str = r',\n"id":\s"[a-f0-9]{8}"'
+    output_file_contents = re.sub(p_str,
+                                  '', output_file_contents,
+                                  flags=re.S)
+    check_contents = re.sub(p_str,
+                            '', check_contents,
+                            flags=re.S)
     if check_contents != output_file_contents:
-        with open("%s" % check_file, "w") as bck_file:
-            bck_file.write(output_file_contents)
+        #with open("%s" % check_file, "w") as bck_file:
+            # bck_file.write(output_file_contents)
         eq_(check_contents, output_file_contents)
 
 
