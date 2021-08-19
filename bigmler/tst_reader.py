@@ -22,6 +22,7 @@
 
 
 import sys
+import os
 
 from bigml.util import get_csv_delimiter
 from bigml.io import UnicodeReader
@@ -46,6 +47,7 @@ class TstReader():
            `objective_field`: field_id of the objective field
         """
         self.test_set = test_set
+        self.directory = os.path.dirname(test_set)
         if test_set.__class__.__name__ == "StringIO":
             self.test_set = UTF8Recoder(test_set, BIGML_SYS_ENCODING)
         self.test_set_header = test_set_header
@@ -84,8 +86,13 @@ class TstReader():
                                 sorted(fields.fields_by_column_number.keys())
                                 if objective_field is None or
                                 i != objective_field]
+                image_fields = [i for i in
+                                sorted(fields.fields_by_column_number.keys())
+                                if fields.fields[fields.field_id(i)][
+                                    "optype"] == "image"]
             except ValueError as exc:
                 sys.exit(exc)
+            self.image_fields = image_fields
             self.raw_headers = self.headers[:]
 
             self.exclude = [i for i in range(len(self.headers))
@@ -127,6 +134,10 @@ class TstReader():
 
         """
         row = next(self.test_reader)
+        if self.image_fields:
+            for index, row_item in enumerate(row):
+                if index in self.image_fields:
+                    row[index] = os.path.join(self.directory, row_item)
         return row
 
     def dict(self, row, filtering=True):

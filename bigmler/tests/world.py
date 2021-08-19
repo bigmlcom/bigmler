@@ -29,58 +29,56 @@ import pkg_resources
 import datetime
 
 from bigml.api import BigML
-from bigml.api import HTTP_OK, HTTP_NO_CONTENT, HTTP_UNAUTHORIZED
+from bigml.api import HTTP_OK, HTTP_NO_CONTENT, HTTP_UNAUTHORIZED, \
+    HTTP_NOT_FOUND
+from bigml.constants import IRREGULAR_PLURALS, RENAMED_RESOURCES
 
 from subprocess import check_call
 
 MAX_RETRIES = 10
 RESOURCE_TYPES = [
-    'project',
-    'batchprojection',
-    'batchtopicdistribution',
-    'batchprediction',
-    'batchanomalyscore',
-    'batchcentroid',
-    'prediction',
-    'centroid',
-    'anomalyscore',
-    'topicdistribution',
-    'forecast',
-    'evaluation',
     'cluster',
     'fusion',
-    'ensemble',
-    'timeseries',
-    'deepnet',
-    'pca',
-    'model',
-    'anomaly',
-    'sample',
-    'association',
-    'logisticregression',
-    'linearregression',
-    'topicmodel',
-    'dataset',
+    'optiml',
+    'composite',
     'source',
-    'externalconnector',
+    'dataset',
+    'prediction',
+    'evaluation',
+    'ensemble',
+    'batchprediction',
+    'centroid',
+    'batchcentroid',
+    'anomaly',
+    'anomalyscore',
+    'batchanomalyscore',
+    'project',
+    'sample',
+    'correlation',
+    'statisticaltest',
+    'logisticregression',
+    'model',
+    'deepnet',
+    'association',
+    'associationset',
+    'configuration',
+    'topicmodel',
+    'topicdistribution',
+    'timeseries',
+    'forecast',
+    'pca',
+    'projection',
+    'batchprojection',
+    'linearregression',
     'script',
+    'execution',
     'library',
-    'execution']
-IRREGULAR_PLURALS = {
-    'anomaly': 'anomalies',
-    'batchprediction': 'batch_predictions',
-    'batchcentroid': 'batch_centroids',
-    'anomalyscore': 'anomaly_scores',
-    'batchanomalyscore': 'batch_anomaly_scores',
-    'logisticregression': 'logistic_regressions',
-    'linearregression': 'linear_regressions',
-    'topicmodel': 'topic_models',
-    'topicdistribution': 'topic_distributions',
-    'batchtopicdistribution': 'batch_topic_distributions',
-    'batchprojection': 'batch_projections',
-    'timeseries': 'time_series_set',
-    'externalconnector': 'external_connectors',
-    'library': 'libraries'}
+    'externalconnector']
+
+irregular_plurals = {}
+irregular_plurals.update(IRREGULAR_PLURALS)
+irregular_plurals.update({"timeseries": "time_series_set"})
+
 TRANSLATED_RESOURCES = {
     'batchprediction': 'batch_prediction',
     'batchcentroid': 'batch_centroid',
@@ -112,7 +110,7 @@ def plural(resource_type):
     """Creates the plural form of a resource type
 
     """
-    return IRREGULAR_PLURALS.get(resource_type, "%ss" % resource_type)
+    return irregular_plurals.get(resource_type, "%ss" % resource_type)
 
 
 def bigmler_delete(directory, output_dir=None):
@@ -220,26 +218,32 @@ class World(object):
         self.source_upper = None
         self.source_reference = None
 
-
     def delete_resources(self):
         """Deletes the created objects
 
         """
         for resource_type in RESOURCE_TYPES:
-            object_list = set(getattr(self, plural(resource_type)))
+            object_list = getattr(self, plural(resource_type))
+            object_list.reverse()
             if object_list:
                 print("Deleting %s %s" % (len(object_list),
                                           plural(resource_type)))
+                kwargs = {}
+                if resource_type == "composite":
+                    resource_type = "source"
+                    kwargs = {"query_string": "delete_all=true"}
                 delete_method = self.api.deleters[resource_type]
                 for obj_id in object_list:
                     counter = 0
-                    result = delete_method(obj_id)
-                    while (result['code'] != HTTP_NO_CONTENT and
+                    print("Deleting %s" % obj_id)
+                    result = delete_method(obj_id, **kwargs)
+                    while (result['code'] not in [HTTP_NO_CONTENT,
+                                                  HTTP_NOT_FOUND] and
                            counter < MAX_RETRIES):
                         print("Delete failed for %s. Retrying" % obj_id)
-                        time.sleep(3)
+                        time.sleep(3 * self.delta)
                         counter += 1
-                        result = delete_method(obj_id)
+                        result = delete_method(obj_id, **kwargs)
                     if counter == MAX_RETRIES:
                         print ("Retries to delete the created resources are"
                                " exhausted. Failed to delete.")

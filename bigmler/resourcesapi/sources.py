@@ -19,6 +19,7 @@
 
 
 import sys
+import os
 import json
 
 import bigml.api
@@ -103,7 +104,18 @@ def create_source(data_set, source_args, args, api=None, path=None,
     message = dated("Creating %ssource.\n" % suffix)
     log_message(message, log_file=session_file, console=args.verbosity)
     check_fields_struct(source_args, "source")
-    source = api.create_source(data_set, source_args)
+    # annotated sources for images
+    try:
+        if os.path.exists(data_set):
+            with open(data_set) as data_handler:
+                source_info = json.load(data_handler)
+            source_attrs = source_info.keys()
+            if "annotations" in source_attrs and "images_file" in source_attrs:
+                source = api.create_annotated_source(data_set, source_args)
+            else:
+                source = api.create_source(data_set, source_args)
+    except (IOError, json.decoder.JSONDecodeError):
+        source = api.create_source(data_set, source_args)
     if path is not None:
         suffix = "_" + source_type if source_type else ""
         log_created_resources(

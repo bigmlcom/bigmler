@@ -53,6 +53,9 @@ from bigmler.reports import REPORTS_DIR
 from nose.tools import ok_, assert_equal, assert_not_equal, assert_almost_equal
 
 
+DECIMAL_PLACES = 3
+
+
 def shell_execute(command, output, test=None, options=None,
                   test_rows=None, project=True):
     """Excute bigmler command in shell
@@ -190,6 +193,23 @@ def i_create_source_with_locale(step, data=None, locale=None,
     command = ("bigmler --train " + res_filename(data) + " --locale " +
                locale + " --field-attributes " + field_attributes +
                " --types " + types + " --output " + output +
+               " --no-dataset --no-model --store")
+    command = check_debug(command)
+    try:
+        retcode = check_call(command, shell=True)
+        ok_(retcode >=0)
+        world.directory = os.path.dirname(output)
+        world.folders.append(world.directory)
+        world.output = output
+    except OSError as e:
+        assert False
+
+
+#@step(r'I create a BigML composite source from file "([^"]*)"
+# storing results in "(.*)"$')
+def i_create_composite_source(step, data=None, output=None):
+    ok_(data is not None and output is not None)
+    command = ("bigmler --train " + res_filename(data) + " --output " + output +
                " --no-dataset --no-model --store")
     command = check_debug(command)
     try:
@@ -974,6 +994,20 @@ def i_check_create_source(step):
     except Exception as exc:
         assert False, str(exc)
 
+#@step(r'I check that the composite has been created$')
+def i_check_create_composite(step):
+    source_file = "%s%ssource" % (world.directory, os.sep)
+    try:
+        source_file = open(source_file, "r")
+        source = check_resource(
+            source_file.readline().strip(), world.api.get_source)
+        if source['resource'] not in world.composites:
+            world.composites.append(source['resource'])
+        world.source = source
+        source_file.close()
+    except Exception as exc:
+        assert False, str(exc)
+
 #@step(r'I check that the model has doubled its rows$')
 def i_check_model_double(step):
     ok_(world.model['object']['rows'] == \
@@ -1363,25 +1397,13 @@ def i_check_predictions(step, check_file):
                     check_row = next(check_file)
                     assert_equal(len(check_row), len(row))
                     for index in range(len(row)):
-                        dot = row[index].find(".")
-                        decimal_places = 1
-                        if dot > 0 or (check_row[index].find(".") > 0
-                                       and check_row[index].endswith(".0")):
-                            try:
-                                decimal_places = min(len(row[index]),
-                                                     len(check_row[index])) \
-                                    - dot - 1
-                                row[index] = round(float(row[index]),
-                                                   decimal_places)
-                                check_row[index] = round(float(check_row[ \
-                                    index]), decimal_places)
-                            except ValueError:
-                                decimal_places = 1
-                            # we set 10 decimal places as max precision
-                            decimal_places = min([10, decimal_places])
-                            assert_almost_equal(check_row[index], row[index],
-                                                places=(decimal_places - 1))
-                        else:
+                        try:
+                            check_row[index] = float(check_row[index])
+                            row[index] = float(row[index])
+                            assert_almost_equal(check_row[index],
+                                                row[index],
+                                                places=DECIMAL_PLACES)
+                        except ValueError:
                             assert_equal(check_row[index], row[index])
     except Exception as exc:
         assert False, traceback.format_exc()
@@ -1758,6 +1780,8 @@ def i_have_previous_scenario_or_reproduce_it(step, scenario, kwargs):
                                (i_check_create_source, False),
                                (i_check_create_dataset, False),
                                (i_check_create_model, False)],
+                 'scenario1_img_dn': [(i_create_composite_source, True),
+                                      (i_check_create_composite, False)],
                  'scenario1_r': [(i_create_all_resources, True),
                                  (i_check_create_source, False),
                                  (i_check_create_dataset, False),

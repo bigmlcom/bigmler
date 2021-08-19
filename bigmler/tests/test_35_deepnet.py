@@ -132,7 +132,9 @@ class TestPrediction(object):
         """
         print(self.test_scenario03.__doc__)
         examples = [
-            ['scenario1_dn', '{"data": "data/iris.csv", "output": "scenario1_dn/predictions.csv", "test": "data/test_iris.csv"}', 'data/test_iris.csv', 'scenario2_dn/predictions.csv', 'check_files/predictions_iris_dn.csv']]
+            ['scenario1_dn', '{"data": "data/iris.csv", "output": "scenario1_dn/predictions.csv", "test": "data/test_iris.csv"}', 'data/test_iris.csv', 'scenario2_dn/predictions.csv', 'check_files/predictions_iris_dn.csv'],
+            ['scenario1_img_dn', '{"data": "data/images/metadata.json", "output": "scenario1_img_dn/predictions.csv"}', 'data/test_images.csv', 'scenario2_img_dn/predictions.csv', 'check_files/predictions_images_dn.csv']
+            ]
         for example in examples:
             print("\nTesting with:\n", example)
             test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])

@@ -4177,7 +4177,7 @@ Requirements
 BigMLer needs Python 3.X versions to work. Compatibility with Python 2.X was
 discontinued in version 3.27.2.
 
-BigMLer requires `bigml 6.0.0 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 7.0.0 <https://github.com/bigmlcom/python>`_  or
 higher. Using proportional missing strategy will additionally request
 the use of the `numpy <http://www.numpy.org/>`_ and
 `scipy <http://www.scipy.org/>`_ libraries. They are not
