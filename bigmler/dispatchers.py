@@ -45,6 +45,7 @@ from bigmler.retrain.dispatcher import retrain_dispatcher
 from bigmler.pca.dispatcher import pca_dispatcher
 from bigmler.fusion.dispatcher import fusion_dispatcher
 from bigmler.dataset.dispatcher import dataset_dispatcher
+from bigmler.source.dispatcher import source_dispatcher
 from bigmler.externalconnector.dispatcher import connector_dispatcher
 
 

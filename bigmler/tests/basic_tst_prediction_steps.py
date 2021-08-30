@@ -46,6 +46,8 @@ from bigmler.tests.basic_association_steps import \
     i_create_association, i_check_create_association
 from bigmler.tests.basic_logistic_r_steps import \
     i_create_all_lr_resources, i_check_create_lr_model
+from bigmler.tests.basic_deepnet_steps import \
+    i_create_all_dn_resources, i_check_create_dn_model
 from bigmler.tests.basic_pca_steps import \
     i_create_all_pca_resources, i_check_create_pca_model
 from bigmler.tests.common_steps import check_debug
@@ -1771,7 +1773,29 @@ def retrieve_resources(scenario_path, step):
             world.model = retrieve_resource(scenario_path, model_id)
     except:
         pass
-
+    try:
+        with open(os.path.join(scenario_path, "deepnets"), open_mode("r")) \
+            as model_id_file:
+            model_id = model_id_file.readline().strip()
+            world.deepnet = retrieve_resource(scenario_path, model_id)
+    except:
+        pass
+    try:
+        with open(os.path.join(scenario_path, "logistic_regressions"),
+                  open_mode("r")) as model_id_file:
+            model_id = model_id_file.readline().strip()
+            world.logistic_regression = retrieve_resource(scenario_path,
+                                                          model_id)
+    except:
+        pass
+    try:
+        with open(os.path.join(scenario_path, "linear_regressions"),
+                  open_mode("r")) as model_id_file:
+            model_id = model_id_file.readline().strip()
+            world.linear_regressions = retrieve_resource(scenario_path,
+                                                         model_id)
+    except:
+        pass
 
 
 #@step(r'I have previously executed "(.*)" or reproduce it with arguments (.*)$')
@@ -1845,6 +1869,10 @@ def i_have_previous_scenario_or_reproduce_it(step, scenario, kwargs):
                                  (i_check_create_source, False),
                                  (i_check_create_dataset, False),
                                  (i_check_create_lr_model, False)],
+                'scenario1_dn': [(i_create_all_dn_resources,True),
+                                 (i_check_create_source, False),
+                                 (i_check_create_dataset, False),
+                                 (i_check_create_dn_model, False)],
                 'scenario1_pca': [(i_create_all_pca_resources, True),
                                   (i_check_create_source, False),
                                   (i_check_create_dataset, False),

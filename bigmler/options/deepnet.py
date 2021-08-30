@@ -228,6 +228,27 @@ def get_deepnet_options(defaults=None):
                      "dependencies before training begins, and so make "
                      "learning proceed more quickly. ")},
 
+        # Image augmentations
+        '--image-augmentations': {
+            'action': 'store',
+            'dest': 'image_augmentations',
+            'default': defaults.get('image_augmentations', None),
+            'help': ("A comma-separated list of augmentation strategies"
+                     " to use for image data."
+                     " The available keys are: \"flip_horizontal\", "
+                     "\"flip_vertical\", \"brightness\"")},
+
+        # Include extracted features
+        '--include-extracted-features': {
+            'action': 'store',
+            'dest': 'include_extracted_features',
+            'default': defaults.get('include_extracted_features', None),
+            'help': ("Controls the use of features extracted from images."
+                     " Use \"all\" to include all generated features, \"none\""
+                     " to include none or a comma-separated"
+                     " of especific field ids, corresponding to extracted fields"
+                     " to add to the default set.")},
+
         # Does not balance fields
         '--no-balance-fields': {
             'action': 'store_false',

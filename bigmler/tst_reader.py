@@ -47,9 +47,11 @@ class TstReader():
            `objective_field`: field_id of the objective field
         """
         self.test_set = test_set
-        self.directory = os.path.dirname(test_set)
+        self.directory = None
         if test_set.__class__.__name__ == "StringIO":
             self.test_set = UTF8Recoder(test_set, BIGML_SYS_ENCODING)
+        else:
+            self.directory = os.path.dirname(test_set)
         self.test_set_header = test_set_header
         self.fields = fields
         if (objective_field is not None and
@@ -74,6 +76,15 @@ class TstReader():
         self.headers = None
         self.raw_headers = None
         self.exclude = []
+        self.image_fields = []
+        try:
+            self.image_fields = [column for column in
+                                 sorted(fields.fields_by_column_number.keys())
+                                 if fields.fields[fields.field_id(column)].get(
+                                    "optype") == "image"]
+        except ValueError as exc:
+            sys.exit(exc)
+
         if test_set_header:
             self.headers = next(self.test_reader)
             # validate headers against model fields excluding objective_field,
@@ -86,13 +97,8 @@ class TstReader():
                                 sorted(fields.fields_by_column_number.keys())
                                 if objective_field is None or
                                 i != objective_field]
-                image_fields = [i for i in
-                                sorted(fields.fields_by_column_number.keys())
-                                if fields.fields[fields.field_id(i)][
-                                    "optype"] == "image"]
             except ValueError as exc:
                 sys.exit(exc)
-            self.image_fields = image_fields
             self.raw_headers = self.headers[:]
 
             self.exclude = [i for i in range(len(self.headers))
@@ -134,7 +140,7 @@ class TstReader():
 
         """
         row = next(self.test_reader)
-        if self.image_fields:
+        if self.directory and self.image_fields:
             for index, row_item in enumerate(row):
                 if index in self.image_fields:
                     row[index] = os.path.join(self.directory, row_item)

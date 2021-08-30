@@ -114,6 +114,14 @@ def set_deepnet_args(args, name=None, fields=None,
         deepnet_args.update(\
             {"tree_embedding": args.tree_embedding})
 
+    if args.image_augmentations is not None:
+        deepnet_args.update(\
+            {"image_augmentations": args.image_augmentations_})
+
+    if args.include_extracted_features is not None:
+        deepnet_args.update(\
+            {"include_extracted_features": args.include_extracted_features_})
+
     deepnet_args = update_sample_parameters_args( \
         deepnet_args, args)
 

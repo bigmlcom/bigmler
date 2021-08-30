@@ -328,6 +328,8 @@ FLAGS = {
         {'flag': 'missing_numerics', 'type': 'boolean'},
         {'flag': 'no_missing_numerics', 'type': 'boolean'},
         {'flag': 'tree_embedding', 'type': 'boolean'},
+        {'flag': 'image_augmentations', 'type': 'string'},
+        {'flag': 'include_extracted_features', 'type': 'string'},
         {'flag': 'no_balance_fields', 'type': 'boolean'},
         {'flag': 'deepnet_attributes', 'type': 'string'}],
     'BigMLer execute': [

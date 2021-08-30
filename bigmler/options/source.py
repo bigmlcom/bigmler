@@ -150,6 +150,77 @@ def get_source_options(defaults=None):
             'default': defaults.get('import_fields', None),
             'help': ("Path to a csv file describing field attributes."
                      " The first row is used as header and rows are"
-                     " expected to comply the the --export-fields output.")}}
+                     " expected to comply the the --export-fields output.")},
+
+        # Whether o not the source will be closed for editing
+        '--closed': {
+            'action': 'store_true',
+            'dest': 'closed',
+            'default': defaults.get('closed', None),
+            'help': ("Whether or not the source will be closed for editing.")},
+
+        # Whether o not the source will be closed for editing
+        '--open': {
+            'action': 'store_false',
+            'dest': 'closed',
+            'default': defaults.get('closed', None),
+            'help': ("Whether or not the source will be open for editing.")},
+
+        # A comma-separated list of source identifiers to remove from a
+        # composite and, if they do not belong to any other composite, delete
+        # as individual resources.
+        '--delete-sources': {
+            'action': 'store',
+            'dest': 'delete_sources',
+            'default': defaults.get('delete_sources', None),
+            'help': ("A comma-separated list of source identifiers to remove"
+                     " from a composite and, if they do not belong to any"
+                     " other composite, delete as individual resources.")},
+
+        # A comma-separated list of source identifiers to remove from a
+        # composite and, if they do not belong to any other composite, delete
+        # as individual resources.
+        '--remove-sources': {
+            'action': 'store',
+            'dest': 'remove_sources',
+            'default': defaults.get('remove_sources', None),
+            'help': ("A comma-separated list of source identifiers to remove"
+                     " from a composite.")},
+
+        # Values to be replaced in some fields and rows.
+        '--row-values-json': {
+            'action': 'store',
+            'dest': 'row_values_json',
+            'default': defaults.get('row_values_json', None),
+            'help': ("Path to a JSON file that contains an array of objects"
+                     " specifying values for different rows and label fields "
+                     " in a composite via the following properties: "
+                     " `indices, components, value, field."
+                     " E.g.: [{\"field\": \"field1\", \"indices\": [0, 3],"
+                     " \"value\": 8}, {\"field\": \"field2\","
+                     " \"value\": 4}]."
+                     " In the second element, no indices or components are "
+                     " specified, so the properties \"row_components\" and "
+                     " \"row_indices\" will be used as default for those.")},
+
+        # Default for the components property of row_values
+        '--row-components': {
+            'action': 'store',
+            'dest': 'row_components',
+            'default': defaults.get('row_components', None),
+            'help': ("Comma-separated list of IDs corresponding to the "
+                     "sources in a composite that will be updated by "
+                     "default when using \"row_values\" with no \"components\""
+                     " specification.")},
+
+        # Default for the indices property of row_values
+        '--row-indices': {
+            'action': 'store',
+            'dest': 'row_indices',
+            'default': defaults.get('row_indices', None),
+            'help': ("Comma-separated list of indices corresponding to the "
+                     "sources in a composite that will be updated by "
+                     "default when using \"row_values\" with no \"indices\""
+                     " specification.")}}
 
     return options

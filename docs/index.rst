@@ -5341,6 +5341,20 @@ Deepnet Subcommand Options
                                               dependencies before training
                                               begins, and so make learning
                                               proceed more quickly.
+``--image-augmentations``                     A comma-separated list of 
+                                              augmentation strategies to use
+                                              for image data. The available
+                                              keys are: `flip_horizontal`,
+                                              `flip_vertical`, `brightness`
+``--include-extracted-features``              Controls the use of features
+                                              extracted from images.
+                                              Use `all` to include all
+                                              generated features, `none`
+                                              to include none, or a 
+                                              comma-separated list of
+                                              especific field ids, 
+                                              corresponding to extracted fields
+                                              to add to the default set.
 ``--no-missing-numerics``                     Avoids the default behaviour,
                                               which creates a new
                                               coefficient for missings in

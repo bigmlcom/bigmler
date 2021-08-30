@@ -55,7 +55,7 @@ SUBCOMMANDS = ["main", "analyze", "cluster", "anomaly", "sample", "dataset",
                "delete", "report", "reify", "project", "association",
                "logistic-regression", "topic-model", "time-series",
                "execute", "whizzml", "export", "deepnet", "retrain",
-               "linear-regression", "pca", "fusion", "connector"]
+               "linear-regression", "pca", "fusion", "connector", "source"]
 
 
 MAIN = SUBCOMMANDS[0]
@@ -147,6 +147,10 @@ under the License.""" % version
         '--replacement': main_options['--replacement'],
         '--sample-rate': main_options['--sample-rate'],
         '--seed': main_options['--seed']}
+
+    subcommand_options["source"] = source_options
+    subcommand_options["source"].update(common_options)
+
 
     defaults = general_defaults["BigMLer whizzml"]
     subcommand_options["whizzml"] = get_whizzml_options(defaults=defaults)

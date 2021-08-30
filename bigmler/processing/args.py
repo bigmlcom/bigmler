@@ -894,6 +894,65 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
+    # Parses image_augmentations
+    try:
+        if command_args.image_augmentations:
+            image_augmentations_arg = [
+                option.strip() for option in
+                command_args.image_augmentations.split(
+                    command_args.args_separator)]
+            command_args.image_augmentations_ = image_augmentations_arg
+        else:
+            command_args.image_augmentations_ = []
+    except AttributeError:
+        pass
+
+    # Parses include_extracted_features
+    try:
+        if command_args.include_extracted_features:
+            include_extracted_features_arg = [
+                field.strip() for field in
+                command_args.include_extracted_features.split(
+                    command_args.args_separator)]
+            if include_extracted_features_arg == ["all"]:
+                include_extracted_features_arg = True
+            elif include_extracted_features_arg == ["none"]:
+                include_extracted_features_arg = False
+            command_args.include_extracted_features_ = \
+                include_extracted_features_arg
+        else:
+            command_args.include_extracted_features_ = []
+    except AttributeError:
+        pass
+
+    # Parses row_components
+    try:
+        if command_args.row_components:
+            row_components_arg = [
+                source.strip() for source in
+                command_args.row_components.split(
+                    command_args.args_separator)]
+            command_args.row_components_ = \
+                row_components_arg
+        else:
+            command_args.row_components_ = []
+    except AttributeError:
+        pass
+
+    # Parses row_indices
+    try:
+        if command_args.row_indices:
+            row_indices_arg = [
+                index.strip() for index in
+                command_args.row_indices.split(
+                    command_args.args_separator)]
+            command_args.row_indices_ = \
+                row_indices_arg
+        else:
+            command_args.row_indices_ = []
+    except AttributeError:
+        pass
+
     anomaly_ids = []
     try:
         # Parses anomaly/ids if provided.
@@ -1120,6 +1179,14 @@ def transform_args(command_args, flags, api):
         if command_args.lisp_filter:
             lisp_filter = u.read_lisp_filter(command_args.lisp_filter)
             command_args.lisp_filter = lisp_filter
+    except AttributeError:
+        pass
+
+    # Reads a json row_values object.
+    try:
+        if command_args.row_values_json:
+            row_values = u.read_json_filter(command_args.row_values_json)
+            command_args.row_values_json = row_values
     except AttributeError:
         pass
 

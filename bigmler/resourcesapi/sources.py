@@ -37,7 +37,7 @@ from bigmler.reports import report
 
 
 def set_source_args(args, name=None, multi_label_data=None,
-                    data_set_header=None, fields=None):
+                    data_set_header=None, fields=None, update=False):
     """Returns a source arguments dict
 
     """
@@ -72,6 +72,21 @@ def set_source_args(args, name=None, multi_label_data=None,
         source_args.update({
             "user_metadata": {
                 "multi_label_data": multi_label_data}})
+
+    if update:
+        if hasattr(args, "remove_sources") and args.remove_sources:
+            source_args["remove_sources"] = args.remove_sources_
+        if hasattr(args, "delete_sources") and args.delete_sources:
+            source_args["delete_sources"] = args.delete_sources_
+        if hasattr(args, "closed") and args.closed:
+            source_args["closed"] = args.closed
+        if hasattr(args, "row_components") and args.row_components:
+            source_args["row_components"] = args.row_components_
+        if hasattr(args, "row_indices") and args.row_indices:
+            source_args["row_indices"] = [int(item) for item
+                in args.row_indices_]
+        if hasattr(args, "row_values") and args.row_values:
+            source_args["row_values"] = args.row_values_
 
     # to update fields attributes or types you must have a previous fields
     # structure (at update time)
@@ -114,7 +129,10 @@ def create_source(data_set, source_args, args, api=None, path=None,
                 source = api.create_annotated_source(data_set, source_args)
             else:
                 source = api.create_source(data_set, source_args)
-    except (IOError, json.decoder.JSONDecodeError):
+        else:
+            source = api.create_source(data_set, source_args)
+    except (IOError, TypeError, UnicodeDecodeError,
+            json.decoder.JSONDecodeError):
         source = api.create_source(data_set, source_args)
     if path is not None:
         suffix = "_" + source_type if source_type else ""
@@ -132,8 +150,33 @@ def create_source(data_set, source_args, args, api=None, path=None,
     message = dated("Source created: %s\n" % get_url(source))
     log_message(message, log_file=session_file, console=args.verbosity)
     log_message("%s\n" % source_id, log_file=log)
-    if args.reports:
+    if hasattr(args, "reports") and args.reports:
         report(args.reports, path, source)
+    return source
+
+
+def clone_source(source, args, api=None, path=None,
+                 session_file=None, log=None):
+    """Clones the source to open it for editing
+
+    """
+    if api is None:
+        api = bigml.api.BigML()
+    message = dated("Cloning source to open it for editing\n")
+    log_message(message, log_file=session_file, console=args.verbosity)
+    source = api.clone_source(source)
+    source_id = check_resource_error(source, "Failed to clone source: ")
+    try:
+        source = check_resource(source, api.get_source,
+                                query_string=ALL_FIELDS_QS,
+                                raise_on_error=True)
+    except Exception as exception:
+        sys.exit("Failed to get a finished source: %s" % str(exception))
+    log_created_resources("source", path, source['resource'], mode='ab',
+        comment=("%s\n" % source['object']['name']))
+    message = dated("Source created: %s\n" % get_url(source))
+    log_message(message, log_file=session_file, console=args.verbosity)
+    log_message("%s\n" % source_id, log_file=log)
     return source
 
 
@@ -143,7 +186,8 @@ def data_to_source(args):
     """
     data_set = None
     data_set_header = None
-    if (args.training_set and not args.source and not args.dataset and
+    if (args.training_set and not args.source and not
+            (hasattr(args, "dataset") and args.dataset) and
             not args.has_models_):
         data_set = args.training_set
         data_set_header = args.train_header

@@ -38,6 +38,20 @@ from bigmler.train_reader import TrainReader
 MONTECARLO_FACTOR = 200
 
 
+def needs_source_update(args):
+    """Checks whether the arguments passed need to be change at update time
+
+    """
+    return (args.field_attributes_ or args.types_ or args.user_locale
+            or args.json_args.get('source') or args.import_fields or
+            (hasattr(args, "remove_sources") and args.remove_sources) or
+            (hasattr(args, "delete_sources") and args.delete_sources) or
+            (hasattr(args, "closed") and args.closed) or
+            (hasattr(args, "row_components") and args.row_components) or
+            (hasattr(args, "row_indices") and args.row_indices) or
+            (hasattr(args, "row_values") and args.row_values))
+
+
 def test_source_processing(api, args, resume,
                            name=None, csv_properties=None,
                            session_file=None, path=None, log=None):
@@ -155,12 +169,14 @@ def source_processing(api, args, resume,
                         source_parser['locale']):
                     args.user_locale = None
         fields = Fields(source['object']['fields'], **csv_properties)
-
-        if (args.field_attributes_ or args.types_ or args.user_locale
-                or args.json_args.get('source') or args.import_fields):
+        if needs_source_update(args):
+            if source["object"].get("closed", False):
+                # need to clone the source to edit it
+                source = r.clone_source(source, args, api, path,
+                                        session_file, log)
             # avoid updating project_id in source
             project_id, args.project_id = args.project_id, None
-            source_args = r.set_source_args(args, fields=fields)
+            source_args = r.set_source_args(args, fields=fields, update=True)
             source = r.update_source(source, source_args, args, api,
                                      session_file)
             args.project_id = project_id
