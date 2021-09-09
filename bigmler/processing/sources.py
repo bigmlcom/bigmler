@@ -32,10 +32,9 @@ import bigmler.utils as u
 import bigmler.resourcesapi.sources as r
 import bigmler.checkpoint as c
 import bigmler.processing.projects as pp
+import bigmler.processing.annotations as an
 
 from bigmler.train_reader import TrainReader
-
-MONTECARLO_FACTOR = 200
 
 
 def needs_source_update(args):
@@ -44,9 +43,11 @@ def needs_source_update(args):
     """
     return (args.field_attributes_ or args.types_ or args.user_locale
             or args.json_args.get('source') or args.import_fields or
-            (hasattr(args, "remove_sources") and args.remove_sources) or
-            (hasattr(args, "delete_sources") and args.delete_sources) or
-            (hasattr(args, "closed") and args.closed) or
+            (hasattr(args, "add_sources") and args.add_sources_) or
+            (hasattr(args, "replace_sources") and args.replace_sources_) or
+            (hasattr(args, "remove_sources") and args.remove_sources_) or
+            (hasattr(args, "delete_sources") and args.delete_sources_) or
+            (hasattr(args, "close") and args.close is not None) or
             (hasattr(args, "row_components") and args.row_components) or
             (hasattr(args, "row_indices") and args.row_indices) or
             (hasattr(args, "row_values") and args.row_values))
@@ -123,6 +124,9 @@ def source_processing(api, args, resume,
     """
     source = None
     fields = None
+    if args.sources:
+        args.source = u.read_sources(args.sources)
+
     if (args.training_set or (
             hasattr(args, "evaluate") and args.evaluate and args.test_set)):
         # If resuming, try to extract args.source form log files
@@ -141,11 +145,25 @@ def source_processing(api, args, resume,
         # Check if there's a created project for it
         args.project_id = pp.project_processing(
             api, args, resume, session_file=session_file, path=path, log=log)
-        source_args = r.set_source_args(args,
-                                        multi_label_data=multi_label_data,
-                                        data_set_header=data_set_header)
-        source = r.create_source(data_set, source_args, args, api,
-                                 path, session_file, log)
+        # If --annotations-language is used, the data_set can be a directory
+        # that contains both images and annotation files that need to be
+        # preprocessed
+        args.images_dir = None
+        args.images_file = None
+        if os.path.isdir(data_set):
+            # When data_set is a directory, we assume it will contain images
+            args.images_dir = data_set
+        elif args.annotations_file:
+            args.images_file = data_set
+        if args.annotations_language is not None:
+            data_set = an.bigml_coco_file(args, session_file)
+        elif os.path.isdir(data_set):
+            data_set = an.bigml_metadata(args)
+        source_args = r.set_source_args(
+            args, multi_label_data=multi_label_data,
+            data_set_header=data_set_header)
+        source = r.create_source(
+            data_set, source_args, args, api, path, session_file, log)
 
     # If a source is provided either through the command line or in resume
     # steps, we use it.
@@ -169,7 +187,8 @@ def source_processing(api, args, resume,
                         source_parser['locale']):
                     args.user_locale = None
         fields = Fields(source['object']['fields'], **csv_properties)
-        if needs_source_update(args):
+        if needs_source_update(args) or (data_set is None and args.images_file
+                and args.annotations_file):
             if source["object"].get("closed", False):
                 # need to clone the source to edit it
                 source = r.clone_source(source, args, api, path,

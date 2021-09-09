@@ -88,7 +88,7 @@ def has_train(args):
     """Returns if some kind of train data is given in args.
 
     """
-    return any(has_value(args, ["training_set", "source", "dataset",
+    return any(has_value(args, ["training_set", "source", "sources", "dataset",
                                 "datasets", "source_file", "dataset_file",
                                 "train_stdin", "source_tag", "dataset_tag"]))
 
@@ -158,6 +158,21 @@ def get_flags(args):
                     i == len(args) - 1 or args[i + 1].startswith("--"))):
                 test_stdin = True
     return flags, train_stdin, test_stdin
+
+
+def comma_to_list(comma_arg, separator):
+    """Returns the list of elements defined in a comma-separated string
+    adapting to the actual command separator
+
+    """
+    print("** sep", separator)
+    if comma_arg:
+        list_arg = [option.strip() for option in
+            comma_arg.split(separator)]
+    else:
+        list_arg = []
+
+    return list_arg
 
 
 def get_command_message(args):
@@ -380,124 +395,71 @@ def get_output_args(api, command_args, resume):
 
     # Parses dataset fields if provided.
     try:
-        if command_args.dataset_fields:
-            dataset_fields_arg = [
-                field.strip() for field in command_args.dataset_fields.split(
-                    command_args.args_separator)]
-            command_args.dataset_fields_ = dataset_fields_arg
-        else:
-            command_args.dataset_fields_ = []
+        command_args.dataset_fields_ = comma_to_list(command_args.dataset_fields,
+                                                     command_args.args_separator)
     except AttributeError:
         pass
 
     # Parses model input fields if provided.
     try:
-        if command_args.model_fields:
-            model_fields_arg = [
-                field.strip() for field in command_args.model_fields.split(
-                    command_args.args_separator)]
-            command_args.model_fields_ = model_fields_arg
-        else:
-            command_args.model_fields_ = []
+        command_args.model_fields_ = comma_to_list(command_args.model_fields,
+                                                   command_args.args_separator)
     except AttributeError:
         pass
 
     # Parses cluster input fields if provided.
     try:
-        if command_args.cluster_fields:
-            cluster_fields_arg = [
-                field.strip() for field in command_args.cluster_fields.split(
-                    command_args.args_separator)]
-            command_args.cluster_fields_ = cluster_fields_arg
-        else:
-            command_args.cluster_fields_ = []
+        command_args.cluster_fields_ = comma_to_list(command_args.cluster_fields,
+                                                     command_args.args_separator)
     except AttributeError:
         pass
 
-
     # Parses association input fields if provided.
     try:
-        if command_args.association_fields:
-            association_fields_arg = [
-                field.strip() for field in \
-                command_args.association_fields.split( \
-                command_args.args_separator)]
-            command_args.association_fields_ = association_fields_arg
-        else:
-            command_args.association_fields_ = []
+        command_args.association_fields_ = comma_to_list(
+            command_args.association_fields, command_args.args_separator)
     except AttributeError:
         pass
 
     # Parses anomaly input fields if provided.
     try:
-        if command_args.anomaly_fields:
-            anomaly_fields_arg = [
-                field.strip() for field in command_args.anomaly_fields.split(
-                    command_args.args_separator)]
-            command_args.anomaly_fields_ = anomaly_fields_arg
-        else:
-            command_args.anomaly_fields_ = []
+        command_args.anomaly_fields_ = comma_to_list(
+            command_args.anomaly_fields, command_args.args_separator)
     except AttributeError:
         pass
 
     # Parses logistic regression input fields if provided.
     try:
-        if command_args.logistic_fields:
-            logistic_fields_arg = [
-                field.strip() for field in command_args.logistic_fields.split(
-                    command_args.args_separator)]
-            command_args.logistic_fields_ = logistic_fields_arg
-        else:
-            command_args.logistic_fields_ = []
+        command_args.logistic_fields_ = comma_to_list(
+            command_args.logistic_fields, command_args.args_separator)
     except AttributeError:
         pass
 
     # Parses linear regression input fields if provided.
     try:
-        if command_args.linear_fields:
-            linear_fields_arg = [
-                field.strip() for field in command_args.linear_fields.split(
-                    command_args.args_separator)]
-            command_args.linear_fields_ = linear_fields_arg
-        else:
-            command_args.linear_fields_ = []
+        command_args.linear_fields_ = comma_to_list(
+            command_args.linear_fields, command_args.args_separator)
     except AttributeError:
         pass
 
     # Parses deepnet input fields if provided.
     try:
-        if command_args.deepnet_fields:
-            deepnet_fields_arg = [
-                field.strip() for field in command_args.deepnet_fields.split(
-                    command_args.args_separator)]
-            command_args.deepnet_fields_ = deepnet_fields_arg
-        else:
-            command_args.deepnet_fields_ = []
+        command_args.deepnet_fields_ = comma_to_list(
+            command_args.deepnet_fields, command_args.args_separator)
     except AttributeError:
         pass
 
     # Parses topic model fields if provided.
     try:
-        if command_args.topic_fields:
-            topic_fields_arg = [
-                field.strip() for field in command_args.topic_fields.split(
-                    command_args.args_separator)]
-            command_args.topic_model_fields_ = topic_fields_arg
-        else:
-            command_args.topic_model_fields_ = []
+        command_args.topic_fields_ = comma_to_list(
+            command_args.topic_fields, command_args.args_separator)
     except AttributeError:
         pass
 
-
     # Parses pca fields if provided.
     try:
-        if command_args.pca_fields:
-            pca_fields_arg = [
-                field.strip() for field in command_args.pca_fields.split(
-                    command_args.args_separator)]
-            command_args.pca_fields_ = pca_fields_arg
-        else:
-            command_args.pca_fields_ = []
+        command_args.pca_fields_ = comma_to_list(
+            command_args.pca_fields, command_args.args_separator)
     except AttributeError:
         pass
 
@@ -513,37 +475,22 @@ def get_output_args(api, command_args, resume):
 
     # Parses imports for scripts and libraries.
     try:
-        if command_args.imports:
-            imports_arg = [
-                field.strip() for field in command_args.imports.split(
-                    command_args.args_separator)]
-            command_args.imports_ = imports_arg
-        else:
-            command_args.imports_ = []
+        command_args.imports_ = comma_to_list(
+            command_args.imports, command_args.args_separator)
     except AttributeError:
         pass
 
     # Parses objective fields for time-series.
     try:
-        if command_args.objectives:
-            objective_fields_arg = [
-                field.strip() for field in command_args.objectives.split(
-                    command_args.args_separator)]
-            command_args.objective_fields_ = objective_fields_arg
-        else:
-            command_args.objective_fields_ = []
+        command_args.objectives_ = comma_to_list(
+            command_args.objectives, command_args.args_separator)
     except AttributeError:
         pass
 
     # Parses range.
     try:
-        if command_args.range:
-            range_arg = [
-                value.strip() for value in command_args.range.split(
-                    command_args.args_separator)]
-            command_args.range_ = range_arg
-        else:
-            command_args.range_ = []
+        command_args.range_ = comma_to_list(
+            command_args.range, command_args.args_separator)
     except AttributeError:
         pass
 
@@ -813,13 +760,8 @@ def get_output_args(api, command_args, resume):
 
     # Parses models list for fusions if provided.
     try:
-        if command_args.fusion_models:
-            fusion_models_arg = [
-                model.strip() for model in command_args.fusion_models.split(
-                    command_args.args_separator)]
-            command_args.fusion_models_ = fusion_models_arg
-        else:
-            command_args.fusion_models_ = []
+        command_args.fusion_models_ = comma_to_list(
+            command_args.fusion_models, command_args.args_separator)
     except AttributeError:
         pass
 
@@ -857,53 +799,57 @@ def get_output_args(api, command_args, resume):
 
     # Parses cluster names to generate datasets if provided
     try:
-        if command_args.cluster_datasets:
-            cluster_datasets_arg = [
-                dataset.strip() for dataset in
-                command_args.cluster_datasets.split(
-                    command_args.args_separator)]
-            command_args.cluster_datasets_ = cluster_datasets_arg
-        else:
-            command_args.cluster_datasets_ = []
+        command_args.cluster_datasets_ = comma_to_list(
+            command_args.cluster_datasets, command_args.args_separator)
     except AttributeError:
         pass
 
     # Parses cluster names to generate models if provided
     try:
-        if command_args.cluster_models:
-            cluster_models_arg = [
-                model.strip() for model in
-                command_args.cluster_models.split(
-                    command_args.args_separator)]
-            command_args.cluster_models_ = cluster_models_arg
-        else:
-            command_args.cluster_models_ = []
+        command_args.cluster_models_ = comma_to_list(
+            command_args.cluster_models, command_args.args_separator)
     except AttributeError:
         pass
 
     # Parses summary_fields to exclude from the clustering algorithm
     try:
-        if command_args.summary_fields:
-            summary_fields_arg = [
-                field.strip() for field in
-                command_args.summary_fields.split(
-                    command_args.args_separator)]
-            command_args.summary_fields_ = summary_fields_arg
-        else:
-            command_args.summary_fields_ = []
+        command_args.summary_fields_ = comma_to_list(
+            command_args.summary_fields, command_args.args_separator)
     except AttributeError:
         pass
 
     # Parses image_augmentations
     try:
-        if command_args.image_augmentations:
-            image_augmentations_arg = [
-                option.strip() for option in
-                command_args.image_augmentations.split(
-                    command_args.args_separator)]
-            command_args.image_augmentations_ = image_augmentations_arg
-        else:
-            command_args.image_augmentations_ = []
+        command_args.image_augmentations_ = comma_to_list(
+            command_args.image_augmentations, command_args.args_separator)
+    except AttributeError:
+        pass
+
+    # Parses add_sources
+    try:
+        command_args.add_sources_ = comma_to_list(
+            command_args.add_sources, command_args.args_separator)
+    except AttributeError:
+        pass
+
+    # Parses remove_sources
+    try:
+        command_args.remove_sources_ = comma_to_list(
+            command_args.remove_sources, command_args.args_separator)
+    except AttributeError:
+        pass
+
+    # Parses delete_sources
+    try:
+        command_args.delete_sources_ = comma_to_list(
+            command_args.delete_sources, command_args.args_separator)
+    except AttributeError:
+        pass
+
+    # Parses replace_sources
+    try:
+        command_args.replace_sources_ = comma_to_list(
+            command_args.replace_sources, command_args.args_separator)
     except AttributeError:
         pass
 
@@ -927,29 +873,16 @@ def get_output_args(api, command_args, resume):
 
     # Parses row_components
     try:
-        if command_args.row_components:
-            row_components_arg = [
-                source.strip() for source in
-                command_args.row_components.split(
-                    command_args.args_separator)]
-            command_args.row_components_ = \
-                row_components_arg
-        else:
-            command_args.row_components_ = []
+        command_args.row_components_ = comma_to_list(
+            command_args.row_components, command_args.args_separator)
     except AttributeError:
         pass
 
+
     # Parses row_indices
     try:
-        if command_args.row_indices:
-            row_indices_arg = [
-                index.strip() for index in
-                command_args.row_indices.split(
-                    command_args.args_separator)]
-            command_args.row_indices_ = \
-                row_indices_arg
-        else:
-            command_args.row_indices_ = []
+        command_args.row_indices_ = comma_to_list(
+            command_args.row_indices, command_args.args_separator)
     except AttributeError:
         pass
 
@@ -995,25 +928,15 @@ def get_output_args(api, command_args, resume):
 
     # Parses sample row fields
     try:
-        if command_args.row_fields:
-            row_fields_arg = [field.strip() for field in
-                              command_args.row_fields.split(
-                                  command_args.args_separator)]
-            command_args.row_fields_ = row_fields_arg
-        else:
-            command_args.row_fields_ = []
+        command_args.row_fields_ = comma_to_list(
+            command_args.row_fields, command_args.args_separator)
     except AttributeError:
         pass
 
     # Parses sample stat_fields
     try:
-        if command_args.stat_fields:
-            stat_fields_arg = [field.strip() for field in
-                               command_args.stat_fields.split(
-                                   command_args.args_separator)]
-            command_args.stat_fields_ = stat_fields_arg
-        else:
-            command_args.stat_fields_ = []
+        command_args.stat_fields_ = comma_to_list(
+            command_args.stat_fields, command_args.args_separator)
     except AttributeError:
         pass
 
@@ -1183,10 +1106,11 @@ def transform_args(command_args, flags, api):
         pass
 
     # Reads a json row_values object.
+    command_args.row_values = None
     try:
         if command_args.row_values_json:
-            row_values = u.read_json_filter(command_args.row_values_json)
-            command_args.row_values_json = row_values
+            row_values = u.read_json(command_args.row_values_json)
+            command_args.row_values = row_values
     except AttributeError:
         pass
 

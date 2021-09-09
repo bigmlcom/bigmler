@@ -35,6 +35,15 @@ def get_source_options(defaults=None):
             'nargs': '?',
             "default": defaults.get('train', None),
             "help": "Training set path."},
+
+        # Path to data
+        '--data': {
+            "action": 'store',
+            "dest": 'train',
+            'nargs': '?',
+            "default": defaults.get('train', None),
+            "help": "Path to source data."},
+
         # If a BigML source is provided, the script won't create a new one
         '--source': {
             "action": 'store',
@@ -49,6 +58,16 @@ def get_source_options(defaults=None):
             'dest': 'source_file',
             'default': defaults.get('source_file', None),
             'help': "BigML source JSON structure file."},
+
+        # If a sources file is provided, the source ID will be extracted from
+        # it
+        '--sources': {
+            "action": 'store',
+            "dest": 'sources',
+            "default": defaults.get('sources', None),
+            'help': ("Path to a file containing source/ids. Just"
+                     " one source per line"
+                     " (e.g., source/50a20697035d0706da0004a4).")},
 
         # The path to a file containing names if you want to alter BigML's
         # default field names or the ones provided by the train file header.
@@ -152,14 +171,15 @@ def get_source_options(defaults=None):
                      " The first row is used as header and rows are"
                      " expected to comply the the --export-fields output.")},
 
-        # Whether o not the source will be closed for editing
-        '--closed': {
+        # Close the source for editing
+        '--close': {
             'action': 'store_true',
             'dest': 'closed',
             'default': defaults.get('closed', None),
-            'help': ("Whether or not the source will be closed for editing.")},
+            'help': ("Close the source (no editing allowed).")},
 
-        # Whether o not the source will be closed for editing
+        # Check if the source is editable. Clone the source into an editable
+        # one otherwise.
         '--open': {
             'action': 'store_false',
             'dest': 'closed',
@@ -186,6 +206,25 @@ def get_source_options(defaults=None):
             'default': defaults.get('remove_sources', None),
             'help': ("A comma-separated list of source identifiers to remove"
                      " from a composite.")},
+
+        # A comma-separated list of source identifiers to remove from a
+        # composite and, if they do not belong to any other composite, delete
+        # as individual resources.
+        '--replace-sources': {
+            'action': 'store',
+            'dest': 'replace_sources',
+            'default': defaults.get('replace_sources', None),
+            'help': ("A comma-separated list of source identifiers to replace"
+                     " the existing ones in the composite.")},
+
+        # A comma-separated list of source identifiers to add to the
+        # composite.
+        '--add-sources': {
+            'action': 'store',
+            'dest': 'add_sources',
+            'default': defaults.get('add_sources', None),
+            'help': ("A comma-separated list of source identifiers to add"
+                     " to the composite.")},
 
         # Values to be replaced in some fields and rows.
         '--row-values-json': {
@@ -221,6 +260,45 @@ def get_source_options(defaults=None):
             'help': ("Comma-separated list of indices corresponding to the "
                      "sources in a composite that will be updated by "
                      "default when using \"row_values\" with no \"indices\""
-                     " specification.")}}
+                     " specification.")},
+
+        # Annotations language
+        # syntax used to handle image annotations
+        '--annotations-language': {
+            'action': 'store',
+            'dest': 'annotations_language',
+            'default': defaults.get('annotations_language', None),
+            'choices': ["VOC", "YOLO"],
+            'help': ("Language used to provide the annotations for images."
+                     "Annotations are expected to be provided using "
+                     "on file per image. The --train option should point"
+                     " to the directory that contains both images and"
+                     " the corresponding annotations.")},
+
+        # Annotations file
+        # File that contains annotations for images
+        '--annotations-file': {
+            'action': 'store',
+            'dest': 'annotations_file',
+            'default': defaults.get('annotations_file', None),
+            'help': "File that contains the annotations to images."},
+
+        # Annotations directory
+        # For annotations stored in individual files, like VOC or YOLO,
+        # directory where the annotation files are located
+        '--annotations-dir': {
+            'action': 'store',
+            'dest': 'annotations_dir',
+            'default': defaults.get('annotations_dir', None),
+            'help': "Directory for individual annotation files."},
+
+        # Images file
+        # Compressed file with images used as reference for annotations
+        '--images-file': {
+            'action': 'store',
+            'dest': 'images_file',
+            'default': defaults.get('images_file', None),
+            'help': ("Compressed file with images used as reference for "
+                     "annotations.")}}
 
     return options

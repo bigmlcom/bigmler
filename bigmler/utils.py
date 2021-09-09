@@ -202,6 +202,20 @@ def read_datasets(path):
     return datasets
 
 
+def read_sources(path):
+    """Reads last source id from a file.
+
+    """
+    sources = []
+    for line in fileinput.input([path]):
+        if line.rstrip().startswith("source/"):
+            sources.append(line.rstrip())
+    try:
+        return sources[-1]
+    except KeyError:
+        return []
+
+
 def read_json_filter(path):
     """Reads a json filter from a file.
 

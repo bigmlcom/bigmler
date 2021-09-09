@@ -34,6 +34,7 @@ from bigmler.resourcesapi.common import set_basic_args, check_fields_struct, \
 
 from bigmler.resourcesapi.common import ALL_FIELDS_QS, LOCALE_DEFAULT
 from bigmler.reports import report
+from bigmler.processing.annotations import bigml_metadata
 
 
 def set_source_args(args, name=None, multi_label_data=None,
@@ -74,6 +75,10 @@ def set_source_args(args, name=None, multi_label_data=None,
                 "multi_label_data": multi_label_data}})
 
     if update:
+        if hasattr(args, "add_sources") and args.add_sources_:
+            source_args["add_sources"] = args.add_sources_
+        if hasattr(args, "replace_sources") and args.replace_sources_:
+            source_args["sources"] = args.replace_sources_
         if hasattr(args, "remove_sources") and args.remove_sources:
             source_args["remove_sources"] = args.remove_sources_
         if hasattr(args, "delete_sources") and args.delete_sources:
@@ -85,8 +90,8 @@ def set_source_args(args, name=None, multi_label_data=None,
         if hasattr(args, "row_indices") and args.row_indices:
             source_args["row_indices"] = [int(item) for item
                 in args.row_indices_]
-        if hasattr(args, "row_values") and args.row_values:
-            source_args["row_values"] = args.row_values_
+        if hasattr(args, "row_values") and args.row_values is not None:
+            source_args["row_values"] = args.row_values
 
     # to update fields attributes or types you must have a previous fields
     # structure (at update time)
@@ -121,14 +126,23 @@ def create_source(data_set, source_args, args, api=None, path=None,
     check_fields_struct(source_args, "source")
     # annotated sources for images
     try:
-        if os.path.exists(data_set):
+        if os.path.exists(data_set) and not os.path.isdir(data_set):
+            # --train metadata.json
             with open(data_set) as data_handler:
                 source_info = json.load(data_handler)
-            source_attrs = source_info.keys()
-            if "annotations" in source_attrs and "images_file" in source_attrs:
-                source = api.create_annotated_source(data_set, source_args)
+            if isinstance(source_info, dict):
+                # could be a metadata.json file describing annotated images
+                source_attrs = source_info.keys()
+                if "annotations" in source_attrs and \
+                        "images_file" in source_attrs:
+                    source = api.create_annotated_source(data_set, source_args)
+                else:
+                    source = api.create_source(data_set, source_args)
             else:
                 source = api.create_source(data_set, source_args)
+        elif args.images_dir and args.annotations_file:
+            source = api.create_annotated_source(bigml_metadata(args),
+                                                 source_args)
         else:
             source = api.create_source(data_set, source_args)
     except (IOError, TypeError, UnicodeDecodeError,
@@ -243,6 +257,11 @@ def update_source(source, source_args, args,
                     get_url(source))
     log_message(message, log_file=session_file,
                 console=args.verbosity)
+    if args.annotations_file and args.images_file:
+        source = api.update_composite_annotations(
+            source, args.images_file, args.annotations_file,
+            new_fields=None,
+            source_changes=source_args)
     source = api.update_source(source, source_args)
     check_resource_error(source, "Failed to update source: ")
     source = check_resource(source, api.get_source)
