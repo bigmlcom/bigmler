@@ -88,9 +88,10 @@ def has_train(args):
     """Returns if some kind of train data is given in args.
 
     """
-    return any(has_value(args, ["training_set", "source", "sources", "dataset",
-                                "datasets", "source_file", "dataset_file",
-                                "train_stdin", "source_tag", "dataset_tag"]))
+    return any(has_value(args, ["training_set", "source", "source_in",
+                                "dataset", "datasets", "source_file",
+                                "dataset_file", "train_stdin", "source_tag",
+                                "dataset_tag"]))
 
 
 def has_source(args):
@@ -160,12 +161,14 @@ def get_flags(args):
     return flags, train_stdin, test_stdin
 
 
-def comma_to_list(comma_arg, separator):
+def comma_to_list(comma_arg, separator, none=False):
     """Returns the list of elements defined in a comma-separated string
     adapting to the actual command separator
 
     """
-    print("** sep", separator)
+    if comma_arg is None and none:
+        return None
+
     if comma_arg:
         list_arg = [option.strip() for option in
             comma_arg.split(separator)]
@@ -846,10 +849,10 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
-    # Parses replace_sources
+    # Parses sources
     try:
-        command_args.replace_sources_ = comma_to_list(
-            command_args.replace_sources, command_args.args_separator)
+        command_args.sources_ = comma_to_list(
+            command_args.sources, command_args.args_separator, none=True)
     except AttributeError:
         pass
 

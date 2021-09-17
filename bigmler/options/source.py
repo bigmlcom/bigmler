@@ -39,9 +39,9 @@ def get_source_options(defaults=None):
         # Path to data
         '--data': {
             "action": 'store',
-            "dest": 'train',
+            "dest": 'training_set',
             'nargs': '?',
-            "default": defaults.get('train', None),
+            "default": defaults.get('training_set', None),
             "help": "Path to source data."},
 
         # If a BigML source is provided, the script won't create a new one
@@ -61,13 +61,22 @@ def get_source_options(defaults=None):
 
         # If a sources file is provided, the source ID will be extracted from
         # it
-        '--sources': {
+        '--source-in': {
             "action": 'store',
-            "dest": 'sources',
-            "default": defaults.get('sources', None),
-            'help': ("Path to a file containing source/ids. Just"
-                     " one source per line"
-                     " (e.g., source/50a20697035d0706da0004a4).")},
+            "dest": 'source_in',
+            "default": defaults.get('source_in', None),
+            'help': ("Path to a file containing source/ids (one per line)"
+                     "that will be used as the source ID to work on.")},
+
+        # If a sources file is provided, the source IDs will be extracted from
+        # it
+        '--sources-in': {
+            "action": 'store',
+            "dest": 'sources_in',
+            "default": defaults.get('sources_in', None),
+            'help': ("Path to a file containing many source/ids (one per line)"
+                     ". Used as the list of sources for a composite "
+                     " source.")},
 
         # The path to a file containing names if you want to alter BigML's
         # default field names or the ones provided by the train file header.
@@ -210,10 +219,10 @@ def get_source_options(defaults=None):
         # A comma-separated list of source identifiers to remove from a
         # composite and, if they do not belong to any other composite, delete
         # as individual resources.
-        '--replace-sources': {
+        '--sources': {
             'action': 'store',
-            'dest': 'replace_sources',
-            'default': defaults.get('replace_sources', None),
+            'dest': 'sources',
+            'default': defaults.get('sources', None),
             'help': ("A comma-separated list of source identifiers to replace"
                      " the existing ones in the composite.")},
 

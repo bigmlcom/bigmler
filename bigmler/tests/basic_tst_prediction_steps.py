@@ -207,12 +207,30 @@ def i_create_source_with_locale(step, data=None, locale=None,
         assert False
 
 
-#@step(r'I create a BigML composite source from file "([^"]*)"
+#@step(r'I create a BigML source from file "([^"]*)"
 # storing results in "(.*)"$')
 def i_create_composite_source(step, data=None, output=None):
     ok_(data is not None and output is not None)
     command = ("bigmler --train " + res_filename(data) + " --output " + output +
                " --no-dataset --no-model --store")
+    command = check_debug(command)
+    try:
+        retcode = check_call(command, shell=True)
+        ok_(retcode >=0)
+        world.directory = os.path.dirname(output)
+        world.folders.append(world.directory)
+        world.output = output
+    except OSError as e:
+        assert False
+
+#@step(r'I create a BigML source from file "([^"]*)"
+# storing results in "(.*)"$')
+def i_create_source(step, data=None, output_dir=None):
+    ok_(data is not None and output_dir is not None)
+    output = os.path.join(output_dir, "tmp.txt")
+    command = ("bigmler source --data " + res_filename(data) +
+               " --output-dir " + output_dir +
+               " --store")
     command = check_debug(command)
     try:
         retcode = check_call(command, shell=True)
@@ -996,20 +1014,6 @@ def i_check_create_source(step):
     except Exception as exc:
         assert False, str(exc)
 
-#@step(r'I check that the composite has been created$')
-def i_check_create_composite(step):
-    source_file = "%s%ssource" % (world.directory, os.sep)
-    try:
-        source_file = open(source_file, "r")
-        source = check_resource(
-            source_file.readline().strip(), world.api.get_source)
-        if source['resource'] not in world.composites:
-            world.composites.append(source['resource'])
-        world.source = source
-        source_file.close()
-    except Exception as exc:
-        assert False, str(exc)
-
 #@step(r'I check that the model has doubled its rows$')
 def i_check_model_double(step):
     ok_(world.model['object']['rows'] == \
@@ -1483,6 +1487,12 @@ def i_check_source_label(step, field_id, field_label):
     except KeyError as exc:
         assert False, str(exc)
 
+#@step(r'I check that the source exists')
+def check_source_exists(step, exists=True):
+    if not exists:
+        exists = None
+    source = world.api.get_source(step.source)
+    assert world.api.ok(source) == exists
 
 #@step(r'I create BigML resources uploading train "(.*)" file to evaluate and
 # log evaluation in "(.*)"')

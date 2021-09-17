@@ -77,14 +77,14 @@ def set_source_args(args, name=None, multi_label_data=None,
     if update:
         if hasattr(args, "add_sources") and args.add_sources_:
             source_args["add_sources"] = args.add_sources_
-        if hasattr(args, "replace_sources") and args.replace_sources_:
-            source_args["sources"] = args.replace_sources_
-        if hasattr(args, "remove_sources") and args.remove_sources:
+        elif hasattr(args, "remove_sources") and args.remove_sources:
             source_args["remove_sources"] = args.remove_sources_
-        if hasattr(args, "delete_sources") and args.delete_sources:
+        elif hasattr(args, "delete_sources") and args.delete_sources:
             source_args["delete_sources"] = args.delete_sources_
-        if hasattr(args, "closed") and args.closed:
+        elif hasattr(args, "closed") and args.closed:
             source_args["closed"] = args.closed
+        elif (hasattr(args, "sources") and (args.sources_ is not None)):
+            source_args["sources"] = args.sources_
         if hasattr(args, "row_components") and args.row_components:
             source_args["row_components"] = args.row_components_
         if hasattr(args, "row_indices") and args.row_indices:
@@ -129,7 +129,10 @@ def create_source(data_set, source_args, args, api=None, path=None,
         if os.path.exists(data_set) and not os.path.isdir(data_set):
             # --train metadata.json
             with open(data_set) as data_handler:
-                source_info = json.load(data_handler)
+                try:
+                    source_info = json.load(data_handler)
+                except (UnicodeDecodeError, json.decoder.JSONDecodeError):
+                    source_info = None
             if isinstance(source_info, dict):
                 # could be a metadata.json file describing annotated images
                 source_attrs = source_info.keys()
@@ -139,15 +142,17 @@ def create_source(data_set, source_args, args, api=None, path=None,
                 else:
                     source = api.create_source(data_set, source_args)
             else:
+                # --train iris.csv
                 source = api.create_source(data_set, source_args)
         elif args.images_dir and args.annotations_file:
+            # --train images_dir
             source = api.create_annotated_source(bigml_metadata(args),
                                                  source_args)
         else:
             source = api.create_source(data_set, source_args)
-    except (IOError, TypeError, UnicodeDecodeError,
-            json.decoder.JSONDecodeError):
-        source = api.create_source(data_set, source_args)
+    except (IOError, TypeError):
+        # empty composite source, for instance
+        source = api.create_source(args.sources_, source_args)
     if path is not None:
         suffix = "_" + source_type if source_type else ""
         log_created_resources(
@@ -166,6 +171,10 @@ def create_source(data_set, source_args, args, api=None, path=None,
     log_message("%s\n" % source_id, log_file=log)
     if hasattr(args, "reports") and args.reports:
         report(args.reports, path, source)
+    if hasattr(source_args, "sources_"):
+        # if we used the list of sources to create a composite, we don't
+        # want the argument to be used in the update step
+        args.sources_ = None
     return source
 
 
@@ -219,7 +228,6 @@ def data_to_source(args):
                     data_set = content
         except (IOError, ValueError, TypeError):
             pass
-
     return data_set, data_set_header
 
 

@@ -34,6 +34,7 @@ import bigmler.checkpoint as c
 import bigmler.processing.projects as pp
 import bigmler.processing.annotations as an
 
+from bigmler.processing.args import has_train
 from bigmler.train_reader import TrainReader
 
 
@@ -44,7 +45,8 @@ def needs_source_update(args):
     return (args.field_attributes_ or args.types_ or args.user_locale
             or args.json_args.get('source') or args.import_fields or
             (hasattr(args, "add_sources") and args.add_sources_) or
-            (hasattr(args, "replace_sources") and args.replace_sources_) or
+            (hasattr(args, "sources") and args.sources_ is not None) or
+            (hasattr(args, "sources_in") and args.sources_in is not None) or
             (hasattr(args, "remove_sources") and args.remove_sources_) or
             (hasattr(args, "delete_sources") and args.delete_sources_) or
             (hasattr(args, "close") and args.close is not None) or
@@ -124,8 +126,8 @@ def source_processing(api, args, resume,
     """
     source = None
     fields = None
-    if args.sources:
-        args.source = u.read_sources(args.sources)
+    if args.sources_in:
+        args.sources_ = u.read_sources(args.sources)
 
     if (args.training_set or (
             hasattr(args, "evaluate") and args.evaluate and args.test_set)):
@@ -155,9 +157,10 @@ def source_processing(api, args, resume,
             args.images_dir = data_set
         elif args.annotations_file:
             args.images_file = data_set
+
         if args.annotations_language is not None:
             data_set = an.bigml_coco_file(args, session_file)
-        elif os.path.isdir(data_set):
+        elif os.path.isdir(data_set) or args.images_file is not None:
             data_set = an.bigml_metadata(args)
         source_args = r.set_source_args(
             args, multi_label_data=multi_label_data,
@@ -169,6 +172,15 @@ def source_processing(api, args, resume,
     # steps, we use it.
     elif args.source:
         source = bigml.api.get_source_id(args.source)
+    elif args.sources_ is not None and not has_train(args):
+        # if no data or source ID is provided and a list of sources
+        # (which might even be empty e.g. --sources "")
+        # is given, it creates a composite
+        source_args = r.set_source_args(
+            args, multi_label_data=multi_label_data,
+            data_set_header=data_set_header)
+        source = r.create_source(
+            data_set, source_args, args, api, path, session_file, log)
 
     # If we already have source, we check that is finished , extract the
     # fields, and update them if needed.
@@ -186,7 +198,8 @@ def source_processing(api, args, resume,
                         bigml_locale(args.user_locale) ==
                         source_parser['locale']):
                     args.user_locale = None
-        fields = Fields(source['object']['fields'], **csv_properties)
+        fields = Fields(source['object'].get('fields', {}),
+                        **csv_properties)
         if needs_source_update(args) or (data_set is None and args.images_file
                 and args.annotations_file):
             if source["object"].get("closed", False):
@@ -199,7 +212,8 @@ def source_processing(api, args, resume,
             source = r.update_source(source, source_args, args, api,
                                      session_file)
             args.project_id = project_id
-            fields = Fields(source['object']['fields'], **csv_properties)
+            fields = Fields(source['object'].get('fields', {}),
+                            **csv_properties)
 
     return source, resume, csv_properties, fields
 

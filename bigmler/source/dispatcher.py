@@ -62,6 +62,8 @@ def source_dispatcher(args=sys.argv[1:]):
 
     # Selects the action to perform
     if (a.has_train(command_args)
+            or (hasattr(command_args, "sources") and
+                command_args.sources is not None)
             or command_args.export_fields is not None):
         output_args = a.get_output_args(api, command_args, resume)
         compute_output(**output_args)
