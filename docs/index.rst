@@ -4981,6 +4981,55 @@ Fancy Options
 ================================= =============================================
 
 
+Source subcommand Options
+-------------------------
+
+===================================== =========================================
+``--data`` *PATH*                     Path to the data file or directory (if 
+                                      more than one file should be uploaded)
+``--images-file`` *PATH*              Path to a compressed file that contains
+								      images
+``--annotations-file`` *PATH*         Path to the file that contains the
+                                      annotations for images
+``--annotations-dir`` *DIRECTORY*     Path to a directory that contains 
+                                      annotation files, one per image
+``--annotations-language`` *LANGUAGE* Language that sets the syntax of
+                                      the annotations. Options: VOC or YOLO
+``--source`` *SOURCE ID*              Id for the source that will be updated
+``--source-in`` *PATH*                Path to the file that contains source Ids
+                                      (one per line) and uses the last one
+                                      as source ID for updates
+``--sources-in`` *PATH*               Path to the file that contains source Ids
+                                      (one per line) and uses them all as the
+                                      list of sources to create composite
+                                      sources
+``--close``                           Causes a source to be closed for editing
+``--open``                            If the source is closed, clones the
+                                      source into a new one open for editing
+``--add-sources`` *STRING*            Adds a comma-separater list of sources to 
+                                      a composite source
+``--delete-sources`` *STRING*         Deletes a comma-separated list of sources
+                                      from the composite source and also
+                                      individually
+                                      if they don't belong to another
+                                      composite
+``--remove-sources`` *STRING*         Deletes a comma-separated list of sources
+                                      from the
+                                      composite source keeping them as
+                                      individual sources
+``--rows-values-json`` *PATH*         Path to a JSON file that contains the
+                                      values for some rows and fields
+``--rows-indices`` *STRING*           Comma-separated list of indices of
+                                      the rows that will be affected by the
+                                      ``--rows-values-json`` option
+``--rows-components`` *STRING*        Comma-separated list of source Ids
+                                      that will be affected by the 
+                                      ``--rows-values-json`` option
+===================================== =========================================
+
+
+
+
 Dataset subcommand Options
 --------------------------
 
