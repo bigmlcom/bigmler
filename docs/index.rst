@@ -462,7 +462,7 @@ performing one of the following operations:
 	bigmler source --source source/4f603fe203ce89bb2d000000 \
 				   --remove-sources source/4f603fe203ce89bb2d000001,source/4f603fe203ce89bb2d000002 \
 				   --output-dir final-composite
-				   
+
 - Replacing the full list of components
 
 .. code-block:: bash
@@ -505,19 +505,19 @@ the archive, and put them all together in a composite source.
 Annotated images as Composite Sources
 -------------------------------------
 
-BigML allows to use images too to build your Machine Learning models. 
+BigML allows to use images too to build your Machine Learning models.
 In order to use images in BigML, each image file needs to be uploaded and
 transformed in a Source object, and the collection of images that will become
-your training data is handled in BigML as a collection of Sources. However, 
+your training data is handled in BigML as a collection of Sources. However,
 this collection of sources is in turn a Source (to be precise, a
 ``Composite Source``). Each row in a Composite Source can contain one or more
 images, but it can also contain other fields related to those images,
-like labels, or regions.
+like labels.
 
 When storing images in a repository, is common practice to keep them
 in directories or compressed files. The related fields, like labels,
 are usually stored as additional files where some attribute points to the image
-they refer to. In BigML Composite Sources, though, 
+they refer to. In BigML Composite Sources, though,
 images and annotations can be consolidated as different fields
 of the composite source, so that every row of data in the composite source
 contains the source created by uploading the related image plus the
@@ -533,9 +533,9 @@ in a single compressed file.
 
 .. code-block:: bash
 	bigmler source --train my_images.zip --output-dir output
-	
+
 In this case, the ``my_images.zip`` is uploaded and a new ``composite source``
-is created containing the images. 
+is created containing the images.
 
 Second scenario: Images are stored in a directory.
 
@@ -555,9 +555,9 @@ annotations which have been stored in an annotations JSON file.
 	               --annotations-file annotations.json \
 	               --output-dir output
 
-BigML uses a BigML-COCO syntax to provide labels or regions associated to
+BigML uses a BigML-COCO syntax to provide labels associated to
 images. The annotations file should contain a list of dictionaries and
-each dictionary corresponds to one of the images. The reference to the 
+each dictionary corresponds to one of the images. The reference to the
 annotated image is provided in the ``file`` attribute.
 
 .. code-block:: JSON
@@ -576,7 +576,7 @@ file will be updated.
 
 These are the basic scenarios, but other annotations syntaxes, like ``VOC`` or
 ``YOLO`` files are also accepted. As in this case, the annotations are
-provided separately, in one file per image, you would need to 
+provided separately, in one file per image, you would need to
 provide the directory where these files are stored and
 the annotations language as options:
 
@@ -585,7 +585,7 @@ the annotations language as options:
 	               --annotations-dir ./annotations_directory \
 	               --annotations-language VOC
 	               --output-dir output
-	               
+
 The createed composite sources are editable up untill you close them
 explicitly or you create a dataset from them. While editable, more annotations
 can be added to an existing source. For instance, to add annotations
@@ -597,8 +597,8 @@ to the source generated in the third scenario,
 				   --images-file my_images.zip \
 	               --annotations-file new_annotations.json \
 	               --output-dir output
-  
-	               
+
+
 Ensembles
 ---------
 
@@ -4985,13 +4985,13 @@ Source subcommand Options
 -------------------------
 
 ===================================== =========================================
-``--data`` *PATH*                     Path to the data file or directory (if 
+``--data`` *PATH*                     Path to the data file or directory (if
                                       more than one file should be uploaded)
 ``--images-file`` *PATH*              Path to a compressed file that contains
 								      images
 ``--annotations-file`` *PATH*         Path to the file that contains the
                                       annotations for images
-``--annotations-dir`` *DIRECTORY*     Path to a directory that contains 
+``--annotations-dir`` *DIRECTORY*     Path to a directory that contains
                                       annotation files, one per image
 ``--annotations-language`` *LANGUAGE* Language that sets the syntax of
                                       the annotations. Options: VOC or YOLO
@@ -5006,7 +5006,7 @@ Source subcommand Options
 ``--close``                           Causes a source to be closed for editing
 ``--open``                            If the source is closed, clones the
                                       source into a new one open for editing
-``--add-sources`` *STRING*            Adds a comma-separater list of sources to 
+``--add-sources`` *STRING*            Adds a comma-separater list of sources to
                                       a composite source
 ``--delete-sources`` *STRING*         Deletes a comma-separated list of sources
                                       from the composite source and also
@@ -5023,7 +5023,7 @@ Source subcommand Options
                                       the rows that will be affected by the
                                       ``--rows-values-json`` option
 ``--rows-components`` *STRING*        Comma-separated list of source Ids
-                                      that will be affected by the 
+                                      that will be affected by the
                                       ``--rows-values-json`` option
 ===================================== =========================================
 
@@ -5565,7 +5565,7 @@ Deepnet Subcommand Options
                                               dependencies before training
                                               begins, and so make learning
                                               proceed more quickly.
-``--image-augmentations``                     A comma-separated list of 
+``--image-augmentations``                     A comma-separated list of
                                               augmentation strategies to use
                                               for image data. The available
                                               keys are: `flip_horizontal`,
@@ -5574,9 +5574,9 @@ Deepnet Subcommand Options
                                               extracted from images.
                                               Use `all` to include all
                                               generated features, `none`
-                                              to include none, or a 
+                                              to include none, or a
                                               comma-separated list of
-                                              especific field ids, 
+                                              especific field ids,
                                               corresponding to extracted fields
                                               to add to the default set.
 ``--no-missing-numerics``                     Avoids the default behaviour,
