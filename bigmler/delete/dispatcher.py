@@ -40,7 +40,7 @@ INDENT_IDS = 26
 RESOURCES_LOG_FILES = set(['project', 'source', 'dataset', 'dataset_train',
                            'dataset_test', 'dataset_gen', 'dataset_cluster',
                            'dataset_parts', 'dataset_multi', 'models',
-                           'ensembles', 'evaluations',
+                           'ensembles', 'evaluations', 'optimls',
                            'clusters', 'batch_prediction', 'batch_centroid',
                            'anomalies', 'batch_anomaly_score', 'sample',
                            'associations', 'time_series', "deepnets",
@@ -62,7 +62,7 @@ STATUS_CODES = {
 }
 
 GROUP_RESOURCES = ["project", "execution"]
-COMPOSED_RESOURCES = ["cluster", "ensemble", "fusion", "composites"]
+COMPOSED_RESOURCES = ["cluster", "ensemble", "fusion", "composites", "optiml"]
 
 
 def retrieve_resources(directory):
@@ -220,6 +220,7 @@ def filtered_selectors(args, api):
         ("project", args.project_tag, api.list_projects, None),
         ("execution", args.execution_tag, api.list_executions, None),
         ("cluster", args.cluster_tag, api.list_clusters, None),
+        ("optiml", args.optiml_tag, api.list_optimls, None),
         ("source", args.source_tag, api.list_sources, None),
         ("dataset", args.dataset_tag, api.list_datasets,
          "cluster_status=false"),

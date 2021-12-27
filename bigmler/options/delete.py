@@ -161,6 +161,12 @@ def get_delete_options(defaults=None):
             'default': defaults.get('cluster_tag', None),
             'help': "Retrieve clusters that were tagged with tag."},
 
+        # Use it to retrieve optimls that were tagged with tag.
+        '--optiml-tag': {
+            'dest': 'optiml_tag',
+            'default': defaults.get('optiml_tag', None),
+            'help': "Retrieve optimls that were tagged with tag."},
+
         # Use it to retrieve centroids that were tagged with tag.
         '--centroid-tag': {
             'dest': 'centroid_tag',
