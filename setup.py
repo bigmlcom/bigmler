@@ -60,7 +60,7 @@ setuptools.setup(
                 'bigmler.linearregression', 'bigmler.pca', 'bigmler.fusion',
                 'bigmler.dataset', 'bigmler.externalconnector',
                 'bigmler.export.out_tree'],
-    install_requires = ['bigml>=7.0.0, <8.0.0',
+    install_requires = ['bigml>=7.1.2, <8.0.0',
                         'jsonschema>=2.6.0',
                         'nbformat>=4.4.0',
                         'opencv-python>=4.5.3'],

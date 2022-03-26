@@ -3,10 +3,12 @@
 History
 -------
 
-5.0.0 (2021-08-20)
+5.0.0 (2022-03-26)
 ~~~~~~~~~~~~~~~~~~
 
 - Adding support for composites of images.
+- Adding --id-fields to bigmler anomaly.
+- Adding OptiML to the bigmler delete list of resources.
 
 4.1.1 (2021-05-04)
 ~~~~~~~~~~~~~~~~~~

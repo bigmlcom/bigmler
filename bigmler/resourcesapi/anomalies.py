@@ -52,7 +52,8 @@ def set_anomaly_args(args, name=None, fields=None, anomaly_fields=None):
     if anomaly_fields and fields is not None:
         input_fields = configure_input_fields(fields, anomaly_fields)
         anomaly_args.update(input_fields=input_fields)
-
+    if args.id_fields is not None:
+        anomaly_args.update({"id_fields": args.id_fields_})
     if args.top_n > 0:
         anomaly_args.update(top_n=args.top_n)
     if args.forest_size > 0:

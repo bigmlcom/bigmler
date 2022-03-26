@@ -145,6 +145,15 @@ def get_anomaly_options(defaults=None):
             'type': int,
             'help': ("Number of selected top anomalies.")},
 
+        # Comma separated list of summary fields
+        '--id-fields': {
+            'action': 'store',
+            'dest': 'id_fields',
+            'default': defaults.get('id_fields', None),
+            'help': ("Comma-separated list of ID fields, that will be"
+                     " included in the generated datasets but not used in"
+                     " the anomaly detector algorithm.")},
+
         # Number of trees in the anomaly detector
         '--forest-size': {
             'action': 'store',

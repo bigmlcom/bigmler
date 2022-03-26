@@ -207,6 +207,7 @@ FLAGS = {
         {'flag': 'score', 'type': 'boolean'},
         {'flag': 'anomalies-dataset', 'type': 'string'},
         {'flag': 'top_n', 'type': 'int'},
+        {'flag': 'id_fields', 'type': 'string'},
         {'flag': 'forest_size', 'type': 'int'}],
     'BigMLer sample': [
         {'flag': 'anomaly_fields', 'type': 'string'},

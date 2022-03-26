@@ -27,19 +27,14 @@ in our `Campfire chatroom <https://bigmlinc.campfirenow.com/f20a0>`_.
 Requirements
 ============
 
-BigMLer needs Python 3.X versions to work. Compatibility with Python 2.X was
-discontinued in version 3.27.2.
+BigMLer needs Python 3.8 or higher versions to work.
+Compatibility with Python 2.X was discontinued in version 3.27.2.
 
-BigMLer requires `bigml 7.0.0 <https://github.com/bigmlcom/python>`_  or
-higher. Using proportional missing strategy will additionally request
-the use of the `numpy <http://www.numpy.org/>`_ and
-`scipy <http://www.scipy.org/>`_ libraries. They are not
-automatically installed as a dependency, as they are quite heavy and
-exclusively required in this case. Therefore, they have been left for
-the user to install them if required. The same happens with the
-`pystemmer <https://pypi.python.org/pypi/PyStemmer>`_
-library, used only for topic modeling. Check the bindings documentation
-for more info.
+BigMLer requires `bigml 7.1.2 <https://github.com/bigmlcom/python>`_  or
+higher.  Using topic modeing will additionally request
+the use of `pystemmer <https://pypi.python.org/pypi/PyStemmer>`_
+library, which is not automatically installed as a dependency and should
+be manually installed. Check the `bindings documentation <https://bigml.readthedocs.org>`_ for more info.
 
 BigMLer Installation
 ====================
