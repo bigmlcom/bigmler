@@ -894,6 +894,19 @@ def get_output_args(api, command_args, resume):
     except AttributeError:
         pass
 
+    # Parses id_fields to exclude from the anomaly detector algorithm
+    try:
+        if command_args.id_fields:
+            id_fields_arg = [
+                field.strip() for field in
+                command_args.id_fields.split(
+                    command_args.args_separator)]
+            command_args.id_fields_ = id_fields_arg
+        else:
+            command_args.id_fields_ = []
+    except AttributeError:
+        pass
+
     anomaly_ids = []
     try:
         # Parses anomaly/ids if provided.

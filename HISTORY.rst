@@ -3,6 +3,13 @@
 History
 -------
 
+5.0.0 (2022-03-26)
+~~~~~~~~~~~~~~~~~~
+
+- Updating the bindings version to support image processing.
+- Adding --id-fields to bigmler anomaly.
+- Adding OptiML to the bigmler delete list of resources.
+
 4.1.1 (2021-05-04)
 ~~~~~~~~~~~~~~~~~~
 
