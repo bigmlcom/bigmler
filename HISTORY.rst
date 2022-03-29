@@ -9,6 +9,7 @@ History
 - Updating the bindings version to support image processing.
 - Adding --id-fields to bigmler anomaly.
 - Adding OptiML to the bigmler delete list of resources.
+- Cloning first if trying to update a closed source.
 
 4.1.1 (2021-05-04)
 ~~~~~~~~~~~~~~~~~~

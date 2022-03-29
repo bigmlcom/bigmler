@@ -81,6 +81,16 @@ def i_create_all_anomaly_resources_with_test_split_no_CSV(step, data=None, test_
     shell_execute(command, "%s/x.csv" % output_dir, data=data, test_split=test_split)
 
 
+#@step(r'And I create anomaly detector with "<id_fields>" and log predictions in "<output_dir>"$')
+def i_create_anomaly_with_id_fields(step, id_fields=None, output_dir=None):
+    if output_dir is None or id_fields is None:
+        assert False
+    command = ("bigmler anomaly --dataset " + world.dataset["resource"] + " --id-fields " +
+               ",".join(json.loads(id_fields)) +
+               " --store --output-dir " + output_dir)
+    shell_execute(command, "%s/x.csv" % output_dir)
+
+
 #@step(r'I create BigML anomaly detector from data <data> with options <options> and generate a new dataset of anomalies in "<output_dir>"$')
 def i_create_anomaly_resources_with_options(step, data=None, options=None, output_dir=None):
     if data is None or output_dir is None or options is None:
@@ -221,6 +231,17 @@ def i_check_anomaly_scores(step, check_file):
         assert True
     except Exception as exc:
         assert False, str(exc)
+
+
+def i_check_anomaly_has_id_fields(step, id_fields=None):
+    if id_fields is None:
+        assert False
+    id_fields = json.loads(id_fields)
+    id_fields.sort()
+    anomaly_id_fields = world.anomaly.get("object", {}).get("id_fields")
+    anomaly_id_fields.sort()
+    assert len(anomaly_id_fields) == len(id_fields)
+    assert anomaly_id_fields == id_fields
 
 
 #@step(r'I create BigML resources uploading train "(.*?)" file to find anomaly scores for "(.*?)" remotely with mapping file "(.*)" and log predictions in "([^"]*)"$')

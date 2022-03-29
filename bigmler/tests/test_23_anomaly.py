@@ -236,3 +236,28 @@ class TestAnomaly(object):
             test_anomaly.i_check_top_anomalies(self, example[3])
             test_anomaly.i_check_forest_size(self, example[4])
             test_anomaly.i_check_dataset_lines_number(self, example[3])
+
+    def test_scenario8(self):
+        """
+            Scenario: Successfully building anomaly detector from dataset with id fields
+
+
+                Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
+                And I create anomaly detector with "<id_fields>" and log predictions in "<output_dir>"
+                And I check that the anomaly detector is ready
+                Then the anomaly detector has id fields "<id_fields>"
+
+                Examples:
+                |scenario    | kwargs                                                  | id_fields                    | output                        |
+        """
+        print(self.test_scenario8.__doc__)
+        examples = [
+            ['scenario_an_1', '{"data": "data/tiny_kdd.csv", "output": "scenario_an_1/anomaly_scores.csv", "test": "data/test_kdd.csv"}', '["000004", "000005"]', 'scenario_an_8']]
+        for example in examples:
+            print("\nTesting with:\n", example)
+            test_pred.i_have_previous_scenario_or_reproduce_it(
+                self, example[0], example[1])
+            test_anomaly.i_create_anomaly_with_id_fields(
+                self, id_fields=example[2], output_dir=example[3])
+            test_anomaly.i_check_create_anomaly(self)
+            test_anomaly.i_check_anomaly_has_id_fields(self, example[2])

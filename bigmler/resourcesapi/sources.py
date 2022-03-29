@@ -24,6 +24,7 @@ import json
 import bigml.api
 
 from bigml.util import bigml_locale
+from bigml.constants import TINY_RESOURCE
 
 from bigmler.utils import (dated, get_url, log_message, check_resource,
                            check_resource_error, log_created_resources)
@@ -187,6 +188,17 @@ def update_source(source, source_args, args,
                     get_url(source))
     log_message(message, log_file=session_file,
                 console=args.verbosity)
+    source_min = api.get_source(source, query_string=TINY_RESOURCE)
+    if source["object"].get("closed", False):
+        message = dated("Source was closed. Cloning %s\n" %
+                        get_url(source))
+        log_message(message, log_file=session_file,
+                    console=verbosity)
+        source = api.clone_source(source)
+        message = "Source created: %s\n" % get_url(source)
+        log_message(message, log_file=session_file, console=args.verbosity)
+        log_message("%s\n" % source["object"]["resource"], log_file=log)
+
     source = api.update_source(source, source_args)
     check_resource_error(source, "Failed to update source: ")
     source = check_resource(source, api.get_source)
