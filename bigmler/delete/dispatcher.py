@@ -204,7 +204,7 @@ def filter_resource_types(delete_list, resource_types):
        only those resources will be deleted.
 
     """
-    if resource_types is not None:
+    if resource_types is not None and resource_types:
         delete_list = [resource for resource in delete_list if
                        bigml.api.get_resource_type(resource) in resource_types]
     return delete_list
@@ -355,10 +355,6 @@ def delete_resources(command_args, api, deleted_list=None):
     if command_args.from_dir:
         delete_list.extend(retrieve_resources(command_args.from_dir))
 
-    # filter resource_types if any
-    delete_list = filter_resource_types(delete_list,
-                                        command_args.resource_types_)
-
     # by time interval and tag (plus filtered resource_types)
     time_qs_list = time_interval_qs(command_args, api)
     delete_list.extend(get_delete_list(command_args, api, time_qs_list))
@@ -366,6 +362,10 @@ def delete_resources(command_args, api, deleted_list=None):
     # by filter expression (plus filtered resource_types)
     filter_qs_list = filter_qs(command_args)
     delete_list.extend(get_delete_list(command_args, api, filter_qs_list))
+
+    # filter resource_types if any
+    delete_list = filter_resource_types(delete_list,
+                                        command_args.resource_types_)
 
     delete_list = [resource_id for resource_id in delete_list \
         if resource_id not in deleted_list]

@@ -194,8 +194,14 @@ def then_the_evaluation_file_is_like(step, check_file_json):
         check = json.loads(check)
         evaluation = json.loads(evaluation)
         if 'model' in check:
-            assert_equal(check['model'], evaluation['model'])
-            assert_equal(check['mode'], evaluation['mode'])
+            for metric, value in check['model'].items():
+                if not isinstance(value, list) and not isinstance(value, dict):
+                    assert_equal(
+                        check['model'][metric], evaluation['model'][metric],
+                        "model %s" % metric)
+                    assert_equal(
+                        check['mode'][metric], evaluation['mode'][metric],
+                        "mode %s" % metric)
         else:
             del check["datasets"]
             del evaluation["datasets"]
