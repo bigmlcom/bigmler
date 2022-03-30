@@ -18,6 +18,7 @@
 import os
 import time
 import json
+import shutil
 
 from bigmler.tests.world import world, res_filename
 from subprocess import check_call, CalledProcessError
@@ -108,13 +109,13 @@ def i_check_create_time_series(step):
 
 #@step(r'the local forecasts file is like "(.*)"')
 def i_check_forecasts(step, check_file):
-    check_file = res_filename(check_file)
-    forecasts_file = "%s_%s.csv" % \
+    check_file_path = res_filename(check_file)
+    forecasts_file_path = "%s_%s.csv" % \
         (world.output, world.time_series["object"]["objective_field"])
     import traceback
     try:
-        with UnicodeReader(forecasts_file) as forecasts_file:
-            with UnicodeReader(check_file) as check_file:
+        with UnicodeReader(forecasts_file_path) as forecasts_file:
+            with UnicodeReader(check_file_path) as check_file:
                 for row in forecasts_file:
                     check_row = next(check_file)
                     assert_equal(len(check_row), len(row))
@@ -138,4 +139,5 @@ def i_check_forecasts(step, check_file):
                         else:
                             assert_equal(check_row[index], row[index])
     except Exception as exc:
+        shutil.copyfile(forecasts_file_path, "%s.new" % check_file_path)
         assert False, traceback.format_exc()

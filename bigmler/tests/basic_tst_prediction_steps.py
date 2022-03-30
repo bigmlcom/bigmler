@@ -18,6 +18,9 @@
 import os
 import time
 import json
+import shutil
+
+
 from bigmler.tests.world import world, res_filename
 from subprocess import check_call, CalledProcessError
 from bigml.api import check_resource
@@ -1393,12 +1396,12 @@ def i_check_predictions_file(step, predictions_file, check_file):
 
 #@step(r'the local prediction file is like "(.*)"')
 def i_check_predictions(step, check_file):
-    check_file = res_filename(check_file)
-    predictions_file = world.output
+    check_file_path = res_filename(check_file)
+    predictions_file_path = world.output
     import traceback
     try:
-        with UnicodeReader(predictions_file) as predictions_file:
-            with UnicodeReader(check_file) as check_file:
+        with UnicodeReader(predictions_file_path) as predictions_file:
+            with UnicodeReader(check_file_path) as check_file:
                 for row in predictions_file:
                     check_row = next(check_file)
                     assert_equal(len(check_row), len(row))
@@ -1412,6 +1415,7 @@ def i_check_predictions(step, check_file):
                         except ValueError:
                             assert_equal(check_row[index], row[index])
     except Exception as exc:
+        shutil.copyfile(predictions_file_path, "%s.new" % check_file_path)
         assert False, traceback.format_exc()
 
 

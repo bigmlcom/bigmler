@@ -185,11 +185,11 @@ def i_create_proportional_to_evaluate(step, test=None):
 
 #@step(r'the evaluation file is like "(.*)"$')
 def then_the_evaluation_file_is_like(step, check_file_json):
-    check_file_json = res_filename(check_file_json)
+    check_file_path = res_filename(check_file_json)
     evaluation_file_json = world.output + ".json"
     try:
         evaluation_file_json = open(evaluation_file_json, "U")
-        check_file_json = open(check_file_json, "U")
+        check_file_json = open(check_file_path, "U")
         check = check_file_json.readline()
         evaluation = evaluation_file_json.readline()
         check = json.loads(check)
@@ -210,6 +210,8 @@ def then_the_evaluation_file_is_like(step, check_file_json):
         evaluation_file_json.close()
         check_file_json.close()
     except Exception as exc:
+        with open("%s.new" % check_file_path, "w") as eval_handler:
+            json.dump(evaluation, eval_handler)
         assert False, str(exc)
 
 #@step(r'I check that the (.*) dataset has been created$')
