@@ -109,7 +109,8 @@ class TestPrediction(object):
             ['data/grades.csv', 'data/test_grades.csv', 'scenario1_r_dn/predictions.csv', 'check_files/predictions_grades_dn.csv']]
         for example in examples:
             print("\nTesting with:\n", example)
-            dn_pred.i_create_all_dn_resources(self, example[0], example[1], example[2])
+            dn_pred.i_create_all_dn_resources(
+                self, example[0], example[1], example[2])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
             dn_pred.i_check_create_dn_model(self)

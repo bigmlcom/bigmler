@@ -136,8 +136,8 @@ def i_check_output_file(step, output=None, check_file=None):
                             '', check_contents,
                             flags=re.S)
     if check_contents != output_file_contents:
-        #with open("%s" % check_file, "w") as bck_file:
-            # bck_file.write(output_file_contents)
+        with open("%s" % check_file, "w") as bck_file:
+            bck_file.write(output_file_contents)
         eq_(check_contents, output_file_contents)
 
 
