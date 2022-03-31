@@ -59,7 +59,7 @@ setuptools.setup(
                 'bigmler.resourcesapi',
                 'bigmler.linearregression', 'bigmler.pca', 'bigmler.fusion',
                 'bigmler.dataset', 'bigmler.externalconnector',
-                'bigmler.export.out_tree'],
+                'bigmler.export.out_tree', 'bigmler.source'],
     install_requires = ['bigml>=7.1.2, <8.0.0',
                         'jsonschema>=2.6.0',
                         'nbformat>=4.4.0',
