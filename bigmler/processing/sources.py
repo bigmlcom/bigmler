@@ -117,6 +117,29 @@ def test_source_processing(api, args, resume,
     return test_source, resume, csv_properties, fields
 
 
+def images_data_set(data_set, args):
+    """Adding images information when the data_set contains the images
+    directory.
+
+    """
+    try:
+        args.images_dir = None
+        args.images_file = None
+        if os.path.isdir(data_set):
+            # When data_set is a directory, we assume it will contain images
+            args.images_dir = data_set
+        elif args.annotations_file:
+            args.images_file = data_set
+
+        if args.annotations_language is not None:
+            data_set = an.bigml_coco_file(args, session_file)
+        elif os.path.isdir(data_set) or args.images_file is not None:
+            data_set = an.bigml_metadata(args)
+    except TypeError:
+        pass
+    return data_set
+
+
 def source_processing(api, args, resume,
                       csv_properties=None,
                       multi_label_data=None,
@@ -147,21 +170,11 @@ def source_processing(api, args, resume,
         # Check if there's a created project for it
         args.project_id = pp.project_processing(
             api, args, resume, session_file=session_file, path=path, log=log)
+
         # If --annotations-language is used, the data_set can be a directory
         # that contains both images and annotation files that need to be
         # preprocessed
-        args.images_dir = None
-        args.images_file = None
-        if os.path.isdir(data_set):
-            # When data_set is a directory, we assume it will contain images
-            args.images_dir = data_set
-        elif args.annotations_file:
-            args.images_file = data_set
-
-        if args.annotations_language is not None:
-            data_set = an.bigml_coco_file(args, session_file)
-        elif os.path.isdir(data_set) or args.images_file is not None:
-            data_set = an.bigml_metadata(args)
+        data_set = images_data_set(data_set, args)
         source_args = r.set_source_args(
             args, multi_label_data=multi_label_data,
             data_set_header=data_set_header)

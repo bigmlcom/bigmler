@@ -186,6 +186,8 @@ class World(object):
         """
         print("Counting resources (%s)." % time_tag)
         for resource_type in RESOURCE_TYPES:
+            if resource_type == "composite":
+                resource_type = "source"
             resource_type = plural(resource_type)
             if resource_type == "time_series_set":
                 resource_type = "time_series"

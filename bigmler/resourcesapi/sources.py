@@ -125,35 +125,39 @@ def create_source(data_set, source_args, args, api=None, path=None,
     message = dated("Creating %ssource.\n" % suffix)
     log_message(message, log_file=session_file, console=args.verbosity)
     check_fields_struct(source_args, "source")
-    # annotated sources for images
-    try:
-        if os.path.exists(data_set) and not os.path.isdir(data_set):
-            # --train metadata.json
-            with open(data_set) as data_handler:
-                try:
-                    source_info = json.load(data_handler)
-                except (UnicodeDecodeError, json.decoder.JSONDecodeError):
-                    source_info = None
-            if isinstance(source_info, dict):
-                # could be a metadata.json file describing annotated images
-                source_attrs = source_info.keys()
-                if "annotations" in source_attrs and \
-                        "images_file" in source_attrs:
-                    source = api.create_annotated_source(data_set, source_args)
+    if not isinstance(data_set, str):
+        # creating source from stream
+        source = api.create_source(data_set, source_args)
+    else:
+        # annotated sources for images
+        try:
+            if os.path.exists(data_set) and not os.path.isdir(data_set):
+                # --train metadata.json
+                with open(data_set) as data_handler:
+                    try:
+                        source_info = json.load(data_handler)
+                    except (UnicodeDecodeError, json.decoder.JSONDecodeError):
+                        source_info = None
+                if isinstance(source_info, dict):
+                    # could be a metadata.json file describing annotated images
+                    source_attrs = source_info.keys()
+                    if "annotations" in source_attrs and \
+                            "images_file" in source_attrs:
+                        source = api.create_annotated_source(data_set, source_args)
+                    else:
+                        source = api.create_source(data_set, source_args)
                 else:
+                    # --train iris.csv
                     source = api.create_source(data_set, source_args)
+            elif args.images_dir and args.annotations_file:
+                # --train images_dir
+                source = api.create_annotated_source(bigml_metadata(args),
+                                                     source_args)
             else:
-                # --train iris.csv
                 source = api.create_source(data_set, source_args)
-        elif args.images_dir and args.annotations_file:
-            # --train images_dir
-            source = api.create_annotated_source(bigml_metadata(args),
-                                                 source_args)
-        else:
-            source = api.create_source(data_set, source_args)
-    except (IOError, TypeError):
-        # empty composite source, for instance
-        source = api.create_source(args.sources_, source_args)
+        except (IOError, TypeError):
+            # empty composite source, for instance
+            source = api.create_source(args.sources_, source_args)
     if path is not None:
         suffix = "_" + source_type if source_type else ""
         log_created_resources(

@@ -69,7 +69,7 @@ def topic_model_processing(datasets, topic_models, topic_model_ids,
         topic_model_args = r.set_topic_model_args( \
             args,
             fields=fields,
-            topic_model_fields=args.topic_model_fields_)
+            topic_model_fields=args.topic_fields_)
         topic_models, topic_model_ids = r.create_topic_models( \
             datasets, topic_models,
             topic_model_args, args, api,

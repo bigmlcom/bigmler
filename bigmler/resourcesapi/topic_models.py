@@ -43,7 +43,7 @@ def set_topic_model_args(args, name=None, fields=None,
     if name is None:
         name = args.name
     if topic_model_fields is None:
-        topic_model_fields = args.topic_model_fields_
+        topic_model_fields = args.topic_fields_
 
     topic_model_args = set_basic_args(args, name)
     topic_model_args.update({
