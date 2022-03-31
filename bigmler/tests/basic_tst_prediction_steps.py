@@ -1807,8 +1807,8 @@ def retrieve_resources(scenario_path, step):
         with open(os.path.join(scenario_path, "linear_regressions"),
                   open_mode("r")) as model_id_file:
             model_id = model_id_file.readline().strip()
-            world.linear_regressions = retrieve_resource(scenario_path,
-                                                         model_id)
+            world.linear_regression = retrieve_resource(scenario_path,
+                                                        model_id)
     except:
         pass
 
