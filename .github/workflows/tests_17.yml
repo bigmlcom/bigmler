@@ -29,7 +29,7 @@ jobs:
     - run: |
         pip install cython
         pip install pystemmer==2.0.0
-        pip instal bigml
+        pip install bigml
         pip install .
 
     - name: Run tests *17*
