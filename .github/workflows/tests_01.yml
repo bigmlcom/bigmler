@@ -35,6 +35,6 @@ jobs:
 
     - name: Run tests *01 02 03 04 05*
       run: |
-        export TESTS=$(for t in "01" "02" "03" "04" "05"; do ls bigml/tests/*$t*;done|paste -sd ",")
+        export TESTS=$(for t in "01" "02" "03" "04" "05"; do ls bigmler/tests/*$t*;done|paste -sd ",")
         echo $TESTS
         python setup.py nosetests --nocapture --tests=$TESTS
