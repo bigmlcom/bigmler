@@ -117,7 +117,7 @@ def test_source_processing(api, args, resume,
     return test_source, resume, csv_properties, fields
 
 
-def images_data_set(data_set, args):
+def images_data_set(data_set, args, session_file):
     """Adding images information when the data_set contains the images
     directory.
 
@@ -137,7 +137,7 @@ def images_data_set(data_set, args):
             data_set = an.bigml_metadata(args)
     except TypeError:
         pass
-    return data_set
+    return data_set, args
 
 
 def source_processing(api, args, resume,
@@ -174,7 +174,7 @@ def source_processing(api, args, resume,
         # If --annotations-language is used, the data_set can be a directory
         # that contains both images and annotation files that need to be
         # preprocessed
-        data_set = images_data_set(data_set, args)
+        data_set, args = images_data_set(data_set, args, session_file)
         source_args = r.set_source_args(
             args, multi_label_data=multi_label_data,
             data_set_header=data_set_header)

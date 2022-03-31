@@ -125,7 +125,7 @@ def create_source(data_set, source_args, args, api=None, path=None,
     message = dated("Creating %ssource.\n" % suffix)
     log_message(message, log_file=session_file, console=args.verbosity)
     check_fields_struct(source_args, "source")
-    if not isinstance(data_set, str):
+    if data_set is not None and not isinstance(data_set, str):
         # creating source from stream
         source = api.create_source(data_set, source_args)
     else:
