@@ -53,6 +53,7 @@ from bigmler.tests.basic_deepnet_steps import \
     i_create_all_dn_resources, i_check_create_dn_model
 from bigmler.tests.basic_pca_steps import \
     i_create_all_pca_resources, i_check_create_pca_model
+from bigmler.tests.composite_steps import i_check_create_composite
 from bigmler.tests.common_steps import check_debug
 from bigmler.reports import REPORTS_DIR
 from nose.tools import ok_, assert_equal, assert_not_equal, assert_almost_equal

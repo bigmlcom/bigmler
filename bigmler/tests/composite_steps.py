@@ -175,4 +175,7 @@ def check_annotation_fields(step, annotations_file):
     field_names = list(source_fields.fields_by_name.keys())
     for field in fields:
         assert field["name"] in field_names
-        assert field_labels[field["name"]] == source_fields.fields[source_fields.fields_by_name[field["name"]]]["values"]
+        assert field_labels[
+            field["name"]] == source_fields.fields[
+            source_fields.fields_by_name[
+            field["name"]]]["values"]

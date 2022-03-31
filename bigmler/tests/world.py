@@ -155,6 +155,7 @@ class World(object):
         try:
             self.debug = bool(os.environ.get('BIGMLER_DEBUG', 0))
             self.api_debug = bool(os.environ.get('BIGML_DEBUG', 0))
+            self.delta = int(os.environ.get('BIGML_DELTA', 1))
         except ValueError:
             pass
         if self.USERNAME is None or self.API_KEY is None:

@@ -83,13 +83,16 @@ def labels_from_annotations(annotations_file):
                             if value["label"] not in annotations_labels[field]:
                                 annotations_labels[field].append(
                                     value["label"])
-                        else:
+                        elif isinstance(value, str):
+                            if value not in \
+                                    annotations_labels[field]:
+                                annotations_labels[field].append(value)
+                        elif isinstance(value, list):
                             for item in value:
                                 if item["label"] not in \
                                         annotations_labels[field]:
                                     annotations_labels[field].append(
                                         item["label"])
-
     return annotations_labels
 
 
