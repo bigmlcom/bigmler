@@ -227,9 +227,9 @@ class TestComposite(object):
         print(self.test_scenario07.__doc__)
         examples = [
             ['data/images/fruits_hist', 'data/images/VOC_annotations',
-             './scenario41_07', 'VOC'],
+             './scenario41_07_v', 'VOC'],
             ['data/images/YOLO_annotations', 'data/images/YOLO_annotations',
-             './scenario41_07', 'YOLO']]
+             './scenario41_07_y', 'YOLO']]
         for example in examples:
             print("\nTesting with:\n", example)
             composite_create.i_create_lang_annotated_source( \
