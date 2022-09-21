@@ -4374,7 +4374,7 @@ using:
     pip install bigmler[images]
 
 The external libraries used in this case exist for the majority of recent
-Operative System versions. Still, some of them might need especific
+Operating System versions. Still, some of them might need especific
 compiler versions or dlls, so their installation may require an additional
 setup effort.
 
@@ -4408,7 +4408,7 @@ For a detailed description of install instructions on Windows see the
 Support for local Topic Distributions (Topic Models' predictions)
 and local predictions for datasets that include Images will only be
 available as extras, because the libraries used for that are not
-usually available in all Operative Systems. If you need to support those,
+usually available in all Operating Systems. If you need to support those,
 please check the `Installation Extras <#installation-extras>`_ section.
 
 Installation Extras
