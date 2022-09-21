@@ -27,6 +27,7 @@ jobs:
     - name: Install packages
       uses: actions/checkout@v2
     - run: |
+        pip install bigml[full]>=8.2.0
         pip install .[full]
 
     - name: Run tests *23 24 25 26 27 36 38 39 40*
