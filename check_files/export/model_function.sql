@@ -1,4 +1,4 @@
-CREATE FUNCTION predict_species (`sepal width` NUMERIC, `petal length` NUMERIC, `petal width` NUMERIC)
+CREATE FUNCTION predict_species (`sepal length` NUMERIC, `sepal width` NUMERIC, `petal length` NUMERIC, `petal width` NUMERIC)
 RETURNS VARCHAR(250) DETERMINISTIC
 RETURN IF ( (ISNULL(`petal length`)), 'Iris-setosa',
     IF ( (`petal length`>2.45),
@@ -19,3 +19,4 @@ RETURN IF ( (ISNULL(`petal length`)), 'Iris-setosa',
                             IF ( (`petal width`>1.65), 'Iris-virginica',
                                 IF ( (`petal width`<=1.65), 'Iris-versicolor', NULL)), NULL)), NULL))),
         IF ( (`petal length`<=2.45), 'Iris-setosa', NULL)))
+

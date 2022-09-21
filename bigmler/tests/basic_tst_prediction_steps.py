@@ -1495,7 +1495,7 @@ def i_check_source_label(step, field_id, field_label):
 #@step(r'I check that the source exists')
 def check_source_exists(step, exists=True):
     if not exists:
-        exists = None
+        exists = False
     source = world.api.get_source(step.source)
     assert world.api.ok(source) == exists
 

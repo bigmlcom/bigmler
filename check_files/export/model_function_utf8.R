@@ -1,11 +1,16 @@
-# Predictor for Imagen from model/592615d67e0a8d5d6a007bf8
+# Predictor for Imagen
 #
 #        Created using BigMLer
 #
-predictImagen <- function(titulo=NA,
+predictImagen <- function(isbn=NA,
+                          titulo=NA,
                           grados=NA,
+                          coleccion=NA,
                           ano_lanzamiento=NA,
                           paginas=NA,
+                          interior=NA,
+                          tamano=NA,
+                          precio=NA,
                           codbarras=NA,
                           imagen=NA){
 

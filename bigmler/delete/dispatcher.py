@@ -28,6 +28,8 @@ import bigml.api
 import bigmler.utils as u
 import bigmler.processing.args as a
 
+from bigml.api import get_resource_type
+
 from bigmler.defaults import DEFAULTS_FILE
 from bigmler.command import get_stored_command, command_handling
 from bigmler.dispatcher import SESSIONS_LOG, clear_log_files
@@ -63,6 +65,32 @@ STATUS_CODES = {
 
 GROUP_RESOURCES = ["project", "execution"]
 COMPOSED_RESOURCES = ["cluster", "ensemble", "fusion", "composites", "optiml"]
+TRASH_BIN = "Trash bin"
+
+
+def to_new_project(api, project_name, resource_ids):
+    """Creates a new project and updates the resources to link them to the
+    project. If the resources are projects, then prepends the name to the
+    original name.
+    """
+    project_ids = []
+    non_project_ids = []
+    for resource_id in resource_ids:
+        if resource_id.startswith("project/"):
+            project_ids.append(resource_id)
+        else:
+            non_project_ids.append(resource_id)
+    for project_id in project_ids:
+        project = api.get_project(project_id)
+        api.update_project(project_id, {"name": "%s: %s" % (project_name,
+            project.get("object", {}).get("name"))})
+    new_project_id = None
+    if non_project_ids:
+        new_project = api.create_project({"name": project_name})
+        new_project_id = new_project["resource"]
+    for resource_id in non_project_ids:
+        resource_type = get_resource_type(resource_id)
+        api.updaters[resource_type](resource_id, {"project": new_project_id})
 
 
 def retrieve_resources(directory):
@@ -340,10 +368,17 @@ def delete_resources(command_args, api, deleted_list=None):
     delete_list = []
     # by ids
     if command_args.delete_list:
+        message = u.dated("Resources selected from a user-given list of ids."
+                          "\n\n")
+        u.log_message(message, log_file=session_file,
+                      console=command_args.verbosity)
         delete_list = [resource_id.strip() for resource_id in
                        command_args.delete_list.split(',')]
     # in file
     if command_args.delete_file:
+        message = u.dated("Resources selected from user-given file.\n\n")
+        u.log_message(message, log_file=session_file,
+                      console=command_args.verbosity)
         if not os.path.exists(command_args.delete_file):
             sys.exit("File %s not found" % command_args.delete_file)
         with open(command_args.delete_file, "r") as delete_file:
@@ -353,15 +388,26 @@ def delete_resources(command_args, api, deleted_list=None):
                 delete_list.append(resource_id)
     # from directory
     if command_args.from_dir:
+        message = u.dated("Resources extracted from directory logs.\n\n")
+        u.log_message(message, log_file=session_file,
+                      console=command_args.verbosity)
+
         delete_list.extend(retrieve_resources(command_args.from_dir))
 
     # by time interval and tag (plus filtered resource_types)
-    time_qs_list = time_interval_qs(command_args, api)
-    delete_list.extend(get_delete_list(command_args, api, time_qs_list))
+    qs_list = time_interval_qs(command_args, api)
 
     # by filter expression (plus filtered resource_types)
     filter_qs_list = filter_qs(command_args)
-    delete_list.extend(get_delete_list(command_args, api, filter_qs_list))
+
+    qs_list.extend(filter_qs_list)
+    if qs_list:
+        message = u.dated("Resources filtered by expression:\n    %s\n\n" %
+            ";".join(qs_list))
+        u.log_message(message, log_file=session_file,
+                      console=command_args.verbosity)
+
+    delete_list.extend(get_delete_list(command_args, api, qs_list))
 
     # filter resource_types if any
     delete_list = filter_resource_types(delete_list,
@@ -370,7 +416,7 @@ def delete_resources(command_args, api, deleted_list=None):
     delete_list = [resource_id for resource_id in delete_list \
         if resource_id not in deleted_list]
     # if there are projects or executions, delete them first
-    bulk_deletion = not command_args.dry_run and \
+    bulk_deletion = not command_args.bin and not command_args.dry_run and \
         any([resource_id.startswith("project/") or \
         (not command_args.execution_only and \
          resource_id.startswith("execution/")) for resource_id in delete_list])
@@ -379,7 +425,14 @@ def delete_resources(command_args, api, deleted_list=None):
     # the deletion list
     types_summary, delete_list = resources_by_type( \
         delete_list, bulk_deletion)
-    message = u.dated("Deleting %s objects%s.\n" % (len(delete_list), aprox))
+    # ensure uniqueness
+    delete_list = list(set(delete_list))
+    action_text = "Moving to Trash bin project" if command_args.bin else \
+        "Deleting"
+    action_text = "Dry-run for deleting" if command_args.dry_run else \
+        action_text
+    message = u.dated("%s %s objects%s.\n" % (action_text,
+        len(delete_list), aprox))
     u.log_message(message, log_file=session_file,
                   console=command_args.verbosity)
     for resource_type, instances in list(types_summary.items()):
@@ -402,8 +455,6 @@ def delete_resources(command_args, api, deleted_list=None):
                                                  " " * pre_indent)))
         u.log_message(message, log_file=None,
                       console=command_args.verbosity)
-    # ensure uniqueness
-    delete_list = list(set(delete_list))
     # Partial console message. Limited number of rows
     segment = delete_list[0: ROWS_LIMIT]
     message = ("\n%s" % (" " * INDENT_IDS)).join(segment)
@@ -414,9 +465,15 @@ def delete_resources(command_args, api, deleted_list=None):
     message = ("\n%s" % (" " * INDENT_IDS)).join(delete_list)
     message = ("%s" % (" " * INDENT_IDS)) + message + "\n"
     u.log_message(message, log_file=session_file)
-    if not command_args.dry_run:
+    if command_args.bin:
+        to_new_project(api, TRASH_BIN, delete_list)
+    elif not command_args.dry_run:
+        message = "Deleting...\n"
+        u.log_message(message, log_file=session_file)
         u.delete(api, delete_list, exe_outputs=not command_args.execution_only)
     if bulk_deletion:
+        message = "Deleting...\n"
+        u.log_message(message, log_file=session_file)
         # if projects and executions have already been deleted, delete the rest
         delete_resources(command_args, api, deleted_list=delete_list)
     else:

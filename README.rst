@@ -30,11 +30,38 @@ Requirements
 BigMLer needs Python 3.8 or higher versions to work.
 Compatibility with Python 2.X was discontinued in version 3.27.2.
 
-BigMLer requires `bigml 7.1.2 <https://github.com/bigmlcom/python>`_  or
-higher.  Using topic modeing will additionally request
-the use of `pystemmer <https://pypi.python.org/pypi/PyStemmer>`_
-library, which is not automatically installed as a dependency and should
-be manually installed. Check the `bindings documentation <https://bigml.readthedocs.org>`_ for more info.
+BigMLer requires `bigml 8.1.1 <https://github.com/bigmlcom/python>`_  or
+higher, that contains the bindings providing support to use the ``BigML``
+platform to create, update, get and delete resources,
+but also to produce local predictions using the
+models created in ``BigML``. Most of them will be actionable with the basic
+installation, but some additional dependencies are needed
+to use local ``Topic Models`` to produce ``Topic Distributions``. These can
+be installed using:
+
+.. code-block:: bash
+
+    pip install bigmler[topics]
+
+The bindings also support local predictions for models generated from images.
+To use these models, an additional set of libraries needs to be installed
+using:
+
+.. code-block:: bash
+
+    pip install bigmler[images]
+
+The external libraries used in this case exist for the majority of recent
+Operative System versions. Still, some of them might need especific
+compiler versions or dlls, so their installation may require an additional
+setup effort.
+
+The full set of libraries can be installed using
+
+.. code-block:: bash
+
+    pip install bigmler[full]
+
 
 BigMLer Installation
 ====================
@@ -54,8 +81,38 @@ from the Git repository
     $ pip install -e git://github.com/bigmlcom/bigmler.git#egg=bigmler
 
 For a detailed description of install instructions on Windows see the
-`BigMLer on Windows <#bigmler-on-windows>`_ section.
+:ref:bigmler-windows section.
 
+Support for local Topic Distributions (Topic Models' predictions)
+and local predictions for datasets that include Images will only be
+available as extras, because the libraries used for that are not
+usually available in all Operative Systems. If you need to support those,
+please check the `Installation Extras <#installation-extras>`_ section.
+
+Installation Extras
+===================
+
+Local Topic Distributions support can be installed using:
+
+.. code-block:: bash
+
+    pip install bigmler[topics]
+
+Images local predictions support can be installed using:
+
+.. code-block:: bash
+
+    pip install bigmler[images]
+
+The full set of features can be installed using:
+
+.. code-block:: bash
+
+    pip install bigmler[full]
+
+
+WARNING: Mind that installing these extras can require some extra work, as
+explained in the :ref:requirements section.
 
 BigML Authentication
 ====================

@@ -1,8 +1,9 @@
-# Predictor for rating from model/5ba5031fc7736e400800276b
+# Predictor for rating
 #
 #        Created using BigMLer
 #
 predictRating <- function(gender=NA,
+                          age_range=NA,
                           occupation=NA,
                           zipcode=NA,
                           title=NA,

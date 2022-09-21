@@ -1,9 +1,9 @@
 
 /**
-*  Predictor for rating from model/5ba5024c9252736dee002433
+*  Predictor for rating
 *  Created using BigMLer
 */
-function predictRating(gender, occupation, zipcode, title, genres, timestamp) {
+function predictRating(gender, age_range, occupation, zipcode, title, genres, timestamp) {
 
     var TERM_ANALYSIS = {
         "title": {

@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 def predict_rating(gender=None,
+                   age_range=None,
                    occupation=None,
                    zipcode=None,
                    title=None,
                    genres=None,
                    timestamp=None):
-    """ Predictor for rating from model/5ba500639252736dee002427
+    """ Predictor for rating
 
         Created using BigMLer
     """
@@ -597,10 +598,11 @@ def predict_rating(gender=None,
 
 
 def predict(gender=None,
+            age_range=None,
             occupation=None,
             zipcode=None,
             title=None,
             genres=None,
             timestamp=None):
-    prediction = predict_rating(gender=gender, occupation=occupation, zipcode=zipcode, title=title, genres=genres, timestamp=timestamp)
+    prediction = predict_rating(gender=gender, age_range=age_range, occupation=occupation, zipcode=zipcode, title=title, genres=genres, timestamp=timestamp)
     return prediction

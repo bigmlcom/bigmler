@@ -3,6 +3,12 @@
 History
 -------
 
+5.1.0 (2022-09-21)
+~~~~~~~~~~~~~~~~~~
+
+- Upgrading dependencies.
+- Improving bigmler delete subcommand.
+
 5.0.0 (2022-03-26)
 ~~~~~~~~~~~~~~~~~~
 

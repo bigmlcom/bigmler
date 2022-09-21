@@ -27,10 +27,7 @@ jobs:
     - name: Install packages
       uses: actions/checkout@v2
     - run: |
-        pip install cython
-        pip install pystemmer==2.0.0
-        pip install bigml
-        pip install .
+        pip install .[full]
 
     - name: Run tests *17*
       run: |

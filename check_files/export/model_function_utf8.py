@@ -1,11 +1,6 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-def predict_imagen(titulo=None,
-                   grados=None,
-                   ano_lanzamiento=None,
-                   paginas=None,
-                   codbarras=None):
-    """ Predictor for Imagen from model/5a087b8836452723e7005ecf
+def predict_imagen(data={}):
+    """ Predictor for Imagen
 
         Created using BigMLer
     """
@@ -72,82 +67,78 @@ def predict_imagen(titulo=None,
     term_analysis = {
         "titulo": {
             "case_sensitive": False,
-            "token_mode": u'all',
+            "token_mode": 'all',
         },
     }
     term_forms = {
         "titulo": {
-            u"fantásticos": [u'fant\xe1sticos', u'fant\xe1sticas'],
-            u"gigante": [u'gigante', u'gigantes'],
+            "fantásticos": ['fantásticos', 'fantásticas'],
+            "gigante": ['gigante', 'gigantes'],
         },
     }
 
-    if (codbarras is None):
+    if (data.get('codbarras') is None):
         return {"prediction": 1.82, "error": 5.53698}
-    if (codbarras > 9789872414340):
-        if (ano_lanzamiento is None):
+    if (data['codbarras'] > 9789872414340):
+        if (data.get('ano_lanzamiento') is None):
             return {"prediction": 9, "error": 7.02326}
-        if (ano_lanzamiento > 2008):
-            if (paginas is None):
+        if (data['ano_lanzamiento'] > 2008):
+            if (data.get('paginas') is None):
                 return {"prediction": 10.5, "error": 5.88884}
-            if (paginas > 90):
-                if (titulo is None):
+            if (data['paginas'] > 90):
+                if (data.get('titulo') is None):
                     return {"prediction": 9, "error": 5.08228}
-                if (term_matches(titulo, "titulo", u"fantásticos") > 0):
+                if (term_matches(data['titulo'], "titulo", u"fantásticos") > 0):
                     return {"prediction":8, "error":5.08228}
-                if (term_matches(titulo, "titulo", u"fantásticos") <= 0):
-                    if (grados is None):
+                if (term_matches(data['titulo'], "titulo", u"fantásticos") <= 0):
+                    if (data.get('grados') is None):
                         return {"prediction": 9.5, "error": 5.26764}
-                    if (grados == "Elsa Pizzi"):
+                    if (data['grados'] == "Elsa Pizzi"):
                         return {"prediction":9, "error":5.26764}
-                    if (grados != "Elsa Pizzi"):
+                    if (data['grados'] != "Elsa Pizzi"):
                         return {"prediction":10, "error":5.26764}
-            if (paginas <= 90):
-                if (titulo is None):
+            if (data['paginas'] <= 90):
+                if (data.get('titulo') is None):
                     return {"prediction": 12, "error": 5.08228}
-                if (term_matches(titulo, "titulo", u"gigante") > 0):
+                if (term_matches(data['titulo'], "titulo", u"gigante") > 0):
                     return {"prediction":11, "error":5.08228}
-                if (term_matches(titulo, "titulo", u"gigante") <= 0):
-                    if (grados is None):
+                if (term_matches(data['titulo'], "titulo", u"gigante") <= 0):
+                    if (data.get('grados') is None):
                         return {"prediction": 12.5, "error": 5.26764}
-                    if (grados == "Patricia Roggio"):
+                    if (data['grados'] == "Patricia Roggio"):
                         return {"prediction":13, "error":5.26764}
-                    if (grados != "Patricia Roggio"):
+                    if (data['grados'] != "Patricia Roggio"):
                         return {"prediction":12, "error":5.26764}
-        if (ano_lanzamiento <= 2008):
-            if (grados is None):
+        if (data['ano_lanzamiento'] <= 2008):
+            if (data.get('grados') is None):
                 return {"prediction": 6, "error": 5.08228}
-            if (grados == "4°, 5°"):
+            if (data['grados'] == "4°, 5°"):
                 return {"prediction":7, "error":5.08228}
-            if (grados != "4°, 5°"):
-                if (grados == "5°, 6°"):
+            if (data['grados'] != "4°, 5°"):
+                if (data['grados'] == "5°, 6°"):
                     return {"prediction":5, "error":5.26764}
-                if (grados != "5°, 6°"):
+                if (data['grados'] != "5°, 6°"):
                     return {"prediction":6, "error":5.26764}
-    if (codbarras <= 9789872414340):
-        if (codbarras > 9789872414309):
-            if (paginas is None):
+    if (data['codbarras'] <= 9789872414340):
+        if (data['codbarras'] > 9789872414309):
+            if (data.get('paginas') is None):
                 return {"prediction": 3, "error": 5.08228}
-            if (paginas > 100):
-                if (grados is None):
+            if (data['paginas'] > 100):
+                if (data.get('grados') is None):
                     return {"prediction": 2.5, "error": 5.26764}
-                if (grados == "4°, 5°"):
+                if (data['grados'] == "4°, 5°"):
                     return {"prediction":2, "error":5.26764}
-                if (grados != "4°, 5°"):
+                if (data['grados'] != "4°, 5°"):
                     return {"prediction":3, "error":5.26764}
-            if (paginas <= 100):
+            if (data['paginas'] <= 100):
                 return {"prediction":4, "error":5.08228}
-        if (codbarras <= 9789872414309):
-            if (codbarras > 9789871989852):
+        if (data['codbarras'] <= 9789872414309):
+            if (data['codbarras'] > 9789871989852):
                 return {"prediction":1, "error":0.26071}
-            if (codbarras <= 9789871989852):
+            if (data['codbarras'] <= 9789871989852):
                 return {"prediction":0, "error":0.04286}
 
 
-def predict(titulo=None,
-            grados=None,
-            ano_lanzamiento=None,
-            paginas=None,
-            codbarras=None):
-    prediction = predict_imagen(titulo=titulo, grados=grados, ano_lanzamiento=ano_lanzamiento, paginas=paginas, codbarras=codbarras)
+def predict(data={}):
+    prediction = predict_imagen(data=data)
     return prediction

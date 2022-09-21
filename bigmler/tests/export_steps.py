@@ -107,6 +107,8 @@ def i_check_if_the_output_is_like_expected_file(step, language, expected_file):
             as file_handler:
         output = extract_content(file_handler)
     if output.strip() != expected_content.strip():
+        with open(res_filename("%s.bck" % expected_file), "w") as whandler:
+            whandler.write(output)
         try:
             name, extension = expected_file.split(".")
             expected_file = "%s_p3.%s" % (name, extension)

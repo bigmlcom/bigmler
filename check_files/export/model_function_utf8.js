@@ -1,9 +1,9 @@
 
 /**
-*  Predictor for Imagen from model/5926fe6d663ac2403400cdf5
+*  Predictor for Imagen
 *  Created using BigMLer
 */
-function predictImagen(titulo, grados, anoLanzamiento, paginas, codBarras) {
+function predictImagen(data) {
 
     var TERM_ANALYSIS = {
         "titulo": {
@@ -97,88 +97,88 @@ function predictImagen(titulo, grados, anoLanzamiento, paginas, codBarras) {
       var matches = text.match(pattern);
       return (matches == null) ? 0 : matches.length;
     }
-    if (codBarras == null) {
+    if (data.codBarras == null) {
         return {prediction: 1.82, error: 5.53698}}
-    if (codBarras > 9789872414340) {
-        if (anoLanzamiento == null) {
+    if (data.codBarras > 9789872414340) {
+        if (data.anoLanzamiento == null) {
             return {prediction: 9, error: 7.02326}}
-        if (anoLanzamiento > 2008) {
-            if (paginas == null) {
+        if (data.anoLanzamiento > 2008) {
+            if (data.paginas == null) {
                 return {prediction: 10.5, error: 5.88884}}
-            if (paginas > 90) {
-                if (titulo == null) {
+            if (data.paginas > 90) {
+                if (data.titulo == null) {
                     return {prediction: 9, error: 5.08228}}
-                if (termMatches(titulo, "titulo", "fantásticos") > 0) {
+                if (termMatches(data.titulo, "titulo", "fantásticos") > 0) {
                     return {prediction: 8, error: 5.08228};
                 }
-                if (termMatches(titulo, "titulo", "fantásticos") <= 0) {
-                    if (grados == null) {
+                if (termMatches(data.titulo, "titulo", "fantásticos") <= 0) {
+                    if (data.grados == null) {
                         return {prediction: 9.5, error: 5.26764}}
-                    if (grados == "Elsa Pizzi") {
+                    if (data.grados == "Elsa Pizzi") {
                         return {prediction: 9, error: 5.26764};
                     }
-                    if (grados != "Elsa Pizzi") {
+                    if (data.grados != "Elsa Pizzi") {
                         return {prediction: 10, error: 5.26764};
                     }
                 }
             }
-            if (paginas <= 90) {
-                if (titulo == null) {
+            if (data.paginas <= 90) {
+                if (data.titulo == null) {
                     return {prediction: 12, error: 5.08228}}
-                if (termMatches(titulo, "titulo", "gigante") > 0) {
+                if (termMatches(data.titulo, "titulo", "gigante") > 0) {
                     return {prediction: 11, error: 5.08228};
                 }
-                if (termMatches(titulo, "titulo", "gigante") <= 0) {
-                    if (grados == null) {
+                if (termMatches(data.titulo, "titulo", "gigante") <= 0) {
+                    if (data.grados == null) {
                         return {prediction: 12.5, error: 5.26764}}
-                    if (grados == "Patricia Roggio") {
+                    if (data.grados == "Patricia Roggio") {
                         return {prediction: 13, error: 5.26764};
                     }
-                    if (grados != "Patricia Roggio") {
+                    if (data.grados != "Patricia Roggio") {
                         return {prediction: 12, error: 5.26764};
                     }
                 }
             }
         }
-        if (anoLanzamiento <= 2008) {
-            if (grados == null) {
+        if (data.anoLanzamiento <= 2008) {
+            if (data.grados == null) {
                 return {prediction: 6, error: 5.08228}}
-            if (grados == "4°, 5°") {
+            if (data.grados == "4°, 5°") {
                 return {prediction: 7, error: 5.08228};
             }
-            if (grados != "4°, 5°") {
-                if (grados == "5°, 6°") {
+            if (data.grados != "4°, 5°") {
+                if (data.grados == "5°, 6°") {
                     return {prediction: 5, error: 5.26764};
                 }
-                if (grados != "5°, 6°") {
+                if (data.grados != "5°, 6°") {
                     return {prediction: 6, error: 5.26764};
                 }
             }
         }
     }
-    if (codBarras <= 9789872414340) {
-        if (codBarras > 9789872414309) {
-            if (paginas == null) {
+    if (data.codBarras <= 9789872414340) {
+        if (data.codBarras > 9789872414309) {
+            if (data.paginas == null) {
                 return {prediction: 3, error: 5.08228}}
-            if (paginas > 100) {
-                if (grados == null) {
+            if (data.paginas > 100) {
+                if (data.grados == null) {
                     return {prediction: 2.5, error: 5.26764}}
-                if (grados == "4°, 5°") {
+                if (data.grados == "4°, 5°") {
                     return {prediction: 2, error: 5.26764};
                 }
-                if (grados != "4°, 5°") {
+                if (data.grados != "4°, 5°") {
                     return {prediction: 3, error: 5.26764};
                 }
             }
-            if (paginas <= 100) {
+            if (data.paginas <= 100) {
                 return {prediction: 4, error: 5.08228};
             }
         }
-        if (codBarras <= 9789872414309) {
-            if (codBarras > 9789871989852) {
+        if (data.codBarras <= 9789872414309) {
+            if (data.codBarras > 9789871989852) {
                 return {prediction: 1, error: 0.26071};
             }
-            if (codBarras <= 9789871989852) {
+            if (data.codBarras <= 9789871989852) {
                 return {prediction: 0, error: 0.04286};
             }
         }

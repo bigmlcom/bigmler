@@ -52,8 +52,8 @@ def create_connection(api):
 
     """
     args = []
-    if api.general_domain != "bigml.io":
-        args.append("domain=\"%s\"" % api.general_domain)
+    if api.domain.general_domain != "bigml.io":
+        args.append("domain=\"%s\"" % api.domain.general_domain)
     if api.project:
         args.append("project=\"%s\"" % api.project)
     if api.organization:

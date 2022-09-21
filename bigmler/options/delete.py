@@ -319,6 +319,15 @@ def get_delete_options(defaults=None):
             'default': defaults.get('filter', None),
             'help': "Retrieve resources that match the query string filter."},
 
+        # Instead of deleting, it moves the selected resources to a project
+        # to allow checking and bulk deleting.
+        '--bin': {
+            'action': 'store_true',
+            'dest': 'bin',
+            'default': defaults.get('bin', False),
+            'help': ("Moves the resources to be deleted to a 'Trash bin' "
+                     " project, but does not delete.")},
+
         # Filter the resources to be deleted by its status (finished if
         # not set)
         '--status': {

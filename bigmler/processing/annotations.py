@@ -114,7 +114,7 @@ def bigml_metadata(args, images_list=None, new_fields=None):
                               recursive=True)
             images_list = [filename for
                            filename in files if
-                           os.path.splitext(filename)[1].lower() in
+                           os.path.splitext(filename)[1].lower()[1:] in
                            IMAGE_EXTENSIONS]
 
         if images_list:
