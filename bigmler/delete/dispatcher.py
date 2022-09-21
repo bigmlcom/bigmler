@@ -321,7 +321,7 @@ def delete_dispatcher(args=sys.argv[1:]):
             dirs_log=DIRS_LOG, sessions_log=SESSIONS_LOG)
     else:
         if command_args.output_dir is None:
-            command_args.output_dir = a.NOW
+            command_args.output_dir = a.OUTPUT_DIR
         directory = u.check_dir(os.path.join(command_args.output_dir, "tmp"))
         session_file = os.path.join(directory, SESSIONS_LOG)
         u.log_message(command.command + "\n", log_file=session_file)
@@ -350,7 +350,7 @@ def delete_resources(command_args, api, deleted_list=None):
     if deleted_list is None:
         deleted_list = []
     if command_args.output_dir is None:
-        path = a.NOW
+        path = a.OUTPUT_DIR
     else:
         path = command_args.output_dir
     session_file = os.path.join(path, SESSIONS_LOG)

@@ -61,7 +61,7 @@ def analyze_dispatcher(args=sys.argv[1:]):
             dirs_log=DIRS_LOG, sessions_log=SESSIONS_LOG)
     else:
         if command_args.output_dir is None:
-            command_args.output_dir = a.NOW
+            command_args.output_dir = a.OUTPUT_DIR
         session_file = os.path.join(command_args.output_dir,
                                     SESSIONS_LOG)
         # If logging is required, open the file for logging

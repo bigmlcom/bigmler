@@ -165,7 +165,7 @@ def get_cmd_context(args, settings):
                 command_args.output is not None:
             command_args.output_dir = u.check_dir(command_args.output)
         if command_args.output_dir is None:
-            command_args.output_dir = a.NOW
+            command_args.output_dir = a.OUTPUT_DIR
         if settings.get('default_output') is None:
             settings['default_output'] = "tmp.txt"
         if not hasattr(command_args, "output") or command_args.output is None:

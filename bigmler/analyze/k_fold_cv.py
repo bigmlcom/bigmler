@@ -299,7 +299,7 @@ def create_kfold_datasets_file(args, api, command_obj, resume=False):
     message = ('Creating the kfold datasets............\n')
     u.log_message(message, log_file=session_file, console=args.verbosity)
     if args.output_dir is None:
-        args.output_dir = a.NOW
+        args.output_dir = a.OUTPUT_DIR
 
     csv_properties = {}
     fields = None

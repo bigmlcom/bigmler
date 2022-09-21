@@ -8,6 +8,8 @@ History
 
 - Upgrading dependencies.
 - Improving bigmler delete subcommand.
+- Moving the default output directory to `.bigmler_outputs` in the current
+  working directory.
 
 5.0.0 (2022-03-26)
 ~~~~~~~~~~~~~~~~~~

@@ -396,6 +396,8 @@ def print_tree(directory, padding):
                 output += padding + connectors[0] + file_name + '\n'
             else:
                 output += padding + connectors[1] + file_name + '\n'
+    output = os.path.dirname(os.path.abspath(directory)) + ':\n' + \
+        "    " + output.replace("\n", "\n    ")
     return output
 
 

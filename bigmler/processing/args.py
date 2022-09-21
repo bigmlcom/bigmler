@@ -23,6 +23,7 @@ import sys
 import os
 import datetime
 import json
+import tempfile
 
 from io import StringIO
 
@@ -41,6 +42,7 @@ from bigmler.utils import check_dir
 
 # Date and time in format SunNov0412_120510 to name and tag resources
 NOW = datetime.datetime.now().strftime("%a%b%d%y_%H%M%S")
+OUTPUT_DIR = os.path.join(".bigmler_outputs", NOW)
 MISSING_STRATEGIES = {'last': LAST_PREDICTION, 'proportional': PROPORTIONAL}
 DEFAULT_DESCRIPTION = "Created using BigMLer"
 RESOURCE_TYPES = ["source", "dataset", "model", "ensemble", "batch_prediction",
