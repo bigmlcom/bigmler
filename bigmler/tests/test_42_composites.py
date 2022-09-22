@@ -77,7 +77,7 @@ class TestComposite(object):
         """
         print(self.test_scenario01.__doc__)
         examples = [
-            ['data/iris.csv', './scenario41_01']]
+            ['data/iris.csv', './scenario42_01']]
         for example in examples:
             print("\nTesting with:\n", example)
             source_create.i_create_source( \
@@ -107,7 +107,7 @@ class TestComposite(object):
         """
         print(self.test_scenario02.__doc__)
         examples = [
-            ['data/iris.csv', './scenario41_02']]
+            ['data/iris.csv', './scenario42_02']]
         for example in examples:
             print("\nTesting with:\n", example)
             source_create.i_create_source( \
@@ -135,7 +135,7 @@ class TestComposite(object):
         """
         print(self.test_scenario03.__doc__)
         examples = [
-            ['data/iris.csv', './scenario41_03']]
+            ['data/iris.csv', './scenario42_03']]
         for example in examples:
             print("\nTesting with:\n", example)
             source_create.i_create_source( \
@@ -163,13 +163,14 @@ class TestComposite(object):
         """
         print(self.test_scenario04.__doc__)
         examples = [
-            ['data/images/fruits_hist.zip', './scenario41_04']]
+            ['data/images/fruits_hist.zip', './scenario42_04']]
         for example in examples:
             print("\nTesting with:\n", example)
             source_create.i_create_source( \
                 self, data=example[0], output_dir=example[1])
             composite_create.i_check_create_composite(self)
             self.sources = world.source["object"].get("sources", [])
+            print(self.sources, world.source)
             composite_create.check_images_number_in_composite(self,
                                                               example[0])
 
@@ -184,7 +185,7 @@ class TestComposite(object):
         """
         print(self.test_scenario05.__doc__)
         examples = [
-            ['data/images/fruits_hist/', './scenario41_05']]
+            ['data/images/fruits_hist/', './scenario42_05']]
         for example in examples:
             print("\nTesting with:\n", example)
             source_create.i_create_source( \
@@ -205,7 +206,7 @@ class TestComposite(object):
         print(self.test_scenario06.__doc__)
         examples = [
             ['data/images/fruits_hist.zip', 'data/images/annotations.json',
-             './scenario41_06']]
+             './scenario42_06']]
         for example in examples:
             print("\nTesting with:\n", example)
             composite_create.i_create_annotated_source( \
@@ -227,9 +228,9 @@ class TestComposite(object):
         print(self.test_scenario07.__doc__)
         examples = [
             ['data/images/fruits_hist', 'data/images/VOC_annotations',
-             './scenario41_07_v', 'VOC'],
+             './scenario42_07_v', 'VOC'],
             ['data/images/YOLO_annotations', 'data/images/YOLO_annotations',
-             './scenario41_07_y', 'YOLO']]
+             './scenario42_07_y', 'YOLO']]
         for example in examples:
             print("\nTesting with:\n", example)
             composite_create.i_create_lang_annotated_source( \
