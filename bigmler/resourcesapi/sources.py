@@ -119,6 +119,7 @@ def create_source(data_set, source_args, args, api=None, path=None,
     """Creates remote source
 
     """
+    print("*** data set", data_set)
     if api is None:
         api = bigml.api.BigML()
     suffix = "" if source_type is None else "%s " % source_type
@@ -138,12 +139,14 @@ def create_source(data_set, source_args, args, api=None, path=None,
                         source_info = json.load(data_handler)
                     except (UnicodeDecodeError, json.decoder.JSONDecodeError):
                         source_info = None
-                if isinstance(source_info, dict):
+                if source_info is not None and isinstance(source_info, dict):
                     # could be a metadata.json file describing annotated images
                     source_attrs = source_info.keys()
+                    print("*** source_attrs", source_attrs)
                     if "annotations" in source_attrs and \
                             "images_file" in source_attrs:
-                        source = api.create_annotated_source(data_set, source_args)
+                        source = api.create_annotated_source(data_set,
+                                                             source_args)
                     else:
                         source = api.create_source(data_set, source_args)
                 else:

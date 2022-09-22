@@ -170,7 +170,6 @@ class TestComposite(object):
                 self, data=example[0], output_dir=example[1])
             composite_create.i_check_create_composite(self)
             self.sources = world.source["object"].get("sources", [])
-            print(self.sources, world.source)
             composite_create.check_images_number_in_composite(self,
                                                               example[0])
 
