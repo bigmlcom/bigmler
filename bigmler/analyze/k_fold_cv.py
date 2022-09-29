@@ -327,6 +327,8 @@ def create_kfold_datasets_file(args, api, command_obj, resume=False):
         if not dataset:
             dataset = api.check_resource(dataset_id,
                                          query_string=ALL_FIELDS_QS)
+            if args.name is None:
+                args.name = dataset["object"]["name"]
         try:
             args.objective_field = int(args.objective_field)
         except (TypeError, ValueError):
