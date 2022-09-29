@@ -57,8 +57,8 @@ def needs_source_update(args):
 
 def extract_source_name(path):
     """Tries to extract a name from the path to the data file"""
-    path = path.replace(os.sep, "/")
     try:
+        path = path.replace(os.sep, "/")
         return path.split("/")[-1]
     except:
         return "BigMLer_%s" % now
