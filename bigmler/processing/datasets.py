@@ -27,6 +27,7 @@ import bigml.api
 
 from bigml.fields import Fields
 from bigml.predicate import TM_FULL_TERM
+from bigml.constants import TINY_RESOURCE
 
 import bigmler.utils as u
 import bigmler.resourcesapi.datasets as r
@@ -264,6 +265,9 @@ def split_processing(dataset, api, args, resume,
     train_dataset = None
     test_dataset = None
     sample_rate = 1 - args.test_split
+    if args.name is None:
+        dataset_res = api.get_dataset(dataset, query_string=TINY_RESOURCE)
+        args.name = dataset_res.get("object", {}).get("name")
     dataset_alternative_args = r.set_dataset_split_args(
         "%s - train (%s %%)" % (
             args.name, int(sample_rate * 100)),
@@ -298,6 +302,9 @@ def split_range_processing(dataset, api, args, resume,
     split_row = int(dataset["object"]["rows"] * train_rate)
     args.range_ = [1, split_row]
     args.test_split = 0
+    if args.name is None:
+        dataset_res = api.get_dataset(dataset, query_string=TINY_RESOURCE)
+        args.name = dataset_res.get("object", {}).get("name")
     dataset_alternative_args = r.set_dataset_split_args(
         "%s - train (%s %%)" % (
             args.name, int(train_rate * 100)),

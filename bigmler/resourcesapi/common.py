@@ -232,11 +232,13 @@ def set_basic_args(args, name):
     """Sets the basic arguments, common to all resources
 
     """
-    return {
-        "name": name,
+    basic = {
         "description": args.description_,
         "category": args.category,
         "tags": args.tag}
+    if name is not None:
+        basic.update({"name": name})
+    return basic
 
 
 def set_basic_model_args(args, name):

@@ -40,7 +40,7 @@ def set_basic_dataset_args(args, name=None):
     """Return dataset basic arguments dict
 
     """
-    if name is None:
+    if name is None and args.name is not None:
         name = args.name
     dataset_args = set_basic_args(args, name)
     if args.sample_rate != 1 and args.no_model:
