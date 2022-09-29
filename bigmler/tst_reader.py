@@ -24,12 +24,21 @@
 import sys
 import os
 
-from bigml.util import get_csv_delimiter
+from bigml.util import get_csv_delimiter, is_image
 from bigml.io import UnicodeReader
+from bigml.constants import IMAGE_EXTENSIONS
 
 from bigmler.utils import BIGML_SYS_ENCODING
 from bigmler.checkpoint import file_number_of_lines
 from bigmler.utf8recoder import UTF8Recoder
+from bigmler.folderreader import FolderReader
+
+
+def contains_csv(folder):
+    """Checking whether a folder contains a CSV file"""
+    files = os.listdir(folder)
+    return any(os.path.splitext(filename)[1].replace(".", "").lower() == "csv"
+               for filename in files)
 
 
 class TstReader():
@@ -47,11 +56,14 @@ class TstReader():
            `objective_field`: field_id of the objective field
         """
         self.test_set = test_set
+        if os.path.isdir(self.test_set) and os.path.exists(self.test_set) and \
+                not self.test_set.endswith(os.sep):
+            self.test_set += os.sep
         self.directory = None
         if test_set.__class__.__name__ == "StringIO":
             self.test_set = UTF8Recoder(test_set, BIGML_SYS_ENCODING)
         else:
-            self.directory = os.path.dirname(test_set)
+            self.directory = os.path.dirname(self.test_set)
         self.test_set_header = test_set_header
         self.fields = fields
         if (objective_field is not None and
@@ -61,21 +73,6 @@ class TstReader():
             except ValueError as exc:
                 sys.exit(exc)
         self.objective_field = objective_field
-        self.test_separator = (test_separator
-                               if test_separator is not None
-                               else get_csv_delimiter())
-        if len(self.test_separator) > 1:
-            sys.exit("Only one character can be used as test data separator.")
-        try:
-            self.test_reader = UnicodeReader(self.test_set,
-                                             delimiter=self.test_separator,
-                                             lineterminator="\n").open_reader()
-        except IOError:
-            sys.exit("Error: cannot read test %s" % test_set)
-
-        self.headers = None
-        self.raw_headers = None
-        self.exclude = []
         self.image_fields = []
         try:
             self.image_fields = [column for column in
@@ -84,6 +81,36 @@ class TstReader():
                                     "optype") == "image"]
         except ValueError as exc:
             sys.exit(exc)
+
+        self.test_separator = (test_separator
+                               if test_separator is not None
+                               else get_csv_delimiter())
+
+        if self.image_fields and len(self.image_fields) == 1 \
+                and not contains_csv(self.test_set):
+            # The test_set points to a directory where images are stored.
+            # Only images are read.
+            image_field_name = fields.fields[
+                fields.field_id(self.image_fields[0])].get(
+                "name") if test_set_header else None
+            self.test_reader = FolderReader(
+                self.test_set,
+                filter_fn=is_image,
+                header=image_field_name).open_reader()
+        else:
+            if len(self.test_separator) > 1:
+                sys.exit("Only one character can be used as test data "
+                         "separator.")
+            try:
+                self.test_reader = UnicodeReader(
+                    self.test_set, delimiter=self.test_separator,
+                    lineterminator="\n").open_reader()
+            except IOError:
+                sys.exit("Error: cannot read test %s" % test_set)
+
+        self.headers = None
+        self.raw_headers = None
+        self.exclude = []
 
         if test_set_header:
             self.headers = next(self.test_reader)
@@ -181,4 +208,7 @@ class TstReader():
         """Closing file handler
 
         """
-        self.test_reader.close_reader()
+        try:
+            self.test_reader.close_reader()
+        except AttributeError:
+            pass

@@ -475,6 +475,9 @@ def compute_output(api, args):
         fields = pm.get_model_fields(
             model, csv_properties, args, single_model=single_model,
             multi_label_data=multi_label_data)
+        args._model_fields = fields # storing the model fields to decide
+        # how to handle test data
+        #
         # Free memory after getting fields
         # local_ensemble = None
         gc.collect()

@@ -451,25 +451,25 @@ performing one of the following operations:
 
 .. code-block:: bash
 
-	bigmler source --source source/4f603fe203ce89bb2d000000 \
-				   --add-sources source/4f603fe203ce89bb2d000001,source/4f603fe203ce89bb2d000002 \
-				   --output-dir final-composite
+    bigmler source --source source/4f603fe203ce89bb2d000000 \
+                   --add-sources source/4f603fe203ce89bb2d000001,source/4f603fe203ce89bb2d000002 \
+                   --output-dir final-composite
 
 - Removing components
 
 .. code-block:: bash
 
-	bigmler source --source source/4f603fe203ce89bb2d000000 \
-				   --remove-sources source/4f603fe203ce89bb2d000001,source/4f603fe203ce89bb2d000002 \
-				   --output-dir final-composite
+    bigmler source --source source/4f603fe203ce89bb2d000000 \
+                   --remove-sources source/4f603fe203ce89bb2d000001,source/4f603fe203ce89bb2d000002 \
+                   --output-dir final-composite
 
 - Replacing the full list of components
 
 .. code-block:: bash
 
-	bigmler source --source source/4f603fe203ce89bb2d000000 \
-				   --replace-sources source/4f603fe203ce89bb2d000001,source/4f603fe203ce89bb2d000002 \
-				   --output-dir final-composite
+    bigmler source --source source/4f603fe203ce89bb2d000000 \
+                   --replace-sources source/4f603fe203ce89bb2d000001,source/4f603fe203ce89bb2d000002 \
+                   --output-dir final-composite
 
 A source can belong to as many composites as you wish,
 and composites can be nested, with the only limitation that a composite
@@ -502,6 +502,29 @@ one can also upload a zip or tar file containing more than one file.
 BigML will then automatically create one source for each file inside
 the archive, and put them all together in a composite source.
 
+Image Feature Extraction
+------------------------
+
+BigML provides configurable Image Analysis extraction capabilities for
+Composites built on images. The Composite configuration options include
+automatically computing as new features the dimensions, average pixels,
+level histogram, histogram of gradients, wavelet subbands and even using
+features derived from pre-trained CNNs. For more detail, you can check
+the `Image Analysis<https://bigml.com/api/sources?id=image-analysis>`_
+API documentation for composites.
+
+All these options are in turn configurable when creating sources using BigMLer.
+
+.. code-block:: bash
+
+    bigmler source --data cats.zip --dimensions --HOG \
+                   --pretrained-cnn mobilenet \
+                   --output-dir final-composite
+
+Thanks to those new features, all kind of models (not only Deepnets) can
+be built taking advantage of the images information. To learn the options
+available for image extraction configuration, see ***
+
 Annotated images as Composite Sources
 -------------------------------------
 
@@ -512,10 +535,10 @@ your training data is handled in BigML as a collection of Sources. However,
 this collection of sources is in turn a Source (to be precise, a
 ``Composite Source``). Each row in a Composite Source can contain one or more
 images, but it can also contain other fields related to those images,
-like labels.
+like labels, used in classification, or regions, used in object detection.
 
 When storing images in a repository, is common practice to keep them
-in directories or compressed files. The related fields, like labels,
+in directories or compressed files. The related fields, like labels or regions,
 are usually stored as additional files where some attribute points to the image
 they refer to. In BigML Composite Sources, though,
 images and annotations can be consolidated as different fields
@@ -532,7 +555,8 @@ First scenario: We only need to upload images and they are already stored
 in a single compressed file.
 
 .. code-block:: bash
-	bigmler source --train my_images.zip --output-dir output
+
+    bigmler source --train my_images.zip --output-dir output
 
 In this case, the ``my_images.zip`` is uploaded and a new ``composite source``
 is created containing the images.
@@ -540,7 +564,8 @@ is created containing the images.
 Second scenario: Images are stored in a directory.
 
 .. code-block:: bash
-	bigmler source --train ./my_images_directory --output-dir output
+
+    bigmler source --train ./my_images_directory --output-dir output
 
 The BigMLer command creates a local compressed file that contains the
 images stored in the directory given as a ``--train`` option. The compressed
@@ -551,9 +576,10 @@ Third scenario: The images are stored in a directory and they have associated
 annotations which have been stored in an annotations JSON file.
 
 .. code-block:: bash
-	bigmler source --train ./my_images_directory \
-	               --annotations-file annotations.json \
-	               --output-dir output
+
+    bigmler source --train ./my_images_directory \
+                   --annotations-file annotations.json \
+                   --output-dir output
 
 BigML uses a BigML-COCO syntax to provide labels associated to
 images. The annotations file should contain a list of dictionaries and
@@ -561,12 +587,13 @@ each dictionary corresponds to one of the images. The reference to the
 annotated image is provided in the ``file`` attribute.
 
 .. code-block:: JSON
-	[{"file": "my_images/image1.jpg",
-	  "label": "label1"}.
-	 {"file": "my_images/image2.jpg",
-	  "label": "label1"},
-	 {"file": "my_images/image3.jpg",
-	  "label": "label2"}]
+
+    [{"file": "my_images/image1.jpg",
+      "label": "label1"}.
+     {"file": "my_images/image2.jpg",
+      "label": "label1"},
+     {"file": "my_images/image3.jpg",
+      "label": "label2"}]
 
 In this case, the previous ``bigmler source`` command will zip the images
 contained in the ``my_images_directory``, upload them and create the
@@ -581,22 +608,24 @@ provide the directory where these files are stored and
 the annotations language as options:
 
 .. code-block:: bash
-	bigmler source --train ./my_images_directory \
-	               --annotations-dir ./annotations_directory \
-	               --annotations-language VOC
-	               --output-dir output
 
-The createed composite sources are editable up untill you close them
+    bigmler source --train ./my_images_directory \
+                   --annotations-dir ./annotations_directory \
+                   --annotations-language VOC
+                   --output-dir output
+
+The created composite sources are editable up until you close them
 explicitly or you create a dataset from them. While editable, more annotations
 can be added to an existing source. For instance, to add annotations
 to the source generated in the third scenario,
 ``source/61373ea6520f903f48000001``, we could use:
 
 .. code-block:: bash
-	bigmler source --source source/61373ea6520f903f48000001 \
-				   --images-file my_images.zip \
-	               --annotations-file new_annotations.json \
-	               --output-dir output
+
+    bigmler source --source source/61373ea6520f903f48000001 \
+                   --images-file my_images.zip \
+                   --annotations-file new_annotations.json \
+                   --output-dir output
 
 
 Ensembles
@@ -4352,7 +4381,7 @@ Requirements
 BigMLer needs Python 3.8 or higher versions to work.
 Compatibility with Python 2.X was discontinued in version 3.27.2.
 
-BigMLer requires `bigml 8.2.1 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 8.2.2 <https://github.com/bigmlcom/python>`_  or
 higher, that contains the bindings providing support to use the ``BigML``
 platform to create, update, get and delete resources,
 but also to produce local predictions using the
@@ -5031,7 +5060,7 @@ Source subcommand Options
 ``--data`` *PATH*                     Path to the data file or directory (if
                                       more than one file should be uploaded)
 ``--images-file`` *PATH*              Path to a compressed file that contains
-								      images
+                                      images
 ``--annotations-file`` *PATH*         Path to the file that contains the
                                       annotations for images
 ``--annotations-dir`` *DIRECTORY*     Path to a directory that contains
@@ -6022,6 +6051,24 @@ Association Specific Subcommand Options
                                       support
 ===================================== =========================================
 
+Image Analysis Specific Options
+-------------------------------
+
+===================================== =========================================
+``--no-image-analysis``               Disables the Image Feature Extraction
+                                      (only Deepnets will be able to use images
+                                      information)
+``--dimensions``                      Enables Image dimensions extraction
+``--average-pixels``                  Enables Image average pixels extraction
+``--level-histogram``                 Enables color level histogram extraction
+``--HOG``                             Enables histogram of gradients extraction
+``--ws-level``                        Enables wavelet subbands extraction and
+                                      sets the number of iterations.
+``--pretrained-cnn``                  Enables extraction of particular
+                                      pretrained CNN features. The available
+                                      options for CNNs are: mobilenet,
+                                      mobilenetv2 and resnet18
+===================================== =========================================
 
 
 Prior Versions Compatibility Issues

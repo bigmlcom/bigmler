@@ -29,8 +29,6 @@ def get_common_options(defaults=None, constants=None):
         defaults = {}
     if constants is None:
         constants = {}
-    now = constants.get('NOW',
-                        datetime.datetime.now().strftime("%a%b%d%y_%H%M%S"))
     version_text = constants['version_text']
     defaults_tag = defaults.get('tag')
     defaults_tag = [] if defaults_tag is None else defaults_tag.split(",")
@@ -142,7 +140,7 @@ def get_common_options(defaults=None, constants=None):
         '--name': {
             "action": 'store',
             "dest": 'name',
-            "default": defaults.get('name', 'BigMLer_%s' % now),
+            "default": defaults.get('name', None),
             "help": "Name for the resources in BigML."},
 
         # Name of the directory where session files will be stored. If --output

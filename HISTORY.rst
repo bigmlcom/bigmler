@@ -3,6 +3,14 @@
 History
 -------
 
+5.2.0 (2022-09-30)
+~~~~~~~~~~~~~~~~~~
+
+- Adding Image Feature Extraction options.
+- Adding local prediction for Images classification, regression and object
+  detection.
+- Improving souce naming.
+
 5.1.0 (2022-09-21)
 ~~~~~~~~~~~~~~~~~~
 

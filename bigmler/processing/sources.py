@@ -34,7 +34,7 @@ import bigmler.checkpoint as c
 import bigmler.processing.projects as pp
 import bigmler.processing.annotations as an
 
-from bigmler.processing.args import has_train
+from bigmler.processing.args import has_train, NOW
 from bigmler.train_reader import TrainReader
 
 
@@ -53,6 +53,15 @@ def needs_source_update(args):
             (hasattr(args, "row_components") and args.row_components) or
             (hasattr(args, "row_indices") and args.row_indices) or
             (hasattr(args, "row_values") and args.row_values))
+
+
+def extract_source_name(path):
+    """Tries to extract a name from the path to the data file"""
+    path = path.replace(os.sep, "/")
+    try:
+        return path.split("/")[-1]
+    except:
+        return "BigMLer_%s" % now
 
 
 def test_source_processing(api, args, resume,
@@ -74,6 +83,11 @@ def test_source_processing(api, args, resume,
                 message=message, log_file=session_file, console=args.verbosity)
 
         if not resume:
+            # in case the test_set contains a directory full of images
+            args.test_set, args = images_data_set(args.test_set,
+                                                  args, session_file)
+            if args.test_set and args.name is None:
+                args.name = extract_source_name(args.test_set)
             source_args = r.set_source_args(args, name=name,
                                             data_set_header=args.test_header)
             test_source = r.create_source(args.test_set, source_args, args,
@@ -167,6 +181,8 @@ def source_processing(api, args, resume,
     # we create a new dataset to test with.
     data_set, data_set_header = r.data_to_source(args)
     if data_set is not None:
+        if args.name is None:
+            args.name = extract_source_name(data_set)
         # Check if there's a created project for it
         args.project_id = pp.project_processing(
             api, args, resume, session_file=session_file, path=path, log=log)

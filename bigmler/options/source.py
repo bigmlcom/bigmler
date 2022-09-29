@@ -126,7 +126,7 @@ def get_source_options(defaults=None):
         '--locale': {
             'action': 'store',
             'dest': 'user_locale',
-            'default': defaults.get('locale', None),
+            'default': defaults.get('locale', 'en_US.UTF8'),
             'help': "Chosen locale code string."},
 
         # The path to a file containing source attributes.
@@ -270,6 +270,63 @@ def get_source_options(defaults=None):
                      "sources in a composite that will be updated by "
                      "default when using \"row_values\" with no \"indices\""
                      " specification.")},
+
+        # Image analysis options: dimensions
+        '--dimensions': {
+            'action': 'store_true',
+            'dest': 'dimensions',
+            'default': defaults.get('dimensions', False),
+            'help': "Whether to use dimensions as image analysis features"},
+
+        # Image analysis options: average pixels
+        '--average-pixels': {
+            'action': 'store_true',
+            'dest': 'average_pixels',
+            'default': defaults.get('average_pixels', False),
+            'help': ("Whether to use average pixels as image analysis"
+                     "features. Captures basic color information.")},
+
+        # Image analysis options: level histogram
+        '--level-histogram': {
+            'action': 'store_true',
+            'dest': 'level_histogram',
+            'default': defaults.get('level_histogram', False),
+            'help': ("Whether to use level histogram as image analysis"
+                     " features. Captures detailed color information.")},
+
+        # Image analysis options: Histogram of Gradients
+        '--HOG': {
+            'action': 'store_true',
+            'dest': 'hog',
+            'default': defaults.get('hog', False),
+            'help': ("Whether to use Histogram of Gradients as image analysis"
+                     " features. Captures profiles.")},
+
+        # Image analysis options: wavelet subbands
+        '--ws-level': {
+            'action': 'store',
+            'type': int,
+            'dest': 'ws_level',
+            'default': defaults.get('ws_level', None),
+            'help': ("If set, wavelet subbands are used as image analysis"
+                     " features and the number decides the level "
+                     " decomposition used. Captures textures.")},
+
+        # Image analysis options: pretrained CNNs
+        '--pretrained-cnn': {
+            'action': 'store',
+            'dest': 'pretrained_cnn',
+            'default': defaults.get('pretrained_cnn', None),
+            'choices': ["mobilenet", "mobilenet2", "resnet18"],
+            'help': ("If set, pretrained CNNs output nodes are used as"
+                     " image analysis features.")},
+
+        # Image analysis options
+        '--no-image-analysis': {
+            'action': 'store_false',
+            'dest': 'image_analysis',
+            'default': defaults.get('image_analysis', None),
+            'help': "Avoiding image analysis feature generation."},
 
         # Annotations language
         # syntax used to handle image annotations

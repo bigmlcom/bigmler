@@ -31,11 +31,14 @@ from bigmler.utils import (dated, get_url, log_message, check_resource,
                            check_resource_error, log_created_resources)
 
 from bigmler.resourcesapi.common import set_basic_args, check_fields_struct, \
-    update_attributes, update_json_args
+    update_attributes, update_json_args, set_config_attrs, hasattr_
 
 from bigmler.resourcesapi.common import ALL_FIELDS_QS, LOCALE_DEFAULT
 from bigmler.reports import report
 from bigmler.processing.annotations import bigml_metadata
+
+
+IMAGE_ATTRS = ["dimensions", "average_pixels", "level_histogram"]
 
 
 def set_source_args(args, name=None, multi_label_data=None,
@@ -75,24 +78,44 @@ def set_source_args(args, name=None, multi_label_data=None,
             "user_metadata": {
                 "multi_label_data": multi_label_data}})
 
+    # image feature generation
+    image_analysis = False
+    extracted_features = []
+    image_config = {}
+    for attr in IMAGE_ATTRS:
+        if hasattr_(args, attr) and getattr(args, attr):
+            extracted_features.append(attr)
+            image_analysis = True
+    if hasattr_(args, "hog") and getattr(args, "hog"):
+        extracted_features.append("histogram_of_gradients")
+        image_analysis = True
+    if hasattr_(args, "ws_level"):
+        extracted_features.append(["wavelet_subbands", args.ws_level])
+        image_analysis = True
+    if hasattr_(args, "pretrained_cnn"):
+        extracted_features.append(["pretrained_cnn", args.pretrained_cnn])
+        image_analysis = True
+    if extracted_features:
+        args.image_analysis = True
+    if hasattr_(args, "image_analysis"):
+        image_config.update({"enabled": args.image_analysis})
+        if extracted_features:
+            image_config.update({"extracted_features": extracted_features})
+        image_analysis = True
+    if image_analysis:
+        source_args.update({"image_analysis": image_config})
+
     if update:
-        if hasattr(args, "add_sources") and args.add_sources_:
-            source_args["add_sources"] = args.add_sources_
-        elif hasattr(args, "remove_sources") and args.remove_sources:
-            source_args["remove_sources"] = args.remove_sources_
-        elif hasattr(args, "delete_sources") and args.delete_sources:
-            source_args["delete_sources"] = args.delete_sources_
-        elif hasattr(args, "closed") and args.closed:
-            source_args["closed"] = args.closed
-        elif (hasattr(args, "sources") and (args.sources_ is not None)):
-            source_args["sources"] = args.sources_
-        if hasattr(args, "row_components") and args.row_components:
-            source_args["row_components"] = args.row_components_
-        if hasattr(args, "row_indices") and args.row_indices:
-            source_args["row_indices"] = [int(item) for item
-                in args.row_indices_]
-        if hasattr(args, "row_values") and args.row_values is not None:
-            source_args["row_values"] = args.row_values
+        exclusive_attrs = ["add_sources_", "remove_sources_",
+                           "delete_sources_", "closed", "sources"]
+        attr_aliases = {"add_sources_": "add_sources",
+                        "remove_sources_": "remove_sources",
+                        "delete_sources_":"delete_sources"}
+        set_config_attrs(args, exclusive_attrs,
+                         source_args, attr_aliases=attr_aliases, exclusive=True)
+
+        row_attrs = ["row_components", "row_indices", "row_values"]
+        set_config_attrs(args, row_attrs, source_args)
 
     # to update fields attributes or types you must have a previous fields
     # structure (at update time)
@@ -164,7 +187,7 @@ def create_source(data_set, source_args, args, api=None, path=None,
         log_created_resources(
             "source%s" % suffix, path,
             source['resource'], mode='ab',
-            comment=("%s\n" % source['object']['name']))
+            comment=("%s\n" % source.get('object', {}).get('name')))
     source_id = check_resource_error(source, "Failed to create source: ")
     try:
         source = check_resource(source, api.get_source,

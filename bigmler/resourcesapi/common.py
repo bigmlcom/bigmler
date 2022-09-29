@@ -305,3 +305,33 @@ def save_txt_and_json(object_dict, output, api=None):
         dict_json.write(message)
     with open(output + '.txt', open_mode) as dict_txt:
         api.pprint(object_dict, dict_txt)
+
+
+def hasattr_(obj, attr):
+    """Checking if an object has a non-empty attribute """
+    return hasattr(obj, attr) and (
+        (isinstance(getattr(obj, attr), (list, dict)) and
+         getattr(obj, attr))
+        or
+        (not isinstance(getattr(obj, attr), (list, dict)) and
+         getattr(obj, attr) is not None))
+
+
+def set_config_attrs(args, attrs, config, attr_aliases=None, exclusive=False):
+    """Checks that the attributes have been set as a bigmler option
+    and not empty before adding them as
+    a resource configuration value. If the attribute in the configuration
+    has a different name, that should be provided in the `attrs_alias`
+    argument. If `exclusive` is provided, when the process ends when the first
+    non-empty attribute is set.
+    """
+    for attr in attrs:
+        if hasattr_(args, attr):
+            if not isinstance(attr_aliases, dict) or \
+                    attr_aliases.get(attr) is None:
+                config_attr = attr
+            else:
+                cofig_attr = attr_aliases.get(attr)
+            config[config_attr] = getattr(args, attr)
+            if exclusive:
+                break
