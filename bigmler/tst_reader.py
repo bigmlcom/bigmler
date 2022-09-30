@@ -56,7 +56,8 @@ class TstReader():
            `objective_field`: field_id of the objective field
         """
         self.test_set = test_set
-        if os.path.isdir(self.test_set) and os.path.exists(self.test_set) and \
+        if isinstance(self.test_set, str) and os.path.isdir(self.test_set) \
+                and os.path.exists(self.test_set) and \
                 not self.test_set.endswith(os.sep):
             self.test_set += os.sep
         self.directory = None
