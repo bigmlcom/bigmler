@@ -34,6 +34,9 @@ from bigmler.processing.annotations import fields_from_annotations, \
     labels_from_annotations
 
 
+TRANSLATED_FEATURES = {"histogram_of_gradients": "HOG"}
+
+
 def shell_execute(command, output, test=None, options=None,
                   test_rows=None, project=True):
     """Excute bigmler command in shell
@@ -116,6 +119,8 @@ def i_create_annotated_source(step, annotations_file=None,
                                     output_dir=None):
     ok_(annotations_file is not None and images_file is not None and
         output_dir is not None)
+    annotations_file = res_filename(annotations_file)
+    images_file = res_filename(images_file)
     command = ("bigmler source --annotations-file " + annotations_file +
                " --data " + images_file +
                " --store --output-dir " + output_dir)
@@ -159,6 +164,7 @@ def i_check_create_composite(step):
 #@step(r'I check the number of sources in the composite is <images_number>')
 def check_images_number_in_composite(step, zip_file):
     sources = []
+    zip_file = res_filename(zip_file)
     if os.path.isdir(zip_file):
         sources = filter_by_extension(glob.glob(os.path.join(zip_file, "**"),
                                                 recursive=True),
@@ -169,6 +175,7 @@ def check_images_number_in_composite(step, zip_file):
     assert_equal(len(sources), len(step.sources))
 
 def check_annotation_fields(step, annotations_file):
+    annotations_file = res_filename(annotations_file)
     fields = fields_from_annotations(annotations_file)
     field_labels = labels_from_annotations(annotations_file)
     source_fields = Fields(world.source)
@@ -183,3 +190,45 @@ def check_annotation_fields(step, annotations_file):
             field["name"]] == source_fields.fields[
             source_fields.fields_by_name[
             field["name"]]]["values"]
+
+
+def i_extract_features(step, extracted_features, output_dir):
+    extracted_features_str = " --".join(extracted_features)
+    if extracted_features_str:
+        extracted_features_str = " --" + extracted_features_str
+    command = ("bigmler source --source " + world.source["resource"] + " " +
+               extracted_features_str +
+               " --store --output-dir " + output_dir)
+    shell_execute(command, os.path.join(output_dir, "txt.tmp"))
+
+
+def i_check_extracted_features(step, extracted_features):
+    try:
+        extracted = world.source["object"]["image_analysis"][
+            "extracted_features"]
+        extracted = [TRANSLATED_FEATURES.get(feature, feature) for
+            feature in extracted]
+        assert all(feature in extracted for feature in extracted_features)
+    except KeyError:
+        assert False
+
+
+def i_extract_t2_features(step, attr, attr_value, output_dir):
+    command = ("bigmler source --source " + world.source["resource"] +
+               " --" +  attr + " " + str(attr_value) +
+               " --store --output-dir " + output_dir)
+    shell_execute(command, os.path.join(output_dir, "txt.tmp"))
+
+
+def i_check_extracted_t2_features(step, attr, attr_value):
+    attr = attr.replace("ws-level", "wavelet_subbands").replace("-", "_")
+    try:
+        value = None
+        extracted = world.source["object"]["image_analysis"][
+            "extracted_features"]
+        for feature in extracted:
+            if isinstance(feature, list) and feature[0] == attr:
+                value = feature[1]
+        assert value == attr_value
+    except KeyError:
+        assert False

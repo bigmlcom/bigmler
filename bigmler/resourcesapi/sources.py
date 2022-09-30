@@ -107,16 +107,16 @@ def set_source_args(args, name=None, multi_label_data=None,
 
     if update:
         exclusive_attrs = ["add_sources_", "remove_sources_",
-                           "delete_sources_", "closed", "sources"]
+                           "delete_sources_", "closed", "sources_"]
         attr_aliases = {"add_sources_": "add_sources",
                         "remove_sources_": "remove_sources",
-                        "delete_sources_":"delete_sources"}
+                        "delete_sources_": "delete_sources",
+                        "sources_": "sources"}
         set_config_attrs(args, exclusive_attrs,
                          source_args, attr_aliases=attr_aliases, exclusive=True)
 
         row_attrs = ["row_components", "row_indices", "row_values"]
         set_config_attrs(args, row_attrs, source_args)
-
     # to update fields attributes or types you must have a previous fields
     # structure (at update time)
     if fields:

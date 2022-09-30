@@ -333,7 +333,7 @@ def set_config_attrs(args, attrs, config, attr_aliases=None, exclusive=False):
                     attr_aliases.get(attr) is None:
                 config_attr = attr
             else:
-                cofig_attr = attr_aliases.get(attr)
+                config_attr = attr_aliases.get(attr)
             config[config_attr] = getattr(args, attr)
             if exclusive:
                 break

@@ -194,7 +194,6 @@ class TestComposite(object):
             composite_create.check_images_number_in_composite(self,
                                                               example[0])
 
-
     def test_scenario06(self):
         """
         Scenario: Successfully building an annotated images composite
@@ -243,3 +242,53 @@ class TestComposite(object):
             composite_create.check_annotation_fields(
                 self,
                 os.path.join(example[2], "annotations.json"))
+
+    def test_scenario08(self):
+        """
+        Scenario: Successfully extracting <type> features from images composite
+            And I create a source from a "<zip>" and store output in "<output_dir>" directory
+            And I check that the composite is ready
+            And I update the source to extract different <types> of features
+            And I check that the image analysis reflects the extracted types
+        """
+        print(self.test_scenario08.__doc__)
+        examples = [
+            ['data/images/fruits_hist.zip', './scenario42_08',
+             [["dimensions"], ["level_histogram"], ["dimensions", "HOG"],
+              ["dimensions", "average_pixels", "level_histogram", "HOG"]]]]
+        for example in examples:
+            print("\nTesting with:\n", example)
+            source_create.i_create_source( \
+                self, data=example[0], output_dir=example[1])
+            composite_create.i_check_create_composite(self)
+            for extracted_features in example[2]:
+                composite_create.i_extract_features(self, extracted_features,
+                    example[1])
+                composite_create.i_check_create_composite(self)
+                composite_create.i_check_extracted_features(self,
+                    extracted_features)
+
+    def test_scenario09(self):
+        """
+        Scenario: Successfully extracting <type2> features from images composite
+            And I create a source from a "<zip>" and store output in "<output_dir>" directory
+            And I check that the composite is ready
+            And I update the source to extract <type2> features
+            And I check that the image analysis reflects the extracted features
+        """
+        print(self.test_scenario09.__doc__)
+        examples = [
+            ['data/images/fruits_hist.zip', './scenario42_09',
+             "ws-level", 2],
+            ['data/images/fruits_hist.zip', './scenario42_09',
+             "pretrained-cnn", "mobilenet"]]
+        for example in examples:
+            print("\nTesting with:\n", example)
+            source_create.i_create_source( \
+                self, data=example[0], output_dir=example[1])
+            composite_create.i_check_create_composite(self)
+            composite_create.i_extract_t2_features(self, example[2],
+                example[3], example[1])
+            composite_create.i_check_create_composite(self)
+            composite_create.i_check_extracted_t2_features(self, example[2],
+                example[3])

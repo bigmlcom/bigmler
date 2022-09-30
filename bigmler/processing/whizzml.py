@@ -31,6 +31,11 @@ import bigmler.checkpoint as c
 import bigmler.processing.projects as pp
 
 from bigmler.resourcesapi.common import log_created_resources
+from bigmler.processing.args import NOW
+
+
+DFT_NAME = "BigMLer_%s - v0" % NOW
+
 
 def build_query_string(args):
     """Builds the query string that selects the script or library id for
@@ -41,7 +46,7 @@ def build_query_string(args):
     try:
         version = args.name.split("-")[1].strip()
         return "%s;tags=%s" % (query_string, version)
-    except IndexError:
+    except (IndexError, AttributeError):
         return query_string
 
 
@@ -55,7 +60,7 @@ def add_version_tag(resource_args, name):
         if version != "":
             tags.append(version)
         resource_args.update({"tags": tags})
-    except IndexError:
+    except (IndexError, AttributeError):
         pass
 
 
@@ -66,6 +71,7 @@ def script_processing(api, args,
     """
     script = None
     resume = args.resume
+
     if args.code_file or args.code:
         # If resuming, try to extract args.script form log files
 
@@ -111,6 +117,8 @@ def script_processing(api, args,
                 u.log_message(message, log_file=session_file,
                               console=args.verbosity)
             if script is None:
+                if args.name is None:
+                    args.name = DFT_NAME
                 script_args = rs.set_script_args(args)
                 add_version_tag(script_args, args.name)
                 script = rs.create_script(source_code, script_args, args, api,
@@ -210,6 +218,8 @@ def library_processing(api, args,
                 u.log_message(message, log_file=session_file,
                               console=args.verbosity)
             if library is None:
+                if args.name is None:
+                    args.name = DFT_NAME
                 library_args = rl.set_library_args(args)
                 add_version_tag(library_args, args.name)
                 library = rl.create_library(source_code, library_args, args,

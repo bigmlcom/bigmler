@@ -61,7 +61,7 @@ def extract_source_name(path):
         path = path.replace(os.sep, "/")
         return path.split("/")[-1]
     except:
-        return "BigMLer_%s" % now
+        return "BigMLer_%s" % NOW
 
 
 def test_source_processing(api, args, resume,

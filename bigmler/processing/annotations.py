@@ -133,19 +133,19 @@ def bigml_metadata(args, images_list=None, new_fields=None):
                 new_fields = fields_from_annotations(args.annotations_file)
 
             metafile_name = os.path.join(args.output_dir, "metadata.json")
-            args.annotations_file = os.path.relpath(args.annotations_file,
+            annotations_file = os.path.relpath(args.annotations_file,
                 args.output_dir)
-            args.images_file = os.path.relpath(args.images_file,
+            images_file = os.path.relpath(args.images_file,
                 args.output_dir)
 
             with open(metafile_name, "w") as \
                     metafile:
                 meta_info = {"description": ("Transformed file for images"
                                              " annotations"),
-                             "images_file": args.images_file,
+                             "images_file": images_file,
                              "source_id": args.source,
                              "new_fields": new_fields,
-                             "annotations": args.annotations_file}
+                             "annotations": annotations_file}
                 json.dump(meta_info, metafile)
             output = metafile_name
     except Exception as exc:
