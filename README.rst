@@ -81,7 +81,7 @@ from the Git repository
     $ pip install -e git://github.com/bigmlcom/bigmler.git#egg=bigmler
 
 For a detailed description of install instructions on Windows see the
-:ref:bigmler-windows section.
+:ref:bigmler-on-windows section.
 
 Support for local Topic Distributions (Topic Models' predictions)
 and local predictions for datasets that include Images will only be

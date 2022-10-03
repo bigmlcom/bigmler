@@ -218,8 +218,8 @@ You can also specify a file name to save the newly created predictions
     bigmler --train data/iris.csv --test data/test_iris.csv --output predictions
 
 If you do not specify the path to an output file, BigMLer will auto-generate
-one for you under a
-new directory named after the current date and time
+one for you under a ``.bigmler_outputs`` directory.
+The new directory will be named after the current date and time
 (e.g., `MonNov1212_174715/predictions.csv`). With ``--prediction-info``
 flag set to ``brief`` only the prediction result will be stored (default is
 ``normal`` and includes confidence information). You can also set it to
@@ -307,16 +307,16 @@ If you want to change this behaviour you can specify your preferred locale
     bigmler --train data/iris.csv --test data/test_iris.csv \
             --locale "English_United States.1252"
 
-If you check your working directory you will see that BigMLer creates a file
-with the
+If you check the ``.bigmler_outputs`` folder in your working directory
+you will see that BigMLer creates a file with the
 model ids that have been generated (e.g., FriNov0912_223645/models).
 This file is handy if then you want to use those model ids to generate local
 predictions. BigMLer also creates a file with the dataset id that has been
 generated (e.g., TueNov1312_003451/dataset) and another one summarizing
 the steps taken in the session progress: ``bigmler_sessions``. You can also
 store a copy of every created or retrieved resource in your output directory
-(e.g., TueNov1312_003451/model_50c23e5e035d07305a00004f) by setting the flag
-``--store``.
+(e.g., .bigmler_outputs/TueNov1312_003451/model_50c23e5e035d07305a00004f)
+by setting the flag ``--store``.
 
 Remote Predictions
 ------------------
@@ -523,7 +523,8 @@ All these options are in turn configurable when creating sources using BigMLer.
 
 Thanks to those new features, all kind of models (not only Deepnets) can
 be built taking advantage of the images information. To learn the options
-available for image extraction configuration, see ***
+available for image extraction configuration,
+ see :ref:image-feature-extraction .
 
 Annotated images as Composite Sources
 -------------------------------------
@@ -3213,7 +3214,6 @@ set a range of dates. The allowed values are:
 Thus,
 
 
-
 .. code-block:: bash
 
     bigmler delete --newer-than 2
@@ -3222,15 +3222,12 @@ will delete all resources created less than two days ago (now being
 2014-03-23 14:00:00.00000, its creation time will be greater
 than 2014-03-21 14:00:00.00000).
 
-
-
 .. code-block:: bash
 
     bigmler delete --older-than 2014-03-20 --newer-than 2014-03-19
 
 will delete all resources created during 2014, March the 19th (creation time
 between 2014-03-19 00:00:00 and 2014-03-20 00:00:00) and
-
 
 
 .. code-block:: bash
@@ -3271,6 +3268,18 @@ that contain the tag ``my_source`` and were created after the one given as
 ``--newer-than`` value. The first 15 resources will be logged
 to console, and the complete list can be found in the ``bigmler_sessions``
 file.
+
+A similar option that does not delete the resources immediately is ``--bin``.
+
+.. code-block:: bash
+
+    bigmler delete --newer-than 3 --resource-types source \
+                   --source-tag my_source --bin
+
+By setting that flag, all the selected resources are moved to a newly
+created ``Trash bin`` project in your account. That allows the user to
+inspect the selected resources before deletion and delete them in an efficient
+way by deleting the ``Trash bin`` project.
 
 By default, only finished resources are selected to be deleted. If you want
 to delete other resources, you can select them by choosing their status:
