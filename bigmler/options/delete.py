@@ -259,6 +259,12 @@ def get_delete_options(defaults=None):
             'default': defaults.get('association_tag', None),
             'help': "Retrieve associations that were tagged with tag."},
 
+        # Use it to retrieve association sets that were tagged with tag.
+        '--association-set-tag': {
+            'dest': 'association_set_tag',
+            'default': defaults.get('association_set_tag', None),
+            'help': "Retrieve association sets that were tagged with tag."},
+
         # Use it to retrieve logistic regression that were tagged with tag.
         '--logistic-regression-tag': {
             'dest': 'logistic_regression_tag',

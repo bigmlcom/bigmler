@@ -40,6 +40,27 @@ def i_create_source_from_file(step, data=None, output_dir=None):
                   project=False)
 
 
+#@step(r'I create a BigML project with name "(.*)" storing results in "(.*)"')
+def i_create_project(step, name=None, output_dir=None):
+    ok_(name is not None and output_dir is not None)
+    command = ("bigmler project --name " + name + " --store --output-dir " +
+               output_dir)
+    shell_execute(command, os.path.join(output_dir, "p.csv"), test=None,
+                  project=True)
+
+
+#@step(r'I check that the project exists$')
+def i_check_project_exists(step):
+    project_file = "%s%sproject" % (world.directory, os.sep)
+    project_file = open(project_file, "r")
+    project_id = project_file.readline().strip()
+    project_file.close()
+    project = check_resource(project_id,
+                             world.api.get_project)
+    assert_not_equal(project['code'], HTTP_NOT_FOUND)
+    world.project = project
+
+
 def i_check_source_exists_by_id(step, source_id):
     source = check_resource(source_id,
                             world.api.get_source)
@@ -73,6 +94,12 @@ def i_check_source_does_not_exist(step, source_id=None):
         source_id = world.source['resource']
     source = world.api.get_source(source_id)
     assert_equal(source['code'], HTTP_NOT_FOUND)
+
+
+#@step(r'I check that the project doesn\'t exist$')
+def i_check_project_does_not_exist(step):
+    project = world.api.get_project(world.project["resource"])
+    assert_equal(project['code'], HTTP_NOT_FOUND)
 
 
 #@step(r'I delete the source by id using --ids storing results in "(.*)"$')
@@ -286,3 +313,12 @@ def i_store_the_number_of_resources(step):
 def i_check_equal_number_of_resources(step):
     store_final_resources()
     check_init_equals_final()
+
+
+#@step(r'I delete the project by name (.*), storing results in "(.*)"$')
+def i_delete_project_by_name(step, name=None, output_dir=None):
+    ok_(output_dir is not None and name is not None)
+    command = ("bigmler delete --filter=\"name=%s\" "  % name +
+               " --output-dir " + output_dir +
+               " --resource-types project")
+    shell_execute(command, os.path.join(output_dir, "p.csv"), test=None)

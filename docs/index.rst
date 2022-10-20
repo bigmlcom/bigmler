@@ -4390,7 +4390,7 @@ Requirements
 BigMLer needs Python 3.8 or higher versions to work.
 Compatibility with Python 2.X was discontinued in version 3.27.2.
 
-BigMLer requires `bigml 8.2.2 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 9.0.0 <https://github.com/bigmlcom/python>`_  or
 higher, that contains the bindings providing support to use the ``BigML``
 platform to create, update, get and delete resources,
 but also to produce local predictions using the

@@ -313,17 +313,21 @@ def list_ids(api_function, query_string, status_code=bigml.api.FINISHED,
     """Lists BigML resources filtered by `query_string`.
 
     """
+    if status_code is None:
+        status_str = ""
+    else:
+        status_str = 'status.code=%s;' % status_code
     limit_s = 'limit=%s' % (PAGE_LENGTH if limit is None else limit)
-    q_s = 'status.code=%s;%s;%s' % (
-        status_code, limit_s, query_string)
+    q_s = '%s%s;%s' % (
+        status_str, limit_s, query_string)
     resources = api_function(q_s)
     ids = [obj['resource'] for obj in (resources['objects'] or [])]
     while (resources['objects'] and (limit is None or len(ids) < limit) and
            (resources['meta']['total_count'] > (resources['meta']['offset'] +
                                                 resources['meta']['limit']))):
         offset = resources['meta']['offset'] + PAGE_LENGTH
-        q_s = 'status.code=%s;offset=%s;%s;%s' % (
-            status_code, offset, limit_s, query_string)
+        q_s = '%soffset=%s;%s;%s' % (
+            status_str, offset, limit_s, query_string)
         resources = api_function(q_s)
         if resources['objects']:
             ids.extend([obj['resource'] for obj in resources['objects']])

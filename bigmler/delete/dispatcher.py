@@ -65,6 +65,8 @@ STATUS_CODES = {
 
 GROUP_RESOURCES = ["project", "execution"]
 COMPOSED_RESOURCES = ["cluster", "ensemble", "fusion", "composites", "optiml"]
+SYNCHRONOUS_RESOURCES = ["project", "prediction", "centroid", "anomalyscore",
+    "topicdistribution", "associationset", "forecast", "projection"]
 TRASH_BIN = "Trash bin"
 
 
@@ -150,7 +152,7 @@ def get_delete_list(args, api, query_list):
     delete_list = []
 
     if resource_selectors:
-        for selector, api_call, filter_linked in resource_selectors:
+        for res_type, selector, api_call, filter_linked in resource_selectors:
             query_value = args.all_tag
             type_query_list = query_list[:]
             if args.all_tag or selector:
@@ -161,6 +163,8 @@ def get_delete_list(args, api, query_list):
                 type_query_list.append(filter_linked)
             if type_query_list:
                 status_code = STATUS_CODES[args.status]
+                if res_type in SYNCHRONOUS_RESOURCES:
+                    status_code = None
                 delete_list.extend(u.list_ids(api_call,
                                               ";".join(type_query_list),
                                               status_code=status_code))
@@ -270,6 +274,8 @@ def filtered_selectors(args, api):
          api.list_batch_anomaly_scores, None),
         ("sample", args.sample_tag, api.list_samples, None),
         ("association", args.association_tag, api.list_associations, None),
+        ("associationset", args.association_set_tag, api.list_association_sets,
+         None),
         ("logisticregression", args.logistic_regression_tag,
          api.list_logistic_regressions, None),
         ("topicmodel", args.topic_model_tag,
@@ -284,7 +290,8 @@ def filtered_selectors(args, api):
         ("fusion", args.fusion_tag, api.list_fusions, None),
         ("pca", args.pca_tag, api.list_pcas, None),
         ("projection", args.projection_tag, api.list_projections, None),
-        ("batch_projection", args.batch_projections_tag, api.list_batch_projections, None),
+        ("batchprojection", args.batch_projections_tag,
+         api.list_batch_projections, None),
         ("linearregression", args.linear_regression_tag,
          api.list_linear_regressions, None),
         ("externalconnector", args.external_connector_tag,
@@ -300,7 +307,7 @@ def filtered_selectors(args, api):
                               resource[1] is not None]
 
     # selected by resource_types (on top of the tag selectors)
-    selectors = [resource[1:] for resource in resource_selectors
+    selectors = [resource for resource in resource_selectors
                  if args.resource_types_ is None or
                  resource[0] in args.resource_types_]
     return selectors

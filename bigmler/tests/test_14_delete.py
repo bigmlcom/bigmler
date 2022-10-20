@@ -315,7 +315,7 @@ class TestDelete(object):
 
     def test_scenario10(self):
         """
-            Scenario: Sucessfully deleting a source in a time range and with a tag:
+            Scenario: Sucessfully deleting a source in a time range and with a tag and status faulty:
                 Given I create a BigML source from file "<data>" storing results in "<output_dir>"
                 And I check that the source has been created
                 And I store the source id as lower
@@ -346,3 +346,26 @@ class TestDelete(object):
             test_delete.i_delete_source_newer_faulty_and_tag(self, tag=example[2], output_dir=example[1])
             test_delete.i_check_source_does_not_exist(self, source_id=world.source_reference)
             test_delete.i_check_source_exists_by_id(self, source_id=world.source_lower)
+
+    def test_scenario11(self):
+        """
+            Scenario: Successfully deleting a project:
+                Given I create a BigML project with name "<name>" storing results in "<output_dir>"
+                And I check that the project exists
+                And I delete the project by name storing results in "<output_dir>"
+                Then I check that the project doesn't exist
+
+                Examples:
+                | name               | output_dir       |
+                | my_trash_project   | ./scenario_del_11 |
+        """
+        print(self.test_scenario11.__doc__)
+        examples = [
+            ['my_trash_project', 'scenario_del_11']]
+        for example in examples:
+            print("\nTesting with:\n", example)
+            test_delete.i_create_project(self, name=example[0], output_dir=example[1])
+            test_delete.i_check_project_exists(self)
+            test_delete.i_delete_project_by_name(self, name=example[0],
+                output_dir=example[1])
+            test_delete.i_check_project_does_not_exist(self)

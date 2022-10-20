@@ -3,6 +3,12 @@
 History
 -------
 
+5.3.0 (2022-10-21)
+~~~~~~~~~~~~~~~~~~
+
+- Updating underlying bindings version.
+- Fixing bigmler delete query for synchronous resources.
+
 5.2.0 (2022-09-30)
 ~~~~~~~~~~~~~~~~~~
 
