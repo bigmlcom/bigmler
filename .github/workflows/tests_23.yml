@@ -26,9 +26,9 @@ jobs:
         BIGML_DELTA: 5
     steps:
     - name: Install packages
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - run: |
-        pip install bigml[full]>=8.2.2
+        pip install bigml[full]>=9.0.0
         pip install .[full]
 
     - name: Run tests *23 24 25 26 27 36 38 39 40*
