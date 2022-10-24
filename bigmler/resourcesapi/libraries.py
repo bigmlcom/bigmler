@@ -46,6 +46,7 @@ def set_library_args(args, name=None):
     return library_args
 
 
+#pylint: disable=locally-disabled,broad-except
 def create_library(source_code, library_args, args, api=None, path=None,
                    session_file=None, log=None):
     """Creates remote library

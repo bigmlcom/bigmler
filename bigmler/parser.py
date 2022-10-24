@@ -68,7 +68,7 @@ def parser_add_options(parser, options):
     for option, properties in sorted(list(options.items()), key=lambda x: x[0]):
         parser.add_argument(option, **properties)
 
-
+#pylint: disable=locally-disabled,dangerous-default-value
 def create_parser(general_defaults={}, constants={}, subcommand=MAIN):
     """Sets the accepted command options, variables, defaults and help
 
@@ -466,8 +466,8 @@ under the License.""" % version
     defaults = general_defaults["BigMLer execute"]
     subcommand_options["execute"] = get_execute_options(defaults=defaults)
     execute_common_options = {}
-    for option in common_options:
-        execute_common_options.update({option: common_options[option]})
+    for option, option_value in common_options.items():
+        execute_common_options.update({option: option_value})
     subcommand_options["execute"].update(execute_common_options)
     subcommand_options["execute"].update(
         {'--project': source_options['--project'],

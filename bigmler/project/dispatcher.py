@@ -39,6 +39,7 @@ SETTINGS = {
     "defaults_file": DEFAULTS_FILE}
 
 
+#pylint: disable=locally-disabled,dangerous-default-value
 def project_dispatcher(args=sys.argv[1:]):
     """Parses command line and calls the different processing functions
 
@@ -60,6 +61,7 @@ def project_dispatcher(args=sys.argv[1:]):
         pp.project_processing(
             api, command_args, command_args.resume, session_file=session_file,
             path=path, log=log, create=True)
+    #pylint: disable=locally-disabled,too-many-boolean-expressions
     if command_args.project_id and (
             command_args.project_attributes or
             command_args.name or command_args.tag or command_args.description

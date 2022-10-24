@@ -56,6 +56,7 @@ def check_compulsory_options(flags, args):
         len([flag for flag in flags if flag.endswith("-tag")]) > 0
 
 
+#pylint: disable=locally-disabled,dangerous-default-value
 def retrain_dispatcher(args=sys.argv[1:]):
     """Main processing of the parsed options for BigMLer retrain
 

@@ -56,6 +56,7 @@ def get_report_url(args):
         return evaluations_report(args)
 
 
+#pylint: disable=locally-disabled,dangerous-default-value
 def report_dispatcher(args=sys.argv[1:]):
     """Parses command line and calls the different report functions
 

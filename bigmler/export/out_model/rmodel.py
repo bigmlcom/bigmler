@@ -47,6 +47,7 @@ def dot(name):
 
 
 class RModel(Model):
+    """R model output generator class"""
 
     def __init__(self, model, api=None, fields=None):
         """Empty attributes to be overriden
@@ -150,14 +151,14 @@ class RModel(Model):
             body += """
     TERM_FORMS <- list("""
             lines = []
-            for field in term_forms:
+            for field_name, field_terms in term_forms.items():
                 inner_lines = []
                 lines.append("""
-        \"%s\"=list(""" % field)
-                terms = sorted(term_forms[field].keys())
+        \"%s\"=list(""" % field_name)
+                terms = sorted(field_terms.keys())
                 for term in terms:
                     terms_list = "list(\"" + \
-                        "\", \"".join(term_forms[field][term])
+                        "\", \"".join(field_terms[term])
                     terms_list += "\")"
                     inner_lines.append("""\
             \"%s\"=%s""" % (term,
@@ -183,7 +184,7 @@ class RModel(Model):
         """ Writes auxiliary functions to handle the item analysis fields
 
         """
-        item_analysis_options = set([x[0] for x in item_analysis_predicates])
+        item_analysis_options = set(x[0] for x in item_analysis_predicates)
         item_analysis_predicates = set(item_analysis_predicates)
 
         body = ""

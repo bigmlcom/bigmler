@@ -132,6 +132,7 @@ def set_deepnet_args(args, name=None, fields=None,
     return deepnet_args
 
 
+#pylint: disable=locally-disabled,broad-except
 def create_deepnets(datasets, deepnet_ids,
                     deepnet_args,
                     args, api=None, path=None,
@@ -217,6 +218,7 @@ def create_deepnets(datasets, deepnet_ids,
     return deepnets, deepnet_ids
 
 
+#pylint: disable=locally-disabled,broad-except
 def get_deepnets(deepnet_ids, args, api=None, session_file=None):
     """Retrieves remote deepnet in its actual status
 

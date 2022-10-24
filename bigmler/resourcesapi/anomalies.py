@@ -81,6 +81,7 @@ def set_publish_anomaly_args(args):
     return public_anomaly
 
 
+#pylint: disable=locally-disabled,broad-except
 def create_anomalies(datasets, anomaly_ids, anomaly_args,
                      args, api=None, path=None,
                      session_file=None, log=None):
@@ -144,6 +145,7 @@ def create_anomalies(datasets, anomaly_ids, anomaly_args,
     return anomalies, anomaly_ids
 
 
+#pylint: disable=locally-disabled,broad-except
 def get_anomalies(anomaly_ids, args, api=None, session_file=None):
     """Retrieves remote anomalies in its actual status
 

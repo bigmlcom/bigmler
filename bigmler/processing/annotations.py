@@ -24,14 +24,17 @@ import sys
 import xml.etree.ElementTree as ET
 import re
 import glob
-import cv2
-
-import bigmler.utils as u
 
 from zipfile import ZipFile
 
+import cv2
+
 from bigml.constants import IMAGE_EXTENSIONS
 from bigml.util import infer_field_type
+
+import bigmler.utils as u
+
+
 
 
 FILE_ATTR = "file"
@@ -100,6 +103,7 @@ def bigml_metadata(args, images_list=None, new_fields=None):
     """Creates a metadata file to summarize the locations of images and
     annotations
     """
+    #pylint: disable=locally-disabled,broad-except
     try:
         if args.images_file is None and args.images_dir and \
                 os.path.exists(args.images_dir):
@@ -109,7 +113,7 @@ def bigml_metadata(args, images_list=None, new_fields=None):
                     zipname = args.images_dir.split(os.path.sep)[-2]
             except Exception:
                 zipname = "annotated_images"
-            zipPath = os.path.join(args.output_dir, "%s.zip" % zipname)
+            zip_path = os.path.join(args.output_dir, "%s.zip" % zipname)
             files = glob.glob(os.path.join(args.images_dir, "**"),
                               recursive=True)
             images_list = [filename for
@@ -118,13 +122,12 @@ def bigml_metadata(args, images_list=None, new_fields=None):
                            IMAGE_EXTENSIONS]
 
         if images_list:
-            if not os.path.exists(zipPath):
-                zipObj = ZipFile(zipPath, 'w')
-                for filename in images_list:
-                    zipObj.write(filename,
-                                 relative_path(args.images_dir, filename))
-                zipObj.close()
-            args.images_file = zipPath
+            if not os.path.exists(zip_path):
+                with ZipFile(zip_path, 'w') as zip_obj:
+                    for filename in images_list:
+                        zip_obj.write(filename,
+                                     relative_path(args.images_dir, filename))
+            args.images_file = zip_path
 
         output = args.images_file
         # if annotations are also uploaded
@@ -149,7 +152,7 @@ def bigml_metadata(args, images_list=None, new_fields=None):
                 json.dump(meta_info, metafile)
             output = metafile_name
     except Exception as exc:
-        sys.exit("Failed to create an annotated images upload file.")
+        sys.exit(f"Failed to create an annotated images upload file: {exc}")
 
     return output
 
@@ -170,6 +173,7 @@ def bigml_coco_file(args, session_file):
 
 
 def get_image_info(annotation_root):
+    """Returns the basic image descriptors"""
     path = annotation_root.findtext('path')
     if path is None:
         filename = annotation_root.findtext('filename')
@@ -194,6 +198,7 @@ def get_image_info(annotation_root):
 
 
 def get_coco_annotation_from_object(obj, filename, logfile, warnings):
+    """Returns the annotation properties reading them from coco notation"""
     label = obj.findtext('name')
     bndbox = obj.find('bndbox')
     ## xmin = int(bndbox.findtext('xmin')) - 1
@@ -211,12 +216,12 @@ def get_coco_annotation_from_object(obj, filename, logfile, warnings):
     # logging possible errors
     if xmin == xmax or ymin == ymax:
         logfile.write(f"Possible bndbox error in {filename}:\n" +
-                      f"  min equal to max: (xmin, ymin, xmax, ymax):" +
+                      "  min equal to max: (xmin, ymin, xmax, ymax):" +
                       f"  {xmin, ymin, xmax, ymax}\n")
         warnings += 1
     if xmin > xmax or ymin > ymax:
         logfile.write(f"Possible bndbox error in {filename}:\n" +
-                      f"  min greater than max: (xmin, ymin, xmax, ymax):" +
+                      "  min greater than max: (xmin, ymin, xmax, ymax):" +
                       f"  {xmin, ymin, xmax, ymax}\n")
         warnings += 1
 
@@ -231,15 +236,11 @@ def get_coco_annotation_from_object(obj, filename, logfile, warnings):
 
 
 def yolo_to_cocojson(yolo_dir, args, session_file):
-
+    """Builds annotations file from yolo separated annotation files """
     ## assume .txt extension for yolo annotation files,
     ## may be input as args
     yolo_extension = '.txt'
     ## extensions of acceptable image files
-
-    output_json_dict = {
-        "annotations": []
-    }
 
     output_json_array = []
 
@@ -300,7 +301,7 @@ def yolo_to_cocojson(yolo_dir, args, session_file):
                 ## the last one in the matched_file list is used
                 for a_file in matched_files:
                     filenames.append(a_file)
-                    base, ext = os.path.splitext(a_file)
+                    ext = os.path.splitext(a_file)[1]
                     if ext.lower() in IMAGE_EXTENSIONS:
                         image_filename = a_file
                     else:
@@ -317,16 +318,16 @@ def yolo_to_cocojson(yolo_dir, args, session_file):
             logfile.write("converting for: " + image_filename + "\n")
             image_filename_base = relative_path(images_dir, image_filename)
 
+            #pylint: disable=locally-disabled,no-member
             image_file = cv2.imread(image_filename)
             if image_file is not None:
                 if image_filename not in filenames:
                     filenames.append(image_filename)
-                yolo_file = open(yolo_filename, "r")
-                yolo_read_lines = yolo_file.readlines()
-                yolo_file.close()
+                with open(yolo_filename, "r") as yolo_file:
+                    yolo_read_lines = yolo_file.readlines()
 
-
-                logfile.write("taking as filename: " + image_filename_base + "\n")
+                logfile.write("taking as filename: " +
+                              image_filename_base + "\n")
 
                 one_image_dict = {
                     ## possible args options for full path or basename
@@ -379,17 +380,18 @@ def yolo_to_cocojson(yolo_dir, args, session_file):
                         #print("xc_decimal=", x_center_decimal, " yc_decimal=",
                         #        y_center_decimal, "\n")
                         logfile.write("xc_decimal=" + str(x_center_decimal) +
-                                      " yc_decimal=" + str(y_center_decimal) + "\n")
+                                      " yc_decimal=" + str(y_center_decimal) +
+                                      "\n")
                         if x_center_decimal <= 0.25:
                             round_x_center = int(float_x_center)
-                        elif x_center_decimal > 0.25 and x_center_decimal <= 0.75:
+                        elif 0.75 >= x_center_decimal > 0.25:
                             round_x_center = int(float_x_center) + 0.5
                         else:
                             round_x_center = int(float_x_center) + 1
 
                         if y_center_decimal <= 0.25:
                             round_y_center = int(float_y_center)
-                        elif y_center_decimal > 0.25 and y_center_decimal <= 0.75:
+                        elif 0.75 >= y_center_decimal > 0.25:
                             round_y_center = int(float_y_center) + 0.5
                         else:
                             round_y_center = int(float_y_center) + 1
@@ -476,8 +478,8 @@ def yolo_to_cocojson(yolo_dir, args, session_file):
                   f"see the log file {logfile_name}\n"
         u.log_message(message, session_file, console=args.verbosity)
 
-    with open(args.annotations_file, 'w') as f:
-        json.dump(output_json_array, f, indent=2)
+    with open(args.annotations_file, 'w') as handler:
+        json.dump(output_json_array, handler, indent=2)
 
     return [relative_path(images_dir, filename) for filename in \
         filenames]
@@ -489,9 +491,6 @@ def voc_to_cocojson(voc_dir, args, session_file):
     the list of images it refers to.
 
     """
-    output_json_dict = {
-        "annotations": []
-    }
 
     output_json_array = []
 
@@ -535,9 +534,6 @@ def voc_to_cocojson(voc_dir, args, session_file):
             if args.images_dir is not None:
                 filename = os.path.join(base_dir, image_filename_base)
 
-            ## img_id for possible future use
-            img_id = img_info['id']
-
             if os.path.exists(filename):
                 if filename not in filenames:
                     filenames.append(filename)
@@ -555,12 +551,9 @@ def voc_to_cocojson(voc_dir, args, session_file):
                 for obj in annotation_root.findall('object'):
                     annotation, warnings = get_coco_annotation_from_object( \
                         obj, filename, logfile, warnings)
-                    ## output_json_dict['annotations'].append(ann)
-                    ## output_json_dict['bboxes'].append(ann)
                     one_image_dict[BBOXES_ATTR].append(annotation)
                     bndbox_id = bndbox_id + 1
 
-                # output_json_dict['annotations'].append(one_image_dict)
                 output_json_array.append(one_image_dict)
             else:
                 warnings += 1
@@ -571,8 +564,8 @@ def voc_to_cocojson(voc_dir, args, session_file):
                 f"see the log file {logfile_name}\n"
         u.log_message(message, session_file, console=args.verbosity)
 
-    with open(args.annotations_file, 'w') as f:
-        json.dump(output_json_array, f, indent=2)
+    with open(args.annotations_file, 'w') as handler:
+        json.dump(output_json_array, handler, indent=2)
 
     return [relative_path(args.images_dir, filename) for filename in \
         filenames]

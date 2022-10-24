@@ -69,6 +69,7 @@ def set_batch_projection_args( \
     return batch_projection_args
 
 
+#pylint: disable=locally-disabled,broad-except
 def create_batch_projection(pca, test_dataset,
                             batch_projection_args, args,
                             api=None, session_file=None,

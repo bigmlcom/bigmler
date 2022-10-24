@@ -29,7 +29,7 @@ from bigmler.export.out_tree.tableautree import plug_in_body
 
 
 class TableauModel(Model):
-
+    """Tableau Model output generator class """
 
     def __init__(self, model, api=None, fields=None):
         """Empty attributes to be overriden

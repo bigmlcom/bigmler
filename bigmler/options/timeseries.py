@@ -30,15 +30,15 @@ def int_or_none(value):
     return None
 
 
-def range(value):
+def str_range(value):
     """Creates a range from two comma-separated integers
 
     """
     if "," not in value:
         sys.exit("Failed to parse a comma-separated pair of integers")
     try:
-        min, max = value.split(",")
-        return [int(min), int(max)]
+        min_value, max_value = value.split(",")
+        return [int(min_value), int(max_value)]
     except ValueError:
         sys.exit("Failed to parse a comma-separated pair of integers")
 

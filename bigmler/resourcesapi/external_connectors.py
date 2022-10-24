@@ -69,6 +69,7 @@ def set_external_connector_args(args, name=None):
     return external_connector_args
 
 
+#pylint: disable=locally-disabled,broad-except
 def create_external_connector(external_connector_args, args, api=None,
                               session_file=None, path=None, log=None):
     """Creates remote external connector

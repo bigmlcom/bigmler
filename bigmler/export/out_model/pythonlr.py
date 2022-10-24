@@ -84,9 +84,11 @@ def summary_example(field):
     for key in distribution_keys:
         if key in field["summary"]:
             return repr(field["summary"][key][0][0])
+    return ""
 
 
 class PythonLR(LogisticRegression):
+    """Python logistic regression output generator"""
 
     def plug_in(self, out):
         """Write logistic regression predict method

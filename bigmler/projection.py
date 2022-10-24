@@ -79,7 +79,7 @@ def use_projection_headers(projection_headers, output, test_reader,
     return exclude
 
 
-def write_projection(projection, output=sys.stdout,
+def write_projection(projection_value, output=sys.stdout,
                      input_data=None,
                      exclude=None):
     """Writes the final projection to the required output
@@ -99,7 +99,7 @@ def write_projection(projection, output=sys.stdout,
     if exclude and input_data:
         for index in exclude:
             del row[index]
-    row.extend(projection)
+    row.extend(projection_value)
     try:
         output.writerow(row)
     except AttributeError:

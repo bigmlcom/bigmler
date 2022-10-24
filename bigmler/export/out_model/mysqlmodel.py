@@ -29,7 +29,7 @@ from bigml.generators.model import get_ids_path
 from bigmler.export.out_tree.mysqltree import plug_in_body
 
 class MySQLModel(Model):
-
+    """MySQL model output generator class"""
 
     def __init__(self, model, api=None, fields=None):
         """Empty attributes to be overriden

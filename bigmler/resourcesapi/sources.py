@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+#pylint: disable=locally-disabled,broad-except
 #
 # Copyright 2020-2022 BigML
 #
@@ -284,7 +285,7 @@ def get_source(source, api=None, verbosity=True,
 
 
 def update_source(source, source_args, args,
-                  api=None, session_file=None):
+                  api=None, verbosity=True, session_file=None, log=None):
     """Updates source properties
 
     """
@@ -295,7 +296,7 @@ def update_source(source, source_args, args,
     log_message(message, log_file=session_file,
                 console=args.verbosity)
     source_min = api.get_source(source, query_string=TINY_RESOURCE)
-    if source["object"].get("closed", False):
+    if source_min["object"].get("closed", False):
         message = dated("Source was closed. Cloning %s\n" %
                         get_url(source))
         log_message(message, log_file=session_file,

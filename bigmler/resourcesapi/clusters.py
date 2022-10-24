@@ -70,6 +70,7 @@ def set_cluster_args(args, name=None, fields=None,
     return cluster_args
 
 
+#pylint: disable=locally-disabled,broad-except
 def create_clusters(datasets, cluster_ids, cluster_args,
                     args, api=None, path=None,
                     session_file=None, log=None):
@@ -132,6 +133,7 @@ def create_clusters(datasets, cluster_ids, cluster_args,
     return clusters, cluster_ids
 
 
+#pylint: disable=locally-disabled,broad-except
 def get_clusters(cluster_ids, args, api=None, session_file=None):
     """Retrieves remote clusters in its actual status
 

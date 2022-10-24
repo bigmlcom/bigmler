@@ -56,6 +56,7 @@ SETTINGS = {
     "defaults_file": DEFAULTS_FILE}
 
 
+#pylint: disable=locally-disabled,dangerous-default-value
 def cluster_dispatcher(args=sys.argv[1:]):
     """Parses command line and calls the different processing functions
 

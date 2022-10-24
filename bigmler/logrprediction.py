@@ -36,7 +36,7 @@ from bigmler.resourcesapi.batch_predictions import create_batch_prediction
 from bigmler.prediction import use_prediction_headers
 
 
-def write_prediction(prediction, output=sys.stdout,
+def write_prediction(prediction_dict, output=sys.stdout,
                      prediction_info=NORMAL_FORMAT, input_data=None,
                      exclude=None):
     """Writes the final prediction to the required output
@@ -58,10 +58,10 @@ def write_prediction(prediction, output=sys.stdout,
         if exclude:
             for index in exclude:
                 del row[index]
-    row.append(prediction.get('prediction'))
-    if 'probability' in prediction and \
+    row.append(prediction_dict.get('prediction'))
+    if 'probability' in prediction_dict and \
             prediction_info in [NORMAL_FORMAT, FULL_FORMAT]:
-        row.append(prediction.get('probability'))
+        row.append(prediction_dict.get('probability'))
     try:
         output.writerow(row)
     except AttributeError:

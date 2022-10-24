@@ -23,7 +23,6 @@ import sys
 import os
 import datetime
 import json
-import tempfile
 
 from io import StringIO
 
@@ -1146,8 +1145,8 @@ def transform_args(command_args, flags, api):
                 and not command_args.method in list(COMBINATION_WEIGHTS.keys())):
             command_args.method = 0
         else:
-            combiner_methods = dict(
-                [[value, key] for key, value in list(COMBINER_MAP.items())])
+            combiner_methods = {
+                value: key for key, value in list(COMBINER_MAP.items())}
             combiner_methods[COMBINATION_LABEL] = COMBINATION
             command_args.method = combiner_methods.get(command_args.method, 0)
     except AttributeError:
@@ -1261,7 +1260,7 @@ def transform_args(command_args, flags, api):
         (hasattr(command_args, 'json_query') and
          command_args.json_query))
 
-
+#pylint: disable=locally-disabled,broad-except
 def transform_dataset_options(command_args, api):
     """Retrieves the dataset ids from the different input options
 

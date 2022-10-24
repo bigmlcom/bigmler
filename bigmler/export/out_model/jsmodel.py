@@ -42,6 +42,7 @@ TERM_TEMPLATE = "%s/static/out_model/term_analysis.js" % BIGMLER_SCRIPT
 ITEMS_TEMPLATE = "%s/static/out_model/items_analysis.js" % BIGMLER_SCRIPT
 
 class JsModel(Model):
+    """Javascript model output generator class"""
 
     def __init__(self, model, api=None, fields=None):
 
@@ -182,13 +183,13 @@ class JsModel(Model):
 
             body += """
     var TERM_FORMS = {"""
-            for field in term_forms:
+            for field_name, field_terms in term_forms.items():
                 body += """
-        \"%s\": {""" % field
-                terms = sorted(term_forms[field].keys())
+        \"%s\": {""" % field_name
+                terms = sorted(field_terms.keys())
                 for term in terms:
                     terms_list = "[\"" + \
-                        "\", \"".join(term_forms[field][term]) + "\"]"
+                        "\", \"".join(field_terms[term]) + "\"]"
                     body += """
             \"%s\": %s,""" % (term, terms_list)
                 body += """

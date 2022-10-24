@@ -83,6 +83,7 @@ def set_linear_regression_args(args, name=None, fields=None,
     return linear_regression_args
 
 
+#pylint: disable=locally-disabled,broad-except
 def create_linear_regressions(datasets, linear_regression_ids,
                               linear_regression_args,
                               args, api=None, path=None,
@@ -168,6 +169,7 @@ def create_linear_regressions(datasets, linear_regression_ids,
     return linear_regressions, linear_regression_ids
 
 
+#pylint: disable=locally-disabled,broad-except
 def get_linear_regressions(linear_regression_ids,
                            args, api=None, session_file=None):
     """Retrieves remote linear regression in its actual status

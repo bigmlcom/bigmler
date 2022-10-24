@@ -41,6 +41,7 @@ DIRS_LOG = ".bigmler_analyze_dir_stack"
 LOG_FILES = [COMMAND_LOG, DIRS_LOG, u.NEW_DIRS_LOG]
 
 
+#pylint: disable=locally-disabled,dangerous-default-value
 def analyze_dispatcher(args=sys.argv[1:]):
     """Main processing of the parsed options for BigMLer analyze
 

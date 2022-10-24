@@ -95,6 +95,7 @@ def set_logistic_regression_args(args, name=None, fields=None,
     return logistic_regression_args
 
 
+#pylint: disable=locally-disabled,broad-except
 def create_logistic_regressions(datasets, logistic_regression_ids,
                                 logistic_regression_args,
                                 args, api=None, path=None,
@@ -179,6 +180,7 @@ def create_logistic_regressions(datasets, logistic_regression_ids,
     return logistic_regressions, logistic_regression_ids
 
 
+#pylint: disable=locally-disabled,broad-except
 def get_logistic_regressions(logistic_regression_ids,
                              args, api=None, session_file=None):
     """Retrieves remote logistic regression in its actual status

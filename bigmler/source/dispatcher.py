@@ -23,15 +23,12 @@ import sys
 import os
 
 import bigml.api
-from bigml.fields import Fields
 
 import bigmler.utils as u
-import bigmler.labels as l
 import bigmler.processing.args as a
 import bigmler.processing.sources as ps
 
 from bigmler.defaults import DEFAULTS_FILE
-from bigmler.reports import clear_reports, upload_reports
 from bigmler.command import get_context
 from bigmler.dispatcher import SESSIONS_LOG, clear_log_files
 
@@ -48,6 +45,7 @@ SETTINGS = {
     "defaults_file": DEFAULTS_FILE}
 
 
+#pylint: disable=locally-disabled,dangerous-default-value
 def source_dispatcher(args=sys.argv[1:]):
     """Parses command line and calls the different processing functions
 

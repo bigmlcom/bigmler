@@ -18,8 +18,6 @@
 """
 
 
-import datetime
-
 def get_common_options(defaults=None, constants=None):
     """Common options used in all subcommands
 

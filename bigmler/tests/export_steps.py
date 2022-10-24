@@ -110,6 +110,9 @@ def i_check_if_the_output_is_like_expected_file(step, language, expected_file):
         try:
             name, extension = expected_file.split(".")
             expected_file = "%s_p3.%s" % (name, extension)
+            out_file = "%s.%s.out" % (name, extension)
+            with open(res_filename(out_file), "w") as writer:
+                writer.write(output)
             with open(res_filename(expected_file)) as file_handler:
                 expected_content = extract_content(file_handler)
         except IOError:

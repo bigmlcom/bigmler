@@ -108,7 +108,8 @@ def clear_log_files(log_files):
     """
     for log_file in log_files:
         try:
-            open(log_file, 'wb', 0).close()
+            with open(log_file, 'wb', 0):
+                pass
         except IOError:
             pass
 
@@ -176,6 +177,7 @@ def check_args_coherence(args):
                " instead.")
 
 
+#pylint: disable=locally-disabled,dangerous-default-value
 def main_dispatcher(args=sys.argv[1:]):
     """Parses command line and calls the different processing functions
 
@@ -348,6 +350,7 @@ def compute_output(api, args):
     # Check if the dataset has a generators file associated with it, and
     # generate a new dataset with the specified field structure. Also
     # if the --to-dataset flag is used to clone or sample the original dataset
+    #pylint: disable=locally-disabled,too-many-boolean-expressions
     if args.new_fields or (args.sample_rate != 1 and args.no_model) or \
             (args.lisp_filter or args.json_filter) and not has_source(args):
         if fields is None:
@@ -475,7 +478,6 @@ def compute_output(api, args):
         fields = pm.get_model_fields(
             model, csv_properties, args, single_model=single_model,
             multi_label_data=multi_label_data)
-        args._model_fields = fields # storing the model fields to decide
         # how to handle test data
         #
         # Free memory after getting fields

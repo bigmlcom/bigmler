@@ -25,10 +25,11 @@ import datetime
 import shutil
 
 import bigml.api
-import bigmler.utils as u
-import bigmler.processing.args as a
 
 from bigml.api import get_resource_type
+
+import bigmler.utils as u
+import bigmler.processing.args as a
 
 from bigmler.defaults import DEFAULTS_FILE
 from bigmler.command import get_stored_command, command_handling
@@ -105,10 +106,12 @@ def retrieve_resources(directory):
         for root, _, files in os.walk(directory):
             for resources_file in files:
                 if resources_file in RESOURCES_LOG_FILES:
-                    for line in open(os.path.join(root, resources_file)):
-                        resource_id = bigml.api.get_resource_id(line.strip())
-                        if resource_id is not None:
-                            log_ids.append(resource_id)
+                    with open(os.path.join(root, resources_file)) as reader:
+                        for line in reader:
+                            resource_id = bigml.api.get_resource_id(
+                                line.strip())
+                            if resource_id is not None:
+                                log_ids.append(resource_id)
     return list(set(log_ids))
 
 
@@ -299,8 +302,8 @@ def filtered_selectors(args, api):
         ("script", args.script_tag, api.list_scripts, None),
         ("library", args.library_tag, api.list_libraries, None)]
 
-    if args.all_tag is None and any([resource[1] is not None for resource in
-                                     resource_selectors]):
+    if args.all_tag is None and any(resource[1] is not None for resource in
+                                     resource_selectors):
         # choose which selectors by tag are used and keep only these
         # selected by resource_tag
         resource_selectors = [resource for resource in resource_selectors if
@@ -313,6 +316,7 @@ def filtered_selectors(args, api):
     return selectors
 
 
+#pylint: disable=locally-disabled,dangerous-default-value
 def delete_dispatcher(args=sys.argv[1:]):
     """Parses command line and calls the different processing functions
 
@@ -424,9 +428,9 @@ def delete_resources(command_args, api, deleted_list=None):
         if resource_id not in deleted_list]
     # if there are projects or executions, delete them first
     bulk_deletion = not command_args.bin and not command_args.dry_run and \
-        any([resource_id.startswith("project/") or \
+        any(resource_id.startswith("project/") or \
         (not command_args.execution_only and \
-         resource_id.startswith("execution/")) for resource_id in delete_list])
+         resource_id.startswith("execution/")) for resource_id in delete_list)
     aprox = "*" if bulk_deletion else ""
     # if bulk_deletion, keep only the project and executions resources in
     # the deletion list

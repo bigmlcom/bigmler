@@ -54,6 +54,7 @@ SETTINGS = {
     "defaults_file": DEFAULTS_FILE}
 
 
+#pylint: disable=locally-disabled,dangerous-default-value
 def time_series_dispatcher(args=sys.argv[1:]):
     """Parses command line and calls the different processing functions
 
@@ -180,14 +181,6 @@ def compute_output(api, args):
                     api=api, path=path, \
                     session_file=session_file)
                 time_series_set[0] = time_series
-
-    """
-    # We get the fields of the time-series if we haven't got
-    # them yet and need them
-    if time_series and (args.test_set or args.export_fields):
-        fields = pts.get_time_series_fields( \
-            time_series, csv_properties, args)
-    """
 
     if fields and args.export_fields:
         fields.summary_csv(os.path.join(path, args.export_fields))

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+#pylint: disable=locally-disabled,unused-import
 #
 # Copyright 2020-2022 BigML
 #
@@ -93,7 +94,7 @@ def configure_input_fields(fields, user_given_fields, by_name=False):
             input_fields.remove(field)
 
     # case of adding and removing fields to the dataset preferred field set
-    if all([name[0] in ADD_REMOVE_PREFIX for name in user_given_fields]):
+    if all(name[0] in ADD_REMOVE_PREFIX for name in user_given_fields):
         preferred_fields = fields.preferred_fields()
         input_fields = list(preferred_fields.keys())
         if by_name:
@@ -169,7 +170,7 @@ def relative_input_fields(fields, user_given_fields):
     """
 
     input_fields = []
-    if all([(name[0] in ADD_REMOVE_PREFIX) for name in user_given_fields]):
+    if all((name[0] in ADD_REMOVE_PREFIX) for name in user_given_fields):
         return user_given_fields
 
     preferred_fields = fields.preferred_fields()

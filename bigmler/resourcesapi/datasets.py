@@ -134,6 +134,7 @@ def set_dataset_split_args(name, description, args, sample_rate=1,
     return dataset_args
 
 
+#pylint: disable=locally-disabled,broad-except
 def create_dataset(origin_resource, dataset_args, args, api=None,
                    path=None, session_file=None, log=None, dataset_type=None):
     """Creates remote dataset from source, dataset, cluster or datasets list
@@ -149,6 +150,7 @@ def create_dataset(origin_resource, dataset_args, args, api=None,
     # the datasets, we create default naming to A, B, C, etc. for the datasets
     # to be used as origin
 
+    #pylint: disable=locally-disabled,too-many-boolean-expressions
     if ((hasattr(args, 'sql_query') and args.sql_query) or \
             (hasattr(args, 'json_query') and args.sql_query)) and \
             isinstance(origin_resource, list) and \

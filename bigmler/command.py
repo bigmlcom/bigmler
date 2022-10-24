@@ -23,7 +23,7 @@
 import os
 import shlex
 import shutil
-
+import re
 
 
 from bigml.multivote import PLURALITY
@@ -74,11 +74,11 @@ def tail(file_handler, window=1):
 
 
 def get_log_reversed(file_name, stack_level):
-    """Reads the line of a log file that has the chosen stack_level
-
-    """
-    lines_list = tail(open(file_name, "r"), window=(stack_level + 1))
-    return lines_list[0].decode(u.BIGML_SYS_ENCODING)
+    """Reads the line of a log file that has the chosen stack_level """
+    with open(file_name, "r") as handler:
+        lines_list = tail(handler, window=(stack_level + 1))
+        return lines_list[0].decode(u.BIGML_SYS_ENCODING)
+    return ""
 
 
 def get_stored_command(args, debug=False, command_log=COMMAND_LOG,
@@ -114,6 +114,18 @@ def command_handling(args, log=COMMAND_LOG):
 
     return command
 
+
+def different_command(next_command, command):
+    """Checks difference between commands"""
+    if next_command == command:
+        return False
+    if 'name=BigMLer_' in command:
+        # the difference may be due to the timestamp of default name
+        # parameter
+        pattern = re.compile(r'name=Bigmler_[^\s]+')
+        return re.sub(pattern, "", next_command) == re.sub(pattern,
+                                                           "", command)
+    return False
 
 
 def get_context(args, settings):

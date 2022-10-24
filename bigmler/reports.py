@@ -225,7 +225,8 @@ def evaluations_report(args):
     for _, directories, _ in os.walk(path):
         for directory in directories:
             file_name = os.path.join(path, directory, CROSS_VALIDATION_FILE)
-            kfold_evaluation = json.load(open(file_name))
+            with open(file_name) as handler:
+                kfold_evaluation = json.load(handler)
             kfold_evaluation['name'] = directory.replace('kfold', '#')
             evaluation = kfold_evaluation
             command = get_command_line(os.path.join(path, directory))
@@ -260,13 +261,16 @@ def evaluations_report(args):
     check_subdir(args.from_dir, REPORTS_DIR)
     check_subdir(os.path.join(args.from_dir, REPORTS_DIR), ANALYZE_DIR)
     # generate summary of metrics values
-    json.dump(sorted(metrics, key=lambda x: x['time']),
-              open(os.path.join(args.from_dir, REPORTS_DIR,
-                                ANALYZE_DIR, METRICS_FILE), "w"))
+    with open(os.path.join(
+            args.from_dir,
+            REPORTS_DIR,
+            ANALYZE_DIR,
+            METRICS_FILE), "w") as handler:
+        json.dump(sorted(metrics, key=lambda x: x['time']), handler)
     # generate list of evaluations
-    json.dump(evaluations_json,
-              open(os.path.join(args.from_dir, REPORTS_DIR, ANALYZE_DIR,
-                                EVALUATIONS_JSON_FILE), "w"))
+    with open(os.path.join(args.from_dir, REPORTS_DIR, ANALYZE_DIR,
+                           EVALUATIONS_JSON_FILE), "w") as handler:
+        json.dump(evaluations_json, handler)
 
     # checks the global server directories
     check_subdir(HOME, SERVER_DIRECTORY.split(os.sep)[0])
@@ -282,6 +286,7 @@ def evaluations_report(args):
     dirname = os.path.join(HOME, SERVER_DIRECTORY)
     # current_directory = os.getcwd()
     os.chdir(dirname)
+    #pylint: disable=locally-disabled,consider-using-with
     symlink = tempfile.NamedTemporaryFile(dir=dirname).name
     try:
         os.symlink(base_destination_dir, symlink)
@@ -337,6 +342,7 @@ def parse_test_feature(command):
     random_candidates = pattern.findall(command)
     if random_candidates:
         return ("random_candidates", random_candidates[0])
+    return (None, None)
 
 
 REPORTS = {'gazibit': add_gazibit_links}

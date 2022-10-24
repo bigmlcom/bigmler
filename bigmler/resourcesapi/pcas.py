@@ -70,6 +70,7 @@ def set_pca_args(args, name=None, fields=None,
     return pca_args
 
 
+#pylint: disable=locally-disabled,broad-except
 def create_pca(datasets, pca, pca_args,
                args, api=None, path=None,
                session_file=None, log=None):
@@ -143,6 +144,7 @@ def create_pca(datasets, pca, pca_args,
     return pca
 
 
+#pylint: disable=locally-disabled,broad-except
 def get_pca(pca,
             args, api=None, session_file=None):
     """Retrieves remote pca in its actual status

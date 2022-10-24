@@ -72,9 +72,10 @@ def missing_prefix_code(tree, fields, field, cmv):
     connection = "||" if missing else "&&"
     if not missing:
         cmv.append(fields[field]['dotted'])
-    return "%s%s %s NA %s " % (fields[field]['dotted'],
+    return "%s%s %s is.na(%s) " % (fields[field]['dotted'],
                                operator,
-                               connection)
+                               connection,
+                               fields[field]['dotted'])
 
 def split_condition_code(tree, fields, field, depth,
                          pre_condition, term_analysis_fields,

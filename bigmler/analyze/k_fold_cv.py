@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+#pylint: disable=locally-disabled,global-statement,invalid-name
 #
 # Copyright 2012-2022 BigML
 #
@@ -21,12 +22,9 @@
 
 """
 
-
-
 import os
 import sys
 import json
-import re
 
 from copy import copy
 
@@ -39,6 +37,7 @@ import bigmler.processing.args as a
 import bigmler.utils as u
 
 from bigmler.dispatcher import main_dispatcher
+from bigmler.command import different_command
 from bigmler.options.analyze import ACCURACY, MINIMIZE_OPTIONS
 from bigmler.resourcesapi.common import ALL_FIELDS_QS
 
@@ -118,6 +117,7 @@ NODES_HEADER = ["step", "node_threshold", "score", "metric_value",
 CANDIDATES_HEADER = ["step", "random_candidates", "score", "metric_value",
                      "best_score"]
 
+
 subcommand_list = []
 subcommand_file = None
 session_file = None
@@ -138,7 +138,8 @@ def retrieve_subcommands():
 
     """
     global subcommand_list
-    subcommand_list = open(subcommand_file, u.open_mode("r")).readlines()
+    with open(subcommand_file, u.open_mode("r")) as handler:
+        subcommand_list = handler.readlines()
     subcommand_list.reverse()
 
 
@@ -149,19 +150,7 @@ def rebuild_command(args):
     return "%s\n" % (" ".join(args)).replace("\\", "\\\\")
 
 
-def different_command(next_command, command):
-    if next_command == command:
-        return False
-    else:
-        if 'name=BigMLer_' in command:
-            # the difference may be due to the timestamp of default name
-            # parameter
-            pattern = re.compile(r'name=Bigmler_[^\s]+')
-            return re.sub(pattern, "", next_command) == re.sub(pattern,
-                                                               "", command)
-        return False
-
-
+#pylint: disable=locally-disabled,global-variable-not-assigned
 def create_prediction_dataset(base_path, folder, args, resume):
     """Creates batch prediction datasets and a multidataset with the prediction
     results for the best scoring model in the folder set by the argument
@@ -396,13 +385,14 @@ def avoid_duplicates(field_name, fields, affix="_"):
     """Checks if a field name already exists in a fields structure.
 
     """
-    if any([field['name'] == field_name
-            for _, field in list(fields.fields.items())]):
+    if any(field['name'] == field_name
+           for _, field in list(fields.fields.items())):
         return avoid_duplicates("%s%s%s" % (affix, field_name, affix),
                                 fields, affix=affix)
     return field_name
 
 
+#pylint: disable=locally-disabled,global-variable-not-assigned
 def create_kfold_datasets(dataset, args,
                           selecting_file_list,
                           command_obj, resume=False):
@@ -413,10 +403,9 @@ def create_kfold_datasets(dataset, args,
     output_dir = args.output_dir
     global subcommand_list
     # creating the selecting datasets
-    for index in range(0, len(selecting_file_list)):
+    for selected_file in selecting_file_list:
         command = COMMANDS["selection"] % (
-            dataset, selecting_file_list[index],
-            output_dir)
+            dataset, selected_file, output_dir)
         command_args = command.split()
         command_obj.propagate(command_args)
         command = rebuild_command(command_args)
@@ -481,6 +470,7 @@ def add_model_options(command_args, args):
     return command_args
 
 
+#pylint: disable=locally-disabled,global-variable-not-assigned
 def create_kfold_evaluations(datasets_file, args, command_obj,
                              resume=False, counter=0):
     """ Create k-fold cross-validation from a datasets file
@@ -507,11 +497,6 @@ def create_kfold_evaluations(datasets_file, args, command_obj,
     command_args.append("--objective")
     command_args.append(args.objective_field)
     command_args = add_model_options(command_args, args)
-    """
-    common_options_list = u.get_options_list(args, command_obj.common_options,
-                                             prioritary=command_args)
-    command_args.extend(common_options_list)
-    """
     command_obj.propagate(command_args, exclude=["--dataset",
                                                  "--datasets",
                                                  "--dataset-file"])
@@ -539,7 +524,7 @@ def create_kfold_evaluations(datasets_file, args, command_obj,
 
 
 def find_max_state(states_list):
-
+    """Finding the best metric value"""
     max_state, max_score, max_metric_value, max_counter = (
         None, - float('inf'), - float('inf'), 0)
     for (state, score, metric_value, counter) in states_list:
@@ -1052,11 +1037,6 @@ def create_candidates_evaluations(datasets_file, args, command_obj,
     command = COMMANDS["random_candidates"] % (
         datasets_file, random_candidates, output_dir)
     command_args = command.split()
-    """
-    common_options_list = u.get_options_list(args, command_obj.common_options,
-                                             prioritary=command_args)
-    command_args.extend(common_options_list)
-    """
     command_args.append("--objective")
     command_args.append(args.objective_field)
     command_args = add_model_options(command_args, args)

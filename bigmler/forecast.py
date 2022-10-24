@@ -32,7 +32,7 @@ import bigmler.checkpoint as c
 from bigmler.resourcesapi.forecasts import create_forecast
 
 
-def write_forecasts(forecast, output):
+def write_forecasts(forecast_dict, output):
     """Writes the final forecast to the required output
 
     The function creates a new file per field used in the forecast input data.
@@ -40,7 +40,7 @@ def write_forecasts(forecast, output):
     parameter.
     """
 
-    for objective_id, forecast_value in list(forecast.items()):
+    for objective_id, forecast_value in list(forecast_dict.items()):
         headers = [f["model"] for f in forecast_value]
         points = []
         if not forecast_value:
@@ -89,7 +89,7 @@ def remote_forecast(time_series,
     # if resuming, try to extract dataset form log files
     if resume:
         message = u.dated("Forecast not found. Resuming.\n")
-        resume, forecast = c.checkpoint(
+        resume, forecast_dict = c.checkpoint(
             c.is_forecast_created, path, debug=args.debug,
             message=message, log_file=session_file, console=args.verbosity)
     if not resume:
@@ -102,8 +102,8 @@ def remote_forecast(time_series,
             input_data = {local_time_series.objective_id: { \
                 "horizon": args.horizon}}
 
-        forecast = create_forecast(
+        forecast_dict = create_forecast(
             time_series_id, input_data, forecast_args,
             args, api, session_file=session_file, path=path, log=log)
 
-        write_forecasts(forecast["object"]["forecast"]["result"], output)
+        write_forecasts(forecast_dict["object"]["forecast"]["result"], output)

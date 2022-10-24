@@ -42,6 +42,7 @@ SETTINGS = {
     "dirs_log": DIRS_LOG}
 
 
+#pylint: disable=locally-disabled,dangerous-default-value
 def whizzml_dispatcher(args=sys.argv[1:]):
     """Main processing of the parsed options for BigMLer whizzml
 

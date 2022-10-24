@@ -133,14 +133,12 @@ def read_json(path):
     """
     json_attributes = {}
     try:
-        attributes_reader = open(path, open_mode('r'))
+        with open(path, open_mode('r')) as attributes_reader:
+            json_attributes = json.load(attributes_reader)
     except IOError:
         sys.exit("Error: cannot read json file %s" % path)
-    try:
-        json_attributes = json.loads(attributes_reader.read())
     except ValueError:
         sys.exit("Error: no valid json found in %s" % path)
-    attributes_reader.close()
     return json_attributes
 
 
@@ -254,20 +252,19 @@ def read_votes_files(dirs_list, path):
     """
     file_name = "%s%scombined_predictions" % (path, os.sep)
     check_dir(file_name)
-    group_predictions = open(file_name, "wb", 0)
-    current_directory = os.getcwd()
-    predictions_files = []
-    for directory in dirs_list:
-        directory = os.path.abspath(directory)
-        os.chdir(directory)
-        for predictions_file in glob.glob("model_*_predictions.csv"):
-            predictions_files.append("%s%s%s" % (os.getcwd(),
-                                                 os.sep, predictions_file))
-            message = "%s\n" % predictions_file
-            message = message.encode(FILE_ENCODING)
-            group_predictions.write(message)
-        os.chdir(current_directory)
-    group_predictions.close()
+    with open(file_name, "wb", 0) as group_predictions:
+        current_directory = os.getcwd()
+        predictions_files = []
+        for directory in dirs_list:
+            directory = os.path.abspath(directory)
+            os.chdir(directory)
+            for predictions_file in glob.glob("model_*_predictions.csv"):
+                predictions_files.append("%s%s%s" % (os.getcwd(),
+                                                     os.sep, predictions_file))
+                message = "%s\n" % predictions_file
+                message = message.encode(FILE_ENCODING)
+                group_predictions.write(message)
+            os.chdir(current_directory)
     return predictions_files
 
 
@@ -373,6 +370,7 @@ def check_dir(path):
     return directory
 
 
+#pylint: disable=locally-disabled,anomalous-backslash-in-string
 def print_tree(directory, padding):
     """Returns a graphical directory tree structure as a string
 
@@ -501,7 +499,7 @@ def log_created_resources(file_name, path, resource_id, mode='ab',
         except IOError as exc:
             print("Failed to write %s: %s" % (file_name, str(exc)))
 
-
+#pylint: disable=locally-disabled,broad-except
 def check_resource(*args, **kwargs):
     """Wrapper to catch errors in resource retrieval
 

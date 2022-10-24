@@ -64,6 +64,7 @@ def check_delete_option(args):
     return args
 
 
+#pylint: disable=locally-disabled,dangerous-default-value
 def main(args=sys.argv[1:]):
     """Main process
 

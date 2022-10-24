@@ -90,6 +90,7 @@ def set_time_series_args(args, name=None, fields=None,
     return time_series_args
 
 
+#pylint: disable=locally-disabled,broad-except
 def create_time_series(datasets, time_series_ids,
                        time_series_args,
                        args, api=None, path=None,
@@ -166,6 +167,7 @@ def create_time_series(datasets, time_series_ids,
     return time_series_set, time_series_ids
 
 
+#pylint: disable=locally-disabled,broad-except
 def get_time_series(time_series_ids,
                     args, api=None, session_file=None):
     """Retrieves remote time-series in its actual status

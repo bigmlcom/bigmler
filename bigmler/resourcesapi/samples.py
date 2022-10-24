@@ -46,6 +46,7 @@ def set_sample_args(args, name=None):
     return sample_args
 
 
+#pylint: disable=locally-disabled,broad-except
 def create_samples(datasets, sample_ids, sample_args,
                    args, api=None, path=None,
                    session_file=None, log=None):
@@ -132,6 +133,7 @@ def update_sample(sample, sample_args, args,
     return sample
 
 
+#pylint: disable=locally-disabled,broad-except
 def get_samples(sample_ids, args,
                 api=None, session_file=None, query_string=''):
     """Retrieves remote samples in its actual status

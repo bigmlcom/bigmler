@@ -396,7 +396,8 @@ def get_user_defaults(defaults_file=DEFAULTS_FILE):
     if defaults_file is None:
         defaults_file = DEFAULTS_FILE
     try:
-        open(defaults_file).close()
+        with open(defaults_file):
+            pass
         config = configparser.ConfigParser()
         config.read(defaults_file)
         defaults = parse_user_defaults(config)
@@ -416,9 +417,9 @@ def parse_user_defaults(config):
                   'int': config.getint,
                   'string': config.get}
     defaults = {}
-    for section in FLAGS:
+    for section, flag in FLAGS.items():
         defaults[section] = {}
-        for argument in FLAGS[section]:
+        for argument in flag:
             try:
                 value = config_get[argument['type']](section,
                                                      argument['flag'])

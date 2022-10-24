@@ -179,7 +179,7 @@ def prediction_to_row(prediction, prediction_info=NORMAL_FORMAT):
     return row
 
 
-def combine_votes(votes_files, to_prediction, to_file, method=0,
+def combine_votes(votes_files, to_prediction_method, to_file, method=0,
                   prediction_info=NORMAL_FORMAT, input_data_list=None,
                   exclude=None):
     """Combines the votes found in the votes' files and stores predictions.
@@ -189,7 +189,7 @@ def combine_votes(votes_files, to_prediction, to_file, method=0,
                       type if needed
        to_file: is the name of the final output file.
     """
-    votes = read_votes(votes_files, to_prediction)
+    votes = read_votes(votes_files, to_prediction_method)
 
     u.check_dir(to_file)
     with UnicodeWriter(to_file) as output:
@@ -456,7 +456,7 @@ def combine_multivote(multivote, other_label=OTHER):
         prediction = [None, None]
     return prediction
 
-
+#pylint: disable=locally-disabled,consider-using-with
 def local_batch_predict(models, test_reader, prediction_file, api, args,
                         resume=False, output_path=None, output=None,
                         method=PLURALITY_CODE, options=None,
@@ -536,8 +536,7 @@ def local_batch_predict(models, test_reader, prediction_file, api, args,
             if not args.fast:
                 votes = local_model.batch_votes(output_path)
             models_count += max_models
-            if models_count > models_total:
-                models_count = models_total
+            models_count = min(models_count, models_total)
             if args.verbosity:
                 draw_progress_bar(models_count, models_total)
 

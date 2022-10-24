@@ -26,7 +26,6 @@ import os
 
 from bigml.util import get_csv_delimiter, is_image
 from bigml.io import UnicodeReader
-from bigml.constants import IMAGE_EXTENSIONS
 
 from bigmler.utils import BIGML_SYS_ENCODING
 from bigmler.checkpoint import file_number_of_lines
@@ -34,11 +33,16 @@ from bigmler.utf8recoder import UTF8Recoder
 from bigmler.folderreader import FolderReader
 
 
+def is_csv(filename):
+    """Checking if the file is a CSV"""
+    return os.path.exists(filename) and os.path.splitext(
+        filename)[1].replace(".", "").lower() == "csv"
+
+
 def contains_csv(folder):
     """Checking whether a folder contains a CSV file"""
     files = os.listdir(folder)
-    return any(os.path.splitext(filename)[1].replace(".", "").lower() == "csv"
-               for filename in files)
+    return any(is_csv(filename) for filename in files)
 
 
 class TstReader():
@@ -87,7 +91,8 @@ class TstReader():
                                if test_separator is not None
                                else get_csv_delimiter())
 
-        if self.image_fields and len(self.image_fields) == 1 \
+        if not is_csv(self.test_set) and \
+                self.image_fields and len(self.image_fields) == 1 \
                 and not contains_csv(self.test_set):
             # The test_set points to a directory where images are stored.
             # Only images are read.

@@ -49,6 +49,7 @@ def set_script_args(args, name=None):
     return script_args
 
 
+#pylint: disable=locally-disabled,broad-except
 def create_script(source_code, script_args, args, api=None, path=None,
                   session_file=None, log=None):
     """Creates remote script
@@ -73,6 +74,7 @@ def create_script(source_code, script_args, args, api=None, path=None,
     return script
 
 
+#pylint: disable=locally-disabled,broad-except
 def get_script(script, api=None, verbosity=True,
                session_file=None):
     """Retrieves the script in its actual state

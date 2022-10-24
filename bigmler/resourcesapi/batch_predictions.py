@@ -97,6 +97,7 @@ def set_batch_prediction_args(args, fields=None,
     return batch_prediction_args
 
 
+#pylint: disable=locally-disabled,broad-except
 def create_batch_prediction(model_or_ensemble, test_dataset,
                             batch_prediction_args, args,
                             api=None, session_file=None,

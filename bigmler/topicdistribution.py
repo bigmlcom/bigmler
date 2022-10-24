@@ -116,6 +116,7 @@ def topic_distribution_to_row(topic_distribution_resource):
     return [topic_distribution_resource['object']['topic_distribution']]
 
 
+#pylint: disable=locally-disabled,broad-except
 def local_topic_distribution(topic_models, test_reader, output, args,
                              exclude=None, headers=None):
     """Get local topic model and issue topic distribution prediction

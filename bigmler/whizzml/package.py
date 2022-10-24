@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+#pylint: disable=locally-disabled,global-statement,invalid-name
 #
 # Copyright 2016-2022 BigML
 #
@@ -26,12 +27,13 @@
 import os
 import sys
 import json
-import re
+
 
 import bigml
 
 import bigmler.utils as u
 
+from bigmler.command import different_command
 from bigmler.execute.dispatcher import execute_dispatcher
 
 COMMANDS = {"script":
@@ -75,7 +77,8 @@ def retrieve_subcommands():
 
     """
     global subcommand_list
-    subcommand_list = open(subcommand_file, u.open_mode("r")).readlines()
+    with open(subcommand_file, u.open_mode("r")) as reader:
+        subcommand_list = reader.readlines()
     subcommand_list.reverse()
 
 
@@ -84,18 +87,6 @@ def rebuild_command(args):
 
     """
     return "%s\n" % (" ".join(args)).replace("\\", "\\\\")
-
-
-def different_command(next_command, command):
-    if next_command == command:
-        return False
-    if 'name=BigMLer_' in command:
-        # the difference may be due to the timestamp of default name
-        # parameter
-        pattern = re.compile(r'name=Bigmler_[^\s]+')
-        return re.sub(pattern, "", next_command) == re.sub(pattern,
-                                                           "", command)
-    return False
 
 
 def read_library_id(path):

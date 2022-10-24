@@ -162,6 +162,7 @@ def dataset_processing(source, api, args, resume,
     # If we have a source but no dataset or model has been provided, we
     # create a new dataset if the no_dataset option isn't set up. Also
     # if evaluate is set and test_set has been provided.
+    #pylint: disable=locally-disabled,too-many-boolean-expressions
     if ((source and not args.has_datasets_ and not args.has_models_
          and not args.no_dataset) or
             (hasattr(args, "evaluate") and args.evaluate and
@@ -173,8 +174,7 @@ def dataset_processing(source, api, args, resume,
 
     # If set of datasets is provided, let's check their ids.
     elif args.dataset_ids:
-        for i in range(0, len(args.dataset_ids)):
-            dataset_id = args.dataset_ids[i]
+        for dataset_id in args.dataset_ids:
             if isinstance(dataset_id, dict) and "id" in dataset_id:
                 dataset_id = dataset_id["id"]
             datasets.append(bigml.api.get_dataset_id(dataset_id))
