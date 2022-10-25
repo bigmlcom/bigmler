@@ -71,7 +71,6 @@ def set_batch_anomaly_score_args(args, fields=None,
     return batch_anomaly_score_args
 
 
-#pylint: disable=locally-disabled,broad-except
 def create_batch_anomaly_score(anomaly, test_dataset,
                                batch_anomaly_score_args, args,
                                api=None, session_file=None,

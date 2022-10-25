@@ -125,7 +125,6 @@ def local_centroid(clusters, test_reader, output, args,
     """
     # Only one cluster at present
     local_cluster = Cluster(clusters[0], api=args.retrieve_api_)
-    #pylint: disable=locally-disabled,broad-except
     for input_data in test_reader:
         input_data_dict = test_reader.dict(input_data, filtering=False)
         try:

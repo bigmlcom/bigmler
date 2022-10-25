@@ -50,7 +50,6 @@ def set_fusion_args(args, name=None, fields=None):
     return fusion_args
 
 
-#pylint: disable=locally-disabled,broad-except
 def create_fusion(models, fusion, fusion_args,
                   args, api=None, path=None,
                   session_file=None, log=None):
@@ -113,7 +112,6 @@ def create_fusion(models, fusion, fusion_args,
     return fusion
 
 
-#pylint: disable=locally-disabled,broad-except
 def get_fusion(fusion,
                args, api=None, session_file=None):
     """Retrieves remote fusion in its actual status

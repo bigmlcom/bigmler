@@ -134,7 +134,6 @@ def set_dataset_split_args(name, description, args, sample_rate=1,
     return dataset_args
 
 
-#pylint: disable=locally-disabled,broad-except
 def create_dataset(origin_resource, dataset_args, args, api=None,
                    path=None, session_file=None, log=None, dataset_type=None):
     """Creates remote dataset from source, dataset, cluster or datasets list

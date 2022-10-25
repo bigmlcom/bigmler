@@ -1260,7 +1260,7 @@ def transform_args(command_args, flags, api):
         (hasattr(command_args, 'json_query') and
          command_args.json_query))
 
-#pylint: disable=locally-disabled,broad-except
+
 def transform_dataset_options(command_args, api):
     """Retrieves the dataset ids from the different input options
 

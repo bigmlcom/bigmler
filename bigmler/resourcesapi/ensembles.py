@@ -208,7 +208,6 @@ def create_ensembles(datasets, ensemble_ids, ensemble_args, args,
     return ensembles, ensemble_ids, models, model_ids
 
 
-#pylint: disable=locally-disabled,broad-except
 def retrieve_ensembles_models(ensembles, api, path=None):
     """Retrieves the models associated to a list of ensembles
 

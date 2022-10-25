@@ -42,7 +42,6 @@ def set_project_args(args, name=None):
     return project_args
 
 
-#pylint: disable=locally-disabled,broad-except
 def create_project(project_args, args, api=None,
                    session_file=None, path=None, log=None):
     """Creates remote project

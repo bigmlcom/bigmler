@@ -51,7 +51,6 @@ def set_execution_args(args, name=None):
     return execution_args
 
 
-#pylint: disable=locally-disabled,broad-except
 def create_execution(execution_args, args, api=None, path=None,
                      session_file=None, log=None):
     """Creates remote execution
@@ -76,7 +75,6 @@ def create_execution(execution_args, args, api=None, path=None,
     return execution
 
 
-#pylint: disable=locally-disabled,broad-except
 def get_execution(execution, api=None, verbosity=True,
                   session_file=None):
     """Retrieves the execution in its actual state

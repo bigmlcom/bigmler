@@ -47,7 +47,6 @@ def set_forecast_args(args, fields=None):
     return forecast_args
 
 
-#pylint: disable=locally-disabled,broad-except
 def create_forecast(time_series, input_data, forecast_args, args,
                     api=None, session_file=None,
                     path=None, log=None):

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-#pylint: disable=locally-disabled,broad-except
 #
 # Copyright 2020-2022 BigML
 #

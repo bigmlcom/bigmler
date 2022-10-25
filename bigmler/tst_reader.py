@@ -40,10 +40,12 @@ def is_folder(folder):
         return True
     return False
 
+
 def contains_csv(folder):
     """Checking whether a folder contains a CSV file"""
     files = os.listdir(folder)
-    return any(is_csv(filename) for filename in files)
+    return any(os.path.splitext(filename)[1].replace(".", "").lower() == "csv"
+               for filename in files)
 
 
 class TstReader():

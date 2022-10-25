@@ -118,7 +118,6 @@ def python_output(workflow, api):
     return "\n".join(lines)
 
 
-#pylint: disable=locally-disabled,broad-except
 def whizzml_script(args, api):
     """Returns the ID of the script to be used to generate the output
 
@@ -166,7 +165,6 @@ def whizzml_script(args, api):
     return reify_script
 
 
-#pylint: disable=locally-disabled,broad-except
 def reify_resources(args, api):
     """ Extracts the properties of the created resources and generates
         code to rebuild them

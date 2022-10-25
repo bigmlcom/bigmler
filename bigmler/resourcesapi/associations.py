@@ -63,7 +63,6 @@ def set_association_args(args, name=None, fields=None,
     return association_args
 
 
-#pylint: disable=locally-disabled,broad-except
 def create_associations(datasets, association_ids, association_args,
                         args, api=None, path=None,
                         session_file=None, log=None):
@@ -131,7 +130,6 @@ def create_associations(datasets, association_ids, association_args,
     return associations, association_ids
 
 
-#pylint: disable=locally-disabled,broad-except
 def get_associations(association_ids, args, api=None, session_file=None):
     """Retrieves remote associations in its actual status
 

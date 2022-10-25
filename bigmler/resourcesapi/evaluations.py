@@ -122,7 +122,6 @@ def set_label_evaluation_args(args, labels, all_labels,
     return evaluation_args_list
 
 
-#pylint: disable=locally-disabled,broad-except
 def create_evaluations(model_or_ensemble_ids, datasets, evaluation_args,
                        args, api=None,
                        path=None, session_file=None, log=None,
@@ -200,7 +199,6 @@ def create_evaluations(model_or_ensemble_ids, datasets, evaluation_args,
     return evaluations
 
 
-#pylint: disable=locally-disabled,broad-except
 def get_evaluation(evaluation, api=None, verbosity=True, session_file=None):
     """Retrieves evaluation in its actual state
 

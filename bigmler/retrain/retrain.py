@@ -108,7 +108,6 @@ def create_input(args, api, input_type, script_id, command):
     return command_args, api, exe_session_file
 
 
-#pylint: disable=locally-disabled,broad-except
 def retrain_model(args, api, command, session_file=None):
     """Retrieve or create the retrain script for a model and
     execute it with the new provided data

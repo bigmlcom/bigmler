@@ -67,7 +67,6 @@ def set_batch_centroid_args(args, fields=None,
     return batch_centroid_args
 
 
-#pylint: disable=locally-disabled,broad-except
 def create_batch_centroid(cluster, test_dataset,
                           batch_centroid_args, args,
                           api=None, session_file=None,

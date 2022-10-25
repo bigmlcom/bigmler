@@ -499,7 +499,7 @@ def log_created_resources(file_name, path, resource_id, mode='ab',
         except IOError as exc:
             print("Failed to write %s: %s" % (file_name, str(exc)))
 
-#pylint: disable=locally-disabled,broad-except
+
 def check_resource(*args, **kwargs):
     """Wrapper to catch errors in resource retrieval
 

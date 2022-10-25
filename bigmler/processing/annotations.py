@@ -103,7 +103,6 @@ def bigml_metadata(args, images_list=None, new_fields=None):
     """Creates a metadata file to summarize the locations of images and
     annotations
     """
-    #pylint: disable=locally-disabled,broad-except
     try:
         if args.images_file is None and args.images_dir and \
                 os.path.exists(args.images_dir):

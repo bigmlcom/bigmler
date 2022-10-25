@@ -55,7 +55,6 @@ def needs_source_update(args):
             (hasattr(args, "row_values") and args.row_values))
 
 
-#pylint: disable=locally-disabled,broad-except
 def extract_source_name(path):
     """Tries to extract a name from the path to the data file"""
     try:
