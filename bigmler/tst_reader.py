@@ -33,11 +33,12 @@ from bigmler.utf8recoder import UTF8Recoder
 from bigmler.folderreader import FolderReader
 
 
-def is_csv(filename):
-    """Checking if the file is a CSV"""
-    return os.path.exists(filename) and os.path.splitext(
-        filename)[1].replace(".", "").lower() == "csv"
-
+def is_folder(folder):
+    """Checking if the test_set is a folder """
+    if isinstance(folder, str) and os.path.isdir(folder) and \
+            os.path.exists(folder):
+        return True
+    return False
 
 def contains_csv(folder):
     """Checking whether a folder contains a CSV file"""
@@ -91,7 +92,7 @@ class TstReader():
                                if test_separator is not None
                                else get_csv_delimiter())
 
-        if not is_csv(self.test_set) and \
+        if is_folder(self.test_set) and \
                 self.image_fields and len(self.image_fields) == 1 \
                 and not contains_csv(self.test_set):
             # The test_set points to a directory where images are stored.
