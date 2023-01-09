@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
+#pylint: disable=locally-disabled,line-too-long,attribute-defined-outside-init
 #
 # Copyright 2017-2022 BigML
 #
@@ -22,12 +23,12 @@
 
 
 from bigmler.tests.world import (world, common_setup_module,
-                                 common_teardown_module,
-                                 teardown_class)
+                                 common_teardown_module, show_method)
 
 
 import bigmler.tests.basic_tst_prediction_steps as test_pred
 import bigmler.tests.basic_time_series_steps as ts_pred
+
 
 def setup_module():
     """Setup for the module
@@ -35,6 +36,7 @@ def setup_module():
     """
     common_setup_module()
     test = TestPrediction()
+    test.bigml = {"method": "setup_scenario02"}
     test.setup_scenario02()
 
 
@@ -45,20 +47,24 @@ def teardown_module():
     common_teardown_module()
 
 
-class TestPrediction(object):
+class TestPrediction:
+    """Testing time series predictions"""
 
-    def setup(self):
+    def setup_method(self, method):
         """
             Debug information
         """
+        self.bigml = {}
+        self.bigml["method"] = method.__name__
         print("\n-------------------\nTests in: %s\n" % __name__)
 
-    def teardown(self):
+    def teardown_method(self):
         """Calling generic teardown for every method
 
         """
-        self.world = teardown_class()
+        world.clear_paths()
         print("\nEnd of tests in: %s\n-------------------\n" % __name__)
+        self.bigml = {}
 
     def test_scenario01(self):
         """
@@ -68,23 +74,21 @@ class TestPrediction(object):
             And I check that the dataset has been created
             And I check that the time series model has been created
             Then the local forecast file is like "<forecast_file>"
-
-            Examples:
-            | data                    | output                        |forecasts_file
-            | ../data/grades_nh.csv   | ./scenario1_ts_nh/forecast   | ./check_files/forecasts_grades_final.csv
-
-
         """
         print(self.test_scenario01.__doc__)
+        headers = ["data", "output", "forecasts_file"]
         examples = [
-            ['data/grades_nh.csv', 'scenario1_ts_nh/forecast', 'check_files/forecasts_grades_final.csv']]
+            ['data/grades_nh.csv', 'scenario1_ts_nh/forecast',
+             'check_files/forecasts_grades_final.csv']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            ts_pred.i_create_all_ts_resources_with_no_headers(self, example[0], example[1])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            ts_pred.i_create_all_ts_resources_with_no_headers(
+                self, example["data"], example["output"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
             ts_pred.i_check_create_time_series(self)
-            ts_pred.i_check_forecasts(self, example[2])
+            ts_pred.i_check_forecasts(self, example["forecasts_file"])
 
     def setup_scenario02(self):
         """
@@ -94,18 +98,20 @@ class TestPrediction(object):
             And I check that the dataset has been created
             And I check that the time series has been created
             Then the local forecasts file is like "<forecasts_file>"
-
-            Examples:
-            | data               | test                    | output                        |forecasts_file
-            | ../data/grades.csv   | ./data/test_grades.json   | ./scenario1_ts/forecasts
         """
         print(self.setup_scenario02.__doc__)
+        headers = ["data", "test", "output", "forecasts_file"]
         examples = [
-            ['data/grades.csv', 'data/test_grades.json', 'scenario1_ts/forecasts', 'check_files/forecasts_grades_final.csv', 'scenario1_ts/forecasts_000005.csv']]
+            ['data/grades.csv', 'data/test_grades.json',
+             'scenario1_ts/forecasts',
+             'check_files/forecasts_grades_final.csv',
+             'scenario1_ts/forecasts_000005.csv']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            ts_pred.i_create_all_ts_resources(self, example[0], example[1], example[2])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            ts_pred.i_create_all_ts_resources(
+                self, example["data"], example["test"], example["output"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
             ts_pred.i_check_create_time_series(self)
-            ts_pred.i_check_forecasts(self, example[3])
+            ts_pred.i_check_forecasts(self, example["forecasts_file"])

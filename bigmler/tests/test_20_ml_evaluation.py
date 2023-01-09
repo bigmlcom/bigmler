@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
+#pylint: disable=locally-disabled,line-too-long,attribute-defined-outside-init
 #
 # Copyright 2015-2022 BigML
 #
@@ -19,14 +20,10 @@
 """ Testing Multi-label evaluations
 
 """
-
-
-
 from bigmler.tests.world import (world, common_setup_module,
-                                 common_teardown_module, teardown_class)
+                                 common_teardown_module, show_method)
 
 import bigmler.tests.basic_tst_prediction_steps as test_pred
-import bigmler.tests.ml_tst_prediction_steps as ml_pred
 import bigmler.tests.ml_tst_evaluation_steps as ml_eval
 import bigmler.tests.evaluation_steps as evaluation
 
@@ -37,6 +34,7 @@ def setup_module():
     """
     common_setup_module()
     test = TestMLEvaluation()
+    test.bigml = {"method": "setup_scenario1"}
     test.setup_scenario1()
 
 def teardown_module():
@@ -45,102 +43,128 @@ def teardown_module():
     """
     common_teardown_module()
 
-class TestMLEvaluation(object):
+class TestMLEvaluation:
+    """Test multi-label evaluation """
 
-    def teardown(self):
-        """Calling generic teardown for every method
-
-        """
-        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
-        teardown_class()
-
-    def setup(self):
+    def setup_method(self, method):
         """
             Debug information
         """
+        self.bigml = {}
+        self.bigml["method"] = method.__name__
         print("\n-------------------\nTests in: %s\n" % __name__)
+
+    def teardown_method(self):
+        """Calling generic teardown for every method
+
+        """
+        world.clear_paths()
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
+        self.bigml = {}
 
     def setup_scenario1(self):
         """
-            Scenario: Successfully building multi-label evaluations from scratch
-                Given I create BigML multi-label resources tagged as "<tag>" with "<label_separator>" label separator and "<number_of_labels>" labels uploading train "<data>" file with "<training_separator>" field separator to evaluate and log evaluation in "<output>"
-                And I check that the source has been created
-                And I check that the dataset has been created
-                And I check that the models have been created
-                And I check that the <number_of_labels> evaluations have been created
-                And I check that the evaluation is ready
-                Then the evaluation file is like "<json_evaluation_file>"
-
-                Examples:
-                |tag |label_separator |number_of_labels| data                   |training_separator |  output                          |json_evaluation_file
-                |my_multilabel_e_1|:|7| ../data/multilabel.csv |,| ./scenario_ml_e1/evaluation | ./check_files/evaluation_ml.json
+        Scenario: Successfully building multi-label evaluations from scratch
+            Given I create BigML multi-label resources tagged as "<tag>" with "<label_separator>" label separator and "<number_of_labels>" labels uploading train "<data>" file with "<training_separator>" field separator to evaluate and log evaluation in "<output>"
+            And I check that the source has been created
+            And I check that the dataset has been created
+            And I check that the models have been created
+            And I check that the <number_of_labels> evaluations have been created
+            And I check that the evaluation is ready
+            Then the evaluation file is like "<json_evaluation_file>"
         """
         print(self.setup_scenario1.__doc__)
+        headers = ["tag", "label_separator", "number_of_labels", "data",
+                   "training_separator", "output", "json_evaluation_file"]
         examples = [
-            ['my_multilabel_e_1', ':', '7', 'data/multilabel.csv', ',', 'scenario_ml_e1/evaluation', 'check_files/evaluation_ml.json']]
+            ['my_multilabel_e_1', ':', '7', 'data/multilabel.csv', ',',
+             'scenario_ml_e1/evaluation', 'check_files/evaluation_ml.json']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            ml_eval.i_create_all_ml_evaluations(self, tag=example[0], label_separator=example[1], number_of_labels=example[2], data=example[3], training_separator=example[4], output=example[5])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            ml_eval.i_create_all_ml_evaluations(
+                self, tag=example["tag"],
+                label_separator=example["label_separator"],
+                number_of_labels=example["number_of_labels"],
+                data=example["data"],
+                training_separator=example["training_separator"],
+                output=example["output"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self)
             test_pred.i_check_create_models(self)
-            test_pred.i_check_create_evaluations(self, number_of_evaluations=example[2])
+            test_pred.i_check_create_evaluations(
+                self, number_of_evaluations=example["number_of_labels"])
             ml_eval.i_check_evaluation_ready(self)
-            evaluation.then_the_evaluation_file_is_like(self, example[6])
+            evaluation.then_the_evaluation_file_is_like(
+                self, example["json_evaluation_file"])
 
     def test_scenario2(self):
         """
-            Scenario: Successfully building multi-label evaluations from source
-                Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
-                And I create BigML multi-label resources using source to evaluate and log evaluation in "<output>"
-                And I check that the dataset has been created
-                And I check that the models have been created
-                And I check that the <number_of_labels> evaluations have been created
-                And I check that the evaluation is ready
-                Then the evaluation file is like "<json_evaluation_file>"
-
-                Examples:
-                |scenario    | kwargs                                                  | number_of_labels                    | output                        |json_evaluation_file          |
-                | scenario_ml_e1| {"tag": "my_multilabel_e_1", "data": "../data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "./scenario_ml_e1/evaluation"}   | 7 | ./scenario_ml_e2/evaluation   | ./check_files/evaluation_ml.json   |
+        Scenario: Successfully building multi-label evaluations from source
+            Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
+            And I create BigML multi-label resources using source to evaluate and log evaluation in "<output>"
+            And I check that the dataset has been created
+            And I check that the models have been created
+            And I check that the <number_of_labels> evaluations have been created
+            And I check that the evaluation is ready
+            Then the evaluation file is like "<json_evaluation_file>"
         """
         print(self.test_scenario2.__doc__)
+        headers = ["scenario", "kwargs", "number_of_labels", "output",
+                   "json_evaluation_file"]
         examples = [
-            ['scenario_ml_e1', '{"tag": "my_multilabel_e_1", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_ml_e1/evaluation"}', '7', 'scenario_ml_e2/evaluation', 'check_files/evaluation_ml.json']]
+            ['scenario_ml_e1', '{"tag": "my_multilabel_e_1",' +
+             ' "data": "data/multilabel.csv", "label_separator": ":",' +
+             ' "number_of_labels": 7, "training_separator": ",",' +
+             ' "output": "scenario_ml_e1/evaluation"}', '7',
+             'scenario_ml_e2/evaluation', 'check_files/evaluation_ml.json']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
-            ml_eval.i_create_ml_evaluations_from_source(self, output=example[3])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            test_pred.i_have_previous_scenario_or_reproduce_it(
+                self, example["scenario"], example["kwargs"])
+            ml_eval.i_create_ml_evaluations_from_source(
+                self, output=example["output"])
             test_pred.i_check_create_dataset(self)
             test_pred.i_check_create_models(self)
-            test_pred.i_check_create_evaluations(self, number_of_evaluations=example[2])
+            test_pred.i_check_create_evaluations(
+                self, number_of_evaluations=example["number_of_labels"])
             ml_eval.i_check_evaluation_ready(self)
-            evaluation.then_the_evaluation_file_is_like(self, example[4])
+            evaluation.then_the_evaluation_file_is_like(
+                self, example["json_evaluation_file"])
 
     def test_scenario3(self):
         """
-            Scenario: Successfully building multi-label evaluations from dataset
-                Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
-                And I create BigML multi-label resources using dataset to evaluate and log evaluation in "<output>"
-                And I check that the models have been created
-                And I check that the <number_of_labels> evaluations have been created
-                And I check that the evaluation is ready
-                Then the evaluation file is like "<json_evaluation_file>"
-
-                Examples:
-                |scenario    | kwargs                                                  | number_of_labels                    | output                        |json_evaluation_file          |
-                | scenario_ml_e1| {"tag": "my_multilabel_e_1", "data": "../data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "./scenario_ml_e1/evaluation"}   | 7 | ./scenario_ml_e3/evaluation   | ./check_files/evaluation_ml.json   |
+        Scenario: Successfully building multi-label evaluations from dataset
+            Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
+            And I create BigML multi-label resources using dataset to evaluate and log evaluation in "<output>"
+            And I check that the models have been created
+            And I check that the <number_of_labels> evaluations have been created
+            And I check that the evaluation is ready
+            Then the evaluation file is like "<json_evaluation_file>"
         """
         print(self.test_scenario3.__doc__)
+        headers = ["scenario", "kwargs", "number_of_labels", "output",
+                   "json_evaluation_file"]
         examples = [
-            ['scenario_ml_e1', '{"tag": "my_multilabel_e_1", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_ml_e1/evaluation"}', '7', 'scenario_ml_e3/evaluation', 'check_files/evaluation_ml.json']]
+            ['scenario_ml_e1', '{"tag": "my_multilabel_e_1",' +
+             ' "data": "data/multilabel.csv", "label_separator": ":",' +
+             ' "number_of_labels": 7, "training_separator": ",",' +
+             ' "output": "scenario_ml_e1/evaluation"}', '7',
+             'scenario_ml_e3/evaluation', 'check_files/evaluation_ml.json']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
-            ml_eval.i_create_ml_evaluations_from_dataset(self, output=example[3])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            test_pred.i_have_previous_scenario_or_reproduce_it(
+                self, example["scenario"], example["kwargs"])
+            ml_eval.i_create_ml_evaluations_from_dataset(
+                self, output=example["output"])
             test_pred.i_check_create_models(self)
-            test_pred.i_check_create_evaluations(self, number_of_evaluations=example[2])
+            test_pred.i_check_create_evaluations(
+                self, number_of_evaluations=example["number_of_labels"])
             ml_eval.i_check_evaluation_ready(self)
-            evaluation.then_the_evaluation_file_is_like(self, example[4])
+            evaluation.then_the_evaluation_file_is_like(
+                self, example["json_evaluation_file"])
 
     def test_scenario4(self):
         """
@@ -150,43 +174,58 @@ class TestMLEvaluation(object):
             And I check that the <number_of_labels> evaluations have been created
             And I check that the evaluation is ready
             Then the evaluation key "<key>" value for the model is greater than <value>
-
-            Examples:
-            |scenario    | kwargs                                                  | models_file | number_of_labels                    | output                        |key          | value
-            | scenario_ml_e1| {"tag": "my_multilabel_e_1", "data": "../data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "./scenario_ml_e1/evaluation"}   | ./scenario_ml_e1/models | 7 | ./scenario_ml_e4/evaluation   | average_phi   | 0.8180
         """
         print(self.test_scenario4.__doc__)
+        headers = ["scenario", "kwargs", "models_file", "number_of_labels",
+                   "output", "key", "value"]
         examples = [
-            ['scenario_ml_e1', '{"tag": "my_multilabel_e_1", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_ml_e1/evaluation"}', 'scenario_ml_e1/models', '7', 'scenario_ml_e4/evaluation', 'average_phi', '0.8180']]
+            ['scenario_ml_e1', '{"tag": "my_multilabel_e_1",' +
+             ' "data": "data/multilabel.csv", "label_separator": ":",' +
+             ' "number_of_labels": 7, "training_separator": ",",' +
+             ' "output": "scenario_ml_e1/evaluation"}',
+             'scenario_ml_e1/models', '7', 'scenario_ml_e4/evaluation',
+             'average_phi', '0.8180']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
-            ml_eval.i_create_ml_evaluations_from_models(self, models_file=example[2], output=example[4])
-            test_pred.i_check_create_evaluations(self, number_of_evaluations=example[3])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            test_pred.i_have_previous_scenario_or_reproduce_it(
+                self, example["scenario"], example["kwargs"])
+            ml_eval.i_create_ml_evaluations_from_models(
+                self, models_file=example["models_file"],
+                output=example["output"])
+            test_pred.i_check_create_evaluations(
+                self, number_of_evaluations=example["number_of_labels"])
             ml_eval.i_check_evaluation_ready(self)
-            evaluation.i_check_evaluation_key(self, key=example[5], value=example[6])
+            evaluation.i_check_evaluation_key(
+                self, key=example["key"], value=example["value"])
 
     def test_scenario5(self):
         """
-            Scenario: Successfully building multi-label evaluations from models retrieved by tag
-                Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
-                And I create BigML multi-label resources using models tagged as "<tag>" to evaluate and log evaluation in "<output>"
-                And I check that the <number_of_labels> evaluations have been created
-                And I check that the evaluation is ready
-                Then the evaluation key "<key>" value for the model is greater than <value>
-
-                Examples:
-                |scenario    | kwargs                                                  | tag | number_of_labels                    | output                        |key          | value
-                | scenario_ml_e1| {"tag": "my_multilabel_e_1", "data": "../data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "./scenario_ml_e1/evaluation"}   | my_multilabel_e_1 | 7 | ./scenario_ml_e5/evaluation   | average_phi   | 0.8180
-
+        Scenario: Successfully building multi-label evaluations from models retrieved by tag
+            Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
+            And I create BigML multi-label resources using models tagged as "<tag>" to evaluate and log evaluation in "<output>"
+            And I check that the <number_of_labels> evaluations have been created
+            And I check that the evaluation is ready
+            Then the evaluation key "<key>" value for the model is greater than <value>
         """
         print(self.test_scenario5.__doc__)
+        headers = ["scenario", "kwargs", "tag", "number_of_labels", "output",
+                   "key", "value"]
         examples = [
-            ['scenario_ml_e1', '{"tag": "my_multilabel_e_1", "data": "data/multilabel.csv", "label_separator": ":", "number_of_labels": 7, "training_separator": ",", "output": "scenario_ml_e1/evaluation"}', 'my_multilabel_e_1' , '7', 'scenario_ml_e5/evaluation', 'average_phi', '0.8180']]
+            ['scenario_ml_e1', '{"tag": "my_multilabel_e_1",' +
+             ' "data": "data/multilabel.csv", "label_separator": ":",' +
+             ' "number_of_labels": 7, "training_separator": ",",' +
+             ' "output": "scenario_ml_e1/evaluation"}', 'my_multilabel_e_1' ,
+             '7', 'scenario_ml_e5/evaluation', 'average_phi', '0.8180']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
-            ml_eval.i_create_ml_evaluations_from_tagged_models(self, tag=example[2], output=example[4])
-            test_pred.i_check_create_evaluations(self, number_of_evaluations=example[3])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            test_pred.i_have_previous_scenario_or_reproduce_it(
+                self, example["scenario"], example["kwargs"])
+            ml_eval.i_create_ml_evaluations_from_tagged_models(
+                self, tag=example["tag"], output=example["output"])
+            test_pred.i_check_create_evaluations(
+                self, number_of_evaluations=example["number_of_labels"])
             ml_eval.i_check_evaluation_ready(self)
-            evaluation.i_check_evaluation_key(self, key=example[5], value=example[6])
+            evaluation.i_check_evaluation_key(
+                self, key=example["key"], value=example["value"])

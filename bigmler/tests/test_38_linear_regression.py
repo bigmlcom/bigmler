@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
+#pylint: disable=locally-disabled,line-too-long,attribute-defined-outside-init
 #
 # Copyright 2016-2022 BigML
 #
@@ -22,8 +23,7 @@
 
 
 from bigmler.tests.world import (world, common_setup_module,
-                                 common_teardown_module,
-                                 teardown_class)
+                                 common_teardown_module, show_method)
 
 
 import bigmler.tests.basic_tst_prediction_steps as test_pred
@@ -36,6 +36,7 @@ def setup_module():
     """
     common_setup_module()
     test = TestPrediction()
+    test.bigml = {"method": "setup_scenario02"}
     test.setup_scenario02()
 
 
@@ -46,20 +47,24 @@ def teardown_module():
     common_teardown_module()
 
 
-class TestPrediction(object):
+class TestPrediction:
+    """Testing linear regression predictions"""
 
-    def setup(self):
+    def setup_method(self, method):
         """
             Debug information
         """
+        self.bigml = {}
+        self.bigml["method"] = method.__name__
         print("\n-------------------\nTests in: %s\n" % __name__)
 
-    def teardown(self):
+    def teardown_method(self):
         """Calling generic teardown for every method
 
         """
-        self.world = teardown_class()
+        world.clear_paths()
         print("\nEnd of tests in: %s\n-------------------\n" % __name__)
+        self.bigml = {}
 
     def test_scenario01(self):
         """
@@ -70,24 +75,22 @@ class TestPrediction(object):
             And I check that the linear regression model has been created
             And I check that the predictions are ready
             Then the local prediction file is like "<predictions_file>"
-
-            Examples:
-            | data               | test                    | output                        |predictions_file           |
-
-
-
         """
         print(self.test_scenario01.__doc__)
+        headers = ["data", "test", "output", "predictions_file"]
         examples = [
-            ['data/grades_nh.csv', 'data/test_grades_nh.csv', 'scenario1_lrr_nh/predictions.csv', 'check_files/predictions_grades_lrr.csv']]
+            ['data/grades_nh.csv', 'data/test_grades_nh.csv',
+             'scenario1_lrr_nh/predictions.csv', 'check_files/predictions_grades_lrr.csv']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            lr_pred.i_create_all_lr_resources_with_no_headers(self, example[0], example[1], example[2])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            lr_pred.i_create_all_lr_resources_with_no_headers(
+                self, example["data"], example["test"], example["output"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
             lr_pred.i_check_create_lr_model(self)
             test_pred.i_check_create_predictions(self)
-            test_pred.i_check_predictions(self, example[3])
+            test_pred.i_check_predictions(self, example["predictions_file"])
 
     def setup_scenario02(self):
         """
@@ -98,22 +101,23 @@ class TestPrediction(object):
             And I check that the model has been created
             And I check that the predictions are ready
             Then the local prediction file is like "<predictions_file>"
-
-            Examples:
-            | data               | test                    | output                        |predictions_file           |
-            | ../data/grades.csv   | ../data/test_grades.csv   | ./scenario1_lrr/predictions.csv   | ./check_files/predictions_grades_lrr.csv   |
         """
         print(self.setup_scenario02.__doc__)
+        headers = ["data", "test", "output", "predictions_file"]
         examples = [
-            ['data/grades.csv', 'data/test_grades_no_missings.csv', 'scenario1_lrr/predictions.csv', 'check_files/predictions_grades_lrr.csv']]
+            ['data/grades.csv', 'data/test_grades_no_missings.csv',
+             'scenario1_lrr/predictions.csv',
+             'check_files/predictions_grades_lrr.csv']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            lr_pred.i_create_all_lr_resources(self, example[0], example[1], example[2])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            lr_pred.i_create_all_lr_resources(
+                self, example["data"], example["test"], example["output"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
             lr_pred.i_check_create_lr_model(self)
             test_pred.i_check_create_predictions(self)
-            test_pred.i_check_predictions(self, example[3])
+            test_pred.i_check_predictions(self, example["predictions_file"])
 
     def test_scenario03(self):
         """
@@ -124,23 +128,27 @@ class TestPrediction(object):
             And I check that the model has been created
             And I check that the predictions are ready
             Then the local prediction file is like "<predictions_file>"
-
-            Examples:
-            |scenario    | kwargs                                                  | test                    | output                        |predictions_file           |
-            | scenario1| {"data": "../data/grades.csv", "output": "./scenario1_lrr/predictions.csv", "test": "../data/test_grades.csv"}   | ../data/test_grades.csv   | ./scenario2/predictions.csv   | ./check_files/predictions_grades.csv   |
         """
         print(self.test_scenario03.__doc__)
+        headers = ["scenario", "kwargs", "test", "output", "predictions_file"]
         examples = [
-            ['scenario1_lrr', '{"data": "data/grades.csv", "output": "scenario1_lrr/predictions.csv", "test": "data/test_grades_no_missings.csv"}', 'data/test_grades_no_missings.csv', 'scenario2_lrr/predictions.csv', 'check_files/predictions_grades_lrr.csv']]
+            ['scenario1_lrr', '{"data": "data/grades.csv",' +
+             ' "output": "scenario1_lrr/predictions.csv",' +
+             ' "test": "data/test_grades_no_missings.csv"}',
+             'data/test_grades_no_missings.csv',
+             'scenario2_lrr/predictions.csv',
+             'check_files/predictions_grades_lrr.csv']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
-            lr_pred.i_create_lr_resources_from_source(self, None, test=example[2], output=example[3])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            test_pred.i_have_previous_scenario_or_reproduce_it(
+                self, example["scenario"], example["kwargs"])
+            lr_pred.i_create_lr_resources_from_source(
+                self, None, test=example["test"], output=example["output"])
             test_pred.i_check_create_dataset(self, suffix=None)
             lr_pred.i_check_create_lr_model(self)
             test_pred.i_check_create_predictions(self)
-            test_pred.i_check_predictions(self, example[4])
-
+            test_pred.i_check_predictions(self, example["predictions_file"])
 
     def test_scenario04(self):
         """
@@ -150,22 +158,26 @@ class TestPrediction(object):
             And I check that the model has been created
             And I check that the predictions are ready
             Then the local prediction file is like "<predictions_file>"
-
-            Examples:
-            |scenario    | kwargs                                                  | test                    | output                        |predictions_file           |
-            | scenario1| {"data": "../data/iris.csv", "output": "./scenario1/predictions.csv", "test": "../data/test_iris.csv"}   | ../data/test_iris.csv   | ./scenario3/predictions.csv   | ./check_files/predictions_iris.csv   |
-
         """
         print(self.test_scenario04.__doc__)
+        headers = ["scenario", "kwargs", "test", "output", "predictions_file"]
         examples = [
-            ['scenario1_lrr', '{"data": "data/grades.csv", "output": "scenario1_lrr/predictions.csv", "test": "data/test_grades_no_missings.csv"}', 'data/test_grades_no_missings.csv', 'scenario3_lrr/predictions.csv', 'check_files/predictions_grades_lrr.csv']]
+            ['scenario1_lrr', '{"data": "data/grades.csv",' +
+             ' "output": "scenario1_lrr/predictions.csv",' +
+             ' "test": "data/test_grades_no_missings.csv"}',
+             'data/test_grades_no_missings.csv',
+             'scenario3_lrr/predictions.csv',
+             'check_files/predictions_grades_lrr.csv']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
-            lr_pred.i_create_lr_resources_from_dataset(self, None, test=example[2], output=example[3])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            test_pred.i_have_previous_scenario_or_reproduce_it(
+                self, example["scenario"], example["kwargs"])
+            lr_pred.i_create_lr_resources_from_dataset(
+                self, None, test=example["test"], output=example["output"])
             lr_pred.i_check_create_lr_model(self)
             test_pred.i_check_create_predictions(self)
-            test_pred.i_check_predictions(self, example[4])
+            test_pred.i_check_predictions(self, example["predictions_file"])
 
     def test_scenario05(self):
         """
@@ -174,20 +186,25 @@ class TestPrediction(object):
             And I create BigML linear regression resources using model to test "<test>" and log predictions in "<output>"
             And I check that the predictions are ready
             Then the local prediction file is like "<predictions_file>"
-
-            Examples:
-            |scenario    | kwargs                                                  | test                    | output                        |predictions_file           |
-
         """
         print(self.test_scenario05.__doc__)
+        headers = ["scenario", "kwargs", "test", "output", "predictions_file"]
         examples = [
-            ['scenario1_lrr', '{"data": "data/grades.csv", "output": "scenario1_lrr/predictions.csv", "test": "data/test_grades_no_missings.csv"}', 'data/test_grades_no_missings.csv', 'scenario4_lrr/predictions.csv', 'check_files/predictions_grades_lrr.csv']]
+            ['scenario1_lrr', '{"data": "data/grades.csv",' +
+             ' "output": "scenario1_lrr/predictions.csv",' +
+             ' "test": "data/test_grades_no_missings.csv"}',
+             'data/test_grades_no_missings.csv',
+             'scenario4_lrr/predictions.csv',
+             'check_files/predictions_grades_lrr.csv']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
-            lr_pred.i_create_lr_resources_from_model(self, test=example[2], output=example[3])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            test_pred.i_have_previous_scenario_or_reproduce_it(
+                self, example["scenario"], example["kwargs"])
+            lr_pred.i_create_lr_resources_from_model(
+                self, test=example["test"], output=example["output"])
             test_pred.i_check_create_predictions(self)
-            test_pred.i_check_predictions(self, example[4])
+            test_pred.i_check_predictions(self, example["predictions_file"])
 
     def test_scenario06(self):
         """
@@ -196,19 +213,23 @@ class TestPrediction(object):
             And I create BigML linear regression resources using model to test "<test>" as a batch prediction and log predictions in "<output>"
             And I check that the predictions are ready
             Then the local prediction file is like "<predictions_file>"
-
-            Examples:
-            |scenario    | kwargs                                                  | test                    | output                        |predictions_file           |
-
-
         """
         print(self.test_scenario06.__doc__)
+        headers = ["scenario", "kwargs", "test", "output", "predictions_file"]
         examples = [
-            ['scenario1_lrr', '{"data": "data/grades.csv", "output": "scenario1_lrr/predictions.csv", "test": "data/test_grades_no_missings.csv"}', 'data/test_grades_no_missings.csv', 'scenario5_lrr/predictions.csv', 'check_files/predictions_grades_lrr.csv']]
+            ['scenario1_lrr', '{"data": "data/grades.csv",' +
+             ' "output": "scenario1_lrr/predictions.csv",' +
+             ' "test": "data/test_grades_no_missings.csv"}',
+             'data/test_grades_no_missings.csv',
+             'scenario5_lrr/predictions.csv',
+             'check_files/predictions_grades_lrr.csv']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
-            lr_pred.i_create_lr_resources_from_model_remote(self, test=example[2], output=example[3])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            test_pred.i_have_previous_scenario_or_reproduce_it(
+                self, example["scenario"], example["kwargs"])
+            lr_pred.i_create_lr_resources_from_model_remote(
+                self, test=example["test"], output=example["output"])
             batch_pred.i_check_create_batch_prediction(self)
             test_pred.i_check_create_predictions(self)
-            test_pred.i_check_predictions(self, example[4])
+            test_pred.i_check_predictions(self, example["predictions_file"])

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
+#pylint: disable=locally-disabled,line-too-long,attribute-defined-outside-init
 #
 # Copyright 2015-2022 BigML
 #
@@ -20,10 +21,8 @@
 
 """
 
-
-
 from bigmler.tests.world import (world, common_setup_module,
-                                 common_teardown_module, teardown_class)
+                                 common_teardown_module, show_method)
 
 
 import bigmler.tests.basic_tst_prediction_steps as test_pred
@@ -42,85 +41,90 @@ def teardown_module():
     """
     common_teardown_module()
 
-class TestAssociation(object):
+class TestAssociation:
+    """Testing associaton commands"""
 
-    def teardown(self):
-        """Calling generic teardown for every method
-
-        """
-        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
-        teardown_class()
-
-    def setup(self):
+    def setup_method(self, method):
         """
             Debug information
         """
+        self.bigml = {}
+        self.bigml["method"] = method.__name__
         print("\n-------------------\nTests in: %s\n" % __name__)
+
+    def teardown_method(self):
+        """Calling generic teardown for every method
+
+        """
+        world.clear_paths()
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
+        self.bigml = {}
 
     def test_scenario1(self):
         """
-            Scenario: Successfully building association from scratch:
-                Given I create BigML association uploading train "<data>" file and log resources in "<output_dir>"
-                And I check that the source has been created
-                And I check that the dataset has been created
-                And I check that the association has been created
-
-                Examples:
-                | data               | output_dir
-                | ../data/grades.csv |  ./scenario_ass_1_r
-                | ../data/diabetes.csv   | ./scenario_ass_1
+        Scenario: Successfully building association from scratch:
+            Given I create BigML association uploading train "<data>" file and log resources in "<output_dir>"
+            And I check that the source has been created
+            And I check that the dataset has been created
+            And I check that the association has been created
         """
         print(self.test_scenario1.__doc__)
+        headers = ["data", "output_dir"]
         examples = [
             ['data/spam.csv', 'scenario_ass_1_r'],
             ['data/movies.csv', 'scenario_ass_1_i'],
             ['data/iris.csv', 'scenario_ass_1']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            test_association.i_create_association(self, data=example[0], output_dir=example[1])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            test_association.i_create_association(
+                self, data=example["data"], output_dir=example["output_dir"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
             test_pred.i_check_create_association(self)
 
     def test_scenario2(self):
         """
-            Scenario: Successfully building association from source
-                Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
-                And I create BigML association using source and log resources in "<output_dir>"
-                And I check that the dataset has been created
-                And I check that the association has been created
-
-                Examples:
-                |scenario    | kwargs                                                  | output_dir
-                | scenario_ass_1| {"data": "../data/iris.csv", "output_dir": "./scenario_ass_1/}   | ./scenario_ass_2   |
+        Scenario: Successfully building association from source
+            Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
+            And I create BigML association using source and log resources in "<output_dir>"
+            And I check that the dataset has been created
+            And I check that the association has been created
         """
         print(self.test_scenario2.__doc__)
+        headers = ["scenario", "kwargs", "output_dir"]
         examples = [
-            ['scenario_ass_1', '{"data": "data/iris.csv", "output_dir": "scenario_ass_1"}', 'scenario_ass_2']]
+            ['scenario_ass_1',
+             '{"data": "data/iris.csv", "output_dir": "scenario_ass_1"}',
+             'scenario_ass_2']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
-            test_association.i_create_association_from_source(self, output_dir=example[2])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            test_pred.i_have_previous_scenario_or_reproduce_it(
+                self, example["scenario"], example["kwargs"])
+            test_association.i_create_association_from_source(
+                self, output_dir=example["output_dir"])
             test_pred.i_check_create_dataset(self, suffix=None)
             test_pred.i_check_create_association(self)
 
     def test_scenario3(self):
         """
-            Scenario: Successfully building test predictions from dataset
-                Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
-                And I create BigML association using dataset and log predictions in "<output_dir>"
-                And I check that the association has been created
-
-                Examples:
-                |scenario    | kwargs                                                  | test                    | output                        |predictions_file           |
-                | scenario_ass_1| {"data": "../data/iris.csv", "output_dir": "./scenario_c_1"}   | ../data/diabetes.csv   | ./scenario_c_3/centroids.csv   | ./check_files/centroids_diabetes.csv   |
-
+        Scenario: Successfully building test predictions from dataset
+            Given I have previously executed "<scenario>" or reproduce it with arguments <kwargs>
+            And I create BigML association using dataset and log predictions in "<output_dir>"
+            And I check that the association has been created
         """
         print(self.test_scenario3.__doc__)
+        headers = ["scenario", "kwargs", "output_dir"]
         examples = [
-            ['scenario_ass_1', '{"data": "data/iris.csv", "output_dir": "scenario_ass_1"}', 'scenario_ass_3']]
+            ['scenario_ass_1',
+             '{"data": "data/iris.csv", "output_dir": "scenario_ass_1"}',
+             'scenario_ass_3']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
-            test_association.i_create_association_from_dataset(self, output_dir=example[2])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            test_pred.i_have_previous_scenario_or_reproduce_it(
+                self, example["scenario"], example["kwargs"])
+            test_association.i_create_association_from_dataset(
+                self, output_dir=example["output_dir"])
             test_pred.i_check_create_association(self)

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
+#pylint: disable=locally-disabled,line-too-long,attribute-defined-outside-init
 #
 # Copyright 2019-2022 BigML
 #
@@ -20,10 +21,8 @@
 
 """
 
-
 from bigmler.tests.world import (world, common_setup_module,
-                                 common_teardown_module,
-                                 teardown_class)
+                                 common_teardown_module, show_method)
 
 
 import bigmler.tests.basic_tst_prediction_steps as test_pred
@@ -36,6 +35,7 @@ def setup_module():
     """
     common_setup_module()
     test = TestProjection()
+    test.bigml = {"method": "setup_scenario02"}
     test.setup_scenario02()
 
 
@@ -46,20 +46,24 @@ def teardown_module():
     common_teardown_module()
 
 
-class TestProjection(object):
+class TestProjection:
+    """Testing Projections"""
 
-    def setup(self):
+    def setup_method(self, method):
         """
             Debug information
         """
+        self.bigml = {}
+        self.bigml["method"] = method.__name__
         print("\n-------------------\nTests in: %s\n" % __name__)
 
-    def teardown(self):
+    def teardown_method(self):
         """Calling generic teardown for every method
 
         """
-        self.world = teardown_class()
+        world.clear_paths()
         print("\nEnd of tests in: %s\n-------------------\n" % __name__)
+        self.bigml = {}
 
     def test_scenario01(self):
         """
@@ -70,25 +74,23 @@ class TestProjection(object):
             And I check that the PCA model has been created
             And I check that the projections are ready
             Then the local projections file is like "<projections_file>"
-
-            Examples:
-            | data               | test                    | output                        |projections_file           |
-
-
-
         """
         print(self.test_scenario01.__doc__)
+        headers = ["data", "test", "output", "projections_file"]
         examples = [
-            ['data/grades_nh.csv', 'data/test_grades_nh.csv', 'scenario1_pca_nh/projections.csv', 'check_files/projections_grades_pca.csv']]
+            ['data/grades_nh.csv', 'data/test_grades_nh.csv',
+             'scenario1_pca_nh/projections.csv',
+             'check_files/projections_grades_pca.csv']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            pca_proj.i_create_all_pca_resources_with_no_headers(self, example[0], example[1], example[2])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            pca_proj.i_create_all_pca_resources_with_no_headers(
+                self, example["data"], example["test"], example["output"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
             pca_proj.i_check_create_pca_model(self)
             test_pred.i_check_create_projections(self)
-            test_pred.i_check_projections(self, example[3])
-
+            test_pred.i_check_projections(self, example["projections_file"])
 
     def setup_scenario02(self):
         """
@@ -99,22 +101,23 @@ class TestProjection(object):
             And I check that the model has been created
             And I check that the projections are ready
             Then the local projection file is like "<projections_file>"
-
-            Examples:
-            | data               | test                    | output                        |projections_file           |
-            | ../data/grades.csv   | ../data/test_grades.csv   | ./scenario1_pca/projections.csv   | ./check_files/projections_grades_pca.csv   |
         """
         print(self.setup_scenario02.__doc__)
+        headers = ["data", "test", "output", "projections_file"]
         examples = [
-            ['data/grades.csv', 'data/test_grades_no_missings.csv', 'scenario1_pca/projections.csv', 'check_files/projections_grades_pca.csv']]
+            ['data/grades.csv', 'data/test_grades_no_missings.csv',
+             'scenario1_pca/projections.csv',
+             'check_files/projections_grades_pca.csv']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            pca_proj.i_create_all_pca_resources(self, example[0], example[1], example[2])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            pca_proj.i_create_all_pca_resources(
+                self, example["data"], example["test"], example["output"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
             pca_proj.i_check_create_pca_model(self)
             test_pred.i_check_create_projections(self)
-            test_pred.i_check_projections(self, example[3])
+            test_pred.i_check_projections(self, example["projections_file"])
 
     def test_scenario03(self):
         """
@@ -125,23 +128,27 @@ class TestProjection(object):
             And I check that the model has been created
             And I check that the projections are ready
             Then the local projections file is like "<projections_file>"
-
-            Examples:
-            |scenario    | kwargs                                                  | test                    | output                        |projections_file           |
-            | scenario1| {"data": "../data/grades.csv", "output": "./scenario1_lrr/projections.csv", "test": "../data/test_grades.csv"}   | ../data/test_grades.csv   | ./scenario2/projections.csv   | ./check_files/projections_grades.csv   |
         """
         print(self.test_scenario03.__doc__)
+        headers = ["scenario", "kwargs", "test", "output", "projections_file"]
         examples = [
-            ['scenario1_pca', '{"data": "data/grades.csv", "output": "scenario1_pca/projections.csv", "test": "data/test_grades_no_missings.csv"}', 'data/test_grades_no_missings.csv', 'scenario2_pca/projections.csv', 'check_files/projections_grades_pca.csv']]
+            ['scenario1_pca', '{"data": "data/grades.csv",' +
+             ' "output": "scenario1_pca/projections.csv",' +
+             ' "test": "data/test_grades_no_missings.csv"}',
+             'data/test_grades_no_missings.csv',
+             'scenario2_pca/projections.csv',
+             'check_files/projections_grades_pca.csv']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
-            pca_proj.i_create_pca_resources_from_source(self, test=example[2], output=example[3])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            test_pred.i_have_previous_scenario_or_reproduce_it(
+                self, example["scenario"], example["kwargs"])
+            pca_proj.i_create_pca_resources_from_source(
+                self, test=example["test"], output=example["output"])
             test_pred.i_check_create_dataset(self, suffix=None)
             pca_proj.i_check_create_pca_model(self)
             test_pred.i_check_create_projections(self)
-            test_pred.i_check_projections(self, example[4])
-
+            test_pred.i_check_projections(self, example["projections_file"])
 
     def test_scenario04(self):
         """
@@ -151,24 +158,26 @@ class TestProjection(object):
             And I check that the model has been created
             And I check that the projections are ready
             Then the local projection file is like "<projections_file>"
-
-            Examples:
-            |scenario    | kwargs                                                  | test                    | output                        |projections_file           |
-
-
         """
         print(self.test_scenario04.__doc__)
+        headers = ["scenario", "kwargs", "test", "output", "projections_file"]
         examples = [
-            ['scenario1_pca', '{"data": "data/grades.csv", "output": "scenario1_pca/projections.csv", "test": "data/test_grades_no_missings.csv"}', 'data/test_grades_no_missings.csv', 'scenario3_pca/projections.csv', 'check_files/projections_grades_pca.csv']]
+            ['scenario1_pca', '{"data": "data/grades.csv",' +
+             ' "output": "scenario1_pca/projections.csv",' +
+             ' "test": "data/test_grades_no_missings.csv"}',
+             'data/test_grades_no_missings.csv',
+             'scenario3_pca/projections.csv',
+             'check_files/projections_grades_pca.csv']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
-            pca_proj.i_create_pca_resources_from_dataset(self, test=example[2], output=example[3])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            test_pred.i_have_previous_scenario_or_reproduce_it(
+                self, example["scenario"], example["kwargs"])
+            pca_proj.i_create_pca_resources_from_dataset(
+                self, test=example["test"], output=example["output"])
             pca_proj.i_check_create_pca_model(self)
             test_pred.i_check_create_projections(self)
-            test_pred.i_check_projections(self, example[4])
-
-
+            test_pred.i_check_projections(self, example["projections_file"])
 
     def test_scenario05(self):
         """
@@ -177,20 +186,25 @@ class TestProjection(object):
             And I create BigML linear regression resources using model to test "<test>" and log projections in "<output>"
             And I check that the projections are ready
             Then the local projection file is like "<projections_file>"
-
-            Examples:
-            |scenario    | kwargs                                                  | test                    | output                        |projections_file           |
-
         """
         print(self.test_scenario05.__doc__)
+        headers = ["scenario", "kwargs", "test", "output", "projections_file"]
         examples = [
-            ['scenario1_pca', '{"data": "data/grades.csv", "output": "scenario1_pca/projections.csv", "test": "data/test_grades_no_missings.csv"}', 'data/test_grades_no_missings.csv', 'scenario4_pca/projections.csv', 'check_files/projections_grades_pca.csv']]
+            ['scenario1_pca', '{"data": "data/grades.csv",' +
+             ' "output": "scenario1_pca/projections.csv",' +
+             ' "test": "data/test_grades_no_missings.csv"}',
+             'data/test_grades_no_missings.csv',
+             'scenario4_pca/projections.csv',
+             'check_files/projections_grades_pca.csv']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
-            pca_proj.i_create_pca_resources_from_model(self, test=example[2], output=example[3])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            test_pred.i_have_previous_scenario_or_reproduce_it(
+                self, example["scenario"], example["kwargs"])
+            pca_proj.i_create_pca_resources_from_model(
+                self, test=example["test"], output=example["output"])
             test_pred.i_check_create_projections(self)
-            test_pred.i_check_projections(self, example[4])
+            test_pred.i_check_projections(self, example["projections_file"])
 
     def test_scenario06(self):
         """
@@ -199,19 +213,23 @@ class TestProjection(object):
             And I create BigML linear regression resources using model to test "<test>" as a batch projection and log projections in "<output>"
             And I check that the projections are ready
             Then the local projection file is like "<projections_file>"
-
-            Examples:
-            |scenario    | kwargs                                                  | test                    | output                        |projections_file           |
-
-
         """
         print(self.test_scenario06.__doc__)
+        headers = ["scenario", "kwargs", "test", "output", "projections_file"]
         examples = [
-            ['scenario1_pca', '{"data": "data/grades.csv", "output": "scenario1_pca/projections.csv", "test": "data/test_grades_no_missings.csv"}', 'data/test_grades_no_missings.csv', 'scenario5_pca/projections.csv', 'check_files/projections_grades_pca.csv']]
+            ['scenario1_pca', '{"data": "data/grades.csv",' +
+             ' "output": "scenario1_pca/projections.csv",' +
+             ' "test": "data/test_grades_no_missings.csv"}',
+             'data/test_grades_no_missings.csv',
+             'scenario5_pca/projections.csv',
+             'check_files/projections_grades_pca.csv']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            test_pred.i_have_previous_scenario_or_reproduce_it(self, example[0], example[1])
-            pca_proj.i_create_pca_resources_from_model_remote(self, test=example[2], output=example[3])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            test_pred.i_have_previous_scenario_or_reproduce_it(
+                self, example["scenario"], example["kwargs"])
+            pca_proj.i_create_pca_resources_from_model_remote(
+                self, test=example["test"], output=example["output"])
             batch_pred.i_check_create_batch_projection(self)
             test_pred.i_check_create_projections(self)
-            test_pred.i_check_projections(self, example[4])
+            test_pred.i_check_projections(self, example["projections_file"])

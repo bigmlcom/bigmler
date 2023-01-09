@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+#pylint: disable=locally-disabled,unused-argument,no-member
 #
 # Copyright 2016-2022 BigML
 #
@@ -16,55 +17,19 @@
 
 
 import os
-import time
-import json
-from bigmler.tests.world import world, res_filename
-from subprocess import check_call, CalledProcessError
+
 from bigml.api import check_resource
 from bigml.io import UnicodeReader
-from bigmler.processing.models import MONTECARLO_FACTOR
-from bigmler.checkpoint import file_number_of_lines
-from bigmler.utils import storage_file_name, open_mode
-from bigmler.tests.common_steps import check_debug
-from nose.tools import ok_, assert_equal, assert_not_equal, assert_almost_equal
+
+from bigmler.tests.common_steps import shell_execute, check_rows_equal
+from bigmler.tests.world import world, res_filename, ok_, eq_
 
 
-def shell_execute(command, output, test=None, options=None,
-                  test_rows=None, project=True):
-    """Excute bigmler command in shell
-
-    """
-    command = check_debug(command, project=project)
-    world.directory = os.path.dirname(output)
-    world.folders.append(world.directory)
-    try:
-        retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            if test is not None:
-                world.test_lines = file_number_of_lines(test)
-                if options is None or \
-                        options.find('--prediction-header') == -1:
-                    # test file has headers in it, so first line must be ignored
-                    world.test_lines -= 1
-            elif test_rows is not None:
-                world.test_lines = test_rows
-                if options is not None and \
-                        options.find('--prediction-header') > -1:
-                    world.test_lines += 1
-            elif options is not None and \
-                    options.find('--prediction-header') > -1:
-                world.test_lines += 1
-            world.output = output
-            assert True
-    except (OSError, CalledProcessError, IOError) as exc:
-        assert False, str(exc)
-
-
-#@step(r'I create BigML topic model resources from dataset to test "(.*)" with options "(.*)" and log predictions in "(.*)"')
-def i_create_all_td_resources_from_dataset( \
+def i_create_all_td_resources_from_dataset(
     step, test=None, options=None, output=None):
+    """Step: I create BigML topic model resources from dataset to test <test>
+    with options <options> and log predictions in <output>
+    """
     ok_(test is not None and options is not None and output is not None)
     test = res_filename(test)
     command = ("bigmler topic-model " +
@@ -74,9 +39,11 @@ def i_create_all_td_resources_from_dataset( \
     shell_execute(command, output, test=test, options=options)
 
 
-#@step(r'I create BigML topic model resources from source to test "(.*)" with options "(.*)" and log predictions in "(.*)"')
-def i_create_all_td_resources_from_source( \
+def i_create_all_td_resources_from_source(
     step, test=None, options=None, output=None):
+    """Step: I create BigML topic model resources from source to test <test>
+    with options <options> and log predictions in <output>
+    """
     ok_(test is not None and options is not None and output is not None)
     test = res_filename(test)
     command = ("bigmler topic-model " +
@@ -86,9 +53,11 @@ def i_create_all_td_resources_from_source( \
     shell_execute(command, output, test=test, options=options)
 
 
-#@step(r'I create BigML topic model resources from model to test "(.*)" with options "(.*)" and log predictions in "(.*)"')
-def i_create_all_td_resources_from_model( \
+def i_create_all_td_resources_from_model(
     step, test=None, options=None, output=None):
+    """Step: I create BigML topic model resources from model to test <test>
+    with options <options> and log predictions in <output>
+    """
     ok_(test is not None and options is not None and output is not None)
     test = res_filename(test)
     command = ("bigmler topic-model " +
@@ -98,9 +67,11 @@ def i_create_all_td_resources_from_model( \
     shell_execute(command, output, test=test, options=options)
 
 
-#@step(r'I create BigML batch topic distribution from model to test "(.*)" with options "(.*)" and log predictions in "(.*)"')
-def i_create_topic_distribution_from_model_remote( \
+def i_create_topic_distribution_from_model_remote(
     step, test=None, options=None, output=None):
+    """Step: I create BigML batch topic distribution from model to test
+    <test> with options <options> and log predictions in <output>
+    """
     ok_(test is not None and options is not None and output is not None)
     test = res_filename(test)
     command = ("bigmler topic-model --remote" +
@@ -110,97 +81,73 @@ def i_create_topic_distribution_from_model_remote( \
     shell_execute(command, output, test=test, options=options)
 
 
-#@step(r'I check that the topic model has been created')
 def i_check_create_topic_model(step):
-    topic_model_file = "%s%stopic_models" % (world.directory, os.sep)
+    """Step: I check that the topic model has been created"""
+    topic_model_file = os.path.join(world.directory, "topic_models")
+    message = None
     try:
-        topic_model_file = open(topic_model_file, "r")
-        topic_model = check_resource(topic_model_file.readline().strip(),
-                                     world.api.get_topic_model)
-        world.topic_models.append(topic_model['resource'])
-        world.topic_model = topic_model
-        topic_model_file.close()
-        assert True
+        with open(topic_model_file) as handler:
+            topic_model = check_resource(handler.readline().strip(),
+                                         world.api.get_topic_model)
+            world.topic_models.append(topic_model['resource'])
+            world.topic_model = topic_model
     except Exception as exc:
-        assert False, str(exc)
+        message = str(exc)
+    ok_(message is None, msg=message)
 
 
-#@step(r'I check that the topic distribution has been created')
 def i_check_create_topic_distribution(step):
-    batch_topic_distribution_file = "%s%sbatch_topic_distribution" % (
-        world.directory, os.sep)
+    """Step: I check that the topic distribution has been created"""
+    batch_topic_distribution_file = os.path.join(world.directory,
+                                                 "batch_topic_distribution")
+    message = None
     try:
-        batch_topic_distribution_file = open(
-            batch_topic_distribution_file, "r")
-        batch_topic_distribution = check_resource(
-            batch_topic_distribution_file.readline().strip(),
-            world.api.get_batch_topic_distribution)
-        world.batch_topic_distribution.append(
-            batch_topic_distribution['resource'])
-        world.batch_topic_distribution = batch_topic_distribution
-        batch_topic_distribution_file.close()
-        assert True
+        with open(batch_topic_distribution_file) as handler:
+            batch_topic_distribution = check_resource(
+                handler.readline().strip(),
+                world.api.get_batch_topic_distribution)
+            world.batch_topic_distribution.append(
+                batch_topic_distribution['resource'])
+            world.batch_topic_distribution = batch_topic_distribution
     except Exception as exc:
-        assert False, str(exc)
+        message = str(exc)
+    ok_(message is None, msg=message)
 
 
-#@step(r'I check that the remote topic distributions is ready')
 def i_check_create_topic_distributions(step):
-    previous_lines = -1
+    """Step: I check that the remote topic distributions is ready"""
     predictions_lines = 0
+    message = None
     try:
         predictions_file = world.output
-        predictions_file = open(predictions_file, "r")
-        predictions_lines = 0
-        for line in predictions_file:
-            predictions_lines += 1
-        if predictions_lines == world.test_lines:
-            assert True
-        else:
-            assert False, "topic distribution lines: %s, test lines: %s" % (
-                predictions_lines, world.test_lines)
-        predictions_file.close()
+        with open(predictions_file) as handler:
+            predictions_lines = 0
+            for _ in handler:
+                predictions_lines += 1
+            eq_(predictions_lines, world.test_lines,
+                msg=f"topic distribution lines: {predictions_lines},"
+                    f" test lines: {world.test_lines}")
     except Exception as exc:
-        assert False, str(exc)
+        message = str(exc)
+    ok_(message is None, msg=message)
 
 
-#@step(r'the local topic distributions file is like "(.*)"')
 def i_check_topic_distributions(step, check_file):
+    """Step: the local topic distributions file is like <check_file>"""
     check_file = res_filename(check_file)
     predictions_file = world.output
-    import traceback
+    message = None
+    #pylint: disable=locally-disabled,import-outside-toplevel
     try:
-        with UnicodeReader(predictions_file) as predictions_file:
-            with UnicodeReader(check_file) as check_file:
-                for row in predictions_file:
-                    check_row = next(check_file)
-                    assert len(check_row) == len(row)
-                    for index in range(len(row)):
-                        dot = row[index].find(".")
-                        decimal_places = 1
-                        if dot > 0 or (check_row[index].find(".") > 0
-                                       and check_row[index].endswith(".0")):
-                            try:
-                                decimal_places = min( \
-                                    len(row[index]),
-                                    len(check_row[index])) - dot - 1
-                                row[index] = round(float(row[index]),
-                                                   decimal_places)
-                                check_row[index] = round(
-                                    float(check_row[index]), decimal_places)
-                            except ValueError:
-                                decimal_places = 1
-                            assert_almost_equal(check_row[index], row[index],
-                                                places=(decimal_places - 1))
-                        else:
-                            assert_equal(check_row[index], row[index])
-    except Exception as exc:
-        assert False, traceback.format_exc()
+        message = check_rows_equal(predictions_file, check_file)
+    except Exception:
+        import traceback
+        message = traceback.format_exc()
+    ok_(message is None, msg=message)
 
 
-#@step(r'I create BigML topic model from dataset"')
-def i_create_topic_model_from_dataset( \
-    step, output=None):
+def i_create_topic_model_from_dataset(step, output=None):
+    """Step: I create BigML topic model from dataset"""
     ok_(output is not None)
     command = ("bigmler topic-model " +
                "--minimum-name-terms 0 --dataset " +

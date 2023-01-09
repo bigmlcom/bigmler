@@ -25,15 +25,20 @@
 import os
 import shutil
 import time
-import pkg_resources
 import datetime
-
-from bigml.api import BigML
-from bigml.api import HTTP_OK, HTTP_NO_CONTENT, HTTP_UNAUTHORIZED, \
-    HTTP_NOT_FOUND
-from bigml.constants import IRREGULAR_PLURALS, RENAMED_RESOURCES
+import re
+import math
 
 from subprocess import check_call
+
+import pytest
+import pkg_resources
+
+
+from bigml.api import BigML
+from bigml.api import HTTP_OK, HTTP_NO_CONTENT, HTTP_NOT_FOUND
+from bigml.constants import IRREGULAR_PLURALS
+
 
 MAX_RETRIES = 10
 RESOURCE_TYPES = [
@@ -106,6 +111,12 @@ def show_doc(self, examples=None):
                                         example in examples]))
 
 
+def show_method(self, method, example):
+    """Prints the test class and method of the current test"""
+    class_name = re.sub(".*'(.*)'.*", "\\1", str(self.__class__))
+    print("\nTesting %s %s with:\n" % (class_name, method), example)
+
+
 def plural(resource_type):
     """Creates the plural form of a resource type
 
@@ -124,21 +135,78 @@ def bigmler_delete(directory, output_dir=None):
         if retcode == 0:
             if os.path.exists(directory):
                 shutil.rmtree(directory)
-    except OSError as e:
+    except OSError:
         pass
 
 
-class World(object):
+def float_round(value, precision=5):
+    """Rounding if float"""
+    if isinstance(value, float):
+        return round(value, precision)
+    return value
+
+
+def eq_(*args, msg=None, precision=None):
+    """Wrapper to assert. If precision is set, previous rounding"""
+    new_args = list(args)
+    if msg is None:
+        msg = "Different values: %s" % ", ".join(
+            [str(arg) for arg in new_args])
+    if precision is not None:
+        for index, arg in enumerate(new_args):
+            new_args[index] = float_round(arg, precision)
+        assert all(new_args[0] == b for b in new_args[1:]), msg
+    else:
+        assert new_args[0] == new_args[1], msg
+
+
+#pylint: disable=locally-disabled,inconsistent-return-statements
+def ok_error(value, msg=None):
+    """Wrapper to return error message"""
+    if value:
+        return None
+    return msg
+
+
+def ok_(value, msg=None):
+    """Wrapper to assert."""
+    if msg is None:
+        assert value
+    else:
+        assert value, msg
+
+
+def approx_error(number_a, number_b, msg=None, precision=5):
+    """Wrapper to assert only on approximate error"""
+    epsilon = math.pow(0.1, precision)
+    if number_a == pytest.approx(number_b, abs=epsilon):
+        return None
+    return msg
+
+
+def approx_(number_a, number_b, msg=None, precision=5):
+    """Wrapper for pytest approx function"""
+    epsilon = math.pow(0.1, precision)
+    if msg is None:
+        assert number_a == pytest.approx(number_b, abs=epsilon)
+    else:
+        assert number_a == pytest.approx(number_b, abs=epsilon), msg
+
+
+class World:
+    """Object to store common test resources"""
 
     def __init__(self):
-        self.USERNAME = None
-        self.API_KEY = None
+        self.username = None
+        self.api_key = None
         self.api = None
         self.debug = False
         self.api_debug = False
         self.source_lower = None
         self.source_upper = None
         self.source_reference = None
+        self.output = None
+        self.directory = None
         self.clear()
         self.dataset_ids = []
         self.fields_properties_dict = {}
@@ -150,27 +218,28 @@ class World(object):
         self.print_connection_info()
 
     def print_connection_info(self):
-        self.USERNAME = os.environ.get('BIGML_USERNAME')
-        self.API_KEY = os.environ.get('BIGML_API_KEY')
+        """Prints the variables used for the connection authentication"""
+        self.username = os.environ.get('BIGML_USERNAME')
+        self.api_key = os.environ.get('BIGML_API_KEY')
         try:
             self.debug = bool(os.environ.get('BIGMLER_DEBUG', 0))
             self.api_debug = bool(os.environ.get('BIGML_DEBUG', 0))
             self.delta = int(os.environ.get('BIGML_DELTA', 1))
         except ValueError:
             pass
-        if self.USERNAME is None or self.API_KEY is None:
+        if self.username is None or self.api_key is None:
             assert False, ("Tests use the BIGML_USERNAME and BIGML_API_KEY"
                            " environment variables to authenticate the"
                            " connection, but they seem to be unset. Please,"
                            "set them before testing.")
         else:
             assert True
-        self.api = BigML(self.USERNAME, self.API_KEY, debug=self.api_debug)
+        self.api = BigML(self.username, self.api_key, debug=self.api_debug)
         print(self.api.connection_info())
         output_dir = "./last_run"
         dirs = []
-        for _, subFolders, _ in os.walk("./"):
-            for folder in subFolders:
+        for _, sub_folders, _ in os.walk("./"):
+            for folder in sub_folders:
                 if folder.startswith("scenario"):
                     dirs.append(folder)
         dirs.reverse()
@@ -204,7 +273,7 @@ class World(object):
                     else:
                         assert False, ("HTTP returned code %s for listing %s" %
                                        (resources['code'], resource_type))
-                    if (not resource_type in self.counters):
+                    if not resource_type in self.counters:
                         self.counters[resource_type] = {}
                     self.counters[resource_type][time_tag] = resources[
                         'meta']['total_count']
@@ -266,10 +335,18 @@ class World(object):
                         (resource_type, counters['init'],
                          resource_type, counters['final']))
 
+    def clear_paths(self):
+        """Cleaning the output paths"""
+        self.output = ""
+        self.directory = ""
+
 world = World()
 
-def res_filename(file):
-    return pkg_resources.resource_filename('bigmler', "../%s" % file)
+
+def res_filename(filename):
+    """Returns path to a data filename"""
+    directory = pkg_resources.resource_filename('bigmler', '__init__.py')
+    return os.path.join(os.path.dirname(os.path.dirname(directory)), filename)
 
 
 def common_setup_module():
@@ -291,7 +368,7 @@ def common_teardown_module():
 
     if not world.debug:
         world.delete_resources()
-        project_stats = world.api.get_project( \
+        project_stats = world.api.get_project(
             world.project_id)['object']['stats']
         for resource_type, value in list(project_stats.items()):
             if value['count'] != 0:
@@ -302,13 +379,5 @@ def common_teardown_module():
         for folder in world.folders:
             try:
                 shutil.rmtree(folder)
-            except:
+            except Exception:
                 pass
-
-
-def teardown_class():
-    """Operations to be performed after each class
-
-    """
-    world.output = ""
-    world.directory = ""

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+#pylint: disable=locally-disabled,unused-argument,no-member
 #
 # Copyright 2019-2022 BigML
 #
@@ -16,55 +17,21 @@
 
 
 import os
-import time
-import json
-from bigmler.tests.world import world, res_filename
-from subprocess import check_call, CalledProcessError
+
+
 from bigml.api import check_resource
-from bigml.io import UnicodeReader
-from bigmler.checkpoint import file_number_of_lines
-from bigmler.utils import storage_file_name, open_mode
-from bigmler.tests.common_steps import check_debug
-from nose.tools import ok_, assert_equal, assert_not_equal
+
 import bigmler.tests.basic_tst_prediction_steps as test_pred
 import bigmler.tests.basic_deepnet_steps as test_dn
 
-
-def shell_execute(command, output, test=None, options=None,
-                  test_rows=None, project=True):
-    """Excute bigmler command in shell
-
-    """
-    command = check_debug(command, project=project)
-    world.directory = os.path.dirname(output)
-    world.folders.append(world.directory)
-    try:
-        retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            if test is not None:
-                world.test_lines = file_number_of_lines(test)
-                if options is None or \
-                        options.find('--prediction-header') == -1:
-                    # test file has headers in it, so first line must be ignored
-                    world.test_lines -= 1
-            elif test_rows is not None:
-                world.test_lines = test_rows
-                if options is not None and \
-                        options.find('--prediction-header') > -1:
-                    world.test_lines += 1
-            elif options is not None and \
-                    options.find('--prediction-header') > -1:
-                world.test_lines += 1
-            world.output = output
-            assert True
-    except (OSError, CalledProcessError, IOError) as exc:
-        assert False, str(exc)
+from bigmler.tests.common_steps import shell_execute
+from bigmler.tests.world import world, res_filename, ok_
 
 
-#@step(r'I create BigML resources using model to test "(.*)" and log predictions in "(.*)"')
 def i_create_fs_resources_from_model(step, test=None, output=None):
+    """Step: I create BigML resources using model to test <test> and log
+    predictions in <output>
+    """
     ok_(test is not None and output is not None)
     test = res_filename(test)
 
@@ -76,8 +43,10 @@ def i_create_fs_resources_from_model(step, test=None, output=None):
     shell_execute(command, output, test=test)
 
 
-#@step(r'I create BigML resources using model to test "(.*)" as batch prediction and log predictions in "(.*)"')
 def i_create_fs_resources_from_model_remote(step, test=None, output=None):
+    """Step: I create BigML resources using model to test <test> as batch
+    prediction and log predictions in <output>
+    """
     ok_(test is not None and output is not None)
     test = res_filename(test)
 
@@ -86,10 +55,15 @@ def i_create_fs_resources_from_model_remote(step, test=None, output=None):
                ",".join(models) + " --test \"" + test +
                "\" --store --remote --output " +
                output)
-    shell_execute(command, output, test=test)
+    shell_execute(command, output, test=test, options="--no-header")
 
-#@step(r'I create BigML resources using model to test "(.*)" as batch prediction with output format "(.*)" and log predictions in "(.*)"')
-def i_create_fs_resources_from_model_remote_with_options(step, test=None, output=None, options_file=None):
+
+def i_create_fs_resources_from_model_remote_with_options(
+    step, test=None, output=None, options_file=None):
+    """Step: I create BigML resources using model to test <test> as batch
+    prediction with output format <options_file> and log predictions in
+    <output>
+    """
     ok_(test is not None and output is not None and options_file is not None)
     test = res_filename(test)
     options_file = res_filename(options_file)
@@ -100,10 +74,13 @@ def i_create_fs_resources_from_model_remote_with_options(step, test=None, output
                "\" --batch-prediction-attributes " + options_file +
                " --store --remote --output " +
                output)
-    shell_execute(command, output, test=test)
+    shell_execute(command, output, test=test, options="--no-header")
 
-#@step(r'I create BigML resources using model to test "(.*)" and an evaluation and log predictions in "(.*)"')
+
 def i_create_fs_resources_from_mode_and_evaluate(step, output=None):
+    """Step: I create BigML resources using model to test <test> and an
+    evaluation and log predictions in <output>
+    """
     ok_(output is not None)
     models = [world.model["resource"], world.deepnet["resource"]]
     command = ("bigmler fusion --fusion-models " +
@@ -111,22 +88,26 @@ def i_create_fs_resources_from_mode_and_evaluate(step, output=None):
                world.dataset["resource"] +
                "\" --evaluate --store --remote --output " +
                output)
-    shell_execute(command, output)
+    shell_execute(command, output, options="--no-header")
 
-#@step(r'I check that the fusion model has been created')
+
 def i_check_create_fusion(step):
-    fs_file = "%s%sfusions" % (world.directory, os.sep)
+    """Step: I check that the fusion model has been created"""
+    fs_file = os.path.join(world.directory, "fusions")
+    message = None
     try:
-        fs_file = open(fs_file, "r")
-        fs = check_resource(fs_file.readline().strip(),
-                            world.api.get_fusion)
-        world.fusions.append(fs['resource'])
-        world.fusion = fs
-        fs_file.close()
+        with open(fs_file) as handler:
+            fusion = check_resource(handler.readline().strip(),
+                                    world.api.get_fusion)
+            world.fusions.append(fusion['resource'])
+            world.fusion = fusion
     except Exception as exc:
-        assert False, str(exc)
+        message = str(exc)
+    ok_(message is None, msg=message)
+
 
 def setup_for_fusion(step, train=None, output_dir=None):
+    """Creating models needed for a fusion"""
     train = res_filename(train)
     command = ("bigmler --train \"" +
                train + "\" --store --output-dir " +
@@ -142,8 +123,11 @@ def setup_for_fusion(step, train=None, output_dir=None):
     shell_execute(command, "%s/predictions" % output_dir)
     test_dn.i_check_create_dn_model(step)
 
-#@step(r'I create BigML fusion resources uploading train "(.*)" file to evaluate and log evaluation in "([^"]*)"$')
+
 def i_create_all_fs_resources_to_evaluate(step, train=None, test=None, output=None):
+    """Step: I create BigML fusion resources uploading train <train> file to
+    evaluate and log evaluation in <output>
+    """
     models = [world.model["resource"], world.deepnet["resource"]]
     command = ("bigmler fusion --fusion-models " + ",".join(models) +
                " --test \"" +

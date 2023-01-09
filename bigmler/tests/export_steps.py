@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+#pylint: disable=locally-disabled,unused-argument,no-member
 #
 # Copyright 2017-2022 BigML
 #
@@ -17,23 +18,14 @@
 
 
 import os
-import time
-import csv
-import json
 
-from nose.tools import assert_equal, assert_not_equal, ok_, eq_
-from bigmler.tests.world import world, res_filename
-from subprocess import check_call, CalledProcessError
-from bigml.api import check_resource
-from bigmler.checkpoint import file_number_of_lines
-from bigmler.tests.common_steps import check_debug
+from bigmler.tests.common_steps import shell_execute
 from bigmler.export.dispatcher import EXTENSIONS
+from bigmler.tests.world import world, res_filename, ok_, eq_
 
 
 def extract_content(file_handler):
-    """reads the file and removes the model ID in the comments
-
-    """
+    """Reads the file and removes the model ID in the comments"""
     content = file_handler.read()
     variable_comment = " from" \
         " model/"
@@ -46,36 +38,8 @@ def extract_content(file_handler):
     return content
 
 
-def shell_execute(command, output, test=None, options=None,
-                  data=None, test_split=None):
-    """Execute bigmler command in shell
-
-    """
-    command = check_debug(command)
-    world.directory = os.path.dirname(output)
-    world.folders.append(world.directory)
-    try:
-        retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            if test is not None:
-                world.test_lines = file_number_of_lines(test)
-                world.test_lines -= 1
-                # prediction file has headers in it,
-                # so first line must be ignored
-                world.prediction_header = options is not None and \
-                    options.find('--prediction-header') > -1
-            if test_split is not None:
-                data_lines = file_number_of_lines(data) - 1
-                world.test_lines = int(data_lines * float(test_split))
-            world.output = output
-    except (OSError, CalledProcessError, IOError) as exc:
-        assert False, str(exc)
-
-
-#@step(r'I I export the model as a function in "(.*)"$')
 def i_export_model(step, language=None, output=None):
+    """Step: I export the model as a function in <output>"""
     ok_(language is not None and output is not None)
     output_dir = world.directory
     command = ("bigmler export --language " + language +
@@ -83,9 +47,11 @@ def i_export_model(step, language=None, output=None):
                world.model['resource'])
     shell_execute(command, output)
 
-#@step(r'I create BigML resources uploading train "(.*)" file using "(.*)" and log in "(.*)"$')
-def i_create_all_resources_to_model_with_source_attrs( \
+def i_create_all_resources_to_model_with_source_attrs(
     self, data=None, source_attributes=None, output=None):
+    """Step: I create BigML resources uploading train <data> file using
+    <source_attributes> and log in <output>
+    """
     ok_(data is not None and source_attributes is not None
         and output is not None)
     if source_attributes != "":
@@ -96,8 +62,11 @@ def i_create_all_resources_to_model_with_source_attrs( \
                " --store --max-batch-models 1 --no-fast")
     shell_execute(command, output)
 
-#@step(r'I check the output for "(.*)" is like "(.*)" expected file')
+
 def i_check_if_the_output_is_like_expected_file(step, language, expected_file):
+    """Step: I check the output for <language> is like <expected_file>
+    expected file
+    """
     ok_(language is not None and expected_file is not None)
     with open(res_filename(expected_file)) as file_handler:
         expected_content = extract_content(file_handler)
@@ -117,6 +86,7 @@ def i_check_if_the_output_is_like_expected_file(step, language, expected_file):
                 expected_content = extract_content(file_handler)
         except IOError:
             pass
-    eq_(output.strip(), expected_content.strip(), "Found: %s\nExpected:%s" % \
+    eq_(output.strip(), expected_content.strip(),
+        msg="Found: %s\nExpected:%s" % \
         (world.directory + "/" + world.model["resource"],
          expected_file))

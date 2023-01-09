@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+#pylint: disable=locally-disabled,unused-argument,no-member
 #
 # Copyright 2014-2022 BigML
 #
@@ -14,29 +15,21 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-
-import os
-import time
-import csv
-import json
 import sys
 
-
-from bigmler.tests.world import world, res_filename
-from subprocess import check_call, CalledProcessError
-from bigml.api import check_resource
-from bigmler.checkpoint import file_number_of_lines
-from bigmler.tests.common_steps import check_debug
-from bigmler.tests.basic_tst_prediction_steps import shell_execute
+from bigmler.tests.common_steps import shell_execute, base_shell_execute
+from bigmler.tests.world import res_filename, ok_
 
 CAT = "type " if sys.platform == "win32" else "cat "
 
-#@step(r'I create BigML resources uploading train "(.*)" file to test "(.*)" read from stdin with name "(.*)" and log predictions in "(.*)"$')
-def i_create_all_resources_to_test_from_stdin(step, data=None, test=None, name=None, output=None):
-    if data is None or test is None or output is None or name is None:
-        assert False
 
+def i_create_all_resources_to_test_from_stdin(
+    step, data=None, test=None, name=None, output=None):
+    """Step: I create BigML resources uploading train <data> file to test
+    <test> read from stdin with name <name> and log predictions in <output>
+    """
+    ok_(data is not None and test is not None and output is not None and
+        name is not None)
     test = res_filename(test)
 
     command = (CAT + test + "|bigmler --train " + res_filename(data) +
@@ -45,11 +38,12 @@ def i_create_all_resources_to_test_from_stdin(step, data=None, test=None, name=N
     shell_execute(command, output, test=test)
 
 
-#@step(r'I create a BigML source from stdin using train "(.*)" file and logging in "(.*)"$')
 def i_create_source_from_stdin(step, data=None, output_dir=None):
-    if data is None or output_dir is None:
-        assert False
+    """Step: I create a BigML source from stdin using train <data>
+    file and logging in <output_dir>
+    """
+    ok_(data is not None and output_dir is not None)
     command = (CAT + res_filename(data) + "|bigmler --train " +
                "--store --no-dataset --no-model --output-dir " +
                output_dir + " --max-batch-models 1")
-    shell_execute(command, output_dir + "/test", test=None)
+    base_shell_execute(command, output_dir)

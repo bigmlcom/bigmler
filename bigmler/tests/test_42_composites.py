@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
+#pylint: disable=locally-disabled,line-too-long,attribute-defined-outside-init
 #
 # Copyright 2021 BigML
 #
@@ -19,13 +20,10 @@
 """ Testing fusion predictions creation
 
 """
-
-
 import os
 
 from bigmler.tests.world import (world, common_setup_module,
-                                 common_teardown_module,
-                                 teardown_class)
+                                 common_teardown_module, show_method)
 
 
 import bigmler.tests.composite_steps as composite_create
@@ -46,21 +44,24 @@ def teardown_module():
     common_teardown_module()
 
 
-class TestComposite(object):
+class TestComposite:
+    """Testing Composite Sources"""
 
-    def setup(self):
+    def setup_method(self, method):
         """
             Debug information
         """
+        self.bigml = {}
+        self.bigml["method"] = method.__name__
         print("\n-------------------\nTests in: %s\n" % __name__)
 
-    def teardown(self):
+    def teardown_method(self):
         """Calling generic teardown for every method
 
         """
-        self.world = teardown_class()
+        world.clear_paths()
         print("\nEnd of tests in: %s\n-------------------\n" % __name__)
-
+        self.bigml = {}
 
     def test_scenario01(self):
         """
@@ -72,23 +73,25 @@ class TestComposite(object):
             And I check that the source is a composite component
             And I remove the source from the composite
             And I check that the composite is empty
-
-
         """
         print(self.test_scenario01.__doc__)
+        headers = ["data", "output_dir"]
         examples = [
             ['data/iris.csv', './scenario42_01']]
         for example in examples:
-            print("\nTesting with:\n", example)
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
             source_create.i_create_source( \
-                self, data=example[0], output_dir=example[1])
+                self, data=example["data"], output_dir=example["output_dir"])
             source_create.i_check_create_source(self)
             self.sources = [world.source["resource"]]
             composite_create.i_create_composite_from_sources( \
-                self, sources=",".join(self.sources), output_dir=example[1])
+                self, sources=",".join(self.sources),
+                output_dir=example["output_dir"])
             composite_create.i_check_create_composite(self)
             composite_create.check_sources_in_composite(self)
-            composite_create.remove_sources(self, output_dir=example[1])
+            composite_create.remove_sources(
+                self, output_dir=example["output_dir"])
             composite_create.i_check_create_composite(self)
             self.source = self.sources[0]
             self.sources = []
@@ -103,20 +106,21 @@ class TestComposite(object):
             And I create an empty composite and add the source
             And I check that the composite is ready
             And I check that the source is a composite component
-
         """
         print(self.test_scenario02.__doc__)
+        headers = ["data", "output_dir"]
         examples = [
             ['data/iris.csv', './scenario42_02']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            source_create.i_create_source( \
-                self, data=example[0], output_dir=example[1])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            source_create.i_create_source(
+                self, data=example["data"], output_dir=example["output_dir"])
             source_create.i_check_create_source(self)
             self.sources = [world.source["resource"]]
-            composite_create.i_create_empty_composite_and_add_source( \
+            composite_create.i_create_empty_composite_and_add_source(
                 self, add_sources=",".join(self.sources),
-                output_dir=example[1])
+                output_dir=example["output_dir"])
             composite_create.i_check_create_composite(self)
             composite_create.check_sources_in_composite(self)
 
@@ -130,23 +134,26 @@ class TestComposite(object):
             And I check that the source is a composite component
             And I remove the source from the composite
             And I check that the composite is empty
-
-
         """
         print(self.test_scenario03.__doc__)
+        headers = ["data", "output_dir"]
         examples = [
             ['data/iris.csv', './scenario42_03']]
         for example in examples:
-            print("\nTesting with:\n", example)
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
             source_create.i_create_source( \
-                self, data=example[0], output_dir=example[1])
+                self, data=example["data"],
+                output_dir=example["output_dir"])
             source_create.i_check_create_source(self)
             self.sources = [world.source["resource"]]
-            composite_create.i_create_composite_from_sources( \
-                self, sources=",".join(self.sources), output_dir=example[1])
+            composite_create.i_create_composite_from_sources(
+                self, sources=",".join(self.sources),
+                output_dir=example["output_dir"])
             composite_create.i_check_create_composite(self)
             composite_create.check_sources_in_composite(self)
-            composite_create.delete_sources(self, output_dir=example[1])
+            composite_create.delete_sources(
+                self, output_dir=example["output_dir"])
             composite_create.i_check_create_composite(self)
             self.source = self.sources[0]
             self.sources = []
@@ -159,111 +166,122 @@ class TestComposite(object):
             And I create a source from a "<zip>" of "<images_number>" images
             And I check that the composite is ready
             And I check that it has "<images_number>" components
-
         """
         print(self.test_scenario04.__doc__)
+        headers = ["data", "output_dir"]
         examples = [
             ['data/images/fruits_hist.zip', './scenario42_04']]
         for example in examples:
-            print("\nTesting with:\n", example)
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
             source_create.i_create_source( \
-                self, data=example[0], output_dir=example[1])
+                self, data=example["data"], output_dir=example["output_dir"])
             composite_create.i_check_create_composite(self)
             self.sources = world.source["object"].get("sources", [])
-            composite_create.check_images_number_in_composite(self,
-                                                              example[0])
-
+            composite_create.check_images_number_in_composite(
+                self, example["data"])
 
     def test_scenario05(self):
         """
         Scenario: Successfully building an images composite from directory
-            And I create a source from a "<directory>" of "<images_number>" images
+            And I create a source from a "<directory>" in <output_dir>
             And I check that the composite is ready
-            And I check that it has "<images_number>" components
-
+            And I check that it has the expected components
         """
         print(self.test_scenario05.__doc__)
+        headers = ["directory", "output_dir"]
         examples = [
             ['data/images/fruits_hist/', './scenario42_05']]
         for example in examples:
-            print("\nTesting with:\n", example)
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
             source_create.i_create_source( \
-                self, data=example[0], output_dir=example[1])
+                self, data=example["directory"],
+                output_dir=example["output_dir"])
             composite_create.i_check_create_composite(self)
             self.sources = world.source["object"].get("sources", [])
-            composite_create.check_images_number_in_composite(self,
-                                                              example[0])
+            composite_create.check_images_number_in_composite(
+                self, example["directory"])
 
     def test_scenario06(self):
         """
         Scenario: Successfully building an annotated images composite
             And I create a source from an "<annotations_file>" and an "<images_file>"
             And I check that the composite is ready
-            And I check that it has "<annotation_fields>"
+            And I check that it has the expected annotation_fields
         """
         print(self.test_scenario06.__doc__)
+        headers = ["images_file", "annotations_file", "output_dir"]
         examples = [
             ['data/images/fruits_hist.zip', 'data/images/annotations.json',
              './scenario42_06']]
         for example in examples:
-            print("\nTesting with:\n", example)
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
             composite_create.i_create_annotated_source( \
-                self, images_file=example[0], annotations_file=example[1],
-                output_dir=example[2])
+                self, images_file=example["images_file"],
+                annotations_file=example["annotations_file"],
+                output_dir=example["output_dir"])
             composite_create.i_check_create_composite(self)
             self.sources = world.source["object"].get("sources", [])
-            composite_create.check_images_number_in_composite(self,
-                                                              example[0])
-            composite_create.check_annotation_fields(self, example[1])
+            composite_create.check_images_number_in_composite(
+                self, example["images_file"])
+            composite_create.check_annotation_fields(
+                self, example["annotations_file"])
 
     def test_scenario07(self):
         """
         Scenario: Successfully building a <annotations_language> annotated images composite
-            And I create a source from an "<annotations_dir>" and an "<images_dir>"
+            And I create a source from an "<annotations_dir>" and an "<images_dir>" using <language> and log in <output_dir>
             And I check that the composite is ready
-            And I check that it has "<annotation_fields>"
+            And I check that it has the expected annotation fields
         """
         print(self.test_scenario07.__doc__)
+        headers = ["images_dir", "annotations_dir", "output_dir", "language"]
         examples = [
             ['data/images/fruits_hist', 'data/images/VOC_annotations',
              './scenario42_07_v', 'VOC'],
             ['data/images/YOLO_annotations', 'data/images/YOLO_annotations',
              './scenario42_07_y', 'YOLO']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            composite_create.i_create_lang_annotated_source( \
-                self, images_dir=example[0], annotations_dir=example[1],
-                annotations_language=example[3],
-                output_dir=example[2])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            composite_create.i_create_lang_annotated_source(
+                self, images_dir=example["images_dir"],
+                annotations_dir=example["annotations_dir"],
+                annotations_language=example["language"],
+                output_dir=example["output_dir"])
             composite_create.i_check_create_composite(self)
             self.sources = world.source["object"].get("sources", [])
-            composite_create.check_images_number_in_composite(self,
-                                                              example[0])
+            composite_create.check_images_number_in_composite(
+                self, example["images_dir"])
             composite_create.check_annotation_fields(
                 self,
-                os.path.join(example[2], "annotations.json"))
+                os.path.join(example["output_dir"], "annotations.json"))
 
     def test_scenario08(self):
         """
         Scenario: Successfully extracting <type> features from images composite
             And I create a source from a "<zip>" and store output in "<output_dir>" directory
             And I check that the composite is ready
-            And I update the source to extract different <types> of features
+            And I update the source to extract <features>
             And I check that the image analysis reflects the extracted types
         """
         print(self.test_scenario08.__doc__)
+        headers = ["zip", "output_dir", "features"]
         examples = [
             ['data/images/fruits_hist.zip', './scenario42_08',
              [["dimensions"], ["level_histogram"], ["dimensions", "HOG"],
               ["dimensions", "average_pixels", "level_histogram", "HOG"]]]]
         for example in examples:
-            print("\nTesting with:\n", example)
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
             source_create.i_create_source( \
-                self, data=example[0], output_dir=example[1])
+                self, data=example["zip"], output_dir=example["output_dir"])
             composite_create.i_check_create_composite(self)
-            for extracted_features in example[2]:
+            for extracted_features in example["features"]:
                 composite_create.i_extract_features(self, extracted_features,
-                    example[1])
+                    example["output_dir"])
                 composite_create.i_check_create_composite(self)
                 composite_create.i_check_extracted_features(self,
                     extracted_features)
@@ -273,22 +291,24 @@ class TestComposite(object):
         Scenario: Successfully extracting <type2> features from images composite
             And I create a source from a "<zip>" and store output in "<output_dir>" directory
             And I check that the composite is ready
-            And I update the source to extract <type2> features
+            And I update the source to extract <feature> <option>
             And I check that the image analysis reflects the extracted features
         """
         print(self.test_scenario09.__doc__)
+        headers = ["zip", "output_dir", "feature", "option"]
         examples = [
             ['data/images/fruits_hist.zip', './scenario42_09',
              "ws-level", 2],
             ['data/images/fruits_hist.zip', './scenario42_09',
              "pretrained-cnn", "mobilenet"]]
         for example in examples:
-            print("\nTesting with:\n", example)
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
             source_create.i_create_source( \
-                self, data=example[0], output_dir=example[1])
+                self, data=example["zip"], output_dir=example["output_dir"])
             composite_create.i_check_create_composite(self)
-            composite_create.i_extract_t2_features(self, example[2],
-                example[3], example[1])
+            composite_create.i_extract_t2_features(self, example["feature"],
+                example["option"], example["output_dir"])
             composite_create.i_check_create_composite(self)
-            composite_create.i_check_extracted_t2_features(self, example[2],
-                example[3])
+            composite_create.i_check_extracted_t2_features(
+                self, example["feature"], example["option"])

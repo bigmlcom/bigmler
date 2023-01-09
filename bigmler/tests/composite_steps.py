@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+#pylint: disable=locally-disabled,unused-argument,no-member
 #
-# Copyright 2021 BigML
+# Copyright 2021-2022 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -16,76 +17,50 @@
 
 
 import os
-import time
-import json
 import zipfile
 import glob
 
-from bigmler.tests.world import world, res_filename
-from subprocess import check_call, CalledProcessError
+
 from bigml.api import check_resource
 from bigml.util import filter_by_extension
 from bigml.fields import Fields
 from bigml.constants import IMAGE_EXTENSIONS
-from nose.tools import ok_, assert_equal, assert_not_equal, assert_almost_equal
-from bigmler.tests.common_steps import check_debug
+
+from bigmler.tests.common_steps import shell_execute
 from bigmler.utils import read_sources
 from bigmler.processing.annotations import fields_from_annotations, \
     labels_from_annotations
+from bigmler.tests.world import world, res_filename, ok_, eq_
 
 
 TRANSLATED_FEATURES = {"histogram_of_gradients": "HOG"}
 
 
-def shell_execute(command, output, test=None, options=None,
-                  test_rows=None, project=True):
-    """Excute bigmler command in shell
-
-    """
-    command = check_debug(command, project=project)
-    world.directory = os.path.dirname(output)
-    world.folders.append(world.directory)
-    try:
-        retcode = check_call(command, shell=True)
-        ok_(retcode >= 0)
-        if test is not None:
-            world.test_lines = file_number_of_lines(test)
-            if options is None or \
-                    options.find('--prediction-header') == -1:
-                # test file has headers in it, so first line must be ignored
-                world.test_lines -= 1
-        elif test_rows is not None:
-            world.test_lines = test_rows
-            if options is not None and \
-                    options.find('--prediction-header') > -1:
-                world.test_lines += 1
-        elif options is not None and \
-                options.find('--prediction-header') > -1:
-            world.test_lines += 1
-        world.output = output
-    except (OSError, CalledProcessError, IOError) as exc:
-        assert False, str(exc)
-
-#@step(r'I create BigML composite from a list of sources and
-#        log results in "(.*)"')
 def i_create_composite_from_sources(step, sources=None, output_dir=None):
+    """Step: I create BigML composite from a list of sources and
+    log results in <output_dir>
+    """
     ok_(sources is not None and output_dir is not None)
     command = ("bigmler source --sources " + sources +
                " --store --output-dir " + output_dir)
     shell_execute(command, os.path.join(output_dir, "txt.tmp"))
 
-#@step(r'I create empty BigML composite and then add list of sources and
-#        log results in "(.*)"')
+
 def i_create_empty_composite_and_add_source(step, add_sources=None,
                                             output_dir=None):
+    """Step: I create empty BigML composite and then add list of sources
+    and log results in <output_dir>
+    """
     ok_(add_sources is not None and output_dir is not None)
     command = ("bigmler source --sources \"\" --add-sources " + add_sources +
                " --store --output-dir " + output_dir)
     shell_execute(command, os.path.join(output_dir, "txt.tmp"))
 
-#@step(r'I remove the sources from a BigML composite and
-#        log results in "(.*)"')
+
 def remove_sources(step, output_dir=None):
+    """Step: I remove the sources from a BigML composite and
+    log results in <output_dir>
+    """
     ok_(output_dir is not None)
     command = ("bigmler source --source " + world.source["resource"] +
                " --remove-sources " + ",".join(step.sources) +
@@ -93,9 +68,10 @@ def remove_sources(step, output_dir=None):
     shell_execute(command, os.path.join(output_dir, "txt.tmp"))
 
 
-#@step(r'I delete the sources from a BigML composite and
-#        log results in "(.*)"')
 def delete_sources(step, output_dir=None):
+    """Step: I delete the sources from a BigML composite and
+    log results in <output_dir>
+    """
     ok_(output_dir is not None)
     command = ("bigmler source --source " + world.source["resource"] +
                " --delete-sources " + ",".join(step.sources) +
@@ -103,20 +79,11 @@ def delete_sources(step, output_dir=None):
     shell_execute(command, os.path.join(output_dir, "txt.tmp"))
 
 
-#@step(r'I create empty BigML composite and then add list of sources and
-#        log results in "(.*)"')
-def i_create_empty_composite_and_add_source(step, add_sources=None,
-                                            output_dir=None):
-    ok_(add_sources is not None and output_dir is not None)
-    command = ("bigmler source --sources \"\" --add-sources " + add_sources +
-               " --store --output-dir " + output_dir)
-    shell_execute(command, os.path.join(output_dir, "txt.tmp"))
-
-#@step(r'I create  BigML composite for an "<annotations_file>" and an
-# "<images_file>" and log results in "(.*)"')
-def i_create_annotated_source(step, annotations_file=None,
-                                    images_file=None,
-                                    output_dir=None):
+def i_create_annotated_source(
+    step, annotations_file=None, images_file=None, output_dir=None):
+    """Step: I create  BigML composite for an <annotations_file> and an
+    <images_file> and log results in <output_dir>
+    """
     ok_(annotations_file is not None and images_file is not None and
         output_dir is not None)
     annotations_file = res_filename(annotations_file)
@@ -127,13 +94,12 @@ def i_create_annotated_source(step, annotations_file=None,
     shell_execute(command, os.path.join(output_dir, "txt.tmp"))
 
 
-#@step(r'I create  BigML composite for a "<annotations_language>"
-# "<annotations_dir>" and an
-# "<images_dir>" and log results in "(.*)"')
-def i_create_lang_annotated_source(step, annotations_dir=None,
-                                        images_dir=None,
-                                        annotations_language=None,
-                                        output_dir=None):
+def i_create_lang_annotated_source(
+    step, annotations_dir=None, images_dir=None,
+    annotations_language=None, output_dir=None):
+    """Step: I create  BigML composite for a "<annotations_language>"
+    <annotations_dir> and an <images_dir> and log results in <output_dir>
+    """
     ok_(annotations_dir is not None and images_dir is not None and
         annotations_language is not None and output_dir is not None)
     command = ("bigmler source --annotations-dir " + annotations_dir +
@@ -143,14 +109,16 @@ def i_create_lang_annotated_source(step, annotations_dir=None,
     shell_execute(command, os.path.join(output_dir, "txt.tmp"))
 
 
-#@step(r'I check that the sources are in the composite')
 def check_sources_in_composite(step):
-    assert_equal(step.sources, ["source/%s" % source for source in
-                                  world.source["object"].get("sources", [])])
+    """Step: I check that the sources are in the composite"""
+    eq_(step.sources, ["source/%s" % source for source in
+                       world.source["object"].get("sources", [])])
 
-#@step(r'I check that the composite has been created$')
+
 def i_check_create_composite(step):
+    """Step: I check that the composite has been created"""
     source_file = os.path.join(world.directory, "source")
+    message = None
     try:
         last_source = read_sources(source_file)
         source = check_resource(
@@ -159,10 +127,14 @@ def i_check_create_composite(step):
             world.composites.append(source['resource'])
         world.source = source
     except Exception as exc:
-        assert False, str(exc)
+        message = str(exc)
+    ok_(message is None, msg=message)
 
-#@step(r'I check the number of sources in the composite is <images_number>')
+
 def check_images_number_in_composite(step, zip_file):
+    """Step: I check the number of sources in the composite is
+    <images_number>
+    """
     sources = []
     zip_file = res_filename(zip_file)
     if os.path.isdir(zip_file):
@@ -170,29 +142,34 @@ def check_images_number_in_composite(step, zip_file):
                                                 recursive=True),
                                       IMAGE_EXTENSIONS)
     else:
-        zip = zipfile.ZipFile(zip_file)
-        sources = filter_by_extension(zip.namelist(), IMAGE_EXTENSIONS)
-    assert_equal(len(sources), len(step.sources))
+        with zipfile.ZipFile(zip_file) as zip_handler:
+            sources = filter_by_extension(zip_handler.namelist(),
+                IMAGE_EXTENSIONS)
+    eq_(len(sources), len(step.sources), msg="Found %s sources in composite."
+        " %s expected" % (len(step.sources), len(sources)))
+
 
 def check_annotation_fields(step, annotations_file):
+    """Checks the created label fields"""
     annotations_file = res_filename(annotations_file)
     fields = fields_from_annotations(annotations_file)
     field_labels = labels_from_annotations(annotations_file)
     source_fields = Fields(world.source)
     field_names = list(source_fields.fields_by_name.keys())
     for field in fields:
-        assert field["name"] in field_names
+        ok_(field["name"] in field_names)
         field_labels[field["name"]].sort()
         source_fields.fields[
             source_fields.fields_by_name[
             field["name"]]]["values"].sort()
-        assert field_labels[
-            field["name"]] == source_fields.fields[
-            source_fields.fields_by_name[
-            field["name"]]]["values"]
+        eq_(field_labels[field["name"]],
+            source_fields.fields[
+                source_fields.fields_by_name[
+                field["name"]]]["values"])
 
 
 def i_extract_features(step, extracted_features, output_dir):
+    """Updating extracted features from source"""
     extracted_features_str = " --".join(extracted_features)
     if extracted_features_str:
         extracted_features_str = " --" + extracted_features_str
@@ -203,17 +180,21 @@ def i_extract_features(step, extracted_features, output_dir):
 
 
 def i_check_extracted_features(step, extracted_features):
+    """Checking extracted features"""
+    message = None
     try:
         extracted = world.source["object"]["image_analysis"][
             "extracted_features"]
         extracted = [TRANSLATED_FEATURES.get(feature, feature) for
             feature in extracted]
-        assert all(feature in extracted for feature in extracted_features)
-    except KeyError:
-        assert False
+        ok_(all(feature in extracted for feature in extracted_features))
+    except KeyError as exc:
+        message = "Feature not found: %s" % str(exc)
+    ok_(message is None, msg=message)
 
 
 def i_extract_t2_features(step, attr, attr_value, output_dir):
+    """Extracting features that involve wavelet subbands or cnns"""
     command = ("bigmler source --source " + world.source["resource"] +
                " --" +  attr + " " + str(attr_value) +
                " --store --output-dir " + output_dir)
@@ -221,7 +202,9 @@ def i_extract_t2_features(step, attr, attr_value, output_dir):
 
 
 def i_check_extracted_t2_features(step, attr, attr_value):
+    """Checking wavelet extracted features"""
     attr = attr.replace("ws-level", "wavelet_subbands").replace("-", "_")
+    message = None
     try:
         value = None
         extracted = world.source["object"]["image_analysis"][
@@ -229,6 +212,7 @@ def i_check_extracted_t2_features(step, attr, attr_value):
         for feature in extracted:
             if isinstance(feature, list) and feature[0] == attr:
                 value = feature[1]
-        assert value == attr_value
-    except KeyError:
-        assert False
+        eq_(value, attr_value)
+    except KeyError as exc:
+        message = "Feature not found: %s" % str(exc)
+    ok_(message is None, msg=message)

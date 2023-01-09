@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+#pylint: disable=locally-disabled,unused-argument,no-member
 #
 # Copyright 2014-2022 BigML
 #
@@ -14,163 +15,105 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-
 import os
-import time
-import csv
-import json
-from bigmler.tests.world import world, res_filename
-from subprocess import check_call, CalledProcessError
-from bigmler.checkpoint import file_number_of_lines
+
 from bigml.api import check_resource
-from bigmler.tests.common_steps import check_debug
+
+from bigmler.tests.common_steps import shell_execute
+from bigmler.tests.world import world, res_filename, ok_
 
 
-#@step(r'I create BigML resources with (\d+) as categories limit and (.*) as objective field and model fields "(.*)" using dataset to test "(.*)" and log predictions in "(.*)"')
-def i_create_all_mc_resources_from_dataset_with_model_fields(step, max_categories=None, objective=None, model_fields=None, test=None, output=None):
-    if max_categories is None or test is None or output is None or model_fields is None:
-        assert False
-    world.directory = os.path.dirname(output)
-    world.folders.append(world.directory)
+def i_create_all_mc_resources_from_dataset_with_model_fields(
+    step, max_categories=None, objective=None, model_fields=None,
+    test=None, output=None):
+    """Step: I create BigML resources with <max_categories> as categories limit
+    and <objective> as objective field and model fields <model_fields> using
+    dataset to test <test> and log predictions in <output>"""
+    ok_(max_categories is not None and test is not None and output is not None
+        and model_fields is not None)
+    command = ("bigmler --dataset " + world.dataset['resource'] +
+               " --max-categories " + max_categories + " --objective " +
+               objective + " --test " + test + " --store --output " +
+               output + " --model-fields \"" + model_fields + "\"")
+    shell_execute(command, output, test=test)
+
+
+def i_create_all_mc_resources(
+    step, data, max_categories=None, objective=None, test=None, output=None):
+    """Step: I create BigML resources from <data> with <max_categories> as
+    categories limit and <objective> as objective field to test <test> and log
+    predictions in <output>
+    """
+    ok_(max_categories is not None and test is not None and output is not None
+        and objective is not None)
     test = res_filename(test)
-    try:
-        command = ("bigmler --dataset " + world.dataset['resource'] +
-                   " --max-categories " + max_categories + " --objective " +
-                   objective + " --test " + test + " --store --output " +
-                   output + " --model-fields \"" + model_fields + "\"")
-        command = check_debug(command)
-        retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.test_lines = file_number_of_lines(test)
-            # test file has headers in it, so first line must be ignored
-            world.test_lines -= 1
-            world.output = output
-            assert True
-    except (OSError, CalledProcessError, IOError) as exc:
-        assert False, str(exc)
+    command = ("bigmler --train " + res_filename(data) + " --max-categories " +
+               max_categories + " --objective " + objective + " --test " +
+               test + " --store --output " + output)
+    shell_execute(command, output, test=test)
 
 
-#@step(r'I create BigML resources from "(.*)" with (\d+) as categories limit and (.*) as objective field to test "(.*)" and log predictions in "(.*)"')
-def i_create_all_mc_resources(step, data, max_categories=None, objective=None, test=None, output=None):
-    if max_categories is None or test is None or output is None or objective is None:
-        assert False
-    world.directory = os.path.dirname(output)
-    world.folders.append(world.directory)
+def i_create_all_mc_resources_from_source(
+    step, max_categories=None, objective=None, test=None, output=None):
+    """Step: I create BigML resources with <max_categories> as categories
+    limit and <objective> as objective field using source to test <test> and
+    log predictions in <output>
+    """
+    ok_(max_categories is not None and test is not None and output is not None)
     test = res_filename(test)
-    try:
-        command = ("bigmler --train " + res_filename(data) + " --max-categories " +
-                   max_categories + " --objective " + objective + " --test " +
-                   test + " --store --output " + output)
-        command = check_debug(command)
-        retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.test_lines = file_number_of_lines(test)
-            # test file has headers in it, so first line must be ignored
-            world.test_lines -= 1
-            world.output = output
-            assert True
-    except (OSError, CalledProcessError, IOError) as exc:
-        assert False, str(exc)
+    command = ("bigmler --source " + world.source['resource'] +
+               " --max-categories " + max_categories +  " --objective " +
+               objective + " --test " + test + " --store --output " +
+               output)
+    shell_execute(command, output, test=test)
 
 
-#@step(r'I create BigML resources with (\d+) as categories limit and (.*) as objective field using source to test "(.*)" and log predictions in "(.*)"')
-def i_create_all_mc_resources_from_source(step, max_categories=None, objective=None, test=None, output=None):
-    if max_categories is None or test is None or output is None:
-        assert False
-    world.directory = os.path.dirname(output)
-    world.folders.append(world.directory)
+def i_create_all_mc_resources_from_dataset(
+    step, max_categories=None, objective=None, test=None, output=None):
+    """Step: I create BigML resources with <max_categories> as categories limit
+    and <objective> as objective field using dataset to test <test> and
+    log predictions in <output>
+    """
+    ok_(max_categories is not None and test is not None and output is not None)
     test = res_filename(test)
-    try:
-        command = ("bigmler --source " + world.source['resource'] +
-                   " --max-categories " + max_categories +  " --objective " +
-                   objective + " --test " + test + " --store --output " +
-                   output)
-        command = check_debug(command)
-        retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.test_lines = file_number_of_lines(test)
-            # test file has headers in it, so first line must be ignored
-            world.test_lines -= 1
-            world.output = output
-            assert True
-    except (OSError, CalledProcessError, IOError) as exc:
-        assert False, str(exc)
+    command = ("bigmler --dataset " + world.dataset['resource'] +
+               " --max-categories " + max_categories + " --objective " +
+               objective + " --test " + test + " --store --output " +
+               output)
+    shell_execute(command, output, test=test)
 
 
-#@step(r'I create BigML resources with (\d+) as categories limit and (.*) as objective field using dataset to test "(.*)" and log predictions in "(.*)"')
-def i_create_all_mc_resources_from_dataset(step, max_categories=None, objective=None, test=None, output=None):
-    if max_categories is None or test is None or output is None:
-        assert False
-    world.directory = os.path.dirname(output)
-    world.folders.append(world.directory)
+def i_create_all_mc_resources_from_models(
+    step, models_file=None, test=None, output=None):
+    """Step: I create BigML resources using models in file <models_file> to
+    test <test> and log predictions with combine method in <output>
+    """
+    ok_(models_file is not None and test is not None and output is not None)
     test = res_filename(test)
-    try:
-        command = ("bigmler --dataset " + world.dataset['resource'] +
-                   " --max-categories " + max_categories + " --objective " +
-                   objective + " --test " + test + " --store --output " +
-                   output)
-        command = check_debug(command)
-        retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.test_lines = file_number_of_lines(test)
-            # test file has headers in it, so first line must be ignored
-            world.test_lines -= 1
-            world.output = output
-            assert True
-    except (OSError, CalledProcessError, IOError) as exc:
-        assert False, str(exc)
+    command = ("bigmler --models " + models_file +
+               " --method combined --test " + test + " --store --output "
+               + output)
+    shell_execute(command, output, test=test)
 
 
-#@step(r'I create BigML resources using models in file "(.*)" to test "(.*)" and log predictions with combine method in "(.*)"')
-def i_create_all_mc_resources_from_models(step, models_file=None, test=None, output=None):
-    if models_file is None or test is None or output is None:
-        assert False
-    world.directory = os.path.dirname(output)
-    world.folders.append(world.directory)
-    test = res_filename(test)
-    try:
-        command = ("bigmler --models " + models_file +
-                   " --method combined --test " + test + " --store --output "
-                   + output)
-        command = check_debug(command)
-        retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            world.test_lines = file_number_of_lines(test)
-            # test file has headers in it, so first line must be ignored
-            world.test_lines -= 1
-            world.output = output
-            assert True
-    except (OSError, CalledProcessError, IOError) as exc:
-        assert False, str(exc)
-
-#@step(r'I check that the max_categories datasets have been created')
 def i_check_create_max_categories_datasets(step):
-    import traceback
-    dataset_file = "%s%sdataset_parts" % (world.directory, os.sep)
+    """Step: I check that the max_categories datasets have been created"""
+    dataset_file = os.path.join(world.directory, "dataset_parts")
+    message = None
+    #pylint: disable=locally-disabled,import-outside-toplevel
     try:
-        dataset_file = open(dataset_file, "r")
-        number_of_datasets = 0
-        for line in dataset_file:
-            dataset_id = line.strip()
-            dataset = check_resource(dataset_id,
-                                     world.api.get_dataset)
-            assert ('user_metadata' in dataset['object'] and 'max_categories'
+        with open(dataset_file) as handler:
+            number_of_datasets = 0
+            for line in handler:
+                dataset_id = line.strip()
+                dataset = check_resource(dataset_id,
+                                         world.api.get_dataset)
+                ok_('user_metadata' in dataset['object'] and 'max_categories'
                     in dataset['object']['user_metadata'])
-            world.datasets.append(dataset['resource'])
-            number_of_datasets += 1
+                world.datasets.append(dataset['resource'])
+                number_of_datasets += 1
         world.number_of_models = number_of_datasets
-        dataset_file.close()
-        assert True
-    except Exception as exc:
-        assert False, traceback.format_exc()
+    except Exception:
+        import traceback
+        message = traceback.format_exc()
+    ok_(message is None, msg=message)

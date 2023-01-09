@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
+#pylint: disable=locally-disabled,line-too-long,attribute-defined-outside-init
+#pylint: disable=locally-disabled,invalid-name
 #
 # Copyright 2020-2022 BigML
 #
@@ -24,8 +26,7 @@
 import os
 
 from bigmler.tests.world import (world, common_setup_module,
-                                 common_teardown_module,
-                                 teardown_class)
+                                 common_teardown_module, show_method)
 
 
 import bigmler.tests.external_connector_steps as external_connection
@@ -44,12 +45,13 @@ if HOST is None or PORT is None or DATABASE is None or USER is None or \
                      " BIGML_EXTERNAL_CONN_PORT, BIGML_EXTERNAL_CONN_DB,"
                      " BIGML_EXTERNAL_CONN_USER, BIGML_EXTERNAL_CONN_PWD")
 
+
 def setup_module():
     """Setup for the module
 
     """
     common_setup_module()
-    test = TestExternalConnector()
+    TestExternalConnector()
 
 
 def teardown_module():
@@ -59,26 +61,29 @@ def teardown_module():
     common_teardown_module()
 
 
-class TestExternalConnector(object):
+class TestExternalConnector:
+    """Testing external connectors"""
 
-    def setup(self):
+    def setup_method(self, method):
         """
             Debug information
         """
+        self.bigml = {}
+        self.bigml["method"] = method.__name__
         print("\n-------------------\nTests in: %s\n" % __name__)
 
-    def teardown(self):
+    def teardown_method(self):
         """Calling generic teardown for every method
 
         """
-        self.world = teardown_class()
+        world.clear_paths()
         print("\nEnd of tests in: %s\n-------------------\n" % __name__)
-
+        self.bigml = {}
 
     def test_scenario01(self):
         """
         Scenario: Successfully building an external connector
-            And I create BigML external connection using  "<name>", "<source>", "<host>", "<port>", "<user>", "<password>" and "<database>" and log files in  "<output-dir>"
+            And I create BigML external connection using  "<name>", "<source>", "<host>", "<port>", "<user>", "<password>" and "<database>" and log files in  "<output_dir>"
             And I check that the external connection is ready
             And I update the external connection to "<new_name>"
             Then the external connection has name "<new_name>"
@@ -87,24 +92,30 @@ class TestExternalConnector(object):
 
         """
         print(self.test_scenario01.__doc__)
+        headers = ["name", "source", "host", "port", "user", "password",
+                   "database", "output_dir", "new_name", "connector",
+                   "sql_query"]
         examples = [
             ['my connection', 'postgresql', HOST,
             PORT, USER, PASSWORD, DATABASE, 'scenario_41',
             'my new connection', 'scenario_41/my_connector.json',
             'select * from iris']]
         for example in examples:
-            print("\nTesting with:\n", example)
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
             external_connection.i_create_external_connector( \
-                self, name=example[0], source=example[1], host=example[2],
-                port=example[3], user=example[4], password=example[5],
-                database=example[6], output_dir=example[7])
+                self, name=example["name"], source=example["source"],
+                host=example["host"], port=example["port"],
+                user=example["user"], password=example["password"],
+                database=example["database"], output_dir=example["output_dir"])
             external_connection.i_check_external_connector(self)
             external_connection.i_update_external_connector( \
-                self, name=example[8], output_dir=example[7])
+                self, name=example["new_name"],
+                output_dir=example["output_dir"])
             external_connection.i_check_external_connector(self)
             external_connection.i_check_external_connector_name( \
-                self, example[8])
-            prediction_create.i_create_source_from_connector(self, example[9],
-                                                             example[7],
-                                                             example[10])
+                self, example["new_name"])
+            prediction_create.i_create_source_from_connector(
+                self, example["connector"], example["output_dir"],
+                example["sql_query"])
             prediction_create.i_check_create_source(self)

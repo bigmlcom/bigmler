@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
+#pylint: disable=locally-disabled,line-too-long,attribute-defined-outside-init
 #
 # Copyright 2015-2022 BigML
 #
@@ -20,7 +21,7 @@
 
 """
 from bigmler.tests.world import (world, common_setup_module,
-                                 common_teardown_module, teardown_class)
+                                 common_teardown_module, show_method)
 
 
 import bigmler.tests.dataset_advanced_steps as dataset_adv
@@ -43,20 +44,24 @@ def teardown_module():
     common_teardown_module()
 
 
-class TestDatasetAdvanced(object):
+class TestDatasetAdvanced:
+    """Testing advanced dataset commands"""
 
-    def teardown(self):
-        """Calling generic teardown for every method
-
-        """
-        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
-        teardown_class()
-
-    def setup(self):
+    def setup_method(self, method):
         """
             Debug information
         """
+        self.bigml = {}
+        self.bigml["method"] = method.__name__
         print("\n-------------------\nTests in: %s\n" % __name__)
+
+    def teardown_method(self):
+        """Calling generic teardown for every method
+
+        """
+        world.clear_paths()
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
+        self.bigml = {}
 
     def test_scenario1(self):
         """
@@ -68,23 +73,25 @@ class TestDatasetAdvanced(object):
                 And I check that the new dataset has been created
                 And I check that the model has been created
                 Then I check that the new dataset has field "<field>"
-
-                Examples:
-                |data |output_dir  |new_fields | field | model_fields
-                |../data/iris.csv | ./scenario_d_1 |../data/new_fields.json| outlier? |petal length,outlier?,species
         """
         print(self.test_scenario1.__doc__)
+        headers = ["data", "output_dir", "new_fields", "field",
+            "model_fields"]
         examples = [
             ['data/iris.csv', 'scenario_d_1', 'data/new_fields.json', 'outlier?', 'petal length,outlier?,species']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            dataset_adv.i_create_dataset(self, data=example[0], output_dir=example[1])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            dataset_adv.i_create_dataset(self, data=example["data"],
+                output_dir=example["output_dir"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
-            dataset_adv.i_create_dataset_new_fields(self, json_file=example[2], model_fields=example[4])
+            dataset_adv.i_create_dataset_new_fields(
+                self, json_file=example["new_fields"],
+                model_fields=example["model_fields"])
             test_pred.i_check_create_new_dataset(self)
             test_pred.i_check_create_model(self)
-            dataset_adv.i_check_dataset_has_field(self, example[3])
+            dataset_adv.i_check_dataset_has_field(self, example["field"])
 
     def test_scenario2(self):
         """
@@ -94,24 +101,27 @@ class TestDatasetAdvanced(object):
                 And I check that the dataset has been created
                 And I update the dataset using the specs in JSON file "<new_fields>"
                 Then I check that property "<property>" for field id "<field_id>" is "<value>" of type "<type>"
-
-                Examples:
-                |data |output_dir  |new_fields | property | field_id | value | type
-                |../data/iris.csv | ./scenario_d_2 |../data/attributes.json| preferred | 000001 | false | boolean
-                |../data/iris.csv | ./scenario_d_2_b |../data/attributes_col.json| preferred | 000001 | false | boolean
         """
         print(self.test_scenario2.__doc__)
+        headers = ["data", "output_dir", "new_fields", "property",
+                   "field_id", "value", "type"]
         examples = [
             ['data/iris.csv', 'scenario_d_2', 'data/attributes.json', 'preferred', '000001', 'false', 'boolean'],
             ['data/iris.csv', 'scenario_d_2_b', 'data/attributes_col.json', 'preferred', '000001', 'false', 'boolean']
         ]
         for example in examples:
-            print("\nTesting with:\n", example)
-            dataset_adv.i_create_dataset(self, data=example[0], output_dir=example[1])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            dataset_adv.i_create_dataset(
+                self, data=example["data"], output_dir=example["output_dir"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
-            dataset_adv.i_update_dataset_new_properties(self, json_file=example[2])
-            dataset_adv.i_check_dataset_has_property(self, attribute=example[3], field_id=example[4], value=example[5], type=example[6])
+            dataset_adv.i_update_dataset_new_properties(
+                self, json_file=example["new_fields"])
+            dataset_adv.i_check_dataset_has_property(
+                self, attribute=example["property"],
+                field_id=example["field_id"], value=example["value"],
+                attr_type=example["type"])
 
     def test_scenario3(self):
         """
@@ -127,15 +137,19 @@ class TestDatasetAdvanced(object):
                 |../data/iris.csv | ./scenario_d_3 |dataset.csv
         """
         print(self.test_scenario3.__doc__)
+        headers = ["data", "output_dir", "csv_file"]
         examples = [
             ['data/iris.csv', 'scenario_d_3', 'dataset.csv']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            dataset_adv.i_create_dataset(self, data=example[0], output_dir=example[1])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            dataset_adv.i_create_dataset(
+                self, data=example["data"], output_dir=example["output_dir"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
-            dataset_adv.i_export_the_dataset(self, example[2])
-            dataset_adv.i_files_equal(self, example[2], example[0])
+            dataset_adv.i_export_the_dataset(self, example["csv_file"])
+            dataset_adv.i_files_equal(self, example["csv_file"],
+                                      example["data"])
 
     def test_scenario4(self):
         """
@@ -148,24 +162,26 @@ class TestDatasetAdvanced(object):
                 And I create a multi-dataset from the datasets file and store logs in "<output_dir2>"
                 And I check that the multi-dataset has been created
                 Then I check that the multi-dataset's origin are the datasets in "<output_dir>"
-
-                Examples:
-                |data |output_dir  |output_dir2 |
-                |../data/iris.csv | ./scenario_d_4 | ./scenario_d_4a|
         """
         print(self.test_scenario4.__doc__)
+        headers = ["data", "output_dir", "output_dir2"]
         examples = [
             ['data/iris.csv', 'scenario_d_4', 'scenario_d_4a']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            dataset_adv.i_create_dataset(self, data=example[0], output_dir=example[1])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            dataset_adv.i_create_dataset(self, data=example["data"],
+                                         output_dir=example["output_dir"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
-            dataset_adv.i_create_dataset_from_source(self, output_dir=example[1])
+            dataset_adv.i_create_dataset_from_source(
+                self, output_dir=example["output_dir"])
             test_pred.i_check_create_dataset(self, suffix=None)
-            dataset_adv.i_create_multi_dataset(self, example[2])
+            dataset_adv.i_create_multi_dataset(
+                self, example["output_dir2"])
             dataset_adv.i_check_create_multi_dataset(self)
-            dataset_adv.i_check_multi_dataset_origin(self, output_dir=example[1])
+            dataset_adv.i_check_multi_dataset_origin(
+                self, output_dir=example["output_dir"])
 
     def test_scenario5(self):
         """
@@ -176,23 +192,25 @@ class TestDatasetAdvanced(object):
                 And I create a BigML filtered dataset with filter "<filter_exp>" from previous dataset and store logs in "<output_dir>"
                 And I check that the dataset has been created
                 And the number of records in the dataset is <filtered_records>
-
-                Examples:
-                |data |output_dir | filtered_records | filter_exp
-                |../data/iris.csv | ./scenario_d_5 | 50 | (= (f "000004") "Iris-setosa")
         """
         print(self.test_scenario5.__doc__)
+        headers = ["data", "output_dir", "filtered_records", "filter_exp"]
         examples = [
-            ['data/iris.csv', 'scenario_d_5', '50', '(= (f "000004") "Iris-setosa")']]
+            ['data/iris.csv', 'scenario_d_5', '50',
+             '(= (f "000004") "Iris-setosa")']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            dataset_adv.i_create_dataset(self, data=example[0], output_dir=example[1])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            dataset_adv.i_create_dataset(self, data=example["data"],
+                                         output_dir=example["output_dir"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
-            dataset_adv.i_create_filtered_dataset_from_dataset(self, filter_exp=example[3], output_dir=example[1])
+            dataset_adv.i_create_filtered_dataset_from_dataset(
+                self, filter_exp=example["filter_exp"],
+                output_dir=example["output_dir"])
             test_pred.i_check_create_dataset(self, suffix='gen ')
-            test_anomaly.i_check_dataset_lines_number(self, example[2])
-
+            test_anomaly.i_check_dataset_lines_number(
+                self, example["filtered_records"])
 
     def test_scenario6(self):
         """
@@ -201,21 +219,23 @@ class TestDatasetAdvanced(object):
                 And I check that the source has been created
                 And I check that the dataset has been created
                 Then the expected field "<expected_file>" is like "<summary_file>"
-
-                Examples:
-                |data |output_dir | summary_file | expected_file
-                |../data/iris.csv | ./scenario_d_6 | fields_summary.csv | check_files/fields_summary.csv
         """
         print(self.test_scenario6.__doc__)
+        headers = ["data", "output_dir", "summary_file", "expected_file"]
         examples = [
-            ['data/iris.csv', 'scenario_d_6', 'fields_summary.csv', 'check_files/fields_summary.csv']]
+            ['data/iris.csv', 'scenario_d_6', 'fields_summary.csv',
+             'check_files/fields_summary.csv']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            dataset_adv.i_create_dataset_with_summary(self, data=example[0], summary_file=example[2], output_dir=example[1])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            dataset_adv.i_create_dataset_with_summary(
+                self, data=example["data"],
+                summary_file=example["summary_file"],
+                output_dir=example["output_dir"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
-            dataset_adv.i_files_equal(self, example[2], example[3])
-
+            dataset_adv.i_files_equal(
+                self, example["summary_file"], example["expected_file"])
 
     def test_scenario7(self):
         """
@@ -225,22 +245,26 @@ class TestDatasetAdvanced(object):
                 And I check that the dataset has been created
                 And I import fields attributes in file "<summary_file>" to dataset
                 Then the field "<field_id>" has "<attribute>" equal to "<attribute_value>"
-
-                Examples:
-                |data |output_dir | summary_file | field_id | attribute | attribute_value
-                |../data/iris.csv | ./scenario_d_7 | fields_summary_modified.csv |  000000 | name | sepal_length
         """
         print(self.test_scenario7.__doc__)
+        headers = ["data", "output_dir", "summary_file", "field_id",
+                   "attribute", "attribute_value"]
         examples = [
-            ['data/iris.csv', 'scenario_d_7', 'data/fields_summary_modified.csv', '000000', 'name', 'sepal_length']]
+            ['data/iris.csv', 'scenario_d_7',
+             'data/fields_summary_modified.csv', '000000',
+             'name', 'sepal_length']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            dataset_adv.i_create_dataset(self, data=example[0], output_dir=example[1])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            dataset_adv.i_create_dataset(
+                self, data=example["data"], output_dir=example["output_dir"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
-            dataset_adv.i_import_fields(self, summary=example[2])
-            dataset_adv.field_attribute_value(self, field=example[3], attribute=example[4], attribute_value=example[5])
-
+            dataset_adv.i_import_fields(self, summary=example["summary_file"])
+            dataset_adv.field_attribute_value(
+                self, field=example["field_id"],
+                attribute=example["attribute"],
+                attribute_value=example["attribute_value"])
 
     def test_scenario8(self):
         """
@@ -251,27 +275,26 @@ class TestDatasetAdvanced(object):
                 And I create a BigML cluster with params "<params>" from dataset in "<output_dir>"
                 And I check that the cluster has been created
                 And the cluster params are "<params_json>"
-
-                Examples:
-                |data |output_dir | params | params_json
-                |../data/iris.csv | ./scenario_d_8 | "--sample-rate 0.2 --replacement" | {"sample-rate": 0.2, "replacement": true}
         """
         print(self.test_scenario8.__doc__)
+        headers = ["data", "output_dir", "params", "params_json"]
         examples = [
             ['data/iris.csv', 'scenario_d_8',
              '--sample-rate 0.2 --replacement',
              '{"sample_rate": 0.2, "replacement": true}']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            dataset_adv.i_create_dataset(self, data=example[0],
-                                         output_dir=example[1])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            dataset_adv.i_create_dataset(self, data=example["data"],
+                                         output_dir=example["output_dir"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
-            dataset_adv.i_create_cluster_with_params_from_dataset( \
-                self, cluster_params=example[2], output_dir=example[1])
+            dataset_adv.i_create_cluster_with_params_from_dataset(
+                self, cluster_params=example["params"],
+                output_dir=example["output_dir"])
             test_pred.i_check_create_cluster(self)
-            dataset_adv.i_check_cluster_params(self, params_json=example[3])
-
+            dataset_adv.i_check_cluster_params(
+                self, params_json=example["params_json"])
 
     def test_scenario9(self):
         """
@@ -282,27 +305,26 @@ class TestDatasetAdvanced(object):
                 And I create a BigML anomaly with params "<params>" from dataset in "<output_dir>"
                 And I check that the anomaly has been created
                 And the anomaly params are "<params_json>"
-
-                Examples:
-                |data |output_dir | params | params_json
-                |../data/iris.csv | ./scenario_d_9 | "--sample-rate 0.2 --replacement" | {"sample-rate": 0.2, "replacement": true}
         """
         print(self.test_scenario9.__doc__)
+        headers = ["data", "output_dir", "params", "params_json"]
         examples = [
             ['data/iris.csv', 'scenario_d_9',
              '--sample-rate 0.2 --replacement',
              '{"sample_rate": 0.2, "replacement": true}']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            dataset_adv.i_create_dataset(self, data=example[0],
-                                         output_dir=example[1])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            dataset_adv.i_create_dataset(self, data=example["data"],
+                                         output_dir=example["output_dir"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
-            dataset_adv.i_create_anomaly_with_params_from_dataset( \
-                self, params=example[2], output_dir=example[1])
+            dataset_adv.i_create_anomaly_with_params_from_dataset(
+                self, params=example["params"],
+                output_dir=example["output_dir"])
             test_pred.i_check_create_anomaly(self)
-            dataset_adv.i_check_anomaly_params(self, params_json=example[3])
-
+            dataset_adv.i_check_anomaly_params(
+                self, params_json=example["params_json"])
 
     def test_scenario10(self):
         """
@@ -313,27 +335,26 @@ class TestDatasetAdvanced(object):
                 And I create a BigML logistic regression with params "<params>" from dataset in "<output_dir>"
                 And I check that the logistic regression has been created
                 And the logistic regression params are "<params_json>"
-
-                Examples:
-                |data |output_dir | params | params_json
-                |../data/iris.csv | ./scenario_d_10 | "--sample-rate 0.2 --replacement" | {"sample-rate": 0.2, "replacement": true}
         """
         print(self.test_scenario10.__doc__)
+        headers = ["data", "output_dir", "params", "params_json"]
         examples = [
             ['data/iris.csv', 'scenario_d_10',
              '--sample-rate 0.2 --replacement',
              '{"sample_rate": 0.2, "replacement": true}']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            dataset_adv.i_create_dataset(self, data=example[0],
-                                         output_dir=example[1])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            dataset_adv.i_create_dataset(self, data=example["data"],
+                                         output_dir=example["output_dir"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
-            dataset_adv.i_create_logistic_with_params_from_dataset( \
-                self, params=example[2], output_dir=example[1])
+            dataset_adv.i_create_logistic_with_params_from_dataset(
+                self, params=example["params"],
+                output_dir=example["output_dir"])
             test_logistic.i_check_create_lr_model(self)
-            dataset_adv.i_check_logistic_params(self, params_json=example[3])
-
+            dataset_adv.i_check_logistic_params(
+                self, params_json=example["params_json"])
 
     def test_scenario11(self):
         """
@@ -344,26 +365,26 @@ class TestDatasetAdvanced(object):
                 And I create a BigML association with params "<params>" from dataset in "<output_dir>"
                 And I check that the association has been created
                 And the association params are "<params_json>"
-
-                Examples:
-                |data |output_dir | params | params_json
-                |../data/iris.csv | ./scenario_d_11 | "--sample-rate 0.2 --replacement" | {"sample-rate": 0.2, "replacement": true}
         """
         print(self.test_scenario11.__doc__)
+        headers = ["data", "output_dir", "params", "params_json"]
         examples = [
             ['data/iris.csv', 'scenario_d_11',
              '--sample-rate 0.2 --replacement',
              '{"sample_rate": 0.2, "replacement": true}']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            dataset_adv.i_create_dataset(self, data=example[0],
-                                         output_dir=example[1])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            dataset_adv.i_create_dataset(self, data=example["data"],
+                                         output_dir=example["output_dir"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
-            dataset_adv.i_create_association_with_params_from_dataset( \
-                self, params=example[2], output_dir=example[1])
+            dataset_adv.i_create_association_with_params_from_dataset(
+                self, params=example["params"],
+                output_dir=example["output_dir"])
             test_pred.i_check_create_association(self)
-            dataset_adv.i_check_association_params(self, params_json=example[3])
+            dataset_adv.i_check_association_params(
+                self, params_json=example["params_json"])
 
     def test_scenario12(self):
         """
@@ -378,31 +399,29 @@ class TestDatasetAdvanced(object):
 logs in "<output_dir>"
                 And I check that the dataset has been created
                 And I check that datasets have been juxtaposed
-
-                Examples:
-                |data |output_dir |
-                |../data/iris.csv | ./scenario_d_12 |
         """
         print(self.test_scenario12.__doc__)
+        headers = ["data", "output_dir"]
         examples = [
             ['data/iris.csv', 'scenario_d_12']]
         for example in examples:
-            print("\nTesting with:\n", example)
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
             datasets = []
-            dataset_adv.i_create_dataset(self, data=example[0],
-                                         output_dir=example[1])
+            dataset_adv.i_create_dataset(self, data=example["data"],
+                                         output_dir=example["output_dir"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
             datasets.append(world.dataset)
-            dataset_adv.i_create_dataset(self, data=example[0],
-                                         output_dir=example[1])
+            dataset_adv.i_create_dataset(self, data=example["data"],
+                                         output_dir=example["output_dir"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
             datasets.append(world.dataset)
-            dataset_adv.i_create_juxtaposed(self, output_dir=example[1])
+            dataset_adv.i_create_juxtaposed(
+                self, output_dir=example["output_dir"])
             test_pred.i_check_create_dataset(self, suffix="gen ")
             dataset_adv.i_check_juxtaposed(self, datasets)
-
 
     def test_scenario13(self):
         """
@@ -417,29 +436,27 @@ logs in "<output_dir>"
 logs in "<output_dir>"
                 And I check that the dataset has been created
                 And I check that datasets have been joined
-
-                Examples:
-                |data |output_dir |
-                |../data/iris.csv | ./scenario_d_13 |
         """
         print(self.test_scenario12.__doc__)
+        headers = ["data", "output_dir", "sql_query", "rows"]
         examples = [
             ['data/iris.csv', 'scenario_d_13', "select A.*,B.* from A join B "
-             "on A.\`000000\` = \`B.000000\`", 900]]
+             "on A.\`000000\` = B.\`000000\`", 900]]
         for example in examples:
-            print("\nTesting with:\n", example)
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
             datasets = []
-            dataset_adv.i_create_dataset(self, data=example[0],
-                                         output_dir=example[1])
+            dataset_adv.i_create_dataset(self, data=example["data"],
+                                         output_dir=example["output_dir"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
             datasets.append(world.dataset)
-            dataset_adv.i_create_dataset(self, data=example[0],
-                                         output_dir=example[1])
+            dataset_adv.i_create_dataset(self, data=example["data"],
+                                         output_dir=example["output_dir"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
             datasets.append(world.dataset)
-            dataset_adv.i_create_join(self, output_dir=example[1],
-                                      sql=example[2])
+            dataset_adv.i_create_join(self, output_dir=example["output_dir"],
+                                      sql=example["sql_query"])
             test_pred.i_check_create_dataset(self, suffix="gen ")
-            dataset_adv.i_check_joined(self, example[3])
+            dataset_adv.i_check_joined(self, example["rows"])

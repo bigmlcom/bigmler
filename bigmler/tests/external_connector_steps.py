@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+#pylint: disable=locally-disabled,unused-argument,no-member
 #
 # Copyright 2020-2022 BigML
 #
@@ -16,53 +17,19 @@
 
 
 import os
-import time
-import json
-from bigmler.tests.world import world
-from subprocess import check_call, CalledProcessError
+
 from bigml.api import check_resource
-from bigml.io import UnicodeReader
-from bigmler.checkpoint import file_number_of_lines
-from bigmler.utils import storage_file_name, open_mode
-from bigmler.tests.common_steps import check_debug
-from nose.tools import ok_, assert_equal, assert_not_equal
+
+from bigmler.tests.common_steps import shell_execute
+from bigmler.tests.world import world, ok_, eq_
 
 
-def shell_execute(command, output, test=None, options=None,
-                  test_rows=None, project=True):
-    """Excute bigmler command in shell
-
-    """
-    command = check_debug(command, project=project)
-    world.directory = os.path.dirname(output)
-    world.folders.append(world.directory)
-    try:
-        retcode = check_call(command, shell=True)
-        if retcode < 0:
-            assert False
-        else:
-            if test is not None:
-                world.test_lines = file_number_of_lines(test)
-                if options is None or \
-                        options.find('--projection-header') == -1:
-                    # test file has headers in it, so first line must be ignored
-                    world.test_lines -= 1
-            elif test_rows is not None:
-                world.test_lines = test_rows
-                if options is not None and \
-                        options.find('--projection-header') > -1:
-                    world.test_lines += 1
-            elif options is not None and \
-                    options.find('--projection-header') > -1:
-                world.test_lines += 1
-            world.output = output
-    except (OSError, CalledProcessError, IOError) as exc:
-        assert False, str(exc)
-
-#@step(r'I create BigML external connection using  "(.*)", "(.*)", "(.*)", "(.*)", "(.*)", "(.*)" and "(.*)" and log files in  "(.*)"$')
 def i_create_external_connector(step, name=None, source=None, host=None,
                                 port=None, database=None, user=None,
                                 password=None ,output_dir=None):
+    """Step: I create BigML external connection using <name>, <source>, <host>,
+    <port>, database, user and password and log files in <output_dir>
+    """
     ok_(name is not None and source is not None and host is not None and
         port is not None and database is not None and user is not None and
         password is not None and output_dir is not None)
@@ -77,23 +44,23 @@ def i_create_external_connector(step, name=None, source=None, host=None,
     shell_execute(command, "%s/x" % output_dir)
 
 
-#@step(r'I check that the external connection is ready')
 def i_check_external_connector(step):
-    connector_file = "%s%sexternal_connector" % (world.directory, os.sep)
+    """Step: I check that the external connection is ready"""
+    connector_file = os.path.join(world.directory, "external_connector")
     try:
-        connector_file = open(connector_file, "r")
-        connector = check_resource(connector_file.readline().strip(),
-                                   world.api.get_external_connector)
-        world.external_connectors.append(connector['resource'])
-        world.external_connector = connector
-        connector_file.close()
+        with open(connector_file) as handler:
+            connector = check_resource(handler.readline().strip(),
+                                       world.api.get_external_connector)
+            world.external_connectors.append(connector['resource'])
+            world.external_connector = connector
     except Exception as exc:
-        assert False, str(exc)
+        ok_(False, msg=str(exc))
 
 
-
-#@step(r'I update the external connection to "(.*)" and logs to "(.*)"$')
 def i_update_external_connector(step, name=None, output_dir=None):
+    """Step: I update the external connection to <name> and logs to
+    <output_dir>
+    """
     ok_(name is not None and output_dir is not None)
     command = ("bigmler connector --external-connector " +
                world.external_connector["resource"] +
@@ -101,8 +68,8 @@ def i_update_external_connector(step, name=None, output_dir=None):
     shell_execute(command, "%s/x" % output_dir)
 
 
-#@step(r'I check that the external connection is ready')
 def i_check_external_connector_name(step, name=None):
+    """Step: I check that the external connection is ready"""
     ec_name = world.external_connector.get( \
         "object", world.external_connector).get("name")
-    assert_equal(ec_name, name)
+    eq_(ec_name, name)

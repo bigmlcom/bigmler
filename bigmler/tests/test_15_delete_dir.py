@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
+#pylint: disable=locally-disabled,line-too-long,attribute-defined-outside-init
 #
 # Copyright 2015-2022 BigML
 #
@@ -15,12 +16,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
 """ Testing delete subcommand, --from-dir option
 
 """
 from bigmler.tests.world import (world, common_setup_module,
-                                 common_teardown_module, teardown_class)
+                                 common_teardown_module, show_method)
 
 import bigmler.tests.delete_subcommand_steps as test_delete
 
@@ -37,41 +37,48 @@ def teardown_module():
     """
     common_teardown_module()
 
-class TestDeleteDir(object):
+class TestDeleteDir:
+    """Testing delete from directory"""
 
-    def teardown(self):
-        """Calling generic teardown for every method
-
-        """
-        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
-        teardown_class()
-
-    def setup(self):
+    def setup_method(self, method):
         """
             Debug information
         """
+        self.bigml = {}
+        self.bigml["method"] = method.__name__
         print("\n-------------------\nTests in: %s\n" % __name__)
+
+    def teardown_method(self):
+        """Calling generic teardown for every method
+
+        """
+        world.clear_paths()
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
+        self.bigml = {}
 
     def test_scenario1(self):
         """
-            Scenario: Sucessfully deleting resources from a directory:
-                Given I store the number of existing resources
-                And I create BigML resources uploading train "<data>" storing results in "<output_dir>"
-                And I check that the number of resources has changed
-                And I delete the resources from the output directory
-                Then the number of resources has not changed
+        Scenario: Sucessfully deleting resources from a directory:
+            Given I store the number of existing resources
+            And I create BigML resources uploading train "<data>" storing results in "<output_dir>"
+            And I check that the number of resources has changed
+            And I delete the resources from the output directory
+            Then the number of resources has not changed
 
-                Examples:
-                | data               | output_dir
-                | ../data/iris.csv   | ./scenario_del_10
+            Examples:
+            | data               | output_dir
+            | ../data/iris.csv   | ./scenario_del_10
         """
         print(self.test_scenario1.__doc__)
+        headers = ["data", "output_dir"]
         examples = [
             ['data/iris.csv', 'scenario_del_10']]
         for example in examples:
-            print("\nTesting with:\n", example)
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
             test_delete.i_store_the_number_of_resources(self)
-            test_delete.i_create_source_from_file(self, data=example[0], output_dir=example[1])
+            test_delete.i_create_source_from_file(
+                self, data=example["data"], output_dir=example["output_dir"])
             test_delete.i_check_changed_number_of_resources(self)
             test_delete.i_delete_resources_from_dir(self)
             test_delete.i_check_equal_number_of_resources(self)

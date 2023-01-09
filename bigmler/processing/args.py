@@ -1119,6 +1119,7 @@ def transform_args(command_args, flags, api):
         if command_args.lisp_filter:
             lisp_filter = u.read_lisp_filter(command_args.lisp_filter)
             command_args.lisp_filter = lisp_filter
+            print(lisp_filter)
     except AttributeError:
         pass
 

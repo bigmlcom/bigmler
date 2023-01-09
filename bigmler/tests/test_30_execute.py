@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
+#pylint: disable=locally-disabled,line-too-long,attribute-defined-outside-init
 #
 # Copyright 2016-2022 BigML
 #
@@ -15,15 +16,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
 """ Testing logistic regression predictions creation
 
 """
-
-
 from bigmler.tests.world import (world, common_setup_module,
-                                 common_teardown_module,
-                                 teardown_class)
+                                 common_teardown_module, show_method)
 
 
 import bigmler.tests.basic_execute_steps as execute
@@ -42,20 +39,24 @@ def teardown_module():
     common_teardown_module()
 
 
-class TestExecute(object):
+class TestExecute:
+    """Testing execution commands"""
 
-    def setup(self):
+    def setup_method(self, method):
         """
             Debug information
         """
+        self.bigml = {}
+        self.bigml["method"] = method.__name__
         print("\n-------------------\nTests in: %s\n" % __name__)
 
-    def teardown(self):
+    def teardown_method(self):
         """Calling generic teardown for every method
 
         """
-        self.world = teardown_class()
+        world.clear_paths()
         print("\nEnd of tests in: %s\n-------------------\n" % __name__)
+        self.bigml = {}
 
     def test_scenario01(self):
         """
@@ -65,41 +66,36 @@ class TestExecute(object):
             And I check that the execution has been created
             And I check that the result is ready
             Then the result file is like "<result_file>"
-
-            Examples:
-            | code      | output_dir       | result_file
-            | (+ 1 1)   | scenario1_exe    | check_files/results_s1exe.json
-
         """
         print(self.test_scenario01.__doc__)
+        headers = ["code", "output_dir", "result_file"]
         examples = [
             ['(+ 1 1)', 'scenario1_exe', 'check_files/results_s1exe.json' ]]
         for example in examples:
-            print("\nTesting with:\n", example)
-            execute.i_create_all_execution_resources(self, example[0], example[1])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            execute.i_create_all_execution_resources(
+                self, example["code"], example["output_dir"])
             execute.i_check_create_script(self)
             execute.i_check_create_execution(self)
             execute.i_check_create_result(self)
-            execute.i_check_result_is(self, example[2])
-
+            execute.i_check_result_is(self, example["result_file"])
 
     def test_scenario02(self):
         """
         Scenario: Successfully creating a library from file:
             Given I create BigML library from code in file "<code_file>" and log results in  "<output_dir>"
             Then I check that the library has been created
-
-            Examples:
-            | code_file         | output_dir
-            | code_lib.whizzml      | scenario2_exe
-
         """
         print(self.test_scenario02.__doc__)
+        headers = ["code_file", "output_dir"]
         examples = [
             ['data/whizzml_lib/lib/code_lib.whizzml', 'scenario2_exe']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            execute.i_create_all_library_resources(self, example[0], example[1])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            execute.i_create_all_library_resources(
+                self, example["code_file"], example["output_dir"])
             execute.i_check_create_library(self)
 
 
@@ -111,59 +107,55 @@ class TestExecute(object):
             And I check that the execution has been created
             And I check that the result is ready
             Then the result file is like "<result_file>"
-
-            Examples:
-            | code_file      | output_dir       | inputs_dec           | outputs_dec           | inputs           | result_file
-            | code.whizzml   | scenario3_exe    | data/inputs_dec.json | data/outputs_dec.json | data/inputs.json | check_files/results_s3exe.json
-
         """
         print(self.test_scenario03.__doc__)
+        headers = ["code_file", "output_dir", "inputs_dec", "outputs_dec",
+                   "inputs", "result_file"]
         examples = [
             ['data/whizzml/code.whizzml', 'scenario3_exe', 'data/inputs_dec.json', 'data/outputs_dec.json', 'data/inputs.json', 'check_files/results_s3exe.json']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            execute.i_create_all_execution_with_io_resources(self, example[0], example[1], example[2], example[3], example[4])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            execute.i_create_all_execution_with_io_resources(
+                self, example["code_file"], example["output_dir"],
+                example["inputs_dec"], example["outputs_dec"],
+                example["inputs"])
             execute.i_check_create_script(self)
             execute.i_check_create_execution(self)
             execute.i_check_create_result(self)
-            execute.i_check_result_is(self, example[5])
-
+            execute.i_check_result_is(self, example["result_file"])
 
     def test_scenario04(self):
         """
         Scenario: Successfully creating an whizzml package from a metadata file:
             Given I create a BigML whizzml package from "<package_dir>" and log results in  "<output_dir>"
             Then I check that the script in "<package_dir>" has been created
-
-            Examples:
-            | package_dir       | output_dir       |
-            | data              | scenario4_pck    |
-
         """
         print(self.test_scenario04.__doc__)
+        headers = ["package_dir", "output_dir"]
         examples = [
             ['data/whizzml', 'scenario4_pck']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            execute.i_create_from_whizzml_package(self, example[0], example[1])
-            execute.i_check_create_package_script(self, example[0])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            execute.i_create_from_whizzml_package(
+                self, example["package_dir"], example["output_dir"])
+            execute.i_check_create_package_script(
+                self, example["package_dir"])
 
-
-    def test_scenario04(self):
+    def test_scenario05(self):
         """
         Scenario: Successfully creating an whizzml package from a metadata file embedding library code:
             Given I create a BigML whizzml package from "<package_dir>", embed any library and log results in  "<output_dir>"
             Then I check that the script in "<package_dir>" has been created
-
-            Examples:
-            | package_dir                   | output_dir       |
-            | data/whizzml_lib              | scenario5_pck    |
-
         """
-        print(self.test_scenario04.__doc__)
+        print(self.test_scenario05.__doc__)
+        headers = ["package_dir", "output_dir"]
         examples = [
             ['data/whizzml_lib', 'scenario5_pck']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            execute.i_create_from_whizzml_package_embedding(self, example[0], example[1])
-            execute.i_check_create_package_script(self, example[0])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            execute.i_create_from_whizzml_package_embedding(
+                self, example["package_dir"], example["output_dir"])
+            execute.i_check_create_package_script(self, example["package_dir"])

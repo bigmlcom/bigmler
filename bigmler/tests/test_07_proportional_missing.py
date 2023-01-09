@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
+#pylint: disable=locally-disabled,line-too-long,attribute-defined-outside-init
 #
 # Copyright 2015-2022 BigML
 #
@@ -19,11 +20,8 @@
 """ Testing predictions with proportional missing strategy
 
 """
-
-
-
 from bigmler.tests.world import (world, common_setup_module,
-                                 common_teardown_module, teardown_class)
+                                 common_teardown_module, show_method)
 
 
 import bigmler.tests.basic_tst_prediction_steps as test_pred
@@ -42,20 +40,24 @@ def teardown_module():
     """
     common_teardown_module()
 
-class TestProportionalMissing(object):
+class TestProportionalMissing:
+    """Testing missings proportional strategy"""
 
-    def teardown(self):
-        """Calling generic teardown for every method
-
-        """
-        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
-        teardown_class()
-
-    def setup(self):
+    def setup_method(self, method):
         """
             Debug information
         """
+        self.bigml = {}
+        self.bigml["method"] = method.__name__
         print("\n-------------------\nTests in: %s\n" % __name__)
+
+    def teardown_method(self):
+        """Calling generic teardown for every method
+
+        """
+        world.clear_paths()
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
+        self.bigml = {}
 
     def test_scenario1(self):
         """
@@ -66,22 +68,24 @@ class TestProportionalMissing(object):
                 And I check that the model has been created
                 And I check that the predictions are ready
                 Then the local prediction file is like "<predictions_file>"
-
-                Examples:
-                | data               | test                          | output                            |predictions_file           |
-                | ../data/iris.csv   | ../data/test_iris_nulls.csv   | ./scenario_mis_1/predictions.csv | ./check_files/predictions_iris_nulls.csv   |
         """
         print(self.test_scenario1.__doc__)
+        headers = ["data", "test", "output", "predictions_file"]
         examples = [
-            ['data/iris.csv', 'data/test_iris_nulls.csv', 'scenario_mis_1/predictions.csv', 'check_files/predictions_iris_nulls.csv']]
+            ['data/iris.csv', 'data/test_iris_nulls.csv',
+             'scenario_mis_1/predictions.csv',
+             'check_files/predictions_iris_nulls.csv']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            test_pred.i_create_all_resources_proportional(self, data=example[0], test=example[1], output=example[2])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            test_pred.i_create_all_resources_proportional(
+                self, data=example["data"], test=example["test"],
+                output=example["output"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
             test_pred.i_check_create_model(self)
             test_pred.i_check_create_predictions(self)
-            test_pred.i_check_predictions(self, example[3])
+            test_pred.i_check_predictions(self, example["predictions_file"])
 
     def test_scenario2(self):
         """
@@ -94,17 +98,17 @@ class TestProportionalMissing(object):
             And I check that the batch prediction has been created
             And I check that the predictions are ready
             Then the local prediction file is like "<predictions_file>"
-
-            Examples:
-            | data               | test                    | output                        |predictions_file           |
-            | ../data/iris.csv   | ../data/test_iris_nulls.csv   | ./scenario_mis_2/predictions.csv   | ./check_files/predictions_iris_nulls.csv
         """
         print(self.test_scenario2.__doc__)
+        headers = ["data", "test", "output", "predictions_file"]
         examples = [
             ['data/iris.csv', 'data/test_iris_nulls.csv', 'scenario_mis_2/predictions.csv', 'check_files/predictions_iris_nulls.csv']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            test_pred.i_create_all_resources_remote_proportional(self, data=example[0], test=example[1], output=example[2])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            test_pred.i_create_all_resources_remote_proportional(
+                self, data=example["data"], test=example["test"],
+                output=example["output"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
             test_pred.i_check_create_model(self)
@@ -112,7 +116,8 @@ class TestProportionalMissing(object):
             test_pred.i_check_create_test_dataset(self)
             test_pred.i_check_create_batch_prediction(self)
             test_pred.i_check_create_predictions(self)
-            test_pred.i_check_predictions(self, example[3])
+            test_pred.i_check_predictions(
+                self, example["predictions_file"])
 
     def test_scenario3(self):
         """
@@ -126,23 +131,25 @@ class TestProportionalMissing(object):
                 And I check that the dataset has been created
                 And I check that the evaluation has been created
                 Then the evaluation file is like "<json_evaluation_file>"
-
-                Examples:
-                | data             | test                          | output                      | json_evaluation_file    |
-                | ../data/iris.csv | ../data/iris_nulls.csv   | ./scenario_mis_3/evaluation | ./check_files/evaluation_iris_nulls.json |
-
         """
         print(self.test_scenario3.__doc__)
+        headers = ["data", "test", "output", "json_evaluation_file"]
         examples = [
-            ['data/iris.csv', 'data/iris_nulls.csv', 'scenario_mis_3/evaluation', 'check_files/evaluation_iris_nulls.json']]
+            ['data/iris.csv', 'data/iris_nulls.csv',
+             'scenario_mis_3/evaluation',
+             'check_files/evaluation_iris_nulls.json']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            test_pred.i_create_all_resources_to_model(self, data=example[0], output=example[2])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            test_pred.i_create_all_resources_to_model(
+                self, data=example["data"], output=example["output"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
             test_pred.i_check_create_model(self)
-            evaluation.i_create_proportional_to_evaluate(self, test=example[1])
+            evaluation.i_create_proportional_to_evaluate(
+                self, test=example["test"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self)
             test_pred.i_check_create_evaluation(self)
-            evaluation.then_the_evaluation_file_is_like(self, example[3])
+            evaluation.then_the_evaluation_file_is_like(
+                self, example["json_evaluation_file"])

@@ -204,7 +204,7 @@ def file_number_of_lines(file_name):
 
     """
     try:
-        item = (0, None)
+        item = (-1, None)
         with open(file_name) as file_handler:
             for item in enumerate(file_handler):
                 pass

@@ -181,7 +181,7 @@ def prediction_to_row(prediction, prediction_info=NORMAL_FORMAT):
 
 def combine_votes(votes_files, to_prediction_method, to_file, method=0,
                   prediction_info=NORMAL_FORMAT, input_data_list=None,
-                  exclude=None):
+                  exclude=None, output=None):
     """Combines the votes found in the votes' files and stores predictions.
 
        votes_files: should contain the list of file names
@@ -192,21 +192,22 @@ def combine_votes(votes_files, to_prediction_method, to_file, method=0,
     votes = read_votes(votes_files, to_prediction_method)
 
     u.check_dir(to_file)
-    with UnicodeWriter(to_file) as output:
-        number_of_tests = len(votes)
-        if input_data_list is None or len(input_data_list) != number_of_tests:
-            input_data_list = None
-        for index in range(0, number_of_tests):
-            multivote = votes[index]
-            input_data = (None if input_data_list is None
-                          else input_data_list[index])
-            write_prediction(multivote.combine(method, full=True), output,
-                             prediction_info, input_data, exclude)
+    output = output or UnicodeWriter(to_file).open_writer()
+    number_of_tests = len(votes)
+    if input_data_list is None or len(input_data_list) != number_of_tests:
+        input_data_list = None
+    for index in range(0, number_of_tests):
+        multivote = votes[index]
+        input_data = (None if input_data_list is None
+                      else input_data_list[index])
+        write_prediction(multivote.combine(method, full=True), output,
+                         prediction_info, input_data, exclude)
 
 
 def remote_predict_models(models, test_reader, prediction_file, api, args,
                           resume=False, output_path=None,
-                          session_file=None, log=None, exclude=None):
+                          session_file=None, log=None, exclude=None,
+                          output=None):
     """Retrieve predictions remotely, combine them and save predictions to file
 
     """
@@ -223,7 +224,8 @@ def remote_predict_models(models, test_reader, prediction_file, api, args,
         raw_input_data_list.append(input_data)
     single_model = len(models) == 1
     if single_model:
-        prediction_file = UnicodeWriter(prediction_file).open_writer()
+        output = output or UnicodeWriter(
+            prediction_file).open_writer()
     for model in models:
         model = bigml.api.get_model_id(model)
         predictions_file = get_predictions_file_name(model,
@@ -250,21 +252,23 @@ def remote_predict_models(models, test_reader, prediction_file, api, args,
                     prediction_row = prediction_to_row(prediction)
                     predictions_file.writerow(prediction_row)
                     if single_model:
-                        write_prediction(prediction_row[0:2], prediction_file,
+                        write_prediction(prediction_row[0:2], output,
                                          args.prediction_info,
                                          input_data, exclude)
     if single_model:
-        prediction_file.close_writer()
+        output.close_writer()
     else:
         combine_votes(predictions_files,
                       partial(Model(models[0]), to_prediction),
                       prediction_file, args.method,
-                      args.prediction_info, raw_input_data_list, exclude)
+                      args.prediction_info, raw_input_data_list, exclude,
+                      output)
 
 
 def remote_predict_ensemble(ensemble_id, test_reader, prediction_file, api,
                             args, resume=False, output_path=None,
-                            session_file=None, log=None, exclude=None):
+                            session_file=None, log=None, exclude=None,
+                            output=None):
     """Retrieve predictions remotely and save predictions to file
 
     """
@@ -617,11 +621,11 @@ def predict(models, fields, args, api=None, log=None,
                 remote_predict_ensemble(args.ensemble, test_reader,
                                         prediction_file, api, args, resume,
                                         output_path, session_file, log,
-                                        exclude)
+                                        exclude, output)
             else:
                 remote_predict_models(models, test_reader, prediction_file,
                                       api, args, resume, output_path,
-                                      session_file, log, exclude)
+                                      session_file, log, exclude, output)
             return
         # Local predictions: Predictions are computed locally using models'
         # rules with MultiModel's predict method

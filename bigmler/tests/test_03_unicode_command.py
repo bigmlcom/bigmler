@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
+#pylint: disable=locally-disabled,line-too-long,attribute-defined-outside-init
 #
 # Copyright 2015-2022 BigML
 #
@@ -19,11 +20,8 @@
 """ Testing dataset creation with unicode characters
 
 """
-
-
-
 from bigmler.tests.world import (world, common_setup_module,
-                                 common_teardown_module, teardown_class)
+                                 common_teardown_module, show_method)
 
 
 import bigmler.tests.dataset_advanced_steps as dataset_adv
@@ -42,20 +40,24 @@ def teardown_module():
     """
     common_teardown_module()
 
-class TestUnicode(object):
+class TestUnicode:
+    """Testing commands using non-ascii"""
 
-    def teardown(self):
-        """Calling generic teardown for every method
-
-        """
-        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
-        teardown_class()
-
-    def setup(self):
+    def setup_method(self, method):
         """
             Debug information
         """
+        self.bigml = {}
+        self.bigml["method"] = method.__name__
         print("\n-------------------\nTests in: %s\n" % __name__)
+
+    def teardown_method(self):
+        """Calling generic teardown for every method
+
+        """
+        world.clear_paths()
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
+        self.bigml = {}
 
     def test_scenario1(self):
         """
@@ -67,20 +69,22 @@ class TestUnicode(object):
                 And I check that the model has been created
                 And I check that the predictions are ready
                 Then the local prediction file is like "<predictions_file>"
-
-                Examples:
-                |data    | output_dir               | test                    | output                         |predictions_file                        | objective | fields   |
-                | ../data/iris_2fb.csv| ./scénario1 | ../data/test_iris2fb.csv   | ./scénario1/predictions.csv   | ./check_files/predictions_iris_2fb.csv   | spécies     | "pétal width" |
         """
         print(self.test_scenario1.__doc__)
+        headers = ["data", "output_dir", "test", "output", "predictions_file",
+                   "objective", "fields"]
         examples = [
             ['data/iris_2fb.csv', 'scénario1', 'data/test_iris2fb.csv', 'scénario1/predictions.csv', 'check_files/predictions_iris_2fb.csv', 'spécies', '"pétal width"']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            dataset_adv.i_create_dataset(self, data=example[0], output_dir=example[1])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            dataset_adv.i_create_dataset(self, data=example["data"],
+                output_dir=example["output_dir"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
-            test_pred.i_create_resources_from_dataset_objective_model(self, objective=example[5], fields=example[6], test=example[2], output=example[3])
+            test_pred.i_create_resources_from_dataset_objective_model(
+                self, objective=example["objective"], fields=example["fields"],
+                test=example["test"], output=example["output"])
             test_pred.i_check_create_model(self)
             test_pred.i_check_create_predictions(self)
-            test_pred.i_check_predictions(self, example[4])
+            test_pred.i_check_predictions(self, example["predictions_file"])

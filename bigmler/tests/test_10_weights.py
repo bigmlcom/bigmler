@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
+#pylint: disable=locally-disabled,line-too-long,attribute-defined-outside-init
 #
 # Copyright 2015-2022 BigML
 #
@@ -19,11 +20,8 @@
 """ Testing weight options
 
 """
-
-
-
 from bigmler.tests.world import (world, common_setup_module,
-                                 common_teardown_module, teardown_class)
+                                 common_teardown_module, show_method)
 
 
 import bigmler.tests.basic_tst_prediction_steps as test_pred
@@ -41,20 +39,24 @@ def teardown_module():
     """
     common_teardown_module()
 
-class TestWeights(object):
+class TestWeights:
+    """Testing weights options in command"""
 
-    def teardown(self):
-        """Calling generic teardown for every method
-
-        """
-        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
-        teardown_class()
-
-    def setup(self):
+    def setup_method(self, method):
         """
             Debug information
         """
+        self.bigml = {}
+        self.bigml["method"] = method.__name__
         print("\n-------------------\nTests in: %s\n" % __name__)
+
+    def teardown_method(self):
+        """Calling generic teardown for every method
+
+        """
+        world.clear_paths()
+        print("\nEnd of tests in: %s\n-------------------\n" % __name__)
+        self.bigml = {}
 
     def test_scenario1(self):
         """
@@ -64,17 +66,16 @@ class TestWeights(object):
                 And I check that the dataset has been created
                 And I check that the model has been created
                 Then I check that the model is balanced
-
-                Examples:
-                |data |output_dir  |
-                |../data/iris.csv | ./scenario_w_1 |
         """
         print(self.test_scenario1.__doc__)
+        headers = ["data", "output_dir"]
         examples = [
             ['data/iris.csv', 'scenario_w_1']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            test_pred.i_create_balanced_model(self, data=example[0], output_dir=example[1])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            test_pred.i_create_balanced_model(
+                self, data=example["data"], output_dir=example["output_dir"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
             test_pred.i_check_create_model(self)
@@ -88,21 +89,23 @@ class TestWeights(object):
                 And I check that the dataset has been created
                 And I check that the model has been created
                 Then I check that the model uses as weight "<field_id>"
-
-                Examples:
-                |data |field | output_dir  | field_id | objective
-                |../data/iris_w.csv | weight |./scenario_w_2 | 000005 |000004
         """
         print(self.test_scenario2.__doc__)
+        headers = ["data", "field", "output_dir", "field_id", "objective"]
         examples = [
             ['data/iris_w.csv', 'weight', 'scenario_w_2', '000005', 'species']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            test_pred.i_create_weighted_field_model(self, data=example[0], field=example[1], output_dir=example[2], objective=example[4])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            test_pred.i_create_weighted_field_model(
+                self, data=example["data"], field=example["field"],
+                output_dir=example["output_dir"],
+                objective=example["objective"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
             test_pred.i_check_create_model(self)
-            test_pred.i_check_weighted_model(self, field=example[3])
+            test_pred.i_check_weighted_model(
+                self, field=example["field_id"])
 
     def test_scenario3(self):
         """
@@ -118,12 +121,18 @@ class TestWeights(object):
                 |../data/iris.csv | ../data/weights.csv |./scenario_w_3 | [["Iris-setosa",5], ["Iris-versicolor",3]]
         """
         print(self.test_scenario3.__doc__)
+        headers = ["data", "path", "output_dir", "weights"]
         examples = [
-            ['data/iris.csv', 'data/weights.csv', 'scenario_w_3', '[["Iris-setosa",5], ["Iris-versicolor",3]]']]
+            ['data/iris.csv', 'data/weights.csv', 'scenario_w_3',
+             '[["Iris-setosa",5], ["Iris-versicolor",3]]']]
         for example in examples:
-            print("\nTesting with:\n", example)
-            test_pred.i_create_objective_weighted_model(self, data=example[0], path=example[1], output_dir=example[2])
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            test_pred.i_create_objective_weighted_model(
+                self, data=example["data"], path=example["path"],
+                output_dir=example["output_dir"])
             test_pred.i_check_create_source(self)
             test_pred.i_check_create_dataset(self, suffix=None)
             test_pred.i_check_create_model(self)
-            test_pred.i_check_objective_weighted_model(self, weights=example[3])
+            test_pred.i_check_objective_weighted_model(
+                self, weights=example["weights"])
