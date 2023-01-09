@@ -25,7 +25,6 @@ import traceback
 from subprocess import check_call, CalledProcessError
 
 from bigml.api import check_resource
-from bigml.io import UnicodeReader
 
 from bigmler.processing.models import MONTECARLO_FACTOR
 from bigmler.checkpoint import file_number_of_lines

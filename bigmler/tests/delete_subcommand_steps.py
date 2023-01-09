@@ -16,7 +16,6 @@
 # under the License.
 
 import os
-import time
 
 from bigml.api import check_resource, HTTP_NOT_FOUND
 

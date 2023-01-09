@@ -197,9 +197,7 @@ def i_check_anomaly_scores(step, check_file):
     try:
         message = check_rows_equal(predictions_file, check_file)
     except Exception as exc:
-        raise exc
         message = str(exc)
-    print(repr(message))
     ok_(message is None, msg=message)
 
 

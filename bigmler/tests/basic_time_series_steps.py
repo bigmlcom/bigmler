@@ -20,7 +20,6 @@ import os
 import shutil
 
 from bigml.api import check_resource
-from bigml.io import UnicodeReader
 
 from bigmler.tests.common_steps import shell_execute, check_rows_equal
 from bigmler.tests.world import world, res_filename, ok_

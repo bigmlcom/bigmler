@@ -286,22 +286,23 @@ def remote_predict_ensemble(ensemble_id, test_reader, prediction_file, api,
         u.log_message(message, log_file=session_file,
                       console=args.verbosity)
 
-        with UnicodeWriter(prediction_file) as predictions_file:
-            for input_data in test_reader:
-                input_data_dict = test_reader.dict(input_data)
-                prediction = api.create_prediction(ensemble_id,
-                                                   input_data_dict,
-                                                   wait_time=0,
-                                                   args=prediction_args)
-                prediction = u.check_resource(prediction,
-                                              api.get_prediction)
-                u.check_resource_error(prediction,
-                                       "Failed to create prediction: ")
-                u.log_message("%s\n" % prediction['resource'], log_file=log)
-                prediction_row = prediction_to_row(prediction,
-                                                   args.prediction_info)
-                write_prediction(prediction_row, predictions_file,
-                                 args.prediction_info, input_data, exclude)
+        output = output or UnicodeWriter(
+            prediction_file).open_writer()
+        for input_data in test_reader:
+            input_data_dict = test_reader.dict(input_data)
+            prediction = api.create_prediction(ensemble_id,
+                                               input_data_dict,
+                                               wait_time=0,
+                                               args=prediction_args)
+            prediction = u.check_resource(prediction,
+                                          api.get_prediction)
+            u.check_resource_error(prediction,
+                                   "Failed to create prediction: ")
+            u.log_message("%s\n" % prediction['resource'], log_file=log)
+            prediction_row = prediction_to_row(prediction,
+                                               args.prediction_info)
+            write_prediction(prediction_row, output,
+                             args.prediction_info, input_data, exclude)
 
 
 def local_predict(models, test_reader, output, args, options=None,

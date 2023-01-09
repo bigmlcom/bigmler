@@ -439,6 +439,7 @@ logs in "<output_dir>"
         """
         print(self.test_scenario12.__doc__)
         headers = ["data", "output_dir", "sql_query", "rows"]
+        #pylint: disable=locally-disabled,anomalous-backslash-in-string
         examples = [
             ['data/iris.csv', 'scenario_d_13', "select A.*,B.* from A join B "
              "on A.\`000000\` = B.\`000000\`", 900]]
