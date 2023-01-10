@@ -3,6 +3,14 @@
 History
 -------
 
+5.4.0 (2023-01-10)
+~~~~~~~~~~~~~~~~~~
+
+- Changing test tool to pytest.
+- Updating underlying bindings version.
+- Changing header for centroid local predictions to `cluster` to match
+  remote header.
+
 5.3.0 (2022-10-21)
 ~~~~~~~~~~~~~~~~~~
 

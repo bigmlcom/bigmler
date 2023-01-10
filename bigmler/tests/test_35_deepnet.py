@@ -137,7 +137,7 @@ class TestPrediction:
              ' "output": "scenario1_dn/predictions.csv",' +
              ' "test": "data/test_iris.csv"}', 'data/test_iris.csv',
              'scenario2_dn/predictions.csv',
-             'check_files/predictions_iris_dn.csv'],
+             'check_files/predictions_iris_dn_nh.csv'],
             ['scenario1_img_dn', '{"data": "data/images/metadata.json",' +
              ' "output": "scenario1_img_dn/predictions.csv"}',
              'data/test_images.csv', 'scenario2_img_dn/predictions.csv',

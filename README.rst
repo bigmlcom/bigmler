@@ -30,7 +30,7 @@ Requirements
 BigMLer needs Python 3.8 or higher versions to work.
 Compatibility with Python 2.X was discontinued in version 3.27.2.
 
-BigMLer requires `bigml 9.0.0 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 9.1.3 <https://github.com/bigmlcom/python>`_  or
 higher, that contains the bindings providing support to use the ``BigML``
 platform to create, update, get and delete resources,
 but also to produce local predictions using the
@@ -326,14 +326,21 @@ to ``statistical`` or ``no-pruning`` values respectively.
 Running the Tests
 -----------------
 
-To run the tests you will need to install
-`nose <https://nose.readthedocs.org/en/latest/>`_ that is installed on setup,
-and set up your authentication via environment variables, as explained
-above. With that in place, you can run the test suite simply by issuing
+The tests will be run using `pytest <https://docs.pytest.org/en/7.2.x/>`_.
+You'll need to set up your authentication
+via environment variables, as explained in the authentication section.
+Also some of the tests need other environment
+variables like ``BIGML_ORGANIZATION`` to test calls when used by Organization
+members and ``BIGML_EXTERNAL_CONN_HOST``, ``BIGML_EXTERNAL_CONN_PORT``,
+``BIGML_EXTERNAL_CONN_DB``, ``BIGML_EXTERNAL_CONN_USER``,
+``BIGML_EXTERNAL_CONN_PWD`` and ``BIGML_EXTERNAL_CONN_SOURCE``
+in order to test external data connectors.
+
+With that in place, you can run the test suite simply by issuing
 
 .. code-block:: bash
 
-    $ python setup.py nosetests
+    $ pytest
 
 Additional Information
 ----------------------

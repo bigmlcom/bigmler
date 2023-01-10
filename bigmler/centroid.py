@@ -49,7 +49,7 @@ def use_prediction_headers(prediction_headers, output, test_reader,
 
     """
     exclude = []
-    headers = ["centroid name"]
+    headers = ["cluster"]
 
     if (args.prediction_info == FULL_FORMAT or
             args.prediction_fields is not None):

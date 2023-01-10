@@ -288,7 +288,7 @@ def i_create_all_resources_remote_proportional(
     command = ("bigmler --train " + res_filename(data) + " --test " + test +
                " --missing-strategy proportional --remote" +
                " --store --output " + output + " --max-batch-models 1")
-    shell_execute(command, output, test=test)
+    shell_execute(command, output, test=test, options="--no-header")
 
 
 def i_create_all_resources_remote_missing_splits(
@@ -302,7 +302,7 @@ def i_create_all_resources_remote_missing_splits(
     command = ("bigmler --train " + res_filename(data) + " --test " + test +
                " --missing-splits --remote" +
                " --store --output " + output + " --max-batch-models 1")
-    shell_execute(command, output, test=test)
+    shell_execute(command, output, test=test, options="--no-header")
 
 
 def i_create_all_resources_with_separator(
@@ -333,7 +333,7 @@ def i_create_all_resources_batch_map(
                " --fields-map "
                + res_filename(fields_map) + " --store --output " + output +
                " --remote")
-    shell_execute(command, output, test=test)
+    shell_execute(command, output, test=test, options="--no-header")
 
 
 def i_create_all_resources_batch(step, data=None, test=None, output=None):
@@ -344,7 +344,7 @@ def i_create_all_resources_batch(step, data=None, test=None, output=None):
     test = res_filename(test)
     command = ("bigmler --train " + res_filename(data) + " --test " + test +
                " --store --output " + output + " --remote")
-    shell_execute(command, output, test=test)
+    shell_execute(command, output, test=test, options="--no-header")
 
 
 def i_create_all_resources_with_no_headers(
@@ -358,7 +358,7 @@ def i_create_all_resources_with_no_headers(
     command = ("bigmler --train " + res_filename(data) + " --test " + test +
                " --store --output " + output + " --max-batch-models 1 " +
                "--no-fast --no-train-header --no-test-header")
-    shell_execute(command, output, test=test)
+    shell_execute(command, output, test=test, options="--no-header")
 
 
 def i_create_all_resources(step, data=None, test=None, output=None):
@@ -722,8 +722,8 @@ def i_create_resources_remotely_from_boosted_ensemble(
     command = ("bigmler --dataset " + world.dataset['resource'] +
                " --test " + test + " --boosting-iterations " +
                str(iterations) + " --remote --tag my_ensemble --store" +
-               " --output " + output + " --prediction-header --to-csv")
-    shell_execute(command, output, test=test)
+               " --output " + output + " --to-csv")
+    shell_execute(command, output, test=test, options="--no-header")
 
 
 def i_create_resources_from_ensemble_generic(step, number_of_models=None,

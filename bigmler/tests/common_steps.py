@@ -100,20 +100,23 @@ def shell_execute(command, output, test=None, options=None,
     try:
         world.test_lines = 0
         if test is not None:
+            world.test_header = 1
             world.test_lines += file_number_of_lines(test)
             # if test file containss headers and the prediction command don't,
             # we need to remove 1 to compensate for the header
             if '_nh' not in test and '--prediction-header' not in command \
                     and '--remote' not in command:
                 world.test_lines -= 1
+                world.test_header = 0
             if '_nh' not in test and options is not None and \
                     '--no-header' in options:
                 world.test_lines -= 1
-            print('_nh' not in test and options is not None and
-                  '--no-header' in options, options)
+                world.test_header = 0
         elif test_rows is not None:
+            world.test_header = 0
             world.test_lines += test_rows
         elif test_split is not None:
+            world.test_header = 0
             data_lines = file_number_of_lines(data) - 1
             world.test_lines = int(data_lines * float(test_split))
     except IOError as exc:

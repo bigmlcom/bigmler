@@ -77,7 +77,7 @@ def i_check_create_test_dataset(step):
             test_dataset = check_resource(handler.readline().strip(),
                                           world.api.get_dataset)
         world.datasets.append(test_dataset['resource'])
-        world.test_lines = test_dataset['object']['rows'] + 1
+        world.test_lines = test_dataset['object']['rows'] + world.test_header
         world.test_dataset = test_dataset
     except Exception as exc:
         message = str(exc)
@@ -156,9 +156,9 @@ def i_create_resources_from_model_with_op_remote(step, operating_point=None,
     operating_point = res_filename(operating_point)
     command = ("bigmler --model " + world.model['resource'] + " --test " +
                test + " --operating-point " + operating_point +
-               " --store --remote --prediction-header --output " + output +
+               " --store --remote --output " + output +
                " --max-batch-models 1")
-    shell_execute(command, output, test=test)
+    shell_execute(command, output, test=test, options="--no-header")
 
 
 def i_create_resources_from_model_remote_no_batch(step,
@@ -170,5 +170,5 @@ def i_create_resources_from_model_remote_no_batch(step,
     test = res_filename(test)
     command = ("bigmler --model " + world.model['resource'] + " --test " +
                test + " --no-batch --store --remote --output " + output +
-               " --max-batch-models 1 --prediction-header")
-    shell_execute(command, output, test=test)
+               " --max-batch-models 1")
+    shell_execute(command, output, test=test, options="--no-header")
