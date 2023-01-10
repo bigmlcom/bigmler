@@ -181,8 +181,8 @@ def i_create_all_cluster_resources_with_mapping(
     command = ("bigmler cluster --remote --train " + res_filename(data) +
                " --test " + test + " --k 8" +
                " --fields-map " + res_filename(fields_map) +
-               " --prediction-header --store --output " + output)
-    shell_execute(command, output, test=test)
+               " --store --output " + output)
+    shell_execute(command, output, test=test, options="--no-header")
 
 
 def i_create_all_cluster_resources_with_prediction_fields(

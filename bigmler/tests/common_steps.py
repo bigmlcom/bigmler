@@ -156,9 +156,9 @@ def check_rows_equal(reader_file, check_file):
                     if dot > 0 or (ref_row[index].find(".") > 0
                                    and ref_row[index].endswith(".0")):
                         try:
-                            decimal_places = (
+                            decimal_places = min((
                                 min(len(row_value), len(ref_row[index]))
-                                - dot - 1)
+                                - dot - 1), 5)
                             message = approx_error(
                                 float(row_value),
                                 float(ref_row[index]),
