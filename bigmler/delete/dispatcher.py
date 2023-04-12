@@ -479,9 +479,12 @@ def delete_resources(command_args, api, deleted_list=None):
     if command_args.bin:
         to_new_project(api, TRASH_BIN, delete_list)
     elif not command_args.dry_run:
+        command_args.qs = '' if not hasattr(command_args, "qs") else \
+            command_args.qs
         message = "Deleting...\n"
         u.log_message(message, log_file=session_file)
-        u.delete(api, delete_list, exe_outputs=not command_args.execution_only)
+        u.delete(api, delete_list, exe_outputs=not command_args.execution_only,
+                 query_string=command_args.qs)
     if bulk_deletion:
         message = "Deleting...\n"
         u.log_message(message, log_file=session_file)

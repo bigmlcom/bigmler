@@ -3286,7 +3286,7 @@ to delete other resources, you can select them by choosing their status:
 
 .. code-block:: bash
 
-    bigmler delete --older-than 2 --status failed
+    bigmler delete --older-than 2 --status faulty
 
 would remove all failed resources created more than two days ago.
 
@@ -3297,7 +3297,6 @@ query strings (see the `API documentation <https://bigml.com/api>`_).
 .. code-block:: bash
 
     bigmler delete --filter "name__icontains=iris"
-
 
 .. _bigmler-export:
 
@@ -4390,7 +4389,7 @@ Requirements
 BigMLer needs Python 3.8 or higher versions to work.
 Compatibility with Python 2.X was discontinued in version 3.27.2.
 
-BigMLer requires `bigml 9.1.3 <https://github.com/bigmlcom/python>`_  or
+BigMLer requires `bigml 9.2.0 <https://github.com/bigmlcom/python>`_  or
 higher, that contains the bindings providing support to use the ``BigML``
 platform to create, update, get and delete resources,
 but also to produce local predictions using the

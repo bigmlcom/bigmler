@@ -19,6 +19,8 @@
 
 """
 
+from argparse import SUPPRESS
+
 def get_delete_options(defaults=None):
     """Delete-related options
 
@@ -343,7 +345,13 @@ def get_delete_options(defaults=None):
                         "in progress", "summarized", "uploading", "unknown",
                         "runnable"],
             'help': ("Filter the resources to be deleted by its status "
-                     "(finished if not set).")}
+                     "(finished if not set).")},
+
+        # Query string to be used when deleting.
+        '--qs': {
+            'action': 'store',
+            'default': defaults.get('qs', ''),
+            'help': SUPPRESS}
         }
 
     return options

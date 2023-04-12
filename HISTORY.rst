@@ -3,6 +3,11 @@
 History
 -------
 
+5.5.0 (2023-04-12)
+~~~~~~~~~~~~~~~~~~
+
+- Improving delete capabilities and updating the underlying bindings.
+
 5.4.0 (2023-01-10)
 ~~~~~~~~~~~~~~~~~~
 
