@@ -349,9 +349,9 @@ def delete(api, delete_list, exe_outputs=True, query_string=''):
             if (resource_type == "execution" and exe_outputs) or \
                     resource_type == "source":
                 query_string_list.append("delete_all=true")
-            query_string = ";".join(query_string_list)
-            api.deleters[resource_type](resource_id,
-                                        query_string=query_string)
+            api.deleters[resource_type](
+                resource_id,
+                query_string=";".join(query_string_list))
         except ValueError:
             console_log("Failed to delete resource %s" % resource_id)
 
