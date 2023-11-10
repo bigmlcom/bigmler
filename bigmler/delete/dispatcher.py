@@ -87,7 +87,7 @@ SELECTOR_FILTERS = {
     "logisticregression": "optiml_status=false;fusion_status=false",
     "linearregression": "optiml_status=false;fusion_status=false",
     "deepnet": "optiml_status=false;fusion_status=false",
-    "dataset": "cluster_status=false;timeseries=false"}
+    "dataset": "cluster_status=false;timeseries_status=false"}
 
 
 def to_new_project(api, project_name, resource_ids):
