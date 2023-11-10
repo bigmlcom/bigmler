@@ -57,6 +57,10 @@ RESOURCE_EMBEDDED_URL = ("%s/embedded/%%s/tree" %
 BIGML_SYS_ENCODING = os.environ.get('BIGML_SYS_ENCODING', \
     sys.getfilesystemencoding() if sys.platform == 'win32' else 'utf-8')
 FILE_ENCODING = 'utf-8'
+# resources that can have other resources as components
+COMPOSED_RESOURCES = [
+    "cluster", "ensemble", "fusion", "composites", "optiml",
+    "evaluation", "timeseries"]
 
 
 def read_description(path):
@@ -347,7 +351,7 @@ def delete(api, delete_list, exe_outputs=True, query_string=''):
                     pass
             query_string_list = [query_string]
             if (resource_type == "execution" and exe_outputs) or \
-                    resource_type == "source":
+                    resource_type in COMPOSED_RESOURCES:
                 query_string_list.append("delete_all=true")
             api.deleters[resource_type](
                 resource_id,

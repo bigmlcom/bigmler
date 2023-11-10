@@ -3254,6 +3254,17 @@ types to be deleted
 
 will delete the sources and models created more than two days ago.
 
+Additionally, you can use the ``--resource-types`` option to tell which
+type of resources to exclude from deletion if the ``--exclude-types`` flag
+is added to the call.
+
+.. code-block:: bash
+
+    bigmler delete --older-than 2 --resource-types source,model --exclude-types
+
+That command will delete all the resources that are older than two days except
+for sources and models.
+
 You can simulate the a delete subcommand using the ``--dry-run``
 flag
 
@@ -5969,7 +5980,7 @@ Delete Subcommand Options
                                       with tag to delete them
 ``--project`` *TAG*                   Retrieves projects that were
                                       tagged with tag to delete them
-``--association `` *TAG*              Retrieves associations that were
+``--association`` *TAG*               Retrieves associations that were
                                       tagged with tag to delete them
 ``--older-than`` *DATE*               Retrieves resources created before the
                                       specified
@@ -5996,6 +6007,11 @@ Delete Subcommand Options
                                       model, ensemble, prediction,
                                       batch_prediction,
                                       cluster, centroid, batch_centroid, etc.
+``--exclude-types``                   When used together with
+                                      ``resource-types``, the list of types
+                                      provided will be excluded from deletion.
+                                      Only the rest of resource types will be
+                                      deleted.
 ``--filter`` *FILTER EXPRESSION*      Filter expression as used in the API
                                       list calls query string
 ``--dry-run``                         Delete simulation. No removal.

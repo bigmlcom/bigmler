@@ -3,6 +3,14 @@
 History
 -------
 
+5.6.0 (2023-11-10)
+~~~~~~~~~~~~~~~~~~
+
+- Adding `exclude-types` flag to bigmler delete subcommand to provide types
+  of resources to be excluded from deletion using `--resource-types`.
+- Improving deletion filter order to ensure that composed objects, like
+  ensembles or clusters, are deleted first.
+
 5.5.1 (2023-10-27)
 ~~~~~~~~~~~~~~~~~~
 

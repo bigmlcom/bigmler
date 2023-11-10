@@ -27,6 +27,7 @@ import shutil
 import bigml.api
 
 from bigml.api import get_resource_type
+from bigml.constants import RENAMED_RESOURCES
 
 import bigmler.utils as u
 import bigmler.processing.args as a
@@ -65,10 +66,23 @@ STATUS_CODES = {
 }
 
 GROUP_RESOURCES = ["project", "execution"]
-COMPOSED_RESOURCES = ["cluster", "ensemble", "fusion", "composites", "optiml"]
 SYNCHRONOUS_RESOURCES = ["project", "prediction", "centroid", "anomalyscore",
     "topicdistribution", "associationset", "forecast", "projection"]
 TRASH_BIN = "Trash bin"
+
+ALL_RESOURCE_TYPES = [
+    "project", "execution", "script", "library", "optiml", "fusion",
+    "batchprediction", "batchcentroid", "batchanomalyscore",
+    "batchtopicdistribution", "batchprojection", "prediction", "anomalyscore",
+    "associationset", "centroid", "forecast", "projection",
+    "topicdistribution", "cluster", "ensemble", "model", "anomaly",
+    "sample", "association", "logisticregression", "topicmodel",
+    "timeseries", "deepnet", "pca", "linearregression", "externalconnector",
+    "evaluation", "dataset", "source"]
+
+SELECTOR_FILTERS = {
+    "model": "ensemble=false",
+    "dataset": "cluster_status=false"}
 
 
 def to_new_project(api, project_name, resource_ids):
@@ -213,7 +227,7 @@ def resources_by_type(resources_list, bulk_deletion=False):
         resource_type = bigml.api.get_resource_type(resource)
         if resource_type in GROUP_RESOURCES:
             groups.append(resource)
-        elif resource_type in COMPOSED_RESOURCES:
+        elif resource_type in u.COMPOSED_RESOURCES:
             composed.append(resource)
         else:
             simple.append(resource)
@@ -252,55 +266,10 @@ def filtered_selectors(args, api):
     """
 
     resource_selectors = [
-        ("project", args.project_tag, api.list_projects, None),
-        ("execution", args.execution_tag, api.list_executions, None),
-        ("cluster", args.cluster_tag, api.list_clusters, None),
-        ("optiml", args.optiml_tag, api.list_optimls, None),
-        ("source", args.source_tag, api.list_sources, None),
-        ("dataset", args.dataset_tag, api.list_datasets,
-         "cluster_status=false"),
-        ("model", args.model_tag, api.list_models, "ensemble=false"),
-        ("prediction", args.prediction_tag, api.list_predictions,
-         None),
-        ("ensemble", args.ensemble_tag, api.list_ensembles, None),
-        ("evaluation", args.evaluation_tag, api.list_evaluations,
-         None),
-        ("batchprediction", args.batch_prediction_tag,
-         api.list_batch_predictions, None),
-        ("centroid", args.centroid_tag, api.list_centroids, None),
-        ("batchcentroid", args.batch_centroid_tag,
-         api.list_batch_centroids, None),
-        ("anomaly", args.anomaly_tag, api.list_anomalies, None),
-        ("anomalyscore", args.anomaly_score_tag, api.list_anomaly_scores,
-         None),
-        ("batchanomalyscore", args.batch_anomaly_score_tag,
-         api.list_batch_anomaly_scores, None),
-        ("sample", args.sample_tag, api.list_samples, None),
-        ("association", args.association_tag, api.list_associations, None),
-        ("associationset", args.association_set_tag, api.list_association_sets,
-         None),
-        ("logisticregression", args.logistic_regression_tag,
-         api.list_logistic_regressions, None),
-        ("topicmodel", args.topic_model_tag,
-         api.list_topic_models, None),
-        ("topicdistribution", args.topic_distribution_tag,
-         api.list_topic_distributions, None),
-        ("batchtopicdistribution", args.batch_topic_distribution_tag,
-         api.list_batch_topic_distributions, None),
-        ("timeseries", args.time_series_tag, api.list_time_series, None),
-        ("forecast", args.forecast_tag, api.list_forecasts, None),
-        ("deepnet", args.deepnet_tag, api.list_deepnets, None),
-        ("fusion", args.fusion_tag, api.list_fusions, None),
-        ("pca", args.pca_tag, api.list_pcas, None),
-        ("projection", args.projection_tag, api.list_projections, None),
-        ("batchprojection", args.batch_projections_tag,
-         api.list_batch_projections, None),
-        ("linearregression", args.linear_regression_tag,
-         api.list_linear_regressions, None),
-        ("externalconnector", args.external_connector_tag,
-         api.list_external_connectors, None),
-        ("script", args.script_tag, api.list_scripts, None),
-        ("library", args.library_tag, api.list_libraries, None)]
+        (resource_type, getattr(args, "%s_tag" % RENAMED_RESOURCES.get(
+         resource_type, resource_type)),
+         api.listers[resource_type], SELECTOR_FILTERS.get(resource_type)) for
+        resource_type in ALL_RESOURCE_TYPES]
 
     if args.all_tag is None and any(resource[1] is not None for resource in
                                      resource_selectors):
@@ -372,7 +341,14 @@ def delete_resources(command_args, api, deleted_list=None):
     if command_args.resource_types is not None:
         resource_types = [resource_type.strip() for resource_type in
                           command_args.resource_types.split(',')]
-        command_args.resource_types_ = resource_types
+        if command_args.exclude_types:
+            # if that flag is set, the given resource_types are excluded
+            command_args.resource_types_ = [
+                resource_type for resource_type in ALL_RESOURCE_TYPES
+                if command_args.resource_types is None or
+                resource_type not in resource_types]
+        else:
+            command_args.resource_types_ = resource_types
     else:
         command_args.resource_types_ = None
 
@@ -432,12 +408,12 @@ def delete_resources(command_args, api, deleted_list=None):
         (not command_args.execution_only and \
          resource_id.startswith("execution/")) for resource_id in delete_list)
     aprox = "*" if bulk_deletion else ""
+    # ensure uniqueness
+    delete_list = list(set(delete_list))
     # if bulk_deletion, keep only the project and executions resources in
     # the deletion list
     types_summary, delete_list = resources_by_type( \
         delete_list, bulk_deletion)
-    # ensure uniqueness
-    delete_list = list(set(delete_list))
     action_text = "Moving to Trash bin project" if command_args.bin else \
         "Deleting"
     action_text = "Dry-run for deleting" if command_args.dry_run else \

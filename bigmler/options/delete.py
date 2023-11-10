@@ -219,6 +219,14 @@ def get_delete_options(defaults=None):
             'default': defaults.get('resource_types', None),
             'help': "Limits the type of resources to be deleted."},
 
+        # Use it to exclude the resources to be deleted.
+        '--exclude-types': {
+            'dest': 'exclude_types',
+            'action': 'store_true',
+            'default': defaults.get('exclude_types', False),
+            'help': ("When set, the --resource-types provided will be"
+                     " excluded.")},
+
         # Simulate the delete, storing the ids to be deleted.
         '--dry-run': {
             'action': 'store_true',
@@ -317,8 +325,8 @@ def get_delete_options(defaults=None):
 
         # Use it to retrieve batch projections that were tagged with tag.
         '--batch-projection-tag': {
-            'dest': 'batch_projections_tag',
-            'default': defaults.get('batch_projections_tag', None),
+            'dest': 'batch_projection_tag',
+            'default': defaults.get('batch_projection_tag', None),
             'help': "Retrieve batch projections that were tagged with tag."},
 
         # Use it to retrieve resources filtered by a query string
