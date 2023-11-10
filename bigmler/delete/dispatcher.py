@@ -81,8 +81,13 @@ ALL_RESOURCE_TYPES = [
     "evaluation", "dataset", "source"]
 
 SELECTOR_FILTERS = {
-    "model": "ensemble=false",
-    "dataset": "cluster_status=false"}
+    "fusion": "fusion_status=false",
+    "model": "ensemble=false;optiml_status=false;fusion_status=false",
+    "ensemble": "optiml_status=false;fusion_status=false",
+    "logisticregression": "optiml_status=false;fusion_status=false",
+    "linearregression": "optiml_status=false;fusion_status=false",
+    "deepnet": "optiml_status=false;fusion_status=false",
+    "dataset": "cluster_status=false;timeseries=false"}
 
 
 def to_new_project(api, project_name, resource_ids):
@@ -213,39 +218,17 @@ def get_date(reference, api):
     return date
 
 
-def resources_by_type(resources_list, bulk_deletion=False):
-    """Sorts resources by type. Projects and executions are deleted first.
-       Then clusters, fusions and ensembles and finally the rest of resources
-       Returns aggregations by type.
-       If bulk_deletion is set, then only projects or executions are kept
-    """
+def resources_by_type(resources_list):
+    """Sorts resources by type and summarizes their number """
     type_summary = {}
-    groups = []
-    composed = []
-    simple = []
-    for resource in resources_list:
-        resource_type = bigml.api.get_resource_type(resource)
-        if resource_type in GROUP_RESOURCES:
-            groups.append(resource)
-        elif resource_type in u.COMPOSED_RESOURCES:
-            composed.append(resource)
-        else:
-            simple.append(resource)
-
-    groups.sort()
-    resources_list = groups
-    if not bulk_deletion:
-        composed.sort()
-        simple.sort()
-        resources_list.extend(composed)
-        resources_list.extend(simple)
-
+    sorted_resources = resources_list[:]
+    sorted_resources.sort()
     for resource in resources_list:
         resource_type = bigml.api.get_resource_type(resource)
         if not resource_type in type_summary:
             type_summary[resource_type] = 0
         type_summary[resource_type] += 1
-    return type_summary, resources_list
+    return type_summary, sorted_resources
 
 
 def filter_resource_types(delete_list, resource_types):
@@ -323,12 +306,23 @@ def delete_dispatcher(args=sys.argv[1:]):
     u.log_message("_" * 80 + "\n", log_file=session_file)
 
 
-def delete_resources(command_args, api, deleted_list=None):
+def delete_resources(command_args, api, deleted_list=None, step=0):
     """Deletes the resources selected by the user given options
 
     """
     if deleted_list is None:
         deleted_list = []
+
+    # deletion will be done in 3 steps. First projects and executions, then
+    # composed resources (ensembles, etc.) and finally the rest of resources
+    if step == 0:
+        types = GROUP_RESOURCES
+    elif step == 1:
+        types = u.COMPOSED_RESOURCES
+    else:
+        types = [res_type for res_type in ALL_RESOURCE_TYPES if
+                 res_type not in GROUP_RESOURCES and
+                 res_type not in u.COMPOSED_RESOURCES]
     if command_args.output_dir is None:
         path = a.OUTPUT_DIR
     else:
@@ -344,128 +338,148 @@ def delete_resources(command_args, api, deleted_list=None):
         if command_args.exclude_types:
             # if that flag is set, the given resource_types are excluded
             command_args.resource_types_ = [
-                resource_type for resource_type in ALL_RESOURCE_TYPES
+                resource_type for resource_type in types
                 if command_args.resource_types is None or
                 resource_type not in resource_types]
         else:
-            command_args.resource_types_ = resource_types
+            command_args.resource_types_ = [
+                res_type for res_type in resource_types if res_type in types]
     else:
-        command_args.resource_types_ = None
+        command_args.resource_types_ = types
 
-    delete_list = []
-    # by ids
-    if command_args.delete_list:
-        message = u.dated("Resources selected from a user-given list of ids."
-                          "\n\n")
-        u.log_message(message, log_file=session_file,
-                      console=command_args.verbosity)
-        delete_list = [resource_id.strip() for resource_id in
-                       command_args.delete_list.split(',')]
-    # in file
-    if command_args.delete_file:
-        message = u.dated("Resources selected from user-given file.\n\n")
-        u.log_message(message, log_file=session_file,
-                      console=command_args.verbosity)
-        if not os.path.exists(command_args.delete_file):
-            sys.exit("File %s not found" % command_args.delete_file)
-        with open(command_args.delete_file, "r") as delete_file:
-            resource_id = bigml.api.get_resource_id(
-                delete_file.readline().strip())
-            if resource_id:
-                delete_list.append(resource_id)
-    # from directory
-    if command_args.from_dir:
-        message = u.dated("Resources extracted from directory logs.\n\n")
-        u.log_message(message, log_file=session_file,
-                      console=command_args.verbosity)
+    if command_args.resource_types_:
+        delete_list = []
+        # by ids
+        if command_args.delete_list:
+            message = u.dated("Resources selected from a user-given list of ids."
+                              "\n\n")
+            u.log_message(message, log_file=session_file,
+                          console=command_args.verbosity)
+            delete_list = [resource_id.strip() for resource_id in
+                           command_args.delete_list.split(',')]
+        # in file
+        if command_args.delete_file:
+            message = u.dated("Resources selected from user-given file.\n\n")
+            u.log_message(message, log_file=session_file,
+                          console=command_args.verbosity)
+            if not os.path.exists(command_args.delete_file):
+                sys.exit("File %s not found" % command_args.delete_file)
+            with open(command_args.delete_file, "r") as delete_file:
+                resource_id = bigml.api.get_resource_id(
+                    delete_file.readline().strip())
+                if resource_id:
+                    delete_list.append(resource_id)
+        # from directory
+        if command_args.from_dir:
+            message = u.dated("Resources extracted from directory logs.\n\n")
+            u.log_message(message, log_file=session_file,
+                          console=command_args.verbosity)
 
-        delete_list.extend(retrieve_resources(command_args.from_dir))
+            delete_list.extend(retrieve_resources(command_args.from_dir))
 
-    # by time interval and tag (plus filtered resource_types)
-    qs_list = time_interval_qs(command_args, api)
+        # by time interval and tag (plus filtered resource_types)
+        qs_list = time_interval_qs(command_args, api)
 
-    # by filter expression (plus filtered resource_types)
-    filter_qs_list = filter_qs(command_args)
+        # by filter expression (plus filtered resource_types)
+        filter_qs_list = filter_qs(command_args)
 
-    qs_list.extend(filter_qs_list)
-    if qs_list:
-        message = u.dated("Resources filtered by expression:\n    %s\n\n" %
-            ";".join(qs_list))
-        u.log_message(message, log_file=session_file,
-                      console=command_args.verbosity)
+        qs_list.extend(filter_qs_list)
+        if qs_list:
+            message = u.dated("Resources filtered by expression:\n    %s\n\n" %
+                ";".join(qs_list))
+            u.log_message(message, log_file=session_file,
+                          console=command_args.verbosity)
 
-    delete_list.extend(get_delete_list(command_args, api, qs_list))
+        delete_list.extend(get_delete_list(command_args, api, qs_list))
 
-    # filter resource_types if any
-    delete_list = filter_resource_types(delete_list,
-                                        command_args.resource_types_)
+        # filter resource_types if any
+        delete_list = filter_resource_types(delete_list,
+                                            command_args.resource_types_)
 
-    delete_list = [resource_id for resource_id in delete_list \
-        if resource_id not in deleted_list]
-    # if there are projects or executions, delete them first
-    bulk_deletion = not command_args.bin and not command_args.dry_run and \
-        any(resource_id.startswith("project/") or \
-        (not command_args.execution_only and \
-         resource_id.startswith("execution/")) for resource_id in delete_list)
-    aprox = "*" if bulk_deletion else ""
-    # ensure uniqueness
-    delete_list = list(set(delete_list))
-    # if bulk_deletion, keep only the project and executions resources in
-    # the deletion list
-    types_summary, delete_list = resources_by_type( \
-        delete_list, bulk_deletion)
-    action_text = "Moving to Trash bin project" if command_args.bin else \
-        "Deleting"
-    action_text = "Dry-run for deleting" if command_args.dry_run else \
-        action_text
-    message = u.dated("%s %s objects%s.\n" % (action_text,
-        len(delete_list), aprox))
-    u.log_message(message, log_file=session_file,
-                  console=command_args.verbosity)
-    for resource_type, instances in list(types_summary.items()):
-        message = "%s%ss: %s\n" % (" " * INDENT_IDS, resource_type,
-                                   instances)
-        u.log_message(message, log_file=session_file,
-                      console=command_args.verbosity)
-    if aprox != "":
-        message = ("* WARNING: Deleting a project or an execution will delete"
-                   " also its associated resources. Note that their IDs"
-                   " may not be listed in this report.\n")
-        u.log_message(message, log_file=session_file,
-                      console=command_args.verbosity)
-    if len(delete_list) > ROWS_LIMIT:
-        pre_indent = INDENT_IDS - 4
-        message = ("\n%s%s\n" % ((" " * pre_indent),
-                                 ("Showing only the first %s resources.\n%s"
-                                  "See details in bigmler_sessions"
-                                  " file.\n") % (ROWS_LIMIT,
-                                                 " " * pre_indent)))
-        u.log_message(message, log_file=None,
-                      console=command_args.verbosity)
-    # Partial console message. Limited number of rows
-    segment = delete_list[0: ROWS_LIMIT]
-    message = ("\n%s" % (" " * INDENT_IDS)).join(segment)
-    message = ("%s" % (" " * INDENT_IDS)) + message + "\n"
-    u.log_message(message, log_file=None,
-                  console=command_args.verbosity)
-    # Complete message in session file
-    message = ("\n%s" % (" " * INDENT_IDS)).join(delete_list)
-    message = ("%s" % (" " * INDENT_IDS)) + message + "\n"
-    u.log_message(message, log_file=session_file)
-    if command_args.bin:
-        to_new_project(api, TRASH_BIN, delete_list)
-    elif not command_args.dry_run:
-        command_args.qs = '' if not hasattr(command_args, "qs") else \
-            command_args.qs
-        message = "Deleting...\n"
-        u.log_message(message, log_file=session_file)
-        u.delete(api, delete_list, exe_outputs=not command_args.execution_only,
-                 query_string=command_args.qs)
-    if bulk_deletion:
-        message = "Deleting...\n"
-        u.log_message(message, log_file=session_file)
-        # if projects and executions have already been deleted, delete the rest
-        delete_resources(command_args, api, deleted_list=delete_list)
-    else:
+        delete_list = [resource_id for resource_id in delete_list \
+            if resource_id not in deleted_list]
+
+
+        # if there are projects or executions, delete them first
+        bulk_deletion = not command_args.bin and not command_args.dry_run and \
+            any(resource_id.startswith("project/") or \
+            (not command_args.execution_only and \
+             resource_id.startswith("execution/")) for resource_id in delete_list)
+        aprox = "*" if bulk_deletion else ""
+        # ensure uniqueness
+        delete_list = list(set(delete_list))
+        types_summary, delete_list = resources_by_type( \
+            delete_list)
+
+        if types_summary.keys():
+            message = ("Found resources with the following types: %s.\n"
+                       % ",".join(types_summary.keys()))
+            u.log_message(message, log_file=session_file,
+                          console=command_args.verbosity)
+
+            action_text = "Moving to Trash bin project" if command_args.bin else \
+                "Deleting"
+            action_text = "Dry-run for deleting" if command_args.dry_run else \
+                action_text
+            message = u.dated("%s %s objects%s.\n" % (action_text,
+                len(delete_list), aprox))
+            u.log_message(message, log_file=session_file,
+                          console=command_args.verbosity)
+            for resource_type, instances in list(types_summary.items()):
+                message = "%s%ss: %s\n" % (" " * INDENT_IDS, resource_type,
+                                           instances)
+                u.log_message(message, log_file=session_file,
+                              console=command_args.verbosity)
+            if aprox != "":
+                message = ("* WARNING: Deleting a project or an execution will delete"
+                           " also its associated resources. Note that their IDs"
+                           " may not be listed in this report.\n")
+                u.log_message(message, log_file=session_file,
+                              console=command_args.verbosity)
+            if len(delete_list) > ROWS_LIMIT:
+                pre_indent = INDENT_IDS - 4
+                message = ("\n%s%s\n" % ((" " * pre_indent),
+                                         ("Showing only the first %s resources.\n%s"
+                                          "See details in bigmler_sessions"
+                                          " file.\n") % (ROWS_LIMIT,
+                                                         " " * pre_indent)))
+                u.log_message(message, log_file=None,
+                              console=command_args.verbosity)
+            # Partial console message. Limited number of rows
+            segment = delete_list[0: ROWS_LIMIT]
+            message = ("\n%s" % (" " * INDENT_IDS)).join(segment)
+            message = ("%s" % (" " * INDENT_IDS)) + message + "\n"
+            u.log_message(message, log_file=None,
+                          console=command_args.verbosity)
+            # Complete message in session file
+            message = ("\n%s" % (" " * INDENT_IDS)).join(delete_list)
+            message = ("%s" % (" " * INDENT_IDS)) + message + "\n"
+            u.log_message(message, log_file=session_file)
+            if command_args.bin:
+                to_new_project(api, TRASH_BIN, delete_list)
+            elif not command_args.dry_run:
+                command_args.qs = '' if not hasattr(command_args, "qs") else \
+                    command_args.qs
+                message = "Deleting...\n"
+                u.log_message(message, log_file=session_file)
+                u.delete(
+                    api, delete_list,
+                    exe_outputs=not command_args.execution_only,
+                    query_string=command_args.qs)
+        else:
+            message = ("No resources found with the following types: %s.\n"
+                       % ",".join(command_args.resource_types_))
+            u.log_message(message, log_file=session_file,
+                          console=command_args.verbosity)
+        if step < 2:
+            message = "Deleting...\n"
+            u.log_message(message, log_file=session_file)
+            # if projects and executions have already been deleted,
+            # delete the rest
+            deleted_list.extend(delete_list)
+            delete_resources(command_args, api, deleted_list=deleted_list,
+                             step=step + 1)
+
+    if step == 2 and deleted_list:
         u.print_generated_files(path, log_file=session_file,
                                 verbosity=command_args.verbosity)
