@@ -3,6 +3,11 @@
 History
 -------
 
+5.6.1 (2023-11-14)
+~~~~~~~~~~~~~~~~~~
+
+- Changing readthedocs configuration file.
+
 5.6.0 (2023-11-10)
 ~~~~~~~~~~~~~~~~~~
 
