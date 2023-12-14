@@ -317,9 +317,9 @@ def list_ids(api_function, query_string, status_code=bigml.api.FINISHED,
     if status_code is None:
         status_str = ""
     else:
-        status_str = 'status.code=%s;' % status_code
+        status_str = 'status.code=%s&' % status_code
     limit_s = 'limit=%s' % (PAGE_LENGTH if limit is None else limit)
-    q_s = '%s%s;%s' % (
+    q_s = '%s%s&%s' % (
         status_str, limit_s, query_string)
     resources = api_function(q_s)
     ids = [obj['resource'] for obj in (resources['objects'] or [])]
@@ -327,7 +327,7 @@ def list_ids(api_function, query_string, status_code=bigml.api.FINISHED,
            (resources['meta']['total_count'] > (resources['meta']['offset'] +
                                                 resources['meta']['limit']))):
         offset = resources['meta']['offset'] + PAGE_LENGTH
-        q_s = '%soffset=%s;%s;%s' % (
+        q_s = '%soffset=%s&%s&%s' % (
             status_str, offset, limit_s, query_string)
         resources = api_function(q_s)
         if resources['objects']:
@@ -355,7 +355,7 @@ def delete(api, delete_list, exe_outputs=True, query_string=''):
                 query_string_list.append("delete_all=true")
             api.deleters[resource_type](
                 resource_id,
-                query_string=";".join(query_string_list))
+                query_string="&".join(query_string_list))
         except ValueError:
             console_log("Failed to delete resource %s" % resource_id)
 
@@ -747,7 +747,7 @@ def get_first_resource(resource_type, api=None, query_string=None):
     if query_string is None:
         query_string = order
     else:
-        query_string = "%s;%s" % (query_string, order)
+        query_string = "%s&%s" % (query_string, order)
 
     if api is None:
         api = bigml.api.BigML()
@@ -766,7 +766,7 @@ def last_resource_url(resource_id, api=None, query_string=None):
         query_string = ""
     if api is None:
         api = bigml.api.BigML()
-    auth = "%sproject=%s;" % (api.auth, api.project) if api.project else api.auth
+    auth = "%sproject=%s&" % (api.auth, api.project) if api.project else api.auth
     resource_type = bigml.api.get_resource_type(resource_id)
     return "%s%s%s%s" % (api.url, resource_type, auth, query_string)
 

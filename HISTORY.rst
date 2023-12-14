@@ -3,6 +3,12 @@
 History
 -------
 
+5.7.0 (2023-12-14)
+~~~~~~~~~~~~~~~~~~
+
+- Upgrading underlying bindings version and updating API query string
+  separator.
+
 5.6.1 (2023-11-14)
 ~~~~~~~~~~~~~~~~~~
 

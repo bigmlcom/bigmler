@@ -443,7 +443,7 @@ def compute_output(api, args):
             elif not args.test_header:
                 query_string = r.ALL_FIELDS_QS
             else:
-                query_string = "%s;%s" % (r.ALL_FIELDS_QS, r.FIELDS_QS)
+                query_string = "%s&%s" % (r.ALL_FIELDS_QS, r.FIELDS_QS)
             model = u.check_resource(model, api.get_model,
                                      query_string=query_string)
             models[0] = model

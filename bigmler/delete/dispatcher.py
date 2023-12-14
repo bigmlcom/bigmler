@@ -188,7 +188,7 @@ def get_delete_list(args, api, query_list):
                 if res_type in SYNCHRONOUS_RESOURCES:
                     status_code = None
                 delete_list.extend(u.list_ids(api_call,
-                                              ";".join(type_query_list),
+                                              "&".join(type_query_list),
                                               status_code=status_code))
     return delete_list
 
@@ -386,7 +386,7 @@ def delete_resources(command_args, api, deleted_list=None, step=0):
         qs_list.extend(filter_qs_list)
         if qs_list:
             message = u.dated("Resources filtered by expression:\n    %s\n\n" %
-                ";".join(qs_list))
+                "&".join(qs_list))
             u.log_message(message, log_file=session_file,
                           console=command_args.verbosity)
 

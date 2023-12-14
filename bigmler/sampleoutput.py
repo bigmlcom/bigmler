@@ -110,7 +110,7 @@ def sample_query_string(args, fields):
     if args.unique:
         query_string.append('unique=true')
 
-    return ";".join(query_string)
+    return "&".join(query_string)
 
 
 def sample_file(sample, fields, args, api, path=None, session_file=None):
