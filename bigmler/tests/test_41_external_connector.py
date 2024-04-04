@@ -3,7 +3,7 @@
 #pylint: disable=locally-disabled,line-too-long,attribute-defined-outside-init
 #pylint: disable=locally-disabled,invalid-name
 #
-# Copyright 2020-2023 BigML
+# Copyright 2020-2024 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain

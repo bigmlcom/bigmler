@@ -2,7 +2,7 @@
 #!/usr/bin/env python
 #pylint: disable=locally-disabled,line-too-long,attribute-defined-outside-init
 #
-# Copyright 2021 BigML
+# Copyright 2021-2024 BigML
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
