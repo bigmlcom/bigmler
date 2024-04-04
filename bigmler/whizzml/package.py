@@ -54,7 +54,8 @@ METADATA_FILE = "metadata.json"
 WHIZZML_LIBRARY = "library"
 WHIZZML_RESOURCES = [WHIZZML_LIBRARY, "script"]
 DFT_CATEGORY = 0 # Miscellaneous
-
+WHIZZML_ATTRS = ["name", "description", "source_code", "imports",
+                 "inputs", "outputs", "category", "project", "resource"]
 
 subcommand_list = []
 subcommand_file = None
@@ -237,3 +238,136 @@ def create_package(args, api, command_obj, resume=False):
             args.output_dir = output_dir
             return whizzml_code
     return ""
+
+
+def get_package_structure(resource_id, api, package_structure=None):
+    """Downloads the JSON information of the script or library and stores in
+    the directory set in api.storage. If the resource imports other resources,
+    it recursively downloads them. It returns a dictionary describing the
+    resources downloaded and the relations between them.
+    """
+    if package_structure is None:
+        package_structure = {"resources": []}
+    elif resource_id in package_structure["resources"]:
+        return package_structure
+    package_structure["resources"].append(resource_id)
+
+    resource_type = bigml.api.get_resource_type(resource_id)
+    resource = api.getters[resource_type](resource_id)
+    metadata = {"kind": resource_type}
+    for attr in WHIZZML_ATTRS:
+        attr_value = resource["object"].get(attr)
+        if attr_value:
+            metadata.update({attr: attr_value})
+
+    package_structure[resource_id] = metadata
+    if metadata.get("imports") is not None:
+        for library_id in metadata.get("imports"):
+            get_package_structure(library_id, api, package_structure)
+    return package_structure
+
+
+def export_as_package(args, api, command_obj, resume=False):
+    """Export the script and/or libraries to the expected file structure of a
+    package.
+
+    """
+    set_subcommand_file(args.output_dir)
+    if resume:
+        retrieve_subcommands()
+    # read the metadata.json information
+    message = ('Reading the WhizzML resources.........\n')
+    u.log_message(message, log_file=session_file,
+                  console=args.verbosity)
+
+    package_dir = args.package_dir
+    os.makedirs(package_dir, exist_ok=True)
+    output_dir = args.output_dir
+    package_structure = get_package_structure(args.from_id, api)
+    write_package(package_structure, args)
+
+
+def write_package(package_structure, args):
+    """Writes the package information in the user-given folder """
+    package_dir = args.package_dir
+    # write the package information
+    message = ('Writting the package structure........\n')
+    u.log_message(message, log_file=session_file,
+                  console=args.verbosity)
+
+    if len(package_structure["resources"]) == 1:
+        # simple case: only one script or library, no structure
+        resource_id = package_structure["resources"][0]
+        write_code(package_structure[resource_id], package_dir)
+    else:
+        # complex case: script or library with imports
+        write_package_folder(package_structure, package_dir)
+    message = ('Local package created.................\n')
+    u.log_message(message, log_file=session_file,
+                  console=args.verbosity)
+
+
+def write_package_folder(package_structure, package_dir):
+    """Creates folders for every script or library and the metadata.json to
+    describes them
+    """
+    counter = 1
+    components = {}
+
+    def write_subfolder(resource_info, counter):
+        resource_id = resource_info["resource"]
+        components[resource_id] = "%s_%s" % (resource_info["kind"], counter)
+        folder = os.path.join(package_dir, components[resource_id])
+        os.makedirs(folder, exist_ok=True)
+        write_code(resource_info, folder)
+        counter += 1
+        return counter
+
+    for resource_id in package_structure["resources"]:
+        if package_structure[resource_id]["kind"] == WHIZZML_LIBRARY:
+            counter = write_subfolder(package_structure[resource_id], counter)
+
+    for resource_id in package_structure["resources"]:
+        metadata = package_structure[resource_id]
+        if metadata["kind"] != WHIZZML_LIBRARY:
+            if metadata.get("imports") is not None:
+                import_folders = [os.path.join("..", components[library_id])
+                                  for library_id in metadata.get("imports")]
+                metadata["imports"] = import_folders
+            counter = write_subfolder(metadata, counter)
+
+    first_script = package_structure[package_structure["resources"][0]]
+    package_info = {"kind": "package",
+                    "components": list(components.values()),
+                    "name": first_script["name"],
+                    "description": first_script["description"]}
+    with open(os.path.join(package_dir, "metadata.json"),
+              "wt", encoding="utf-8") as handler:
+        json.dump(package_info, handler)
+
+
+def write_code(resource_info, package_dir):
+    """Creates a metadata.json, script.whizzml | library.whizzml and
+    a README.md file in the package_dir
+    """
+    filename = "%s.whizzml" % resource_info["kind"]
+    code_file = os.path.join(package_dir, filename)
+    with open(code_file, "wt", encoding="utf-8") as handler:
+        handler.write(resource_info["source_code"])
+    resource_info["source_code"] = filename
+    with open(os.path.join(package_dir, "README.md"),
+              "wt", encoding="utf-8") as handler:
+        project_info = ""
+        if resource_info.get("project") is not None:
+            project_info = " in project %s " % resource_info["project"]
+        content = "Extracted from %s%s by bigmler" % (
+            resource_info["resource"], project_info)
+        handler.write(content)
+    del resource_info["resource"]
+    try:
+        del resource_info["project"]
+    except KeyError:
+        pass
+    with open(os.path.join(package_dir, "metadata.json"),
+              "wt", encoding="utf-8") as handler:
+        json.dump(resource_info, handler)

@@ -3044,6 +3044,34 @@ metadata.
       ]
     }
 
+Also, existing scripts or libraries can be downladed and stored in the
+user's file system following the structure and conventions needed to be
+uploaded again to BigML. By using the option ``--from`` followed by the
+script or library ID and the ``--package-dir`` pointing to the storage folder.
+
+.. code-block:: bash
+
+    bigmler whizzml --package-dir package_bck \
+                    --from script/5a3ae0f14006833a070003a4
+
+If the script is self-contained, the
+previous command will create a ``package_bck`` folder where the
+corresponding ``metadata.json`` file will store all the attributes, like the
+name and description of the script, its inputs and outputs, the kind of
+resource (script or library) and a ``source_code`` attribute that will
+contain the name of the file where the source code will be placed.
+
+Other complex scripts (and libraries) may not be self-contained and
+will be importing functions defined in WhizzML libraries.
+In that case, the ``package_bck`` folder will contain a list
+of subdirectories, one per script or imported library. Each subdirectory will
+contain the information about either the script or the library as described
+in the previous paragraph. The ``--package-dir`` containing folder will in this
+case also contain a ``metadata.json`` where the list of subfolders is stored
+in its ``components`` attribute so that each of them can be generated and
+imported correctly. It also contains the name and description of the
+downloaded script and the ``kind`` attribute will be set to ``package``.
+
 
 .. _bigmler-retrain:
 

@@ -27,7 +27,7 @@ import os
 
 import bigmler.utils as u
 
-from bigmler.whizzml.package import create_package
+from bigmler.whizzml.package import create_package, export_as_package
 from bigmler.dispatcher import SESSIONS_LOG, clear_log_files
 from bigmler.command import get_context
 
@@ -57,7 +57,13 @@ def whizzml_dispatcher(args=sys.argv[1:]):
     # package_dir
     if command_args.package_dir is not None:
         command_args.package_dir = os.path.expanduser(command_args.package_dir)
-        create_package(command_args, api, command,
+        if command_args.from_id is not None:
+            # the command can create a local storage of a script and or libraries
+            # as a package
+            export_as_package(command_args, api, command, resume=resume)
+        else:
+            # or create the resources described in a package
+            create_package(command_args, api, command,
                        resume=resume)
     else:
         sys.exit("You must use the --package-dir flag pointing to the"

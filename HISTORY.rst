@@ -3,6 +3,12 @@
 History
 -------
 
+5.8.0 (2024-04-05)
+~~~~~~~~~~~~~~~~~~
+
+- Adding option to bigmler whizzml subcommand that stores scripts and
+  libraries as packages in the local file system.
+
 5.7.0 (2023-12-14)
 ~~~~~~~~~~~~~~~~~~
 

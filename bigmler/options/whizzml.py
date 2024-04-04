@@ -43,6 +43,14 @@ def get_whizzml_options(defaults=None):
             "default": defaults.get('upgrade', False),
             "help": "Create resource only if it doesn't exist."},
 
+        # export script or library to be stored in a package directory
+        '--from': {
+            "action": 'store',
+            "dest": 'from_id',
+            "default": defaults.get('from_id', None),
+            "help": ("Script or library ID to be exported"
+                     " to a package directory")},
+
         # any imported library's code will be embedded in the script
         '--embed-libs': {
             "action": 'store_true',

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2012-2017 BigML, Inc
+# Copyright 2012-2024 BigML, Inc
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -47,7 +47,6 @@ setuptools.setup(
     url="https://bigml.com/developers",
     download_url="https://github.com/bigmlcom/bigmler",
     license="http://www.apache.org/licenses/LICENSE-2.0",
-    setup_requires=['nose'],
     packages=['bigmler', 'bigmler.processing', 'bigmler.analyze',
               'bigmler.cluster', 'bigmler.anomaly', 'bigmler.report',
               'bigmler.options', 'bigmler.delete', 'bigmler.sample',
