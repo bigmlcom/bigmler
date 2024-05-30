@@ -24,6 +24,7 @@ import sys
 import xml.etree.ElementTree as ET
 import re
 import glob
+import ntpath
 
 from zipfile import ZipFile
 
@@ -177,7 +178,7 @@ def get_image_info(annotation_root):
     if path is None:
         filename = annotation_root.findtext('filename')
     else:
-        filename = os.path.basename(path)
+        filename = ntpath.basename(path)
     img_name = os.path.basename(filename)
     img_id = os.path.splitext(img_name)[0]
     if isinstance(img_id, str):
