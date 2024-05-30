@@ -334,7 +334,7 @@ def get_source_options(defaults=None):
             'action': 'store',
             'dest': 'annotations_language',
             'default': defaults.get('annotations_language', None),
-            'choices': ["VOC", "YOLO"],
+            'choices': ["VOC", "YOLO", "COCO"],
             'help': ("Language used to provide the annotations for images."
                      "Annotations are expected to be provided using "
                      "on file per image. The --train option should point"

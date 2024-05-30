@@ -163,10 +163,13 @@ def bigml_coco_file(args, session_file):
     """
 
     args.annotations_file = os.path.join(args.output_dir, "annotations.json")
-    filenames = voc_to_cocojson(args.annotations_dir, args,
-                                session_file) \
-        if args.annotations_language == "VOC" else \
-        yolo_to_cocojson(args.annotations_dir, args, session_file)
+    if args.annotations_language == "VOC":
+        filenames = voc_to_cocojson(args.annotations_dir, args, session_file)
+    elif args.annotations_language == "YOLO":
+        filenames = yolo_to_cocojson(args.annotations_dir, args, session_file)
+    elif args.annotations_language == "COCO":
+        filenames = mscoco_to_cocojson(args.annotations_dir, args, session_file)
+
     return bigml_metadata(args, images_list=filenames,
                           new_fields=[{"name": "boxes", "optype": "regions"}])
 
@@ -564,6 +567,75 @@ def voc_to_cocojson(voc_dir, args, session_file):
         u.log_message(message, session_file, console=args.verbosity)
 
     with open(args.annotations_file, 'w') as handler:
+        json.dump(output_json_array, handler, indent=2)
+
+    return [relative_path(args.images_dir, filename) for filename in \
+        filenames]
+
+def mscoco_to_cocojson(mscoco_file, args, session_file):
+    """Translates annotations from a VOC format, where each image is associated
+    to a .xml file that contains one object per associated info. It returns
+    the list of images it refers to.
+
+    """
+
+    output_json_array = []
+
+    filenames = []
+
+    logfile_name = args.annotations_file + ".log"
+
+    with open(logfile_name, "w") as logfile:
+
+        warnings = 0
+        message = "Start converting COCO file from " + mscoco_file + "\n"
+        u.log_message(message, session_file, console=args.verbosity)
+        logfile.write("\n\n%s\n" % message)
+
+        # Load the MS-COCO json into memory
+
+        with open(mscoco_file, "r") as handle:
+            data = json.load(handle)
+
+        # Extract the file_name and id into a dict
+        images = dict([ [el['id'], { "file": el['file_name'], "boxes": [] }]\
+            for el in data['images'] ])
+
+        # Extract the category labels into a dict
+        labels = dict([ [el['id'], { "name": el['name'], "super": el['supercategory'] } ]\
+            for el in data['categories'] ])
+
+        # Add the bbox data
+
+        for annotation in data['annotations']:
+            images[annotation["image_id"]]["boxes"].append({
+                "label": labels[annotation['category_id']]['name'],
+                "xmin": int(annotation["bbox"][0]),
+                "ymin": int(annotation["bbox"][1]),
+                "xmax": int(annotation["bbox"][0] + annotation["bbox"][2]),
+                "ymax": int(annotation["bbox"][1] + annotation["bbox"][3])
+            })
+
+            if labels[annotation['category_id']]['super']:
+                images[annotation["image_id"]]["boxes"].append({
+                    "label": labels[annotation['category_id']]['super'],
+                    "xmin": int(annotation["bbox"][0]),
+                    "ymin": int(annotation["bbox"][1]),
+                    "xmax": int(annotation["bbox"][0] + annotation["bbox"][2]),
+                    "ymax": int(annotation["bbox"][1] + annotation["bbox"][3])
+                })
+
+        output_json_array = [images[el] for el in images.keys()]
+
+    if warnings > 0:
+        message = f"\nThere are {warnings} warnings, " \
+                f"see the log file {logfile_name}\n"
+        u.log_message(message, session_file, console=args.verbosity)
+
+    filenames = [el['file'] for el in output_json_array]
+
+    with open(args.annotations_file, 'w') as handler:
+        print("WRITING: ", args.annotations_file)
         json.dump(output_json_array, handler, indent=2)
 
     return [relative_path(args.images_dir, filename) for filename in \
