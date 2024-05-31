@@ -1,6 +1,7 @@
 <annotation>
 	<folder>f1</folder>
 	<filename>fruits1b.png</filename>
+	<path>C:\fruits1b.png</path>
 	<source>
 		<database>The VOC2007 Database</database>
 		<annotation>PASCAL VOC2007</annotation>

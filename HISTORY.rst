@@ -3,6 +3,11 @@
 History
 -------
 
+5.8.1 (2024-05-31)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing Pascal VOC to BigML-COCO translator.
+
 5.8.0 (2024-04-05)
 ~~~~~~~~~~~~~~~~~~
 

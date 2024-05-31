@@ -173,10 +173,9 @@ def bigml_coco_file(args, session_file):
 
 def get_image_info(annotation_root):
     """Returns the basic image descriptors"""
+    filename = annotation_root.findtext('filename')
     path = annotation_root.findtext('path')
-    if path is None:
-        filename = annotation_root.findtext('filename')
-    else:
+    if filename is None and path is not None:
         filename = os.path.basename(path)
     img_name = os.path.basename(filename)
     img_id = os.path.splitext(img_name)[0]
@@ -530,6 +529,7 @@ def voc_to_cocojson(voc_dir, args, session_file):
             if args.images_dir is not None:
                 base_dir = os.path.join(base_dir, args.images_dir)
             image_filename_base = os.path.join(folder, img_info['filename'])
+            filename = image_filename_base
             if args.images_dir is not None:
                 filename = os.path.join(base_dir, image_filename_base)
 
