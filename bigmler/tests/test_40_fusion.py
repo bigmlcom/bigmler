@@ -116,7 +116,7 @@ class TestPrediction:
         headers = ["test", "output", "predictions_file"]
         examples = [
             ['data/test_iris.csv', 'scenario2_fs/predictions.csv',
-             'check_files/predictions_iris_fs.csv']]
+             'check_files/predictions_iris_fs2.csv']]
         for example in examples:
             example = dict(zip(headers, example))
             show_method(self, self.bigml["method"], example)
