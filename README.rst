@@ -54,7 +54,7 @@ using:
 The external libraries used in this case exist for the majority of recent
 Operating System versions. Still, some of them might need especific
 compiler versions or dlls, so their installation may require an additional
-setup effort.
+setup effort and will not be supported by default.
 
 The full set of libraries can be installed using
 
@@ -146,32 +146,26 @@ For a detailed description of authentication instructions on Windows see the
 BigMLer on Windows
 ==================
 
-To install BigMLer on Windows environments, you'll need `Python for Windows
-(v.2.7.x) <http://www.python.org/download/>`_ installed.
+To install BigMLer on Windows environments, you'll Python installed.
+The code has been tested with Python 3.10 and you can create a conda
+environment with that Python version or download it from `Python for Windows
+ <http://www.python.org/download/>`_ and install it. In the last case, you'll
+ also need too install the ``pip`` tool to install BigMLer.
 
-In addition to that, you'll need the ``pip`` tool to install BigMLer. To
-install pip, first you need to open your command line window (write ``cmd`` in
-the input field that appears when you click on ``Start`` and hit ``enter``),
-download this `python file <http://python-distribute.org/distribute_setup.py>`_
-and execute it
+To install ``pip``, first you need to open your command line window
+(write ``cmd`` in
+the input field that appears when you click on ``Start`` and hit ``enter``).
+Then you can follow the steps described, for example, in this `guide
+<https://monovm.com/blog/how-to-install-pip-on-windows-linux/#How-to-install-PIP-on-Windows?-[A-Step-by-Step-Guide]>`_
+to install its latest version.
 
-.. code-block:: bash
-
-    c:\Python27\python.exe distribute_setup.py
-
-After that, you'll be able to install ``pip`` by typing the following command
-
-.. code-block:: bash
-
-    c:\Python27\Scripts\easy_install.exe pip
-
-And finally, to install BigMLer, just type
+And finally, to install BigMLer in its basic capacities, just type
 
 .. code-block:: bash
 
-    c:\Python27\Scripts\pip.exe install bigmler
+    python -m pip install bigmler
 
-and BigMLer should be installed in your computer. Then
+and BigMLer should be installed in your computer or conda environment. Then
 issuing
 
 .. code-block:: bash
@@ -179,6 +173,11 @@ issuing
     bigmler --version
 
 should show BigMLer version information.
+
+Extensions of BigMLer to use images are not supported in Windows by default.
+The libraries needed for those models are not available usually for that
+operating system. If your Machine Learning project involves images, we
+recommend that you choose a Linux based operating system.
 
 Finally, to start using BigMLer to handle your BigML resources, you need to
 set your credentials in BigML for authentication. If you want them to be
@@ -188,6 +187,9 @@ permanently stored in your system, use
 
     setx BIGML_USERNAME myusername
     setx BIGML_API_KEY ae579e7e53fb9abd646a6ff8aa99d4afe83ac291
+
+Note that ``setx`` will not change the environment variables of your actual
+console, so you will need to open a new one to start using them.
 
 
 BigML Development Mode
