@@ -51,6 +51,11 @@ def relative_path(base_dir, absolute_path):
     return os.path.relpath(absolute_path, base_dir)
 
 
+def get_file_ext(filename):
+    """Getting the file extension in lowercase and without the dot """
+    return os.path.splitext(filename)[1].lower()[1:]
+
+
 def fields_from_annotations(annotations_file):
     """Infers the type of the fields that will contain the annotations
     in an annotations file.
@@ -116,9 +121,8 @@ def bigml_metadata(args, images_list=None, new_fields=None):
             files = glob.glob(os.path.join(args.images_dir, "**"),
                               recursive=True)
             images_list = [filename for
-                           filename in files if
-                           os.path.splitext(filename)[1].lower()[1:] in
-                           IMAGE_EXTENSIONS]
+                           filename in files if get_file_ext(filename)
+                           in IMAGE_EXTENSIONS]
 
         if images_list:
             if not os.path.exists(zip_path):
@@ -157,18 +161,21 @@ def bigml_metadata(args, images_list=None, new_fields=None):
 
 
 def bigml_coco_file(args, session_file):
-    """Translates from alternative annotations format, like VOC and YOLO to
-    the format accepted by BigML
+    """Translates from alternative annotations format, like VOC, YOLO or
+    MSCOCO to the format accepted by BigML
 
     """
 
+    if args.annotations_file is not None:
+        args.original_annotations_file = args.annotations_file
     args.annotations_file = os.path.join(args.output_dir, "annotations.json")
     if args.annotations_language == "VOC":
         filenames = voc_to_cocojson(args.annotations_dir, args, session_file)
     elif args.annotations_language == "YOLO":
         filenames = yolo_to_cocojson(args.annotations_dir, args, session_file)
     elif args.annotations_language == "COCO":
-        filenames = mscoco_to_cocojson(args.annotations_dir, args, session_file)
+        filenames = mscoco_to_cocojson(args.original_annotations_file,
+                                       args, session_file)
 
     return bigml_metadata(args, images_list=filenames,
                           new_fields=[{"name": "boxes", "optype": "regions"}])
@@ -264,8 +271,7 @@ def yolo_to_cocojson(yolo_dir, args, session_file):
         filenames = glob.glob(os.path.join(images_dir, "**"),
                               recursive=True)
         filenames = [os.path.abspath(filename) for
-                     filename in filenames if
-                     os.path.splitext(filename)[1].lower() in
+                     filename in filenames if get_file_ext(filename) in
                      IMAGE_EXTENSIONS]
 
         ## Read yolo annotation txt file
@@ -302,8 +308,8 @@ def yolo_to_cocojson(yolo_dir, args, session_file):
                 ## the last one in the matched_file list is used
                 for a_file in matched_files:
                     filenames.append(a_file)
-                    ext = os.path.splitext(a_file)[1]
-                    if ext.lower() in IMAGE_EXTENSIONS:
+                    ext = get_file_ext(a_file)
+                    if ext in IMAGE_EXTENSIONS:
                         image_filename = a_file
                     else:
                         warnings += 1
@@ -517,8 +523,7 @@ def voc_to_cocojson(voc_dir, args, session_file):
             filenames = glob.glob(os.path.join(args.images_dir, "**"),
                                   recursive=True)
             filenames = [os.path.abspath(filename) for
-                         filename in filenames if
-                         os.path.splitext(filename)[1].lower() in
+                         filename in filenames if get_file_ext(filename) in
                          IMAGE_EXTENSIONS]
 
         for a_file in annotation_file_list:
@@ -573,15 +578,18 @@ def voc_to_cocojson(voc_dir, args, session_file):
         filenames]
 
 def mscoco_to_cocojson(mscoco_file, args, session_file):
-    """Translates annotations from a VOC format, where each image is associated
-    to a .xml file that contains one object per associated info. It returns
-    the list of images it refers to.
+    """Translates annotations from a MS COCO format, where each image is
+    associated with a JSON file that contains one object per associated info.
+    Maps images, categories and annotations to image file names, labels and
+    regions. It returns the list of images it refers to.
 
     """
 
     output_json_array = []
 
     filenames = []
+    labels = {}
+    images = {}
 
     logfile_name = args.annotations_file + ".log"
 
@@ -592,50 +600,64 @@ def mscoco_to_cocojson(mscoco_file, args, session_file):
         u.log_message(message, session_file, console=args.verbosity)
         logfile.write("\n\n%s\n" % message)
 
-        # Load the MS-COCO json into memory
+        # Loading the MS-COCO json into memory
 
         with open(mscoco_file, "r") as handle:
             data = json.load(handle)
 
-        # Extract the file_name and id into a dict
-        images = dict([ [el['id'], { "file": el['file_name'], "boxes": [] }]\
-            for el in data['images'] ])
+        # Images will be found either in the images_dir file or where
+        # the annotation file points to
+        if args.images_dir is not None and os.path.exists(args.images_dir):
+            filenames = glob.glob(os.path.join(args.images_dir, "**"),
+                                  recursive=True)
+            paths = [os.path.abspath(filename) for
+                     filename in filenames if get_file_ext(filename) in
+                     IMAGE_EXTENSIONS]
+            filenames = [os.path.basename(path) for path in paths]
 
-        # Extract the category labels into a dict
-        labels = dict([ [el['id'], { "name": el['name'], "super": el['supercategory'] } ]\
-            for el in data['categories'] ])
-
-        # Add the bbox data
-
-        for annotation in data['annotations']:
-            images[annotation["image_id"]]["boxes"].append({
-                "label": labels[annotation['category_id']]['name'],
-                "xmin": int(annotation["bbox"][0]),
-                "ymin": int(annotation["bbox"][1]),
-                "xmax": int(annotation["bbox"][0] + annotation["bbox"][2]),
-                "ymax": int(annotation["bbox"][1] + annotation["bbox"][3])
-            })
-
-            if labels[annotation['category_id']]['super']:
+        # Extracting the file_name and id into a dict
+        images = dict([[image['id'],
+                        { "file": image['file_name'], "boxes": [] }]
+                       for image in data['images'] if image['file_name'] in
+                       filenames])
+        if data.get("categories") and data['categories'][0].get("name"):
+            # Extract the image category labels into a dict
+            labels = dict([[category['id'],
+                            { "name": category['name'],
+                              "super": category.get('supercategory', "") } ]
+                           for category in data['categories']])
+        # Adding the regions data
+        if data.get('annotations'):
+            for annotation in data['annotations']:
                 images[annotation["image_id"]]["boxes"].append({
-                    "label": labels[annotation['category_id']]['super'],
+                    "label": labels[annotation['category_id']]['name'],
                     "xmin": int(annotation["bbox"][0]),
                     "ymin": int(annotation["bbox"][1]),
                     "xmax": int(annotation["bbox"][0] + annotation["bbox"][2]),
                     "ymax": int(annotation["bbox"][1] + annotation["bbox"][3])
                 })
 
-        output_json_array = [images[el] for el in images.keys()]
+                if labels[annotation['category_id']]['super']:
+                    images[annotation["image_id"]]["boxes"].append({
+                        "label": labels[annotation['category_id']]['super'],
+                        "xmin": int(annotation["bbox"][0]),
+                        "ymin": int(annotation["bbox"][1]),
+                        "xmax": int(annotation["bbox"][0] +
+                                    annotation["bbox"][2]),
+                        "ymax": int(annotation["bbox"][1] +
+                                    annotation["bbox"][3])
+                    })
+
+        output_json_array = [images[image_id] for image_id in images.keys()]
 
     if warnings > 0:
         message = f"\nThere are {warnings} warnings, " \
                 f"see the log file {logfile_name}\n"
         u.log_message(message, session_file, console=args.verbosity)
 
-    filenames = [el['file'] for el in output_json_array]
+    filenames = [image['file'] for image in output_json_array]
 
     with open(args.annotations_file, 'w') as handler:
-        print("WRITING: ", args.annotations_file)
         json.dump(output_json_array, handler, indent=2)
 
     return [relative_path(args.images_dir, filename) for filename in \

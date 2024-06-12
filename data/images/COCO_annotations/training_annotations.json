@@ -1,0 +1,228 @@
+{
+  "images": [
+    {
+      "height": 1521,
+      "width": 1920,
+      "id": 2564,
+      "file_name": "002b37ac08e1.jpg"
+    },
+    {
+      "height": 901,
+      "width": 1201,
+      "id": 5070,
+      "file_name": "01ec07bf27f2.jpg"
+    },
+    {
+      "height": 730,
+      "width": 864,
+      "id": 6062,
+      "file_name": "01f33743d791.jpg"
+    },
+    {
+      "height": 1807,
+      "width": 2048,
+      "id": 8238,
+      "file_name": "01b9488fc8d8.jpg"
+    },
+    {
+      "height": 1536,
+      "width": 2048,
+      "id": 9835,
+      "file_name": "00841198dabf.jpg"
+    },
+    {
+      "height": 1396,
+      "width": 1862,
+      "id": 9864,
+      "file_name": "0290b380693f.jpg"
+    },
+    {
+      "height": 1365,
+      "width": 2048,
+      "id": 11403,
+      "file_name": "01839a8ab28e.jpg"
+    },
+    {
+      "height": 1171,
+      "width": 1757,
+      "id": 11983,
+      "file_name": "01a8549b844b.jpg"
+    }
+  ],
+  "categories": [
+    {
+      "id": 6,
+      "name": "Araneae"
+    },
+    {
+      "id": 1,
+      "name": "Coleoptera"
+    },
+    {
+      "id": 2,
+      "name": "Diptera"
+    },
+    {
+      "id": 4,
+      "name": "Hemiptera"
+    },
+    {
+      "id": 3,
+      "name": "Hymenoptera"
+    },
+    {
+      "id": 5,
+      "name": "Lepidoptera"
+    },
+    {
+      "id": 7,
+      "name": "Odonata"
+    }
+  ],
+  "annotations": [
+    {
+      "iscrowd": 0,
+      "category_id": 5,
+      "id": 3265,
+      "image_id": 2564,
+      "area": 340550.3427345507,
+      "bbox": [
+        90.95599393019727,
+        362.76724137931035,
+        517.1471927162366,
+        658.5172413793103
+      ],
+      "category_name": "Lepidoptera",
+      "tags": [],
+      "shape_type": "rectangle"
+    },
+    {
+      "iscrowd": 0,
+      "category_id": 3,
+      "id": 3266,
+      "image_id": 2564,
+      "area": 115900.87384228977,
+      "bbox": [
+        909.6509863429438,
+        585.6724137931035,
+        313.2018209408194,
+        370.05172413793105
+      ],
+      "category_name": "Hymenoptera",
+      "tags": [],
+      "shape_type": "rectangle"
+    },
+    {
+      "iscrowd": 0,
+      "category_id": 6,
+      "id": 6419,
+      "image_id": 5070,
+      "area": 425678.3371427999,
+      "bbox": [
+        236.9488993136682,
+        63.15420560747664,
+        590.6787383177569,
+        720.6596573208723
+      ],
+      "category_name": "Araneae",
+      "tags": [],
+      "shape_type": "rectangle"
+    },
+    {
+      "iscrowd": 0,
+      "category_id": 3,
+      "id": 7673,
+      "image_id": 6062,
+      "area": 142687.99464345496,
+      "bbox": [
+        325.9769417475728,
+        111.87739463601532,
+        320.8543689320388,
+        444.71264367816093
+      ],
+      "category_name": "Hymenoptera",
+      "tags": [],
+      "shape_type": "rectangle"
+    },
+    {
+      "iscrowd": 0,
+      "category_id": 7,
+      "id": 10526,
+      "image_id": 8238,
+      "area": 812639.8050764899,
+      "bbox": [
+        383.7360824742268,
+        461.601246105919,
+        902.2460481099657,
+        900.6853582554517
+      ],
+      "category_name": "Odonata",
+      "tags": [],
+      "shape_type": "rectangle"
+    },
+    {
+      "iscrowd": 0,
+      "category_id": 2,
+      "id": 12598,
+      "image_id": 9835,
+      "area": 336485.6694411415,
+      "bbox": [
+        774.6206896551724,
+        366.3448275862069,
+        560.551724137931,
+        600.2758620689655
+      ],
+      "category_name": "Diptera",
+      "tags": [],
+      "shape_type": "rectangle"
+    },
+    {
+      "iscrowd": 0,
+      "category_id": 2,
+      "id": 12633,
+      "image_id": 9864,
+      "area": 334636.735318404,
+      "bbox": [
+        578.8653017241379,
+        405.1609195402299,
+        605.9525862068965,
+        552.2490421455939
+      ],
+      "category_name": "Diptera",
+      "tags": [],
+      "shape_type": "rectangle"
+    },
+    {
+      "iscrowd": 0,
+      "category_id": 6,
+      "id": 14575,
+      "image_id": 11403,
+      "area": 706044.043369156,
+      "bbox": [
+        753.7091660923501,
+        308.51893743536715,
+        741.0062026188835,
+        952.8179937952431
+      ],
+      "category_name": "Araneae",
+      "tags": [],
+      "shape_type": "rectangle"
+    },
+    {
+      "iscrowd": 0,
+      "category_id": 1,
+      "id": 15327,
+      "image_id": 11983,
+      "area": 887361.6967351976,
+      "bbox": [
+        284.55892487939354,
+        264.6329821613237,
+        1256.9028256374916,
+        705.9906928645295
+      ],
+      "category_name": "Coleoptera",
+      "tags": [],
+      "shape_type": "rectangle"
+    }
+  ]
+}

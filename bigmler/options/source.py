@@ -337,9 +337,13 @@ def get_source_options(defaults=None):
             'choices': ["VOC", "YOLO", "COCO"],
             'help': ("Language used to provide the annotations for images."
                      "Annotations are expected to be provided using "
-                     "on file per image. The --train option should point"
+                     "one file per image. The --train option should point"
                      " to the directory that contains both images and"
-                     " the corresponding annotations.")},
+                     " the corresponding annotations, unless some "
+                     " folder attribute is provided in each"
+                     " annotation. In that case it should point to"
+                     " the folder parent directory and --anotations-dir"
+                     " should be used to point to the annotations files.")},
 
         # Annotations file
         # File that contains annotations for images
@@ -356,7 +360,15 @@ def get_source_options(defaults=None):
             'action': 'store',
             'dest': 'annotations_dir',
             'default': defaults.get('annotations_dir', None),
-            'help': "Directory for individual annotation files."},
+            'help': ("Directory for individual annotation files."
+                     " Used when annotations are provided using "
+                     "one file per image. The --train option should point"
+                     " to the directory that contains both images and"
+                     " the corresponding annotations, unless some "
+                     " folder attribute is provided in each"
+                     " annotation. In that case it should point to"
+                     " the folder parent directory and --anotations-dir"
+                     " should be used to point to the annotations files.")},
 
         # Images file
         # Compressed file with images used as reference for annotations
