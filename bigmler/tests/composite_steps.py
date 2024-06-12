@@ -95,17 +95,25 @@ def i_create_annotated_source(
 
 
 def i_create_lang_annotated_source(
-    step, annotations_dir=None, images_dir=None,
+    step, annotations_dir=None, annotations_file=None, images_dir=None,
     annotations_language=None, output_dir=None):
     """Step: I create  BigML composite for a "<annotations_language>"
-    <annotations_dir> and an <images_dir> and log results in <output_dir>
+    <annotations_[dir|file]> and an <images_dir> and log results in <output_dir>
     """
-    ok_(annotations_dir is not None and images_dir is not None and
+    ok_((annotations_dir is not None or annotations_file is not None)
+        and images_dir is not None and
         annotations_language is not None and output_dir is not None)
-    command = ("bigmler source --annotations-dir " + annotations_dir +
-               " --data " + images_dir + " --annotations-language " +
-               annotations_language +
-               " --store --output-dir " + output_dir)
+    if annotations_dir is not None:
+        command = ("bigmler source --annotations-dir " + annotations_dir +
+                   " --data " + images_dir + " --annotations-language " +
+                   annotations_language +
+                   " --store --output-dir " + output_dir)
+    else:
+        command = ("bigmler source --annotations-file " + annotations_file +
+                   " --data " + images_dir + " --annotations-language " +
+                   annotations_language +
+                   " --store --output-dir " + output_dir)
+
     shell_execute(command, os.path.join(output_dir, "txt.tmp"))
 
 
@@ -155,6 +163,7 @@ def check_annotation_fields(step, annotations_file):
     fields = fields_from_annotations(annotations_file)
     field_labels = labels_from_annotations(annotations_file)
     source_fields = Fields(world.source)
+
     field_names = list(source_fields.fields_by_name.keys())
     for field in fields:
         ok_(field["name"] in field_names)

@@ -259,6 +259,36 @@ class TestComposite:
                 self,
                 os.path.join(example["output_dir"], "annotations.json"))
 
+    def test_scenario07a(self):
+        """
+        Scenario: Successfully building a <annotations_language> annotated images composite
+            And I create a source from an "<annotations_file>" and an "<images_dir>" using <language> and log in <output_dir>
+            And I check that the composite is ready
+            And I check that it has the expected annotation fields
+        """
+        print(self.test_scenario07a.__doc__)
+        headers = ["images_dir", "annotations_file", "output_dir", "language"]
+        examples = [
+            ['data/images/COCO_annotations',
+             'data/images/COCO_annotations/training_annotations.json',
+             './scenario42_07_c', 'COCO']]
+        for example in examples:
+            example = dict(zip(headers, example))
+            show_method(self, self.bigml["method"], example)
+            composite_create.i_create_lang_annotated_source(
+                self, images_dir=example["images_dir"],
+                annotations_file=example["annotations_file"],
+                annotations_language=example["language"],
+                output_dir=example["output_dir"])
+            composite_create.i_check_create_composite(self)
+            self.sources = world.source["object"].get("sources", [])
+            composite_create.check_images_number_in_composite(
+                self, example["images_dir"])
+            composite_create.check_annotation_fields(
+                self,
+                os.path.join(example["output_dir"], "annotations.json"))
+
+
     def test_scenario08(self):
         """
         Scenario: Successfully extracting <type> features from images composite
