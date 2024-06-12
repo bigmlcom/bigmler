@@ -471,6 +471,7 @@ Install the tools required to build the documentation
 .. code-block:: bash
 
     $ pip install sphinx
+    $ pip install sphinx-rtd-theme
 
 To build the HTML version of the documentation
 
