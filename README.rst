@@ -14,16 +14,6 @@ the
 BigMLer is open sourced under the `Apache License, Version
 2.0 <http://www.apache.org/licenses/LICENSE-2.0.html>`_.
 
-Support
-=======
-
-Please report problems and bugs to our `BigML.io issue
-tracker <https://github.com/bigmlcom/io/issues>`_.
-
-Discussions about the different bindings take place in the general
-`BigML mailing list <http://groups.google.com/group/bigml>`_. Or join us
-in our `Campfire chatroom <https://bigmlinc.campfirenow.com/f20a0>`_.
-
 Requirements
 ============
 
@@ -349,3 +339,13 @@ Additional Information
 
 For additional information, see
 the `full documentation for BigMLer on Read the Docs <http://bigmler.readthedocs.org>`_.
+
+
+Support
+=======
+
+Please report problems and bugs to our `BigML.io issue
+tracker <https://github.com/bigmlcom/io/issues>`_.
+
+Discussions about the different bindings take place in the general
+`BigML mailing list <http://groups.google.com/group/bigml>`_.

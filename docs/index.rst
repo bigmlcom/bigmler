@@ -53,16 +53,6 @@ BigMLer is open sourced under the `Apache License, Version
    scripting
 
 
-Support
-=======
-
-Please report problems and bugs to our `BigML.io issue
-tracker <https://github.com/bigmlcom/io/issues>`_.
-
-Discussions about the different bindings take place in the general
-`BigML mailing list <http://groups.google.com/group/bigml>`_. Or join us
-in our `Campfire chatroom <https://bigmlinc.campfirenow.com/f20a0>`_.
-
 Requirements
 ============
 
@@ -490,6 +480,15 @@ the `full documentation for the Python
 bindings on Read the Docs <http://bigml.readthedocs.org>`_. For more
 information about BigML's API, see the
 `BigML developer's documentation <https://bigml.com/api>`_.
+
+Support
+=======
+
+Please report problems and bugs to our `BigML.io issue
+tracker <https://github.com/bigmlcom/io/issues>`_.
+
+Discussions about the different bindings take place in the general
+`BigML mailing list <http://groups.google.com/group/bigml>`_.
 
 How to Contribute
 =================
