@@ -379,8 +379,8 @@ a similar set in ``./dir2`` and combine all of them to generate the final
 prediction.
 
 
-Making your Dataset and Model public or share it privately
-----------------------------------------------------------
+Making your Dataset and Model public or sharing it privately
+------------------------------------------------------------
 
 Creating a model and making it public in BigML's gallery is as easy as
 
@@ -421,8 +421,8 @@ and the link will be listed in the output of the command
 or can also be found in the information pannel for the resource through the
 web interface.
 
-Content
--------
+Descriptive information
+^^^^^^^^^^^^^^^^^^^^^^^
 
 Before making your model public, probably you want to add a name, a category,
 a description, and tags to your resources. This is easy too. For example

@@ -154,7 +154,7 @@ evaluation to use the remaining part of the dataset test data.
 The ``bigmler reify`` command can generate also other types of
 output depending on the
 choice of the ``--language`` option. The available options are ``python``
- (the one by default), ``nb`` and ``whizzml``.
+(the one by default), ``nb`` and ``whizzml``.
 The ``nb`` option will generate a jupyter notebook file.
 
 .. code-block:: json

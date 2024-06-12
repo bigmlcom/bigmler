@@ -117,7 +117,7 @@ Linear regression Subcommand Options
                                               no intercept term.
 ``--field-codings`` *FIELD_CODINGS*           Numeric encoding for categorical
                                               fields (default one-hot encoding)
-``--linear-regression-attributes`` *PATH*   Path to a JSON file containing
+``--linear-regression-attributes`` *PATH*     Path to a JSON file containing
                                               attributes (any of the updatable
                                               attributes described in the
                                               `developers section <https://bigml.com/api/linearregressions#ln_linear_regression_arguments>`_ )

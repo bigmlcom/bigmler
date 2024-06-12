@@ -98,7 +98,7 @@ to create a batch anomaly score, use:
 
 To extract the top anomalies as a new dataset, or to exclude from the training
 dataset the top anomalies in the anomaly detector, set the
- ``--anomalies-dataset`` to ``ìn`` or ``out`` respectively:
+``--anomalies-dataset`` to ``ìn`` or ``out`` respectively:
 
 .. code-block:: bash
 

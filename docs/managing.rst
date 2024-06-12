@@ -198,115 +198,101 @@ query strings (see the `API documentation <https://bigml.com/api>`_).
 Delete Subcommand Options
 -------------------------
 
-===================================== =========================================
-``--ids`` *LIST_OF_IDS*               Comma separated list of ids to be deleted
-``--from-file`` *FILE_OF_IDS*         Path to a file containing the resources'
-                                      ids to be deleted
-``--from-dir``                        Path to a directory where BigMLer has
-                                      stored
-                                      its session data and created resources
-``--all-tag`` *TAG*                   Retrieves resources that were tagged
-                                      with tag
-                                      to delete them
-``--source-tag`` *TAG*                Retrieves sources that were tagged
-                                      with tag to
-                                      delete them
-``--dataset-tag`` *TAG*               Retrieves datasets that were tagged
-                                      with tag to
-                                      delete them
-``--model-tag`` *TAG*                 Retrieves models that were tagged
-                                      with tag to
-                                      delete them
-``--prediction-tag`` *TAG*            Retrieves predictions that were tagged
-                                      with tag
-                                      to delete them
-``--evaluation-tag`` *TAG*            Retrieves evaluations that were tagged
-                                      with tag
-                                      to delete them
-``--ensemble-tag`` *TAG*              Retrieves ensembles that were tagged
-                                      with tag
-                                      to delete them
-``--batch-prediction-tag`` *TAG*      Retrieves batch predictions that
-                                      were tagged
-                                      with tag to delete them
-``--cluster-tag`` *TAG*               Retrieves clusters that were tagged with
-                                      tag to delete them
-``--centroid-tag`` *TAG*              Retrieves centroids that were tagged with
-                                      tag to delete them
-``--batch-centroid-tag`` *TAG*        Retrieves batch centroids that were
-                                      tagged with
-                                      tag to delete them
-``--anomaly-tag`` *TAG*               Retrieves anomalies that were tagged with
-                                      tag to delete them
-``--anomaly-score-tag`` *TAG*         Retrieves anomaly scores that were
-                                      tagged with
-                                      tag to delete them
-``--batch-anomlay-score-tag`` *TAG*   Retrieves batch anomaly scores that were
-                                      tagged with tag to delete them
-``--logistic-regression-tag`` *TAG*   Retrieves logistic regressions
-                                      that were tagged with
-                                      tag to delete them
-``--linear-regression-tag`` *TAG*     Retrieves linear regressions
-                                      that were tagged with
-                                      tag to delete them
-``--topic-model-tag`` *TAG*           Retrieves topic models that were tagged
-                                      with tag to delete them
-``--topic-distribution-tag`` *TAG*    Retrieves topic distributions that were
-                                      tagged with
-                                      tag to delete them
+========================================== ===================================
+``--ids`` *LIST_OF_IDS*                    Comma separated list of ids to be
+                                           deleted
+``--from-file`` *FILE_OF_IDS*              Path to a file containing the
+                                           resources'
+                                           ids to be deleted
+``--from-dir``                             Path to a directory where BigMLer
+                                           has stored its session data and
+                                           created resources
+``--all-tag`` *TAG*                        Retrieves resources that were tagged
+                                           with tag to delete them
+``--source-tag`` *TAG*                     Retrieves sources that were tagged
+                                           with tag to delete them
+``--dataset-tag`` *TAG*                    Retrieves datasets that were tagged
+                                           with tag to delete them
+``--model-tag`` *TAG*                      Retrieves models that were tagged
+                                           with tag to delete them
+``--prediction-tag`` *TAG*                 Retrieves predictions that were
+                                           tagged with tag to delete them
+``--evaluation-tag`` *TAG*                 Retrieves evaluations that were
+                                           tagged with tag to delete them
+``--ensemble-tag`` *TAG*                   Retrieves ensembles that were tagged
+                                           with tag to delete them
+``--batch-prediction-tag`` *TAG*           Retrieves batch predictions that
+                                           were tagged with tag to delete them
+``--cluster-tag`` *TAG*                    Retrieves clusters that were tagged
+                                           with tag to delete them
+``--centroid-tag`` *TAG*                   Retrieves centroids that were tagged
+                                           with tag to delete them
+``--batch-centroid-tag`` *TAG*             Retrieves batch centroids that were
+                                           tagged with tag to delete them
+``--anomaly-tag`` *TAG*                    Retrieves anomalies that were tagged
+                                           with tag to delete them
+``--anomaly-score-tag`` *TAG*              Retrieves anomaly scores that were
+                                           tagged with tag to delete them
+``--batch-anomlay-score-tag`` *TAG*        Retrieves batch anomaly scores that
+                                           were tagged with tag to delete them
+``--logistic-regression-tag`` *TAG*        Retrieves logistic regressions
+                                           that were tagged with
+                                           tag to delete them
+``--linear-regression-tag`` *TAG*          Retrieves linear regressions that
+                                           were tagged with tag to delete them
+``--topic-model-tag`` *TAG*                Retrieves topic models that were
+                                           tagged with tag to delete them
+``--topic-distribution-tag`` *TAG*         Retrieves topic distributions that
+                                           were tagged with tag to delete them
 ``--batch-topic-distribution-tag`` *TAG*   Retrieves batch topic distributions
                                            that were
                                            tagged with tag to delete them
-``--time-series-tag`` *TAG*           Retrieves time series that were tagged
-                                      with tag to delete them
-``--forecast-tag`` *TAG*              Retrieves forecasts that were
-                                      tagged with
-                                      tag to delete them
-``--deepnet-tag`` *TAG*               Retrieves deepnets that were tagged
-                                      with tag to delete them
-``--project`` *TAG*                   Retrieves projects that were
-                                      tagged with tag to delete them
-``--association`` *TAG*               Retrieves associations that were
-                                      tagged with tag to delete them
-``--older-than`` *DATE*               Retrieves resources created before the
-                                      specified
-                                      date. Date can be any YYYY-MM-DD string,
-                                      an
-                                      integer meaning the number of days
-                                      before the
-                                      current datetime or a resource id,
-                                      meaning the
-                                      creation datetime of the resource
-``--newer-than`` *DATE*               Retrieves resources created after the
-                                      specified
-                                      date. Date can be any YYYY-MM-DD string,
-                                      an
-                                      integer meaning the number of days
-                                      before the
-                                      current datetime or a resource id,
-                                      meaning the
-                                      creation datetime of the resource
-``--resource-types``                  Comma-separated list of types of
-                                      resources to
-                                      be deleted. Allowed values are source,
-                                      dataset,
-                                      model, ensemble, prediction,
-                                      batch_prediction,
-                                      cluster, centroid, batch_centroid, etc.
-``--exclude-types``                   When used together with
-                                      ``resource-types``, the list of types
-                                      provided will be excluded from deletion.
-                                      Only the rest of resource types will be
-                                      deleted.
-``--filter`` *FILTER EXPRESSION*      Filter expression as used in the API
-                                      list calls query string
-``--dry-run``                         Delete simulation. No removal.
-``--status``                          Status codes used in the filter to
-                                      retrieved the resources to be delete. The
-                                      possible values are: finished, faulty,
-                                      waiting, queued, started, in progress,
-                                      summarized, uploading, unknown, runnable
-===================================== =========================================
+``--time-series-tag`` *TAG*                Retrieves time series that were
+                                           tagged with tag to delete them
+``--forecast-tag`` *TAG*                   Retrieves forecasts that were
+                                           tagged with tag to delete them
+``--deepnet-tag`` *TAG*                    Retrieves deepnets that were tagged
+                                           with tag to delete them
+``--project`` *TAG*                        Retrieves projects that were
+                                           tagged with tag to delete them
+``--association`` *TAG*                    Retrieves associations that were
+                                           tagged with tag to delete them
+``--older-than`` *DATE*                    Retrieves resources created before
+                                           the specified date. Date can be any
+                                           YYYY-MM-DD string, an integer
+                                           meaning the number of days before
+                                           the current datetime or a resource
+                                           id, meaning the creation datetime of
+                                           the resource
+``--newer-than`` *DATE*                    Retrieves resources created after
+                                           the specified date. Date can be any
+                                           YYYY-MM-DD string, an integer
+                                           meaning the number of days before
+                                           the current datetime or a resource
+                                           id, meaning the creation datetime
+                                           of the resource
+``--resource-types``                       Comma-separated list of types of
+                                           resources to be deleted. Allowed
+                                           values are source, dataset,
+                                           model, ensemble, prediction,
+                                           batch_prediction, cluster, centroid,
+                                           batch_centroid, etc.
+``--exclude-types``                        When used together with
+                                           ``resource-types``, the list of
+                                           types provided will be excluded from
+                                           deletion.
+                                           Only the rest of resource types will
+                                           be deleted.
+``--filter`` *FILTER EXPRESSION*           Filter expression as used in the API
+                                           list calls query string
+``--dry-run``                              Delete simulation. No removal.
+``--status``                               Status codes used in the filter to
+                                           retrieved the resources to be
+                                           delete. The possible values are:
+                                           finished, faulty, waiting, queued,
+                                           started, in progress, summarized,
+                                           uploading, unknown, runnable
+========================================== ====================================
 
 
 

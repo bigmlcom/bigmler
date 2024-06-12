@@ -191,8 +191,8 @@ BigMLer Install and Authentication on Windows
 To install BigMLer on Windows environments, you'll Python installed.
 The code has been tested with Python 3.10 and you can create a conda
 environment with that Python version or download it from `Python for Windows
- <http://www.python.org/download/>`_ and install it. In the last case, you'll
- also need too install the ``pip`` tool to install BigMLer.
+<http://www.python.org/download/>`_ and install it. In the last case, you'll
+also need too install the ``pip`` tool to install BigMLer.
 
 To install ``pip``, first you need to open your command line window
 (write ``cmd`` in

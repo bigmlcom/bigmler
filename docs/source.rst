@@ -95,7 +95,7 @@ Composites built on images. The Composite configuration options include
 automatically computing as new features the dimensions, average pixels,
 level histogram, histogram of gradients, wavelet subbands and even using
 features derived from pre-trained CNNs. For more detail, you can check
-the `Image Analysis<https://bigml.com/api/sources?id=image-analysis>`_
+the `Image Analysis <https://bigml.com/api/sources?id=image-analysis>`_
 API documentation for composites.
 
 All these options are in turn configurable when creating sources using BigMLer.
@@ -109,7 +109,7 @@ All these options are in turn configurable when creating sources using BigMLer.
 Thanks to those new features, all kind of models (not only Deepnets) can
 be built taking advantage of the images information. To learn the options
 available for image extraction configuration,
- see :ref:image-feature-extraction .
+see :ref:image-feature-extraction .
 
 Annotated images as Composite Sources
 -------------------------------------
