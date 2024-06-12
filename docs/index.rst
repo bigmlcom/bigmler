@@ -178,13 +178,13 @@ For a detailed description of authentication instructions on Windows see the
 BigMLer Install and Authentication on Windows
 =============================================
 
-To install BigMLer on Windows environments, you'll Python installed.
-The code has been tested with Python 3.10 and you can create a conda
+To install BigMLer on Windows environments, you'll need Python installed.
+The code has been tested with Python 3.10 and you can create a *conda*
 environment with that Python version or download it from `Python for Windows
-<http://www.python.org/download/>`_ and install it. In the last case, you'll
+<http://www.python.org/download/>`_ and install it. In the latter case, you'll
 also need too install the ``pip`` tool to install BigMLer.
 
-To install ``pip``, first you need to open your command line window
+To install ``pip``, first you need to open your command terminal window
 (write ``cmd`` in
 the input field that appears when you click on ``Start`` and hit ``enter``).
 Then you can follow the steps described, for example, in this `guide
@@ -206,7 +206,7 @@ issuing
 
 should show BigMLer version information.
 
-Extensions of BigMLer to use images are not supported in Windows by default.
+Extensions of BigMLer to use images are usually not available in Windows.
 The libraries needed for those models are not available usually for that
 operating system. If your Machine Learning project involves images, we
 recommend that you choose a Linux based operating system.

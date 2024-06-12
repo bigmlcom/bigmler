@@ -342,7 +342,7 @@ def get_source_options(defaults=None):
                      " the corresponding annotations, unless some "
                      " folder attribute is provided in each"
                      " annotation. In that case it should point to"
-                     " the folder parent directory and --anotations-dir"
+                     " the folder's' parent directory and --anotations-dir"
                      " should be used to point to the annotations files.")},
 
         # Annotations file
@@ -367,7 +367,7 @@ def get_source_options(defaults=None):
                      " the corresponding annotations, unless some "
                      " folder attribute is provided in each"
                      " annotation. In that case it should point to"
-                     " the folder parent directory and --anotations-dir"
+                     " the folder's' parent directory and --anotations-dir"
                      " should be used to point to the annotations files.")},
 
         # Images file
