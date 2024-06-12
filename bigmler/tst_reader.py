@@ -146,16 +146,16 @@ class TstReader():
                     for index in self.exclude:
                         del self.headers[index]
                 else:
-                    raise Exception(("No test field matches the model fields."
-                                     "\nThe expected fields are:\n\n%s\n\n"
-                                     "while "
-                                     "the headers found in the test file are:"
-                                     "\n\n%s\n\n"
-                                     "Use --no-test-header flag if first li"
-                                     "ne should not be interpreted as"
-                                     " headers." %
-                                     (",".join(fields_names),
-                                      ",".join(self.headers))).encode("utf-8"))
+                    raise ValueError(("No test field matches the model fields."
+                                      "\nThe expected fields are:\n\n%s\n\n"
+                                      "while "
+                                      "the headers found in the test file are:"
+                                      "\n\n%s\n\n"
+                                      "Use --no-test-header flag if first li"
+                                      "ne should not be interpreted as"
+                                      " headers." %
+                                      (",".join(fields_names),
+                                       ",".join(self.headers))).encode("utf-8"))
         else:
             columns = fields.fields_columns[:]
             if objective_field is not None:

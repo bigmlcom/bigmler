@@ -96,6 +96,7 @@ def remote_forecast(time_series,
         local_time_series = TimeSeries(time_series,
                                        api=args.retrieve_api_)
         output = args.predictions
+        input_data = {}
         if args.test_set is not None:
             input_data = u.read_json(args.test_set)
         elif args.horizon is not None:

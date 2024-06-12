@@ -182,6 +182,7 @@ def remote_topic_distribution( \
         batch_topic_distribution = create_batch_topic_distribution(
             topic_model_id, test_dataset, batch_topic_distribution_args,
             args, api, session_file=session_file, path=path, log=log)
+    #pylint: disable=locally-disabled,possibly-used-before-assignment
     if not args.no_csv:
         file_name = api.download_batch_topic_distribution( \
             batch_topic_distribution,

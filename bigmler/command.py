@@ -76,7 +76,8 @@ def tail(file_handler, window=1):
 def get_log_reversed(file_name, stack_level):
     """Reads the line of a log file that has the chosen stack_level """
     with open(file_name, "r") as handler:
-        lines_list = tail(handler, window=(stack_level + 1))
+        window = stack_level + 1
+        lines_list = tail(handler, window=window)
         return lines_list[0].decode(u.BIGML_SYS_ENCODING)
     return ""
 

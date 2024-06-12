@@ -175,7 +175,7 @@ def prediction_to_row(prediction, prediction_info=NORMAL_FORMAT):
             elif 'categories' in summary:
                 distribution = summary['categories']
         if distribution:
-            row.extend([repr(distribution), sum([x[1] for x in distribution])])
+            row.extend([repr(distribution), sum(x[1] for x in distribution)])
     return row
 
 
@@ -700,6 +700,7 @@ def remote_predict(model, test_dataset, batch_prediction_args, args,
 
     Predictions are computed remotely using the batch predictions call.
     """
+    #pylint: disable=locally-disabled,used-before-assignment
     if args.ensemble is not None and not args.dataset_off:
         model_or_ensemble = args.ensemble
     elif args.dataset_off:
@@ -716,6 +717,7 @@ def remote_predict(model, test_dataset, batch_prediction_args, args,
         resume, batch_prediction = c.checkpoint(
             c.is_batch_prediction_created, path, debug=args.debug,
             message=message, log_file=session_file, console=args.verbosity)
+    #pylint: disable=locally-disabled,possibly-used-before-assignment
     if not resume:
         if not args.dataset_off:
             batch_prediction = create_batch_prediction(

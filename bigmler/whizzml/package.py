@@ -123,7 +123,7 @@ def create_package(args, api, command_obj, resume=False):
     if resume:
         retrieve_subcommands()
     # read the metadata.json information
-    message = ('Reading the metadata.json files.........\n')
+    message = 'Reading the metadata.json files.........\n'
     u.log_message(message, log_file=session_file,
                   console=args.verbosity)
     package_dir = args.package_dir
@@ -137,7 +137,7 @@ def create_package(args, api, command_obj, resume=False):
     if metadata.get("kind") == "package" and 'components' in metadata:
         components = metadata.get("components")
         for component in components:
-            message = ('Inspecting component %s.........\n' % component)
+            message = 'Inspecting component %s.........\n' % component
             u.log_message(message, log_file=session_file,
                           console=args.verbosity)
             args.package_dir = os.path.join(package_dir, component)
@@ -169,7 +169,7 @@ def create_package(args, api, command_obj, resume=False):
                 imports.append(library_ref)
                 args.package_dir = package_dir
         # read the metadata.json information
-        message = ('Creating the %s.........\n' % metadata.get("kind"))
+        message = 'Creating the %s.........\n' % metadata.get("kind")
         u.log_message(message, log_file=session_file,
                       console=args.verbosity)
         if metadata.get("kind") in WHIZZML_RESOURCES:
@@ -267,7 +267,7 @@ def get_package_structure(resource_id, api, package_structure=None):
     return package_structure
 
 
-def export_as_package(args, api, command_obj, resume=False):
+def export_as_package(args, api, resume=False):
     """Export the script and/or libraries to the expected file structure of a
     package.
 
@@ -276,13 +276,12 @@ def export_as_package(args, api, command_obj, resume=False):
     if resume:
         retrieve_subcommands()
     # read the metadata.json information
-    message = ('Reading the WhizzML resources.........\n')
+    message = 'Reading the WhizzML resources.........\n'
     u.log_message(message, log_file=session_file,
                   console=args.verbosity)
 
     package_dir = args.package_dir
     os.makedirs(package_dir, exist_ok=True)
-    output_dir = args.output_dir
     package_structure = get_package_structure(args.from_id, api)
     write_package(package_structure, args)
 
@@ -291,7 +290,7 @@ def write_package(package_structure, args):
     """Writes the package information in the user-given folder """
     package_dir = args.package_dir
     # write the package information
-    message = ('Writting the package structure........\n')
+    message = 'Writting the package structure........\n'
     u.log_message(message, log_file=session_file,
                   console=args.verbosity)
 
@@ -302,7 +301,7 @@ def write_package(package_structure, args):
     else:
         # complex case: script or library with imports
         write_package_folder(package_structure, package_dir)
-    message = ('Local package created.................\n')
+    message = 'Local package created.................\n'
     u.log_message(message, log_file=session_file,
                   console=args.verbosity)
 

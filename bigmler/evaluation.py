@@ -146,7 +146,7 @@ def standard_deviation(points, mean):
     """
     total = float(len(points))
     if total > 0:
-        return math.sqrt(sum([(point - mean) ** 2 for point in points]) /
+        return math.sqrt(sum((point - mean) ** 2 for point in points) /
                          total)
     return float('nan')
 

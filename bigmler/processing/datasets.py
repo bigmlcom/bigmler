@@ -67,6 +67,7 @@ def get_categories_distribution(dataset, objective_id):
     try:
         dataset_info = dataset.get('object', [])
         if dataset_info['objective_field']['optype'] == 'categorical':
+            distribution = []
             if 'distribution' in dataset_info:
                 distribution = dataset_info['distribution']
             elif 'objective_summary' in dataset_info:

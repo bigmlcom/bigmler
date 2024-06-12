@@ -123,7 +123,7 @@ def bigml_metadata(args, images_list=None, new_fields=None):
             images_list = [filename for
                            filename in files if get_file_ext(filename)
                            in IMAGE_EXTENSIONS]
-
+        #pylint: disable=locally-disabled,possibly-used-before-assignment
         if images_list:
             if not os.path.exists(zip_path):
                 with ZipFile(zip_path, 'w') as zip_obj:
@@ -169,6 +169,7 @@ def bigml_coco_file(args, session_file):
     if args.annotations_file is not None:
         args.original_annotations_file = args.annotations_file
     args.annotations_file = os.path.join(args.output_dir, "annotations.json")
+    filenames = []
     if args.annotations_language == "VOC":
         filenames = voc_to_cocojson(args.annotations_dir, args, session_file)
     elif args.annotations_language == "YOLO":
@@ -616,16 +617,16 @@ def mscoco_to_cocojson(mscoco_file, args, session_file):
             filenames = [os.path.basename(path) for path in paths]
 
         # Extracting the file_name and id into a dict
-        images = dict([[image['id'],
-                        { "file": image['file_name'], "boxes": [] }]
-                       for image in data['images'] if image['file_name'] in
-                       filenames])
+        images = dict([image['id'],
+                       { "file": image['file_name'], "boxes": [] }]
+                      for image in data['images'] if image['file_name'] in
+                      filenames)
         if data.get("categories") and data['categories'][0].get("name"):
             # Extract the image category labels into a dict
-            labels = dict([[category['id'],
-                            { "name": category['name'],
-                              "super": category.get('supercategory', "") } ]
-                           for category in data['categories']])
+            labels = dict([category['id'],
+                           { "name": category['name'],
+                             "super": category.get('supercategory', "") } ]
+                          for category in data['categories'])
         # Adding the regions data
         if data.get('annotations'):
             for annotation in data['annotations']:
@@ -648,7 +649,7 @@ def mscoco_to_cocojson(mscoco_file, args, session_file):
                                     annotation["bbox"][3])
                     })
 
-        output_json_array = [images[image_id] for image_id in images.keys()]
+        output_json_array = images.values()
 
     if warnings > 0:
         message = f"\nThere are {warnings} warnings, " \

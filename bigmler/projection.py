@@ -184,6 +184,7 @@ def remote_projection(pca, test_dataset,
         batch_projection = create_batch_projection(
             pca_id, test_dataset, batch_projection_args,
             args, api, session_file=session_file, path=path, log=log)
+    #pylint: disable=locally-disabled,possibly-used-before-assignment
     if not args.no_csv:
         file_name = api.download_batch_projection(batch_projection,
                                                   projection_file)

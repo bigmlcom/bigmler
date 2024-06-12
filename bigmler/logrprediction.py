@@ -136,6 +136,7 @@ def remote_prediction(model, test_dataset,
         batch_prediction = create_batch_prediction(
             model_id, test_dataset, batch_prediction_args,
             args, api, session_file=session_file, path=path, log=log)
+    #pylint: disable=locally-disabled,possibly-used-before-assignment
     if not args.no_csv:
         file_name = api.download_batch_prediction(batch_prediction,
                                                   prediction_file)

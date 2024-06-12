@@ -194,6 +194,7 @@ def gazibit_upload(output_file, exit_flag=False):
         if os.path.isfile(output_file):
             with open(output_file, "rb") as output:
                 content = output.read()
+                #pylint: disable=locally-disabled,missing-timeout
                 response = requests.post(GAZIBIT_CREATE_URL,
                                          data=content, headers=GAZIBIT_HEADERS)
             code = response.status_code

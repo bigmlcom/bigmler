@@ -177,6 +177,7 @@ def remote_centroid(cluster, test_dataset, batch_centroid_args, args,
         batch_centroid = create_batch_centroid(
             cluster_id, test_dataset, batch_centroid_args,
             args, api, session_file=session_file, path=path, log=log)
+    #pylint: disable=locally-disabled,possibly-used-before-assignment
     if not args.no_csv:
         file_name = api.download_batch_centroid(batch_centroid,
                                                 prediction_file)

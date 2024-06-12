@@ -60,7 +60,7 @@ def whizzml_dispatcher(args=sys.argv[1:]):
         if command_args.from_id is not None:
             # the command can create a local storage of a script and or libraries
             # as a package
-            export_as_package(command_args, api, command, resume=resume)
+            export_as_package(command_args, api, resume=resume)
         else:
             # or create the resources described in a package
             create_package(command_args, api, command,

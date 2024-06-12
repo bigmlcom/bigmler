@@ -193,7 +193,7 @@ def create_kfold_cv(args, api, command_obj, resume=False):
         args.output_dir = os.path.normpath(
             os.path.join(u.check_dir(datasets_file),
                          KFOLD_SUBDIR))
-        message = ('Creating the kfold evaluations.........\n')
+        message = 'Creating the kfold evaluations.........\n'
         u.log_message(message, log_file=session_file,
                       console=args.verbosity)
         args.objective_field = objective_name
@@ -213,7 +213,7 @@ def create_features_analysis(args, api, command_obj, resume=False):
     datasets_file, objective_name, resume = create_kfold_datasets_file(
         args, api, command_obj, resume=resume)
     args.objective_field = objective_name
-    message = ('Creating the best features set..........\n')
+    message = 'Creating the best features set..........\n'
     u.log_message(message, log_file=session_file,
                   console=args.verbosity)
     model_fields = best_first_search(
@@ -256,7 +256,7 @@ def create_nodes_analysis(args, api, command_obj, resume=False):
     datasets_file, objective_name, resume = create_kfold_datasets_file(
         args, api, command_obj, resume=resume)
     args.objective_field = objective_name
-    message = ('Creating the node threshold set..........\n')
+    message = 'Creating the node threshold set..........\n'
     u.log_message(message, log_file=session_file,
                   console=args.verbosity)
     node_threshold = best_node_threshold(
@@ -285,7 +285,7 @@ def create_kfold_datasets_file(args, api, command_obj, resume=False):
        one per line
 
     """
-    message = ('Creating the kfold datasets............\n')
+    message = 'Creating the kfold datasets............\n'
     u.log_message(message, log_file=session_file, console=args.verbosity)
     if args.output_dir is None:
         args.output_dir = a.OUTPUT_DIR
@@ -899,7 +899,7 @@ def create_candidates_analysis(args, api, command_obj, resume=False):
     args.objective_field = objective_name
     if args.number_of_models == 1:
         args.number_of_models = DEFAULT_NUMBER_OF_MODELS
-    message = ('Creating the random candidates set..........\n')
+    message = 'Creating the random candidates set..........\n'
     u.log_message(message, log_file=session_file,
                   console=args.verbosity)
     random_candidates = best_candidates_number(

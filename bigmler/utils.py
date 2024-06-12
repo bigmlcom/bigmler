@@ -475,6 +475,7 @@ def check_resource_error(resource, message):
     """
     if ('error' in resource and resource['error'] or
             bigml.api.get_status(resource)['code'] == bigml.api.FAULTY):
+        error_message = ""
         try:
             if ('status' in resource['error'] and
                     'message' in resource['error']['status']):

@@ -182,6 +182,7 @@ def remote_anomaly_score(anomaly, test_dataset, batch_anomaly_score_args, args,
         batch_anomaly_score = create_batch_anomaly_score(
             anomaly_id, test_dataset, batch_anomaly_score_args,
             args, api, session_file=session_file, path=path, log=log)
+    #pylint: disable=locally-disabled,possibly-used-before-assignment
     if not args.no_csv:
         file_name = api.download_batch_anomaly_score(batch_anomaly_score,
                                                      prediction_file)

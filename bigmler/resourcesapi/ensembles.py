@@ -116,7 +116,8 @@ def set_ensemble_args(args, name=None,
         ensemble_args.update(input_fields=input_fields)
 
     if args.pruning and args.pruning != 'smart':
-        ensemble_args.update(stat_pruning=(args.pruning == 'statistical'))
+        stat_pruning = args.pruning == 'statistical'
+        ensemble_args.update(stat_pruning=stat_pruning)
     if args.node_threshold > 0:
         ensemble_args.update(node_threshold=args.node_threshold)
     if args.balance:
@@ -204,7 +205,7 @@ def create_ensembles(datasets, ensemble_ids, ensemble_args, args,
                         console=args.verbosity)
             if args.reports:
                 report(args.reports, path, ensemble)
-
+    #pylint: disable=locally-disabled,possibly-used-before-assignment
     return ensembles, ensemble_ids, models, model_ids
 
 

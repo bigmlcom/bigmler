@@ -462,6 +462,7 @@ def compute_output(api, args):
 
     # We get the fields of the model if we haven't got
     # them yet and need them
+    #pylint: disable=locally-disabled,possibly-used-before-assignment
     if model and not args.evaluate and (a.has_test(args) or
                                         args.export_fields):
         # if we are using boosted ensembles to predict, activate boosting

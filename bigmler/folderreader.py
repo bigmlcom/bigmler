@@ -39,5 +39,4 @@ class FolderReader():
         """
         self.reader.extend([[filename] for filename in
             os.listdir(self.folder) if self.filter_fn(filename)])
-        for filename in self.reader:
-            yield filename
+        yield from self.reader

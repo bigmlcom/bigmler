@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#pylint: disable=locally-disabled,attribute-defined-outside-init
+#pylint: disable=locally-disabled,attribute-defined-outside-init,inconsistent-return-statements
 # Auxiliar class: Simple stoppable HTTPServer extracted from
 #
 # http://code.activestate.com/recipes/425210-simple-stoppable-server-using-socket-timeout/
@@ -22,6 +22,7 @@ class StoppableHTTPServer(http.server.HTTPServer):
 
     def get_request(self):
         """Get method"""
+        #pylint: disable=locally-disabled,inconsistent-return-statements
         while self.run:
             try:
                 sock, addr = self.socket.accept()

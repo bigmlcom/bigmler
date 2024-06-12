@@ -71,12 +71,14 @@ def set_model_args(args, name=None, objective_id=None, fields=None,
               and not args.dataset_off):
             args.sample_rate = EVALUATE_SAMPLE_RATE
     if model_fields and fields is not None:
+        use_name = args.max_categories > 0
         input_fields = configure_input_fields(
-            fields, model_fields, by_name=(args.max_categories > 0))
+            fields, model_fields, by_name=use_name)
         model_args.update(input_fields=input_fields)
 
     if args.pruning and args.pruning != 'smart':
-        model_args.update(stat_pruning=(args.pruning == 'statistical'))
+        stat_pruning = args.pruning == 'statistical'
+        model_args.update(stat_pruning=stat_pruning)
 
     if args.node_threshold > 0:
         model_args.update(node_threshold=args.node_threshold)

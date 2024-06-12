@@ -225,7 +225,7 @@ def clone_source(source, args, api=None, path=None,
     except Exception as exception:
         sys.exit("Failed to get a finished source: %s" % str(exception))
     log_created_resources("source", path, source['resource'], mode='ab',
-        comment=("%s\n" % source['object']['name']))
+        comment=f"{source['object']['name']}\n")
     message = dated("Source created: %s\n" % get_url(source))
     log_message(message, log_file=session_file, console=args.verbosity)
     log_message("%s\n" % source_id, log_file=log)

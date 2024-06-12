@@ -94,6 +94,7 @@ def compute_output(api, args):
     args.max_parallel_fusions = 1
     # fusion cannot be published yet.
     args.public_fusion = False
+    fields = {}
 
     # It is compulsory to have a description to publish either datasets or
     # fusions
