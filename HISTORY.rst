@@ -3,6 +3,11 @@
 History
 -------
 
+5.9.1 (2024-06-13)
+~~~~~~~~~~~~~~~~~~
+
+- Fixing issues with Readthedocs templates.
+
 5.9.0 (2024-06-12)
 ~~~~~~~~~~~~~~~~~~
 
