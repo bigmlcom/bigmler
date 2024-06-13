@@ -6,7 +6,7 @@
 .. _bigmler-source:
 
 Source subcommand
------------------
+=================
 
 The ``bigmler source`` subcommand can be used to create sources from data files
 either with or without images. Regular CSV files will generate a ``Source``
@@ -215,7 +215,7 @@ to the source generated in the third scenario,
 
 
 Source subcommand Options
--------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ===================================== =========================================
 ``--data`` *PATH*                     Path to the data file or directory (if
@@ -263,7 +263,7 @@ Source subcommand Options
 
 
 Image Analysis Specific Options
--------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ===================================== =========================================
 ``--no-image-analysis``               Disables the Image Feature Extraction

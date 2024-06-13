@@ -6,7 +6,7 @@
 .. _bigmler-project:
 
 Project subcommand
-------------------
+==================
 
 Projects are organizational resources and they are usually created at
 source-creation time in order to keep together in a separate repo all
@@ -30,7 +30,7 @@ the project using a JSON file with the ``--project-attributes`` option.
 
 
 Project Specific Subcommand Options
------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ===================================== =========================================
 ``--organization`` *ORGANIZATION_ID*  Organization ID to create projects

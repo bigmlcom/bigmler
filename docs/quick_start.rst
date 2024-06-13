@@ -283,7 +283,7 @@ To create a boosted trees' ensemble use the `--boosting` option
      bigmler --train data/iris.csv --test data/test_iris.csv \
              --boosting --tag my_boosted_trees
 
-or add the ``--boosting-iterations` limit
+or add the ``--boosting-iterations`` limit
 
 .. code-block:: bash
 
@@ -1374,29 +1374,12 @@ The set of negative flags is:
 ==============================  ===============================================
 
 
-BigMLer encodings and locale
-============================
-
-All data uploaded to BigML (and used in BigMLer) is expected to be ``UTF-8``
-encoded. The data itself, besides its encoding,
-can contain information in different languages. English is the default
-language, but that can be set to a different value using --locale. Setting
-the language determines the conventions for parsing number literals
-(decimal separator), dates, etc.
-
-Also, BigMLer will write information to your console and local files.
-Most Operating Systems will also accept ``UTF-8`` output, which is used
-by default. However, Windows systems may need a different encoding.
-We allow the user to specify this enconding
-as an environment variable ``BIGML_SYS_ENCODING``. In this case, BigMLer will
-try to guess the system encoding when absent.
-
 
 Optional Arguments
-==================
+------------------
 
 General configuration
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
 ==============   ==============================================================
 ``--username``   BigML's username. If left unspecified, it will default to the
@@ -1408,7 +1391,7 @@ General configuration
 ==============   ==============================================================
 
 Basic Functionality
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 ===========================================================   =================
 ``--train`` *TRAINING_SET*                                    Full path to a
@@ -1559,8 +1542,8 @@ Basic Functionality
                                                               node
 ===========================================================   =================
 
-Content
--------
+Meta information
+^^^^^^^^^^^^^^^^
 
 =============================== ===============================================
 ``--name`` *NAME*               Name for the resources in BigML.
@@ -1574,7 +1557,7 @@ Content
 =============================== ===============================================
 
 Data Configuration
-------------------
+^^^^^^^^^^^^^^^^^^
 
 ========================================= =====================================
 ``--no-train-header``                     The train set file hasn't a header
@@ -1701,7 +1684,7 @@ Data Configuration
 ========================================= =====================================
 
 Remote Resources
-----------------
+^^^^^^^^^^^^^^^^
 
 ================================= =============================================
 ``--source`` *SOURCE*             BigML source Id
@@ -1736,7 +1719,7 @@ Remote Resources
 
 
 Ensembles
----------
+^^^^^^^^^
 
 ================================================= =============================
 ``--number-of-models`` *NUMBER_OF_MODELS*         Number of models to create
@@ -1799,7 +1782,7 @@ then retrieve them later to generate predictions.
 
 
 Public Resources
-----------------
+^^^^^^^^^^^^^^^^
 
 ======================== ======================================================
 ``--public-dataset``     Makes newly created dataset public
@@ -1814,7 +1797,7 @@ Notice that datasets and models will be made public without assigning any price
 to them.
 
 Local Resources
----------------
+^^^^^^^^^^^^^^^
 
 ==========================   ==================================================
 ``--model-file`` *PATH*      Path to a JSON file containing the model info
@@ -1823,7 +1806,7 @@ Local Resources
 
 
 Fancy Options
--------------
+^^^^^^^^^^^^^
 
 ================================= =============================================
 ``--no-dataset``                  Does not create a model. BigMLer will only
@@ -1841,3 +1824,21 @@ Fancy Options
 ``--store``                       Stores every created or retrieved resource in
                                   your output directory
 ================================= =============================================
+
+
+BigMLer encodings and locale
+============================
+
+All data uploaded to BigML (and used in BigMLer) is expected to be ``UTF-8``
+encoded. The data itself, besides its encoding,
+can contain information in different languages. English is the default
+language, but that can be set to a different value using --locale. Setting
+the language determines the conventions for parsing number literals
+(decimal separator), dates, etc.
+
+Also, BigMLer will write information to your console and local files.
+Most Operating Systems will also accept ``UTF-8`` output, which is used
+by default. However, Windows systems may need a different encoding.
+We allow the user to specify this enconding
+as an environment variable ``BIGML_SYS_ENCODING``. In this case, BigMLer will
+try to guess the system encoding when absent.

@@ -5,7 +5,7 @@
 .. _bigmler-anomaly:
 
 Anomaly subcommand
-------------------
+==================
 
 The ``bigmler anomaly`` subcommand generates all the resources needed to buid
 an anomaly detection model and/or predict the anomaly scores associated to your
@@ -110,7 +110,7 @@ to the anomaly detector.
 
 
 Anomaly Specific Subcommand Options
------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ============================================= =================================
 ``--anomaly`` *ANOMALY*                       BigML anomaly Id

@@ -6,7 +6,7 @@
 .. _bigmler-reify:
 
 Reify subcommand
------------------
+================
 
 This subcommand extracts the information in the existing resources to determine
 the arguments that were used when they were created,
@@ -64,10 +64,9 @@ located at  ``https://static.bigml.com/csv/iris.csv``
 and the types of each of it's fields are described and stored to ensure
 that they match the ones in the resource.
 
- This script will be stored in the command output
-directory and named `reify.py`` (you can specify a different name and location
-using the ``--output`` option).
-
+This script will be stored in the command output directory and named
+``reify.py`` (you can specify a different name and location using the
+``--output`` option).
 
 Other resources will have more complex workflows and more user-given
 attributes. Let's see for instance the
@@ -284,7 +283,7 @@ resource and obtain the WhizzML script that would recreate it using
 
 
 Reify Subcommand Options
-------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 ===================================== =========================================
 ``--id`` *RESOURCE_ID*                ID for the resource to be reified
@@ -302,7 +301,7 @@ Reify Subcommand Options
 .. _bigmler-execute:
 
 Execute subcommand
-------------------
+==================
 
 This subcommand creates and executes scripts in WhizzML (BigML's automation
 language). With WhizzML you can program any specific workflow that involves
@@ -461,12 +460,12 @@ it takes precedence over these defaults.
 
 
 Execute Subcommand Options
---------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 =============================================== ===============================
 ``--code`` *SOURCE_CODE*                        WhizzML source code to be
                                                 executed
-``--code-file `` *PATH*                         Path to the file that contains
+``--code-file`` *PATH*                          Path to the file that contains
                                                 Whizzml source code
 ``--creation-defaults`` *RESOURCE_DEFAULTS*     Path to the JSON file with the
                                                 default configurations
@@ -547,7 +546,7 @@ Execute Subcommand Options
 .. _bigmler-whizzml:
 
 Whizzml subcommand
-------------------
+==================
 
 This subcommand creates packages of scripts and libraries in WhizzML
 (BigML's automation
@@ -740,7 +739,7 @@ downloaded script and the ``kind`` attribute will be set to ``package``.
 
 
 Whizzml Subcommand Options
---------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 =============================================== ===============================
 ``--package-dir`` *DIR*                         Directory that stores the
@@ -760,7 +759,7 @@ Whizzml Subcommand Options
 .. _bigmler-retrain:
 
 Retrain subcommand
-------------------
+==================
 
 This subcommand can be used to retrain an existing modeling resource (model,
 ensemble, deepnet, etc.) by adding new data to it. In BigML, resources are
@@ -831,7 +830,7 @@ by using the ``--upgrade`` flag in any ``bigmler retrain`` command call.
 
 
 Retrain Subcommand Options
---------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ===================================== =========================================
 ``--id`` *RESOURCE_ID*                ID for the resource to be reified

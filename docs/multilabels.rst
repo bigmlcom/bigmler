@@ -3,7 +3,7 @@
    :hidden:
 
 Multi-labeled categories in training data
-------------------------------------------
+=========================================
 
 Sometimes the information you want to predict is not a single category but a
 set of complementary categories. In this case, training data is usually
@@ -138,7 +138,7 @@ or you can retrieve all previously tagged ensembles with ``--ensemble-tag``
 
 
 Multi-labeled resources
-------------------------
+=======================
 
 The resources generated from a multi-labeled training data file can also be
 recovered and used to generate more multi-labeled predictions. As in the
@@ -301,8 +301,8 @@ data stored in a file or a previous dataset
             --dataset dataset/50a1f441035d0706d9000371 --evaluate
 
 
-Multi-labels
-----------------
+Multi-label Options
+^^^^^^^^^^^^^^^^^^^
 
 ======================================= =======================================
 ``--multi-label``                       Use multiple labels in the objective

@@ -6,7 +6,7 @@
 .. _bigmler-connector:
 
 Connector subcommand
---------------------
+====================
 
 Connections to external databases can be used to upload data to BigML. The
 ``bigmler connector`` subcommand can be used to create such connections in the
@@ -29,7 +29,7 @@ As you can see, the options needed to create an external connector are:
 - the host that publishes the database manager
 - the port that listens to the requests
 - the type of database manager: PostgreSQL, MySQL, Elasticsearch or
-SQL Server.
+  SQL Server.
 - the user and password needed to grant the access to the database
 
 With this information, the command will create an ``externalconnector`` object
@@ -39,7 +39,7 @@ querying the database for new data. Please, check the `remote sources
 
 
 External Connector Specific Subcommand Options
-----------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ============================================ =================================
 ``--external-connector-id`` *CONNECTOR_ID*   external connector ID used as

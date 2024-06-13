@@ -6,7 +6,7 @@
 .. _bigmler-topic-model:
 
 Topic Model subcommand
-----------------------
+======================
 
 Using this subcommand you can generate all the
 resources leading to finding a ``topic model`` and its ``topic distributions``.
@@ -92,7 +92,7 @@ set it to ``0``.
 
 
 Topic Model Subcommand Options
-------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ============================================= =================================
 ``--topic-model`` *TOPIC_MODEL*               BigML topic model Id

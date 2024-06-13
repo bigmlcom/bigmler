@@ -6,7 +6,7 @@
 .. _bigmler-cluster:
 
 Cluster subcommand
-------------------
+==================
 
 Just as the simple ``bigmler`` command can generate all the
 resources leading to finding models and predictions for a supervised learning
@@ -115,7 +115,7 @@ Models can be useful to see which features are important to determine whether
 a certain instance belongs to a concrete cluster.
 
 Cluster Specific Subcommand Options
------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ========================================= =====================================
 ``--cluster`` *CLUSTER*                   BigML cluster Id

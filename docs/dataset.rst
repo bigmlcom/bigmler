@@ -6,7 +6,7 @@
 .. _bigmler-dataset:
 
 Dataset subcommand
-------------------
+==================
 
 In addition to the main BigMLer capabilities explained so far, there's a
 subcommand ``bigmler dataset`` that can be used to create datasets either
@@ -82,7 +82,7 @@ that will create the average of the ``petal length`` field value for the rows
 whose ``species`` field contains the ``Iris-setosa`` category.
 
 Dataset subcommand Options
---------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ===================================== =========================================
 ``--file``                            Path to the data file

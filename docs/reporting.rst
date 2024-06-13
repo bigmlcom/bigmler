@@ -6,7 +6,7 @@
 .. _bigmler-report:
 
 Report subcommand
------------------
+=================
 
 The results of a ``bigmler analyze --features`` or ``bigmler analyze --nodes``
 command are a series of k-fold cross-validations made on the training data that
@@ -44,7 +44,7 @@ directory will be stored and served from.
 
 
 Report Specific Subcommand Options
------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ===================================== =========================================
 ``--from-dir``                        Path to a directory where BigMLer has

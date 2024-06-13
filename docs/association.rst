@@ -6,7 +6,7 @@
 .. _bigmler-association:
 
 Association subcommand
-----------------------
+======================
 
 Association Discovery is a popular method to find out relations among values
 in high-dimensional datasets.
@@ -42,14 +42,14 @@ It gives a measure of the importance of the rule. Association rules have
 to satisfy a minimum support constraint (i.e., min_support).
 
 - Coverage: the support of the antedecent of an association rule.
-It measures how often a rule can be applied.
+  It measures how often a rule can be applied.
 
 - Confidence or (strength): The probability of seeing the rule's consequent
-under the condition that the instances also contain the rule's antecedent.
-Confidence is computed using the support of the association rule over the
-coverage. That is, the percentage of instances which contain the consequent
-and antecedent together over the number of instances which only contain
-the antecedent.
+  under the condition that the instances also contain the rule's antecedent.
+  Confidence is computed using the support of the association rule over the
+  coverage. That is, the percentage of instances which contain the consequent
+  and antecedent together over the number of instances which only contain
+  the antecedent.
 
 Confidence is directed and gives different values for the association
 rules Antecedent → Consequent and Consequent → Antecedent. Association
@@ -57,11 +57,11 @@ rules also need to satisfy a minimum confidence constraint
 (i.e., min_confidence).
 
 - Leverage: the difference of the support of the association
-rule (i.e., the antecedent and consequent appearing together) and what would
-be expected if antecedent and consequent where statistically independent.
-This is a value between -1 and 1. A positive value suggests a positive
-relationship and a negative value suggests a negative relationship.
-0 indicates independence.
+  rule (i.e., the antecedent and consequent appearing together) and what would
+  be expected if antecedent and consequent where statistically independent.
+  This is a value between -1 and 1. A positive value suggests a positive
+  relationship and a negative value suggests a negative relationship.
+  0 indicates independence.
 
 Lift: how many times more often antecedent and consequent occur together
 than expected if they where statistically independent.
@@ -77,7 +77,8 @@ extract items for the rules as follows:
 - Text: each unique term will be considered a separate item.
 - Items: each different item in the items summary will be considered.
 - Numeric: Values will be converted into categorical by making a
-segmentation of the values.
+  segmentation of the values.
+
 For example, a numeric field with values ranging from 0 to 600 split
 into 3 segments:
 segment 1 → [0, 200), segment 2 → [200, 400), segment 3 → [400, 600].
@@ -118,7 +119,7 @@ In this case, the ``confidence`` is used (the default value being
 
 
 Association Specific Subcommand Options
----------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ===================================== =========================================
 ``--association-attributes``          Path to a JSON file containing

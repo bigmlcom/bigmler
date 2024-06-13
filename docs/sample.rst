@@ -5,7 +5,7 @@
 .. _bigmler-sample:
 
 Sample subcommand
------------------
+=================
 
 You can extract samples from your datasets in BigML using the
 ``bigmler sample`` subcommand. When a new sample is requested, a copy
@@ -71,7 +71,7 @@ section.
 
 
 Samples Subcommand Options
---------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ============================================= =================================
 ``--sample`` *SAMPLE*                         BigML sample Id

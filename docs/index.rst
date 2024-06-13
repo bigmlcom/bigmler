@@ -18,7 +18,6 @@ BigMLer is open sourced under the `Apache License, Version
    :caption: Basic BigMLer Workflows
 
    quick_start
-   multilabels
 
 .. toctree::
    :maxdepth: 2
@@ -41,6 +40,13 @@ BigMLer is open sourced under the `Apache License, Version
    topic_model
    association
 
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Automating and Retraining
+
+   tuning
+   scripting
 
 .. toctree::
    :maxdepth: 2
@@ -49,8 +55,13 @@ BigMLer is open sourced under the `Apache License, Version
 
    managing
    reporting
-   tuning
-   scripting
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Multilabel Models
+
+   multilabels
 
 
 Requirements
@@ -431,7 +442,7 @@ BigML Development Mode
 
 The Sandbox environment that could be reached by using the flag ``--dev``
 has been deprecated and. Right now, there's only one mode to work with BigML:
-the previous ``Production Model `, so the flag is no longer available.
+the previous ``Production Model``, so the flag is no longer available.
 
 Using BigMLer
 =============

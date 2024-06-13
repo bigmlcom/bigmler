@@ -6,7 +6,7 @@
 .. _bigmler-logistic-regression:
 
 Logistic-regression subcommand
-------------------------------
+==============================
 
 The ``bigmler logistic-regression`` subcommand generates all the
 resources needed to buid
@@ -99,7 +99,7 @@ file that contains the desired attributes, like:
      "all_fields": true}
 
 Logistic regression Subcommand Options
---------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ============================================= =================================
 ``--logistic-regression`` *LOGISTIC_R*        BigML logistic regression Id

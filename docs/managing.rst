@@ -196,9 +196,9 @@ query strings (see the `API documentation <https://bigml.com/api>`_).
 
 
 Delete Subcommand Options
--------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-========================================== ===================================
+========================================== ====================================
 ``--ids`` *LIST_OF_IDS*                    Comma separated list of ids to be
                                            deleted
 ``--from-file`` *FILE_OF_IDS*              Path to a file containing the

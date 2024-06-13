@@ -5,7 +5,7 @@
 .. _bigmler-pca:
 
 PCA subcommand
---------------
+==============
 
 The ``bigmler pca`` subcommand generates all the
 resources needed to buid
@@ -120,7 +120,7 @@ file that contains the desired attributes, like:
 
 
 PCA Subcommand Options
-----------------------
+^^^^^^^^^^^^^^^^^^^^^^
 
 ============================================= =================================
 ``--pca`` *PCA*                               BigML PCA Id

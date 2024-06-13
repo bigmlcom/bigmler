@@ -6,7 +6,7 @@
 .. _bigmler-fusion:
 
 Fusion subcommand
------------------
+=================
 
 The ``bigmler fusion`` subcommand generates all the
 resources needed to build
@@ -86,7 +86,7 @@ file that contains the desired attributes, like:
 
 
 Fusion Subcommand Options
--------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ============================================= =================================
 ``--fusion`` *FUSION*                         BigML fusion Id

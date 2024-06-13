@@ -6,7 +6,7 @@
 .. _bigmler-time-series:
 
 Time Series subcommand
-----------------------
+======================
 
 Using this subcommand you can generate all the
 resources leading to a ``time series`` and its ``forecasts``.
@@ -99,7 +99,7 @@ and the ``test.json`` file should contain the following JSON:
 
 
 Time Series Subcommand Options
-------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ============================================= =================================
 ``--time-seriers`` *TIME_SERIES*              BigML time series Id

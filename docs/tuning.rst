@@ -6,7 +6,7 @@
 .. _bigmler-analyze:
 
 Analyze subcommand
-------------------
+==================
 
 In addition to the main BigMLer capabilities explained so far, there's a
 subcommand ``bigmler analyze`` with more options to evaluate the performance
@@ -92,7 +92,7 @@ the test set, but sometimes it can be more useful to optimize the
 performance of the model for a single category. This can be specially
 important in highly non-balanced datasets or when the cost function is
 mainly associated to one of the existing classes in the objective field.
-Using ``--optimize-category" you can set the category whose evaluation
+Using ``--optimize-category`` you can set the category whose evaluation
 metrics you'd like to optimize
 
 .. code-block:: bash
@@ -174,7 +174,7 @@ will be stored in a new folder named ``kfold4_pred``.
 
 
 Analyze subcommand Options
---------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ===================================== =========================================
 ``--cross-validation``                Sets the k-fold cross-validation mode

@@ -6,7 +6,7 @@
 .. _bigmler-linear-regression:
 
 Linear-regression subcommand
-----------------------------
+============================
 
 The ``bigmler linear-regression`` subcommand generates all the
 resources needed to buid
@@ -98,7 +98,7 @@ file that contains the desired attributes, like:
 
 
 Linear regression Subcommand Options
-------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ============================================= =================================
 ``--linear-regression`` *LINEAR_R*            BigML linear regression Id

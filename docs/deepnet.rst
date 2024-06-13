@@ -5,7 +5,7 @@
 .. _bigmler-deepnet:
 
 Deepnet subcommand
-------------------
+==================
 
 The ``bigmler deepnet`` subcommand generates all the
 resources needed to buid
@@ -104,7 +104,7 @@ file that contains the desired attributes, like:
 
 
 Deepnet Subcommand Options
---------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ============================================= =================================
 ``--deepnet`` *DEEPNET*                       BigML deepnet Id
