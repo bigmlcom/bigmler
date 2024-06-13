@@ -187,8 +187,9 @@ corresponding composite source, and finally add a new field named ``label``
 to the composite source where the labels provided in the ``annotations.json``
 file will be updated.
 
-These are the basic scenarios, but other annotations syntaxes, like ``VOC`` or
-``YOLO`` files are also accepted. As in this case, the annotations are
+These are the basic scenarios, but other annotations syntaxes, like ``VOC``,
+``YOLO`` or ``COCO`` files are also accepted.
+As for the first two the annotations are
 provided separately, in one file per image, you would need to
 provide the directory where these files are stored and
 the annotations language as options:
@@ -198,6 +199,21 @@ the annotations language as options:
     bigmler source --train ./my_images_directory \
                    --annotations-dir ./annotations_directory \
                    --annotations-language VOC
+                   --output-dir output
+
+Each annotation file can contain some ``folder`` attribute.
+That will be interpreted as a subfolder information that will be
+added to the given ``--train`` path on a per image basis.
+
+On the contrary, ``COCO`` annotations are provided in a single file.
+In that case, you can point to the file using the ``--annotations-file``
+option.
+
+.. code-block:: bash
+
+    bigmler source --train ./my_images_directory \
+                   --annotations-file ./my_coco_annotations.json \
+                   --annotations-language COCO
                    --output-dir output
 
 The created composite sources are editable up until you close them
