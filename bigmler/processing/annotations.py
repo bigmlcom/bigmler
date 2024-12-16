@@ -24,7 +24,10 @@ import sys
 import xml.etree.ElementTree as ET
 import re
 import glob
+import csv
 
+
+from PIL import Image
 from zipfile import ZipFile
 
 import cv2
@@ -39,6 +42,7 @@ import bigmler.utils as u
 
 FILE_ATTR = "file"
 BBOXES_ATTR = "boxes"
+REGION_FIELD_SEPARATOR = "] ["
 
 
 def relative_path(base_dir, absolute_path):
@@ -108,6 +112,9 @@ def bigml_metadata(args, images_list=None, new_fields=None):
     """Creates a metadata file to summarize the locations of images and
     annotations
     """
+    if images_list is None:
+        images_list = []
+    image_names = [os.path.basename(image_path) for image_path in images_list]
     try:
         if args.images_file is None and args.images_dir and \
                 os.path.exists(args.images_dir):
@@ -122,14 +129,18 @@ def bigml_metadata(args, images_list=None, new_fields=None):
                               recursive=True)
             images_list = [filename for
                            filename in files if get_file_ext(filename)
-                           in IMAGE_EXTENSIONS]
+                           in IMAGE_EXTENSIONS and (
+                           (not args.annotated_only) or
+                           os.path.basename(filename) in image_names)]
+
         #pylint: disable=locally-disabled,possibly-used-before-assignment
         if images_list:
-            if not os.path.exists(zip_path):
-                with ZipFile(zip_path, 'w') as zip_obj:
-                    for filename in images_list:
-                        zip_obj.write(filename,
-                                     relative_path(args.images_dir, filename))
+            if os.path.exists(zip_path):
+                os.remove(zip_path)
+            with ZipFile(zip_path, 'w') as zip_obj:
+                for filename in images_list:
+                    zip_obj.write(filename,
+                                 relative_path(args.images_dir, filename))
             args.images_file = zip_path
 
         output = args.images_file
@@ -177,9 +188,15 @@ def bigml_coco_file(args, session_file):
     elif args.annotations_language == "COCO":
         filenames = mscoco_to_cocojson(args.original_annotations_file,
                                        args, session_file)
+    elif args.annotations_language == "CSV":
+        filenames = csv_to_cocojson(args.original_annotations_file, args,
+                                    session_file)
+    if args.annotations_field is None:
+        args.annotations_field = BBOXES_ATTR
 
     return bigml_metadata(args, images_list=filenames,
-                          new_fields=[{"name": "boxes", "optype": "regions"}])
+                          new_fields=[{"name": BBOXES_ATTR,
+                                       "optype": "regions"}])
 
 
 def get_image_info(annotation_root):
@@ -618,7 +635,7 @@ def mscoco_to_cocojson(mscoco_file, args, session_file):
 
         # Extracting the file_name and id into a dict
         images = dict([image['id'],
-                       { "file": image['file_name'], "boxes": [] }]
+                       { FILE_ATTR: image['file_name'], BBOXES_ATTR: [] }]
                       for image in data['images'] if image['file_name'] in
                       filenames)
         if data.get("categories") and data['categories'][0].get("name"):
@@ -649,7 +666,7 @@ def mscoco_to_cocojson(mscoco_file, args, session_file):
                                     annotation["bbox"][3])
                     })
 
-        output_json_array = images.values()
+        output_json_array = list(images.values())
 
     if warnings > 0:
         message = f"\nThere are {warnings} warnings, " \
@@ -663,3 +680,109 @@ def mscoco_to_cocojson(mscoco_file, args, session_file):
 
     return [relative_path(args.images_dir, filename) for filename in \
         filenames]
+
+
+def expand_regions(data, regions_field):
+    """Expanding the regions information as exported in a CSV from a dataset"""
+
+    annotations = {}
+    for record in data:
+        regions = record[regions_field]
+        filename = record["filename"]
+        if regions != "":
+            annotations[filename] = []
+            boxes = []
+            regions = regions.replace(REGION_FIELD_SEPARATOR, "],[")
+            regions = re.sub(r'(.+?) (\d+?\.?\d*?) (.+?)', '\\1,\\2,\\3',
+                             regions)
+            regions = re.sub(r'(.+?) (\d+?\.?\d*?),', '\\1,\\2,', regions)
+            regions_list = json.loads(regions)
+            label_components = len(regions_list)
+            for region_index, region in enumerate(regions_list):
+                annotation = {"label": region[0],
+                              "xmin": float(region[1]),
+                              "ymin": float(region[2]),
+                              "xmax": float(region[3]),
+                              "ymax": float(region[4])}
+                if len(region) > 5:
+                    annotation.update({"score": float(region[5])})
+                boxes.append(annotation)
+            annotations[filename] = {FILE_ATTR: filename, BBOXES_ATTR: boxes}
+
+    return annotations
+
+
+def csv_to_cocojson(csv_file, args, session_file):
+    """Translates annotations from the CSV downloaded from am images dataset.
+    Maps image file names and regions information to image file names,
+    labels and boxes. It returns the list of images it refers to.
+
+    """
+
+    output_json_array = []
+
+    filenames = []
+    labels = {}
+    images = {}
+
+    logfile_name = args.annotations_file + ".log"
+
+    with open(logfile_name, "w") as logfile:
+
+        warnings = 0
+        message = "Start converting CSV file from " + csv_file + "\n"
+        u.log_message(message, session_file, console=args.verbosity)
+        logfile.write("\n\n%s\n" % message)
+
+        # Loading the CSV file as a list into memory
+
+        with open(csv_file, "r") as handler:
+            csv_reader = csv.DictReader(handler)
+            data = [row for row in csv_reader]
+
+        # Images will be found either in the images_dir file or where
+        # the annotation file points to
+        if args.images_dir is not None and os.path.exists(args.images_dir):
+            filenames = glob.glob(os.path.join(args.images_dir, "**"),
+                                  recursive=True)
+            paths = [os.path.abspath(filename) for
+                     filename in filenames if get_file_ext(filename) in
+                     IMAGE_EXTENSIONS]
+            sizes = []
+            filenames = [os.path.basename(path) for path in paths]
+
+        annotations = expand_regions(
+            data, args.annotations_field or BBOXES_ATTR)
+
+        annotated_images = list(annotations.keys())
+        annotation_boxes = list(annotations.values())
+
+        for boxes in annotation_boxes:
+            path = paths[filenames.index(os.path.basename(boxes["file"]))]
+            img = Image.open(path)
+            width, height = img.size
+            for index, box in enumerate(boxes["boxes"]):
+                boxes["boxes"][index].update(
+                    {"xmin": int(round(box["xmin"] * width, 0))})
+                boxes["boxes"][index].update(
+                    {"ymin": int(round(box["ymin"] * height, 0))})
+                boxes["boxes"][index].update(
+                    {"xmax": int(round(box["xmax"] * width, 0))})
+                boxes["boxes"][index].update(
+                    {"ymax": int(round(box["ymax"] * height, 0))})
+
+    for image in annotated_images:
+        if image not in filenames:
+            warnings += 1
+            logfile.write("failed to find: " + filename + "\n")
+
+    if warnings > 0:
+        message = f"\nThere are {warnings} warnings, " \
+                f"see the log file {logfile_name}\n"
+        u.log_message(message, session_file, console=args.verbosity)
+
+    with open(args.annotations_file, 'w') as handler:
+        json.dump(annotation_boxes, handler, indent=2)
+
+    return [relative_path(args.images_dir, filename) for filename in \
+        annotated_images]

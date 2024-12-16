@@ -52,6 +52,7 @@ def needs_source_update(args):
             (hasattr(args, "close") and args.close is not None) or
             (hasattr(args, "row_components") and args.row_components) or
             (hasattr(args, "row_indices") and args.row_indices) or
+            (hasattr(args, "annotations_field") and args.annotations_field) or
             (hasattr(args, "row_values") and args.row_values))
 
 

@@ -132,6 +132,11 @@ def set_source_args(args, name=None, multi_label_data=None,
             fields_struct = fields.new_fields_structure(args.import_fields)
             check_fields_struct(fields_struct, "source")
             update_attributes(source_args, fields_struct)
+        if args.annotations_field:
+            update_attributes(source_args,
+                              {"fields": {"boxes": {
+                                "name": args.annotations_field}}},
+                              fields=fields)
         if 'source' in args.json_args:
             update_json_args(source_args, args.json_args.get('source'), fields)
     return source_args

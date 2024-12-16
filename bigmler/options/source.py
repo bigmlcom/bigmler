@@ -334,7 +334,7 @@ def get_source_options(defaults=None):
             'action': 'store',
             'dest': 'annotations_language',
             'default': defaults.get('annotations_language', None),
-            'choices': ["VOC", "YOLO", "COCO"],
+            'choices': ["VOC", "YOLO", "COCO", "CSV"],
             'help': ("Language used to provide the annotations for images."
                      "Annotations are expected to be provided using "
                      "one file per image. The --train option should point"
@@ -369,6 +369,22 @@ def get_source_options(defaults=None):
                      " annotation. In that case it should point to"
                      " the folder's' parent directory and --anotations-dir"
                      " should be used to point to the annotations files.")},
+
+        # Only images that have annotations are included in the composite
+        '--annotated-only': {
+            'action': 'store_true',
+            'dest': 'annotated_only',
+            'default': defaults.get('annotated_only', False),
+            'help': ("Whether to add only the annotated images.")},
+
+        # Annotations field name
+        # Name of the field that will contain the annotations
+        '--annotations-field': {
+            'action': 'store',
+            'dest': 'annotations_field',
+            'default': defaults.get('annotations_field', None),
+            'help': "Name of the field that will contain the annotations."},
+
 
         # Images file
         # Compressed file with images used as reference for annotations
