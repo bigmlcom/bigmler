@@ -3,6 +3,12 @@
 History
 -------
 
+5.10.0 (2024-12-17)
+~~~~~~~~~~~~~~~~~~~
+
+- Adding new format for annotations: CSV as extracted from an image dataset
+  with a regions field.
+
 5.9.1 (2024-06-13)
 ~~~~~~~~~~~~~~~~~~
 
