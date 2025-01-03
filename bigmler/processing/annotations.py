@@ -693,9 +693,18 @@ def expand_regions(data, regions_field):
             annotations[filename] = []
             boxes = []
             regions = regions.replace(REGION_FIELD_SEPARATOR, "],[")
+            # includes scientific notation. E.g.
+            # [["label" 0.0 6.262755E-4 7.608954E-5 7.238262E-4]]
+            regions = re.sub(r'(.+?) (\d+?\.?\d*?E\-\d+) (.+?)', '\\1,\\2,\\3',
+                             regions)
+            regions = re.sub(r'(.+?) (\d+?\.?\d*?E\-\d+),', '\\1,\\2,', regions)
+            regions = re.sub(r'(.+?) (\d+?\.?\d*?E\-\d+)]', '\\1,\\2]',
+                             regions)
             regions = re.sub(r'(.+?) (\d+?\.?\d*?) (.+?)', '\\1,\\2,\\3',
                              regions)
             regions = re.sub(r'(.+?) (\d+?\.?\d*?),', '\\1,\\2,', regions)
+            regions = re.sub(r'(.+?) (\d+?\.?\d*?)]', '\\1,\\2]',
+                             regions)
             regions_list = json.loads(regions)
             label_components = len(regions_list)
             for region_index, region in enumerate(regions_list):
@@ -757,9 +766,18 @@ def csv_to_cocojson(csv_file, args, session_file):
         annotated_images = list(annotations.keys())
         annotation_boxes = list(annotations.values())
 
+        for image in annotated_images:
+            if image not in filenames:
+                sys.exit(f"Failed to find the annotated file {image} in"
+                         f" {args.images_dir}.")
+
         for boxes in annotation_boxes:
             path = paths[filenames.index(os.path.basename(boxes["file"]))]
-            img = Image.open(path)
+            try:
+                img = Image.open(path)
+            except ValueError:
+                sys.exit(f"Failed to find the annotated file: {path}.")
+
             width, height = img.size
             for index, box in enumerate(boxes["boxes"]):
                 boxes["boxes"][index].update(
@@ -770,11 +788,6 @@ def csv_to_cocojson(csv_file, args, session_file):
                     {"xmax": int(round(box["xmax"] * width, 0))})
                 boxes["boxes"][index].update(
                     {"ymax": int(round(box["ymax"] * height, 0))})
-
-    for image in annotated_images:
-        if image not in filenames:
-            warnings += 1
-            logfile.write("failed to find: " + filename + "\n")
 
     if warnings > 0:
         message = f"\nThere are {warnings} warnings, " \
