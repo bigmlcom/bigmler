@@ -758,7 +758,8 @@ def csv_to_cocojson(csv_file, args, session_file):
                      filename in filenames if get_file_ext(filename) in
                      IMAGE_EXTENSIONS]
             sizes = []
-            filenames = [os.path.basename(path) for path in paths]
+            filenames = [os.path.relpath(path, start=args.images_dir)
+                         for path in paths]
 
         annotations = expand_regions(
             data, args.annotations_field or BBOXES_ATTR)
@@ -772,7 +773,7 @@ def csv_to_cocojson(csv_file, args, session_file):
                          f" {args.images_dir}.")
 
         for boxes in annotation_boxes:
-            path = paths[filenames.index(os.path.basename(boxes["file"]))]
+            path = paths[filenames.index(boxes["file"])]
             try:
                 img = Image.open(path)
             except ValueError:
