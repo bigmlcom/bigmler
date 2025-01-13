@@ -767,7 +767,9 @@ def csv_to_cocojson(csv_file, args, session_file):
         annotated_images = list(annotations.keys())
         annotation_boxes = list(annotations.values())
 
-        for image in annotated_images:
+        for index, image in enumerate(annotated_images):
+            image = image.replace("/", os.path.sep)
+            annotated_images[index] = image
             if image not in filenames:
                 sys.exit(f"Failed to find the annotated file {image} in"
                          f" {args.images_dir}.")
