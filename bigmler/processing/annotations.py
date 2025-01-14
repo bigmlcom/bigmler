@@ -43,6 +43,7 @@ import bigmler.utils as u
 FILE_ATTR = "file"
 BBOXES_ATTR = "boxes"
 REGION_FIELD_SEPARATOR = "] ["
+REGION_FIELD_JSON_SEPARATOR = "],["
 
 
 def relative_path(base_dir, absolute_path):
@@ -692,7 +693,8 @@ def expand_regions(data, regions_field):
         if regions != "":
             annotations[filename] = []
             boxes = []
-            regions = regions.replace(REGION_FIELD_SEPARATOR, "],[")
+            regions = regions.replace(REGION_FIELD_SEPARATOR,
+                                      REGION_FIELD_JSON_SEPARATOR)
             # includes scientific notation. E.g.
             # [["label" 0.0 6.262755E-4 7.608954E-5 7.238262E-4]]
             regions = re.sub(r'(.+?) (\d+?\.?\d*?E\-\d+) (.+?)', '\\1,\\2,\\3',
