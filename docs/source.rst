@@ -229,6 +229,32 @@ to the source generated in the third scenario,
                    --annotations-file new_annotations.json \
                    --output-dir output
 
+Sometimes, dataset's annotations are created on a set of images and need to
+be applied to a different one. For instance, map images can be better
+annotated if their image contains existing information layers that will not
+be available at prediction time. In those cases, annotations can be exported by
+downloading the dataset information as a CSV.
+Then, they can be added to a new composite source created from raw map images.
+In the example below, a new
+source is created in a BigML Organization project, specified using
+``--org-project``, and the ``--annotations-file``
+option points to the downladed dataset information, which contains a regions
+field called ``objects``. Raw images should be named identically to the ones
+used in the original dataset and stored in the directory provided by
+the ``--data`` option. Using the ``--annotated-only`` flag will ensure that
+only images that have been annotated are uploaded to the new source.
+
+.. code-block:: bash
+
+    bigmler source --org-project project/672546c1e2bd384653292ab0 \
+                   --annotations-file ./download/annotated_dataset.csv \
+                   --data "./raw-images" \
+                   --annotations-language CSV \
+                   --output-dir ./upload-raw \
+                   --annotations-field objects \
+                   --annotated-only
+
+
 
 Source subcommand Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^

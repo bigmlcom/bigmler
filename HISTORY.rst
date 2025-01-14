@@ -3,7 +3,7 @@
 History
 -------
 
-5.10.0 (2024-12-17)
+5.10.0 (2025-01-14)
 ~~~~~~~~~~~~~~~~~~~
 
 - Adding new format for annotations: CSV as extracted from an image dataset
