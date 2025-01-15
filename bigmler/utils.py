@@ -380,7 +380,7 @@ def print_tree(directory, padding):
     """Returns a graphical directory tree structure as a string
 
     """
-    connectors = ['+--', '\--'] if sys.platform == 'win32' else ['├─', '└─']
+    connectors = ['+--', '\\--'] if sys.platform == 'win32' else ['├─', '└─']
     if padding != ' ':
         output = padding[:-1] + connectors[0]
     else:

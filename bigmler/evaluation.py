@@ -177,7 +177,7 @@ def average_evaluations(evaluation_files):
     number_of_evaluations = float(len(evaluation_files))
     if number_of_evaluations > 0:
         for evaluation_file in evaluation_files:
-            with open(evaluation_file, 'U') as evaluation_file:
+            with open(evaluation_file) as evaluation_file:
                 evaluation = json.loads(evaluation_file.read())
                 avg_evaluation(averaged_evaluation,
                                evaluation, number_of_evaluations)
