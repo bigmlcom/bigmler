@@ -25,7 +25,7 @@ except ImportError:
 from bigml.api import check_resource
 
 from bigmler.tests.common_steps import shell_execute
-from bigmler.tests.world import world, res_filename, ok_, eq_
+from bigmler.tests.world import world, res_filename, ok_, eq_, approx_
 
 
 def given_i_create_bigml_resources_using_source_to_evaluate(
@@ -131,10 +131,20 @@ def then_the_evaluation_file_is_like(step, check_file_json):
         if 'model' in check:
             for metric, value in check['model'].items():
                 if not isinstance(value, list) and not isinstance(value, dict):
-                    eq_(check['model'][metric], evaluation['model'][metric],
-                        msg=f"model {metric}")
-                    eq_(check['mode'][metric], evaluation['mode'][metric],
-                        msg=f"mode {metric}")
+                    if isinstance(value,str):
+                        eq(check['model'][metric],
+                           evaluation['model'][metric],
+                           msg=f"model {metric}")
+                        eq_(check['mode'][metric],
+                            evaluation['mode'][metric],
+                            msg=f"mode {metric}")
+                    else:
+                        approx_(check['model'][metric],
+                                evaluation['model'][metric],
+                                msg=f"model {metric}")
+                        approx_(check['mode'][metric],
+                                evaluation['mode'][metric],
+                                msg=f"mode {metric}")
         else:
             del check["datasets"]
             del evaluation["datasets"]

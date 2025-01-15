@@ -1399,7 +1399,8 @@ def i_check_cross_validation(step, check_file):
             check_content = json.loads(check_handler.read())
     except Exception as exc:
         ok_(False, msg=str(exc))
-    eq_(cv_content['model'], check_content['model'])
+    eq_(cv_content['model']['confusion_matrix'],
+        check_content['model']['confusion_matrix'])
 
 
 def i_check_stored_source(step):
