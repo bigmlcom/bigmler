@@ -3,6 +3,11 @@
 History
 -------
 
+5.10.1 (2025-03-11)
+~~~~~~~~~~~~~~~~~~~
+
+- Fixing issues with path separators on Windows.
+
 5.10.0 (2025-01-14)
 ~~~~~~~~~~~~~~~~~~~
 
