@@ -777,7 +777,8 @@ def csv_to_cocojson(csv_file, args, session_file):
                          f" {args.images_dir}.")
 
         for boxes in annotation_boxes:
-            path = paths[filenames.index(boxes["file"])]
+            filename = boxes["file"].replace("/", os.path.sep)
+            path = paths[filenames.index(filename)]
             try:
                 img = Image.open(path)
             except ValueError:
