@@ -3,6 +3,12 @@
 History
 -------
 
+5.10.2 (2025-03-27)
+~~~~~~~~~~~~~~~~~~~
+
+- Improving annotations updates to avoid temporary failures.
+- Fixing composite source deletes.
+
 5.10.1 (2025-03-11)
 ~~~~~~~~~~~~~~~~~~~
 
