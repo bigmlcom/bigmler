@@ -346,7 +346,6 @@ def delete_resources(command_args, api, deleted_list=None, step=0):
                 res_type for res_type in resource_types if res_type in types]
     else:
         command_args.resource_types_ = types
-
     if command_args.resource_types_:
         delete_list = []
         # by ids
@@ -477,6 +476,11 @@ def delete_resources(command_args, api, deleted_list=None, step=0):
             # if projects and executions have already been deleted,
             # delete the rest
             deleted_list.extend(delete_list)
+            delete_resources(command_args, api, deleted_list=deleted_list,
+                             step=step + 1)
+    else:
+        # no resources to delete in that group. Try the next
+        if step < 2:
             delete_resources(command_args, api, deleted_list=deleted_list,
                              step=step + 1)
 

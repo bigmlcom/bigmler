@@ -113,7 +113,8 @@ def set_source_args(args, name=None, multi_label_data=None,
                         "delete_sources_": "delete_sources",
                         "sources_": "sources"}
         set_config_attrs(args, exclusive_attrs,
-                         source_args, attr_aliases=attr_aliases, exclusive=True)
+                         source_args, attr_aliases=attr_aliases,
+                         exclusive=True)
 
         row_attrs = ["row_components", "row_indices", "row_values"]
         set_config_attrs(args, row_attrs, source_args)
@@ -132,11 +133,6 @@ def set_source_args(args, name=None, multi_label_data=None,
             fields_struct = fields.new_fields_structure(args.import_fields)
             check_fields_struct(fields_struct, "source")
             update_attributes(source_args, fields_struct)
-        if args.annotations_field:
-            update_attributes(source_args,
-                              {"fields": {"boxes": {
-                                "name": args.annotations_field}}},
-                              fields=fields)
         if 'source' in args.json_args:
             update_json_args(source_args, args.json_args.get('source'), fields)
     return source_args
@@ -243,7 +239,7 @@ def data_to_source(args):
     """
     data_set = None
     data_set_header = None
-    if (args.training_set and not args.source and not
+    if (args.training_set and (not args.source or args.annotations_file) and not
             (hasattr(args, "dataset") and args.dataset) and
             not args.has_models_):
         data_set = args.training_set
@@ -309,12 +305,6 @@ def update_source(source, source_args, args,
         message = "Source created: %s\n" % get_url(source)
         log_message(message, log_file=session_file, console=args.verbosity)
         log_message("%s\n" % source["object"]["resource"], log_file=log)
-
-    if args.annotations_file and args.images_file:
-        source = api.update_composite_annotations(
-            source, args.images_file, args.annotations_file,
-            new_fields=None,
-            source_changes=source_args)
 
     source = api.update_source(source, source_args)
     check_resource_error(source, "Failed to update source: ")

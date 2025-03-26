@@ -312,7 +312,8 @@ def get_api_instance(command_args, storage_path):
         'api_key': command_args.api_key,
         'debug': command_args.debug,
         'storage': retrieve_dir})
-
+    if command_args.debug:
+        print(api_command_args)
     return command_args.api_
 
 

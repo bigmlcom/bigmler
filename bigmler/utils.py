@@ -60,7 +60,7 @@ FILE_ENCODING = 'utf-8'
 # resources that can have other resources as components
 COMPOSED_RESOURCES = [
     "cluster", "ensemble", "fusion", "composites", "optiml",
-    "evaluation", "timeseries"]
+    "evaluation", "timeseries", "source"]
 
 
 def read_description(path):

@@ -27,7 +27,6 @@ import glob
 import csv
 
 
-from PIL import Image
 from zipfile import ZipFile
 
 import cv2
@@ -42,8 +41,6 @@ import bigmler.utils as u
 
 FILE_ATTR = "file"
 BBOXES_ATTR = "boxes"
-REGION_FIELD_SEPARATOR = "] ["
-REGION_FIELD_JSON_SEPARATOR = "],["
 
 
 def relative_path(base_dir, absolute_path):
@@ -177,7 +174,6 @@ def bigml_coco_file(args, session_file):
     MSCOCO to the format accepted by BigML
 
     """
-
     if args.annotations_file is not None:
         args.original_annotations_file = args.annotations_file
     args.annotations_file = os.path.join(args.output_dir, "annotations.json")
@@ -196,7 +192,7 @@ def bigml_coco_file(args, session_file):
         args.annotations_field = BBOXES_ATTR
 
     return bigml_metadata(args, images_list=filenames,
-                          new_fields=[{"name": BBOXES_ATTR,
+                          new_fields=[{"name": args.annotations_field,
                                        "optype": "regions"}])
 
 
@@ -358,7 +354,7 @@ def yolo_to_cocojson(yolo_dir, args, session_file):
                 one_image_dict = {
                     ## possible args options for full path or basename
                     FILE_ATTR: image_filename_base,
-                    BBOXES_ATTR: []
+                    args.annotations_field: []
                 }
 
                 ## yolo format - (label, xc, yc, width, height)
@@ -488,7 +484,7 @@ def yolo_to_cocojson(yolo_dir, args, session_file):
                             'xmax': x_max,
                             'ymax': y_max
                             }
-                    one_image_dict[BBOXES_ATTR].append(annotation)
+                    one_image_dict[args.annotations_field].append(annotation)
 
                 # output_json_dict['annotations'].append(one_image_dict)
                 output_json_array.append(one_image_dict)
@@ -571,13 +567,13 @@ def voc_to_cocojson(voc_dir, args, session_file):
                 one_image_dict = {
                     ## possible args options for full path or basename
                     FILE_ATTR: image_filename_base,
-                    BBOXES_ATTR: []
+                    args.annotations_field: []
                 }
 
                 for obj in annotation_root.findall('object'):
                     annotation, warnings = get_coco_annotation_from_object( \
                         obj, filename, logfile, warnings)
-                    one_image_dict[BBOXES_ATTR].append(annotation)
+                    one_image_dict[args.annotations_field].append(annotation)
                     bndbox_id = bndbox_id + 1
 
                 output_json_array.append(one_image_dict)
@@ -636,7 +632,8 @@ def mscoco_to_cocojson(mscoco_file, args, session_file):
 
         # Extracting the file_name and id into a dict
         images = dict([image['id'],
-                       { FILE_ATTR: image['file_name'], BBOXES_ATTR: [] }]
+                       { FILE_ATTR: image['file_name'],
+                         args.annotations_field: [] }]
                       for image in data['images'] if image['file_name'] in
                       filenames)
         if data.get("categories") and data['categories'][0].get("name"):
@@ -648,7 +645,7 @@ def mscoco_to_cocojson(mscoco_file, args, session_file):
         # Adding the regions data
         if data.get('annotations'):
             for annotation in data['annotations']:
-                images[annotation["image_id"]]["boxes"].append({
+                images[annotation["image_id"]][args.annotations_field].append({
                     "label": labels[annotation['category_id']]['name'],
                     "xmin": int(annotation["bbox"][0]),
                     "ymin": int(annotation["bbox"][1]),
@@ -657,7 +654,8 @@ def mscoco_to_cocojson(mscoco_file, args, session_file):
                 })
 
                 if labels[annotation['category_id']]['super']:
-                    images[annotation["image_id"]]["boxes"].append({
+                    images[annotation["image_id"]][
+                        args.annotations_field].append({
                         "label": labels[annotation['category_id']]['super'],
                         "xmin": int(annotation["bbox"][0]),
                         "ymin": int(annotation["bbox"][1]),
@@ -683,8 +681,10 @@ def mscoco_to_cocojson(mscoco_file, args, session_file):
         filenames]
 
 
-def expand_regions(data, regions_field):
-    """Expanding the regions information as exported in a CSV from a dataset"""
+def transform_regions(data, regions_field):
+    """Escaping quotes in regions labels as exported in a CSV from a dataset
+    and setting the expected attributes.
+    """
 
     annotations = {}
     for record in data:
@@ -693,33 +693,10 @@ def expand_regions(data, regions_field):
         if regions != "":
             annotations[filename] = []
             boxes = []
-            regions = regions.replace(REGION_FIELD_SEPARATOR,
-                                      REGION_FIELD_JSON_SEPARATOR)
-            # includes scientific notation. E.g.
-            # [["label" 0.0 6.262755E-4 7.608954E-5 7.238262E-4]]
-            regions = re.sub(r'(.+?) (\d+?\.?\d*?E\-\d+) (.+?)', '\\1,\\2,\\3',
-                             regions)
-            regions = re.sub(r'(.+?) (\d+?\.?\d*?E\-\d+),', '\\1,\\2,', regions)
-            regions = re.sub(r'(.+?) (\d+?\.?\d*?E\-\d+)]', '\\1,\\2]',
-                             regions)
-            regions = re.sub(r'(.+?) (\d+?\.?\d*?) (.+?)', '\\1,\\2,\\3',
-                             regions)
-            regions = re.sub(r'(.+?) (\d+?\.?\d*?),', '\\1,\\2,', regions)
-            regions = re.sub(r'(.+?) (\d+?\.?\d*?)]', '\\1,\\2]',
-                             regions)
-            regions_list = json.loads(regions)
-            label_components = len(regions_list)
-            for region_index, region in enumerate(regions_list):
-                annotation = {"label": region[0],
-                              "xmin": float(region[1]),
-                              "ymin": float(region[2]),
-                              "xmax": float(region[3]),
-                              "ymax": float(region[4])}
-                if len(region) > 5:
-                    annotation.update({"score": float(region[5])})
-                boxes.append(annotation)
-            annotations[filename] = {FILE_ATTR: filename, BBOXES_ATTR: boxes}
-
+            # we keep the compact format, but scape quotes
+            regions = re.sub(r'""', '\\"', regions)
+            annotations[filename] = {FILE_ATTR: filename,
+                                     regions_field: regions}
     return annotations
 
 
@@ -763,8 +740,7 @@ def csv_to_cocojson(csv_file, args, session_file):
             filenames = [os.path.relpath(path, start=args.images_dir)
                          for path in paths]
 
-        annotations = expand_regions(
-            data, args.annotations_field or BBOXES_ATTR)
+        annotations = transform_regions(data, args.annotations_field)
 
         annotated_images = list(annotations.keys())
         annotation_boxes = list(annotations.values())
@@ -775,25 +751,6 @@ def csv_to_cocojson(csv_file, args, session_file):
             if image not in filenames:
                 sys.exit(f"Failed to find the annotated file {image} in"
                          f" {args.images_dir}.")
-
-        for boxes in annotation_boxes:
-            filename = boxes["file"].replace("/", os.path.sep)
-            path = paths[filenames.index(filename)]
-            try:
-                img = Image.open(path)
-            except ValueError:
-                sys.exit(f"Failed to find the annotated file: {path}.")
-
-            width, height = img.size
-            for index, box in enumerate(boxes["boxes"]):
-                boxes["boxes"][index].update(
-                    {"xmin": int(round(box["xmin"] * width, 0))})
-                boxes["boxes"][index].update(
-                    {"ymin": int(round(box["ymin"] * height, 0))})
-                boxes["boxes"][index].update(
-                    {"xmax": int(round(box["xmax"] * width, 0))})
-                boxes["boxes"][index].update(
-                    {"ymax": int(round(box["ymax"] * height, 0))})
 
     if warnings > 0:
         message = f"\nThere are {warnings} warnings, " \
