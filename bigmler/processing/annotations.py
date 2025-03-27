@@ -268,6 +268,8 @@ def yolo_to_cocojson(yolo_dir, args, session_file):
     output_json_array = []
 
     filenames = []
+    if args.annotations_field is None:
+        args.annotations_field = BBOXES_ATTR
 
     logfile_name = args.annotations_file + ".log"
     with open(logfile_name, "w") as logfile:
@@ -519,6 +521,9 @@ def voc_to_cocojson(voc_dir, args, session_file):
     filenames = []
 
     annotation_file_list = []
+    if args.annotations_field is None:
+        args.annotations_field = BBOXES_ATTR
+
     for file in os.listdir(voc_dir):
         if file.endswith(".xml"):
             annotation_file_list.append(os.path.join(voc_dir, file))
@@ -563,7 +568,7 @@ def voc_to_cocojson(voc_dir, args, session_file):
                 ## possible args options for full path or basename
                 logfile.write("converting for: " + filename + "\n")
                 logfile.write("taking as filename: " + image_filename_base + "\n")
-
+                
                 one_image_dict = {
                     ## possible args options for full path or basename
                     FILE_ATTR: image_filename_base,
@@ -629,6 +634,9 @@ def mscoco_to_cocojson(mscoco_file, args, session_file):
                      filename in filenames if get_file_ext(filename) in
                      IMAGE_EXTENSIONS]
             filenames = [os.path.basename(path) for path in paths]
+
+        if args.annotations_field is None:
+            args.annotations_field = BBOXES_ATTR
 
         # Extracting the file_name and id into a dict
         images = dict([image['id'],
