@@ -3,6 +3,12 @@
 History
 -------
 
+5.10.3 (2025-05-02)
+~~~~~~~~~~~~~~~~~~~
+
+- Improving format in bigmler whizzml script exports.
+- Adding new arguments for script creation.
+
 5.10.2 (2025-03-27)
 ~~~~~~~~~~~~~~~~~~~
 

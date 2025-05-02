@@ -55,8 +55,8 @@ WHIZZML_LIBRARY = "library"
 WHIZZML_RESOURCES = [WHIZZML_LIBRARY, "script"]
 DFT_CATEGORY = 0 # Miscellaneous
 WHIZZML_ATTRS = ["name", "description", "source_code", "imports",
-                 "inputs", "outputs", "category", "project", "resource"]
-
+                 "inputs", "outputs", "category", "project", "resource",
+                 "auto_temp", "keep_temp"]
 subcommand_list = []
 subcommand_file = None
 session_file = None
@@ -173,17 +173,17 @@ def create_package(args, api, command_obj, resume=False):
         u.log_message(message, log_file=session_file,
                       console=args.verbosity)
         if metadata.get("kind") in WHIZZML_RESOURCES:
+            kind = metadata.get("kind")
             whizzml_code = os.path.normpath(os.path.join(args.package_dir, \
                 metadata.get("source_code", "%s.whizzml" % \
-                metadata.get("kind"))))
-            if args.embed_libs and metadata.get("kind") == WHIZZML_LIBRARY:
+                kind)))
+            if args.embed_libs and kind == WHIZZML_LIBRARY:
                 return whizzml_code
 
             args.output_dir = os.path.join(output_dir, \
                 os.path.basename(package_dir))
             # creating command to create the resource
-            command = COMMANDS[metadata.get("kind")] % (whizzml_code,
-                                                        args.output_dir)
+            command = COMMANDS[kind] % (whizzml_code, args.output_dir)
             command_args = command.split()
             bigml.util.check_dir(args.output_dir)
 
@@ -200,12 +200,21 @@ def create_package(args, api, command_obj, resume=False):
                 desc_file = os.path.join(args.output_dir, "description.txt")
                 u.write_to_utf8(desc_file, metadata.get("description"))
                 command_args.extend(["--description", desc_file])
+            
+            if "auto_temp" in metadata or "keep_temp" in metadata:
+                if metadata.get("auto_temp"):
+                    attrs = {"auto_temp": metadata.get("auto_temp")}
+                else:
+                    attrs = {"keep_temp": metadata.get("keep_temp")}
+                command_args.extend(
+                    ["--%s-attrs-json" % kind, json.dumps(attrs)])
             if metadata.get("name"):
                 command_args.extend(["--name", metadata.get("name")])
             if args.tag:
                 for tag in args.tag:
                     command_args.extend(["--tag", tag])
             command_args.extend(["--category", category])
+            
 
             # adding imports, if any
             if imports:
@@ -342,7 +351,7 @@ def write_package_folder(package_structure, package_dir):
                     "description": first_script["description"]}
     with open(os.path.join(package_dir, "metadata.json"),
               "wt", encoding="utf-8") as handler:
-        json.dump(package_info, handler)
+        json.dump(package_info, handler, indent=2)
 
 
 def write_code(resource_info, package_dir):
@@ -369,4 +378,4 @@ def write_code(resource_info, package_dir):
         pass
     with open(os.path.join(package_dir, "metadata.json"),
               "wt", encoding="utf-8") as handler:
-        json.dump(resource_info, handler)
+        json.dump(resource_info, handler, indent=2)

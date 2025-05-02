@@ -1047,11 +1047,20 @@ def attribute_args(command_args):
     for resource_type in RESOURCE_TYPES:
         attributes_file = getattr(command_args,
                                   "%s_attributes" % resource_type, None)
+        attributes_json_str = getattr(command_args,
+                                      "%s_attrs_json" % resource_type, None)
         if attributes_file is not None:
             command_args.json_args[resource_type] = u.read_json(
                 attributes_file)
         else:
             command_args.json_args[resource_type] = {}
+        try:
+            if attributes_json_str is not None:
+                attrs = json.loads(attributes_json_str)
+                if isinstance(attrs, dict):
+                    command_args.json_args[resource_type].update(attrs)
+        except (AttributeError, json.decoder.JSONDecodeError):
+            pass
 
 
 def transform_args(command_args, flags, api):

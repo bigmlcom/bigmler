@@ -205,7 +205,21 @@ def get_execute_options(defaults=None):
             "action": 'store_true',
             "dest": 'to_library',
             "default": defaults.get('to_library', False),
-            "help": "Compile the code as a library."}
+            "help": "Compile the code as a library."},
+            
+        # Attributes in stringified JSON format to be added to the script
+        '--script-attrs-json': {
+            'action': 'store',
+            'dest': 'script_attrs_json',
+            'default': defaults.get('script_attrs_json', None),
+            'help': "Stringified JSON attributes for the script."},
+
+        # Attributes in stringified JSON format to be added to the execution
+        '--execution-attrs-json': {
+            'action': 'store',
+            'dest': 'execution_attrs_json',
+            'default': defaults.get('execution_attrs_json', None),
+            'help': "Stringified JSON attributes for the execution."}
     }
 
     return options
